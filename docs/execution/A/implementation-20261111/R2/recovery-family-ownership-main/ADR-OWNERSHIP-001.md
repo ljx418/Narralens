@@ -1,0 +1,7 @@
+# MAIN裁决：恢复认领先于解析/计数/改状态
+
+依据已审A三族恢复目标和BRIDGE只读源审查，所有权由原controlledRecoveryFamily(kind,request_json)决定，仅决定哪个处理者有责任，不授予write/commit。已知marker但合同损坏由本族保全attention，无法解析或unknown marker留原generic；其它kind的marker不能被认领。generic不动已知族未决行，pending仍原gate阻断，不是绕过验证。
+
+原M4B路由测试将完全无法解析JSON也无任何adoption标记的edit当作M4B，并期待ADOPTION_REQUEST_UNREADABLE。该测试前提在三族存在时过宽，会让adoption抢任何模块故障行，和原unknown仍generic目标冲突。本轮精确测试调整：原latch测试改为明确adoption marker但缺合同字段，仍要求attention+原错误码（不删除此保证）；新真实Host重开测试单独保留原无法解析JSON输入，要求原generic产生CRASH_RECOVERY_REQUIRED与blocked gate，不能叫adoption错误。旧源及原测试完整备份、Git历史、旧Gate报告全部保留。本裁决不把未知事务判writable，也不把recovering称为业务恢复成功；后续人工核对仍由原gate要求。
+
+其余原legacy发布/提交/补偿/closedcommit/DDL/状态机不变。第一批新增10个组件用例在原源8断言失败/2对照通过（真实SQLite和原family/generic入口），不是Host或SIGKILL验证。本轮还补实际Host两条路由启动回归，与组件证据分开记。

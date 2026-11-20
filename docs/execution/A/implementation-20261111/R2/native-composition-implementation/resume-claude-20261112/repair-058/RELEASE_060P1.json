@@ -1,0 +1,125 @@
+{
+  "release_id": "MAIN_RELEASE_060P1_ISOLATED_CACHE_IMPLEMENTATION",
+  "at": "2026-11-14T04:49:17.670664+00:00",
+  "status": "RELEASED_TO_EXISTING_CLAUDE_PENDING_DISPATCH",
+  "base_head": "1d348d419120f23f45d958112ea8c43df5a04675",
+  "cwd": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+  "allow_existing": [
+    "src/adapters/openfilm/openfilm-upstream.ts",
+    "src/host/agent-driven/created-native-workspace.ts",
+    "src/host/agent-driven/created-native-source-reader.ts",
+    "tests/m2.1/openfilm-upstream-lock.test.ts",
+    "tests/agent-driven/integration/native-cache-witness.test.ts",
+    "tests/agent-driven/integration/created-native-source-reader.test.ts"
+  ],
+  "allow_new": [
+    "src/adapters/openfilm/cache-production-scope.ts",
+    "src/adapters/openfilm/cache-process-supervisor.ts",
+    "src/adapters/openfilm/openfilm-cache-worker.mjs",
+    "src/adapters/openfilm/cache-worker-policy.mjs",
+    "src/adapters/openfilm/cache-worker-integrity.json",
+    "tools/openfilm-cache-worker-integrity.mjs",
+    "tests/agent-driven/integration/cache-production-scope.test.ts",
+    "tests/agent-driven/integration/cache-process-settlement.test.ts"
+  ],
+  "existing_raw_sha256": {
+    "src/adapters/openfilm/openfilm-upstream.ts": "1583d4aba7f1a2fde487b1339745a039759d09b29fe81edc3268a76edb054e41",
+    "src/host/agent-driven/created-native-workspace.ts": "3702917cf6efe09287030435c1883e1cdd57eb6e0da2fdd577bf3879ab965c1e",
+    "src/host/agent-driven/created-native-source-reader.ts": "057015a54e9daee8d08f56eadbd7b2766622f2f915f29a0ebc330e0d4cc676b6",
+    "tests/m2.1/openfilm-upstream-lock.test.ts": "9b2cf8525c7e51da9a7c0d9eb579b65be56a679651fcbb5bfb5bd8e1424c175a",
+    "tests/agent-driven/integration/native-cache-witness.test.ts": "6ba76059a41c1820d580ea0a7ae684f62b7afcd445bdc431a1524b8c7647ccd4",
+    "tests/agent-driven/integration/created-native-source-reader.test.ts": "6325eab3e4411e77a0b000a084793fb57545d961437c572d0a990625a50d9784"
+  },
+  "all_prior_dirty_source_sha256": {
+    "src/adapters/openfilm/openfilm-upstream.ts": "1583d4aba7f1a2fde487b1339745a039759d09b29fe81edc3268a76edb054e41",
+    "src/host/agent-driven/committed-snapshot-authority.ts": "e7277382b1b3819d1f6aaa8459dc4d2bf904169d31e614aa45ac6a7b3c610f8b",
+    "src/host/agent-driven/created-native-source-reader.ts": "057015a54e9daee8d08f56eadbd7b2766622f2f915f29a0ebc330e0d4cc676b6",
+    "src/host/agent-driven/retained-native-closure.ts": "fd896104149d6cd2663b63a59d50beabbeee546f3e3f46a5d6bf07fbe662ede9",
+    "tests/agent-driven/integration/created-native-source-reader.test.ts": "6325eab3e4411e77a0b000a084793fb57545d961437c572d0a990625a50d9784",
+    "tests/m2.1/openfilm-upstream-lock.test.ts": "9b2cf8525c7e51da9a7c0d9eb579b65be56a679651fcbb5bfb5bd8e1424c175a",
+    "tests/agent-driven/integration/helpers/native-read-byte-observer.mjs": "a249498702425a01cb3964ef87cfddbbd036b6998a2d03a8938a755d43b89169",
+    "tests/agent-driven/integration/helpers/native-read-growth-child.mjs": "2a31e13d30b98d161a69fcd4c33a125d2733762adb65dddb75fd1b79517f5c84",
+    "tests/agent-driven/integration/openfilm-serving-url.test.ts": "6c02e6d3cf56f60e33cbbb74a1b56bef3eaabbb20f10bba025e41e4f3de74e2b",
+    "tests/agent-driven/integration/retained-native-budget.test.ts": "3241bdd2c8b7b958e9852db2f28bd831f5a6f70bd2c09d975c09295769e7cd9d",
+    "tests/fixtures/openfilm-serving-url-child.mjs": "db3caf37f9983bdebf69ea76795925c79a446e88a779e063235f3d402d085a41"
+  },
+  "protected_AGENTS_sha256": "37300463a72a612ae16e0a5fcfb496502c57c722b83781e0e2e8c9480594542b",
+  "adr_sha256": "27c6bcbc46ab5473716cc04a92ac3f50a1ee027d68045db72048af488168d6f2",
+  "allowed_runtime": [
+    {
+      "argv": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "tsc",
+        "--noEmit"
+      ],
+      "kind": "typecheck"
+    },
+    {
+      "argv": [
+        "node",
+        "--check",
+        "src/adapters/openfilm/openfilm-cache-worker.mjs"
+      ],
+      "kind": "syntax only; does not execute worker"
+    },
+    {
+      "argv": [
+        "node",
+        "--check",
+        "src/adapters/openfilm/cache-worker-policy.mjs"
+      ],
+      "kind": "syntax only"
+    },
+    {
+      "argv": [
+        "node",
+        "tools/openfilm-cache-worker-integrity.mjs",
+        "--check"
+      ],
+      "kind": "raw byte validation only; no producer import/child birth"
+    },
+    {
+      "argv": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "vitest",
+        "run",
+        "--config",
+        "vitest.config.ts",
+        "tests/agent-driven/integration/cache-production-scope.test.ts"
+      ],
+      "kind": "scheduler only; no Host/media/browser/child; actual same-root directories permitted"
+    },
+    {
+      "argv": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "vitest",
+        "run",
+        "--config",
+        "vitest.config.ts",
+        "tests/m2.1/openfilm-upstream-lock.test.ts"
+      ],
+      "kind": "static seam/fitness regression; no Chrome/media/Host"
+    }
+  ],
+  "allowed_generation_command": [
+    "node",
+    "tools/openfilm-cache-worker-integrity.mjs",
+    "--generate"
+  ],
+  "generation_writable_only": "src/adapters/openfilm/cache-worker-integrity.json",
+  "recorder": "docs/execution/A/implementation-20261111/integration/e1-main-takeover/run-recorded.py",
+  "recorder_sha256": "88cd47ec732a340f54cdd4bb05b05878887697eebb0ddc94b1ccd7d0e434fd10",
+  "capture_prefix": "n1n2-claude-060p1-",
+  "one_writer": true,
+  "heavy_slot_reserved": true,
+  "browser_media_host_child_runtime": false,
+  "no_fullcheck_build": true,
+  "previous_handback": "msg_376e6df56513",
+  "spec_sha256": "1d4a337048a967a5e25ea9bca9dd738ba8f6c2bd2078fad4040939f85d0472be"
+}

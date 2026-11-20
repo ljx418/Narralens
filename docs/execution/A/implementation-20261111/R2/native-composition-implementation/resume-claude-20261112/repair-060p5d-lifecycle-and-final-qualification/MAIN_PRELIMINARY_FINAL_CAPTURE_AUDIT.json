@@ -1,0 +1,214 @@
+{
+  "at": "2026-11-15T08:20:30.784262+00:00",
+  "status": "PRELIMINARY_FINAL_CAPTURE_AUDIT_NOT_HANDRETURN_NOT_ACCEPTANCE",
+  "final6": [
+    {
+      "capture": "n1n2-claude-060p5d-final-tsc",
+      "exit": 0,
+      "input_count": 651,
+      "input_drift": [],
+      "log_matches": true,
+      "source_changed": [],
+      "source_added": [],
+      "argv_allowed": true,
+      "cwd_matches": true,
+      "exit_matches": true
+    },
+    {
+      "capture": "n1n2-claude-060p5d-final-identity",
+      "exit": 0,
+      "input_count": 651,
+      "input_drift": [],
+      "log_matches": true,
+      "source_changed": [],
+      "source_added": [],
+      "argv_allowed": true,
+      "cwd_matches": true,
+      "exit_matches": true
+    },
+    {
+      "capture": "n1n2-claude-060p5d-final-pilot",
+      "exit": 0,
+      "input_count": 651,
+      "input_drift": [],
+      "log_matches": true,
+      "source_changed": [],
+      "source_added": [],
+      "argv_allowed": true,
+      "cwd_matches": true,
+      "exit_matches": true
+    },
+    {
+      "capture": "n1n2-claude-060p5d-final-python",
+      "exit": 0,
+      "input_count": 651,
+      "input_drift": [],
+      "log_matches": true,
+      "source_changed": [],
+      "source_added": [],
+      "argv_allowed": true,
+      "cwd_matches": true,
+      "exit_matches": true
+    },
+    {
+      "capture": "n1n2-claude-060p5d-final-generate",
+      "exit": 0,
+      "input_count": 651,
+      "input_drift": [],
+      "log_matches": true,
+      "source_changed": [],
+      "source_added": [],
+      "argv_allowed": true,
+      "cwd_matches": true,
+      "exit_matches": true
+    },
+    {
+      "capture": "n1n2-claude-060p5d-final-check",
+      "exit": 0,
+      "input_count": 651,
+      "input_drift": [],
+      "log_matches": true,
+      "source_changed": [],
+      "source_added": [],
+      "argv_allowed": true,
+      "cwd_matches": true,
+      "exit_matches": true
+    }
+  ],
+  "protected7_drift": [],
+  "source8": {
+    "src/adapters/openfilm/cache-process-supervisor.ts": "049489317e8f4f37be77556a90698c82027c8d8d4bf0ee51d15c15862b26d553",
+    "src/adapters/openfilm/cache-process-custodian.py": "30583caab4024b3e4131183e19d60635b1711735892640c5dc7d7e0db34c34f2",
+    "src/adapters/openfilm/cache-worker-integrity.json": "e916cc632b80794793342aff6b84a02eb6ab1a15a4b637d29d7137bb6180cda1",
+    "tests/agent-driven/integration/cache-process-identity.test.ts": "fcebae33a8eca72365a5a121042d7e107924de43ce7254c4b7abbf55e9a47d5a",
+    "tests/agent-driven/integration/helpers/cache-custodian-unit.py": "3be0b3c533ea22c0ff9f882e4a2cc4683750101f2808536f8ed6238ca66dba31",
+    "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts": "7293aed94e7ecdefa87208b8611672a6ca429e94efda7aa14cd83dad3243bea5",
+    "tools/native-cache-normal-pilot.ts": "a9e343cc257ddb1dad678be7de8bcb7a5bfdb9c8e99a0cd662b01b54067be3b3",
+    "tests/agent-driven/integration/native-cache-normal-pilot.test.ts": "7dadcb126ba6c370bb1dd4ccd10ea31ad7ab9920641594ae508ba37976b57352"
+  },
+  "all_completed": [
+    {
+      "capture": "n1n2-claude-060p5d-final-check-001",
+      "exit": 0
+    },
+    {
+      "capture": "n1n2-claude-060p5d-final-check",
+      "exit": 0
+    },
+    {
+      "capture": "n1n2-claude-060p5d-final-generate-001",
+      "exit": 0
+    },
+    {
+      "capture": "n1n2-claude-060p5d-final-generate",
+      "exit": 0
+    },
+    {
+      "capture": "n1n2-claude-060p5d-final-identity",
+      "exit": 0
+    },
+    {
+      "capture": "n1n2-claude-060p5d-final-pilot",
+      "exit": 0
+    },
+    {
+      "capture": "n1n2-claude-060p5d-final-python",
+      "exit": 0
+    },
+    {
+      "capture": "n1n2-claude-060p5d-final-tsc",
+      "exit": 0
+    },
+    {
+      "capture": "n1n2-claude-060p5d-fix-identity-001",
+      "exit": 1
+    },
+    {
+      "capture": "n1n2-claude-060p5d-fix-identity-002",
+      "exit": 0
+    },
+    {
+      "capture": "n1n2-claude-060p5d-fix-identity-003",
+      "exit": 0
+    },
+    {
+      "capture": "n1n2-claude-060p5d-fix-pilot-001",
+      "exit": 1
+    },
+    {
+      "capture": "n1n2-claude-060p5d-fix-pilot-002",
+      "exit": 0
+    },
+    {
+      "capture": "n1n2-claude-060p5d-fix-pilot-003",
+      "exit": 1
+    },
+    {
+      "capture": "n1n2-claude-060p5d-fix-pilot-004",
+      "exit": 1
+    },
+    {
+      "capture": "n1n2-claude-060p5d-fix-pilot-006",
+      "exit": 1
+    },
+    {
+      "capture": "n1n2-claude-060p5d-fix-pilot-007",
+      "exit": 0
+    },
+    {
+      "capture": "n1n2-claude-060p5d-fix-python-001",
+      "exit": 0
+    },
+    {
+      "capture": "n1n2-claude-060p5d-fix-tsc-001",
+      "exit": 2
+    },
+    {
+      "capture": "n1n2-claude-060p5d-fix-tsc-002",
+      "exit": 0
+    },
+    {
+      "capture": "n1n2-claude-060p5d-fix-tsc-003",
+      "exit": 0
+    },
+    {
+      "capture": "n1n2-claude-060p5d-fix-tsc-004",
+      "exit": 2
+    },
+    {
+      "capture": "n1n2-claude-060p5d-red-identity",
+      "exit": 1
+    },
+    {
+      "capture": "n1n2-claude-060p5d-red-pilot",
+      "exit": 1
+    },
+    {
+      "capture": "n1n2-claude-060p5d-red-python-002",
+      "exit": 1
+    },
+    {
+      "capture": "n1n2-claude-060p5d-red-python-003",
+      "exit": 1
+    },
+    {
+      "capture": "n1n2-claude-060p5d-red-python-004",
+      "exit": 1
+    },
+    {
+      "capture": "n1n2-claude-060p5d-red-python",
+      "exit": 1
+    },
+    {
+      "capture": "n1n2-claude-060p5d-red-tsc",
+      "exit": 2
+    }
+  ],
+  "incomplete_claims": [
+    "n1n2-claude-060p5d-fix-pilot-005"
+  ],
+  "MAIN_stopped_004": "Actualrecorderexit1 after exactpidfd hung mockworkerstop, not businessfailure",
+  "005": "Outer timeout killedrecorder, missingexit/result remainsINCOMPLETE, observedPID891444/start2371661",
+  "index": "",
+  "realN": "NOT_RUN"
+}

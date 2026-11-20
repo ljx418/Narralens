@@ -1,0 +1,28 @@
+{
+  "last_grant": {
+    "format": "narralens.dev-resource-ledger@1",
+    "status": "HELD",
+    "holder": "MAIN",
+    "queue": [],
+    "policy": "MAIN grants single heavy slot for Host/media/ffmpeg/Chromium/build/full gate; pure typecheck/unit permitted isolated",
+    "last_main_heavy": "REGRESSION003 terminal exit0 34/34; exact PIDs absent; source restored and frozen cca95020",
+    "evidence_limit": "operational coordination ledger, not proof of unrelated OS process absence",
+    "no_budget_ceiling": true,
+    "grant_id": "R1-MAIN-MEDIA-ARTIFACT-006",
+    "granted_at": "2026-11-11T15:04:11.358298+00:00",
+    "exact_command": "corepack pnpm test tests/agent-driven/media/preview-prepared-source.test.ts --maxWorkers=1 --minWorkers=1 -t renders an isolated preview",
+    "cwd": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+    "scope": "one actual render retained as five byte/hash-bound diagnostic artifacts, receipt and scope statement; code unchanged except evidence capture",
+    "request_message": "msg_e85d9722e2fd",
+    "source_fence": "freeze corrected tested input before command; no source/index mutation during command"
+  },
+  "commands": {
+    "MEDIA003": "exit1,7processorPASS+2previewnegativePASS+2stagingFAIL",
+    "MEDIA004": "exit0,preview4/4",
+    "RECOVERY005": "exit0,4files87/87",
+    "ARTIFACT006": "exit0,1positivePASS3SKIP with5actualproducts"
+  },
+  "final_media_commit": "05889e7f10e94538b0aff9ef121d3a120e52a985",
+  "final_helper_commit": "6402ae78179a48dfad5ab1c1ebfe54488ae9ce2d",
+  "no_active_heavy_commands": true
+}

@@ -1,0 +1,220 @@
+{
+  "format": "narralens.a057-04.independent-settlement-design@1",
+  "candidate_commit": "1d348d419120f23f45d958112ea8c43df5a04675",
+  "upstream_commit": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+  "review_role": "MAIN-derived independent architecture design B; not implementer or new candidate external review",
+  "conclusion": "PUBLIC_API_INSUFFICIENT_REQUIRES_REVIEWED_SETTLEMENT_SEAM",
+  "business_runtime": "NOT_RUN",
+  "source_evidence": [
+    {
+      "repository": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+      "commit": "1d348d419120f23f45d958112ea8c43df5a04675",
+      "path": "src/adapters/openfilm/openfilm-upstream.ts",
+      "sha256": "013f50ce87e04b3ff542e15f3c98d833ae43940fef9d85ccad79ff38e5bd200b",
+      "lines": [
+        399,
+        402,
+        404,
+        406,
+        412,
+        417,
+        1102,
+        1109,
+        1111
+      ]
+    },
+    {
+      "repository": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+      "commit": "1d348d419120f23f45d958112ea8c43df5a04675",
+      "path": "src/host/agent-driven/created-native-workspace.ts",
+      "sha256": "3702917cf6efe09287030435c1883e1cdd57eb6e0da2fdd577bf3879ab965c1e",
+      "lines": [
+        727,
+        815,
+        818,
+        819,
+        829
+      ]
+    },
+    {
+      "repository": "/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm",
+      "commit": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+      "path": "packages/openfilm/studio/server/pageframes.mjs",
+      "sha256": "87d82f73add17d699aab963a99e45b4406cf68ecf547389b61a24083658f2828",
+      "lines": [
+        176,
+        183,
+        186,
+        188,
+        274,
+        276,
+        280,
+        282,
+        286,
+        295,
+        299,
+        317,
+        321,
+        332
+      ]
+    },
+    {
+      "repository": "/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm",
+      "commit": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+      "path": "packages/openfilm/src/host.mjs",
+      "sha256": "dfed0fd5b068823d06b5091fbc01821791f0f470bbf061741bf21a25dc0bb170",
+      "lines": [
+        222,
+        226,
+        235,
+        257,
+        262,
+        278,
+        285,
+        294,
+        301,
+        302,
+        335,
+        353,
+        381,
+        382,
+        410,
+        414,
+        417,
+        431
+      ]
+    }
+  ],
+  "recommended_route": "Verified Host-owned derived observation seam + local resource facade + ticket ledger + FIFO actual-settlement gate + retire/evict each draw page; retain shared browser, explicitly accept native JOB shared impact or choose owner isolation",
+  "approval_state": "PROPOSAL_ONLY_NOT_AUTHORIZED",
+  "missing_minimal_seam": [
+    "raw withPage.work/pageFor/launch/forget/LRU/old-browser-close promises before Promise.race or swallowed catch",
+    "original browser/context/page/frame/CDP allocation and raw evaluate/send/close tracking before resource exposure",
+    "issued owner + accepted draw token + serving + input PRE lease binding, late-birth fence",
+    "retire by exact draw/opening identity to close context and evict cached page or explicit persistent input lease transfer",
+    "settlement receipt distinct from result; unresolved quarantine keeps PRE/serving ownership",
+    "private folder-drain access after context retirement; never call serving.close recursively while accepted ticket is waiting for settlement"
+  ],
+  "linearization": [
+    "synchronous owner/serving admission and PRE ticket ownership",
+    "FIFO permits one unsettled raw draw per shared realm",
+    "call original fixed producer; retain result primary",
+    "seal late birth for closing draw; retire/evict actual context; observe original raw/close tasks and old epochs",
+    "drain local HTTP streams and actual ffprobe children separately",
+    "only verified receipt permits endDraw and PRE release; otherwise explicit UNSETTLED ownership retained"
+  ],
+  "peer_semantics": {
+    "host_close_or_seek_failure": "No Host global browser kill while peer owner exists; retire only own context",
+    "native_JOB": "Pinned global closeBrowser inherently disconnects peers sharing this module browser; cannot promise physical noninterference",
+    "strict_peer_survival": "Requires separately reviewed owner realm/browser/process isolation, not possible with unchanged shared topology"
+  },
+  "cases": [
+    {
+      "id": "SET-01",
+      "case": "正常真实 pageframe/poster 与连续第二帧",
+      "stimulus": "实际固定 producer、真实本地页和授权loopback serving；连续同URL同版本请求，保留两帧/最新duration既有测试",
+      "assertions": [
+        "原 pageFrame 输出bytes/cache key/deps/stamp与原固定算法一致",
+        "每次实际context close后才endDraw/PRE release；第二次可重新打开而非复用closed FilmPage",
+        "共享browser仍可用；owner身份和非模态/UX均不据此签PASS"
+      ]
+    },
+    {
+      "id": "SET-02",
+      "case": "真实seek timeout",
+      "stimulus": "真实页ready完成，film.frame返回永不resolve的Promise；使用原FRAME_MS=15000和原stuck探测，不改计时算法",
+      "assertions": [
+        "在原evaluate仍pending时观察公开seek/pageFrame拒绝",
+        "真实对应context关闭、原evaluate/CDP拒绝或实质执行销毁及原work结算、HTTP/probe drain之后才释放PRE",
+        "主错误仍是seek超时，cleanup错误附加；没有witness；peer context/browser不得因Host主动全局关闭而损失"
+      ]
+    },
+    {
+      "id": "SET-03",
+      "case": "真实JOB timeout",
+      "stimulus": "真实浏览器goto等待load的依赖流持续未结束，goto60s大于JOB45s；等待原45000ms JOB，不以缩短timer冒充",
+      "assertions": [
+        "在JOB closeBrowser把全局browser置null之前注册旧browser epoch及close promise",
+        "公开pageFrame拒绝早于真实close可观察；endDraw/PRE仍未释放",
+        "旧close即使跨越第二次closePageFrames也必须被原ledger等待",
+        "共享peer缓存context可能被原生JOB关闭，记录native_job原因；Host不追加杀peer动作，不声称peer物理不受影响"
+      ]
+    },
+    {
+      "id": "SET-04",
+      "case": "late launch / late context birth",
+      "stimulus": "受授权Host-private seam对真实launch或newContext交付建立barrier，使JOB/owner.close发生在资源交付前；记录这是实际资源+可控交付延迟，非自然OS挂死的证明",
+      "assertions": [
+        "launch从调用前占birth计数；真实handle先登记再暴露",
+        "closing epoch收到晚到browser/context时立即隔离并await真实关闭，不开始新use",
+        "没有原始launch/open/birth悬挂的情况下才完成receipt；重复close复用原settlement",
+        "若无法得到handle/进程退出证明则UNSETTLED，不能PASS或提前释放PRE"
+      ]
+    },
+    {
+      "id": "SET-05",
+      "case": "两个真实owner + close/失败/排队peer",
+      "stimulus": "两个issued producer owner和各自serving；A实际绘制时close A，B保持存活且有accepted/queued draw；另测A seek失败和A JOB失败",
+      "assertions": [
+        "A关闭只停止A新接单，等待A accepted队列/真实资源；B身份、serving和原权属保持",
+        "seek故障只retire A上下文；B下一实际绘制成功",
+        "JOB共享browser native close明确允许影响B旧context；不把这归因为Host kill，也不承诺B当前绘制成功",
+        "若要求JOB下B实际context也绝不关闭，必须改用owner隔离realm/进程并单独验证"
+      ]
+    },
+    {
+      "id": "SET-06",
+      "case": "真实关闭失败/未知结算",
+      "stimulus": "Host-private钩子在实际context关闭后抛同一Error；另一路在实际关闭前失败并保持资源存活",
+      "assertions": [
+        "前者关闭事实可证但genuine cleanup cause仍保留一次，候选不交付witness",
+        "后者进入UNSETTLED/quarantine，PRE和serving所有权不丢失，不伪报已reap",
+        "其他独立资源仍逐一尝试清理；重复close不重复释放FD",
+        "只在独占进程路线且所有权已证明时可按授权终止该进程组，再核实browser descendants/launch已结束"
+      ]
+    },
+    {
+      "id": "SET-07",
+      "case": "capture timeout 与后台源请求",
+      "stimulus": "真实page/CDP截屏操作停滞到原CAPTURE_MS=30000；真实页在绘制完成后试图延迟加载本地资源；覆盖iframe frame.evaluate和CDP send",
+      "assertions": [
+        "原capture race返回并非原CDP结算；必须持有raw send promise和context销毁事实",
+        "正常成功也retire/evict本次页面或显式转移输入lease，不能把cached live page当无消费者",
+        "serving在允许请求完成/取消和实际probe退出前不断开；释放后无可发起请求的页面/iframe"
+      ]
+    },
+    {
+      "id": "SET-08",
+      "case": "完整性/身份负例",
+      "stimulus": "源hash不符、instrumentation锚点数不符、copied token、foreign owner/serving、closed epoch、scope错配",
+      "assertions": [
+        "加载/执行前拒绝；不能fallback为未观测原producer",
+        "验证真实执行模块hash和所有instrumentation源码hash，不将派生字节声称等于原upstream",
+        "范围漂移必须重新审查，原vendor/lock/pin/Approved015字节保持不变"
+      ]
+    }
+  ],
+  "decision_inputs_for_MAIN": [
+    "Approve exact read-only derived source seam or choose exclusive process route",
+    "Clarify peer contract: no Host-added termination versus physical isolation under upstream JOB",
+    "Approve performance tradeoff: retire per draw versus larger persistent page/input lease lifecycle",
+    "Authorize exact heavy-resource argv/cases before runtime; every case here NOT_RUN"
+  ],
+  "rejected_shortcuts": [
+    "fixed sleep",
+    "public Promise settlement as underlying completion",
+    "repeat closePageFrames after browser=null",
+    "unconditional kill shared browser",
+    "permanently disable producer or always failclosed",
+    "global monkey-patch shared Playwright/FilmPage",
+    "change vendor pin or rewrite renderer algorithm"
+  ],
+  "scope_and_risks": {
+    "estimated_size": "medium-to-large architecture correction, 2 new adapter/ledger modules + bridge/workspace edits + 1–2 real settlement test files; process route expands worker/supervisor scope",
+    "success_cached_page": "must retire and evict or retain source/serving lease; raw task emptiness alone does not stop future script requests",
+    "same_process_limit": "unknown launch/channel/close cannot always be force-settled in finite time without process isolation",
+    "all_runtime": "NOT_RUN",
+    "W_or_V_mutation": false,
+    "workers_started": false
+  }
+}

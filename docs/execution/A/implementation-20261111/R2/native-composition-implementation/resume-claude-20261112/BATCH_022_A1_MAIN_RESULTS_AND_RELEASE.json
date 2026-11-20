@@ -1,0 +1,40 @@
+{
+  "at": "2026-11-13T01:03:19.480756+00:00",
+  "grant": "N1N2_021_CONDITIONAL_RUNTIME_022",
+  "capture": "n1n2-claude-021-run-A1",
+  "actual": {
+    "exit": 1,
+    "source_changed": [],
+    "source_added": [],
+    "log_sha256": "8e62b4f31fed40e50561708d9536c3f8326e1c0b705524c1826d71663bec2a35",
+    "finished_at": "2026-11-13T01:00:54.117642+00:00"
+  },
+  "passed": 5,
+  "failed": 3,
+  "filtered": 80,
+  "passed_cases": [
+    "K02-a",
+    "K02-b",
+    "K02-c",
+    "K06-b",
+    "K06-d"
+  ],
+  "failed_cases": {
+    "K06-a": "Actual producer plan setup rejects no narration + planned captions; heard assertion not reached",
+    "K06-c": "Real base mutation refused CLOSURE_MOVED, assertion expected later WORKSPACE_STALE",
+    "K06-e": "Same-binding prepare reuses view, no generation/ref replacement occurred; original rejection unproved"
+  },
+  "all14_current_match": true,
+  "observed_processes": {
+    "2213712": "ABSENT",
+    "2213590": "ABSENT"
+  },
+  "own_cleanup_report": "msg_11d37a9969b3 reports no owned surviving runtime and no new parse folders;170 historical prefixes preserved; not independently global processabsence proof",
+  "remaining_commands": "A2..D5 NOT_RUN, withdrawn until fresh source-bound grant",
+  "source_release": "Same021 minimal tests/helper corrections authorized; no product contract change; fresh recorded compile and bytes before any new runtime",
+  "next_case_requirements": [
+    "K06-a actual lawful no-caption no-narration producer success then actual heard missing-transcript assertion before birth",
+    "K06-c retain actual DB hit and precise earliest refusal, no set of broad acceptable errors",
+    "K06-e actual view object/root/generation replacement and old registered lease/ref before and after; preserve G02 actual in-read invalidate case; no author source edits"
+  ]
+}

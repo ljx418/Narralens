@@ -1,0 +1,293 @@
+{
+  "verdict": "REQUEST_CHANGES",
+  "review_kind": "INDEPENDENT_TARGETED_STATIC_REVIEW",
+  "historical_base_head": "1d348d419120f23f45d958112ea8c43df5a04675",
+  "binding": "24 current dirty snapshot paths matched SHA256 and bytes; not accepted freeze",
+  "findings": [
+    {
+      "id": "R2-C04",
+      "priorID": [
+        "P1R-C04"
+      ],
+      "status": "STILL_OPEN",
+      "severity": "MAJOR",
+      "title": "UNKNOWN and unexpected post-fork failures still destroy the only reaper",
+      "locations": [
+        "src/adapters/openfilm/cache-process-custodian.py:673",
+        "src/adapters/openfilm/cache-process-custodian.py:687",
+        "src/adapters/openfilm/cache-process-custodian.py:1373",
+        "src/adapters/openfilm/cache-process-custodian.py:1561",
+        "src/adapters/openfilm/cache-process-custodian.py:1569",
+        "src/adapters/openfilm/cache-process-custodian.py:1622",
+        "src/adapters/openfilm/cache-process-supervisor.ts:1798"
+      ],
+      "trigger": "A live/unknown target remains at KILL-confirm expiry, or a real OSError occurs after fork during set_blocking/selector registration. TargetSettlement breaks, proceeds to reap N regardless of remaining targets, and run returns4 on unknown; unexpected exceptions go directly to main's return2. Host also KILLs C after its independent timeout.",
+      "impact": "The ordinary all-target escalation is improved, but the continuing wait owner is lost on uncertainty. Reaping N early removes the signal anchor; C exit can orphan live or zombie adopted children. Host keeps a barrier, but a pending promise is not a surviving reaper. No claim that ordinary successful TERM-ignore always hits this exception.",
+      "contract": "ADR rev3 §1; SPEC B: retain real responsible owner on unknown; N last only after all other execution/reaping complete.",
+      "minimal_correction": "Retain C and N's unreaped anchor in an inspectable recovery state on unresolved targets; do not run last-N reap until every other target is terminal and all adopted waits succeeded. Wrap the actual fork-to-exit lifetime in cleanup ownership including unexpected exceptions, and remove timeout-driven destruction of the sole reaper. Define bounded actions with a live retry/reconcile owner rather than timeout=exit.",
+      "decisive_test": "Mock actual Custodian/KernelSettlementOperations OS boundaries, not only FakeSettlementOperations: persistent unknown proc, wait error, KILL not yet terminal, and selector-register failure after real fork authority is recorded. Assert no N reap/C exit while owned children remain; authorized P2 then demonstrates ordinary leader-first TERM-ignore completes."
+    },
+    {
+      "id": "R2-C06",
+      "priorID": [
+        "P1R-C06",
+        "IR-03",
+        "P1R-C07"
+      ],
+      "status": "STILL_OPEN",
+      "severity": "MAJOR",
+      "title": "A real diagnostic overflow receipt is accepted as a successful draw",
+      "locations": [
+        "src/adapters/openfilm/cache-process-custodian.py:1069",
+        "src/adapters/openfilm/cache-process-custodian.py:1554",
+        "src/adapters/openfilm/cache-process-custodian.py:1569",
+        "src/adapters/openfilm/cache-process-custodian.py:1604",
+        "src/adapters/openfilm/cache-process-supervisor.ts:480",
+        "src/adapters/openfilm/cache-process-supervisor.ts:1649"
+      ],
+      "trigger": "N emits a valid result+JPEG and then exceeds stdout/stderr64KiB before final settlement. C sets diagnostics_lost and _terminated, but does not set failure. If targets are successfully reaped it emits outcome=reaped and exits0. validateCacheExecutionReceipt never rejects diagnostics_lost or checks stream byte limits.",
+      "impact": "Host may deliver the candidate after an observed required budget failure. Current validation also omits complete C/N PPID/PGID/SID binding, exec/anchor and terminal wait semantics; a recomputed digest of arbitrary strings is not a validation of the required wait transcript. Old missing-receipt/nonzero-C bypasses are repaired, but not the full proof.",
+      "contract": "SPEC B/C/D and private contract C require diagnostics/complete identities/wait records plus monotonic failure, not only a self-consistent digest.",
+      "minimal_correction": "Latch C-side budget failure independently of cleanup success, carry a bounded structured original outcome, reject diagnostics_lost/invalid counts in the shared Host proof, and validate complete identity and terminal wait/event semantics against fork authority. Keep execution-ended proof distinct from successful result eligibility.",
+      "decisive_test": "Feed the actual validator an otherwise matching receipt with diagnostics_lost=true and bytes65537, empty/missing wait records, wrong SID/PGID, or failed exec; each must fail. Authorized helper sends candidate then >64KiB: actual domain reaps but zero picture delivery, original failure retained."
+    },
+    {
+      "id": "R2-C08",
+      "priorID": [
+        "P1R-C08",
+        "P1R-C07"
+      ],
+      "status": "STILL_OPEN",
+      "severity": "MAJOR",
+      "title": "Final output has no bounded writable-drain state and events are not segmented",
+      "locations": [
+        "src/adapters/openfilm/cache-process-custodian.py:518",
+        "src/adapters/openfilm/cache-process-custodian.py:956",
+        "src/adapters/openfilm/cache-process-custodian.py:1562",
+        "src/adapters/openfilm/cache-process-custodian.py:1571",
+        "src/adapters/openfilm/cache-process-supervisor.ts:1628"
+      ],
+      "trigger": "A terminal write gets EAGAIN/short-write, or a valid multi-child receipt exceeds its reserved16KiB. _send_receipt packs all events/waits into one object; run flushes immediately again and returns4 if still pending, without waiting for a later writable event. Host accepts only the next single DOMAIN_REAPED frame.",
+      "impact": "Short-write offsets and terminal capacity reservation are repaired, but resumable backpressure still loses the final proof irreversibly after C exits. Up to512 identities/256 events plus waits cannot fit a guaranteed16KiB final summary. This is failclosed, not false settlement, but prevents the required recoverable/normal bounded route; it is not evidence that small normal receipt always fails.",
+      "contract": "SPEC B/C and private contract C explicitly require sequenced event segments, final summary<16KiB and bounded real flush handling.",
+      "minimal_correction": "Implement matching C/Host segmented transcript with bounded queues/count/digest and a final small summary, plus a final writable-drain state with a real deadline/EOF outcome after local reaping. A temporarily full socket must resume, while Host disconnect must never block local reaping or be called success.",
+      "decisive_test": "Drive actual Custodian.run writer/selector with EAGAIN until a later writable notification and then success; prove exact frame bytes/seq/digest survive. A maximum authorized transcript must segment and validate. Disconnect case must reap then exit non-success, not remain blocked."
+    },
+    {
+      "id": "R2-C09",
+      "priorID": [
+        "IR-04"
+      ],
+      "status": "STILL_OPEN",
+      "severity": "MAJOR",
+      "title": "Post-JPEG draw terminal messages are queued but never interpreted",
+      "locations": [
+        "src/adapters/openfilm/cache-process-supervisor.ts:1305",
+        "src/adapters/openfilm/cache-process-supervisor.ts:1599",
+        "src/adapters/openfilm/cache-process-supervisor.ts:1616",
+        "src/adapters/openfilm/cache-process-supervisor.ts:1628",
+        "src/adapters/openfilm/openfilm-cache-worker.mjs:469",
+        "src/adapters/openfilm/openfilm-cache-worker.mjs:474",
+        "src/adapters/openfilm/openfilm-cache-worker.mjs:507"
+      ],
+      "trigger": "Actual worker has sent a candidate then closePageFrames rejects (worker sends closed:false), or a fatal/protocol message arrives after JPEG before delivery. Host stops consuming drawQueue after the JPEG and immediately FINALIZEs C; later waits read only controlQueue.",
+      "impact": "The extracted latch helper now allows candidate->failure, but the actual terminal message never calls that latch. closed:false/fatal is silently left in the queue and a good raw reaping receipt can still deliver the picture. closePageFrames's thrown error is discarded in the worker catch as well. No need to assume a public untrusted producer.",
+      "contract": "ADR F09 and SPEC D require observed closed/fatal/protocol failure before final delivery to remain the outcome; raw termination alone does not erase known errors.",
+      "minimal_correction": "Define and wire the actual post-candidate draw protocol state to consume/validate closed/fatal and drain/error/EOF facts concurrently with C settlement. Preserve a bounded close error envelope. Do not require a never-resolving upstream wrapper before initiating owned termination; retain original3s finalization limit.",
+      "decisive_test": "Actual supervisor with controlled channels receives result+JPEG+closed:false/fatal (same chunk and delayed) plus otherwise valid C receipt/exit. Assert no delivery and exact failure envelope; success requires a valid normal terminal/control transcript. A pure latch function test is insufficient."
+    },
+    {
+      "id": "R2-C11",
+      "priorID": [
+        "P1R-C11",
+        "IR-09"
+      ],
+      "status": "STILL_OPEN",
+      "severity": "MAJOR",
+      "title": "Lifecycle pilot has no unconditional owned cleanup and does not observe its claimed proof",
+      "locations": [
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts:64",
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts:68",
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts:94",
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts:114",
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts:136",
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts:157",
+        "tests/agent-driven/integration/cache-frame-duration-lifetime.test.ts:107"
+      ],
+      "trigger": "A draw remains held, an assertion throws, or Vitest times out. Lifecycle cases use supervisor.draw (hides the reserved handle), have no child/domain cleanup finally, push all roots to removable immediately and never push any to kept. withScenario finally only removes a file. Probe reapHelper returns after a5s race even if close never happened; afterEach removes its directory anyway.",
+      "impact": "The pilot may leave live responsibility and erase its evidence. It does not assert actual C/N identities, receipt/exit, adopted waits, target group/Z disappearance or precise failure codes for most faults. Host-group count is not target reaping proof. This blocks using the current file as the first safe P2a pilot.",
+      "contract": "SPEC G and task's unconditional precise-owned cleanup and intentional-assertion-failure requirement.",
+      "minimal_correction": "Use reserve/start with an immediately registered real owner/handle and a try/finally covering all awaits/assertions; provide an ownership-checked cancel/reap route and explicit unknown retention/escalation. Remove roots only after verified settlement. Record exact C/N/startticks and receipt/actual close. Keep one single-slot scenario reservation or approved unique per-run fixture copy/root; shared files are test scaffolding only.",
+      "decisive_test": "Before the fault suite, intentionally fail an assertion after C/N birth and prove exact owned cleanup including Z and root retention on injected unknown. Then a minimal normal positive roundtrip must capture C/N actual identity, control receipt, C exit/close and zero target leftovers; arbitrary reject/count equality cannot pass."
+    },
+    {
+      "id": "R2-N01",
+      "priorID": [],
+      "status": "NEW",
+      "severity": "MAJOR",
+      "title": "Asynchronous spawn and channel errors have no listener",
+      "locations": [
+        "src/adapters/openfilm/cache-process-supervisor.ts:1205",
+        "src/adapters/openfilm/cache-process-supervisor.ts:1327",
+        "src/adapters/openfilm/cache-process-supervisor.ts:1354"
+      ],
+      "trigger": "spawn returns ChildProcess then emits error (e.g. EAGAIN/ENOENT), or one of the private socket writes emits an asynchronous EPIPE/ECONNRESET. try/catch catches only synchronous spawn/write throws; this module installs data/end/close listeners but no error listener on child or either private socket.",
+      "impact": "An unhandled EventEmitter error can terminate the Host/test process instead of entering the owned cleanup state. The fixed executable normally existing does not exclude resource exhaustion or startup transport errors. Current pure test only makes mocked spawn throw synchronously and misses the actual API error route.",
+      "contract": "ADR F06/failed startup cleanup, private FD/Host disconnect lifecycle; no unowned process or Host crash on expected error paths.",
+      "minimal_correction": "Install error listeners immediately on ChildProcess and both channels, latch the original error, retain child-not-born versus born/unknown authority, and route through the same cancellation/real-close proof. Do not settle just because error fired.",
+      "decisive_test": "A mocked ChildProcess returned normally then emits error on next tick; socket emits error before/after GO. Assert no unhandled event, original error preserved and exact no-birth or owned-cleanup branch. Authorized first pilot separately records real spawn failure."
+    },
+    {
+      "id": "R2-N02",
+      "priorID": [],
+      "status": "NEW",
+      "severity": "MAJOR",
+      "title": "Host last-resort signalling uses close absence as an unreaped PID guarantee",
+      "locations": [
+        "src/adapters/openfilm/cache-process-supervisor.ts:1804",
+        "src/adapters/openfilm/cache-process-supervisor.ts:1810",
+        "src/adapters/openfilm/cache-process-supervisor.ts:1820"
+      ],
+      "trigger": "C exit was already observed/reaped by Node but child close is delayed by inherited/open stdio (or an event delivery gap); #terminate's timeout sees custodianClosed=false and signals child.pid without checking custodianExit or fresh epoch. Node close is later than exit and does not preserve a wait anchor.",
+      "impact": "The stated unreaped-child guarantee is false; PID can have become reusable before close. A later TERM/KILL can target a reused unrelated process. Separately, killing a live C destroys the intended reaper (R2-C04). This is a conditional PID-reuse safety bug, not a claim that reuse was observed.",
+      "contract": "ADR full owned epoch/no arbitrary process kill; Q2 explicitly distinguishes exit from stdio/close.",
+      "minimal_correction": "Do not signal an exited C; validate actual retained child authority and fresh full epoch for any allowed direct-C signal, and retain the reaper rather than killing it on a cleanup deadline. If a dead C has open endpoints, handle those endpoints conservatively without targeting its old numeric PID.",
+      "decisive_test": "Inject observed exit before delayed close and a changed PID startticks; assert process.kill is never called for the old/reused PID. Another case with live C doing valid TERM3+KILL15 cleanup must not KILL its reaper at a shorter Host timer."
+    },
+    {
+      "id": "R2-N03",
+      "priorID": [],
+      "status": "NEW",
+      "severity": "MAJOR",
+      "title": "Finalize3s budget is not carried through actual C-close proof",
+      "locations": [
+        "src/adapters/openfilm/cache-process-supervisor.ts:1627",
+        "src/adapters/openfilm/cache-process-supervisor.ts:1649",
+        "src/adapters/openfilm/cache-process-supervisor.ts:1730"
+      ],
+      "trigger": "C receipt arrives inside the3s finalize window but C close does not. #proveExecution waits an independent killConfirmMs(15s), then can accept close that happened well after finalize expiry.",
+      "impact": "The deadline class is wired to receipt arrival, but not the complete raw-close finalization promised by ADR. Normal roundtrip may appear successful despite exceeding the fixed finalize budget; the report's 'from candidate' claim is incomplete.",
+      "contract": "ADR rev3 §2 and SPEC C: candidate->closed/raw-ended finalize3s, no budget relaxation.",
+      "minimal_correction": "Pass one candidate-time deadline through receipt and C exit/close/transport verification; expiry latches failure and initiates owned recovery without declaring raw settlement. Cleanup may continue under its action deadlines, but the candidate cannot become success after the finalize budget.",
+      "decisive_test": "Actual orchestration branch with receipt at2.9s and C close at4s must latch finalize failure and eventually clean, while receipt/close before3s succeeds. Pure CacheDeadline.remaining tests do not establish this."
+    },
+    {
+      "id": "R2-N04",
+      "priorID": [],
+      "status": "NEW",
+      "severity": "MINOR",
+      "title": "Leader-first fixture kills its child through stdout EPIPE before proving adoption/KILL",
+      "locations": [
+        "tests/agent-driven/integration/helpers/cache-worker-fixture.mjs:215",
+        "tests/agent-driven/integration/helpers/cache-worker-fixture.mjs:288",
+        "tests/agent-driven/integration/helpers/cache-worker-fixture.mjs:333"
+      ],
+      "trigger": "ignore-term-adopted creates child.stdout as pipe with N as only reader, then main returns and process.exit(0). Child writes alive every200ms and has no stdout error listener. Closing N's read side can make child exit on unhandled EPIPE, before C's group escalation.",
+      "impact": "leader-leaves/child-spawned events alone do not prove the child survived leader exit or ignored TERM while adopted. This can falsely exercise a simpler all-already-dead cleanup branch. Also the positive1024x0x4a payload is protocol bytes, not a decodable JPEG and must be described accordingly.",
+      "contract": "SPEC G actual foreign/adopted/TERM-ignore mode reached; no mock/helper claims as real media.",
+      "minimal_correction": "Give adopted child stdio an owned nonblocking sink that survives leader death (or ignore), add explicit child-ready/TERM-ignored/adopted-liveness observations before KILL, and preserve precise cleanup ownership. Label normal buffer as synthetic protocol payload, or use a valid tiny JPEG if decode is asserted.",
+      "decisive_test": "Record child's same epoch alive and PPID=C after leader exit and after TERM grace, then receipt's real SIGKILL wait before N final wait. An EPIPE exit must fail the adoption case."
+    }
+  ],
+  "prior_disposition": [
+    {
+      "priorID": "P1R-C01",
+      "status": "CLOSED_STATIC",
+      "assessment": "detached:true actual spawn; Python checks isolated identity; sequence=0; GET pointer/c_int repaired. Unit calls helper with Python fake, not real prctl binding/kernel: actual conversion/SET+GET remains P2 NOT_RUN.",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "priorID": "P1R-C02",
+      "status": "CLOSED_STATIC",
+      "assessment": "parent_close_set includes exec writer and fd3; child keeps CLOEXEC writer; nonblocking exec-status registered in selector; errno preserved. Actual fork/exec/FD EOF NOT_RUN; R2-N01/C04 covers errors around it.",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "priorID": "P1R-C03",
+      "status": "CLOSED_STATIC",
+      "assessment": "custodian_identity separated from target map; _known_targets_gone iterates targets only; collection is now actual kernel adapter.",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "priorID": "P1R-C04",
+      "status": "STILL_OPEN",
+      "assessment": "All-target escalation wired, but unresolved branch reaps N/returnsC and unexpected exceptions bypass cleanup: R2-C04.",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "priorID": "P1R-C05",
+      "status": "CLOSED_STATIC",
+      "assessment": "Old inherited C/Host group signalling removed: only N sid=pgid=pid selects group, otherwise exact unreaped direct N. Tri-state functions improved. Remaining loss of authority/unknown handling and new Host PID bug separately R2-C04/N02.",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "priorID": "P1R-C06",
+      "status": "STILL_OPEN",
+      "assessment": "Shared proof now requires receipt+exit0+close; incomplete diagnostic/wait/full identity eligibility remains R2-C06.",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "priorID": "P1R-C07",
+      "status": "STILL_OPEN",
+      "assessment": "Bounded decoded queues and per-round stream reads added; overflow can still be accepted, settlement stops draining, and no event segmentation: R2-C06/C08.",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "priorID": "P1R-C08",
+      "status": "STILL_OPEN",
+      "assessment": "Offset, byte accounting, terminal slot and fd3 closure fixed; resumable final flush and segmentation absent: R2-C08.",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "priorID": "P1R-C09",
+      "status": "CLOSED_STATIC",
+      "assessment": "Old candidate guard and self-appending cleanup iteration fixed by actual wired helpers. Distinct unobserved terminal messages/finalize deadline remain R2-C09/N03; not closing IR-04 whole behavior.",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "priorID": "P1R-C10",
+      "status": "CLOSED_STATIC",
+      "assessment": "Private per-draw HOME/TMP/XDG created before spawn; allowlist child env points there; settled-only removal. Runtime no-user-config/Chrome containment still NOT_RUN.",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "priorID": "P1R-C11",
+      "status": "STILL_OPEN",
+      "assessment": "Ticket/mode/half frame/ref timer fixes present, but pilot ownership/finally and real assertions remain unsafe; R2-C11/N04.",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "priorID": "IR-03",
+      "status": "STILL_OPEN",
+      "assessment": "See R2-C06/C04; strict receipt existence and C exit checks improved.",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "priorID": "IR-04",
+      "status": "STILL_OPEN",
+      "assessment": "Pure latch helper fixed but actual trailing closed/fatal never consumed: R2-C09.",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "priorID": "IR-08",
+      "status": "STILL_OPEN",
+      "assessment": "Queue limits/common READY/draw-EOF cancel implemented; diagnostic eligibility/phase and final deadline incomplete R2-C06/N03. READY starts after spawn setup rather than reservation/spawn.",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "priorID": "IR-09",
+      "status": "STILL_OPEN",
+      "assessment": "See R2-C11/N04; helper no browser/media imports is static, not executed.",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "priorID": "IR-10",
+      "status": "CLOSED_STATIC",
+      "assessment": "vi.mock node:child_process intercepts named spawn before supervisor imports execute; synchronous mocked spawn only. Historical failed interpreter spawn admission retained, not retroactively erased.",
+      "runtime": "NOT_RUN"
+    }
+  ],
+  "original17": "NOT_RUN / no N1N2 or whole requirement acceptance; NEXT pending after acceptance",
+  "ISO01_18": "ALL NOT_RUN",
+  "runtime": "Reviewer ran no tests/product/kernel/children/browser/Host/media; only read/hash and review-document writes"
+}

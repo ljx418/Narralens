@@ -1,0 +1,28 @@
+{
+  "at": "2026-11-12T06:13:53.812074+00:00",
+  "capture": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-resume-008-smoke",
+  "result": {
+    "exit": 1,
+    "source_changed": [],
+    "source_added": [],
+    "log_sha256": "136e6fe39d9418c8c2e8c41c922fde5264c9e1266bbbdb8e91fd653926c30314",
+    "finished_at": "2026-11-12T06:12:30.939561+00:00"
+  },
+  "counts": {
+    "passed": 1,
+    "failed": 1
+  },
+  "failure": "Expected settings hydration hydrated; actual unsupported",
+  "observed_processes": [
+    {
+      "pid": 930430,
+      "state": "ABSENT"
+    },
+    {
+      "pid": 930809,
+      "state": "ABSENT"
+    }
+  ],
+  "cleanup": "await child owned Host/tool cleanup evidence",
+  "verdict": "FAIL; no broader acceptance"
+}

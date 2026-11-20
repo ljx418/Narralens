@@ -1,0 +1,169 @@
+{
+  "verdict": "CURRENT_SOURCE_GAPS_CONFIRMED_FOR_MAIN_CONSOLIDATED_R6_PLAN",
+  "scope": "Independent read-only planning verification; no source/runtime release or implementation acceptance",
+  "historical_head": "1d348d419120f23f45d958112ea8c43df5a04675",
+  "runtime_this_review": "ALL_NOT_RUN",
+  "baseline": {
+    "source8_protected7_current651": "MATCH_R5I",
+    "normal002": "Previously MAIN accepted, actual saved outer0; observer NameError and readonly supplement preserved",
+    "fault001": "Previously MAIN accepted exact expected assertion outer1; not arbitrary business failure1",
+    "raw_segments_saved": false
+  },
+  "findings": [
+    {
+      "id": "R3-C06",
+      "severity": "MAJOR",
+      "status": "STILL_OPEN_PARTIALLY_IMPLEMENTED",
+      "classification": [
+        "ALREADY_IMPLEMENTED_STATIC",
+        "NEEDS_IMPLEMENTATION",
+        "NEEDS_DIRECT_TEST",
+        "NEEDS_REAL_RUNTIME"
+      ],
+      "locations": [
+        "src/adapters/openfilm/cache-process-supervisor.ts:771",
+        "src/adapters/openfilm/cache-process-supervisor.ts:865",
+        "src/adapters/openfilm/cache-process-supervisor.ts:915",
+        "src/adapters/openfilm/cache-process-supervisor.ts:1029",
+        "src/adapters/openfilm/cache-process-supervisor.ts:2333",
+        "src/adapters/openfilm/cache-process-custodian.py:1994",
+        "src/adapters/openfilm/cache-process-custodian.py:2049",
+        "src/adapters/openfilm/cache-process-custodian.py:2466"
+      ],
+      "already_implemented": "Control global seq, segment index/count consistency, item digests/kinds/item4096/identity512 caps and duplicate PID refusal, nondestructive snapshots; final summary binding/full C and accepted N epochs, counts/digests/ECHILD/group/known gone. Failed exec separately requires a terminal wait of forked N and never qualifies creative success. Do not redo C01/C04 fixes.",
+      "reachable_trigger": "Private C->Host receipt seam supplies exec.ok=true with one wait for PID999,status.kind=unknown, identity PID200/start_ticks='wrong', recomputed matching hashes/counts, correct final summary epochs and fresh independently gone kernel facts. Actual pump sends segments to cacheInterpretControlMessage before any per-segment protocol/draw/ticket check; domain success branch requires only waits>=1.",
+      "impact": "Missing/wrong/duplicate/nonterminal N wait, N-before-adopted ordering, mismatched identities can satisfy receipt contract; independent fresh observations do not prove historical reap ordering. This is a private protocol seam, not a new public HTTP attacker capability. The current256 wait-fact retention is only for failed startup: failed exec does not normally spawn adopted descendants, so a >256-adopted failed-exec production trigger is NOT claimed. Expanded success semantics must not silently reuse that truncating list.",
+      "contract": "R6 SPEC C06; private contract C segmented exact-epoch/wait proof and resource-ended vs creative eligibility separation",
+      "minimal_fix": "Bind accumulator/control state to immutable expected protocol/draw/ticket at actual draw creation; enforce every segment's binding, bounded count/order, terminal-summary one-shot phase. Stream bounded semantic facts keyed by epoch, not PID alone; validate actual terminal status and explicit completion categories, N exactly once/last, identity/wait correspondence. Producer must emit needed epoch/category fields (currently identity items only pid/startticks and waits pid/status). Track N terminal separately from retained256 examples; no arbitrary cap increase. Document legitimate parent-reaped descendants as observed-gone evidence, never fabricated C wait. _echild catch-up after N cannot silently claim N-last.",
+      "direct_counterexample_design": "Actual accumulator+domain/execution validator and actual supervisor pump: recomputed matching digest wrong-N/nonterminal/duplicate/N-before-adopted/foreign-segment/missing-full-epoch; preserve failed-exec terminal-wait positive. New adopted-success semantic proof must handle N after >256 adopted waits with bounded dedicated state rather than silent truncation. Normal real-shaped transcript positive. All NOT_RUN.",
+      "current_tests": "cache-process-identity.test.ts:524..850 tests actual exported accumulator/validators, digest/order/summary/failed exec but helper segments omit protocol/draw/ticket and positive transcript has one pid-only wait; not complete semantic negatives.",
+      "case_mapping": [
+        "R04 native_cache",
+        "R05 child_lifetime",
+        "ISO-07",
+        "ISO-09",
+        "ISO-10",
+        "ISO-11",
+        "ISO-15"
+      ],
+      "runtime_gap": "Real adopted and parent-reaped transcript, N-last and failure cleanup untested by the two single-N baseline runs."
+    },
+    {
+      "id": "R3-C07",
+      "severity": "MAJOR",
+      "status": "STILL_OPEN_PARTIALLY_IMPLEMENTED",
+      "classification": [
+        "ALREADY_IMPLEMENTED_STATIC",
+        "NEEDS_IMPLEMENTATION",
+        "NEEDS_DIRECT_TEST",
+        "NEEDS_REAL_RUNTIME"
+      ],
+      "locations": [
+        "src/adapters/openfilm/cache-process-custodian.py:1027",
+        "src/adapters/openfilm/cache-process-custodian.py:1405",
+        "src/adapters/openfilm/cache-process-custodian.py:2025",
+        "src/adapters/openfilm/cache-process-custodian.py:2304",
+        "src/adapters/openfilm/cache-process-custodian.py:2406",
+        "src/adapters/openfilm/cache-process-custodian.py:2536",
+        "src/adapters/openfilm/cache-process-supervisor.ts:2280"
+      ],
+      "already_implemented": "Running phase nonblocking bounded64KiB/stream/round reads, per-stream cumulative64KiB bounds/tail8KiB, detected flood latches DIAGNOSTIC_BUDGET and terminates; Host C stdout/stderr handlers persist across phases; real control writer.fd writable wait repaired.",
+      "reachable_trigger": "Candidate/FINALIZE or CANCEL exits _run_loop; TERM handler writes an additional stdout/stderr block while TargetSettlement or _recover runs. KernelSettlementOperations.sleep and _reap_worker only sleep; recovery ignores stream keys, and receipt follows settlement with no final worker-stream drain. A stream read OSError is merely break with diagnostics_lost unchanged.",
+      "impact": "Late bytes/EOF omitted, limit bypass in eligible receipt; read failure can look like clean diagnostics. Registered EOF/read-ready stream ignored by recovery select can return immediately and spin repeated unsuccessful reconciliation (e.g. identity-overflow), rather than bounded sleeping.",
+      "contract": "R6 C07 and private contract B/C: full lifetime per-stream accounting and bounded fair control/reap servicing; failure never downgrades transport error.",
+      "minimal_fix": "One owned per-stream ledger (counts/tail/EOF/read-error) serviced in running, settlement poll, worker wait, recovery/local pause and final pre-receipt drain; bounded rounds preserve wait/control fairness, unregister proven EOF. Preserve current per-stream64KiB/tail8KiB values, not combined128KiB/new budget. Latch EIO as non-success without discarding real wait ownership. Explicit positive EOF evidence and failed-diagnostics terminal close path, never throw out of sole-owner loop while raw children may exist.",
+      "direct_counterexample_design": "Drive actual Custodian->KernelSettlementOperations->TargetSettlement->recovery with guarded raw edges, late TERM output across65536 boundary, short reads/EAGAIN/EOF/EIO, endlessly readable stream plus RECHECK; verify real counters/latch/fairness and original promise failed with proven cleanup. Genuine draw/control/child error after candidate before receipt is a separate actual-supervisor callback test; reporting EPIPE is not it.",
+      "current_tests": "TheRecoveryOfAnUnknownDomain at helpers/cache-custodian-unit.py:1310 drives real recovery but installs selector/identity/wait scripts without live stream phases. Existing budget summary rejection in cache-process-identity.test.ts:835 does not exercise late drain producer.",
+      "case_mapping": [
+        "R07 budgets",
+        "R05 child_lifetime",
+        "ISO-07",
+        "ISO-08",
+        "ISO-10",
+        "ISO-15"
+      ],
+      "runtime_gap": "Late stdout/stderr, backpressure and real channel errors remain unrun by this review and not proved by minimal baseline."
+    },
+    {
+      "id": "R3-C08",
+      "severity": "MAJOR",
+      "status": "STILL_OPEN_PARTIALLY_IMPLEMENTED",
+      "classification": [
+        "ALREADY_IMPLEMENTED_STATIC",
+        "NEEDS_IMPLEMENTATION",
+        "NEEDS_DIRECT_TEST",
+        "NEEDS_REAL_RUNTIME"
+      ],
+      "locations": [
+        "src/adapters/openfilm/cache-process-custodian.py:1239",
+        "src/adapters/openfilm/cache-process-custodian.py:1459",
+        "src/adapters/openfilm/cache-process-custodian.py:2066",
+        "src/adapters/openfilm/cache-process-custodian.py:2085",
+        "src/adapters/openfilm/cache-process-custodian.py:2466",
+        "src/adapters/openfilm/cache-process-supervisor.ts:1058"
+      ],
+      "already_implemented": "Event retention256/identity512 bounds and sticky overflow flags; signal fact saturation latches failure; diagnostics-lost already separates execution eligibility from domain proof. Current unknown recovery retains sole owner/actions without responsibility expiry; do not reopen revoked authority algorithm.",
+      "reachable_trigger": "513 unique _record_target calls set _identity_overflow; even when all actual children are waited and retained epochs gone, _known_targets_gone immediately false on every pass. Separately >256 events truncates events, C can reach raw settlement and exit, but Host rejects events_truncated in domain validator, and emitted full-event digest cannot equal retained-event segments.",
+      "impact": "Identity overflow can retain empty C forever; event truncation can leave Host/PRE/scope held after C exited, with no possible newly complete receipt. Neither _record_target nor _record_event latches the first budget error/starts immediate cleanup at overflow. Retained self.waits and receipt_items also need a bounded full-lifetime strategy rather than transferring unbounded facts to final list.",
+      "contract": "R6 C08/private contract C: permanent creative refusal, raw ownership until independent real terminal evidence; no clear-flag or timer shortcut.",
+      "minimal_fix": "MAIN must lock separate complete-success transcript and bounded failed-terminal certificate semantics, producer and Host together. Sticky original overflow error initiates cleanup; retain original N/C authority and bounded kernel settlement state plus streaming count/digest, not unlimited waits/events. Failed certificate must prove actual owned wait/reap completion, fresh ECHILD/original group ESRCH/retained epochs gone and stream disposition; absent/unknown required proof still holds. It may waive missing diagnostic transcript only under explicit private failed-terminal kind, never validateCacheExecutionReceipt success or ordinary truncated-success receipt. Do not just remove overflow checks, clear flags, or replace per-target evidence by ECHILD alone.",
+      "direct_counterexample_design": "Actual _record_target/_record_event -> real settle/recover -> actual receipt segments -> Host validators with all-ended kernel script yields failed non-held original overflow outcome. Companion unknown/live/replacement/groupEPERM must remain held with no new authority. Test max vs max+1, repeated passes bounded wait memory, Host original continuation one-shot.",
+      "current_tests": "TheEventChain at helpers/cache-custodian-unit.py:703 verifies truncation/count only; identity validator tests:776 explicitly reject domain flags. Neither proves end-to-end failed overflow convergence.",
+      "case_mapping": [
+        "R07 budgets",
+        "R05 child_lifetime",
+        "ISO-08",
+        "ISO-10",
+        "ISO-11",
+        "ISO-15"
+      ],
+      "runtime_gap": "Real bounded inventory/event overflow not covered by single-N baseline; stress only after smaller separately released cases."
+    },
+    {
+      "id": "R3-C09",
+      "severity": "MINOR",
+      "status": "STILL_OPEN_FUTURE_SCENARIO_GATE",
+      "classification": [
+        "ALREADY_IMPLEMENTED_STATIC",
+        "NEEDS_IMPLEMENTATION",
+        "NEEDS_DIRECT_TEST",
+        "NEEDS_REAL_RUNTIME"
+      ],
+      "locations": [
+        "tests/agent-driven/integration/helpers/cache-worker-fixture.mjs:236",
+        "tests/agent-driven/integration/helpers/cache-worker-fixture.mjs:322",
+        "tests/agent-driven/integration/helpers/cache-worker-fixture.mjs:377",
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts:18",
+        "src/adapters/openfilm/cache-process-custodian.py:857"
+      ],
+      "already_implemented": "Grandchild owns events-file sink, ignores stdio and has referenced timer; normal/silent fixture paths and real pilot ownership baseline now accepted. Old R3 blanket pilot blockers must not be copied as current.",
+      "reachable_trigger": "ignore-term-adopted spawns grandchild and immediately returns to process.exit(0); grandchild handler installs asynchronously, no ready acknowledgement. Host EOF can initiate TERM before child has handler or before same-epoch adoption evidence; TargetSettlement sends TERM before first target_census.",
+      "impact": "Future case may test early TERM death instead of live adopted TERM-ignore->KILL->wait. Existing protected fixture cannot prove requested barrier; this does not invalidate accepted normal/silent runs.",
+      "contract": "R6 C09/ISO-09,10,18 explicit same-epoch readiness/adoption/TERM survival then escalation.",
+      "minimal_fix": "Do not modify protected fixture in current ticket. MAIN must separately authorize minimal helper readiness ack via owned per-run pipe/file, full pid/startticks/ppid/pgid/sid event evidence and orchestration that requires child ready before N leaves, C adoption evidence before TERM, post-TERM same-epoch liveness before KILL, adopted wait before N-last. Add bounded pre-signal observation or explicitly approved test-only barrier at actual custodian seam if current automatic EOF cleanup outruns observation; do not solve by sleep or enlarged grace/public hook. Early/missing-ready still exact-owned cleanup and failed case.",
+      "direct_counterexample_design": "Scenario orchestration early/missing-ready/adoption absent/TERM-before-handler must go red with real finally ownership; happy fake sequence reaches actual C settlement gates. Then separately released actual handler-ready/adoption/TERM-live/KILL/adopted-wait/N-last with peer positive.",
+      "current_tests": "Lifecycle file explicitly only nofork+positive scaffolding; Python TargetSettlement mocks validate broad adopted-before-worker order but not helper ready/real adoption/live-afterTERM.",
+      "case_mapping": [
+        "R05 child_lifetime",
+        "ISO-09",
+        "ISO-10",
+        "ISO-18"
+      ],
+      "runtime_gap": "All adopted/TERM-ignore/Chrome lineage runs remain outside accepted minimal normal/fault baseline."
+    }
+  ],
+  "related_limits": [
+    "R5H genuine late channel error needs direct actual callback test, static R5I nonregression retained",
+    "Old5s/20s mock timeout root cause unproven; persistent denied raw edges isolate actual OS but fake promise/timer ownership needs explicit teardown assertions, not wider timeout",
+    "Normal002 original observer NameError and readonly supplement do not represent two product runs; raw receipt frames were not saved",
+    "Historical os.kill(200,SIGTERM) incident and interrupted/INCOMPLETE remain historical unknowns; not rerun or erased"
+  ],
+  "decisions_before_release": [
+    "Lock bounded full-epoch/category schema including legitimate parent-reaped and failed-exec outcomes, immutable segment binding, success-vs-failed-terminal forms",
+    "Lock failed overflow proof obligations and which missing facts necessarily retain responsibility; no PID/group authority expansion",
+    "Lock stream EOF/read-error final dispositions and fair polling at existing budgets",
+    "Fixture remains protected; separately authorize exact readiness/adoption barrier and new fixture pin if required, or keep C09/runtime gate open"
+  ],
+  "source_edits": false,
+  "acceptance": "No R6/R7/R8/original17/ISO18/N1N2/freeze/NEXT/V1 PASS; reviewer runtime ALL_NOT_RUN"
+}

@@ -1,0 +1,23 @@
+{
+  "last_grant": {
+    "format": "narralens.dev-resource-ledger@1",
+    "status": "HELD",
+    "holder": "MAIN",
+    "queue": [],
+    "policy": "MAIN grants single heavy slot for Host/media/ffmpeg/Chromium/build/full gate; pure typecheck/unit permitted isolated",
+    "last_main_heavy": "all actualmedia/creation regressions terminal; exact logs and artifacts retained",
+    "evidence_limit": "operational coordination ledger, not proof of unrelated OS process absence",
+    "no_budget_ceiling": true,
+    "grant_id": "R1-MAIN-BRIDGE-COMPAT-010",
+    "granted_at": "2026-11-11T15:37:55.544021+00:00",
+    "exact_command": "corepack pnpm exec vitest run tests/agent-driven/bridge tests/agent-driven/integration/created-run-authority.test.ts tests/agent-driven/integration/created-task-store.test.ts tests/agent-driven/integration/created-task-worker.test.ts tests/agent-driven/integration/host-close-lifecycle.test.ts tests/agent-driven/integration/review-media-transport.test.ts tests/architecture --maxWorkers=1 --minWorkers=1",
+    "cwd": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+    "scope": "remaining affected BRIDGE/MCP/worker/lifecycle/media read transport and fullarchitecture fitness; no productUI/human claim",
+    "request_message": "msg_d766fdaf314d",
+    "source_fence": "freeze corrected tested input before command; no source/index mutation during command"
+  },
+  "main_host_replay": "4files25PASS,logfdfad17d7...",
+  "compatibility": "14files229PASS,loga7aab39ac9f28141198305c07507a149b6d5823867c54ccd1e701ba8e41abfaa",
+  "both_commands_terminal": true,
+  "no_stageA_PASS": "Only R1 takeover interfaces/workers/MCP/architecture scope"
+}

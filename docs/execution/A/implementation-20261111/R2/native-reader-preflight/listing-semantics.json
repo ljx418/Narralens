@@ -1,0 +1,24 @@
+{
+  "at": "2026-11-12T03:23:39.654227+00:00",
+  "upstream": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+  "source_sha256": {
+    "packages/openfilm/studio/server/files.mjs": "93d65bb02d76ab09e112588d7a852b3d4ada3083ebcd1d9ea2e7d216e82dcf99",
+    "packages/openfilm/studio/server/server.mjs": "c2da2fcf3b8cab3c6758a8d50a660b9d8d0543b917d9927e52b4cda4f2344a0f"
+  },
+  "facts": [
+    {
+      "location": "files.mjs:166-216",
+      "fact": "listFiles recursively gathers assets media; returns files sorted by path.localeCompare(other.path, undefined, {numeric:true}); folders/made sort separately. This is not raw readdir order."
+    },
+    {
+      "location": "files.mjs:181-207",
+      "fact": "hidden names skipped; .gitkeep affects made; assets recursion max depth8; pages outside assets max depth3; symlink handling has separate linkedPlaces authority."
+    },
+    {
+      "location": "server.mjs:500",
+      "fact": "videos=(await listFiles(project.path)).files.filter(kind===video).map(path); numeric native path ordering feeds settings consumer."
+    }
+  ],
+  "reader_requirement": "Derive video_files_in_native_order from independently closed native listFiles semantics, preserving actual execution-host collation; do not use raw directory order, lexical sort, storyboard order or observed browser rows. Sidecar transcript directory lookups are a separate exact-order dependency. Unknown/symlink sources remain fail-closed under Narralens controlled profile.",
+  "verification": "Static pinned code/blob equality only; no listFiles runtime fixture, hydration, media probe or NativeAck acceptance claimed."
+}

@@ -1,0 +1,70 @@
+{
+  "release_id": "MAIN_R5A_TWO_DETERMINISTIC_NORMAL_PATH_FIXES",
+  "at": "2026-11-15T02:18:21.230138+00:00",
+  "cwd": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+  "base_head": "1d348d419120f23f45d958112ea8c43df5a04675",
+  "allow_existing": [
+    "src/adapters/openfilm/cache-process-supervisor.ts",
+    "src/adapters/openfilm/cache-process-custodian.py",
+    "src/adapters/openfilm/cache-worker-integrity.json",
+    "tests/agent-driven/integration/cache-process-identity.test.ts",
+    "tests/agent-driven/integration/helpers/cache-custodian-unit.py"
+  ],
+  "allow_new": [],
+  "start_sha256": {
+    "src/adapters/openfilm/cache-process-supervisor.ts": "b561eda7141590b98e00250a856688be80ddce1492955cf8a763b5fc1d47f07a",
+    "src/adapters/openfilm/cache-process-custodian.py": "6b8d6df32b1958b3cf53e05152e9b04abf6c010d58ae6e672fcd7fa4c9511618",
+    "src/adapters/openfilm/cache-worker-integrity.json": "9dac431b53d620c2ea8832a6dbab02e1c66e5583f5b634c399defe24250f4c65",
+    "tests/agent-driven/integration/cache-process-identity.test.ts": "4d3e18f759496a2a4123fb2c89d737e682600073763b619908397899d9643585",
+    "tests/agent-driven/integration/helpers/cache-custodian-unit.py": "85b738d0fc8cf81337749d65eed4eda06cfaa77e9e4d36eefbf47193c9d12347"
+  },
+  "protectedAGENTS_sha256": "37300463a72a612ae16e0a5fcfb496502c57c722b83781e0e2e8c9480594542b",
+  "recorder": "docs/execution/A/implementation-20261111/integration/e1-main-takeover/run-recorded.py",
+  "recorder_sha256": "88cd47ec732a340f54cdd4bb05b05878887697eebb0ddc94b1ccd7d0e434fd10",
+  "capture_prefix": "n1n2-claude-060p5a-",
+  "allowed_runtime": [
+    [
+      "corepack",
+      "pnpm",
+      "exec",
+      "tsc",
+      "--noEmit"
+    ],
+    [
+      "corepack",
+      "pnpm",
+      "exec",
+      "vitest",
+      "run",
+      "--config",
+      "vitest.config.ts",
+      "tests/agent-driven/integration/cache-process-identity.test.ts"
+    ],
+    [
+      "/usr/bin/python3.12",
+      "-I",
+      "-S",
+      "-B",
+      "tests/agent-driven/integration/helpers/cache-custodian-unit.py"
+    ],
+    [
+      "node",
+      "tools/openfilm-cache-worker-integrity.mjs",
+      "--generate"
+    ],
+    [
+      "node",
+      "tools/openfilm-cache-worker-integrity.mjs",
+      "--check"
+    ]
+  ],
+  "generation_writable_only": "src/adapters/openfilm/cache-worker-integrity.json",
+  "findings": [
+    "R3-C01",
+    "R3-C03"
+  ],
+  "authority": "Code incremental twofaultfix only, no kernel/fork/N/Host/media/browser/pilot/build/fullcheck. PurelocalFD/mock permitted, no targetprocess.",
+  "next": "actualbranchcounterfactuals+selfverify, handback then targetedreview; R5Bstartup/positiveowner later, all otherfindingstillOPEN",
+  "new429": "STOP_NO_RETRY_TAKEOVER",
+  "spec_sha256": "b55edbd3d663c33249d8f18141890e636b7eb96f2f9cca77d0d717b6807d1755"
+}

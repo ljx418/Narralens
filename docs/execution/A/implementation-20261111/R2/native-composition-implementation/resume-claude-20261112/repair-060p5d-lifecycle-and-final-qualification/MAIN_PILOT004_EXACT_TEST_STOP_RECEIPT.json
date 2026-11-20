@@ -1,0 +1,20 @@
+{
+  "at": "2026-11-15T08:10:08.624426+00:00",
+  "capture": "n1n2-claude-060p5d-fix-pilot-004",
+  "target": {
+    "pid": 875664,
+    "ppid": 875597,
+    "start_ticks": "2304928",
+    "state": "R",
+    "comm": "node (vitest 1)",
+    "cmd_sha256": "f6a4a9b81c98e97d978bdecbdd013f5b45daf7543568001f311d4ae015cf97e5",
+    "is_pilot_command": false,
+    "is_recorder004": false
+  },
+  "method": "pidfd_send_signal exact proven hung Vitest worker only",
+  "signal": "SIGTERM",
+  "recorder_and_agent_not_signalled": true,
+  "source_not_modified": true,
+  "signal_sent": true,
+  "pidfd_exit_readable_within5s": true
+}

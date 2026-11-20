@@ -1,0 +1,16 @@
+{
+  "date": "2026-11-20",
+  "product_implementation": "NOT_RUN",
+  "product_runtime": "NOT_RUN",
+  "claude_restart": "NOT_RUN",
+  "checks": [
+    "metadata checker synthetic positive/negative",
+    "current partial packet must reject",
+    "process JSON/path inventory",
+    "new/changed upload secret rules",
+    "archive SHA and member verification",
+    "dependency symlink inspection",
+    "Orca/Git cleanup receipts"
+  ],
+  "note": "One auxiliary read-only process-control inspection exited143; not counted as a passing check. Original independent dependency inspection completed exit0 with no broken/old-workspace links."
+}

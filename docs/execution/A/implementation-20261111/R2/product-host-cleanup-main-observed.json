@@ -1,0 +1,25 @@
+{
+  "at": "2026-11-11T17:30:17.324921+00:00",
+  "specific_prior_listeners": [
+    {
+      "pid": 1206457,
+      "exists": false
+    },
+    {
+      "pid": 650,
+      "exists": true,
+      "comm": "node",
+      "cwd": "/mnt/c/WINDOWS",
+      "start_ticks": "623"
+    },
+    {
+      "pid": 386,
+      "exists": true,
+      "comm": "node",
+      "cwd": "/home/administrator/dsh-workspaces",
+      "start_ticks": "503"
+    }
+  ],
+  "current_lane_node_vitest": [],
+  "limitation": "point-in-time observation; no inference of prior isolation or ownership of unrelated system listeners"
+}

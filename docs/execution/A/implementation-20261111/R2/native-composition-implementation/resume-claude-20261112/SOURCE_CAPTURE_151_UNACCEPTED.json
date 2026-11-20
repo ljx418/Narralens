@@ -1,0 +1,76 @@
+{
+  "at": "2026-11-12T15:33:34.819254+00:00",
+  "status": "151_UNACCEPTED_CANDIDATE_SOURCE_BYTES_SAVED",
+  "request": "msg_96eb097765c1",
+  "source_head": "e2eff61b464d75d36598103d718cd2a75db5dfda",
+  "compile_capture": "n1n2-claude-resume-151-tsc-restored",
+  "implementation_release": "Existing014correctionsonly; NO152 runtimegrant",
+  "files": {
+    "src/host/agent-driven/retained-native-closure.ts": {
+      "sha256": "3bd37ab6eaaf0201c6fc78a339fe4cd1267dea6e2c75a96baaa4ad200d2774df",
+      "blob": "source-captures/3bd37ab6eaaf0201c6fc78a339fe4cd1267dea6e2c75a96baaa4ad200d2774df.txt",
+      "bytes": 53813
+    },
+    "src/host/agent-driven/committed-snapshot-authority.ts": {
+      "sha256": "f6b791bfac3105fad4f400de3b62d15cb5e297a3414eae99e0e518f6333e4e44",
+      "blob": "source-captures/f6b791bfac3105fad4f400de3b62d15cb5e297a3414eae99e0e518f6333e4e44.txt",
+      "bytes": 39116
+    },
+    "src/host/agent-driven/created-native-source-reader.ts": {
+      "sha256": "a8ad22df324ad8c721919ff4462d73a20583b79e2bedc338cabeb7805335ffe7",
+      "blob": "source-captures/a8ad22df324ad8c721919ff4462d73a20583b79e2bedc338cabeb7805335ffe7.txt",
+      "bytes": 73510
+    },
+    "src/host/agent-driven/created-native-workspace.ts": {
+      "sha256": "5f19b43d9b345dc345b6f0c8562a0f08b07a9fbd42a489de4d46a1c6cca2e2f8",
+      "blob": "source-captures/5f19b43d9b345dc345b6f0c8562a0f08b07a9fbd42a489de4d46a1c6cca2e2f8.txt",
+      "bytes": 25117
+    },
+    "src/host/agent-driven/native-cache-witness.ts": {
+      "sha256": "078bc3071ce1d57f05e4bb74e8aa85a9e33c516ac3fcc3c07a9dd0a7afda8435",
+      "blob": "source-captures/078bc3071ce1d57f05e4bb74e8aa85a9e33c516ac3fcc3c07a9dd0a7afda8435.txt",
+      "bytes": 20324
+    },
+    "src/adapters/openfilm/openfilm-upstream.ts": {
+      "sha256": "850234a5c29a0dd742f51d7a8d591abe4ba01e68a0b3755838099f94b1bf9b16",
+      "blob": "source-captures/850234a5c29a0dd742f51d7a8d591abe4ba01e68a0b3755838099f94b1bf9b16.txt",
+      "bytes": 20696
+    },
+    "tests/agent-driven/integration/created-native-source-reader.test.ts": {
+      "sha256": "ffcbc6d8426bc68ac8dedb694249faa99b210a056a5c859133f1a0888e64bb7b",
+      "blob": "source-captures/ffcbc6d8426bc68ac8dedb694249faa99b210a056a5c859133f1a0888e64bb7b.txt",
+      "bytes": 137170
+    },
+    "tests/agent-driven/integration/helpers/native-source-fixture.ts": {
+      "sha256": "19cb73cb9d69394e550699d3363128a4ea60e96a3f28f22e1ea4fce01c6dda0a",
+      "blob": "source-captures/19cb73cb9d69394e550699d3363128a4ea60e96a3f28f22e1ea4fce01c6dda0a.txt",
+      "bytes": 20219
+    },
+    "tests/agent-driven/integration/committed-snapshot-host.test.ts": {
+      "sha256": "bfd0c6373b254050d32a6a99e7b6f8b9827dc24b6b2587515ab4c5aad2cd9037",
+      "blob": "source-captures/bfd0c6373b254050d32a6a99e7b6f8b9827dc24b6b2587515ab4c5aad2cd9037.txt",
+      "bytes": 12061
+    },
+    "tests/agent-driven/integration/native-cache-witness.test.ts": {
+      "sha256": "a73fee186f6aad3df16e9c9e510245af57d8b40673e3985d8e7fb0e2afb45143",
+      "blob": "source-captures/a73fee186f6aad3df16e9c9e510245af57d8b40673e3985d8e7fb0e2afb45143.txt",
+      "bytes": 19208
+    },
+    "src/host/m5/openfilm-native-expected.ts": {
+      "sha256": "19110e45a83b6d5b611b4260620ce873f923f1e5a5b907bc6176c4b734fbeed3",
+      "blob": "source-captures/19110e45a83b6d5b611b4260620ce873f923f1e5a5b907bc6176c4b734fbeed3.txt",
+      "bytes": 47279
+    },
+    "tests/agent-driven/integration/created-native-workspace.test.ts": {
+      "sha256": "439d469032c9af2b83ceb826e0aead7cf5c2fe5c5693be7cbf18c8e67f0f615f",
+      "blob": "source-captures/439d469032c9af2b83ceb826e0aead7cf5c2fe5c5693be7cbf18c8e67f0f615f.txt",
+      "bytes": 12700
+    },
+    "tests/agent-driven/integration/created-native-ack.test.ts": {
+      "sha256": "5f50db85c7c07a2ecf4faefc20ec2ec6c7ad4910fafe549c2edc76bbad729c7c",
+      "blob": "source-captures/5f50db85c7c07a2ecf4faefc20ec2ec6c7ad4910fafe549c2edc76bbad729c7c.txt",
+      "bytes": 134160
+    }
+  },
+  "limit": "Actualcandidate151bytes matchedcompileinputs; NOTold145originalbytebackup, notacceptedtestrestoration, notbusinessPASS"
+}

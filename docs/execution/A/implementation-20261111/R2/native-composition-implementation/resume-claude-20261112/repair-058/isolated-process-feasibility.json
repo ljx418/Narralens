@@ -1,0 +1,164 @@
+{
+  "format": "narralens.a057-04.isolated-process-feasibility@1",
+  "baseline_commit": "1d348d419120f23f45d958112ea8c43df5a04675",
+  "upstream_commit": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+  "source_fence": "git show full baseline:path; current059 working changes excluded",
+  "conclusion": "FEASIBLE_WITH_NARROW_MAIN_ADR_AND_EXPLICIT_RELEASE",
+  "authorization": "DESIGN_ONLY_A04_CODE_NOT_RELEASED",
+  "runtime": "ALL_NOT_RUN",
+  "source_evidence": [
+    {
+      "path": "src/host/render/native-renderer.ts",
+      "commit": "1d348d419120f23f45d958112ea8c43df5a04675",
+      "bytes": 18640,
+      "sha256": "591c30235a12df42a0234ad9bdf3bf09975864db818ca2b4ed2484a4ca8c829f"
+    },
+    {
+      "path": "src/host/render/media-process-policy.mjs",
+      "commit": "1d348d419120f23f45d958112ea8c43df5a04675",
+      "bytes": 2505,
+      "sha256": "3d448ff79c497ee5e123f6931c554a716bc033088e05e701e1de42e48ae995bc"
+    },
+    {
+      "path": "src/host/render/openfilm-render-worker.mjs",
+      "commit": "1d348d419120f23f45d958112ea8c43df5a04675",
+      "bytes": 20102,
+      "sha256": "a074a3e7aefeef1ea85a9a058447151cf42aef6351a1c0528323ae76bcd94f39"
+    },
+    {
+      "path": "src/host/render/openfilm-offline-wrapper.mjs",
+      "commit": "1d348d419120f23f45d958112ea8c43df5a04675",
+      "bytes": 3661,
+      "sha256": "3da8a0b3a817d80bc9fad8be3d92f022b638c6919e4c959b9a5d895b62a08d30"
+    },
+    {
+      "path": "src/host/render/openfilm-offline-hooks.mjs",
+      "commit": "1d348d419120f23f45d958112ea8c43df5a04675",
+      "bytes": 1747,
+      "sha256": "1f73d6b61741062d8b2419323174743ea42ffc93ae282a08cab6f97fe1a7f1ee"
+    },
+    {
+      "path": "src/host/render/openfilm-guard-rules.mjs",
+      "commit": "1d348d419120f23f45d958112ea8c43df5a04675",
+      "bytes": 4068,
+      "sha256": "8ff1f73170dc0fd8414fb8fc8015416ac9e8522d0d7d092b903782f657c90c0a"
+    },
+    {
+      "path": "tools/agent-driven/media/process-group-probe.mjs",
+      "commit": "1d348d419120f23f45d958112ea8c43df5a04675",
+      "bytes": 4647,
+      "sha256": "7b151896505d685c7e0abf919b1e8ca731eb55a701c0179844e815bf75b00d37"
+    },
+    {
+      "path": "tests/agent-driven/media/process-group-inheritance.test.ts",
+      "commit": "1d348d419120f23f45d958112ea8c43df5a04675",
+      "bytes": 2618,
+      "sha256": "61212fa04b02ef8fcf24c683156c44a2469fb029a72b7fb5eb3c675d8cacccc7"
+    },
+    {
+      "path": "docs/execution/A/logs/main-media-process-r3/chromium-groups.json",
+      "commit": "1d348d419120f23f45d958112ea8c43df5a04675",
+      "bytes": 2566,
+      "sha256": "8d2ae4175d523aec1df2d0ddc69a6bc147c5c025d55919ac0f12d757ffe45ccc"
+    },
+    {
+      "path": "docs/execution/A/logs/main-media-process-r3/chromium-probe.exit",
+      "commit": "1d348d419120f23f45d958112ea8c43df5a04675",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": "docs/execution/A/logs/main-media-process-r3/tests.txt",
+      "commit": "1d348d419120f23f45d958112ea8c43df5a04675",
+      "bytes": 1399,
+      "sha256": "4981b27a75c7e8dcbba6b329d56e1c166bcd2465d4394b704051ef9364e87508"
+    },
+    {
+      "path": "src/adapters/openfilm/openfilm-upstream.ts",
+      "commit": "1d348d419120f23f45d958112ea8c43df5a04675",
+      "bytes": 55012,
+      "sha256": "013f50ce87e04b3ff542e15f3c98d833ae43940fef9d85ccad79ff38e5bd200b"
+    },
+    {
+      "path": "src/host/agent-driven/created-native-workspace.ts",
+      "commit": "1d348d419120f23f45d958112ea8c43df5a04675",
+      "bytes": 65816,
+      "sha256": "3702917cf6efe09287030435c1883e1cdd57eb6e0da2fdd577bf3879ab965c1e"
+    }
+  ],
+  "public_interface": "OpenFilmCacheProducerOwner.pageFrame/close and issued brand unchanged",
+  "new_files_proposed": [
+    "src/adapters/openfilm/openfilm-cache-worker.mjs",
+    "src/adapters/openfilm/cache-process-supervisor.ts",
+    "small worker-local birth-gate/IPC/mute facade and separate integrity manifest if needed",
+    "tests/agent-driven/integration/cache-process-settlement.test.ts",
+    "separate bounded real containment probe"
+  ],
+  "protected": [
+    "src/host/render/* unchanged",
+    "vendor/pin/locks/contracts/Approved015 unchanged",
+    "059 writer files not modified"
+  ],
+  "normal_and_timeout_closure": [
+    "reserve accepted ownership before spawn",
+    "worker READY barrier; validate actual pid/startticks/ppid/pgid/sid before GO",
+    "execute original pinned producer in private process with existing worker-local media policy+guard",
+    "candidate result never means settled; seal future process births",
+    "graceful close then anchored owned-group TERM/KILL if needed",
+    "actual worker close and no group/proc identities including zombies",
+    "parent folder streams and probes actually drain",
+    "deliver only if no primary/cancel/budget/protocol/cleanup failure; otherwise FAILED_SETTLED"
+  ],
+  "signal_fallback_assessment": "existing signalProcessGroup catch->child.kill is insufficient; new guarded signal_group required; awaitChildExit reusable only behind verified ownership and additional proc checks",
+  "known_exception": "unexpected leader death/group identity uncertainty or permission/kernel inability retains explicit CLEANUP_REQUIRED; not normal/timeout design end state",
+  "containment_boundary": "trusted fixed executable closure validated by new actual proc diagnostic; JS detached:false is not universal native setsid containment; cgroup/pidfd/reaper needed for stronger adversarial guarantees",
+  "linux_support": "WSL Linux/proc/POSIX group baseline only; no unverified native Windows/macOS support",
+  "ipc_proposal": {
+    "transport": "private inherited bounded length-framed pipes, random32byte ticket; no stdout JSON result or unbounded Node IPC deserialization",
+    "metadata_bytes": 16384,
+    "request_bytes": 65536,
+    "jpeg_bytes": 8388608,
+    "stdout_bytes": 65536,
+    "stderr_bytes": 65536,
+    "log_tail_bytes": 8192
+  },
+  "deadline_proposal_ms": {
+    "ready": 30000,
+    "operation_outer": 60000,
+    "graceful_finalize": 3000,
+    "term_grace": 3000,
+    "post_kill_confirmation": 15000,
+    "upstream_unchanged": {
+      "seek": 15000,
+      "job": 45000,
+      "capture": 30000
+    }
+  },
+  "historical_evidence_limit": {
+    "r3_policy_sha256": "bcadcfecda8080a337b1ceb14b2ffb96c42ba1f3f583f94a1eeceb46261f0559",
+    "frozen057_policy_sha256": "3d448ff79c497ee5e123f6931c554a716bc033088e05e701e1de42e48ae995bc",
+    "r3_results": "normal-close6/0remaining and kill-group6/0remaining exit0;137tests",
+    "does_not_prove": "new worker/IPC/SID/late launch/exact057policy actualChrome; new diagnostic required"
+  },
+  "adr_decisions": [
+    "per-draw process vs previous observer; startup/performance costs and lost page reuse",
+    "Linux exact executable noescape baseline and limits",
+    "owner.close wait or private cancel semantics",
+    "intentional forced_finalize after candidate may be accepted only with independently proven settlement and no primary failure",
+    "capacity/per-serving/workspace key mutual exclusion",
+    "new private protocol/budgets/integrity manifest scope"
+  ],
+  "new_runtime_cases": [
+    "normal continuous frames/poster",
+    "actual seek15s",
+    "actual JOB45s and peer real draw",
+    "capture30s controlled real transport",
+    "late launch/newPage controlled delivery",
+    "parent close/cancel/pipe EOF",
+    "stdout/stderr/length-framed IPC overflow",
+    "cleanup failure vs actual termination",
+    "new actual Chrome process inheritance including SID and zombies"
+  ],
+  "workers_started": false,
+  "W_or_V_written": false
+}

@@ -1,0 +1,162 @@
+{
+  "verdict": "REQUEST_CHANGES",
+  "scope": "R5D targeted startup/reaper, exact minimal N lifecycle and final qualification; no runtime release or overall acceptance",
+  "candidate": {
+    "historical_head": "1d348d419120f23f45d958112ea8c43df5a04675",
+    "custodian_sha256": "30583caab4024b3e4131183e19d60635b1711735892640c5dc7d7e0db34c34f2",
+    "supervisor_sha256": "049489317e8f4f37be77556a90698c82027c8d8d4bf0ee51d15c15862b26d553",
+    "tool_sha256": "a9e343cc257ddb1dad678be7de8bcb7a5bfdb9c8e99a0cd662b01b54067be3b3",
+    "report_sha256": "82ead1e02aa7d2379de593e07ab69066ca60caafb6baa9d5c8d5aeaf6019cef9",
+    "new_git_freeze": false
+  },
+  "findings": [
+    {
+      "id": "R5D-N01",
+      "classification": "STILL_OPEN",
+      "priorIDs": [
+        "R5C-N04"
+      ],
+      "severity": "MAJOR",
+      "title": "Revoked signal state still drops the original group ESRCH proof obligation",
+      "locations": [
+        "src/adapters/openfilm/cache-process-custodian.py:2131",
+        "src/adapters/openfilm/cache-process-custodian.py:948"
+      ],
+      "reachable_precondition": "Original N epoch and independent PGID were bound. N is actually reaped; an uncertain post-reap phase revokes signal permission. On later recovery group_members can be read as empty while the separate raw group_state/killpg(0) probe remains unknown/EIO.",
+      "actual_call_path": "_settle_domain sets group_established only if signal_authority!='revoked'. After revocation it passes false/0 into TargetSettlement even though original_worker_epoch still records the original group. TargetSettlement.run then substitutes group='gone' instead of calling group_state. Census enumeration and numeric group ESRCH are distinct checks.",
+      "impact": "Evidence collection no longer permanently stops, which repairs the old early-return defect, but it can now claim group_esrch=true without the required original group probe. This is a false proof obligation bypass, not a claim that every such run physically leaves a process or kills a peer. The Host has further guards on identified-N paths, but preHELLO/failed-start cleanup also relies on C receipt proof.",
+      "contract": "R5D SPEC D explicitly says permission revocation cannot discard the original group obligation or turn current_group=0 into gone. Original epoch/known-target/ECHILD/group proof must continue independently of signal permission.",
+      "minimal_fix": "Derive the original group evidence obligation from immutable original_worker_epoch regardless of whether signals are revoked. Keep raw signal guards unchanged and irreversible. Query that original group for proof, retaining unknown when it is not ESRCH; do not signal replacement groups.",
+      "direct_counterexample": "Use actual _settle_domain -> KernelSettlementOperations -> raw OS-edge mocks through real mock waitpid consuming N, post-reap refusal and recovered census. Separate group_members=[] from raw killpg(pgid,0)=EIO. Assert proof remains unknown and raw signal count stays0; after raw probe changes to ESRCH, the same responsibility completes. Current updated test couples unknown_group to both enumeration and probe, then clears both and only checks nonzero-signal calls, missing whether the final probe was actually made.",
+      "runtime": "NOT_RUN; static counterexample, no signal/probe experiment"
+    },
+    {
+      "id": "R5D-N02",
+      "classification": "NEW",
+      "priorIDs": [
+        "FINAL-QUALIFICATION",
+        "DIRECT-EVIDENCE"
+      ],
+      "severity": "MAJOR",
+      "title": "Required per-file hash errors and null final-link hashes do not disqualify final qualification",
+      "locations": [
+        "tools/native-cache-normal-pilot.ts:315",
+        "tools/native-cache-normal-pilot.ts:323",
+        "tools/native-cache-normal-pilot.ts:1295",
+        "tools/native-cache-normal-pilot.ts:1316"
+      ],
+      "reachable_precondition": "Actual artifact directory listing succeeds, but reading any required artifact for hashing fails (EIO/EACCES/ENOENT), or a later candidate/manifest hash read fails.",
+      "actual_call_path": "REAL_DEPENDENCIES.artifactFacts records artifacts[i].error/digest=null but always returns top-level error:null. judge only receives facts.error and ignores row errors. candidate_sha256 and manifest_sha256 are read after finalJudgement is computed; sha256OfFile returns null on error and neither null is checked before writing an authoritative green final.",
+      "impact": "final.json can claim kind_of_run='ok' or fault_case_passed=true with a missing required digest/error-bearing manifest. A strict external validator should reject it, but the tool's claimed final authority and main exit do not implement the stipulated qualification. This is evidence integrity, not loss of a live resource owner.",
+      "contract": "R5D SPEC G/H: all necessary read/list/hash/write failures must be explicit non-green; missing valid final/complete manifest is not acceptance. A null hash is not success.",
+      "minimal_fix": "Propagate any artifact-row error to final qualification, compute and validate required candidate/manifest digests before judging, and reject missing/invalid required entries and links. Preserve explicit candidate/manifest/final acyclic ordering; no new backend or raw-segment audit is needed.",
+      "direct_counterexample": "Drive actual runner/main with actual-shaped artifactFacts returning a listed candidate or helper with digest=null/error while top error is null, and separately fail only the final-link reread. Assert final qualification failed, fault_case_passed=false and no accepted success. Test actual default artifactFacts at fs/read boundaries rather than only overriding it with top-level error:EIO. Existing test covers listing/top-level error, not the production mapper's swallowed row failure.",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "id": "R5D-N03",
+      "classification": "NEW",
+      "priorIDs": [
+        "FINAL-QUALIFICATION"
+      ],
+      "severity": "MAJOR",
+      "title": "Final write failure leaves green returned qualification; current legacy consumer accepts it",
+      "locations": [
+        "tools/native-cache-normal-pilot.ts:1321",
+        "tools/native-cache-normal-pilot.ts:1323",
+        "tools/native-cache-normal-pilot.ts:1325",
+        "tools/native-cache-normal-pilot.ts:1395",
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts:254"
+      ],
+      "reachable_precondition": "Normal or exact-fault result has completed full cleanup, then writeEvidence(final.json) throws. A real write may fail after some or all bytes became visible, for example a close error after writing.",
+      "actual_call_path": "writeEvidence catches and appends the error; authoritative becomes false, but finalKind/finalExitCode/faultCasePassed are copied from the pre-write green finalJudgement. runPositivePilot returns normal kind ok/exitCode0 or fault-observed/faultCasePassed true. The actual legacy normal caller only checks those fields and terminal/image facts, never authoritative/final/manifest/evidenceErrors. main changes !authoritative to exit1, which is indistinguishable from the expected fault's exit1 if a full-looking green final file survived the failed write.",
+      "impact": "The returned protocol and a real existing consumer can accept a run whose authoritative publication failed. For assertion mode, exit1 alone cannot repair the ambiguity; there can be a green-looking persisted record plus expected exit1 despite known final I/O failure. C/N are already terminal in this trigger: no physical orphan is alleged.",
+      "contract": "R5D SPEC G and explicit task require valid final+manifest+candidate/raw result/cleanup/fresh proof plus outer exit jointly; any required write error must not remain green. The report's 'final or exit' wording is insufficient.",
+      "minimal_fix": "Revoke all returned eligibility on final-publication failure, make final-write failure externally distinguishable from the expected-fault exit, and update actual legacy consumption to require authoritative complete publication and the same joint artifact predicate. Use a publication scheme/status that does not treat a file left by a failed write as committed authority. Preserve original error and cleanup proof.",
+      "direct_counterexample": "Use actual runPositivePilot/main and a filesystem-shaped writer that serializes final bytes then throws EIO (also a before-write failure case). Read the persisted JSON snapshot, not a live object reference. Normal return and the real legacy acceptance predicate must fail; expected-fault must not satisfy final+outer-status acceptance. Current mock evidence objects can retain mutable references, so later evidenceErrors changes must not be mistaken for bytes already written.",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "id": "R5D-N04",
+      "classification": "NEW",
+      "severity": "MAJOR",
+      "title": "Current identity pure test can send real SIGTERM to synthetic PID4242",
+      "locations": [
+        "tests/agent-driven/integration/cache-process-identity.test.ts:1151",
+        "tests/agent-driven/integration/cache-process-identity.test.ts:1172",
+        "src/adapters/openfilm/cache-process-supervisor.ts:3057"
+      ],
+      "reachable_precondition": "Run the released identity Vitest command's 'keeps a draw HELD when it was ALLOWED to fork and no worker was proved' case. It mocks spawn to FakeChild4242, supplies accepted C_HELLO and fake readable /proc epoch, then waits until held without emitting C exit/close until afterward.",
+      "actual_call_path": "C_HELLO is accepted, AUTHORIZE sent, no FORKED follows; #fail -> #terminate waits the short cleanup deadline. custodianClosed=false/custodianExit=null and #custodianIsStillThisProcess reads the fake matching epoch, so process.kill(4242,'SIGTERM') is called. The test mocks node:child_process.spawn and node:fs reads but not process.kill; project Vitest config has no global setup to guard it.",
+      "impact": "The purported pure gate can signal an unrelated real process occupying4242, or make an unauthorized real syscall that happens to return ESRCH. Matching synthetic proc data is not real ownership. This is a current exact test path, beyond the acknowledged Python200 incident. No new execution or retrospective claim about recipient/effects is made here.",
+      "contract": "R5D release permits only mocked kernel edges and explicitly forbids real target signal/fork/wait runtime. Task specifically requires all tested raw boundaries isolated after the leaked Python call.",
+      "minimal_fix": "Install fail-closed raw process.kill guards before the actual supervisor can run in both relevant TS test files, with explicit per-case controlled mock outcomes for signal0 and nonzero signals; never forward synthetic PIDs/groups to real OS. Add equivalent deny-by-default safeguards for Python raw edges. Preserve real production dispatch and test its actual call arguments through injected OS mocks.",
+      "direct_counterexample": "Without executing a real signal, spy/deny process.kill before actual start in this same case and assert it receives the expected synthetic call in the controlled mock only. Any unmocked raw signal must fail before side effect. Verify all no-FORKED/late-close/transport-error/held combinations and the Python fallback path, with no real PID existence check/retry.",
+      "runtime": "NOT_RUN; statically proven reachable source path, not an observed new syscall"
+    }
+  ],
+  "prior_dispositions": [
+    {
+      "priorID": "R5C-N01",
+      "classification": "CLOSED_STATIC",
+      "assessment": "Normal pending no longer causes DRAW_NOT_SETTLED cancel; only originalFailure requests cancel. Fault waits for accepted worker and real failure/deadline before GO/live checks. Tests now include actual CacheProcessSupervisor plus mocked ChildProcess/proc protocol and macrotask-yielding clock, not solely synchronous stub."
+    },
+    {
+      "priorID": "R5C-N02",
+      "classification": "CLOSED_STATIC",
+      "assessment": "First cancel provenance/Error is immutable; secondary bounded count/last fact preserves it. Existing cancelSent makes C CANCEL one-shot. Actual supervisor same/different repeated reserved and started/held cancellation tests plus delayed runner combination were read."
+    },
+    {
+      "priorID": "R5C-N03",
+      "classification": "CLOSED_STATIC",
+      "assessment": "With no bound epoch, actual issued PID is freshly queried after exit/close; gone permits original failed settlement, known/unknown remain held. Actual start/reconcile test exercises initial EIO then ENOENT."
+    },
+    {
+      "priorID": "R5C-N04",
+      "classification": "STILL_OPEN",
+      "assessment": "Early authority_lost terminal-proof starvation fixed and anchor state is no longer hardcoded; current group obligation is still incorrectly conditioned on nonrevoked signal authority (R5D-N01)."
+    },
+    {
+      "priorID": "R5C-N05",
+      "classification": "CLOSED_STATIC",
+      "assessment": "First32/recent32 signal facts plus counters/saturation replace unbounded history; only sent consumes delivery debt. New raw EPERM mock path covers bounded retained history and later locally allowed convergence. This is not full R6 receipt semantics closure."
+    },
+    {
+      "priorID": "R5C-NOTE-01",
+      "classification": "CLOSED_STATIC",
+      "assessment": "Same original C epoch in Z is rejected by proof; MAIN clarification is correctly followed. No impossible fake close event is being used here to claim a real kernel orphan."
+    },
+    {
+      "priorID": "R5C-NOTE-02",
+      "classification": "CLOSED_STATIC",
+      "assessment": "Original raw cleanup is boundedly serialized and both raw cleanup facts and final diagnostic cleanup_failures disqualify normal/fault. Actual rmSync-error boundary test is present. Publication remains separately defective under N02/N03."
+    }
+  ],
+  "notes": [
+    {
+      "id": "R5D-NOTE-01",
+      "severity": "MINOR",
+      "locations": [
+        "tests/agent-driven/integration/helpers/cache-custodian-unit.py:602",
+        "tests/agent-driven/integration/helpers/cache-custodian-unit.py:612",
+        "tests/agent-driven/integration/helpers/cache-custodian-unit.py:1727"
+      ],
+      "assessment": "Current new raw adapter fixture explicitly mocks both killpg and kill, and other reviewed adapter classes patch both signal wrappers/waits; no second current leak was established by static inspection. However _FakeOs.__getattr__ still forwards unlisted dangerous operations including kill/fork/exec to real os, and default killpg synthesizes ESRCH instead of failing the test. After the actual red-python-002 leak this is not a fail-closed boundary. Add deny-by-default guards for unmocked raw signal/fork/wait/exec/prctl edges before another purported pure gate, retaining explicit per-case injected implementations. This is requested test-safety hardening, not a claim that another live syscall occurred or an unrelated prerequisite for the real N production code."
+    },
+    {
+      "id": "R5D-NOTE-02",
+      "severity": "NOTE",
+      "locations": [
+        "src/adapters/openfilm/cache-process-supervisor.ts:1927",
+        "src/adapters/openfilm/cache-process-supervisor.ts:1957"
+      ],
+      "assessment": "Persisted receipt_summary/accumulator_summary expose counts/flags but no events/waits/identities digest strings, despite candidate comment/report claiming digest facts. raw_segments_saved=false is honest. Do not describe the saved artifact as full/digest-reproducible transcript; copy the already computed bounded digest facts for the minimal evidence contract when fixing publication, without demanding R6's complete segment semantics here."
+    },
+    {
+      "id": "R5D-NOTE-03",
+      "severity": "NOTE",
+      "assessment": "red-python-002 attempted real os.kill(200,SIGTERM), outside the pure/runtime permission scope. Author reports ESRCH; later PID absence is not retrospective proof that a call had no impact. This reviewer did not repeat it. Do not count that attempt as a compliant pure test or a semantic old-code failure. Preserve MAIN fixture-causality notes, raw captures and 005 INCOMPLETE."
+    }
+  ],
+  "runtime": "Reviewer all tests/imports/C/N/CLI/fork/wait/signal/prctl/kernel/Host/browser/media/network NOT_RUN; no implementation. Original17/ISO18/R6/R7/N1N2/NEXT remain OPEN/NOT_RUN."
+}

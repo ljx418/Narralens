@@ -1,0 +1,6 @@
+{
+  "exit": 0,
+  "stdout": "{\"ok\":true,\"result\":{\"dispatchId\":\"ctx_e657630bbb6b\",\"taskId\":\"task_d4071ac7b4d1\",\"runId\":\"run_399f9dd3ce5a\",\"state\":\"outcome_unknown\",\"agent\":\"codex\",\"mode\":\"terminal\",\"terminal\":\"term_2f85f6f4-0952-41f5-81fb-d2b36e00c807\",\"workspace\":\"2e732423-9bcc-494c-a0ed-e27a9488f313::\\\\\\\\wsl.localhost\\\\Ubuntu-24.04\\\\home\\\\administrator\\\\orca\\\\workspaces\\\\Narralens\\\\Narralens-A-R1-BRIDGE\",\"keptOpen\":true,\"next\":\"Task typed in but the worker hasn't been seen starting; don't resend or abandon it. End your turn; Orca wakes you when it reports. If nothing arrives, run \\\"orca-ide\\\" \\\"orchestration\\\" \\\"worker-show\\\" \\\"--dispatch\\\" \\\"ctx_e657630bbb6b\\\".\"}}\n",
+  "stderr": "warning: turn_start_unobserved: task typed in; the worker may still be starting. Don't resend.\n",
+  "method": "structured argv --spec; no model override"
+}

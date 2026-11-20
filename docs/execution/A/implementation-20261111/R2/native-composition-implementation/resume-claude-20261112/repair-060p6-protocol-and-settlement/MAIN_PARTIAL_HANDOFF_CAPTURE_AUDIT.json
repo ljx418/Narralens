@@ -1,0 +1,80 @@
+{
+  "at": "2026-11-15T18:14:04.262121+00:00",
+  "rejected_message": "msg_df71854ea386",
+  "accepted_transport_message": "msg_dc51bdc745d7",
+  "task": "task_d6998927a394",
+  "outcome_claim": "succeeded",
+  "main_disposition": "PARTIAL_NOT_ACCEPTED_SCOPE_INCOMPLETE",
+  "six_captures": [
+    {
+      "capture": "n1n2-claude-060p6-final2-integrity-generate",
+      "exit": 0,
+      "inputs": 651,
+      "log_sha256": "542cd98985745dace76dc3a207d5061d387ff4220086b92555f5856cd3b94adb",
+      "source_changed": []
+    },
+    {
+      "capture": "n1n2-claude-060p6-final2-tsc",
+      "exit": 0,
+      "inputs": 651,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source_changed": []
+    },
+    {
+      "capture": "n1n2-claude-060p6-final2-identity",
+      "exit": 0,
+      "inputs": 651,
+      "log_sha256": "c5b6ad22ab06dc0726b6a3929be24c71f9d59ce66c51bfc3aa900e053459b536",
+      "source_changed": []
+    },
+    {
+      "capture": "n1n2-claude-060p6-final2-python",
+      "exit": 0,
+      "inputs": 651,
+      "log_sha256": "0f8b52398f410cd7f4e827c8af22f2d511a38cd750ec09f429376a9abd7d6617",
+      "source_changed": []
+    },
+    {
+      "capture": "n1n2-claude-060p6-final2-pilot",
+      "exit": 0,
+      "inputs": 651,
+      "log_sha256": "33db12882af7c9f8283b1ce4f16910eeaec677ae7b1584947aee5e05d5327674",
+      "source_changed": []
+    },
+    {
+      "capture": "n1n2-claude-060p6-final2-integrity-check",
+      "exit": 0,
+      "inputs": 651,
+      "log_sha256": "7480083d801311b007ec2f2a6c4717621f8aed33de5e17dd7ba35815b0d68e68",
+      "source_changed": []
+    }
+  ],
+  "source_changed_from_release": [
+    "src/adapters/openfilm/cache-process-custodian.py",
+    "src/adapters/openfilm/cache-process-supervisor.ts",
+    "src/adapters/openfilm/cache-worker-integrity.json",
+    "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts",
+    "tests/agent-driven/integration/cache-process-identity.test.ts",
+    "tests/agent-driven/integration/helpers/cache-custodian-unit.py",
+    "tests/agent-driven/integration/native-cache-normal-pilot.test.ts"
+  ],
+  "protected7_match": true,
+  "source8": {
+    "src/adapters/openfilm/cache-process-supervisor.ts": "3396945546985a334bd99520c97d403eb853fdd0c4a01ff4359b4ac97d414eed",
+    "src/adapters/openfilm/cache-process-custodian.py": "d7eee942d3fb2acf1db12bca4ce32568e3038a1ef03e3efebed222eda6dd55c4",
+    "src/adapters/openfilm/cache-worker-integrity.json": "dc68cb3d4417c065d83c0564e7bbf38e315be54d8afb32afd2b98eb6a268959f",
+    "tests/agent-driven/integration/cache-process-identity.test.ts": "8aef2bd65a87fa99f69f1286b415dd582a748f488ec1e6c79df7eaad7aa11a74",
+    "tests/agent-driven/integration/helpers/cache-custodian-unit.py": "ec3baa5ff292b3f7b14f31fdcd8e05b60a5f15a6bf82dd24eb55c8727b6dd63b",
+    "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts": "0599c27158ad52f29c26ae9d2697d5c4b3bbb30f96161ccdc94ac5742ef0b985",
+    "tools/native-cache-normal-pilot.ts": "e4db3499f715d5b6b5634568677a6688cf80a897c9321c45e93cda98c6a19ebb",
+    "tests/agent-driven/integration/native-cache-normal-pilot.test.ts": "8ebecbfbcca0fe722c88215804c5d9b544df4d0042ac311a1a99ade046bc1f4e"
+  },
+  "report_sha256": "9ff59982a3c3a7722a7d6cf79597b666a0d7ef923a42529033c1641216d5e11a",
+  "not_accepted": [
+    "R6_SOURCE_C06_C08_INTERNAL_EVIDENCED",
+    "independent code PASS",
+    "actual runtime",
+    "R6",
+    "N1N2"
+  ]
+}

@@ -1,0 +1,1336 @@
+{
+  "finished_at": "2026-11-15T02:11:50.427110+00:00",
+  "actual_exit": 0,
+  "observed": {
+    "185922": {
+      "identity": {
+        "pid": 185922,
+        "state": "D",
+        "ppid": 185921,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280760"
+      },
+      "kind": "recorder",
+      "observed_at": "2026-11-15T02:11:50.403164+00:00",
+      "direct_children": []
+    },
+    "186033": {
+      "identity": {
+        "pid": 186033,
+        "state": "D",
+        "ppid": 185922,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280951"
+      },
+      "kind": "provenance-or-other-tool",
+      "observed_at": "2026-11-15T02:11:48.095530+00:00",
+      "direct_children": []
+    },
+    "186039": {
+      "identity": {
+        "pid": 186039,
+        "state": "S",
+        "ppid": 185922,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280957"
+      },
+      "kind": "node-pilot",
+      "observed_at": "2026-11-15T02:11:48.217506+00:00",
+      "direct_children": []
+    },
+    "186046": {
+      "identity": {
+        "pid": 186046,
+        "state": "R",
+        "ppid": 186039,
+        "pgid": 186046,
+        "sid": 186046,
+        "start_ticks": "280962"
+      },
+      "kind": "custodian",
+      "observed_at": "2026-11-15T02:11:48.197053+00:00",
+      "direct_children": []
+    }
+  },
+  "bounded_transition_samples": [
+    {
+      "identity": {
+        "pid": 185922,
+        "state": "R",
+        "ppid": 185921,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280760"
+      },
+      "kind": "recorder",
+      "observed_at": "2026-11-15T02:11:46.150937+00:00",
+      "direct_children": []
+    },
+    {
+      "identity": {
+        "pid": 185922,
+        "state": "D",
+        "ppid": 185921,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280760"
+      },
+      "kind": "recorder",
+      "observed_at": "2026-11-15T02:11:46.171165+00:00",
+      "direct_children": []
+    },
+    {
+      "identity": {
+        "pid": 185922,
+        "state": "R",
+        "ppid": 185921,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280760"
+      },
+      "kind": "recorder",
+      "observed_at": "2026-11-15T02:11:46.191443+00:00",
+      "direct_children": []
+    },
+    {
+      "identity": {
+        "pid": 185922,
+        "state": "D",
+        "ppid": 185921,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280760"
+      },
+      "kind": "recorder",
+      "observed_at": "2026-11-15T02:11:46.231908+00:00",
+      "direct_children": []
+    },
+    {
+      "identity": {
+        "pid": 185922,
+        "state": "R",
+        "ppid": 185921,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280760"
+      },
+      "kind": "recorder",
+      "observed_at": "2026-11-15T02:11:46.292593+00:00",
+      "direct_children": []
+    },
+    {
+      "identity": {
+        "pid": 185922,
+        "state": "D",
+        "ppid": 185921,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280760"
+      },
+      "kind": "recorder",
+      "observed_at": "2026-11-15T02:11:46.312831+00:00",
+      "direct_children": []
+    },
+    {
+      "identity": {
+        "pid": 185922,
+        "state": "R",
+        "ppid": 185921,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280760"
+      },
+      "kind": "recorder",
+      "observed_at": "2026-11-15T02:11:46.333069+00:00",
+      "direct_children": []
+    },
+    {
+      "identity": {
+        "pid": 185922,
+        "state": "D",
+        "ppid": 185921,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280760"
+      },
+      "kind": "recorder",
+      "observed_at": "2026-11-15T02:11:46.373507+00:00",
+      "direct_children": []
+    },
+    {
+      "identity": {
+        "pid": 185922,
+        "state": "R",
+        "ppid": 185921,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280760"
+      },
+      "kind": "recorder",
+      "observed_at": "2026-11-15T02:11:46.434191+00:00",
+      "direct_children": []
+    },
+    {
+      "identity": {
+        "pid": 185922,
+        "state": "D",
+        "ppid": 185921,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280760"
+      },
+      "kind": "recorder",
+      "observed_at": "2026-11-15T02:11:46.454423+00:00",
+      "direct_children": []
+    },
+    {
+      "identity": {
+        "pid": 185922,
+        "state": "R",
+        "ppid": 185921,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280760"
+      },
+      "kind": "recorder",
+      "observed_at": "2026-11-15T02:11:46.474656+00:00",
+      "direct_children": []
+    },
+    {
+      "identity": {
+        "pid": 185922,
+        "state": "D",
+        "ppid": 185921,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280760"
+      },
+      "kind": "recorder",
+      "observed_at": "2026-11-15T02:11:46.494853+00:00",
+      "direct_children": []
+    },
+    {
+      "identity": {
+        "pid": 185922,
+        "state": "R",
+        "ppid": 185921,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280760"
+      },
+      "kind": "recorder",
+      "observed_at": "2026-11-15T02:11:46.515076+00:00",
+      "direct_children": []
+    },
+    {
+      "identity": {
+        "pid": 185922,
+        "state": "D",
+        "ppid": 185921,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280760"
+      },
+      "kind": "recorder",
+      "observed_at": "2026-11-15T02:11:46.575965+00:00",
+      "direct_children": []
+    },
+    {
+      "identity": {
+        "pid": 185922,
+        "state": "R",
+        "ppid": 185921,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280760"
+      },
+      "kind": "recorder",
+      "observed_at": "2026-11-15T02:11:46.616461+00:00",
+      "direct_children": []
+    },
+    {
+      "identity": {
+        "pid": 185922,
+        "state": "D",
+        "ppid": 185921,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280760"
+      },
+      "kind": "recorder",
+      "observed_at": "2026-11-15T02:11:46.656974+00:00",
+      "direct_children": []
+    },
+    {
+      "identity": {
+        "pid": 185922,
+        "state": "R",
+        "ppid": 185921,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280760"
+      },
+      "kind": "recorder",
+      "observed_at": "2026-11-15T02:11:46.717674+00:00",
+      "direct_children": []
+    },
+    {
+      "identity": {
+        "pid": 185922,
+        "state": "D",
+        "ppid": 185921,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280760"
+      },
+      "kind": "recorder",
+      "observed_at": "2026-11-15T02:11:46.737915+00:00",
+      "direct_children": []
+    },
+    {
+      "identity": {
+        "pid": 185922,
+        "state": "R",
+        "ppid": 185921,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280760"
+      },
+      "kind": "recorder",
+      "observed_at": "2026-11-15T02:11:46.778405+00:00",
+      "direct_children": []
+    },
+    {
+      "identity": {
+        "pid": 185922,
+        "state": "D",
+        "ppid": 185921,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280760"
+      },
+      "kind": "recorder",
+      "observed_at": "2026-11-15T02:11:46.798664+00:00",
+      "direct_children": []
+    },
+    {
+      "identity": {
+        "pid": 185922,
+        "state": "R",
+        "ppid": 185921,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280760"
+      },
+      "kind": "recorder",
+      "observed_at": "2026-11-15T02:11:46.818928+00:00",
+      "direct_children": []
+    },
+    {
+      "identity": {
+        "pid": 185922,
+        "state": "D",
+        "ppid": 185921,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280760"
+      },
+      "kind": "recorder",
+      "observed_at": "2026-11-15T02:11:46.839259+00:00",
+      "direct_children": []
+    },
+    {
+      "identity": {
+        "pid": 185922,
+        "state": "R",
+        "ppid": 185921,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280760"
+      },
+      "kind": "recorder",
+      "observed_at": "2026-11-15T02:11:46.900047+00:00",
+      "direct_children": []
+    },
+    {
+      "identity": {
+        "pid": 185922,
+        "state": "D",
+        "ppid": 185921,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280760"
+      },
+      "kind": "recorder",
+      "observed_at": "2026-11-15T02:11:46.920403+00:00",
+      "direct_children": []
+    },
+    {
+      "identity": {
+        "pid": 185922,
+        "state": "R",
+        "ppid": 185921,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280760"
+      },
+      "kind": "recorder",
+      "observed_at": "2026-11-15T02:11:46.940635+00:00",
+      "direct_children": []
+    },
+    {
+      "identity": {
+        "pid": 185922,
+        "state": "D",
+        "ppid": 185921,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280760"
+      },
+      "kind": "recorder",
+      "observed_at": "2026-11-15T02:11:46.960884+00:00",
+      "direct_children": []
+    },
+    {
+      "identity": {
+        "pid": 185922,
+        "state": "R",
+        "ppid": 185921,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280760"
+      },
+      "kind": "recorder",
+      "observed_at": "2026-11-15T02:11:47.102611+00:00",
+      "direct_children": []
+    },
+    {
+      "identity": {
+        "pid": 185922,
+        "state": "D",
+        "ppid": 185921,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280760"
+      },
+      "kind": "recorder",
+      "observed_at": "2026-11-15T02:11:47.143194+00:00",
+      "direct_children": []
+    },
+    {
+      "identity": {
+        "pid": 185922,
+        "state": "R",
+        "ppid": 185921,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280760"
+      },
+      "kind": "recorder",
+      "observed_at": "2026-11-15T02:11:47.163543+00:00",
+      "direct_children": []
+    },
+    {
+      "identity": {
+        "pid": 185922,
+        "state": "D",
+        "ppid": 185921,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280760"
+      },
+      "kind": "recorder",
+      "observed_at": "2026-11-15T02:11:47.184021+00:00",
+      "direct_children": []
+    },
+    {
+      "identity": {
+        "pid": 185922,
+        "state": "R",
+        "ppid": 185921,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280760"
+      },
+      "kind": "recorder",
+      "observed_at": "2026-11-15T02:11:47.285487+00:00",
+      "direct_children": []
+    },
+    {
+      "identity": {
+        "pid": 185922,
+        "state": "D",
+        "ppid": 185921,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280760"
+      },
+      "kind": "recorder",
+      "observed_at": "2026-11-15T02:11:47.305682+00:00",
+      "direct_children": []
+    },
+    {
+      "identity": {
+        "pid": 185922,
+        "state": "R",
+        "ppid": 185921,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280760"
+      },
+      "kind": "recorder",
+      "observed_at": "2026-11-15T02:11:47.346098+00:00",
+      "direct_children": []
+    },
+    {
+      "identity": {
+        "pid": 185922,
+        "state": "D",
+        "ppid": 185921,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280760"
+      },
+      "kind": "recorder",
+      "observed_at": "2026-11-15T02:11:47.366351+00:00",
+      "direct_children": []
+    },
+    {
+      "identity": {
+        "pid": 185922,
+        "state": "R",
+        "ppid": 185921,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280760"
+      },
+      "kind": "recorder",
+      "observed_at": "2026-11-15T02:11:47.487939+00:00",
+      "direct_children": []
+    },
+    {
+      "identity": {
+        "pid": 185922,
+        "state": "D",
+        "ppid": 185921,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280760"
+      },
+      "kind": "recorder",
+      "observed_at": "2026-11-15T02:11:47.508181+00:00",
+      "direct_children": []
+    },
+    {
+      "identity": {
+        "pid": 185922,
+        "state": "R",
+        "ppid": 185921,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280760"
+      },
+      "kind": "recorder",
+      "observed_at": "2026-11-15T02:11:47.548753+00:00",
+      "direct_children": []
+    },
+    {
+      "identity": {
+        "pid": 185922,
+        "state": "D",
+        "ppid": 185921,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280760"
+      },
+      "kind": "recorder",
+      "observed_at": "2026-11-15T02:11:47.589201+00:00",
+      "direct_children": []
+    },
+    {
+      "identity": {
+        "pid": 185922,
+        "state": "R",
+        "ppid": 185921,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280760"
+      },
+      "kind": "recorder",
+      "observed_at": "2026-11-15T02:11:47.649922+00:00",
+      "direct_children": []
+    },
+    {
+      "identity": {
+        "pid": 185922,
+        "state": "D",
+        "ppid": 185921,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280760"
+      },
+      "kind": "recorder",
+      "observed_at": "2026-11-15T02:11:47.690364+00:00",
+      "direct_children": []
+    },
+    {
+      "identity": {
+        "pid": 185922,
+        "state": "R",
+        "ppid": 185921,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280760"
+      },
+      "kind": "recorder",
+      "observed_at": "2026-11-15T02:11:47.811876+00:00",
+      "direct_children": []
+    },
+    {
+      "identity": {
+        "pid": 185922,
+        "state": "D",
+        "ppid": 185921,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280760"
+      },
+      "kind": "recorder",
+      "observed_at": "2026-11-15T02:11:47.832131+00:00",
+      "direct_children": []
+    },
+    {
+      "identity": {
+        "pid": 185922,
+        "state": "R",
+        "ppid": 185921,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280760"
+      },
+      "kind": "recorder",
+      "observed_at": "2026-11-15T02:11:47.872620+00:00",
+      "direct_children": []
+    },
+    {
+      "identity": {
+        "pid": 185922,
+        "state": "D",
+        "ppid": 185921,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280760"
+      },
+      "kind": "recorder",
+      "observed_at": "2026-11-15T02:11:47.892839+00:00",
+      "direct_children": []
+    },
+    {
+      "identity": {
+        "pid": 185922,
+        "state": "S",
+        "ppid": 185921,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280760"
+      },
+      "kind": "recorder",
+      "observed_at": "2026-11-15T02:11:48.075001+00:00",
+      "direct_children": [
+        186033
+      ]
+    },
+    {
+      "identity": {
+        "pid": 186033,
+        "state": "R",
+        "ppid": 185922,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280951"
+      },
+      "kind": "provenance-or-other-tool",
+      "observed_at": "2026-11-15T02:11:48.075056+00:00",
+      "direct_children": []
+    },
+    {
+      "identity": {
+        "pid": 186033,
+        "state": "D",
+        "ppid": 185922,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280951"
+      },
+      "kind": "provenance-or-other-tool",
+      "observed_at": "2026-11-15T02:11:48.095530+00:00",
+      "direct_children": []
+    },
+    {
+      "identity": {
+        "pid": 185922,
+        "state": "D",
+        "ppid": 185921,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280760"
+      },
+      "kind": "recorder",
+      "observed_at": "2026-11-15T02:11:48.115771+00:00",
+      "direct_children": [
+        186039
+      ]
+    },
+    {
+      "identity": {
+        "pid": 186039,
+        "state": "R",
+        "ppid": 185922,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280957"
+      },
+      "kind": "node-pilot",
+      "observed_at": "2026-11-15T02:11:48.115845+00:00",
+      "direct_children": []
+    },
+    {
+      "identity": {
+        "pid": 185922,
+        "state": "S",
+        "ppid": 185921,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280760"
+      },
+      "kind": "recorder",
+      "observed_at": "2026-11-15T02:11:48.136090+00:00",
+      "direct_children": [
+        186039
+      ]
+    },
+    {
+      "identity": {
+        "pid": 186039,
+        "state": "S",
+        "ppid": 185922,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280957"
+      },
+      "kind": "node-pilot",
+      "observed_at": "2026-11-15T02:11:48.176735+00:00",
+      "direct_children": [
+        186046
+      ]
+    },
+    {
+      "identity": {
+        "pid": 186046,
+        "state": "R",
+        "ppid": 186039,
+        "pgid": 186046,
+        "sid": 186046,
+        "start_ticks": "280962"
+      },
+      "kind": "custodian",
+      "observed_at": "2026-11-15T02:11:48.176777+00:00",
+      "direct_children": []
+    },
+    {
+      "identity": {
+        "pid": 185922,
+        "state": "D",
+        "ppid": 185921,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280760"
+      },
+      "kind": "recorder",
+      "observed_at": "2026-11-15T02:11:48.237667+00:00",
+      "direct_children": []
+    },
+    {
+      "identity": {
+        "pid": 185922,
+        "state": "R",
+        "ppid": 185921,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280760"
+      },
+      "kind": "recorder",
+      "observed_at": "2026-11-15T02:11:48.257854+00:00",
+      "direct_children": []
+    },
+    {
+      "identity": {
+        "pid": 185922,
+        "state": "D",
+        "ppid": 185921,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280760"
+      },
+      "kind": "recorder",
+      "observed_at": "2026-11-15T02:11:48.278042+00:00",
+      "direct_children": []
+    },
+    {
+      "identity": {
+        "pid": 185922,
+        "state": "R",
+        "ppid": 185921,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280760"
+      },
+      "kind": "recorder",
+      "observed_at": "2026-11-15T02:11:48.298328+00:00",
+      "direct_children": []
+    },
+    {
+      "identity": {
+        "pid": 185922,
+        "state": "D",
+        "ppid": 185921,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280760"
+      },
+      "kind": "recorder",
+      "observed_at": "2026-11-15T02:11:48.318610+00:00",
+      "direct_children": []
+    },
+    {
+      "identity": {
+        "pid": 185922,
+        "state": "R",
+        "ppid": 185921,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280760"
+      },
+      "kind": "recorder",
+      "observed_at": "2026-11-15T02:11:48.359227+00:00",
+      "direct_children": []
+    },
+    {
+      "identity": {
+        "pid": 185922,
+        "state": "D",
+        "ppid": 185921,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280760"
+      },
+      "kind": "recorder",
+      "observed_at": "2026-11-15T02:11:48.379425+00:00",
+      "direct_children": []
+    },
+    {
+      "identity": {
+        "pid": 185922,
+        "state": "R",
+        "ppid": 185921,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280760"
+      },
+      "kind": "recorder",
+      "observed_at": "2026-11-15T02:11:48.460415+00:00",
+      "direct_children": []
+    },
+    {
+      "identity": {
+        "pid": 185922,
+        "state": "D",
+        "ppid": 185921,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280760"
+      },
+      "kind": "recorder",
+      "observed_at": "2026-11-15T02:11:48.480638+00:00",
+      "direct_children": []
+    },
+    {
+      "identity": {
+        "pid": 185922,
+        "state": "R",
+        "ppid": 185921,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280760"
+      },
+      "kind": "recorder",
+      "observed_at": "2026-11-15T02:11:48.521059+00:00",
+      "direct_children": []
+    },
+    {
+      "identity": {
+        "pid": 185922,
+        "state": "D",
+        "ppid": 185921,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280760"
+      },
+      "kind": "recorder",
+      "observed_at": "2026-11-15T02:11:48.541256+00:00",
+      "direct_children": []
+    },
+    {
+      "identity": {
+        "pid": 185922,
+        "state": "R",
+        "ppid": 185921,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280760"
+      },
+      "kind": "recorder",
+      "observed_at": "2026-11-15T02:11:48.622193+00:00",
+      "direct_children": []
+    },
+    {
+      "identity": {
+        "pid": 185922,
+        "state": "D",
+        "ppid": 185921,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280760"
+      },
+      "kind": "recorder",
+      "observed_at": "2026-11-15T02:11:48.642402+00:00",
+      "direct_children": []
+    },
+    {
+      "identity": {
+        "pid": 185922,
+        "state": "R",
+        "ppid": 185921,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280760"
+      },
+      "kind": "recorder",
+      "observed_at": "2026-11-15T02:11:48.824590+00:00",
+      "direct_children": []
+    },
+    {
+      "identity": {
+        "pid": 185922,
+        "state": "D",
+        "ppid": 185921,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280760"
+      },
+      "kind": "recorder",
+      "observed_at": "2026-11-15T02:11:48.885342+00:00",
+      "direct_children": []
+    },
+    {
+      "identity": {
+        "pid": 185922,
+        "state": "R",
+        "ppid": 185921,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280760"
+      },
+      "kind": "recorder",
+      "observed_at": "2026-11-15T02:11:48.905541+00:00",
+      "direct_children": []
+    },
+    {
+      "identity": {
+        "pid": 185922,
+        "state": "D",
+        "ppid": 185921,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280760"
+      },
+      "kind": "recorder",
+      "observed_at": "2026-11-15T02:11:48.925874+00:00",
+      "direct_children": []
+    },
+    {
+      "identity": {
+        "pid": 185922,
+        "state": "R",
+        "ppid": 185921,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280760"
+      },
+      "kind": "recorder",
+      "observed_at": "2026-11-15T02:11:49.067528+00:00",
+      "direct_children": []
+    },
+    {
+      "identity": {
+        "pid": 185922,
+        "state": "D",
+        "ppid": 185921,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280760"
+      },
+      "kind": "recorder",
+      "observed_at": "2026-11-15T02:11:49.087763+00:00",
+      "direct_children": []
+    },
+    {
+      "identity": {
+        "pid": 185922,
+        "state": "R",
+        "ppid": 185921,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280760"
+      },
+      "kind": "recorder",
+      "observed_at": "2026-11-15T02:11:49.107958+00:00",
+      "direct_children": []
+    },
+    {
+      "identity": {
+        "pid": 185922,
+        "state": "D",
+        "ppid": 185921,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280760"
+      },
+      "kind": "recorder",
+      "observed_at": "2026-11-15T02:11:49.128190+00:00",
+      "direct_children": []
+    },
+    {
+      "identity": {
+        "pid": 185922,
+        "state": "R",
+        "ppid": 185921,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280760"
+      },
+      "kind": "recorder",
+      "observed_at": "2026-11-15T02:11:49.168657+00:00",
+      "direct_children": []
+    },
+    {
+      "identity": {
+        "pid": 185922,
+        "state": "D",
+        "ppid": 185921,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280760"
+      },
+      "kind": "recorder",
+      "observed_at": "2026-11-15T02:11:49.188865+00:00",
+      "direct_children": []
+    },
+    {
+      "identity": {
+        "pid": 185922,
+        "state": "R",
+        "ppid": 185921,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280760"
+      },
+      "kind": "recorder",
+      "observed_at": "2026-11-15T02:11:49.229275+00:00",
+      "direct_children": []
+    },
+    {
+      "identity": {
+        "pid": 185922,
+        "state": "D",
+        "ppid": 185921,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280760"
+      },
+      "kind": "recorder",
+      "observed_at": "2026-11-15T02:11:49.249493+00:00",
+      "direct_children": []
+    },
+    {
+      "identity": {
+        "pid": 185922,
+        "state": "R",
+        "ppid": 185921,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280760"
+      },
+      "kind": "recorder",
+      "observed_at": "2026-11-15T02:11:49.269692+00:00",
+      "direct_children": []
+    },
+    {
+      "identity": {
+        "pid": 185922,
+        "state": "D",
+        "ppid": 185921,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280760"
+      },
+      "kind": "recorder",
+      "observed_at": "2026-11-15T02:11:49.310108+00:00",
+      "direct_children": []
+    },
+    {
+      "identity": {
+        "pid": 185922,
+        "state": "R",
+        "ppid": 185921,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280760"
+      },
+      "kind": "recorder",
+      "observed_at": "2026-11-15T02:11:49.431564+00:00",
+      "direct_children": []
+    },
+    {
+      "identity": {
+        "pid": 185922,
+        "state": "D",
+        "ppid": 185921,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280760"
+      },
+      "kind": "recorder",
+      "observed_at": "2026-11-15T02:11:49.451818+00:00",
+      "direct_children": []
+    },
+    {
+      "identity": {
+        "pid": 185922,
+        "state": "R",
+        "ppid": 185921,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280760"
+      },
+      "kind": "recorder",
+      "observed_at": "2026-11-15T02:11:49.512485+00:00",
+      "direct_children": []
+    },
+    {
+      "identity": {
+        "pid": 185922,
+        "state": "D",
+        "ppid": 185921,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280760"
+      },
+      "kind": "recorder",
+      "observed_at": "2026-11-15T02:11:49.532696+00:00",
+      "direct_children": []
+    },
+    {
+      "identity": {
+        "pid": 185922,
+        "state": "R",
+        "ppid": 185921,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280760"
+      },
+      "kind": "recorder",
+      "observed_at": "2026-11-15T02:11:49.634005+00:00",
+      "direct_children": []
+    },
+    {
+      "identity": {
+        "pid": 185922,
+        "state": "D",
+        "ppid": 185921,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280760"
+      },
+      "kind": "recorder",
+      "observed_at": "2026-11-15T02:11:49.674435+00:00",
+      "direct_children": []
+    },
+    {
+      "identity": {
+        "pid": 185922,
+        "state": "R",
+        "ppid": 185921,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280760"
+      },
+      "kind": "recorder",
+      "observed_at": "2026-11-15T02:11:50.018443+00:00",
+      "direct_children": []
+    },
+    {
+      "identity": {
+        "pid": 185922,
+        "state": "D",
+        "ppid": 185921,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280760"
+      },
+      "kind": "recorder",
+      "observed_at": "2026-11-15T02:11:50.038727+00:00",
+      "direct_children": []
+    },
+    {
+      "identity": {
+        "pid": 185922,
+        "state": "R",
+        "ppid": 185921,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280760"
+      },
+      "kind": "recorder",
+      "observed_at": "2026-11-15T02:11:50.139942+00:00",
+      "direct_children": []
+    },
+    {
+      "identity": {
+        "pid": 185922,
+        "state": "D",
+        "ppid": 185921,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280760"
+      },
+      "kind": "recorder",
+      "observed_at": "2026-11-15T02:11:50.160185+00:00",
+      "direct_children": []
+    },
+    {
+      "identity": {
+        "pid": 185922,
+        "state": "R",
+        "ppid": 185921,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280760"
+      },
+      "kind": "recorder",
+      "observed_at": "2026-11-15T02:11:50.220937+00:00",
+      "direct_children": []
+    },
+    {
+      "identity": {
+        "pid": 185922,
+        "state": "D",
+        "ppid": 185921,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280760"
+      },
+      "kind": "recorder",
+      "observed_at": "2026-11-15T02:11:50.241185+00:00",
+      "direct_children": []
+    },
+    {
+      "identity": {
+        "pid": 185922,
+        "state": "R",
+        "ppid": 185921,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280760"
+      },
+      "kind": "recorder",
+      "observed_at": "2026-11-15T02:11:50.261441+00:00",
+      "direct_children": []
+    },
+    {
+      "identity": {
+        "pid": 185922,
+        "state": "D",
+        "ppid": 185921,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280760"
+      },
+      "kind": "recorder",
+      "observed_at": "2026-11-15T02:11:50.281680+00:00",
+      "direct_children": []
+    }
+  ],
+  "read_errors": [],
+  "new_runtime_roots": [
+    "run-wyCcKv"
+  ],
+  "after": [
+    {
+      "original": {
+        "pid": 185922,
+        "state": "D",
+        "ppid": 185921,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280760"
+      },
+      "kind": "recorder",
+      "now": null,
+      "original_epoch_gone": true
+    },
+    {
+      "original": {
+        "pid": 186033,
+        "state": "D",
+        "ppid": 185922,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280951"
+      },
+      "kind": "provenance-or-other-tool",
+      "now": null,
+      "original_epoch_gone": true
+    },
+    {
+      "original": {
+        "pid": 186039,
+        "state": "S",
+        "ppid": 185922,
+        "pgid": 185920,
+        "sid": 185920,
+        "start_ticks": "280957"
+      },
+      "kind": "node-pilot",
+      "now": null,
+      "original_epoch_gone": true
+    },
+    {
+      "original": {
+        "pid": 186046,
+        "state": "R",
+        "ppid": 186039,
+        "pgid": 186046,
+        "sid": 186046,
+        "start_ticks": "280962"
+      },
+      "kind": "custodian",
+      "now": null,
+      "original_epoch_gone": true
+    }
+  ],
+  "claim_limit": "Proc observations for exactownedlineage, no HELLO socket interception and no signal bymonitor; actualHELLO checks evidenced by fixedtool outcomeassertions, rawHELLO notsaved"
+}

@@ -1,0 +1,1071 @@
+{
+  "format": "narralens.dev-resource-ledger@1",
+  "status": "044_SINGLE_TEST_CORRECTION_AND_CONDITIONAL_REAL_VALIDATION",
+  "holder": "ClaudeCode ctx_ae73a82c85e9",
+  "queue": [
+    {
+      "holder": "BRIDGE Codex",
+      "request": "D09 REAL003 test-only precise corrections",
+      "state": "HISTORICAL_COMPLETED_REAL0038PASS_NO_ACTIVE_GRANT"
+    },
+    {
+      "holder": "MEDIA Codex",
+      "request": "R2-MEDIA-PHASE-REAL-002",
+      "candidate": "ff2646f3ca59c8980b57a2a68710148f1c58e22e",
+      "state": "SUSPENDED_NOT_GRANTED; frozen paths MAIN-owned; prior media task unfinished"
+    }
+  ],
+  "policy": "MAIN grants single heavy slot for Host/media/ffmpeg/Chromium/build/full gate; pure typecheck/unit permitted isolated",
+  "last_main_heavy": "smoke011 2PASS actual amended input, no drift; bounded process cleanup recorded. No current heavy grant.",
+  "evidence_limit": "Internal component validation; final full requirements and independent frozen candidate audit still required.",
+  "no_budget_ceiling": true,
+  "grant_id": "N1N2_044_TEST_ANALYZER_FIX_AND_SCOPED_CONTINUOUS_VALIDATION",
+  "granted_at": "2026-11-13T09:13:11.430819+00:00",
+  "cwd": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+  "scope": "Only this analyzer test file may be corrected between fully settled compile/static runs with complete fresh byte snapshots. No input edits while running. Latest actualstatic0+currentinputs/otherguards stable+owncleanup -> ONE focused real run thenSTOP on any result, no production repair permission. AnyNEW429STOP.",
+  "request_message": "msg_dc6a9e6ff60f",
+  "source_fence": "Only one allowed test between terminal static/typecheck runs; runtimeallinputs frozen; all other043 guards unchanged.",
+  "ledger_note": "038 terminal independently verified. Source freeze released only for039 exact nine paths. Full previous ledger saved at /mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/resource-ledger-history/9e2f4cf9bbffccbfe1606ad5efb1d7e7a0bf9fa84950d6fb6d7bd56ebcbdc435.json",
+  "previous_main_result": "real0467PASS;resource01048PASS;type0560;product-sidecars-main00127PASS;type0570; all exact command sessions terminal and capture hashes stable",
+  "previous_product_result": "Studio validate001 frozen d02bb53 actual3 exits0 inspected; own launchers1622881/1623075/1623621 absent now, descendant survivors recorded empty",
+  "tool_commit": "d0e22e4687242ca68877b8ef2ae199934db85d46",
+  "tool_sha256": "27bc17f0befa7984c74e2c0ccd8a68feb57f0a0317b15608fc6a067a0c4b39f8",
+  "previous_media_result": "REAL001 exit1 during setup before phase; ack no heavy in flight; no current relevant expensive comm/cwd matches observed; historical exclusivity not claimed",
+  "phase": "N1N2_REMEDIATED_VALIDATION",
+  "exact_commands": [
+    [
+      "corepack",
+      "pnpm",
+      "exec",
+      "tsc",
+      "--noEmit"
+    ],
+    [
+      "corepack",
+      "pnpm",
+      "exec",
+      "vitest",
+      "run",
+      "--config",
+      "vitest.config.ts",
+      "tests/m2.1/openfilm-upstream-lock.test.ts",
+      "tests/architecture/m2.2-fitness.test.ts"
+    ],
+    [
+      "corepack",
+      "pnpm",
+      "exec",
+      "vitest",
+      "run",
+      "--config",
+      "vitest.config.ts",
+      "tests/agent-driven/integration/native-cache-witness.test.ts",
+      "-t",
+      "Q01|Q02|Q03|K05-c|PF01|PF02"
+    ]
+  ],
+  "request_source": "8cdd98ed24b6dad9450a2c28fddffe2b5d15d651",
+  "source_check_limit": "upstream source .npmrc not opened by MAIN under no-CLI-config rule; parent original hash retained",
+  "source_candidate": "e2eff61b464d75d36598103d718cd2a75db5dfda",
+  "previous_bridge_result": "REAL0038PASS report664f178; observed recorded command/test PIDs1788543/1788595 absent now; stale queued question closed, no duplicate grant/run",
+  "exec_session": null,
+  "actual_command_status": "043_EXIT1_VERIFIED_044_NOT_STARTED",
+  "claude_429": "STOP affected implementation; no replacement writer unless user explicit authorization",
+  "previous_released_at": "2026-11-12T07:13:11.069613+00:00",
+  "previous_source_candidate": "7e41f4844610c6ce455825f4940284eb9c28bf1e",
+  "source_candidate_limit": "source baseline only; current Claude implementation uncommitted, actualcapture pre/post hashes required",
+  "previous_source_files_independently_hashed": 623,
+  "previous_grant_id": "N1N2-RESUME-BATCH-002",
+  "start_relay": "msg_b2d54b9267a4",
+  "observed_at": "2026-11-12T08:19:43.839403+00:00",
+  "actual_process_observations": [
+    {
+      "pid": 958096,
+      "state": "ABSENT"
+    },
+    {
+      "pid": 958249,
+      "state": "ABSENT"
+    },
+    {
+      "pid": 958338,
+      "state": "ABSENT"
+    }
+  ],
+  "released_at": "2026-11-13T01:37:50.636841+00:00",
+  "review_task": "task_eb84de278676",
+  "review_verdict": "REQUEST_CHANGES MAJOR=1 MINOR=0",
+  "release_message": "msg_d138cdbc55e8",
+  "parallel_readonly_architecture_review": {
+    "dispatch": "ctx_37dd2aec12c7",
+    "task": "task_a6de052eb310",
+    "terminal": "term_496cba4f711aad7a60b06d85abd4e91a",
+    "state": "ready, S01 exact migration provenance correction only, no source/test grant",
+    "at": "2026-11-12T05:03:50.264835+00:00"
+  },
+  "blocked_reason": null,
+  "input_amendment": {
+    "at": "2026-11-12T06:23:39.487931+00:00",
+    "test_sha256": "a0e7eafc0186fc0d220ce5deba82f6e6d8efadb8737802012c2c8d763f92ad1c",
+    "reason": "Reviewed same assertions, all-attempt cleanup strengthening",
+    "original_freeze_deviation": "RETAINED_NOT_ERASED",
+    "further_changes": "FORBIDDEN until actual011 terminal"
+  },
+  "batch_partial_results": {
+    "017": {
+      "exit": 1,
+      "passed": 2,
+      "failed": 5,
+      "filtered": 15,
+      "no_input_drift": true
+    },
+    "018": {
+      "exit": 1,
+      "passed": 14,
+      "failed": 1,
+      "filtered": 7,
+      "no_input_drift": true
+    }
+  },
+  "batch_results": [
+    {
+      "capture": "n1n2-claude-resume-017-batch-pure",
+      "result": {
+        "exit": 1,
+        "source_changed": [],
+        "source_added": [],
+        "log_sha256": "a94348421d081a401176f81d92ddfb4629c6a009a1bc89144979250f79ea3921",
+        "finished_at": "2026-11-12T06:37:54.819831+00:00"
+      },
+      "passed": 2,
+      "failed": 5,
+      "started_at": "2026-11-12T06:37:24.154950+00:00"
+    },
+    {
+      "capture": "n1n2-claude-resume-018-batch-component",
+      "result": {
+        "exit": 1,
+        "source_changed": [],
+        "source_added": [],
+        "log_sha256": "360ade92e1cc02e404123e4d545ac819bb33ed7a2cd8f1ceb195ff1533d3711e",
+        "finished_at": "2026-11-12T06:42:23.958598+00:00"
+      },
+      "passed": 14,
+      "failed": 1,
+      "started_at": "2026-11-12T06:38:31.920266+00:00"
+    },
+    {
+      "capture": "n1n2-claude-resume-019-batch-regressions",
+      "result": {
+        "exit": 1,
+        "source_changed": [],
+        "source_added": [],
+        "log_sha256": "d8f638c0b85fe8bf7b825bb9fb7b993e0fa44aa7358bbc33842b8861abdd42bc",
+        "finished_at": "2026-11-12T06:44:42.981292+00:00"
+      },
+      "passed": 82,
+      "failed": 24,
+      "started_at": "2026-11-12T06:42:53.157713+00:00"
+    }
+  ],
+  "batch2_partial_results": {
+    "021": {
+      "exit": 1,
+      "passed": 6,
+      "failed": 2,
+      "filtered": 18,
+      "source_changed": [],
+      "source_added": []
+    },
+    "022": {
+      "exit": 1,
+      "passed": 17,
+      "failed": 1,
+      "filtered": 8,
+      "unhandled_errors": 1,
+      "source_changed": [],
+      "source_added": []
+    }
+  },
+  "batch2_results": [
+    {
+      "capture": "n1n2-claude-resume-021-batch-pure",
+      "result": {
+        "exit": 1,
+        "source_changed": [],
+        "source_added": [],
+        "log_sha256": "ccc6ac29b697f69bdf52931de560c9eaa88c0032dd1cec3ea4676f82bef3362c",
+        "finished_at": "2026-11-12T07:02:18.378202+00:00"
+      },
+      "passed": 6,
+      "failed": 2,
+      "unhandled_errors": 0,
+      "started_at": "2026-11-12T07:01:55.747456+00:00"
+    },
+    {
+      "capture": "n1n2-claude-resume-022-batch-component",
+      "result": {
+        "exit": 1,
+        "source_changed": [],
+        "source_added": [],
+        "log_sha256": "58f3114a15ce4c69cc60a4e718b879b983e88a13989a1a54a816b4837d727a13",
+        "finished_at": "2026-11-12T07:06:11.414305+00:00"
+      },
+      "passed": 17,
+      "failed": 1,
+      "unhandled_errors": 1,
+      "started_at": "2026-11-12T07:02:48.943472+00:00"
+    },
+    {
+      "capture": "n1n2-claude-resume-023-batch-regressions",
+      "result": {
+        "exit": 0,
+        "source_changed": [],
+        "source_added": [],
+        "log_sha256": "53bfd698cc978698fabf41ffac3de14d5d5b7d84a4631814d84b2e905cfa0a50",
+        "finished_at": "2026-11-12T07:08:43.408310+00:00"
+      },
+      "passed": 107,
+      "failed": 0,
+      "unhandled_errors": 0,
+      "started_at": "2026-11-12T07:06:58.057916+00:00"
+    }
+  ],
+  "source_frozen_sha256": {
+    "src/host/agent-driven/native-cache-witness.ts": "97c1fe93037f3f31afdf67e97a5d4451d42ac7016d3cca642217fe1750c2573b",
+    "src/host/agent-driven/created-native-workspace.ts": "3702917cf6efe09287030435c1883e1cdd57eb6e0da2fdd577bf3879ab965c1e",
+    "src/host/agent-driven/committed-snapshot-authority.ts": "1c53360e3c618c603cfcbe61d0c2d57004c5bd33dc26a92c2fdec72a1844bd6d",
+    "src/host/m5/openfilm-native-expected.ts": "19110e45a83b6d5b611b4260620ce873f923f1e5a5b907bc6176c4b734fbeed3",
+    "src/adapters/openfilm/openfilm-upstream.ts": "013f50ce87e04b3ff542e15f3c98d833ae43940fef9d85ccad79ff38e5bd200b",
+    "tests/agent-driven/integration/helpers/native-source-fixture.ts": "419332f4f5d8e2ece1fb79fb5004ac4755f1b230b0c2dfeb59c0baf986d10b31",
+    "tests/agent-driven/integration/helpers/created-draft-fixture.ts": "59788a8f9c08415a808b2418e86b4dac6bb7de65297ad5d1cb19b5f26eb22d27",
+    "tests/agent-driven/integration/created-native-workspace.test.ts": "439d469032c9af2b83ceb826e0aead7cf5c2fe5c5693be7cbf18c8e67f0f615f",
+    "tests/agent-driven/integration/committed-snapshot-host.test.ts": "bfd0c6373b254050d32a6a99e7b6f8b9827dc24b6b2587515ab4c5aad2cd9037",
+    "tests/agent-driven/integration/created-native-ack.test.ts": "5f50db85c7c07a2ecf4faefc20ec2ec6c7ad4910fafe549c2edc76bbad729c7c",
+    "src/host/agent-driven/retained-native-closure.ts": "ab7ffead1c4b7b238f7e4f6097b1d17ad7792513e84591b623f67c95576ac6e7",
+    "src/host/agent-driven/created-native-source-reader.ts": "cde88435d61dba1a881bef403e6a013f1d4f2bb93db8e1ffa2b3c15b4c74f82b",
+    "tests/agent-driven/integration/native-cache-witness.test.ts": "c4303230fbdb37fbdac35825208c4fd172f93001f25635a4a8765945d85551ba",
+    "tests/agent-driven/integration/created-draft-processor.test.ts": "684df1c287890a13ecd8b08a4cd32d5053c2868e80494eca2fcc6412cdc4e0b6",
+    "tests/agent-driven/integration/created-native-source-reader.test.ts": "09ef2019ad95cbd3b3bb377e8f146b994c9462f48f4662db5e072b629383ea77",
+    "package.json": "edace26fdfa5a9808f2706fe15ab3935d0512d08f765d4cffec268eb7e783263",
+    "pnpm-lock.yaml": "66d38478d0b035777472a8cdb53954559a6c1a5f8803f7247caaffce1ac3584d",
+    "tsconfig.json": "83fbe518b8002a19afcf522215bdd431b9addca24f88771732e123f689acb475",
+    "vitest.config.ts": "b8cc675ba57ac95cc74b007db787a33b830fe628f7648f902a4dcf8235d787d4",
+    "vite.config.ts": "6dc4858d37a5ddfac9779371b63b4d3d129641dc485c642de05c17f29a746f2c",
+    "vite.m5.config.ts": "777295eb5278d162ce549a5fa695618fd68cfb35769b30a9b8c52344a3220ff7",
+    "contracts/openfilm-upstream-lock.json": "69c4da1decfb27fd6002a030228a2ccadd1a9fb4392e42320cf249ae311b301b",
+    "src/host/agent-driven/local-asset-registry.ts": "0f99ed585bc8152926b555a3139a240c80025c023db4dc690b26769e1635bb25",
+    "src/host/agent-driven/created-source-impact-store.ts": "f1cb2d87b21dd5177c2ea29e214a0d89c46868eaa5a255cd6debe4cf4f72a3b1",
+    "src/host/agent-driven/created-source-change-service.ts": "249df97d95939beeebcc1f9f51d3daed21100fc6aaebfb9b5d000d3a32c0f259",
+    "tests/agent-driven/integration/local-assets-host.test.ts": "5c13f98cebe4bc196c4f515ff267fe1059cc17aeb712c5d597f76944b8bb1452",
+    "tests/agent-driven/integration/created-source-change.test.ts": "9d82c3c47b23a44ee27cf129ea51aa61c7e29259e94d6d14a27ed43fc6817860",
+    "tests/agent-driven/integration/created-source-adoption.test.ts": "8ab6dfcdc98bdef2f4dd42a38c32b0048a0907a95a7c07488910534f49b2097e",
+    "tests/agent-driven/integration/created-impact-atomic.test.ts": "e6f1ddb662deea7c506ec28d390aa1f548c818016a0bc829e8cebd3294e0f5d8",
+    "tests/architecture/m2.2-fitness.test.ts": "e806d88c7a5452539e629a4da0f4c4e0a4346e0364c233f07e0f16675931cb63",
+    "tests/m2.1/openfilm-upstream-lock.test.ts": "2f32519a05da494ec237094f55540692f4aef9f93fd83c6ce7b557596180efb6",
+    "tests/m2.3/migration-real-export.test.ts": "0862247a6ddb953e462f861983379e0e97ade1d5744df0d1de61cc2b38e227f0",
+    "tests/fixtures/m2.1/snapshot-project/assets/generated/visual-10s.mp4": "0427d617584264ac2875243d6cf711dd985577566f71db6b9d5faf051575989c",
+    "tests/fixtures/m2.1/snapshot-project/assets/generated/visual-alt-10s.mp4": "40d825e66ee7e69ae53dfdc8d5195fbb9ffc3af7eb07452a5081c51e24115cff",
+    "tests/fixtures/m2.1/snapshot-project/assets/generated/narration-30s.wav": "e4276d5ec9199f11df067a98061508eaa11dbaf11ffac107775714b95962173d"
+  },
+  "batch3_partial_results": {
+    "034": {
+      "exit": 0,
+      "passed": 8,
+      "filtered": 18,
+      "source_changed": [],
+      "source_added": [],
+      "log_sha256": "2df7f22afccda8cba9a772720c125d27c34be3bee265459420a8d7e11bd37eea"
+    },
+    "035": {
+      "exit": 0,
+      "passed": 18,
+      "filtered": 8,
+      "no_input_drift": true,
+      "log_sha256": "82d64e914fab5b2371dd77d22e1e5ee82f784d118cd526bab4a354a43aac7da5"
+    }
+  },
+  "parallel_readonly_coverage_audit": {
+    "at": "2026-11-12T07:17:43.884067+00:00",
+    "run": "run_399f9dd3ce5a",
+    "task": "task_59ec0f29cf45",
+    "dispatch": "ctx_1cb85a138c29",
+    "terminal": "term_4ac6ea68-5016-4510-986e-a02b3a85ff4d",
+    "state": "COMPLETED_REQUEST_CHANGES",
+    "scope": "independent read-only requirement/test coverage gap audit, frozen uncommitted batch003 input hashes; no tests/source/index writes",
+    "not_final_external_acceptance": true,
+    "findings": {
+      "BLOCKER": 1,
+      "MAJOR": 8,
+      "MINOR": 1
+    },
+    "external_pass": false
+  },
+  "batch3_results": [
+    {
+      "capture": "n1n2-claude-resume-034-batch-pure",
+      "result": {
+        "exit": 0,
+        "source_changed": [],
+        "source_added": [],
+        "log_sha256": "2df7f22afccda8cba9a772720c125d27c34be3bee265459420a8d7e11bd37eea",
+        "finished_at": "2026-11-12T07:13:57.324892+00:00"
+      },
+      "passed": 8,
+      "failed": 0,
+      "started_at": "2026-11-12T07:13:30.208702+00:00",
+      "input_count": 624
+    },
+    {
+      "capture": "n1n2-claude-resume-035-batch-component",
+      "result": {
+        "exit": 0,
+        "source_changed": [],
+        "source_added": [],
+        "log_sha256": "82d64e914fab5b2371dd77d22e1e5ee82f784d118cd526bab4a354a43aac7da5",
+        "finished_at": "2026-11-12T07:18:12.246962+00:00"
+      },
+      "passed": 18,
+      "failed": 0,
+      "started_at": "2026-11-12T07:14:11.919445+00:00",
+      "input_count": 624
+    },
+    {
+      "capture": "n1n2-claude-resume-036-batch-regressions",
+      "result": {
+        "exit": 0,
+        "source_changed": [],
+        "source_added": [],
+        "log_sha256": "4c84e9e75dea48f0f68a07380b57bfd2003d24790b0b1c6b895429a30c50f04f",
+        "finished_at": "2026-11-12T07:21:12.264716+00:00"
+      },
+      "passed": 107,
+      "failed": 0,
+      "started_at": "2026-11-12T07:18:40.370849+00:00",
+      "input_count": 624
+    }
+  ],
+  "release_evidence": {
+    "at": "2026-11-12T16:03:11.324247+00:00",
+    "status": "020_ALL_ACTUAL_GATES_PASS_K01_K06_REQUEST_CHANGES",
+    "grant": "N1N2-RESUME-CONDITIONAL-BATCH-020",
+    "results": [
+      {
+        "capture": "n1n2-claude-resume-156-gate-alias-focused",
+        "result": {
+          "exit": 0,
+          "source_changed": [],
+          "source_added": [],
+          "log_sha256": "feb386e692afc04ceca73387baa1bab2a4cf0db0bc42b8d961a0a86ed90a0f83",
+          "finished_at": "2026-11-12T15:47:17.269153+00:00"
+        },
+        "passed": 3
+      },
+      {
+        "capture": "n1n2-claude-resume-157-gate-pure",
+        "result": {
+          "exit": 0,
+          "source_changed": [],
+          "source_added": [],
+          "log_sha256": "8cc2591108744e2a90d139fd456bc51c96dbabb906a8171347827784baa7f664",
+          "finished_at": "2026-11-12T15:47:42.990549+00:00"
+        },
+        "passed": 19
+      },
+      {
+        "capture": "n1n2-claude-resume-158-gate-component",
+        "result": {
+          "exit": 0,
+          "source_changed": [],
+          "source_added": [],
+          "log_sha256": "e81de0b781d65c158ff9c7f011d01575c7becb6f371cdf6a1dd52275a012a4f3",
+          "finished_at": "2026-11-12T15:58:15.280919+00:00"
+        },
+        "passed": 61
+      },
+      {
+        "capture": "n1n2-claude-resume-159-gate-legacy",
+        "result": {
+          "exit": 0,
+          "source_changed": [],
+          "source_added": [],
+          "log_sha256": "6c6af114c67cd641a0ead3c49c03206a26eafc5e7405999e49d6d420e2a45bee",
+          "finished_at": "2026-11-12T16:00:37.332131+00:00"
+        },
+        "passed": 107
+      }
+    ],
+    "current13hashes": "MATCH",
+    "recorded_node_pids_absent": [
+      1928955,
+      1930438,
+      1930697,
+      1947777,
+      1949466,
+      1950461
+    ],
+    "own_cleanup_receipt": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/parallel/lane-product/A-R2-20261112/N1N2-native-source/n1n2-claude-resume-020-cleanup-evidence.txt",
+    "own_cleanup_sha256": "f603b22ca9799c02e714d48bb407621f3c856b843e32b22e8dee61f0e2938a5a",
+    "cleanup_limit": "Runtimequiescentboundedobservation; K02 privateparsecopyremainder NOT cleaned; no global/historicalabsenceclaim",
+    "parse_copy_prefix_count": 170,
+    "independent_review": "1BLOCKER5MAJOR; no finalacceptance",
+    "next_source_release": "ROUND3_K01_K06_CORRECTIVE_RELEASE_021.md"
+  },
+  "corrective_source_release": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/MAIN_CORRECTIVE_RELEASE_004.md",
+  "no_new_heavy_grant": false,
+  "batch4_partial_results": [
+    {
+      "capture": "n1n2-claude-resume-049-corrective-pure",
+      "result": {
+        "exit": 0,
+        "source_changed": [],
+        "source_added": [],
+        "log_sha256": "1f994bfd27da29c3d9a21c29d1615fd684fa5c776f5c303e1de8efc8b1df2c99",
+        "finished_at": "2026-11-12T08:09:42.924636+00:00"
+      },
+      "passed": 11,
+      "failed": 0
+    },
+    {
+      "capture": "n1n2-claude-resume-050-corrective-component",
+      "result": {
+        "exit": 1,
+        "source_changed": [],
+        "source_added": [],
+        "log_sha256": "5dd8781441e319209fdc593c7eac152f7986538cb5155fe7b8e8598749fb65f8",
+        "finished_at": "2026-11-12T08:18:48.479397+00:00"
+      },
+      "passed": 26,
+      "failed": 4
+    }
+  ],
+  "batch4_results": [
+    {
+      "capture": "n1n2-claude-resume-049-corrective-pure",
+      "result": {
+        "exit": 0,
+        "source_changed": [],
+        "source_added": [],
+        "log_sha256": "1f994bfd27da29c3d9a21c29d1615fd684fa5c776f5c303e1de8efc8b1df2c99",
+        "finished_at": "2026-11-12T08:09:42.924636+00:00"
+      }
+    },
+    {
+      "capture": "n1n2-claude-resume-050-corrective-component",
+      "result": {
+        "exit": 1,
+        "source_changed": [],
+        "source_added": [],
+        "log_sha256": "5dd8781441e319209fdc593c7eac152f7986538cb5155fe7b8e8598749fb65f8",
+        "finished_at": "2026-11-12T08:18:48.479397+00:00"
+      }
+    },
+    {
+      "capture": "n1n2-claude-resume-051-corrective-regressions",
+      "result": {
+        "exit": 0,
+        "source_changed": [],
+        "source_added": [],
+        "log_sha256": "ca70ae830234f79bee703e157e21e646faa9855acc07ed3a5597615e4ac7d237",
+        "finished_at": "2026-11-12T08:22:57.181913+00:00"
+      }
+    }
+  ],
+  "batch5_partial_results": [
+    {
+      "capture": "n1n2-claude-resume-057-corrective-pure",
+      "result": {
+        "exit": 0,
+        "source_changed": [],
+        "source_added": [],
+        "log_sha256": "c8851618f7ea0d5d10694bf84e9475418fdeec1f7a5bc829361300feca558056",
+        "finished_at": "2026-11-12T08:34:24.441617+00:00"
+      }
+    },
+    {
+      "capture": "n1n2-claude-resume-058-corrective-component",
+      "result": {
+        "exit": 1,
+        "source_changed": [],
+        "source_added": [],
+        "log_sha256": "c2e492cad57569a0dc84827ebacd3434e4471513a0588a8a3e2bad72eb40d464",
+        "finished_at": "2026-11-12T08:42:04.363265+00:00"
+      }
+    }
+  ],
+  "batch5_results": [
+    {
+      "capture": "n1n2-claude-resume-057-corrective-pure",
+      "result": {
+        "exit": 0,
+        "source_changed": [],
+        "source_added": [],
+        "log_sha256": "c8851618f7ea0d5d10694bf84e9475418fdeec1f7a5bc829361300feca558056",
+        "finished_at": "2026-11-12T08:34:24.441617+00:00"
+      }
+    },
+    {
+      "capture": "n1n2-claude-resume-058-corrective-component",
+      "result": {
+        "exit": 1,
+        "source_changed": [],
+        "source_added": [],
+        "log_sha256": "c2e492cad57569a0dc84827ebacd3434e4471513a0588a8a3e2bad72eb40d464",
+        "finished_at": "2026-11-12T08:42:04.363265+00:00"
+      }
+    },
+    {
+      "capture": "n1n2-claude-resume-059-corrective-regressions",
+      "result": {
+        "exit": 0,
+        "source_changed": [],
+        "source_added": [],
+        "log_sha256": "4976c25a3a0584efb74ae6247cbdc2b0bf8277abc1f645164ba3e88549eab3c5",
+        "finished_at": "2026-11-12T08:47:23.416001+00:00"
+      }
+    }
+  ],
+  "batch6_result": {
+    "status": "FOCUSED_THREE_PASS_AWAIT_CLEANUP_NOT_N1N2_ACCEPTANCE",
+    "result": {
+      "exit": 0,
+      "source_changed": [],
+      "source_added": [],
+      "log_sha256": "1c683c55d20e45339d6f1afd7c7189435642b1f8517aa05080fbdab49faa9ca8",
+      "finished_at": "2026-11-12T08:58:15.778197+00:00"
+    },
+    "passed": 3,
+    "filtered": 38,
+    "all_ten_current_match_grant": true,
+    "remaining": "original proof checklist + final fullgate + real frozencommit independent acceptance + nextplan"
+  },
+  "batch7_result": {
+    "status": "PURE_GATE_FAILED_AWAIT_CLEANUP",
+    "passed": 14,
+    "failed": 2,
+    "filtered": 34,
+    "result": {
+      "exit": 1,
+      "source_changed": [],
+      "source_added": [],
+      "log_sha256": "c7623a026aa4fae0e234b47a32ce95d4d210c8acab3d5e749ca69818874a2a18",
+      "finished_at": "2026-11-12T09:24:37.640423+00:00"
+    },
+    "scope": "readTextgrowthrealdefect+Nthopenoraclemismatch;081/082notgranted"
+  },
+  "batch8_result": {
+    "status": "PURE008_FAILED_REMEDIATION_REQUIRED",
+    "result": {
+      "exit": 1,
+      "source_changed": [],
+      "source_added": [],
+      "log_sha256": "2d2a6a577176d36146385ecc4c2deed2842a2ba6254a1362b152973863e2b0d2",
+      "finished_at": "2026-11-12T09:35:57.122228+00:00"
+    },
+    "passed": 14,
+    "failed": 3,
+    "filtered": 34,
+    "scope": "fastpuredefectdiscovery only;noheavygate",
+    "cleanup_receipt": "PENDING080_AND083"
+  },
+  "last_preflight_review": "docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/PURE009_PREFLIGHT_REQUEST_CHANGES.json",
+  "stop_receipt": "docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/NEW_429_STOP_20261113_0007.json",
+  "resume_authorized_at": "2026-11-13T00:37:35.406573+00:00",
+  "resume_release": "docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/USER_AUTHORIZED_RESUME_20261113.md",
+  "implementation_writer": "ctx_ae73a82c85e9",
+  "writer_terminal": "term_2dc99ebb-91cc-4ec3-91c9-28fd81bfb66f",
+  "resume_receipt": "docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/CLAUDE_RESUME_20261113_DISPATCH_RECEIPT.json",
+  "implementation_release": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/CORRECTIVE_SOURCE_AND_VALIDATION_044.json",
+  "parallel_readonly_coverage_audit_round3": {
+    "at": "2026-11-12T15:39:10.314069+00:00",
+    "run": "run_399f9dd3ce5a",
+    "task": "task_f07e7d1521af",
+    "dispatch": "ctx_3410a32b611a",
+    "terminal": "term_6118c8a2c6121760925e2b8134154e3d",
+    "followup_target": "ctx_a89a8bf38c02",
+    "role": "Independent readonly original17requirements gap audit round3 on exact019sourcebyteblobs, NOT finalfrozencommit acceptance",
+    "status": "LIVE_IN_PROGRESS_OBSERVED_WORKER_LIST",
+    "scope": "Onlycanonical independent-coverage-audit-round3/REVIEW.md and MATRIX.json; no product source/index/runtime/Claude supervision",
+    "model_observed": "codex/gpt-6.1-sol from Orca worker-list; MAIN did not request modeloverride",
+    "implementation_writer": "ctx_b4086093cd96 remains solewriter running154focused22",
+    "grant": "BATCH_019_GRANT.json",
+    "state": "COMPLETED_REQUEST_CHANGES",
+    "findings": {
+      "BLOCKER": 1,
+      "MAJOR": 5
+    },
+    "reports": {
+      "REVIEW.md": "c0d228e09394d142731dbe798edaafb1681cd128ff72cbed393667b9c29cd7de",
+      "MATRIX.json": "baa321eece3c2bcca154b9463e6fcdc94dd86ddabf13a396e0d88a3db5f667e6"
+    }
+  },
+  "preceding_cleanup": {
+    "at": "2026-11-12T15:46:06.251893+00:00",
+    "grant": "N1N2-RESUME-FOCUSED-019",
+    "status": "154_FAILED_CLEANUP_VERIFIED",
+    "receipt": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/parallel/lane-product/A-R2-20261112/N1N2-native-source/n1n2-claude-resume-154-cleanup-evidence.txt",
+    "sha256": "478bcf023d6ebfac8cbfc2c1bce26f95544f84d7864c25e967271ac41be05a36",
+    "capture13inputs_match": true,
+    "recorded_pid1915186": "ABSENT",
+    "current_test_changed_after_capture": true,
+    "index": "EMPTY",
+    "AGENTS": "UNCHANGED",
+    "limit": "Current owncleanup observation only; notglobal/historical FDabsence;154notgreen"
+  },
+  "batch020_partial_results": {
+    "at": "2026-11-12T15:48:24.048890+00:00",
+    "status": "156_3PASS_157_19PASS_NO_DRIFT_NEXT158_CONDITIONAL",
+    "grant": "N1N2-RESUME-CONDITIONAL-BATCH-020",
+    "results": [
+      {
+        "capture": "n1n2-claude-resume-156-gate-alias-focused",
+        "result": {
+          "exit": 0,
+          "source_changed": [],
+          "source_added": [],
+          "log_sha256": "feb386e692afc04ceca73387baa1bab2a4cf0db0bc42b8d961a0a86ed90a0f83",
+          "finished_at": "2026-11-12T15:47:17.269153+00:00"
+        },
+        "actualpassed": 3,
+        "filtered": 77
+      },
+      {
+        "capture": "n1n2-claude-resume-157-gate-pure",
+        "result": {
+          "exit": 0,
+          "source_changed": [],
+          "source_added": [],
+          "log_sha256": "8cc2591108744e2a90d139fd456bc51c96dbabb906a8171347827784baa7f664",
+          "finished_at": "2026-11-12T15:47:42.990549+00:00"
+        },
+        "actualpassed": 19,
+        "filtered": 61
+      }
+    ],
+    "current13hashes": "MATCH",
+    "claim_limit": "Onlynarrow3+pure19; original17requirements andfullcomponent/legacy/browser/frozenreview outstanding"
+  },
+  "batch020_partial_results_after158": {
+    "at": "2026-11-12T16:00:48.164780+00:00",
+    "status": "1563PASS15719PASS15861PASS_159_ALREADY_STARTED",
+    "grant": "N1N2-RESUME-CONDITIONAL-BATCH-020",
+    "results": [
+      {
+        "capture": "n1n2-claude-resume-156-gate-alias-focused",
+        "result": {
+          "exit": 0,
+          "source_changed": [],
+          "source_added": [],
+          "log_sha256": "feb386e692afc04ceca73387baa1bab2a4cf0db0bc42b8d961a0a86ed90a0f83",
+          "finished_at": "2026-11-12T15:47:17.269153+00:00"
+        },
+        "actualpassed": 3,
+        "filtered": 77
+      },
+      {
+        "capture": "n1n2-claude-resume-157-gate-pure",
+        "result": {
+          "exit": 0,
+          "source_changed": [],
+          "source_added": [],
+          "log_sha256": "8cc2591108744e2a90d139fd456bc51c96dbabb906a8171347827784baa7f664",
+          "finished_at": "2026-11-12T15:47:42.990549+00:00"
+        },
+        "actualpassed": 19,
+        "filtered": 61
+      },
+      {
+        "capture": "n1n2-claude-resume-158-gate-component",
+        "result": {
+          "exit": 0,
+          "source_changed": [],
+          "source_added": [],
+          "log_sha256": "e81de0b781d65c158ff9c7f011d01575c7becb6f371cdf6a1dd52275a012a4f3",
+          "finished_at": "2026-11-12T15:58:15.280919+00:00"
+        },
+        "actualpassed": 61,
+        "filtered": 19
+      }
+    ],
+    "current13hashes": "MATCH",
+    "159": "CLAIM_EXISTS_NO_TERMINAL_RESULT; finishalreadystartedunmodified, no newruntime",
+    "scope_limit": "Full80reader tests green; original17notclosed, independentK01BLOCKER+K02-K06MAJOR stillrequirecorrective021; no acceptance orbrowserPASS"
+  },
+  "pending_original_scope_corrections": "ROUND3_K01_K06_CORRECTIVE_RELEASE_021.md",
+  "stopped_at": "2026-11-12T16:08:12.472659+00:00",
+  "batch024_A1c": {
+    "at": "2026-11-13T01:15:37.929949+00:00",
+    "grant": "N1N2_021_CONDITIONAL_RUNTIME_024",
+    "capture": "n1n2-claude-021-run-A1c",
+    "actual": {
+      "exit": 0,
+      "source_changed": [],
+      "source_added": [],
+      "log_sha256": "0376c2116f2e27c7c988895c8fbfacde2d64c40a3bde8b2045c3b0ab82db2004",
+      "finished_at": "2026-11-13T01:15:07.195618+00:00"
+    },
+    "passed": 8,
+    "filtered": 80,
+    "recorded_test_pid2258334": "ABSENT",
+    "current14match": true,
+    "claim_limit": "K02/K06 focused8 evidence only; fullreader/cache/regression/frozencommitreview original17 stillpending",
+    "next": "A2 under existingconditional024 after owncleanupcertain; no newsourceedit release"
+  },
+  "batch026_A2b": {
+    "at": "2026-11-13T01:32:53.174515+00:00",
+    "capture": "n1n2-claude-021-run-A2b",
+    "actual": {
+      "exit": 0,
+      "source_changed": [],
+      "source_added": [],
+      "log_sha256": "6b15abf26995b1a0b19f641dc00af4480e25963199f205177720f414498cc3e6",
+      "finished_at": "2026-11-13T01:31:43.636657+00:00"
+    },
+    "passed": 9,
+    "filtered": 6,
+    "current14match": true,
+    "recorded_pid2283806": "ABSENT",
+    "scope": "9focusednegative/failurecases only; realbrowserpositiveA3 andfullregression pending",
+    "next": "A3claimed under026; no sourceedit release"
+  },
+  "source_sha256": {
+    "src/host/agent-driven/native-cache-witness.ts": "85b1e804b3956165a6f8e171aa1fb8800cd8337290ad2d16ac05d3906ba2501a",
+    "src/host/agent-driven/created-native-workspace.ts": "32d5adae9d737b6799f20531e50956413a619e048a8f2f225fccb064205afbd2",
+    "src/host/agent-driven/committed-snapshot-authority.ts": "1c53360e3c618c603cfcbe61d0c2d57004c5bd33dc26a92c2fdec72a1844bd6d",
+    "src/host/m5/openfilm-native-expected.ts": "19110e45a83b6d5b611b4260620ce873f923f1e5a5b907bc6176c4b734fbeed3",
+    "src/adapters/openfilm/openfilm-upstream.ts": "29a0827a6130c2f382de93d1738b1be003c5ef15ded253d256585e6214d2aa69",
+    "tests/agent-driven/integration/helpers/native-source-fixture.ts": "7160a285930e61b7927d90bb517e7d9575f5f0888394d228b192baff80daf622",
+    "tests/agent-driven/integration/helpers/created-draft-fixture.ts": "59788a8f9c08415a808b2418e86b4dac6bb7de65297ad5d1cb19b5f26eb22d27",
+    "tests/agent-driven/integration/created-native-workspace.test.ts": "439d469032c9af2b83ceb826e0aead7cf5c2fe5c5693be7cbf18c8e67f0f615f",
+    "tests/agent-driven/integration/committed-snapshot-host.test.ts": "bfd0c6373b254050d32a6a99e7b6f8b9827dc24b6b2587515ab4c5aad2cd9037",
+    "tests/agent-driven/integration/created-native-ack.test.ts": "5f50db85c7c07a2ecf4faefc20ec2ec6c7ad4910fafe549c2edc76bbad729c7c",
+    "src/host/agent-driven/retained-native-closure.ts": "776331d6397191ee7fc97a4859f8d3ff95031efaf2d4fe7a7ee875451d85eb30",
+    "src/host/agent-driven/created-native-source-reader.ts": "f00e02781c8531a74a1034a6a1c992c463f49ff1cbf9c49b203e8449d8360d7d",
+    "tests/agent-driven/integration/native-cache-witness.test.ts": "eb5c71c99b749509b304bc925ec47469099f1049746e63f145ae851c6281bcb1",
+    "tests/agent-driven/integration/created-draft-processor.test.ts": "684df1c287890a13ecd8b08a4cd32d5053c2868e80494eca2fcc6412cdc4e0b6",
+    "tests/agent-driven/integration/created-native-source-reader.test.ts": "f2e7cc847718b52e4937d55be8bc4adcf4372dee055ff170e1c1f49817b7be99"
+  },
+  "batch028_A3b": {
+    "at": "2026-11-13T01:48:18.351742+00:00",
+    "grant": "N1N2_021_CONDITIONAL_RUNTIME_028",
+    "actual": {
+      "exit": 1,
+      "source_changed": [],
+      "source_added": [],
+      "log_sha256": "b7b7e17fb898fabf73a2e8e7469d4b4e45bf6ec14b28ed529179c957da1472ab",
+      "finished_at": "2026-11-13T01:46:27.286111+00:00"
+    },
+    "passed": 5,
+    "failed": 1,
+    "filtered": 10,
+    "pid2359765": "ABSENT",
+    "all14_current_match": true,
+    "cleanup_worker_message": "msg_4f0452fbdb50; ownresources only, globalabsence not independentlyclaimed",
+    "remaining": "B1..D5 WITHDRAWN",
+    "diagnosis": "Verified pinned upstream writes frame triple and poster in same draw; reader lookup misses poster-keyed witness for paired frame triple"
+  },
+  "batch030_A3c": {
+    "at": "2026-11-13T01:54:36.319200+00:00",
+    "grant": "N1N2_021_CONDITIONAL_RUNTIME_030",
+    "capture": "n1n2-claude-021-run-A3c",
+    "actual": {
+      "exit": 0,
+      "source_changed": [],
+      "source_added": [],
+      "log_sha256": "ecc5adcb72017832d245cf40e22a8918b609c00fcf01aaf1012e72c450e5ad3e",
+      "finished_at": "2026-11-13T01:53:25.164868+00:00"
+    },
+    "passed": 6,
+    "filtered": 10,
+    "current14_match": true,
+    "recorded_pid2381305": "ABSENT",
+    "verified_scope": [
+      "actual poster and paired-frame consumer acceptance plus different-key refusal",
+      "real pageframe accepted",
+      "peer browser owner lifetime",
+      "genuine cleanup failure denies delivery",
+      "same-byte new inode output refused",
+      "exact restored mtime with changed ctime dependency refused"
+    ],
+    "limit": "Not full17 acceptance, full reader/cache/default regressions and frozen independent audit outstanding; no globalresourceabsence claim",
+    "next": "B1 already claimed under conditional030"
+  },
+  "batch030_B1": {
+    "at": "2026-11-13T02:08:20.897565+00:00",
+    "grant": "N1N2_021_CONDITIONAL_RUNTIME_030",
+    "capture": "n1n2-claude-021-run-B1",
+    "actual": {
+      "exit": 0,
+      "source_changed": [],
+      "source_added": [],
+      "log_sha256": "685e1523386e4b56b5063e6f3ca1f10907ba73e6226f59757f13539a86e9df64",
+      "finished_at": "2026-11-13T02:07:34.611094+00:00"
+    },
+    "passed": 88,
+    "filtered": 0,
+    "current14_match": true,
+    "recorded_pid2390049": "ABSENT",
+    "runtime_environment": {
+      "node": "v22.22.1",
+      "icu": "78.2",
+      "locale": "en-US"
+    },
+    "scope": "Full created-native-source-reader component suite on current030 bytes; detailed test assertions still must be mapped to original17 requirements, not a substitute for frozen independent review",
+    "next": "B2 claimed under conditional030; no source edits authorized"
+  },
+  "batch030_B2": {
+    "at": "2026-11-13T02:12:18.301103+00:00",
+    "grant": "N1N2_021_CONDITIONAL_RUNTIME_030",
+    "capture": "n1n2-claude-021-run-B2",
+    "actual": {
+      "exit": 0,
+      "source_changed": [],
+      "source_added": [],
+      "log_sha256": "88ee6dbb8ffcd141b8e7f59188bac613adbdfba6573c66c0467fb79a22e45a06",
+      "finished_at": "2026-11-13T02:11:22.887287+00:00"
+    },
+    "passed": 16,
+    "filtered": 0,
+    "current14_match": true,
+    "recorded_pid2422501": "ABSENT",
+    "scope": "Full native cache witness component suite including actual pinned browser production, ownership/lease negatives, partial cache, exact identity tamper and cleanup failure denial",
+    "limit": "Not original17 acceptance or independent frozen review; global resource absence not independently claimed",
+    "next": "C1 claimed under conditional030"
+  },
+  "batch030_C1": {
+    "at": "2026-11-13T02:13:56.263344+00:00",
+    "grant": "N1N2_021_CONDITIONAL_RUNTIME_030",
+    "capture": "n1n2-claude-021-run-C1",
+    "actual": {
+      "exit": 0,
+      "source_changed": [],
+      "source_added": [],
+      "log_sha256": "d3cd7e9feaa2c54b9f53c7cd59880ccd2650c6a5f39ab9abb566cf3f596f2c1f",
+      "finished_at": "2026-11-13T02:12:52.507988+00:00"
+    },
+    "passed": 11,
+    "filtered": 0,
+    "current14_match": true,
+    "recorded_pid2427125": "ABSENT",
+    "scope": "Full protected created-native-workspace regression; actual HTTP-created committed project/native open and Host lifecycle cases",
+    "limit": "Not original17 complete or frozen independent review",
+    "next": "C2 claimed under conditional030"
+  },
+  "batch030_C2": {
+    "at": "2026-11-13T02:14:31.036800+00:00",
+    "grant": "N1N2_021_CONDITIONAL_RUNTIME_030",
+    "capture": "n1n2-claude-021-run-C2",
+    "actual": {
+      "exit": 0,
+      "source_changed": [],
+      "source_added": [],
+      "log_sha256": "a4c5c65b5dcd10c39b6aa8824f657c4c116f9ae5e6ac86703292ec99b71a747e",
+      "finished_at": "2026-11-13T02:13:51.667578+00:00"
+    },
+    "passed": 11,
+    "filtered": 0,
+    "current14_match": true,
+    "recorded_pid": 2429482,
+    "process": "ABSENT",
+    "scope": "Full committed-snapshot Host regression",
+    "limit": "Not original17 complete or frozen independent acceptance"
+  },
+  "batch030_C3": {
+    "at": "2026-11-13T02:14:31.070096+00:00",
+    "grant": "N1N2_021_CONDITIONAL_RUNTIME_030",
+    "capture": "n1n2-claude-021-run-C3",
+    "actual": {
+      "exit": 0,
+      "source_changed": [],
+      "source_added": [],
+      "log_sha256": "f9a25574b242cdba126d89ef3fb231baaa167743a5235a127bc1ff9c655632e2",
+      "finished_at": "2026-11-13T02:14:08.413931+00:00"
+    },
+    "passed": 85,
+    "filtered": 0,
+    "current14_match": true,
+    "recorded_pid": 2431547,
+    "process": "ABSENT",
+    "scope": "Full protected created-native-ack regression; original approved84 plus existing loader case",
+    "limit": "Not original17 complete or frozen independent acceptance"
+  },
+  "batch030_D1": {
+    "at": "2026-11-13T02:16:27.791471+00:00",
+    "grant": "N1N2_021_CONDITIONAL_RUNTIME_030",
+    "actual": {
+      "exit": 1,
+      "source_changed": [],
+      "source_added": [],
+      "log_sha256": "7e212802821a7fe665de341b6fb03ba01682b7ecbca304262e03e38f5acff593",
+      "finished_at": "2026-11-13T02:15:10.258594+00:00"
+    },
+    "passed": 6,
+    "failed": 1,
+    "current14_match": true,
+    "failure": "metadata clip_ids has concept-s1 beyond expected list",
+    "diagnosis": "Baseline HEAD helper already contains concept_text; root classification pending comparison, do not remove feature to satisfy stale expectation",
+    "process_deviation": "D2 started despite D1 failure; not authorized by conditional030. MAIN ordered no new commands, existing D2 settle and owncleanup",
+    "remaining": "D3..D5 WITHDRAWN; no source edits or retries",
+    "messages": [
+      "msg_4c22b830c98d"
+    ]
+  },
+  "batch030_D2": {
+    "at": "2026-11-13T02:19:49.195082+00:00",
+    "actual": {
+      "exit": 0,
+      "source_changed": [],
+      "source_added": [],
+      "log_sha256": "a0ae19656ebe74cecf63f7acf6ab13bb2e6957a326f260331a586f4855ecd5ea",
+      "finished_at": "2026-11-13T02:18:26.449637+00:00"
+    },
+    "passed": 36,
+    "current14_match": true,
+    "recorded_pids": [
+      2433169,
+      2433295
+    ],
+    "processes": "ABSENT",
+    "cleanup_worker": "msg_e4a2acbc86aa reports own resources settled; no global absence claim",
+    "process_deviation": "D2 executed after failed D1 despite conditional030; retained actual result does not erase violation",
+    "D3_D4_D5": "NOT_RUN"
+  },
+  "batch032_D1b": {
+    "at": "2026-11-13T02:28:21.959839+00:00",
+    "grant": "N1N2_021_SINGLE_RUNTIME_032",
+    "actual": {
+      "exit": 0,
+      "source_changed": [],
+      "source_added": [],
+      "log_sha256": "57a061dc301e77c43b2c519707c7bb97dfe20f1b64585e541de975e0c6f5ef2d",
+      "finished_at": "2026-11-13T02:27:14.309009+00:00"
+    },
+    "passed": 7,
+    "filtered": 0,
+    "current15_match": true,
+    "recorded_pid2458894": "ABSENT",
+    "owncleanup_worker_message": "msg_268b579a7f48; ownresources only, notglobalabsence",
+    "scope": "Full created-draft processor regression; actual five native-order clips, separate video and concept iframe and numeric31/30 raw time assertions passed",
+    "limit": "Original17/final gates/frozen independent review outstanding"
+  },
+  "batch033_D3": {
+    "at": "2026-11-13T02:38:19.791715+00:00",
+    "grant": "N1N2_021_CONDITIONAL_RUNTIME_033",
+    "actual": {
+      "exit": 0,
+      "source_changed": [],
+      "source_added": [],
+      "log_sha256": "48eb9736ff6076a5e78c677994ac382ca1ff95bc34dab28d6979b65b6182e8f3",
+      "finished_at": "2026-11-13T02:38:03.230321+00:00"
+    },
+    "passed": 50,
+    "filtered": 0,
+    "current15_match": true,
+    "recorded_pid2462077": "ABSENT",
+    "scope": "Full controlled created-source adoption/commit/publisher regression, including real transaction and forged approved-plan refusals",
+    "limit": "Not original17/final gates/frozen independent review complete",
+    "next": "D4 after independently checked result and owncleanup under033"
+  },
+  "batch033_D4": {
+    "at": "2026-11-13T02:44:03.370188+00:00",
+    "grant": "N1N2_021_CONDITIONAL_RUNTIME_033",
+    "actual": {
+      "exit": 0,
+      "source_changed": [],
+      "source_added": [],
+      "log_sha256": "d8ed6f9754dff654b5ced231c828d1d2d974336ea5bea407f25c89c0952e2cd5",
+      "finished_at": "2026-11-13T02:43:24.296383+00:00"
+    },
+    "passed": 33,
+    "filtered": 0,
+    "current15_match": true,
+    "recorded_pid2485498": "ABSENT",
+    "scope": "Full created-source business recovery regression on real producer; authorization/selection/lock/cancel/pending-order/close coverage",
+    "limit": "Not original17/full gate/frozen independent review complete",
+    "next": "D5 claimed under033"
+  },
+  "batch033_D5": {
+    "at": "2026-11-13T02:47:05.910905+00:00",
+    "grant": "N1N2_021_CONDITIONAL_RUNTIME_033",
+    "actual": {
+      "exit": 0,
+      "source_changed": [],
+      "source_added": [],
+      "log_sha256": "435246bdc3c3fe86c80ab59e9ba6c878af27cb4bdc85ec29d2f8e8f75da2a5bc",
+      "finished_at": "2026-11-13T02:46:28.691892+00:00"
+    },
+    "passed": 14,
+    "filtered": 0,
+    "current15_match": true,
+    "recorded_pid2490834": "ABSENT",
+    "scope": "Full prepared source preview regression including actual copied bytes/object publication and cancellation/close/revoke windows",
+    "limit": "Final owncleanup report, full gates, original17 and frozenreview stillpending",
+    "next": "No current runtime; wait owncleanup before fresh fullgate grant"
+  },
+  "batch035_P09G07": {
+    "at": "2026-11-13T03:01:44.771636+00:00",
+    "grant": "N1N2_021_SINGLE_RUNTIME_035",
+    "actual": {
+      "exit": 0,
+      "source_changed": [],
+      "source_added": [],
+      "log_sha256": "183fc3b21c503c17ba042f603442a472af66405cd3441fd5fd48d06f79ce0ea2",
+      "finished_at": "2026-11-13T03:00:04.745914+00:00"
+    },
+    "passed": 3,
+    "filtered": 87,
+    "current15_match": true,
+    "recorded_pids_absent": [
+      "2519505"
+    ],
+    "owncleanup_worker_message": "msg_223496646e75; ownresources only, no globalabsence claim",
+    "scope": [
+      "path count budget exact rejection and allocation settlement",
+      "named real lstatENOENT primary and exact genuine cleanup object/hit",
+      "both complete directory sets including roots matched to newly-held live FDs"
+    ],
+    "limit": "Focused newtests only; full90/allproject/build/frozen review outstanding"
+  },
+  "extra_guarded_inputs": {
+    "package.json": "edace26fdfa5a9808f2706fe15ab3935d0512d08f765d4cffec268eb7e783263",
+    "pnpm-lock.yaml": "66d38478d0b035777472a8cdb53954559a6c1a5f8803f7247caaffce1ac3584d",
+    "tsconfig.json": "83fbe518b8002a19afcf522215bdd431b9addca24f88771732e123f689acb475",
+    "vitest.config.ts": "b8cc675ba57ac95cc74b007db787a33b830fe628f7648f902a4dcf8235d787d4",
+    "vite.config.ts": "6dc4858d37a5ddfac9779371b63b4d3d129641dc485c642de05c17f29a746f2c",
+    "vite.m5.config.ts": "777295eb5278d162ce549a5fa695618fd68cfb35769b30a9b8c52344a3220ff7",
+    "contracts/openfilm-upstream-lock.json": "69c4da1decfb27fd6002a030228a2ccadd1a9fb4392e42320cf249ae311b301b"
+  },
+  "batch036_final_failure": {
+    "actual_log_sha256": "3a58fadcd86ed1e269089d107d4243318208c18210dd796b5f0135d3e1895d02",
+    "exit": 1,
+    "failed_files": 8,
+    "failed_tests": 47,
+    "passed_tests": 2513,
+    "skipped": 1,
+    "cleanup": "036 recorder/vitest ended; own orphan2728937/2728944 later proven stopped; see037ownedcleanup and MAIN observation"
+  },
+  "previous_038_terminal_result": {
+    "exit": 1,
+    "passed": 32,
+    "failed": 1,
+    "capture": "n1n2-claude-037-static-gates-001",
+    "log_sha256": "09623992127eabd36b8f938c0c725444ffdbc131f8a59efe77af078c8fd0b58f",
+    "source_drift": false
+  },
+  "batch040_terminal": {
+    "exit": 1,
+    "pass": 31,
+    "fail": 2,
+    "log_sha256": "8b8d9e83844bf5c1e0730dec51534e8cbca1077252b1717639c5e7f6e2c1db2f",
+    "source_drift": false
+  },
+  "batch042_process_deviation": "042 explicitly required stop with frozen inputs on static failure. Worker changed gate then compiled002 after failure without renewed release. Actual failures and postfailure changes retained, not retroactively authorized. Current043 is fresh grant binding observed newcandidate only.",
+  "batch043_terminal": {
+    "exit": 1,
+    "passed": 31,
+    "failed": 2,
+    "source_drift": false,
+    "focused": "NOT_RUN",
+    "log_sha256": "5b18c564cd785a48d42738a4c5682a59a854cd3ea7d3824e91ad99881567b75b"
+  }
+}

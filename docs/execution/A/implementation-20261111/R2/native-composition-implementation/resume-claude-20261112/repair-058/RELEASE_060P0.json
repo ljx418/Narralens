@@ -1,0 +1,68 @@
+{
+  "release_id": "MAIN_RELEASE_060P0_BASELINE_REAL_REGRESSION",
+  "at": "2026-11-14T03:49:43.227713+00:00",
+  "base_head": "1d348d419120f23f45d958112ea8c43df5a04675",
+  "dirty_source_inputs_sha256": {
+    "src/adapters/openfilm/openfilm-upstream.ts": "1583d4aba7f1a2fde487b1339745a039759d09b29fe81edc3268a76edb054e41",
+    "src/host/agent-driven/retained-native-closure.ts": "ef1f3db57ba42da36d216dc6e066b8662861a5f1b9cba2c3394e788da7f56e90",
+    "src/host/agent-driven/committed-snapshot-authority.ts": "e7277382b1b3819d1f6aaa8459dc4d2bf904169d31e614aa45ac6a7b3c610f8b",
+    "src/host/agent-driven/created-native-source-reader.ts": "057015a54e9daee8d08f56eadbd7b2766622f2f915f29a0ebc330e0d4cc676b6",
+    "tests/m2.1/openfilm-upstream-lock.test.ts": "9b2cf8525c7e51da9a7c0d9eb579b65be56a679651fcbb5bfb5bd8e1424c175a",
+    "tests/agent-driven/integration/created-native-source-reader.test.ts": "4880dfea7600c53c0246d384c92b3a60f52522058a42be494f33164cf9920598",
+    "tests/agent-driven/integration/retained-native-budget.test.ts": "3241bdd2c8b7b958e9852db2f28bd831f5a6f70bd2c09d975c09295769e7cd9d",
+    "tests/agent-driven/integration/openfilm-serving-url.test.ts": "6c02e6d3cf56f60e33cbbb74a1b56bef3eaabbb20f10bba025e41e4f3de74e2b",
+    "tests/agent-driven/integration/helpers/native-read-byte-observer.mjs": "a249498702425a01cb3964ef87cfddbbd036b6998a2d03a8938a755d43b89169",
+    "tests/agent-driven/integration/helpers/native-read-growth-child.mjs": "2a31e13d30b98d161a69fcd4c33a125d2733762adb65dddb75fd1b79517f5c84",
+    "tests/fixtures/openfilm-serving-url-child.mjs": "db3caf37f9983bdebf69ea76795925c79a446e88a779e063235f3d402d085a41"
+  },
+  "allow_existing": [
+    "src/adapters/openfilm/openfilm-upstream.ts",
+    "src/host/agent-driven/retained-native-closure.ts",
+    "src/host/agent-driven/committed-snapshot-authority.ts",
+    "src/host/agent-driven/created-native-source-reader.ts",
+    "tests/m2.1/openfilm-upstream-lock.test.ts",
+    "tests/agent-driven/integration/created-native-source-reader.test.ts",
+    "tests/agent-driven/integration/native-cache-witness.test.ts"
+  ],
+  "allow_new": [
+    "tests/agent-driven/integration/openfilm-serving-url.test.ts",
+    "tests/fixtures/openfilm-serving-url-child.mjs",
+    "tests/agent-driven/integration/retained-native-budget.test.ts",
+    "tests/agent-driven/integration/helpers/native-read-growth-child.mjs",
+    "tests/agent-driven/integration/helpers/native-read-byte-observer.mjs"
+  ],
+  "allowed_commands": [
+    [
+      "corepack",
+      "pnpm",
+      "exec",
+      "tsc",
+      "--noEmit"
+    ],
+    [
+      "corepack",
+      "pnpm",
+      "exec",
+      "vitest",
+      "run",
+      "--config",
+      "vitest.config.ts",
+      "tests/agent-driven/integration/created-native-source-reader.test.ts"
+    ],
+    [
+      "corepack",
+      "pnpm",
+      "exec",
+      "vitest",
+      "run",
+      "--config",
+      "vitest.config.ts",
+      "tests/agent-driven/integration/native-cache-witness.test.ts"
+    ]
+  ],
+  "capture_prefix": "n1n2-claude-060p0-",
+  "runtime": "Single heavy slot; exact reader/cache files serial, tsc; loopback/headless/muted only",
+  "source_constraints": "Only059 clear repairs and K04-c direct test correction; A04 architecture withheld",
+  "spec_sha256": "b8c2f213032d18802c61eab8bf5b2824c9201e9eac9155efb0644ee1e61056b0",
+  "state": "RELEASED_PENDING_ACTUAL_CLAUDE_DISPATCH"
+}

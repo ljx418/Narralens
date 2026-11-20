@@ -1,0 +1,53 @@
+{
+  "at": "2026-11-12T14:15:36.083740+00:00",
+  "request": "msg_c2049753320f",
+  "reply": "msg_597c554f49ec",
+  "verdict": "REQUEST_CHANGES_BEFORE_HEAVY_OR_BROWSER",
+  "source_version": "BATCH_015_GRANT.json current13hashes",
+  "static_findings": [
+    {
+      "id": "014-P01",
+      "path": "src/host/agent-driven/native-cache-witness.ts",
+      "finding": "structural arbitrary producer/registry/rawroot maymintissuedwitness; no brandedpinnedproducer andissuedworkspace rootbinding"
+    },
+    {
+      "id": "014-P02",
+      "path": "src/host/agent-driven/native-cache-witness.ts",
+      "finding": "no pre-render retained dependency closure; post-only mtime/size stamp cannotfence samebytesidentity/source races"
+    },
+    {
+      "id": "014-P03",
+      "path": "src/host/agent-driven/native-cache-witness.ts",
+      "finding": "film-poster pathsdeps/stamp null thenunconditionalnullreject; legitimateposter canneverpass"
+    },
+    {
+      "id": "014-P04",
+      "path": "src/host/agent-driven/native-cache-witness.ts",
+      "finding": "overrides key differsfrompinned when[]/noat; expectedtweakspredicate missing"
+    },
+    {
+      "id": "014-P05",
+      "path": "src/host/agent-driven/native-cache-witness.ts",
+      "finding": "unboundedcacheallocation,rawpathstat/read+unvalidateddeps/parentlinks/untrackedFDs/incorrect8MiBmediahashlimit"
+    },
+    {
+      "id": "014-P06",
+      "path": "tests/agent-driven/integration/native-cache-witness.test.ts",
+      "finding": "loopbackserver noCSP/noactualbrowser outboundblock; serverallowlist doesnotpreventexternalrequests"
+    },
+    {
+      "id": "014-P07",
+      "path": "src/adapters/openfilm/openfilm-upstream.ts",
+      "finding": "filmPoster earlyrace return hidesrawfreshwork fromownerdrain; peerclose proofabsent"
+    }
+  ],
+  "original_scope_gaps": [
+    "G01canceledrawreject notactualbodyproved",
+    "finalbindingowner/base/controlfence and tests",
+    "realchildabrupt/cancel faultlifetime",
+    "presentsettings/style adddelete",
+    "captionnonlexicalactualconsumer propagation distinctfromOSorder"
+  ],
+  "allowed_execution": "117pureonlyinterim;no118119120",
+  "source_edit_after": "117terminalandowncleanup, existing014scope corrections;standingsserialtsc"
+}

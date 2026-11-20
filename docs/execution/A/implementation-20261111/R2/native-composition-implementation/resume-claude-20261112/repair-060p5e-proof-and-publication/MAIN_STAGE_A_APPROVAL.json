@@ -1,0 +1,33 @@
+{
+  "at": "2026-11-15T09:01:50.462333+00:00",
+  "verdict": "STAGE_A_STATIC_SAFE_FOR_RECORDED_STAGE_B_PURE_TESTS_ONLY",
+  "guard_sha256": {
+    "tests/agent-driven/integration/cache-process-identity.test.ts": "69827b62a1309f27d696fd749e6342ea2aaf04e7d481b61acd1edb9a07e2754d",
+    "tests/agent-driven/integration/native-cache-normal-pilot.test.ts": "e5beb9ae61f36851b3402e70f37cc75a968cb346ce2239d470a97a7f3d37e1c7",
+    "tests/agent-driven/integration/helpers/cache-custodian-unit.py": "3e42803c8a0d121013bdd1d7774d49bb9db4a58b5f147e115c8b331f9b6762d9"
+  },
+  "capture": "n1n2-claude-060p5e-stage-a-tsc-002",
+  "captured_inputs_verified": 651,
+  "changed_source_paths": [
+    "tests/agent-driven/integration/cache-process-identity.test.ts",
+    "tests/agent-driven/integration/helpers/cache-custodian-unit.py",
+    "tests/agent-driven/integration/native-cache-normal-pilot.test.ts"
+  ],
+  "protected7": "ALL_MATCH",
+  "index": "EMPTY",
+  "review_basis": [
+    "Actual Node production uses process.kill and node:child_process.spawn; wrappers deny non-scripted kill, mock spawn, deny other exec/fork entries",
+    "vi.hoisted symbol constructed internally; ledger afterEach checks occur before clearing; wrappers never restored",
+    "Python guarded base now defined before subclasses; all test classes inherit guard and overridden hooks call super",
+    "Python global os, ctypes loaders, signal registration guarded; FakeOs dangerous fallback refuses; explicit kill/killpg scripts stay synthetic",
+    "No current pure runtime; tsc002 actual exit0/log hash/input bytes verified"
+  ],
+  "limitations": [
+    "This is static permission for specified pure commands, not proof tests pass or independent safety/realN acceptance",
+    "StageB tests must preserve these guard protections; weakening requires MAIN review before further execution",
+    "Typecheck does not execute Python; runtime loading/function failures must be captured and fixed within safe boundaries"
+  ],
+  "stage_b_release": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p5e-proof-and-publication/RELEASE.json",
+  "actual_N_runtime_release": false,
+  "new429": "STOP_NO_RETRY_NO_TAKEOVER"
+}

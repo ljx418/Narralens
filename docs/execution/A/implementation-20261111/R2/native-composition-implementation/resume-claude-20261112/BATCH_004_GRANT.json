@@ -1,0 +1,119 @@
+{
+  "grant_id": "N1N2-RESUME-BATCH-004",
+  "at": "2026-11-12T08:08:08.507248+00:00",
+  "holder": "ctx_e5e736e1846b",
+  "request": "msg_589776473ece",
+  "cwd": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+  "frozen_sha256": {
+    "src/host/agent-driven/committed-snapshot-authority.ts": "d18dfac5405228204faf7d3798a3e739f96ebbec02fa06f64dd761bf48fe3d1a",
+    "src/host/agent-driven/created-native-workspace.ts": "b57bed5df0ea600a2aa1a5b2dc3df2873f794389ee5274f32efb52a6f3d653ad",
+    "src/host/m5/openfilm-native-expected.ts": "19110e45a83b6d5b611b4260620ce873f923f1e5a5b907bc6176c4b734fbeed3",
+    "src/host/agent-driven/retained-native-closure.ts": "0b6c3de8f10d1ad06b4abe0f287dfb80f00f25adeeba61d0ac46faf2fef35290",
+    "src/host/agent-driven/created-native-source-reader.ts": "6ae2329d63d83d4cd882dbf4120d44a241c8194e8b4163fb927520c66cba2931",
+    "tests/agent-driven/integration/created-native-workspace.test.ts": "439d469032c9af2b83ceb826e0aead7cf5c2fe5c5693be7cbf18c8e67f0f615f",
+    "tests/agent-driven/integration/committed-snapshot-host.test.ts": "bfd0c6373b254050d32a6a99e7b6f8b9827dc24b6b2587515ab4c5aad2cd9037",
+    "tests/agent-driven/integration/created-native-ack.test.ts": "5f50db85c7c07a2ecf4faefc20ec2ec6c7ad4910fafe549c2edc76bbad729c7c",
+    "tests/agent-driven/integration/created-native-source-reader.test.ts": "642ba52c41009a77a20b7b36fa0e710cd699138f5e737c1c8245769206080d67",
+    "tests/agent-driven/integration/helpers/native-source-fixture.ts": "0109458a3a7530f31c7c5fd1397cebf1ebe4b2a0da6857e14b9cf37f5ea456c2"
+  },
+  "commands": [
+    {
+      "capture": "n1n2-claude-resume-049-corrective-pure",
+      "argv": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "vitest",
+        "run",
+        "--config",
+        "vitest.config.ts",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts",
+        "-t",
+        "P0|F01|F10 lists|F10 keeps"
+      ],
+      "expected_cases": 11
+    },
+    {
+      "capture": "n1n2-claude-resume-050-corrective-component",
+      "argv": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "vitest",
+        "run",
+        "--config",
+        "vitest.config.ts",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts",
+        "-t",
+        "R0|F02|F03|F04|F05|F06|F07|F08|F09|F10 shows"
+      ],
+      "expected_cases": 30
+    },
+    {
+      "capture": "n1n2-claude-resume-051-corrective-regressions",
+      "argv": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "vitest",
+        "run",
+        "--config",
+        "vitest.config.ts",
+        "tests/agent-driven/integration/created-native-ack.test.ts",
+        "tests/agent-driven/integration/committed-snapshot-host.test.ts",
+        "tests/agent-driven/integration/created-native-workspace.test.ts"
+      ],
+      "expected_cases": 107
+    }
+  ],
+  "selected_assertion_titles": {
+    "A": [
+      "F01 keeps a temporary release failure and reports it once at the final release",
+      "F10 lists the media as the pinned consumer lists it",
+      "F10 keeps the caption directory in the platform order",
+      "P07 refuses a symbolic link, a same-bytes replacement and a restored change time",
+      "P07 refuses a text file above the budget and bounds the total",
+      "P07 refuses to release while work is in flight and releases every allocation once",
+      "P07 refuses a reentrant release from inside an accepted read",
+      "P07 keeps the failure of the walk release with the failure that stopped it",
+      "P07 proves an empty directory and sees the file that appears in it",
+      "P06 reproduces the five pinned native revision vectors",
+      "P06 lists the media in the numeric order of the host"
+    ],
+    "B": [
+      "R00 smoke reaches the reader from the real committed created source",
+      "R00 smoke commits a rich source with the native files and the media",
+      "R01 refuses the legacy project that has no created producer",
+      "R02 invalidates the old proof when the working copy changes under it",
+      "R02 refuses a pending round when the working copy changes during the read",
+      "R03 refuses a sidecar, an unknown item and a missing committed file",
+      "R04 refuses a foreign native id, a forged probe cache and a file in flight",
+      "R04 accepts a legitimate cache in the next stable round",
+      "R05 proves the media facts of the retained bytes",
+      "R06 lists the media in the native numeric order",
+      "R02 keeps parallel leases independent and refuses foreign and copied tokens",
+      "R02 refuses a facts lease of another authority",
+      "R02 releases the whole closure only after the last retained leaf",
+      "R06 places every clip where the committed film places it",
+      "R07 ends a read at a close and releases a late result exactly once",
+      "R07 lets the real media child exit before the reader closes",
+      "R07 registers the read before a binding callback can close the reader",
+      "R07 refuses a later read after a delivered release failed",
+      "F03 refuses a source leaf and a source parent replaced during the acquisition",
+      "F03 refuses a stale source identity and proves the next one",
+      "F04 refuses a hardlink alias and an unknown directory in the working copy",
+      "F05 refuses a page frame cache entry and an orphan film poster",
+      "F07 reports a delivered release failure when the reader closes",
+      "F08 refuses a lease whose producer lineage changed after the issue",
+      "F08 refuses a lineage changed during the acquisition",
+      "F02 accepts a proved absence and refuses its later birth",
+      "F06 refuses a referenced text above the budget in the authority path",
+      "F09 refuses every injected probe failure",
+      "F09 normalises a rotated video and the first of two video streams",
+      "F10 shows that the pinned consumer refuses a clip without a number"
+    ]
+  },
+  "scope": "interim correction evidence; remaining original NOT_RUN not waived; not final external acceptance",
+  "effects": "serial pure and component tests, real loopback Host/privateDB/diagnostic local ffmpeg/ffprobe including rotation/multistream; clearly labelled fault-only injection; fixed upstream/015 read-only; no browser/J/network/provider/paid/config/index/build",
+  "execution": "unchanged recorder; each command once serial; freeze ALL source/tests/tools/config/index throughout ALL3; preserve failures, actual child exit and cleanup; new429STOP"
+}

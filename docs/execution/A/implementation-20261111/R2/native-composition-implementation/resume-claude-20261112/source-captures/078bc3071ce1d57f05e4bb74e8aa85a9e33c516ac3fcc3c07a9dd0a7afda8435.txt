@@ -1,0 +1,355 @@
+import {createHash} from 'node:crypto';
+import {lstatSync} from 'node:fs';
+import {join} from 'node:path';
+import {isIssuedOpenFilmCacheProducer} from '../../adapters/openfilm/openfilm-upstream.js';
+import {RetainedNativeClosure} from './retained-native-closure.js';
+import type {RetainedDescriptorPool,RetainedNativeFile} from './retained-native-closure.js';
+
+/** The NUL the upstream hashes between the parts of a cache key. */
+const NUL=String.fromCharCode(0);
+
+/** The witness of ONE native cache entry.
+ *
+ * It is issued ONLY by the guarded wrapper around the FIXED upstream producer, when
+ * that producer was really invoked. It binds:
+ *  - the issued workspace instance and its generation,
+ *  - the request that produced it: the relative path, the moment, the width and the
+ *    overrides exactly as the upstream hashed them,
+ *  - the key the upstream computes from that request,
+ *  - the digests of the files the producer really wrote,
+ *  - the dependency closure the producer read, BEFORE and AFTER the call.
+ *
+ * The PUBLIC shape of a witness is not authority: a JSON object that looks like
+ * this proves nothing. The authority is the issued brand below, which only the
+ * wrapper can put on a witness, and the workspace instance and generation it is
+ * bound to. */
+export interface NativeCacheWitness{
+ /** Which family of the native cache this witness is about. */
+ readonly kind:'pageframe'|'film-poster';
+ readonly workspace_ref:string;
+ readonly generation:number;
+ /** The request: the path of the page, the moment, the width and the overrides. */
+ readonly rel:string;
+ readonly ms:number;
+ readonly width:number;
+ /** The exact overrides the upstream hashed, or null when it hashed none. */
+ readonly overrides_json:string|null;
+ /** The root the producer really drew in: the issued root of that view. */
+ readonly root:string;
+ /** The upstream's own key of that request. */
+ readonly key:string;
+ /** The upstream's own key of the request's page frame, whatever family this
+  *  witness is about: the triple of the files lives under it. */
+ readonly frame_key:string;
+ /** The digest of the picture the producer really drew. */
+ readonly jpeg_sha256:string;
+ /** The digest of the dependency list the producer really wrote. */
+ readonly deps_sha256:string;
+ /** The digest of the stamp the producer really wrote. */
+ readonly stamp_sha256:string;
+ /** The digest of the poster the producer really wrote, when it wrote one. */
+ readonly poster_sha256:string|null;
+ /** The files the producer really read, as they were when it read them. */
+ readonly dependencies:readonly {readonly path:string;readonly sha256:string;readonly bytes:number;readonly mtime_ms:number;readonly ctime_ms:number;readonly dev:string;readonly ino:string}[];
+ readonly issued_at:string;
+}
+
+/** The upstream's own tweaks of a request.
+ *
+ * `studio/server/pageframes.mjs:65-66`: the overrides are hashed ONLY when one of
+ * them is an object that carries an `at` - an empty list, or a list without such an
+ * override, hashes as nothing at all. */
+export function upstreamCacheTweaks(overrides:readonly unknown[]|null):string|null{
+ if(overrides===null)return null;
+ const hashed=overrides.some(entry=>!!entry&&typeof entry==='object'&&'at' in (entry as Record<string,unknown>));
+ return hashed?JSON.stringify(overrides):null;
+}
+
+/** The upstream's own key of a request.
+ *
+ * `studio/server/pageframes.mjs:62-71`: the key is
+ * `sha256('black' + NUL + rel + NUL + round(ms) + NUL + w [+ NUL + overrides])` cut
+ * to its first 24 hex digits, and the width it hashes is the NORMALIZED one - the
+ * width the producer really drew at. */
+export function nativeCacheKey(request:{readonly rel:string;readonly ms:number;readonly width:number;readonly overrides_json:string|null}):string{
+ const tweaks=request.overrides_json??'';
+ return createHash('sha256').update(`black${NUL}${request.rel}${NUL}${Math.round(request.ms)}${NUL}${request.width}${tweaks?`${NUL}${tweaks}`:''}`).digest('hex').slice(0,24);
+}
+
+/** The upstream's own stamp of a dependency list.
+ *
+ * `studio/server/pageframes.mjs:119-122`: the stamp is the digest of
+ * `${path}:${mtimeMs}:${size}` joined by newlines, cut to its first 24 hex digits. */
+export function nativeCacheStamp(dependencies:readonly {readonly path:string;readonly mtime_ms:number;readonly bytes:number}[]):string{
+ return createHash('sha256').update(dependencies.map(entry=>`${entry.path}:${entry.mtime_ms}:${entry.bytes}`).join('\n')).digest('hex').slice(0,24);
+}
+
+/** The witnesses this module issued.
+ *
+ * The brand is what makes a witness real: it cannot be copied, cannot be forged by
+ * a JSON file and cannot be replayed for another workspace instance. */
+const issuedWitnesses=new WeakSet<object>();
+/** Whether this object is a witness this module issued. */
+export function isIssuedNativeCacheWitness(value:unknown):value is NativeCacheWitness{
+ return typeof value==='object'&&value!==null&&issuedWitnesses.has(value);
+}
+/** Put the brand on a witness. Only the wrapper below may call this. */
+function issue(witness:NativeCacheWitness):NativeCacheWitness{
+ const frozen=Object.freeze({...witness,dependencies:Object.freeze(witness.dependencies.map(entry=>Object.freeze({...entry})))});
+ issuedWitnesses.add(frozen);
+ return frozen;
+}
+
+/** The registry of the witnesses of ONE workspace instance.
+ *
+ * It refuses a lookalike, a clone and a witness of another view: the witness is
+ * bound to the issued ref and to the generation it was issued for, and a new
+ * generation never inherits the witnesses of the old one. */
+export interface NativeCacheWitnessRegistry{
+ /** Record a witness for an issued view. It is refused when it is not one this
+  *  module issued, or when it names another view or another generation.
+  *
+  *  The registry that holds the witnesses is the SERVICE's: the ledger underneath is
+  *  not handed out, and a record that did not come through the service's own
+  *  validation is refused by the ledger as well. */
+ record(witness:NativeCacheWitness):boolean;
+ /** The witness of this view's key, or null when there is none. */
+ lookup(workspace_ref:string,generation:number,key:string):NativeCacheWitness|null;
+ /** The ISSUED root of this view and generation, or null when there is none.
+  *
+  * It is the root the Host handed out for that view: a producer may not be run
+  * anywhere else, and the witness may never speak about another tree. */
+ issuedRoot(workspace_ref:string,generation:number):string|null;
+}
+
+/** The in-memory registry of one workspace service.
+ *
+ * It knows the issued roots through the resolver the service gave it: the registry
+ * may only speak about the roots the Host handed out. */
+export class NativeCacheWitnessLedger implements NativeCacheWitnessRegistry{
+ /** The witnesses, by the view they belong to and by their key. */
+ readonly #witnesses=new Map<string,NativeCacheWitness>();
+ /** The resolver of the issued roots of this service. */
+ readonly #roots:((workspace_ref:string,generation:number)=>string|null)|undefined;
+ /** The token only the service holds: a record that does not carry it is refused. */
+ readonly #token:unknown;
+ constructor(token:unknown,roots?:(workspace_ref:string,generation:number)=>string|null){
+  this.#token=token;this.#roots=roots;
+ }
+ /** Record a witness, with the service's own token.
+  *
+  * The token is the service's private capability: the ledger itself refuses a
+  * record that did not come through it, so the ledger cannot be used to insert a
+  * witness behind the service's back. */
+ record(witness:NativeCacheWitness,token?:unknown):boolean{
+  if(token!==this.#token)return false;
+  if(!isIssuedNativeCacheWitness(witness))return false;
+  if(typeof witness.workspace_ref!=='string'||witness.workspace_ref==='')return false;
+  if(!Number.isInteger(witness.generation)||witness.generation<1)return false;
+  if(typeof witness.key!=='string'||witness.key==='')return false;
+  const scope=`${witness.workspace_ref} ${witness.generation}`;
+  const existing=this.#witnesses.get(scope+' '+witness.key);
+  // A witness of another family never replaces the one that is already there.
+  if(existing!==undefined&&existing.kind!==witness.kind)return false;
+  this.#witnesses.set(scope+' '+witness.key,witness);
+  return true;
+ }
+ lookup(workspace_ref:string,generation:number,key:string):NativeCacheWitness|null{
+  const witness=this.#witnesses.get(`${workspace_ref} ${generation} ${key}`);
+  if(witness===undefined)return null;
+  // A witness that was not issued by this module is not a witness.
+  return isIssuedNativeCacheWitness(witness)?witness:null;
+ }
+ /** The ISSUED root of this view and generation, or null when there is none. */
+ issuedRoot(workspace_ref:string,generation:number):string|null{
+  return this.#roots===undefined?null:this.#roots(workspace_ref,generation);
+ }
+ /** Forget the witnesses of the generations older than the given one: a new
+  *  generation never inherits the witnesses of the old one. */
+ invalidate(generation:number):void{
+  for(const [scope,witness] of [...this.#witnesses]){
+   if(witness.generation<generation)this.#witnesses.delete(scope);
+  }
+ }
+}
+
+/** The fixed producer the wrapper calls.
+ *
+ * It is the PINNED upstream producer and nothing else: the wrapper never draws a
+ * picture of its own, and only the producer this module's factory issued may be
+ * used here - a hand-written object with the right shape is refused. */
+export interface NativeCacheProducer{
+ /** Draw one page frame with the fixed producer.
+  *
+  * It answers the JPEG the producer really drew. The files it really read are not
+  * taken from it: they are read back from the dependency list the producer itself
+  * wrote, so the Host never trusts a report about its own origin. */
+ pageFrame(request:{readonly root:string;readonly base:string;readonly rel:string;readonly ms:number;readonly width:number;readonly overrides:unknown[]|null}):Promise<Buffer>;
+ /** The upstream's own close of its resources. It never kills another instance's
+  *  work: the browser is shared and the owner ledger decides. */
+ close():Promise<void>;
+}
+
+/** The failure of the native cache producer. */
+export class NativeCacheWitnessError extends Error{
+ constructor(readonly code:string,message:string){super(message);this.name='NativeCacheWitnessError';}
+}
+const refuseCache:(code:string,message:string)=>never=(code,message)=>{throw new NativeCacheWitnessError(code,message);};
+
+/** The facts of one retained file. */
+interface FileFacts{readonly path:string;readonly sha256:string;readonly bytes:number;readonly mtime_ms:number;readonly ctime_ms:number;readonly dev:string;readonly ino:string;}
+/** The facts of a retained file, read through its own descriptor. */
+function factsOf(file:RetainedNativeFile,path:string):FileFacts{
+ return {path,sha256:file.sha256,bytes:file.bytes,mtime_ms:file.mtime_ms,ctime_ms:file.ctime_ms,dev:file.dev,ino:file.ino};
+}
+
+/** Produce ONE native cache entry with the FIXED producer, and witness it.
+ *
+ * The order is fixed and it is the whole point of the witness:
+ *  1. the producer must be the one the Host's factory issued - a lookalike that
+ *     merely has the right shape is refused, and so is a repacked copy of the real
+ *     one;
+ *  2. the root must be the ISSUED root of this view and generation;
+ *  3. the key of the request is computed with the upstream's own formula and the
+ *     upstream's own overrides predicate;
+ *  4. a pre-existing, unwitnessed triple of that key is REFUSED - the fixed
+ *     producer may hit the disk cache, and a cache hit is not proof that the
+ *     producer drew the picture, so it may never issue an origin witness;
+ *  5. the tree is RETAINED before the producer runs, so the state of the page it
+ *     draws from is known before the draw;
+ *  6. the fixed producer is invoked, once, awaited;
+ *  7. the tree is retained again afterwards: the page must be the very same file,
+ *     with the very same identity and bytes, as it was before the draw;
+ *  8. the dependency list is the one the producer ITSELF wrote, every file of it is
+ *     read back through a retained descriptor, and the upstream's own stamp over
+ *     them must be the stamp that was written;
+ *  9. only then is the witness issued and recorded.
+ *
+ * The witness is a fact about THIS call. It is never an author source, never an
+ * independent expected fact, and it is lost with the workspace instance that holds
+ * it. */
+export async function produceNativeCacheEntry(request:{
+ readonly workspaces:NativeCacheWitnessRegistry;
+ readonly producer:NativeCacheProducer;
+ readonly workspace_ref:string;
+ readonly generation:number;
+ readonly root:string;
+ readonly base:string;
+ readonly rel:string;
+ readonly ms:number;
+ readonly width:number;
+ readonly overrides:unknown[]|null;
+ readonly kind:'pageframe'|'film-poster';
+ readonly pool?:RetainedDescriptorPool;
+}):Promise<NativeCacheWitness>{
+ // 1) the producer is the FIXED one, issued by the Host's own factory.
+ if(!isIssuedOpenFilmCacheProducer(request.producer))refuseCache('NATIVE_CACHE_PRODUCER_FOREIGN','The cache producer is not the fixed one this Host issued');
+ // 2) the root is the ISSUED root of this view and generation: only the workspace
+ //    service knows the roots it handed out, and a registry that answers with another
+ //    root is refused.
+ const issued=request.workspaces.issuedRoot(request.workspace_ref,request.generation);
+ if(issued===null||issued!==request.root)refuseCache('NATIVE_CACHE_ROOT_FOREIGN','The cache is not produced in the issued root of this view');
+ // 3) the key, with the upstream's own overrides predicate and width rule. The poster
+ //    is the paired output of the very same draw of the film's own page, so its
+ //    triple is the triple of that frame key.
+ const overridesJson=upstreamCacheTweaks(request.overrides);
+ const width=Math.max(32,Math.min(960,Math.round(request.width/2)*2||160));
+ const frameKey=nativeCacheKey({rel:request.rel,ms:request.ms,width,overrides_json:overridesJson});
+ const key=request.kind==='film-poster'?'film-poster':frameKey;
+ const jpegPath=`.film/cache/pageframes/${frameKey}.jpg`;
+ const depsPath=`.film/cache/pageframes/${frameKey}.json`;
+ const stampPath=`.film/cache/pageframes/${frameKey}.stamp`;
+ const posterPath='.film/cache/film-poster.jpg';
+ // 4) a triple that is already there was not produced by THIS call: the fixed
+ //    producer may hit the disk cache, and a cache hit is never witnessed.
+ if(isRegularFileWithin(request.root,jpegPath))refuseCache('NATIVE_CACHE_PREEXISTING','The native cache entry is already there and was not produced by this call');
+ // 5) the tree is retained BEFORE the draw: every regular file of it is retained
+ //    and hashed, and the closure stays OPEN across the draw, so the state of the
+ //    files the producer is about to read is known before it reads them.
+ const before=await RetainedNativeClosure.open(request.root,{},undefined,request.pool);
+ try{
+  const beforeFacts=new Map<string,FileFacts>();
+  for(const path of before.fileMembership()){
+   const file=await before.retainFile(path);
+   beforeFacts.set(path,factsOf(file,path));
+  }
+  // The path the request names must be a member of the ISSUED tree.
+  if(!beforeFacts.has(request.rel))refuseCache('NATIVE_CACHE_REQUEST_FOREIGN','The page the request names is not a member of the issued tree');
+  // 6) the producer really runs, once, awaited.
+  const produced=await request.producer.pageFrame({root:request.root,base:request.base,rel:request.rel,ms:request.ms,width,overrides:request.overrides});
+  // 7) the tree is retained again AFTER the draw.
+  const after=await RetainedNativeClosure.open(request.root,{},undefined,request.pool);
+  try{
+   // The view must still be the issued one: the production is refused if the view
+   // was replaced while the producer was drawing.
+   const stillIssued=request.workspaces.issuedRoot(request.workspace_ref,request.generation);
+   if(stillIssued===null||stillIssued!==request.root)refuseCache('NATIVE_CACHE_ROOT_FOREIGN','The issued view was replaced while the producer was drawing');
+   // The dependency list is the one the producer ITSELF wrote.
+   const depsFile=await after.retainFile(depsPath);
+   const depsText=await after.readText(depsFile);
+   let parsed:unknown;
+   try{parsed=JSON.parse(depsText);}catch{refuseCache('NATIVE_CACHE_OUTPUT_MALFORMED','The dependency list of the cache entry is not JSON');}
+   const declared=(parsed as {files?:unknown}).files;
+   if(!Array.isArray(declared)||declared.length===0||declared.some(file=>typeof file!=='string'))
+    refuseCache('NATIVE_CACHE_OUTPUT_MALFORMED','The dependency list of the cache entry names no file');
+   // Every dependency is read back through a retained descriptor, and it must be
+   // THE VERY file that was there before the draw: the same device, the same inode,
+   // the same bytes and the same change time. A file that was replaced by an equal
+   // copy with a restored change time is refused here.
+   const dependencies:FileFacts[]=[];
+   for(const dependency of declared as string[]){
+    const file=await after.retainFile(dependency);
+    const facts=factsOf(file,dependency);
+    const beforeFactsOf=beforeFacts.get(dependency);
+    if(beforeFactsOf===undefined)refuseCache('NATIVE_CACHE_DEPENDENCY_UNRELATED','The producer read a file that was not part of the issued tree');
+    // The INODE's change time is compared as well: a file whose content was
+    // changed and restored under the same inode has the same bytes and the same
+    // change time of its content, but a new change time of its inode.
+    if(beforeFactsOf.dev!==facts.dev||beforeFactsOf.ino!==facts.ino||beforeFactsOf.sha256!==facts.sha256
+     ||beforeFactsOf.bytes!==facts.bytes||beforeFactsOf.mtime_ms!==facts.mtime_ms||beforeFactsOf.ctime_ms!==facts.ctime_ms)
+     refuseCache('NATIVE_CACHE_SOURCE_RACED','A file the producer read changed while it was drawing');
+    dependencies.push(facts);
+   }
+   // The request's own path must be among the dependencies: a triple that does not
+   // name the page it was drawn from is not a triple of this request.
+   if(!dependencies.some(entry=>entry.path===request.rel))refuseCache('NATIVE_CACHE_DEPENDENCY_UNRELATED','The producer did not read the page the request names');
+   // The upstream's own stamp over the dependencies must be the stamp that was
+   // written: the source did not move under the producer.
+   const stampFile=await after.retainFile(stampPath);
+   const stamp=await after.readText(stampFile);
+   if(nativeCacheStamp(dependencies)!==stamp)refuseCache('NATIVE_CACHE_SOURCE_RACED','A file the producer read changed while it was drawing');
+   // The picture the producer really returned must be the file that is there.
+   const picture=await after.retainFile(jpegPath);
+   if(createHash('sha256').update(produced).digest('hex')!==picture.sha256)
+    refuseCache('NATIVE_CACHE_OUTPUT_MISMATCH','The picture the producer returned is not the file that was written');
+   // The poster is the paired output of the very same draw, when the producer wrote
+   // one: it is the LAST poster, and it never says that the film was rendered now.
+   let posterSha:string|null=null;
+   if(request.kind==='film-poster'){
+    if(!isRegularFileWithin(request.root,posterPath))refuseCache('NATIVE_CACHE_OUTPUT_MISSING','The producer did not write the poster it must write');
+    const poster=await after.retainFile(posterPath);
+    posterSha=poster.sha256;
+   }
+   const witness=issue({
+    kind:request.kind,workspace_ref:request.workspace_ref,generation:request.generation,root:request.root,
+    rel:request.rel,ms:request.ms,width,overrides_json:overridesJson,key,frame_key:frameKey,
+    jpeg_sha256:picture.sha256,
+    deps_sha256:depsFile.sha256,
+    stamp_sha256:stampFile.sha256,
+    poster_sha256:posterSha,
+    dependencies,issued_at:new Date().toISOString(),
+   });
+   if(!request.workspaces.record(witness))refuseCache('NATIVE_CACHE_WITNESS_REFUSED','The workspace instance refused the witness');
+   return witness;
+  }finally{
+   await after.release();
+  }
+ }finally{
+  await before.release();
+ }
+}
+
+/** Whether a path under a root is a regular file (a link is not). */
+function isRegularFileWithin(root:string,relative:string):boolean{
+ try{return lstatSync(join(root,relative)).isFile();}catch{return false;}
+}

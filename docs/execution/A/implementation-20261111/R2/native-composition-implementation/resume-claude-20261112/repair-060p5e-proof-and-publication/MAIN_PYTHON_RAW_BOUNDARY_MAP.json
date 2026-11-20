@@ -1,0 +1,69 @@
+{
+  "at": "2026-11-15T08:55:08.023173+00:00",
+  "scope": "Python actual privileged entry inventory for StageA static guard review",
+  "production_sha256": "30583caab4024b3e4131183e19d60635b1711735892640c5dc7d7e0db34c34f2",
+  "rows": [
+    {
+      "line": 326,
+      "entry": "os.killpg(pgid, 0)"
+    },
+    {
+      "line": 345,
+      "entry": "os.killpg(pgid, number)"
+    },
+    {
+      "line": 360,
+      "entry": "os.kill(pid, number)"
+    },
+    {
+      "line": 1306,
+      "entry": "libc = ctypes.CDLL(None, use_errno=True)"
+    },
+    {
+      "line": 1372,
+      "entry": "signal.set_wakeup_fd(self._wakeup_write)"
+    },
+    {
+      "line": 1373,
+      "entry": "signal.signal(signal.SIGCHLD, lambda *_args: None)"
+    },
+    {
+      "line": 1376,
+      "entry": "signal.signal(signal.SIGTERM, self._on_terminate)"
+    },
+    {
+      "line": 1377,
+      "entry": "signal.signal(signal.SIGINT, self._on_terminate)"
+    },
+    {
+      "line": 1500,
+      "entry": "pid = os.fork()"
+    },
+    {
+      "line": 1531,
+      "entry": "os.execve(node_path, [node_path, worker_path], environment)"
+    },
+    {
+      "line": 1682,
+      "entry": "info = os.waitid(os.P_PID, self.worker_pid, os.WEXITED | os.WNOHANG | os.WNOWAIT)"
+    },
+    {
+      "line": 2013,
+      "entry": "reaped_pid, status = os.waitpid(pid, os.WNOHANG)"
+    },
+    {
+      "line": 2035,
+      "entry": "reaped, status = os.waitpid(self.worker_pid, os.WNOHANG)"
+    },
+    {
+      "line": 2053,
+      "entry": "reaped, status = os.waitpid(-1, os.WNOHANG)"
+    }
+  ],
+  "review_requirements": [
+    "All call paths need explicit fake or guard; os wrapper alone does not intercept ctypes.CDLL and signal module registration",
+    "Actual prctl bind uses injected libc in unit cases; global default must refuse loading real libc for tested effects",
+    "Guard proof must verify case hooks cover original early classes and overridden setup/teardown; do not execute current partial edit"
+  ],
+  "status": "INVENTORY_NOT_APPROVAL_NOT_RUNTIME_EVIDENCE"
+}

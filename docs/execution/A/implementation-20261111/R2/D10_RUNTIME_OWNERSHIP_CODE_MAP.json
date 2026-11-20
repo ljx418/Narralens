@@ -1,0 +1,18 @@
+{
+  "code_commit": "1b267fff99af5752aabcfe3c3a58d3d516ec372c",
+  "observed_at": "2026-11-11T22:21:13.654192+00:00",
+  "files": {
+    "src/host/agent-driven/owned-runtime.ts": "9ff6bca28da8f9d9537eda9a013149ef5789616ce98d43066eb91d8872fda8e4",
+    "src/host/agent-driven/start-runtime.ts": "d5bd8fb2507f61e1dc1c01c83def8a9d81406dc48a7e7120746c090dca9227a4",
+    "src/launcher/local-runtime-ports.ts": "bf885c40271d7a73a772cbdafffa798b5cc143dbaa383fd43c19ec4117885f0d",
+    "tests/agent-driven/integration/owned-runtime.test.ts": "5f1c0358dd0ffc89f5b6d447d4f414cd381c32e5d2b339af42a92a37cfeecf1e"
+  },
+  "facts": [
+    "LocalRuntimePorts.discover acquires real flock and refuses alive or unknown predecessor",
+    "Host start-runtime begins with beginRuntime(root) before constructing Host/listen",
+    "beginRuntime asserts inherited FD9 matches owned instance.lock and exact predecessor PID/start identity before taking a new generation",
+    "All runtime DB/snapshot/project roots are derived from that owned root",
+    "Existing owned-runtime tests contain real flock and SIGKILL paths; not rerun by this code-map read"
+  ],
+  "scope": "Static source map only, not new business/runtime acceptance. Reuse existing lock, never add a second PID-file authority; module-only direct Host fixtures do not prove production ownership hook."
+}

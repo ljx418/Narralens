@@ -1,0 +1,282 @@
+{
+  "id": "N1N2_052_LF04_REAL_SECOND_PROJECT_AND_REMAINING_VALIDATION",
+  "at": "2026-11-13T16:11:50.358041+00:00",
+  "executor_lineage": "Orca followup of ctx_8d0e4eca6a91 in same implementationworkspace; exact new dispatch/terminal to be registered from sendreceipt; singlewriter.",
+  "cwd": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+  "head": "e2eff61b464d75d36598103d718cd2a75db5dfda",
+  "source_baseline": {
+    "src/host/agent-driven/native-cache-witness.ts": {
+      "sha256": "97c1fe93037f3f31afdf67e97a5d4451d42ac7016d3cca642217fe1750c2573b",
+      "bytes": 13857,
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/97c1fe93037f3f31afdf67e97a5d4451d42ac7016d3cca642217fe1750c2573b.txt"
+    },
+    "src/host/agent-driven/created-native-workspace.ts": {
+      "sha256": "3702917cf6efe09287030435c1883e1cdd57eb6e0da2fdd577bf3879ab965c1e",
+      "bytes": 65816,
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/3702917cf6efe09287030435c1883e1cdd57eb6e0da2fdd577bf3879ab965c1e.txt"
+    },
+    "src/host/agent-driven/committed-snapshot-authority.ts": {
+      "sha256": "1c53360e3c618c603cfcbe61d0c2d57004c5bd33dc26a92c2fdec72a1844bd6d",
+      "bytes": 44087,
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/1c53360e3c618c603cfcbe61d0c2d57004c5bd33dc26a92c2fdec72a1844bd6d.txt"
+    },
+    "src/host/m5/openfilm-native-expected.ts": {
+      "sha256": "19110e45a83b6d5b611b4260620ce873f923f1e5a5b907bc6176c4b734fbeed3",
+      "bytes": 47279,
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/19110e45a83b6d5b611b4260620ce873f923f1e5a5b907bc6176c4b734fbeed3.txt"
+    },
+    "src/adapters/openfilm/openfilm-upstream.ts": {
+      "sha256": "013f50ce87e04b3ff542e15f3c98d833ae43940fef9d85ccad79ff38e5bd200b",
+      "bytes": 55012,
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/013f50ce87e04b3ff542e15f3c98d833ae43940fef9d85ccad79ff38e5bd200b.txt"
+    },
+    "tests/agent-driven/integration/helpers/native-source-fixture.ts": {
+      "sha256": "419332f4f5d8e2ece1fb79fb5004ac4755f1b230b0c2dfeb59c0baf986d10b31",
+      "bytes": 23444,
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/419332f4f5d8e2ece1fb79fb5004ac4755f1b230b0c2dfeb59c0baf986d10b31.txt"
+    },
+    "tests/agent-driven/integration/helpers/created-draft-fixture.ts": {
+      "sha256": "59788a8f9c08415a808b2418e86b4dac6bb7de65297ad5d1cb19b5f26eb22d27",
+      "bytes": 14589,
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/59788a8f9c08415a808b2418e86b4dac6bb7de65297ad5d1cb19b5f26eb22d27.txt"
+    },
+    "tests/agent-driven/integration/created-native-workspace.test.ts": {
+      "sha256": "439d469032c9af2b83ceb826e0aead7cf5c2fe5c5693be7cbf18c8e67f0f615f",
+      "bytes": 12700,
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/439d469032c9af2b83ceb826e0aead7cf5c2fe5c5693be7cbf18c8e67f0f615f.txt"
+    },
+    "tests/agent-driven/integration/committed-snapshot-host.test.ts": {
+      "sha256": "bfd0c6373b254050d32a6a99e7b6f8b9827dc24b6b2587515ab4c5aad2cd9037",
+      "bytes": 12061,
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/bfd0c6373b254050d32a6a99e7b6f8b9827dc24b6b2587515ab4c5aad2cd9037.txt"
+    },
+    "tests/agent-driven/integration/created-native-ack.test.ts": {
+      "sha256": "5f50db85c7c07a2ecf4faefc20ec2ec6c7ad4910fafe549c2edc76bbad729c7c",
+      "bytes": 134160,
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/5f50db85c7c07a2ecf4faefc20ec2ec6c7ad4910fafe549c2edc76bbad729c7c.txt"
+    },
+    "src/host/agent-driven/retained-native-closure.ts": {
+      "sha256": "ab7ffead1c4b7b238f7e4f6097b1d17ad7792513e84591b623f67c95576ac6e7",
+      "bytes": 66515,
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/ab7ffead1c4b7b238f7e4f6097b1d17ad7792513e84591b623f67c95576ac6e7.txt"
+    },
+    "src/host/agent-driven/created-native-source-reader.ts": {
+      "sha256": "cde88435d61dba1a881bef403e6a013f1d4f2bb93db8e1ffa2b3c15b4c74f82b",
+      "bytes": 77595,
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/cde88435d61dba1a881bef403e6a013f1d4f2bb93db8e1ffa2b3c15b4c74f82b.txt"
+    },
+    "tests/agent-driven/integration/native-cache-witness.test.ts": {
+      "sha256": "6ba76059a41c1820d580ea0a7ae684f62b7afcd445bdc431a1524b8c7647ccd4",
+      "bytes": 94440,
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/6ba76059a41c1820d580ea0a7ae684f62b7afcd445bdc431a1524b8c7647ccd4.txt"
+    },
+    "tests/agent-driven/integration/created-draft-processor.test.ts": {
+      "sha256": "684df1c287890a13ecd8b08a4cd32d5053c2868e80494eca2fcc6412cdc4e0b6",
+      "bytes": 15025,
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/684df1c287890a13ecd8b08a4cd32d5053c2868e80494eca2fcc6412cdc4e0b6.txt"
+    },
+    "tests/agent-driven/integration/created-native-source-reader.test.ts": {
+      "sha256": "09ef2019ad95cbd3b3bb377e8f146b994c9462f48f4662db5e072b629383ea77",
+      "bytes": 163608,
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/09ef2019ad95cbd3b3bb377e8f146b994c9462f48f4662db5e072b629383ea77.txt"
+    },
+    "package.json": {
+      "sha256": "edace26fdfa5a9808f2706fe15ab3935d0512d08f765d4cffec268eb7e783263",
+      "bytes": 5661,
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/edace26fdfa5a9808f2706fe15ab3935d0512d08f765d4cffec268eb7e783263.txt"
+    },
+    "pnpm-lock.yaml": {
+      "sha256": "66d38478d0b035777472a8cdb53954559a6c1a5f8803f7247caaffce1ac3584d",
+      "bytes": 91093,
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/66d38478d0b035777472a8cdb53954559a6c1a5f8803f7247caaffce1ac3584d.txt"
+    },
+    "tsconfig.json": {
+      "sha256": "83fbe518b8002a19afcf522215bdd431b9addca24f88771732e123f689acb475",
+      "bytes": 507,
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/83fbe518b8002a19afcf522215bdd431b9addca24f88771732e123f689acb475.txt"
+    },
+    "vitest.config.ts": {
+      "sha256": "b8cc675ba57ac95cc74b007db787a33b830fe628f7648f902a4dcf8235d787d4",
+      "bytes": 2146,
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/b8cc675ba57ac95cc74b007db787a33b830fe628f7648f902a4dcf8235d787d4.txt"
+    },
+    "vite.config.ts": {
+      "sha256": "6dc4858d37a5ddfac9779371b63b4d3d129641dc485c642de05c17f29a746f2c",
+      "bytes": 252,
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/6dc4858d37a5ddfac9779371b63b4d3d129641dc485c642de05c17f29a746f2c.txt"
+    },
+    "vite.m5.config.ts": {
+      "sha256": "777295eb5278d162ce549a5fa695618fd68cfb35769b30a9b8c52344a3220ff7",
+      "bytes": 1337,
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/777295eb5278d162ce549a5fa695618fd68cfb35769b30a9b8c52344a3220ff7.txt"
+    },
+    "contracts/openfilm-upstream-lock.json": {
+      "sha256": "69c4da1decfb27fd6002a030228a2ccadd1a9fb4392e42320cf249ae311b301b",
+      "bytes": 11136,
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/69c4da1decfb27fd6002a030228a2ccadd1a9fb4392e42320cf249ae311b301b.txt"
+    },
+    "src/host/agent-driven/local-asset-registry.ts": {
+      "sha256": "0f99ed585bc8152926b555a3139a240c80025c023db4dc690b26769e1635bb25",
+      "bytes": 41475,
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/0f99ed585bc8152926b555a3139a240c80025c023db4dc690b26769e1635bb25.txt"
+    },
+    "src/host/agent-driven/created-source-impact-store.ts": {
+      "sha256": "f1cb2d87b21dd5177c2ea29e214a0d89c46868eaa5a255cd6debe4cf4f72a3b1",
+      "bytes": 23999,
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/f1cb2d87b21dd5177c2ea29e214a0d89c46868eaa5a255cd6debe4cf4f72a3b1.txt"
+    },
+    "src/host/agent-driven/created-source-change-service.ts": {
+      "sha256": "249df97d95939beeebcc1f9f51d3daed21100fc6aaebfb9b5d000d3a32c0f259",
+      "bytes": 11967,
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/249df97d95939beeebcc1f9f51d3daed21100fc6aaebfb9b5d000d3a32c0f259.txt"
+    },
+    "tests/agent-driven/integration/local-assets-host.test.ts": {
+      "sha256": "5c13f98cebe4bc196c4f515ff267fe1059cc17aeb712c5d597f76944b8bb1452",
+      "bytes": 29419,
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/5c13f98cebe4bc196c4f515ff267fe1059cc17aeb712c5d597f76944b8bb1452.txt"
+    },
+    "tests/agent-driven/integration/created-source-change.test.ts": {
+      "sha256": "9d82c3c47b23a44ee27cf129ea51aa61c7e29259e94d6d14a27ed43fc6817860",
+      "bytes": 10686,
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/9d82c3c47b23a44ee27cf129ea51aa61c7e29259e94d6d14a27ed43fc6817860.txt"
+    },
+    "tests/agent-driven/integration/created-source-adoption.test.ts": {
+      "sha256": "8ab6dfcdc98bdef2f4dd42a38c32b0048a0907a95a7c07488910534f49b2097e",
+      "bytes": 62806,
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/8ab6dfcdc98bdef2f4dd42a38c32b0048a0907a95a7c07488910534f49b2097e.txt"
+    },
+    "tests/agent-driven/integration/created-impact-atomic.test.ts": {
+      "sha256": "e6f1ddb662deea7c506ec28d390aa1f548c818016a0bc829e8cebd3294e0f5d8",
+      "bytes": 6559,
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/e6f1ddb662deea7c506ec28d390aa1f548c818016a0bc829e8cebd3294e0f5d8.txt"
+    },
+    "tests/architecture/m2.2-fitness.test.ts": {
+      "sha256": "e806d88c7a5452539e629a4da0f4c4e0a4346e0364c233f07e0f16675931cb63",
+      "bytes": 16652,
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/e806d88c7a5452539e629a4da0f4c4e0a4346e0364c233f07e0f16675931cb63.txt"
+    },
+    "tests/m2.1/openfilm-upstream-lock.test.ts": {
+      "sha256": "a4f1d676e8a246cc79cf5de6547e7df23a0298941132c6ded34bea7155b400b2",
+      "bytes": 43159,
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/a4f1d676e8a246cc79cf5de6547e7df23a0298941132c6ded34bea7155b400b2.txt"
+    },
+    "tests/m2.3/migration-real-export.test.ts": {
+      "sha256": "0862247a6ddb953e462f861983379e0e97ade1d5744df0d1de61cc2b38e227f0",
+      "bytes": 18749,
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/0862247a6ddb953e462f861983379e0e97ade1d5744df0d1de61cc2b38e227f0.txt"
+    },
+    "tests/fixtures/m2.1/snapshot-project/assets/generated/visual-10s.mp4": {
+      "sha256": "0427d617584264ac2875243d6cf711dd985577566f71db6b9d5faf051575989c",
+      "bytes": 17,
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/0427d617584264ac2875243d6cf711dd985577566f71db6b9d5faf051575989c.txt"
+    },
+    "tests/fixtures/m2.1/snapshot-project/assets/generated/visual-alt-10s.mp4": {
+      "sha256": "40d825e66ee7e69ae53dfdc8d5195fbb9ffc3af7eb07452a5081c51e24115cff",
+      "bytes": 17,
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/40d825e66ee7e69ae53dfdc8d5195fbb9ffc3af7eb07452a5081c51e24115cff.txt"
+    },
+    "tests/fixtures/m2.1/snapshot-project/assets/generated/narration-30s.wav": {
+      "sha256": "e4276d5ec9199f11df067a98061508eaa11dbaf11ffac107775714b95962173d",
+      "bytes": 18,
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/e4276d5ec9199f11df067a98061508eaa11dbaf11ffac107775714b95962173d.txt"
+    }
+  },
+  "allow_paths": [
+    "tests/agent-driven/integration/created-source-adoption.test.ts"
+  ],
+  "edit_scope": "Only LF04 actual foreignproject case diagnostic and idempotency/testconstruction correction; no production or othercases",
+  "rulings": "LF04_FIX_AND_REMAINING_VALIDATION_052.md",
+  "commands": [
+    {
+      "capture": "n1n2-claude-052-tsc-NNN",
+      "argv": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "tsc",
+        "--noEmit"
+      ]
+    },
+    {
+      "capture": "n1n2-claude-052-lf04-NNN",
+      "argv": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "vitest",
+        "run",
+        "--config",
+        "vitest.config.ts",
+        "tests/agent-driven/integration/created-source-adoption.test.ts",
+        "-t",
+        "LF04 refuses a REAL impact and a REAL transaction of another project, and moves no authority"
+      ]
+    },
+    {
+      "capture": "n1n2-claude-052-authority-001",
+      "argv": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "vitest",
+        "run",
+        "--config",
+        "vitest.config.ts",
+        "tests/agent-driven/integration/created-source-adoption.test.ts",
+        "tests/agent-driven/integration/created-impact-atomic.test.ts",
+        "tests/agent-driven/integration/created-source-change.test.ts"
+      ],
+      "depends": "All earlier commands actuallyexit0, terminal separatelyread, unchanged inputs and own resources settled."
+    },
+    {
+      "capture": "n1n2-claude-052-real-export-001",
+      "argv": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "vitest",
+        "run",
+        "--config",
+        "vitest.config.ts",
+        "tests/m2.3/migration-real-export.test.ts"
+      ],
+      "depends": "All earlier commands actuallyexit0, terminal separatelyread, unchanged inputs and own resources settled."
+    },
+    {
+      "capture": "n1n2-claude-052-native-reader-001",
+      "argv": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "vitest",
+        "run",
+        "--config",
+        "vitest.config.ts",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts"
+      ],
+      "depends": "All earlier commands actuallyexit0, terminal separatelyread, unchanged inputs and own resources settled."
+    },
+    {
+      "capture": "n1n2-claude-052-legacy-fixtures-001",
+      "argv": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "vitest",
+        "run",
+        "--config",
+        "vitest.config.ts",
+        "tests/m2.2/snapshot-store.test.ts",
+        "tests/m2.2/host-coordinator-integration.test.ts",
+        "tests/m2.3/migration-service.test.ts",
+        "tests/m2.3/openfilm-migrator.test.ts"
+      ],
+      "depends": "All earlier commands actuallyexit0, terminal separatelyread, unchanged inputs and own resources settled."
+    }
+  ],
+  "conditions": "Precise original409 diagnostic retained -> proven samecase testsetup correction, compile0+lf04actual1PASS+inputsmatch/owncleanup -> freeze -> authority->realexport->reader->legacy all serial, anynonzero/drift/uncertainSTOP. All runtimeinputs frozen; new429STOP always.",
+  "not_granted": "No other production/testfiles, no full/build/mutation/nextimplementation/Gitaction.",
+  "executor_dispatch": "ctx_fe79a6bd8195",
+  "executor_task": "task_e354a43f1e16",
+  "executor_terminal": "term_cfe0f050c10d656973004cdf346308c8"
+}

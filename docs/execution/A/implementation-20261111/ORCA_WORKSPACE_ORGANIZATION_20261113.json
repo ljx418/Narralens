@@ -1,0 +1,232 @@
+{
+  "scope": "Orca metadata only; no filesystem/git/agent replacements",
+  "receipts": [
+    {
+      "argv": [
+        "worktree",
+        "set",
+        "--worktree",
+        "identity:wt2:local:69eebd4c-1bf3-4f2c-af8e-e12cb582df5b",
+        "--display-name",
+        "Narralens｜项目总览与文档",
+        "--parent-worktree",
+        "id:90974dd7-625f-46bf-a442-37f7cbadac25::C:\\workSpace\\videoWorkLine",
+        "--comment",
+        "主控文档与验收入口；实施位于子工作区01 ClaudeCode",
+        "--json"
+      ],
+      "exit": 0,
+      "stdout": "{\n  \"id\": \"79114e18-eeb2-43b2-94a1-0f65e5743a82\",\n  \"ok\": true,\n  \"result\": {\n    \"worktree\": {\n      \"id\": \"2e732423-9bcc-494c-a0ed-e27a9488f313::C:\\\\workSpace\\\\videoWorkLine\\\\Narralens\",\n      \"identity\": {\n        \"key\": \"wt2:local:69eebd4c-1bf3-4f2c-af8e-e12cb582df5b\",\n        \"executionHostId\": \"local\",\n        \"instanceId\": \"69eebd4c-1bf3-4f2c-af8e-e12cb582df5b\"\n      },\n      \"instanceId\": \"69eebd4c-1bf3-4f2c-af8e-e12cb582df5b\",\n      \"repoId\": \"2e732423-9bcc-494c-a0ed-e27a9488f313\",\n      \"projectId\": \"github:ljx418/narralens\",\n      \"hostId\": \"local\",\n      \"projectHostSetupId\": \"2e732423-9bcc-494c-a0ed-e27a9488f313\",\n      \"path\": \"C:\\\\workSpace\\\\videoWorkLine\\\\Narralens\",\n      \"head\": \"ca5b67a8285b130c79055317c6202f73cfbb99c8\",\n      \"branch\": \"refs/heads/migration/m2.2-coordinator-persistence\",\n      \"isBare\": false,\n      \"isMainWorktree\": true,\n      \"displayName\": \"Narralens｜项目总览与文档\",\n      \"displayNameMode\": \"fixed\",\n      \"comment\": \"主控文档与验收入口；实施位于子工作区01 ClaudeCode\",\n      \"linkedIssue\": null,\n      \"linkedPR\": null,\n      \"linkedLinearIssue\": null,\n      \"linkedLinearIssueWorkspaceId\": null,\n      \"linkedLinearIssueOrganizationUrlKey\": null,\n      \"linkedGitLabMR\": null,\n      \"linkedGitLabIssue\": null,\n      \"linkedBitbucketPR\": null,\n      \"linkedAzureDevOpsPR\": null,\n      \"linkedGiteaPR\": null,\n      \"linkedWorkItem\": null,\n      \"linkedTaskSourceContext\": null,\n      \"isArchived\": false,\n      \"isUnread\": false,\n      \"isPinned\": false,\n      \"sortOrder\": 1794402589530,\n      \"lastActivityAt\": 1794402589530,\n      \"pendingFirstAgentMessageRename\": false,\n      \"firstAgentMessageRenameError\": null,\n      \"workspaceStatus\": \"in-progress\",\n      \"parentWorktreeId\": \"90974dd7-625f-46bf-a442-37f7cbadac25::C:\\\\workSpace\\\\videoWorkLine\",\n      \"childWorktreeIds\": [],\n      \"lineage\": {\n        \"worktreeId\": \"2e732423-9bcc-494c-a0ed-e27a9488f313::C:\\\\workSpace\\\\videoWorkLine\\\\Narralens\",\n        \"worktreeInstanceId\": \"69eebd4c-1bf3-4f2c-af8e-e12cb582df5b\",\n        \"parentWorktreeId\": \"90974dd7-625f-46bf-a442-37f7cbadac25::C:\\\\workSpace\\\\videoWorkLine\",\n        \"parentWorktreeInstanceId\": \"6bcbf1e0-5038-44e7-8908-ee6388e764dc\",\n        \"origin\": \"manual\",\n        \"capture\": {\n          \"source\": \"manual-action\",\n          \"confidence\": \"explicit\"\n        },\n        \"createdAt\": 1794533799835\n      },\n      \"git\": {\n        \"path\": \"C:\\\\workSpace\\\\videoWorkLine\\\\Narralens\",\n        \"head\": \"ca5b67a8285b130c79055317c6202f73cfbb99c8\",\n        \"branch\": \"refs/heads/migration/m2.2-coordinator-persistence\",\n        \"isBare\": false,\n        \"isMainWorktree\": true\n      },\n      \"linkedItems\": [],\n      \"workspaceLineage\": {\n        \"childWorkspaceKey\": \"worktree:2e732423-9bcc-494c-a0ed-e27a9488f313::C:\\\\workSpace\\\\videoWorkLine\\\\Narralens\",\n        \"childInstanceId\": \"69eebd4c-1bf3-4f2c-af8e-e12cb582df5b\",\n        \"parentWorkspaceKey\": \"worktree:90974dd7-625f-46bf-a442-37f7cbadac25::C:\\\\workSpace\\\\videoWorkLine\",\n        \"parentInstanceId\": \"6bcbf1e0-5038-44e7-8908-ee6388e764dc\",\n        \"origin\": \"manual\",\n        \"capture\": {\n          \"source\": \"manual-action\",\n          \"confidence\": \"explicit\"\n        },\n        \"createdAt\": 1794533799835\n      }\n    }\n  },\n  \"_meta\": {\n    \"runtimeId\": \"854c82c2-6710-44db-ad53-7a56fce6074c\"\n  }\n}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "worktree",
+        "set",
+        "--worktree",
+        "identity:wt2:local:3e906924-8c30-4dd8-bd81-cbebd88eb807",
+        "--display-name",
+        "01 实施｜ClaudeCode N1-N2",
+        "--parent-worktree",
+        "identity:wt2:local:69eebd4c-1bf3-4f2c-af8e-e12cb582df5b",
+        "--comment",
+        "唯一实施Claude：ctx_297f7b8da2e1；A3待修复，未验收；不新开重复writer",
+        "--json"
+      ],
+      "exit": 0,
+      "stdout": "{\n  \"id\": \"08555a49-0355-43d5-ac0d-4a62ee623a68\",\n  \"ok\": true,\n  \"result\": {\n    \"worktree\": {\n      \"id\": \"2e732423-9bcc-494c-a0ed-e27a9488f313::C:\\\\workspace\\\\videoworkline\\\\Narralens-agents\\\\main-integration\",\n      \"identity\": {\n        \"key\": \"wt2:local:3e906924-8c30-4dd8-bd81-cbebd88eb807\",\n        \"executionHostId\": \"local\",\n        \"instanceId\": \"3e906924-8c30-4dd8-bd81-cbebd88eb807\"\n      },\n      \"instanceId\": \"3e906924-8c30-4dd8-bd81-cbebd88eb807\",\n      \"repoId\": \"2e732423-9bcc-494c-a0ed-e27a9488f313\",\n      \"projectId\": \"github:ljx418/narralens\",\n      \"hostId\": \"local\",\n      \"projectHostSetupId\": \"2e732423-9bcc-494c-a0ed-e27a9488f313\",\n      \"path\": \"C:\\\\workspace\\\\videoworkline\\\\Narralens-agents\\\\main-integration\",\n      \"head\": \"e2eff61b464d75d36598103d718cd2a75db5dfda\",\n      \"branch\": \"refs/heads/agent-driven/main-a-integration\",\n      \"isBare\": false,\n      \"isMainWorktree\": false,\n      \"displayName\": \"01 实施｜ClaudeCode N1-N2\",\n      \"displayNameMode\": \"fixed\",\n      \"comment\": \"唯一实施Claude：ctx_297f7b8da2e1；A3待修复，未验收；不新开重复writer\",\n      \"linkedIssue\": null,\n      \"linkedPR\": null,\n      \"linkedLinearIssue\": null,\n      \"linkedLinearIssueWorkspaceId\": null,\n      \"linkedLinearIssueOrganizationUrlKey\": null,\n      \"linkedGitLabMR\": null,\n      \"linkedGitLabIssue\": null,\n      \"linkedBitbucketPR\": null,\n      \"linkedAzureDevOpsPR\": null,\n      \"linkedGiteaPR\": null,\n      \"linkedWorkItem\": null,\n      \"linkedTaskSourceContext\": null,\n      \"isArchived\": false,\n      \"isUnread\": false,\n      \"isPinned\": false,\n      \"sortOrder\": 1794402738546,\n      \"lastActivityAt\": 0,\n      \"pendingFirstAgentMessageRename\": false,\n      \"firstAgentMessageRenameError\": null,\n      \"workspaceStatus\": \"in-progress\",\n      \"parentWorktreeId\": \"2e732423-9bcc-494c-a0ed-e27a9488f313::C:\\\\workSpace\\\\videoWorkLine\\\\Narralens\",\n      \"childWorktreeIds\": [],\n      \"lineage\": {\n        \"worktreeId\": \"2e732423-9bcc-494c-a0ed-e27a9488f313::C:\\\\workspace\\\\videoworkline\\\\Narralens-agents\\\\main-integration\",\n        \"worktreeInstanceId\": \"3e906924-8c30-4dd8-bd81-cbebd88eb807\",\n        \"parentWorktreeId\": \"2e732423-9bcc-494c-a0ed-e27a9488f313::C:\\\\workSpace\\\\videoWorkLine\\\\Narralens\",\n        \"parentWorktreeInstanceId\": \"69eebd4c-1bf3-4f2c-af8e-e12cb582df5b\",\n        \"origin\": \"manual\",\n        \"capture\": {\n          \"source\": \"manual-action\",\n          \"confidence\": \"explicit\"\n        },\n        \"createdAt\": 1794533801890\n      },\n      \"git\": {\n        \"path\": \"C:\\\\workspace\\\\videoworkline\\\\Narralens-agents\\\\main-integration\",\n        \"head\": \"e2eff61b464d75d36598103d718cd2a75db5dfda\",\n        \"branch\": \"refs/heads/agent-driven/main-a-integration\",\n        \"isBare\": false,\n        \"isMainWorktree\": false\n      },\n      \"linkedItems\": [],\n      \"workspaceLineage\": {\n        \"childWorkspaceKey\": \"worktree:2e732423-9bcc-494c-a0ed-e27a9488f313::C:\\\\workspace\\\\videoworkline\\\\Narralens-agents\\\\main-integration\",\n        \"childInstanceId\": \"3e906924-8c30-4dd8-bd81-cbebd88eb807\",\n        \"parentWorkspaceKey\": \"worktree:2e732423-9bcc-494c-a0ed-e27a9488f313::C:\\\\workSpace\\\\videoWorkLine\\\\Narralens\",\n        \"parentInstanceId\": \"69eebd4c-1bf3-4f2c-af8e-e12cb582df5b\",\n        \"origin\": \"manual\",\n        \"capture\": {\n          \"source\": \"manual-action\",\n          \"confidence\": \"explicit\"\n        },\n        \"createdAt\": 1794533801890\n      }\n    }\n  },\n  \"_meta\": {\n    \"runtimeId\": \"854c82c2-6710-44db-ad53-7a56fce6074c\"\n  }\n}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "worktree",
+        "set",
+        "--worktree",
+        "identity:wt2:local:2fd5eab9-de71-4012-8fa7-f414f43c4ef2",
+        "--display-name",
+        "02 审查｜PRODUCT Codex",
+        "--parent-worktree",
+        "identity:wt2:local:69eebd4c-1bf3-4f2c-af8e-e12cb582df5b",
+        "--comment",
+        "领域设计与独立复核；当前源码writer在01实施区",
+        "--json"
+      ],
+      "exit": 0,
+      "stdout": "{\n  \"id\": \"bbcca540-ba96-4588-92f1-43cdcc63d5d7\",\n  \"ok\": true,\n  \"result\": {\n    \"worktree\": {\n      \"id\": \"2e732423-9bcc-494c-a0ed-e27a9488f313::\\\\\\\\wsl.localhost\\\\Ubuntu-24.04\\\\home\\\\administrator\\\\orca\\\\workspaces\\\\Narralens\\\\Narralens-A-R1-PRODUCT\",\n      \"identity\": {\n        \"key\": \"wt2:local:2fd5eab9-de71-4012-8fa7-f414f43c4ef2\",\n        \"executionHostId\": \"local\",\n        \"instanceId\": \"2fd5eab9-de71-4012-8fa7-f414f43c4ef2\"\n      },\n      \"instanceId\": \"2fd5eab9-de71-4012-8fa7-f414f43c4ef2\",\n      \"repoId\": \"2e732423-9bcc-494c-a0ed-e27a9488f313\",\n      \"projectId\": \"github:ljx418/narralens\",\n      \"hostId\": \"local\",\n      \"projectHostSetupId\": \"2e732423-9bcc-494c-a0ed-e27a9488f313\",\n      \"creatorProvenance\": {\n        \"kind\": \"host\"\n      },\n      \"path\": \"\\\\\\\\wsl.localhost\\\\Ubuntu-24.04\\\\home\\\\administrator\\\\orca\\\\workspaces\\\\Narralens\\\\Narralens-A-R1-PRODUCT\",\n      \"head\": \"dd32f156ee576e65c5e0ed8e7f9dc228827a97fe\",\n      \"branch\": \"refs/heads/agent-driven/a-r1-product\",\n      \"isBare\": false,\n      \"isMainWorktree\": false,\n      \"displayName\": \"02 审查｜PRODUCT Codex\",\n      \"displayNameMode\": \"fixed\",\n      \"comment\": \"领域设计与独立复核；当前源码writer在01实施区\",\n      \"linkedIssue\": null,\n      \"linkedPR\": null,\n      \"linkedLinearIssue\": null,\n      \"linkedLinearIssueWorkspaceId\": null,\n      \"linkedLinearIssueOrganizationUrlKey\": null,\n      \"linkedGitLabMR\": null,\n      \"linkedGitLabIssue\": null,\n      \"linkedBitbucketPR\": null,\n      \"linkedAzureDevOpsPR\": null,\n      \"linkedGiteaPR\": null,\n      \"linkedWorkItem\": null,\n      \"linkedTaskSourceContext\": null,\n      \"isArchived\": false,\n      \"isUnread\": false,\n      \"isPinned\": false,\n      \"sortOrder\": 1794402745689,\n      \"lastActivityAt\": 1794443539377,\n      \"createdAt\": 1794402745689,\n      \"cliProvenance\": {\n        \"kind\": \"created-by-cli\",\n        \"createdAt\": 1794402738545,\n        \"callerTerminalHandle\": \"term_a731c232-35c7-4f55-a75d-9b2beeade398\"\n      },\n      \"pendingFirstAgentMessageRename\": false,\n      \"firstAgentMessageRenameError\": null,\n      \"baseRef\": \"9f583239714835a89332fcae9363aa39d887821d\",\n      \"workspaceStatus\": \"in-progress\",\n      \"parentWorktreeId\": \"2e732423-9bcc-494c-a0ed-e27a9488f313::C:\\\\workSpace\\\\videoWorkLine\\\\Narralens\",\n      \"childWorktreeIds\": [],\n      \"lineage\": {\n        \"worktreeId\": \"2e732423-9bcc-494c-a0ed-e27a9488f313::\\\\\\\\wsl.localhost\\\\Ubuntu-24.04\\\\home\\\\administrator\\\\orca\\\\workspaces\\\\Narralens\\\\Narralens-A-R1-PRODUCT\",\n        \"worktreeInstanceId\": \"2fd5eab9-de71-4012-8fa7-f414f43c4ef2\",\n        \"parentWorktreeId\": \"2e732423-9bcc-494c-a0ed-e27a9488f313::C:\\\\workSpace\\\\videoWorkLine\\\\Narralens\",\n        \"parentWorktreeInstanceId\": \"69eebd4c-1bf3-4f2c-af8e-e12cb582df5b\",\n        \"origin\": \"manual\",\n        \"capture\": {\n          \"source\": \"manual-action\",\n          \"confidence\": \"explicit\"\n        },\n        \"createdAt\": 1794533804705\n      },\n      \"git\": {\n        \"path\": \"\\\\\\\\wsl.localhost\\\\Ubuntu-24.04\\\\home\\\\administrator\\\\orca\\\\workspaces\\\\Narralens\\\\Narralens-A-R1-PRODUCT\",\n        \"head\": \"dd32f156ee576e65c5e0ed8e7f9dc228827a97fe\",\n        \"branch\": \"refs/heads/agent-driven/a-r1-product\",\n        \"isBare\": false,\n        \"isMainWorktree\": false\n      },\n      \"linkedItems\": [],\n      \"workspaceLineage\": {\n        \"childWorkspaceKey\": \"worktree:2e732423-9bcc-494c-a0ed-e27a9488f313::\\\\\\\\wsl.localhost\\\\Ubuntu-24.04\\\\home\\\\administrator\\\\orca\\\\workspaces\\\\Narralens\\\\Narralens-A-R1-PRODUCT\",\n        \"childInstanceId\": \"2fd5eab9-de71-4012-8fa7-f414f43c4ef2\",\n        \"parentWorkspaceKey\": \"worktree:2e732423-9bcc-494c-a0ed-e27a9488f313::C:\\\\workSpace\\\\videoWorkLine\\\\Narralens\",\n        \"parentInstanceId\": \"69eebd4c-1bf3-4f2c-af8e-e12cb582df5b\",\n        \"origin\": \"manual\",\n        \"capture\": {\n          \"source\": \"manual-action\",\n          \"confidence\": \"explicit\"\n        },\n        \"createdAt\": 1794533804705\n      }\n    }\n  },\n  \"_meta\": {\n    \"runtimeId\": \"854c82c2-6710-44db-ad53-7a56fce6074c\"\n  }\n}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "worktree",
+        "set",
+        "--worktree",
+        "identity:wt2:local:ac95a321-56c5-4d21-822f-efe0f30b08e7",
+        "--display-name",
+        "03 审查｜BRIDGE Codex",
+        "--parent-worktree",
+        "identity:wt2:local:69eebd4c-1bf3-4f2c-af8e-e12cb582df5b",
+        "--comment",
+        "桥接合同与只读审查工作区，按任务派发",
+        "--json"
+      ],
+      "exit": 0,
+      "stdout": "{\n  \"id\": \"2e229d9c-967d-4b6a-a5f8-915d913108c6\",\n  \"ok\": true,\n  \"result\": {\n    \"worktree\": {\n      \"id\": \"2e732423-9bcc-494c-a0ed-e27a9488f313::\\\\\\\\wsl.localhost\\\\Ubuntu-24.04\\\\home\\\\administrator\\\\orca\\\\workspaces\\\\Narralens\\\\Narralens-A-R1-BRIDGE\",\n      \"identity\": {\n        \"key\": \"wt2:local:ac95a321-56c5-4d21-822f-efe0f30b08e7\",\n        \"executionHostId\": \"local\",\n        \"instanceId\": \"ac95a321-56c5-4d21-822f-efe0f30b08e7\"\n      },\n      \"instanceId\": \"ac95a321-56c5-4d21-822f-efe0f30b08e7\",\n      \"repoId\": \"2e732423-9bcc-494c-a0ed-e27a9488f313\",\n      \"projectId\": \"github:ljx418/narralens\",\n      \"hostId\": \"local\",\n      \"projectHostSetupId\": \"2e732423-9bcc-494c-a0ed-e27a9488f313\",\n      \"creatorProvenance\": {\n        \"kind\": \"host\"\n      },\n      \"path\": \"\\\\\\\\wsl.localhost\\\\Ubuntu-24.04\\\\home\\\\administrator\\\\orca\\\\workspaces\\\\Narralens\\\\Narralens-A-R1-BRIDGE\",\n      \"head\": \"664f178e4e34069de0da19140de1f6915efb0537\",\n      \"branch\": \"refs/heads/agent-driven/a-r1-bridge\",\n      \"isBare\": false,\n      \"isMainWorktree\": false,\n      \"displayName\": \"03 审查｜BRIDGE Codex\",\n      \"displayNameMode\": \"fixed\",\n      \"comment\": \"桥接合同与只读审查工作区，按任务派发\",\n      \"linkedIssue\": null,\n      \"linkedPR\": null,\n      \"linkedLinearIssue\": null,\n      \"linkedLinearIssueWorkspaceId\": null,\n      \"linkedLinearIssueOrganizationUrlKey\": null,\n      \"linkedGitLabMR\": null,\n      \"linkedGitLabIssue\": null,\n      \"linkedBitbucketPR\": null,\n      \"linkedAzureDevOpsPR\": null,\n      \"linkedGiteaPR\": null,\n      \"linkedWorkItem\": null,\n      \"linkedTaskSourceContext\": null,\n      \"isArchived\": false,\n      \"isUnread\": false,\n      \"isPinned\": false,\n      \"sortOrder\": 1794402639595,\n      \"lastActivityAt\": 1794443297376,\n      \"createdAt\": 1794402639594,\n      \"cliProvenance\": {\n        \"kind\": \"created-by-cli\",\n        \"createdAt\": 1794402634092,\n        \"callerTerminalHandle\": \"term_a731c232-35c7-4f55-a75d-9b2beeade398\"\n      },\n      \"pendingFirstAgentMessageRename\": false,\n      \"firstAgentMessageRenameError\": null,\n      \"baseRef\": \"9f583239714835a89332fcae9363aa39d887821d\",\n      \"workspaceStatus\": \"in-progress\",\n      \"parentWorktreeId\": \"2e732423-9bcc-494c-a0ed-e27a9488f313::C:\\\\workSpace\\\\videoWorkLine\\\\Narralens\",\n      \"childWorktreeIds\": [],\n      \"lineage\": {\n        \"worktreeId\": \"2e732423-9bcc-494c-a0ed-e27a9488f313::\\\\\\\\wsl.localhost\\\\Ubuntu-24.04\\\\home\\\\administrator\\\\orca\\\\workspaces\\\\Narralens\\\\Narralens-A-R1-BRIDGE\",\n        \"worktreeInstanceId\": \"ac95a321-56c5-4d21-822f-efe0f30b08e7\",\n        \"parentWorktreeId\": \"2e732423-9bcc-494c-a0ed-e27a9488f313::C:\\\\workSpace\\\\videoWorkLine\\\\Narralens\",\n        \"parentWorktreeInstanceId\": \"69eebd4c-1bf3-4f2c-af8e-e12cb582df5b\",\n        \"origin\": \"manual\",\n        \"capture\": {\n          \"source\": \"manual-action\",\n          \"confidence\": \"explicit\"\n        },\n        \"createdAt\": 1794533806521\n      },\n      \"git\": {\n        \"path\": \"\\\\\\\\wsl.localhost\\\\Ubuntu-24.04\\\\home\\\\administrator\\\\orca\\\\workspaces\\\\Narralens\\\\Narralens-A-R1-BRIDGE\",\n        \"head\": \"664f178e4e34069de0da19140de1f6915efb0537\",\n        \"branch\": \"refs/heads/agent-driven/a-r1-bridge\",\n        \"isBare\": false,\n        \"isMainWorktree\": false\n      },\n      \"linkedItems\": [],\n      \"workspaceLineage\": {\n        \"childWorkspaceKey\": \"worktree:2e732423-9bcc-494c-a0ed-e27a9488f313::\\\\\\\\wsl.localhost\\\\Ubuntu-24.04\\\\home\\\\administrator\\\\orca\\\\workspaces\\\\Narralens\\\\Narralens-A-R1-BRIDGE\",\n        \"childInstanceId\": \"ac95a321-56c5-4d21-822f-efe0f30b08e7\",\n        \"parentWorkspaceKey\": \"worktree:2e732423-9bcc-494c-a0ed-e27a9488f313::C:\\\\workSpace\\\\videoWorkLine\\\\Narralens\",\n        \"parentInstanceId\": \"69eebd4c-1bf3-4f2c-af8e-e12cb582df5b\",\n        \"origin\": \"manual\",\n        \"capture\": {\n          \"source\": \"manual-action\",\n          \"confidence\": \"explicit\"\n        },\n        \"createdAt\": 1794533806521\n      }\n    }\n  },\n  \"_meta\": {\n    \"runtimeId\": \"854c82c2-6710-44db-ad53-7a56fce6074c\"\n  }\n}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "worktree",
+        "set",
+        "--worktree",
+        "identity:wt2:local:fa5e9dce-8067-491d-9a92-38b1ac32b5ea",
+        "--display-name",
+        "04 审查｜MEDIA Codex",
+        "--parent-worktree",
+        "identity:wt2:local:69eebd4c-1bf3-4f2c-af8e-e12cb582df5b",
+        "--comment",
+        "媒体设计与验收工作区，按任务派发",
+        "--json"
+      ],
+      "exit": 0,
+      "stdout": "{\n  \"id\": \"f0d63c65-85d2-446f-bc02-68cd3dafd6a7\",\n  \"ok\": true,\n  \"result\": {\n    \"worktree\": {\n      \"id\": \"2e732423-9bcc-494c-a0ed-e27a9488f313::\\\\\\\\wsl.localhost\\\\Ubuntu-24.04\\\\home\\\\administrator\\\\orca\\\\workspaces\\\\Narralens\\\\Narralens-A-R1-MEDIA\",\n      \"identity\": {\n        \"key\": \"wt2:local:fa5e9dce-8067-491d-9a92-38b1ac32b5ea\",\n        \"executionHostId\": \"local\",\n        \"instanceId\": \"fa5e9dce-8067-491d-9a92-38b1ac32b5ea\"\n      },\n      \"instanceId\": \"fa5e9dce-8067-491d-9a92-38b1ac32b5ea\",\n      \"repoId\": \"2e732423-9bcc-494c-a0ed-e27a9488f313\",\n      \"projectId\": \"github:ljx418/narralens\",\n      \"hostId\": \"local\",\n      \"projectHostSetupId\": \"2e732423-9bcc-494c-a0ed-e27a9488f313\",\n      \"creatorProvenance\": {\n        \"kind\": \"host\"\n      },\n      \"path\": \"\\\\\\\\wsl.localhost\\\\Ubuntu-24.04\\\\home\\\\administrator\\\\orca\\\\workspaces\\\\Narralens\\\\Narralens-A-R1-MEDIA\",\n      \"head\": \"ff2646f3ca59c8980b57a2a68710148f1c58e22e\",\n      \"branch\": \"refs/heads/agent-driven/a-r1-media\",\n      \"isBare\": false,\n      \"isMainWorktree\": false,\n      \"displayName\": \"04 审查｜MEDIA Codex\",\n      \"displayNameMode\": \"fixed\",\n      \"comment\": \"媒体设计与验收工作区，按任务派发\",\n      \"linkedIssue\": null,\n      \"linkedPR\": null,\n      \"linkedLinearIssue\": null,\n      \"linkedLinearIssueWorkspaceId\": null,\n      \"linkedLinearIssueOrganizationUrlKey\": null,\n      \"linkedGitLabMR\": null,\n      \"linkedGitLabIssue\": null,\n      \"linkedBitbucketPR\": null,\n      \"linkedAzureDevOpsPR\": null,\n      \"linkedGiteaPR\": null,\n      \"linkedWorkItem\": null,\n      \"linkedTaskSourceContext\": null,\n      \"isArchived\": false,\n      \"isUnread\": false,\n      \"isPinned\": false,\n      \"sortOrder\": 1794402752248,\n      \"lastActivityAt\": 1794402752247,\n      \"createdAt\": 1794402752247,\n      \"cliProvenance\": {\n        \"kind\": \"created-by-cli\",\n        \"createdAt\": 1794402746874,\n        \"callerTerminalHandle\": \"term_a731c232-35c7-4f55-a75d-9b2beeade398\"\n      },\n      \"pendingFirstAgentMessageRename\": false,\n      \"firstAgentMessageRenameError\": null,\n      \"baseRef\": \"9f583239714835a89332fcae9363aa39d887821d\",\n      \"workspaceStatus\": \"in-progress\",\n      \"parentWorktreeId\": \"2e732423-9bcc-494c-a0ed-e27a9488f313::C:\\\\workSpace\\\\videoWorkLine\\\\Narralens\",\n      \"childWorktreeIds\": [],\n      \"lineage\": {\n        \"worktreeId\": \"2e732423-9bcc-494c-a0ed-e27a9488f313::\\\\\\\\wsl.localhost\\\\Ubuntu-24.04\\\\home\\\\administrator\\\\orca\\\\workspaces\\\\Narralens\\\\Narralens-A-R1-MEDIA\",\n        \"worktreeInstanceId\": \"fa5e9dce-8067-491d-9a92-38b1ac32b5ea\",\n        \"parentWorktreeId\": \"2e732423-9bcc-494c-a0ed-e27a9488f313::C:\\\\workSpace\\\\videoWorkLine\\\\Narralens\",\n        \"parentWorktreeInstanceId\": \"69eebd4c-1bf3-4f2c-af8e-e12cb582df5b\",\n        \"origin\": \"manual\",\n        \"capture\": {\n          \"source\": \"manual-action\",\n          \"confidence\": \"explicit\"\n        },\n        \"createdAt\": 1794533808299\n      },\n      \"git\": {\n        \"path\": \"\\\\\\\\wsl.localhost\\\\Ubuntu-24.04\\\\home\\\\administrator\\\\orca\\\\workspaces\\\\Narralens\\\\Narralens-A-R1-MEDIA\",\n        \"head\": \"ff2646f3ca59c8980b57a2a68710148f1c58e22e\",\n        \"branch\": \"refs/heads/agent-driven/a-r1-media\",\n        \"isBare\": false,\n        \"isMainWorktree\": false\n      },\n      \"linkedItems\": [],\n      \"workspaceLineage\": {\n        \"childWorkspaceKey\": \"worktree:2e732423-9bcc-494c-a0ed-e27a9488f313::\\\\\\\\wsl.localhost\\\\Ubuntu-24.04\\\\home\\\\administrator\\\\orca\\\\workspaces\\\\Narralens\\\\Narralens-A-R1-MEDIA\",\n        \"childInstanceId\": \"fa5e9dce-8067-491d-9a92-38b1ac32b5ea\",\n        \"parentWorkspaceKey\": \"worktree:2e732423-9bcc-494c-a0ed-e27a9488f313::C:\\\\workSpace\\\\videoWorkLine\\\\Narralens\",\n        \"parentInstanceId\": \"69eebd4c-1bf3-4f2c-af8e-e12cb582df5b\",\n        \"origin\": \"manual\",\n        \"capture\": {\n          \"source\": \"manual-action\",\n          \"confidence\": \"explicit\"\n        },\n        \"createdAt\": 1794533808299\n      }\n    }\n  },\n  \"_meta\": {\n    \"runtimeId\": \"854c82c2-6710-44db-ad53-7a56fce6074c\"\n  }\n}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "worktree",
+        "set",
+        "--worktree",
+        "identity:wt2:local:aa90ee43-9f40-49ee-b91d-b33f49300fde",
+        "--display-name",
+        "90 保留｜BRIDGE 代码树",
+        "--parent-worktree",
+        "identity:wt2:local:69eebd4c-1bf3-4f2c-af8e-e12cb582df5b",
+        "--comment",
+        "保留既有内容与会话；不是当前N1/N2源码实施位置",
+        "--json"
+      ],
+      "exit": 0,
+      "stdout": "{\n  \"id\": \"af59775e-2b87-467a-acd0-3411cbc2670d\",\n  \"ok\": true,\n  \"result\": {\n    \"worktree\": {\n      \"id\": \"2e732423-9bcc-494c-a0ed-e27a9488f313::C:\\\\workspace\\\\videoworkline\\\\Narralens-agents\\\\bridge-observability\",\n      \"identity\": {\n        \"key\": \"wt2:local:aa90ee43-9f40-49ee-b91d-b33f49300fde\",\n        \"executionHostId\": \"local\",\n        \"instanceId\": \"aa90ee43-9f40-49ee-b91d-b33f49300fde\"\n      },\n      \"instanceId\": \"aa90ee43-9f40-49ee-b91d-b33f49300fde\",\n      \"repoId\": \"2e732423-9bcc-494c-a0ed-e27a9488f313\",\n      \"projectId\": \"github:ljx418/narralens\",\n      \"hostId\": \"local\",\n      \"projectHostSetupId\": \"2e732423-9bcc-494c-a0ed-e27a9488f313\",\n      \"path\": \"C:\\\\workspace\\\\videoworkline\\\\Narralens-agents\\\\bridge-observability\",\n      \"head\": \"50f4e19309d81ad0bf6ddc986494c2d34f32bea1\",\n      \"branch\": \"refs/heads/agent-driven/lane-bridge\",\n      \"isBare\": false,\n      \"isMainWorktree\": false,\n      \"displayName\": \"90 保留｜BRIDGE 代码树\",\n      \"displayNameMode\": \"fixed\",\n      \"comment\": \"保留既有内容与会话；不是当前N1/N2源码实施位置\",\n      \"linkedIssue\": null,\n      \"linkedPR\": null,\n      \"linkedLinearIssue\": null,\n      \"linkedLinearIssueWorkspaceId\": null,\n      \"linkedLinearIssueOrganizationUrlKey\": null,\n      \"linkedGitLabMR\": null,\n      \"linkedGitLabIssue\": null,\n      \"linkedBitbucketPR\": null,\n      \"linkedAzureDevOpsPR\": null,\n      \"linkedGiteaPR\": null,\n      \"linkedWorkItem\": null,\n      \"linkedTaskSourceContext\": null,\n      \"isArchived\": false,\n      \"isUnread\": false,\n      \"isPinned\": false,\n      \"sortOrder\": 1794402738546,\n      \"lastActivityAt\": 0,\n      \"pendingFirstAgentMessageRename\": false,\n      \"firstAgentMessageRenameError\": null,\n      \"workspaceStatus\": \"in-progress\",\n      \"parentWorktreeId\": \"2e732423-9bcc-494c-a0ed-e27a9488f313::C:\\\\workSpace\\\\videoWorkLine\\\\Narralens\",\n      \"childWorktreeIds\": [],\n      \"lineage\": {\n        \"worktreeId\": \"2e732423-9bcc-494c-a0ed-e27a9488f313::C:\\\\workspace\\\\videoworkline\\\\Narralens-agents\\\\bridge-observability\",\n        \"worktreeInstanceId\": \"aa90ee43-9f40-49ee-b91d-b33f49300fde\",\n        \"parentWorktreeId\": \"2e732423-9bcc-494c-a0ed-e27a9488f313::C:\\\\workSpace\\\\videoWorkLine\\\\Narralens\",\n        \"parentWorktreeInstanceId\": \"69eebd4c-1bf3-4f2c-af8e-e12cb582df5b\",\n        \"origin\": \"manual\",\n        \"capture\": {\n          \"source\": \"manual-action\",\n          \"confidence\": \"explicit\"\n        },\n        \"createdAt\": 1794533809847\n      },\n      \"git\": {\n        \"path\": \"C:\\\\workspace\\\\videoworkline\\\\Narralens-agents\\\\bridge-observability\",\n        \"head\": \"50f4e19309d81ad0bf6ddc986494c2d34f32bea1\",\n        \"branch\": \"refs/heads/agent-driven/lane-bridge\",\n        \"isBare\": false,\n        \"isMainWorktree\": false\n      },\n      \"linkedItems\": [],\n      \"workspaceLineage\": {\n        \"childWorkspaceKey\": \"worktree:2e732423-9bcc-494c-a0ed-e27a9488f313::C:\\\\workspace\\\\videoworkline\\\\Narralens-agents\\\\bridge-observability\",\n        \"childInstanceId\": \"aa90ee43-9f40-49ee-b91d-b33f49300fde\",\n        \"parentWorkspaceKey\": \"worktree:2e732423-9bcc-494c-a0ed-e27a9488f313::C:\\\\workSpace\\\\videoWorkLine\\\\Narralens\",\n        \"parentInstanceId\": \"69eebd4c-1bf3-4f2c-af8e-e12cb582df5b\",\n        \"origin\": \"manual\",\n        \"capture\": {\n          \"source\": \"manual-action\",\n          \"confidence\": \"explicit\"\n        },\n        \"createdAt\": 1794533809847\n      }\n    }\n  },\n  \"_meta\": {\n    \"runtimeId\": \"854c82c2-6710-44db-ad53-7a56fce6074c\"\n  }\n}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "worktree",
+        "set",
+        "--worktree",
+        "identity:wt2:local:c97288d7-0899-4312-8b81-ea40c11d88cf",
+        "--display-name",
+        "91 保留｜MEDIA 代码树",
+        "--parent-worktree",
+        "identity:wt2:local:69eebd4c-1bf3-4f2c-af8e-e12cb582df5b",
+        "--comment",
+        "保留既有内容与会话；不是当前N1/N2源码实施位置",
+        "--json"
+      ],
+      "exit": 0,
+      "stdout": "{\n  \"id\": \"2511b46a-29e3-40e4-a2c1-e400dd3ac63d\",\n  \"ok\": true,\n  \"result\": {\n    \"worktree\": {\n      \"id\": \"2e732423-9bcc-494c-a0ed-e27a9488f313::C:\\\\workspace\\\\videoworkline\\\\Narralens-agents\\\\media-delivery\",\n      \"identity\": {\n        \"key\": \"wt2:local:c97288d7-0899-4312-8b81-ea40c11d88cf\",\n        \"executionHostId\": \"local\",\n        \"instanceId\": \"c97288d7-0899-4312-8b81-ea40c11d88cf\"\n      },\n      \"instanceId\": \"c97288d7-0899-4312-8b81-ea40c11d88cf\",\n      \"repoId\": \"2e732423-9bcc-494c-a0ed-e27a9488f313\",\n      \"projectId\": \"github:ljx418/narralens\",\n      \"hostId\": \"local\",\n      \"projectHostSetupId\": \"2e732423-9bcc-494c-a0ed-e27a9488f313\",\n      \"path\": \"C:\\\\workspace\\\\videoworkline\\\\Narralens-agents\\\\media-delivery\",\n      \"head\": \"480561a9c08cc82094e883e58c499b2892b87ca7\",\n      \"branch\": \"refs/heads/agent-driven/lane-media\",\n      \"isBare\": false,\n      \"isMainWorktree\": false,\n      \"displayName\": \"91 保留｜MEDIA 代码树\",\n      \"displayNameMode\": \"fixed\",\n      \"comment\": \"保留既有内容与会话；不是当前N1/N2源码实施位置\",\n      \"linkedIssue\": null,\n      \"linkedPR\": null,\n      \"linkedLinearIssue\": null,\n      \"linkedLinearIssueWorkspaceId\": null,\n      \"linkedLinearIssueOrganizationUrlKey\": null,\n      \"linkedGitLabMR\": null,\n      \"linkedGitLabIssue\": null,\n      \"linkedBitbucketPR\": null,\n      \"linkedAzureDevOpsPR\": null,\n      \"linkedGiteaPR\": null,\n      \"linkedWorkItem\": null,\n      \"linkedTaskSourceContext\": null,\n      \"isArchived\": false,\n      \"isUnread\": false,\n      \"isPinned\": false,\n      \"sortOrder\": 1794402738546,\n      \"lastActivityAt\": 0,\n      \"pendingFirstAgentMessageRename\": false,\n      \"firstAgentMessageRenameError\": null,\n      \"workspaceStatus\": \"in-progress\",\n      \"parentWorktreeId\": \"2e732423-9bcc-494c-a0ed-e27a9488f313::C:\\\\workSpace\\\\videoWorkLine\\\\Narralens\",\n      \"childWorktreeIds\": [],\n      \"lineage\": {\n        \"worktreeId\": \"2e732423-9bcc-494c-a0ed-e27a9488f313::C:\\\\workspace\\\\videoworkline\\\\Narralens-agents\\\\media-delivery\",\n        \"worktreeInstanceId\": \"c97288d7-0899-4312-8b81-ea40c11d88cf\",\n        \"parentWorktreeId\": \"2e732423-9bcc-494c-a0ed-e27a9488f313::C:\\\\workSpace\\\\videoWorkLine\\\\Narralens\",\n        \"parentWorktreeInstanceId\": \"69eebd4c-1bf3-4f2c-af8e-e12cb582df5b\",\n        \"origin\": \"manual\",\n        \"capture\": {\n          \"source\": \"manual-action\",\n          \"confidence\": \"explicit\"\n        },\n        \"createdAt\": 1794533811509\n      },\n      \"git\": {\n        \"path\": \"C:\\\\workspace\\\\videoworkline\\\\Narralens-agents\\\\media-delivery\",\n        \"head\": \"480561a9c08cc82094e883e58c499b2892b87ca7\",\n        \"branch\": \"refs/heads/agent-driven/lane-media\",\n        \"isBare\": false,\n        \"isMainWorktree\": false\n      },\n      \"linkedItems\": [],\n      \"workspaceLineage\": {\n        \"childWorkspaceKey\": \"worktree:2e732423-9bcc-494c-a0ed-e27a9488f313::C:\\\\workspace\\\\videoworkline\\\\Narralens-agents\\\\media-delivery\",\n        \"childInstanceId\": \"c97288d7-0899-4312-8b81-ea40c11d88cf\",\n        \"parentWorkspaceKey\": \"worktree:2e732423-9bcc-494c-a0ed-e27a9488f313::C:\\\\workSpace\\\\videoWorkLine\\\\Narralens\",\n        \"parentInstanceId\": \"69eebd4c-1bf3-4f2c-af8e-e12cb582df5b\",\n        \"origin\": \"manual\",\n        \"capture\": {\n          \"source\": \"manual-action\",\n          \"confidence\": \"explicit\"\n        },\n        \"createdAt\": 1794533811509\n      }\n    }\n  },\n  \"_meta\": {\n    \"runtimeId\": \"854c82c2-6710-44db-ad53-7a56fce6074c\"\n  }\n}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "worktree",
+        "set",
+        "--worktree",
+        "identity:wt2:local:324684da-45d4-4dd6-8277-1ccdbb20d01f",
+        "--display-name",
+        "92 保留｜PRODUCT 代码树",
+        "--parent-worktree",
+        "identity:wt2:local:69eebd4c-1bf3-4f2c-af8e-e12cb582df5b",
+        "--comment",
+        "保留既有内容与会话；不是当前N1/N2源码实施位置",
+        "--json"
+      ],
+      "exit": 0,
+      "stdout": "{\n  \"id\": \"0478df5e-bbd0-4705-8370-004b0a10479b\",\n  \"ok\": true,\n  \"result\": {\n    \"worktree\": {\n      \"id\": \"2e732423-9bcc-494c-a0ed-e27a9488f313::C:\\\\workspace\\\\videoworkline\\\\Narralens-agents\\\\product-workbench\",\n      \"identity\": {\n        \"key\": \"wt2:local:324684da-45d4-4dd6-8277-1ccdbb20d01f\",\n        \"executionHostId\": \"local\",\n        \"instanceId\": \"324684da-45d4-4dd6-8277-1ccdbb20d01f\"\n      },\n      \"instanceId\": \"324684da-45d4-4dd6-8277-1ccdbb20d01f\",\n      \"repoId\": \"2e732423-9bcc-494c-a0ed-e27a9488f313\",\n      \"projectId\": \"github:ljx418/narralens\",\n      \"hostId\": \"local\",\n      \"projectHostSetupId\": \"2e732423-9bcc-494c-a0ed-e27a9488f313\",\n      \"path\": \"C:\\\\workspace\\\\videoworkline\\\\Narralens-agents\\\\product-workbench\",\n      \"head\": \"07399c230023591b84fa2872b45b2a8b58b286f4\",\n      \"branch\": \"refs/heads/agent-driven/lane-product\",\n      \"isBare\": false,\n      \"isMainWorktree\": false,\n      \"displayName\": \"92 保留｜PRODUCT 代码树\",\n      \"displayNameMode\": \"fixed\",\n      \"comment\": \"保留既有内容与会话；不是当前N1/N2源码实施位置\",\n      \"linkedIssue\": null,\n      \"linkedPR\": null,\n      \"linkedLinearIssue\": null,\n      \"linkedLinearIssueWorkspaceId\": null,\n      \"linkedLinearIssueOrganizationUrlKey\": null,\n      \"linkedGitLabMR\": null,\n      \"linkedGitLabIssue\": null,\n      \"linkedBitbucketPR\": null,\n      \"linkedAzureDevOpsPR\": null,\n      \"linkedGiteaPR\": null,\n      \"linkedWorkItem\": null,\n      \"linkedTaskSourceContext\": null,\n      \"isArchived\": false,\n      \"isUnread\": false,\n      \"isPinned\": false,\n      \"sortOrder\": 1794402738546,\n      \"lastActivityAt\": 0,\n      \"pendingFirstAgentMessageRename\": false,\n      \"firstAgentMessageRenameError\": null,\n      \"workspaceStatus\": \"in-progress\",\n      \"parentWorktreeId\": \"2e732423-9bcc-494c-a0ed-e27a9488f313::C:\\\\workSpace\\\\videoWorkLine\\\\Narralens\",\n      \"childWorktreeIds\": [],\n      \"lineage\": {\n        \"worktreeId\": \"2e732423-9bcc-494c-a0ed-e27a9488f313::C:\\\\workspace\\\\videoworkline\\\\Narralens-agents\\\\product-workbench\",\n        \"worktreeInstanceId\": \"324684da-45d4-4dd6-8277-1ccdbb20d01f\",\n        \"parentWorktreeId\": \"2e732423-9bcc-494c-a0ed-e27a9488f313::C:\\\\workSpace\\\\videoWorkLine\\\\Narralens\",\n        \"parentWorktreeInstanceId\": \"69eebd4c-1bf3-4f2c-af8e-e12cb582df5b\",\n        \"origin\": \"manual\",\n        \"capture\": {\n          \"source\": \"manual-action\",\n          \"confidence\": \"explicit\"\n        },\n        \"createdAt\": 1794533813024\n      },\n      \"git\": {\n        \"path\": \"C:\\\\workspace\\\\videoworkline\\\\Narralens-agents\\\\product-workbench\",\n        \"head\": \"07399c230023591b84fa2872b45b2a8b58b286f4\",\n        \"branch\": \"refs/heads/agent-driven/lane-product\",\n        \"isBare\": false,\n        \"isMainWorktree\": false\n      },\n      \"linkedItems\": [],\n      \"workspaceLineage\": {\n        \"childWorkspaceKey\": \"worktree:2e732423-9bcc-494c-a0ed-e27a9488f313::C:\\\\workspace\\\\videoworkline\\\\Narralens-agents\\\\product-workbench\",\n        \"childInstanceId\": \"324684da-45d4-4dd6-8277-1ccdbb20d01f\",\n        \"parentWorkspaceKey\": \"worktree:2e732423-9bcc-494c-a0ed-e27a9488f313::C:\\\\workSpace\\\\videoWorkLine\\\\Narralens\",\n        \"parentInstanceId\": \"69eebd4c-1bf3-4f2c-af8e-e12cb582df5b\",\n        \"origin\": \"manual\",\n        \"capture\": {\n          \"source\": \"manual-action\",\n          \"confidence\": \"explicit\"\n        },\n        \"createdAt\": 1794533813024\n      }\n    }\n  },\n  \"_meta\": {\n    \"runtimeId\": \"854c82c2-6710-44db-ad53-7a56fce6074c\"\n  }\n}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "worktree",
+        "set",
+        "--worktree",
+        "identity:wt2:local:8d8d5575-143c-432f-8ed9-b90a2d5b210c",
+        "--display-name",
+        "93 基线｜固定 OpenFilm 隔离树",
+        "--parent-worktree",
+        "identity:wt2:local:69eebd4c-1bf3-4f2c-af8e-e12cb582df5b",
+        "--comment",
+        "保留既有内容与会话；不是当前N1/N2源码实施位置",
+        "--json"
+      ],
+      "exit": 0,
+      "stdout": "{\n  \"id\": \"2cd5c603-3a39-49f3-a722-1c71b3622fc5\",\n  \"ok\": true,\n  \"result\": {\n    \"worktree\": {\n      \"id\": \"2e732423-9bcc-494c-a0ed-e27a9488f313::C:\\\\workspace\\\\videoworkline\\\\Narralens-openfilm-m1b\",\n      \"identity\": {\n        \"key\": \"wt2:local:8d8d5575-143c-432f-8ed9-b90a2d5b210c\",\n        \"executionHostId\": \"local\",\n        \"instanceId\": \"8d8d5575-143c-432f-8ed9-b90a2d5b210c\"\n      },\n      \"instanceId\": \"8d8d5575-143c-432f-8ed9-b90a2d5b210c\",\n      \"repoId\": \"2e732423-9bcc-494c-a0ed-e27a9488f313\",\n      \"projectId\": \"github:ljx418/narralens\",\n      \"hostId\": \"local\",\n      \"projectHostSetupId\": \"2e732423-9bcc-494c-a0ed-e27a9488f313\",\n      \"path\": \"C:\\\\workspace\\\\videoworkline\\\\Narralens-openfilm-m1b\",\n      \"head\": \"6e9bdeeb49093a4b830c4bc4337f012662c3e89d\",\n      \"branch\": \"refs/heads/spike/openfilm-m1b\",\n      \"isBare\": false,\n      \"isMainWorktree\": false,\n      \"displayName\": \"93 基线｜固定 OpenFilm 隔离树\",\n      \"displayNameMode\": \"fixed\",\n      \"comment\": \"保留既有内容与会话；不是当前N1/N2源码实施位置\",\n      \"linkedIssue\": null,\n      \"linkedPR\": null,\n      \"linkedLinearIssue\": null,\n      \"linkedLinearIssueWorkspaceId\": null,\n      \"linkedLinearIssueOrganizationUrlKey\": null,\n      \"linkedGitLabMR\": null,\n      \"linkedGitLabIssue\": null,\n      \"linkedBitbucketPR\": null,\n      \"linkedAzureDevOpsPR\": null,\n      \"linkedGiteaPR\": null,\n      \"linkedWorkItem\": null,\n      \"linkedTaskSourceContext\": null,\n      \"isArchived\": false,\n      \"isUnread\": false,\n      \"isPinned\": false,\n      \"sortOrder\": 1794402738546,\n      \"lastActivityAt\": 0,\n      \"pendingFirstAgentMessageRename\": false,\n      \"firstAgentMessageRenameError\": null,\n      \"workspaceStatus\": \"in-progress\",\n      \"parentWorktreeId\": \"2e732423-9bcc-494c-a0ed-e27a9488f313::C:\\\\workSpace\\\\videoWorkLine\\\\Narralens\",\n      \"childWorktreeIds\": [],\n      \"lineage\": {\n        \"worktreeId\": \"2e732423-9bcc-494c-a0ed-e27a9488f313::C:\\\\workspace\\\\videoworkline\\\\Narralens-openfilm-m1b\",\n        \"worktreeInstanceId\": \"8d8d5575-143c-432f-8ed9-b90a2d5b210c\",\n        \"parentWorktreeId\": \"2e732423-9bcc-494c-a0ed-e27a9488f313::C:\\\\workSpace\\\\videoWorkLine\\\\Narralens\",\n        \"parentWorktreeInstanceId\": \"69eebd4c-1bf3-4f2c-af8e-e12cb582df5b\",\n        \"origin\": \"manual\",\n        \"capture\": {\n          \"source\": \"manual-action\",\n          \"confidence\": \"explicit\"\n        },\n        \"createdAt\": 1794533814576\n      },\n      \"git\": {\n        \"path\": \"C:\\\\workspace\\\\videoworkline\\\\Narralens-openfilm-m1b\",\n        \"head\": \"6e9bdeeb49093a4b830c4bc4337f012662c3e89d\",\n        \"branch\": \"refs/heads/spike/openfilm-m1b\",\n        \"isBare\": false,\n        \"isMainWorktree\": false\n      },\n      \"linkedItems\": [],\n      \"workspaceLineage\": {\n        \"childWorkspaceKey\": \"worktree:2e732423-9bcc-494c-a0ed-e27a9488f313::C:\\\\workspace\\\\videoworkline\\\\Narralens-openfilm-m1b\",\n        \"childInstanceId\": \"8d8d5575-143c-432f-8ed9-b90a2d5b210c\",\n        \"parentWorkspaceKey\": \"worktree:2e732423-9bcc-494c-a0ed-e27a9488f313::C:\\\\workSpace\\\\videoWorkLine\\\\Narralens\",\n        \"parentInstanceId\": \"69eebd4c-1bf3-4f2c-af8e-e12cb582df5b\",\n        \"origin\": \"manual\",\n        \"capture\": {\n          \"source\": \"manual-action\",\n          \"confidence\": \"explicit\"\n        },\n        \"createdAt\": 1794533814576\n      }\n    }\n  },\n  \"_meta\": {\n    \"runtimeId\": \"854c82c2-6710-44db-ad53-7a56fce6074c\"\n  }\n}\n",
+      "stderr": ""
+    }
+  ],
+  "verified_at": "2026-11-13T01:38:17.642930+00:00",
+  "observed_workspaces": [
+    {
+      "id": "2e732423-9bcc-494c-a0ed-e27a9488f313::C:\\workSpace\\videoWorkLine\\Narralens",
+      "displayName": "Narralens｜项目总览与文档",
+      "parentWorktreeId": "90974dd7-625f-46bf-a442-37f7cbadac25::C:\\workSpace\\videoWorkLine",
+      "comment": "主控文档与验收入口；实施位于子工作区01 ClaudeCode"
+    },
+    {
+      "id": "2e732423-9bcc-494c-a0ed-e27a9488f313::\\\\wsl.localhost\\Ubuntu-24.04\\home\\administrator\\orca\\workspaces\\Narralens\\Narralens-A-R1-BRIDGE",
+      "displayName": "03 审查｜BRIDGE Codex",
+      "parentWorktreeId": "2e732423-9bcc-494c-a0ed-e27a9488f313::C:\\workSpace\\videoWorkLine\\Narralens",
+      "comment": "桥接合同与只读审查工作区，按任务派发"
+    },
+    {
+      "id": "2e732423-9bcc-494c-a0ed-e27a9488f313::\\\\wsl.localhost\\Ubuntu-24.04\\home\\administrator\\orca\\workspaces\\Narralens\\Narralens-A-R1-MEDIA",
+      "displayName": "04 审查｜MEDIA Codex",
+      "parentWorktreeId": "2e732423-9bcc-494c-a0ed-e27a9488f313::C:\\workSpace\\videoWorkLine\\Narralens",
+      "comment": "媒体设计与验收工作区，按任务派发"
+    },
+    {
+      "id": "2e732423-9bcc-494c-a0ed-e27a9488f313::\\\\wsl.localhost\\Ubuntu-24.04\\home\\administrator\\orca\\workspaces\\Narralens\\Narralens-A-R1-PRODUCT",
+      "displayName": "02 审查｜PRODUCT Codex",
+      "parentWorktreeId": "2e732423-9bcc-494c-a0ed-e27a9488f313::C:\\workSpace\\videoWorkLine\\Narralens",
+      "comment": "领域设计与独立复核；当前源码writer在01实施区"
+    },
+    {
+      "id": "2e732423-9bcc-494c-a0ed-e27a9488f313::C:\\workspace\\videoworkline\\Narralens-agents\\bridge-observability",
+      "displayName": "90 保留｜BRIDGE 代码树",
+      "parentWorktreeId": "2e732423-9bcc-494c-a0ed-e27a9488f313::C:\\workSpace\\videoWorkLine\\Narralens",
+      "comment": "保留既有内容与会话；不是当前N1/N2源码实施位置"
+    },
+    {
+      "id": "2e732423-9bcc-494c-a0ed-e27a9488f313::C:\\workspace\\videoworkline\\Narralens-agents\\main-integration",
+      "displayName": "01 实施｜ClaudeCode N1-N2",
+      "parentWorktreeId": "2e732423-9bcc-494c-a0ed-e27a9488f313::C:\\workSpace\\videoWorkLine\\Narralens",
+      "comment": "唯一实施Claude：ctx_297f7b8da2e1；A3待修复，未验收；不新开重复writer"
+    },
+    {
+      "id": "2e732423-9bcc-494c-a0ed-e27a9488f313::C:\\workspace\\videoworkline\\Narralens-agents\\media-delivery",
+      "displayName": "91 保留｜MEDIA 代码树",
+      "parentWorktreeId": "2e732423-9bcc-494c-a0ed-e27a9488f313::C:\\workSpace\\videoWorkLine\\Narralens",
+      "comment": "保留既有内容与会话；不是当前N1/N2源码实施位置"
+    },
+    {
+      "id": "2e732423-9bcc-494c-a0ed-e27a9488f313::C:\\workspace\\videoworkline\\Narralens-agents\\product-workbench",
+      "displayName": "92 保留｜PRODUCT 代码树",
+      "parentWorktreeId": "2e732423-9bcc-494c-a0ed-e27a9488f313::C:\\workSpace\\videoWorkLine\\Narralens",
+      "comment": "保留既有内容与会话；不是当前N1/N2源码实施位置"
+    },
+    {
+      "id": "2e732423-9bcc-494c-a0ed-e27a9488f313::C:\\workspace\\videoworkline\\Narralens-openfilm-m1b",
+      "displayName": "93 基线｜固定 OpenFilm 隔离树",
+      "parentWorktreeId": "2e732423-9bcc-494c-a0ed-e27a9488f313::C:\\workSpace\\videoWorkLine\\Narralens",
+      "comment": "保留既有内容与会话；不是当前N1/N2源码实施位置"
+    }
+  ],
+  "visible_claude": {
+    "dispatch": "ctx_297f7b8da2e1",
+    "terminal": "term_1537c11b-273b-403d-ba3a-7185edaacea4",
+    "tab_title": "ClaudeCode｜N1-N2 实施与自验证",
+    "pane_title": "ClaudeCode 实施节点 · 唯一源码写入者",
+    "switch_navigated": true,
+    "kept_open": true
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "base": "abf34c9a04ae31639ce9ea2180fda32458413a17",
+  "product_candidate": "dd32f156ee576e65c5e0ed8e7f9dc228827a97fe",
+  "writer": "MAIN",
+  "paths": {
+    "src/host/m5/openfilm-native-expected.ts": {
+      "before_sha256": "9f9d2c820510beee15d926f3d7e6e11034843ff829d15b5526ac45028848ab14",
+      "before_blob": "9a1104fc16c5065c1737a208c5efcaa0a704f7c4",
+      "import_sha256": "0d59ee891c9a1d3bf491e479639c67d61e35271f5af6b0e4bd708c34eece0795",
+      "import_blob": "37ae6ad83c9b0c07fb1b8d22cd22302c848c90b8"
+    },
+    "tests/agent-driven/integration/created-native-ack.test.ts": {
+      "before_sha256": "12c3e8b3e70f4a2a278f2998941c6d24133234157a1106cdda66efbde225e5bc",
+      "before_blob": "34b43e0e089667d0a017b98ae8b3531555ba25e6",
+      "import_sha256": "8f21cb81d38281364f0e654a128175de24dac96ffec89e77dbb44b21634dd510",
+      "import_blob": "242c6af3606edfbccd8aff6c1b538d3d5917720c"
+    }
+  },
+  "protected_agents_sha256": "37300463a72a612ae16e0a5fcfb496502c57c722b83781e0e2e8c9480594542b",
+  "source": "exact committed blobs, no user dirty files copied",
+  "acceptance_scope": "two-file lifecycle only, actual NativeSourcePort/Studio not yet implemented",
+  "at": "2026-11-12T04:21:18.711304+00:00"
+}

@@ -1,0 +1,111 @@
+{
+  "verdict": "REQUEST_CHANGES",
+  "scope": "Only R4A standalone nofork NF01..NF06 and same-two-file safety; no production re-review",
+  "counts": {
+    "MAJOR": 1,
+    "MINOR": 2
+  },
+  "findings": [
+    {
+      "id": "R4A-NF01-A",
+      "priorID": "NF-01",
+      "classification": "STILL_OPEN",
+      "severity": "MAJOR",
+      "title": "Default HELD stderr reporting can emit an unhandled asynchronous error and terminate the live owner",
+      "locations": [
+        "tools/native-cache-nofork-pilot.mjs:853",
+        "tools/native-cache-nofork-pilot.mjs:1239",
+        "tools/native-cache-nofork-pilot.mjs:1240",
+        "tools/native-cache-nofork-pilot.mjs:1299"
+      ],
+      "actual_trigger": "C is still live after cleanup returned unknown, so main emits HELD using REAL_DEPENDENCIES.writeStderr. When the stderr destination pipe has closed or fails, process.stderr.write can return and emit EPIPE/EIO asynchronously. The default adapter neither registers an error listener nor handles a write callback; main's surrounding try/catch only catches synchronous throws.",
+      "impact": "An unhandled Writable/EventEmitter error can terminate the standalone Node owner while its detached noauthorize C is still live. The filesystem-write fixes do preserve the owner, but the logging half of NF01 is not closed. This is an actual ordinary I/O route in the two-file tool, not a production-N defect, a mocked-only observer throw, or an externally killed/OOMed runner.",
+      "contract": "R4A SPEC NF01: all post-spawn evidence/log/report errors retain the same owner, root, original failure and close promise until full terminal proof; no unhandled top-level owner loss.",
+      "minimal_two_file_fix": "Make the standalone tool's stderr/reporting adapter handle asynchronous write errors before spawning C, retain a bounded error fact tied to the same run, and never let reporting failure escape while ownership is live. Keep persistent full-terminal waiting and no further signal after exit. Do not install a production Host patch or add a responsibility deadline.",
+      "actual_branch_mock": "Exercise actual main with the real-shaped writable reporting boundary: write returns normally then schedules error on the next turn while C remains live. Prove the owned error handler captures it without an unhandled error/rejected or completed main; later exit+close+freshgone completes the original failed run. Current writeStderr injection stores a string synchronously and cannot detect this branch.",
+      "static_support": "Local Node stream documentation says write errors are delivered asynchronously before the error event; local EventEmitter documentation says an unhandled error event throws and terminates Node. Neither real stream nor C was executed.",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "id": "R4A-NF01-B",
+      "priorID": "NF-01",
+      "classification": "STILL_OPEN",
+      "severity": "MINOR",
+      "title": "Outcome-write failure changes kind but leaves fault_case_passed true",
+      "locations": [
+        "tools/native-cache-nofork-pilot.mjs:1127",
+        "tools/native-cache-nofork-pilot.mjs:1143",
+        "tools/native-cache-nofork-pilot.mjs:1151",
+        "tools/native-cache-nofork-pilot.mjs:1182",
+        "tools/native-cache-nofork-pilot.mjs:1186"
+      ],
+      "actual_trigger": "assertion-failure observes the exact expected injection and terminal proof is complete, then writeEvidence(outcome.json) throws. runPilot sets outcome.kind='failed' but does not clear fault_case_passed or attach an unexpected failure; returned fault_case_passed remains true, unexpected_failure remains null, and main returns1 just as for an expected fault.",
+      "impact": "The returned tuple contradicts its evidence-error fact and can satisfy the report's listed expected-fault predicate despite an unexpected evidence-write failure. C is already terminal here, so this is an evidence/result-qualification gap rather than loss of a live owner. A write may also have made bytes visible before reporting an error; such a candidate receipt must not be treated as committed proof.",
+      "contract": "NF01 requires evidence failures to disqualify the case; R4A exact assertion-failure exit1 is expected only for the intended fault plus full terminal proof and no unrelated failure.",
+      "minimal_two_file_fix": "Recompute all eligibility fields after evidence errors: explicitly false fault_case_passed, preserve original expected error plus evidence error, and make the final authoritative status require successful evidence publication or an explicit failed status. Do not use exit1 alone or leave the caller with a green fault flag alongside kind failed.",
+      "actual_branch_mock": "Drive actual runPilot/main in assertion-failure mode with valid HELLO and real-shaped exit/close/gone, then make only outcome.json write fail. Assert kind failed, fault_case_passed false, evidence error retained and no classification as the intended successful fault case. Existing ENOSPC/EIO test covers unknown cleanup rather than this already-terminal assertion branch.",
+      "runtime": "NOT_RUN; nonblocking alone"
+    },
+    {
+      "id": "R4A-NF02-A",
+      "priorID": "NF-02",
+      "classification": "STILL_OPEN",
+      "severity": "MINOR",
+      "title": "Decode-error path bypasses queue bounds and keeps a failed decoder buffer",
+      "locations": [
+        "tools/native-cache-nofork-pilot.mjs:179",
+        "tools/native-cache-nofork-pilot.mjs:180",
+        "tools/native-cache-nofork-pilot.mjs:469",
+        "tools/native-cache-nofork-pilot.mjs:471",
+        "tools/native-cache-nofork-pilot.mjs:480"
+      ],
+      "actual_trigger": "After an oversize/invalid frame header causes decoder.feed to throw, later chunks are still appended to the same undecodable buffer; every caught error pushes another null sentinel without using the decoded queue frame/byte gate.",
+      "impact": "The valid complete-frame branch now has caps and failures disqualify result, but repeated malformed-frame callbacks can still grow the buffer and null queue. The currently pinned noauthorize C emits a small bounded transcript; this is a negative parser/ledger-branch defect, not an assertion that the exact C has flooded or that this alone makes the identity launch physically unsafe.",
+      "contract": "NF02 requires actual decoder/queued frames bounded on all error paths, not only valid complete frames.",
+      "minimal_two_file_fix": "On first decoder failure, mark a terminal decoder-failed state and discard/reset its partial buffer; enqueue at most one bounded error marker or rely on the failure latch. Later chunks must not grow retained memory. Maintain actual queue byte accounting when taking frames if it is intended as a queued-byte bound.",
+      "actual_branch_mock": "Use the actual ledger/decoder: send an oversize header, then many additional small chunks after failure. Assert retained partial bytes and ledger.frames stay within bounds and first failure is preserved. Current tests cover valid frame-count/byte overrun and a single oversize decode, not repeated post-error input.",
+      "runtime": "NOT_RUN; nonblocking for this fixed small C transcript alone"
+    }
+  ],
+  "prior_dispositions": [
+    {
+      "priorID": "NF-01",
+      "classification": "STILL_OPEN",
+      "assessment": "Synchronous preflight/outcome/held/final filesystem exceptions now preserved without discarding C, actual main mock covers unknown owner through later terminal proof. Asynchronous default stderr error remains R4A-NF01-A; outcome qualification remains R4A-NF01-B."
+    },
+    {
+      "priorID": "NF-02",
+      "classification": "STILL_OPEN",
+      "assessment": "Actual child/stdio/control/budget callbacks now latch firstFailure and disqualify identity/assertion-failure; valid complete-frame queue cap added. Only post-decoder-error retention loophole remains R4A-NF02-A, not normal fixed-C flood evidence."
+    },
+    {
+      "priorID": "NF-03",
+      "classification": "CLOSED_STATIC",
+      "assessment": "One checkTerminalProof is called by cleanup, runPilot eligibility and main HELD polling. Already resolved close does not bypass fresh proc unknown, referenced50ms poll retains owner indefinitely until complete, no new signals in HELD. close code/signal may supply exit fact consistent with actual ChildProcess semantics; real event ordering remains NOT_RUN."
+    },
+    {
+      "priorID": "NF-04",
+      "classification": "CLOSED_STATIC",
+      "assessment": "Null epoch protected; actual runner waits async no-PID EAGAIN/ENOENT and close/no-exit and selects firstError over generic closed error. Actual branch test977 covers it."
+    },
+    {
+      "priorID": "NF-05",
+      "classification": "CLOSED_STATIC",
+      "assessment": "Fresh PPID is explicitly compared with actual toolPid and recorded PPID at264/268; actual verifier+runner wrong-parent test1005 covers it."
+    },
+    {
+      "priorID": "NF-06",
+      "classification": "CLOSED_STATIC",
+      "assessment": "New authorized R4A report explicitly corrects R4 to four failed test001..004 plus005 green, preserving old report and captures. No scope waiver or fresh user approval needed for mandated report."
+    }
+  ],
+  "candidate": {
+    "tool_sha256": "bc0a9e112431dc445bb2ac602862879d5446324903e1eee5c60afe613e79de9c",
+    "test_sha256": "d5f426108cbc4472dcc9770c22793efa21c6503903e48f299bd64344cd585ca8",
+    "report_sha256": "f2ce3aaff1ed7f6c887dd222b178b8cac4a2ebf3bd73a7a004d982f32758aae7",
+    "C_sha256": "6b8d6df32b1958b3cf53e05152e9b04abf6c010d58ae6e672fcd7fa4c9511618",
+    "python_sha256": "e50d468e8b0adfb05733f5b87b3cff34829c4a8c1aea50c865aa8bdfe4bb150f"
+  },
+  "runtime": "All reviewer runtime/actual C/kernel/signals/close NOT_RUN; no actual pilot permission",
+  "production14_original17_ISO18_N1N2_NEXT": "Remain OPEN / NOT_RUN; not prerequisites introduced for this nofork slice"
+}

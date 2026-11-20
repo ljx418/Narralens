@@ -1,0 +1,36 @@
+{
+  "at": "2026-11-12T15:19:46.333070+00:00",
+  "grant": "N1N2-RESUME-FOCUSED-018",
+  "status": "145_FAILED_AWAIT_OWN_CLEANUP",
+  "result": {
+    "exit": 1,
+    "source_changed": [],
+    "source_added": [],
+    "log_sha256": "07daf837588446b14ad17efca6590f0d26e8e0ae8c3d9478f29c48a330614f22",
+    "finished_at": "2026-11-12T15:18:34.226150+00:00"
+  },
+  "counts": {
+    "passed": 15,
+    "failed": 2,
+    "filtered": 62,
+    "total": 79
+  },
+  "failures": [
+    {
+      "case": "tests/agent-driven/integration/created-native-source-reader.test.ts > F04 refuses a hardlink alias and an unknown directory in the working copy",
+      "diagnostic_excerpt": "AssertionError: expected RetainedNativeError: The retained file is\u2026 { code: '\u2026' } to match object { code: 'REVISION_CONFLICT' }\n(1 matching property omitted from actual)\n\n- Expected\n+ Received\n\n- {\n-   \"code\": \"REVISION_CONFLICT\",\n+ RetainedNativeError {\n+   \"code\": \"NATIVE_CLOSURE_ALIASED\",\n  }\n"
+    },
+    {
+      "case": "tests/agent-driven/integration/created-native-source-reader.test.ts > P07 hands a non-lexical caption order to the actual consumer without changing it",
+      "diagnostic_excerpt": "AssertionError: DIRECTORY_FILE_CONFLICT missing=: expected 'unsupported' to be 'computed' // Object.is equality\n\nExpected: \"computed\"\nReceived: \"unsupported\"\n\n \u276f tests/agent-driven/integration/created-native-source-reader.test.ts:2333:128\n    2331|  };\n    2332|  const unsorted=await run(['001.vtt','001.zh.vtt','001.en.vtt']);\n    2333|  expect(unsorted.status,unsorted.status==='unsupported'?`${unsorted.re\u2026\n       |                                                                                                                                ^\n    2334|  const languagesOf=(result:typeof unsorted):string[]=>{\n    2335|   const cues=(result.status==='computed'&&result.captions.state==='pre\u2026"
+    }
+  ],
+  "recorded_pid1879501": "ABSENT_CURRENT_OBSERVATION",
+  "notification": "msg_f81a358e5652",
+  "causal_diagnosis": [
+    "RetainedNativeClosure.open before outertry bypasses centralized authority normalization, partialfailedopen cleanup remainsopenowner responsibility",
+    "Supplier exactlisting omits consumed assets/vo/001.wav; consumer postvalidation correctly rejects incomplete membership; preserveVTTorder/fullmembership"
+  ],
+  "other_open_static_review": "G014_ALIAS_OWNERSHIP_OBSERVER_REVIEW.json",
+  "remaining": "OriginalR01-R07/17acceptance; fullsuite/legacy/browser; frozencommit independentreview; nextstagefinalreleaseplan"
+}

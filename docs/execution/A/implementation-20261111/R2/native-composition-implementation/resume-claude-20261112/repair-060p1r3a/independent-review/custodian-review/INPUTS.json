@@ -1,0 +1,334 @@
+{
+  "review": "R3+R3A independent targeted custodian static review",
+  "verdict": "REQUEST_CHANGES",
+  "historical_base_head": "1d348d419120f23f45d958112ea8c43df5a04675",
+  "binding": "25 current dirty files in repair-060p1r3a/independent-review/INPUT_SNAPSHOT.json; not accepted freeze",
+  "bound_files": 25,
+  "start_bound_sha256_and_bytes_match": true,
+  "end_bound_sha256_and_bytes_match": true,
+  "all_inspected_input_hashes_equal": true,
+  "files": [
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p1r3a/independent-review/INPUT_SNAPSHOT.json",
+      "start_sha256": "5bd64deb4253e9b9452d2e0a077659b12019d287f73c0bfc2eddddcc683a7e41",
+      "start_bytes": 4759,
+      "end_sha256": "5bd64deb4253e9b9452d2e0a077659b12019d287f73c0bfc2eddddcc683a7e41",
+      "end_bytes": 4759,
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/AGENTS.md",
+      "start_sha256": "37300463a72a612ae16e0a5fcfb496502c57c722b83781e0e2e8c9480594542b",
+      "start_bytes": 12665,
+      "end_sha256": "37300463a72a612ae16e0a5fcfb496502c57c722b83781e0e2e8c9480594542b",
+      "end_bytes": 12665,
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/src/adapters/openfilm/openfilm-upstream.ts",
+      "start_sha256": "17fe1138e50bc30df5c26b74e1e0ff9393140c070e1233676d2811485890a2b6",
+      "start_bytes": 87571,
+      "end_sha256": "17fe1138e50bc30df5c26b74e1e0ff9393140c070e1233676d2811485890a2b6",
+      "end_bytes": 87571,
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/src/host/agent-driven/created-native-workspace.ts",
+      "start_sha256": "d83edbdac8cd6dd7db6b5d18f1d0f5d3beb028279297a822f59f97f6504d562c",
+      "start_bytes": 80984,
+      "end_sha256": "d83edbdac8cd6dd7db6b5d18f1d0f5d3beb028279297a822f59f97f6504d562c",
+      "end_bytes": 80984,
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/src/host/agent-driven/created-native-source-reader.ts",
+      "start_sha256": "0a52b8ff16652cf4bf439ef19812b05a4a417396a9139dd4ee4ce7df8505289e",
+      "start_bytes": 80202,
+      "end_sha256": "0a52b8ff16652cf4bf439ef19812b05a4a417396a9139dd4ee4ce7df8505289e",
+      "end_bytes": 80202,
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/m2.1/openfilm-upstream-lock.test.ts",
+      "start_sha256": "9b2cf8525c7e51da9a7c0d9eb579b65be56a679651fcbb5bfb5bd8e1424c175a",
+      "start_bytes": 58158,
+      "end_sha256": "9b2cf8525c7e51da9a7c0d9eb579b65be56a679651fcbb5bfb5bd8e1424c175a",
+      "end_bytes": 58158,
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/native-cache-witness.test.ts",
+      "start_sha256": "33ce515e5555eb79ea842ee95d832bcf4d310df0696a6d75016d3e6cac1ac218",
+      "start_bytes": 94490,
+      "end_sha256": "33ce515e5555eb79ea842ee95d832bcf4d310df0696a6d75016d3e6cac1ac218",
+      "end_bytes": 94490,
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/created-native-source-reader.test.ts",
+      "start_sha256": "6325eab3e4411e77a0b000a084793fb57545d961437c572d0a990625a50d9784",
+      "start_bytes": 173839,
+      "end_sha256": "6325eab3e4411e77a0b000a084793fb57545d961437c572d0a990625a50d9784",
+      "end_bytes": 173839,
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/src/adapters/openfilm/cache-production-scope.ts",
+      "start_sha256": "0072d30b8e465658d26942010c7cad800bdedef5d32dc743df44e644acbef8b3",
+      "start_bytes": 30182,
+      "end_sha256": "0072d30b8e465658d26942010c7cad800bdedef5d32dc743df44e644acbef8b3",
+      "end_bytes": 30182,
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/src/adapters/openfilm/cache-process-supervisor.ts",
+      "start_sha256": "b561eda7141590b98e00250a856688be80ddce1492955cf8a763b5fc1d47f07a",
+      "start_bytes": 101560,
+      "end_sha256": "b561eda7141590b98e00250a856688be80ddce1492955cf8a763b5fc1d47f07a",
+      "end_bytes": 101560,
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/src/adapters/openfilm/openfilm-cache-worker.mjs",
+      "start_sha256": "579a484bea740d768f7b183b46de85775446a3b0f8ea62ab7927d7e026d5b089",
+      "start_bytes": 21415,
+      "end_sha256": "579a484bea740d768f7b183b46de85775446a3b0f8ea62ab7927d7e026d5b089",
+      "end_bytes": 21415,
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/src/adapters/openfilm/cache-worker-policy.mjs",
+      "start_sha256": "0d2b2b38eea9922b0348ae2dbbbfbe1c2bc7715fc923879776696110015b1214",
+      "start_bytes": 5798,
+      "end_sha256": "0d2b2b38eea9922b0348ae2dbbbfbe1c2bc7715fc923879776696110015b1214",
+      "end_bytes": 5798,
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/src/adapters/openfilm/cache-worker-integrity.json",
+      "start_sha256": "9dac431b53d620c2ea8832a6dbab02e1c66e5583f5b634c399defe24250f4c65",
+      "start_bytes": 2135,
+      "end_sha256": "9dac431b53d620c2ea8832a6dbab02e1c66e5583f5b634c399defe24250f4c65",
+      "end_bytes": 2135,
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tools/openfilm-cache-worker-integrity.mjs",
+      "start_sha256": "8f59fb5951a1f83dc360413ac1b71e7914bc98f65c1efa71af909751b7d509d0",
+      "start_bytes": 11028,
+      "end_sha256": "8f59fb5951a1f83dc360413ac1b71e7914bc98f65c1efa71af909751b7d509d0",
+      "end_bytes": 11028,
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/cache-production-scope.test.ts",
+      "start_sha256": "3aa86112afc8b419b03e4d9176dd4872bc39321d88fa8f712cfb2ca2530f6088",
+      "start_bytes": 20536,
+      "end_sha256": "3aa86112afc8b419b03e4d9176dd4872bc39321d88fa8f712cfb2ca2530f6088",
+      "end_bytes": 20536,
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/cache-process-settlement.test.ts",
+      "start_sha256": "ddd557cf50e28d1f7893e4edc90d7714e688015b3ec99d223c4002426e07b115",
+      "start_bytes": 12031,
+      "end_sha256": "ddd557cf50e28d1f7893e4edc90d7714e688015b3ec99d223c4002426e07b115",
+      "end_bytes": 12031,
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/src/adapters/openfilm/cache-process-custodian.py",
+      "start_sha256": "6b8d6df32b1958b3cf53e05152e9b04abf6c010d58ae6e672fcd7fa4c9511618",
+      "start_bytes": 90894,
+      "end_sha256": "6b8d6df32b1958b3cf53e05152e9b04abf6c010d58ae6e672fcd7fa4c9511618",
+      "end_bytes": 90894,
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/helpers/cache-worker-fixture.mjs",
+      "start_sha256": "e3f4ccb1c4016a54356ce04be344b4ffff23f2f88698efe191570ad8407d03ab",
+      "start_bytes": 15045,
+      "end_sha256": "e3f4ccb1c4016a54356ce04be344b4ffff23f2f88698efe191570ad8407d03ab",
+      "end_bytes": 15045,
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/helpers/cache-probe-fixture.mjs",
+      "start_sha256": "80388baed7275482ea7c4b7273d43706aa143a532aa47b8e0922c53e3c2720ef",
+      "start_bytes": 4068,
+      "end_sha256": "80388baed7275482ea7c4b7273d43706aa143a532aa47b8e0922c53e3c2720ef",
+      "end_bytes": 4068,
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/cache-custodian-lifecycle.test.ts",
+      "start_sha256": "5491f60ef72a55486dd270fb97c680690cedfbb65d62f1d3a6f29902d77c35d0",
+      "start_bytes": 13276,
+      "end_sha256": "5491f60ef72a55486dd270fb97c680690cedfbb65d62f1d3a6f29902d77c35d0",
+      "end_bytes": 13276,
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/cache-frame-duration-lifetime.test.ts",
+      "start_sha256": "df45f9294d5b583367506ad4ce4fbc733a8c87e7997855fab8be2151e55864bc",
+      "start_bytes": 8405,
+      "end_sha256": "df45f9294d5b583367506ad4ce4fbc733a8c87e7997855fab8be2151e55864bc",
+      "end_bytes": 8405,
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/cache-process-identity.test.ts",
+      "start_sha256": "4d3e18f759496a2a4123fb2c89d737e682600073763b619908397899d9643585",
+      "start_bytes": 29951,
+      "end_sha256": "4d3e18f759496a2a4123fb2c89d737e682600073763b619908397899d9643585",
+      "end_bytes": 29951,
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/cache-serving-drain.test.ts",
+      "start_sha256": "d9734282dd8a67d4a7d0a0bb0531ed2a9db0ca5db6c6d92caa2c9b3895bf1c4d",
+      "start_bytes": 4671,
+      "end_sha256": "d9734282dd8a67d4a7d0a0bb0531ed2a9db0ca5db6c6d92caa2c9b3895bf1c4d",
+      "end_bytes": 4671,
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/helpers/cache-custodian-unit.py",
+      "start_sha256": "85b738d0fc8cf81337749d65eed4eda06cfaa77e9e4d36eefbf47193c9d12347",
+      "start_bytes": 45236,
+      "end_sha256": "85b738d0fc8cf81337749d65eed4eda06cfaa77e9e4d36eefbf47193c9d12347",
+      "end_bytes": 45236,
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/parallel/lane-product/A-R2-20261112/N1N2-native-source/n1n2-claude-060p1r3-report.md",
+      "start_sha256": "ba45163378fc2dd9d4f5dc6b5c7217700c27c752ca94840f3ec3d2fc7acccba8",
+      "start_bytes": 42887,
+      "end_sha256": "ba45163378fc2dd9d4f5dc6b5c7217700c27c752ca94840f3ec3d2fc7acccba8",
+      "end_bytes": 42887,
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/parallel/lane-product/A-R2-20261112/N1N2-native-source/n1n2-claude-060p1r3-evidence-gap.md",
+      "start_sha256": "699e2e978d61911092e10e2512919c9d5f6de3f462a4cabab6b92cf54cc4f874",
+      "start_bytes": 9738,
+      "end_sha256": "699e2e978d61911092e10e2512919c9d5f6de3f462a4cabab6b92cf54cc4f874",
+      "end_bytes": 9738,
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/parallel/lane-product/A-R2-20261112/N1N2-native-source/n1n2-claude-060p1r3a-report.md",
+      "start_sha256": "d9df4ee59c43bff9ad132488de341642abd060eabf5a9176914a87e0573e5069",
+      "start_bytes": 14996,
+      "end_sha256": "d9df4ee59c43bff9ad132488de341642abd060eabf5a9176914a87e0573e5069",
+      "end_bytes": 14996,
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p1r3/RELEASE.json",
+      "start_sha256": "83f06182849814986c6e8359b8be2b5c720b607d381e4641e6d1bbb723f36eba",
+      "start_bytes": 9622,
+      "end_sha256": "83f06182849814986c6e8359b8be2b5c720b607d381e4641e6d1bbb723f36eba",
+      "end_bytes": 9622,
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p1r3/SPEC.md",
+      "start_sha256": "48f8105333e32d5535c9e7b683dd9ff04f3e0623423e923193f497783c7ad2ce",
+      "start_bytes": 12233,
+      "end_sha256": "48f8105333e32d5535c9e7b683dd9ff04f3e0623423e923193f497783c7ad2ce",
+      "end_bytes": 12233,
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p1r3a/RELEASE.json",
+      "start_sha256": "3526fa63bfa210a02666288264efd53c07c129d66e293125b168bb38cbdaa98f",
+      "start_bytes": 2147,
+      "end_sha256": "3526fa63bfa210a02666288264efd53c07c129d66e293125b168bb38cbdaa98f",
+      "end_bytes": 2147,
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p1r3a/SPEC.md",
+      "start_sha256": "76ace55bf79cf4469943fa71e4644153ba5e247d36c761f800a023f634d9e40d",
+      "start_bytes": 3377,
+      "end_sha256": "76ace55bf79cf4469943fa71e4644153ba5e247d36c761f800a023f634d9e40d",
+      "end_bytes": 3377,
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p1r3/MAIN_COMBINED_DECISION.json",
+      "start_sha256": "c43730f8ce29c454caa0d66ae0111d431c55fd4e3d85afb37ab61bb16abd1176",
+      "start_bytes": 1100,
+      "end_sha256": "c43730f8ce29c454caa0d66ae0111d431c55fd4e3d85afb37ab61bb16abd1176",
+      "end_bytes": 1100,
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p1-review/ADR_060_REV3_CUSTODIAN_AND_REPAIR.md",
+      "start_sha256": "326bed74476956e363a1168460803f35b57e088259cf30e6a6c1315583d395ac",
+      "start_bytes": 12929,
+      "end_sha256": "326bed74476956e363a1168460803f35b57e088259cf30e6a6c1315583d395ac",
+      "end_bytes": 12929,
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p1-review/060P1R_PRIVATE_CONTRACT.md",
+      "start_sha256": "bead5edc8547b22521d835a468c75fc88024dce62bb8b3d39ba6fc9406fe3a2e",
+      "start_bytes": 8556,
+      "end_sha256": "bead5edc8547b22521d835a468c75fc88024dce62bb8b3d39ba6fc9406fe3a2e",
+      "end_bytes": 8556,
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p1r2/independent-review/custodian-review/REVIEW.md",
+      "start_sha256": "e26fae605b895c6137be473a137f224e10f910f1d530fb2a772be39399666f78",
+      "start_bytes": 11787,
+      "end_sha256": "e26fae605b895c6137be473a137f224e10f910f1d530fb2a772be39399666f78",
+      "end_bytes": 11787,
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p1r2/independent-review/custodian-review/FINDINGS.json",
+      "start_sha256": "6a7bcdbe085df627dff917d57b08bdca6ea5c8835c65fa692f553a9ef3a06cf4",
+      "start_bytes": 23291,
+      "end_sha256": "6a7bcdbe085df627dff917d57b08bdca6ea5c8835c65fa692f553a9ef3a06cf4",
+      "end_bytes": 23291,
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p1r3/MAIN_HANDOFF_REVIEW/MAIN_BLOCKER_DECISION.json",
+      "start_sha256": "aa0805ec806ec64be0330072fe6bf545b75787ff5071588662300a8e9eaa495d",
+      "start_bytes": 1024,
+      "end_sha256": "aa0805ec806ec64be0330072fe6bf545b75787ff5071588662300a8e9eaa495d",
+      "end_bytes": 1024,
+      "equal": true
+    }
+  ],
+  "input_count": 37,
+  "scope": "All25 snapshot entries read for hash/byte binding; targeted full lifecycle branches of custodian, supervisor, worker and pilot/helpers inspected. Other bound source/test paths have byte-binding coverage only; no whole integration acceptance.",
+  "instructions": "W/AGENTS.md read and preserved; all W ancestor AGENTS paths checked absent; source/test/docs nested AGENTS rg discovery returned none; supplied workspace instructions apply",
+  "operations": [
+    "read text and SHA256/size via Python stdlib pathlib/hashlib/json",
+    "rg/sed/nl static inspections",
+    "only REVIEW.md/FINDINGS.json/INPUTS.json written to assigned new directory",
+    "Orca worker_done report only"
+  ],
+  "not_run": [
+    "production imports/tests/build",
+    "target C/N/kernel/prctl/fork/signal/wait",
+    "Host/HTTP/browser/Chrome",
+    "probe/ffmpeg/media/network",
+    "original17/ISO18/full gates/human/N1N2 acceptance"
+  ],
+  "historical_evidence": {
+    "R3": "Developer direct trials incl approximately10 failures admitted UNRECORDED; counts/recalled errors are not independently captured original outcomes; preserved",
+    "R3A": "Report lists recorded unit001 failure, unit00238/38, generation001 and integrity001; no reviewer reruns or exhaustive capture re-audit",
+    "R3_MAIN_01": "Finite60s responsibility expiry explicitly rejected; current source removes it, CLOSED_STATIC only",
+    "old_failures": "All previous failures/admissions remain; no old artifacts edited and no reconstructed original argv/logs"
+  },
+  "runtime_permission": false,
+  "source_write_permission": false,
+  "normal_roundtrip": "Blocked statically by destructive receipt hash snapshots; no runtime claim",
+  "nofork_identity": "Current harness unsafe until precise unconditional close/error ownership repaired; may be independently scoped without requiring all N/Chrome gates"
+}

@@ -1,0 +1,80 @@
+{
+  "grant_id": "N1N2-RESUME-CORRECTION-BATCH-016",
+  "at": "2026-11-12T14:25:06.250386+00:00",
+  "request": "msg_fe4efba3678a",
+  "holder": "ctx_b4086093cd96",
+  "cwd": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+  "frozen_sha256": {
+    "src/host/agent-driven/retained-native-closure.ts": "bd83a07eb2e9d7ca4acbd30e131a19b225b7f82b50a574b64f178b86ec297c29",
+    "src/host/agent-driven/committed-snapshot-authority.ts": "53321dfe1560b8403d9b78ca643eb24ff4ce6360a619cee30adbff0fc7b8bca5",
+    "src/host/agent-driven/created-native-source-reader.ts": "128fb4d23929faace3c32f12f8e6d98d2001436636357bec60e58f3ac2c9b814",
+    "src/host/agent-driven/created-native-workspace.ts": "3decdc3d826e323a943589b372ccca23560802170b2cebf34904fc2355fbca56",
+    "src/host/agent-driven/native-cache-witness.ts": "87d05c958672e7030a202f75eafc6f2e38f2d79e59e80d28a06d3926f03fdb04",
+    "src/adapters/openfilm/openfilm-upstream.ts": "046cb8bd74a70770b1afc8dc5bf2800a6a54c35961e75254a1b7b5ae2dcb086d",
+    "tests/agent-driven/integration/created-native-source-reader.test.ts": "83d13030b19a6e3bc79eaa2104a53ab31cfc8214b9fbce8047a24cc34bb0d21a",
+    "tests/agent-driven/integration/helpers/native-source-fixture.ts": "19cb73cb9d69394e550699d3363128a4ea60e96a3f28f22e1ea4fce01c6dda0a",
+    "tests/agent-driven/integration/committed-snapshot-host.test.ts": "bfd0c6373b254050d32a6a99e7b6f8b9827dc24b6b2587515ab4c5aad2cd9037",
+    "tests/agent-driven/integration/native-cache-witness.test.ts": "6cb418cd4fa2ed9481ec98130b9133ceb7a20d04f53f8c072b14b19c4aa8ff2c",
+    "src/host/m5/openfilm-native-expected.ts": "19110e45a83b6d5b611b4260620ce873f923f1e5a5b907bc6176c4b734fbeed3",
+    "tests/agent-driven/integration/created-native-workspace.test.ts": "439d469032c9af2b83ceb826e0aead7cf5c2fe5c5693be7cbf18c8e67f0f615f",
+    "tests/agent-driven/integration/created-native-ack.test.ts": "5f50db85c7c07a2ecf4faefc20ec2ec6c7ad4910fafe549c2edc76bbad729c7c"
+  },
+  "case_inventory": {
+    "total": 77,
+    "pure": 18,
+    "component": 59,
+    "both": 0,
+    "neither": 0
+  },
+  "commands": [
+    {
+      "capture": "n1n2-claude-resume-125-gate-pure",
+      "argv": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "vitest",
+        "run",
+        "--config",
+        "vitest.config.ts",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts",
+        "-t",
+        "P0|F01|F10 lists|F10 keeps"
+      ],
+      "expected_cases": 18
+    },
+    {
+      "capture": "n1n2-claude-resume-126-gate-component",
+      "argv": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "vitest",
+        "run",
+        "--config",
+        "vitest.config.ts",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts",
+        "-t",
+        "R0|F02|F03|F04|F05|F06|F07|F08|F09|F10 shows|G0"
+      ],
+      "expected_cases": 59
+    },
+    {
+      "capture": "n1n2-claude-resume-127-gate-legacy",
+      "argv": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "vitest",
+        "run",
+        "--config",
+        "vitest.config.ts",
+        "tests/agent-driven/integration/created-native-ack.test.ts",
+        "tests/agent-driven/integration/committed-snapshot-host.test.ts",
+        "tests/agent-driven/integration/created-native-workspace.test.ts"
+      ]
+    }
+  ],
+  "execution": "Serial recorder once each; next only if prior actualexit0 and noinputdrift; allsrc/tests/tools/config/index frozen until terminal+owncleanup. Stoponfail/new429; no128browser grant. KnownG04preflight gaps not waived.",
+  "scope": "Interim correction validation, not final acceptance"
+}

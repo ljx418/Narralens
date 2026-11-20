@@ -1,0 +1,19 @@
+{
+  "at": "2026-11-12T14:32:48.740389+00:00",
+  "pid": 1808480,
+  "capture": "n1n2-claude-resume-126-gate-component",
+  "scope": "single process current read-only observation, not root-cause conclusion",
+  "comm": "node (vitest 1)\n",
+  "wchan": "do_epoll_wait",
+  "io": {
+    "error": "[Errno 2] No such file or directory: '/proc/1808480/io'"
+  },
+  "fd_count": 149,
+  "children": [
+    {
+      "pid": 1818357,
+      "comm": "git",
+      "wchan": "p9_client_rpc"
+    }
+  ]
+}

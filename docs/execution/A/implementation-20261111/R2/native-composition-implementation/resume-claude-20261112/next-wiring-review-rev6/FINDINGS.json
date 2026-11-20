@@ -1,0 +1,123 @@
+{
+  "format": "narralens.independent-document-review@1",
+  "revision_reviewed": 6,
+  "verdict": "REQUEST_CHANGES",
+  "scope": "文档准备性审计；不签实现/业务/implementation-ready",
+  "source_commit": "1d348d419120f23f45d958112ea8c43df5a04675",
+  "counts": {
+    "BLOCKER": 0,
+    "MAJOR": 1,
+    "MINOR": 1
+  },
+  "findings": [
+    {
+      "id": "NW6-A01",
+      "severity": "MAJOR",
+      "classification": "DOCUMENT_INTERFACE_GAP",
+      "title": "媒体读取的异步后 session/currentness 检查没有可实施的调用者接口与接线路径",
+      "sources": [
+        {
+          "path": "next-wiring-draft/04_PATHS_PORTS_AND_PRODUCERS.md",
+          "line": 11
+        },
+        {
+          "path": "next-wiring-draft/04_PATHS_PORTS_AND_PRODUCERS.md",
+          "line": 43
+        },
+        {
+          "path": "next-wiring-draft/06_REVIEW_PUBLICATION_SCHEMA_PROPOSAL.md",
+          "line": 71
+        },
+        {
+          "path": "next-wiring-draft/06_REVIEW_PUBLICATION_SCHEMA_PROPOSAL.md",
+          "line": 84
+        },
+        {
+          "path": "src/host/agent-driven/review-media-http.ts",
+          "line": 46,
+          "commit": "1d348d419120f23f45d958112ea8c43df5a04675"
+        },
+        {
+          "path": "src/host/agent-driven/review-media-http.ts",
+          "line": 290,
+          "commit": "1d348d419120f23f45d958112ea8c43df5a04675"
+        },
+        {
+          "path": "src/host/agent-driven/review-media-http.ts",
+          "line": 339,
+          "commit": "1d348d419120f23f45d958112ea8c43df5a04675"
+        }
+      ],
+      "contract_conflict": "06要求 await 后重验当前包/运行/授权/S01 lease，并以 PUB-RD01 的实际 session 变更拒绝陈旧读；04却只给新 publication 模块实现既有无 caller/session 的 binding resolver，复用原 HTTP/reader，没有声明媒体 transport 的窄增量接口。",
+      "trigger": "真实已鉴权 GET 等待 reader.open 或 handle.read 时，撤销该请求 session，保持项目owner与package/receipt不变；或开流后在一次 bounded read 中切换package/marker。",
+      "reachable_path": "GET /api/ui/v1/projects/:id/review-media/:reference -> ReviewMediaHttp.handle authenticate(290) -> currentByReference(296) -> reader.open(303) -> owner/current binding(305–308) -> handle.read(339) -> response.write(342)。resolver的两个现有方法均没有caller/session输入；HTTP在认证后没有session重验，chunk await之后也没有binding/marker复核。openMedia的read包装231–238同样只有abort检查。",
+      "counterexample": "实现者只按04所列新resolver与原transport接线，能够完成两次package校验，仍无法区分同一owner下已撤销的请求session。也无法在handle.read返回至write之间靠此前的resolver调用观察新marker/package。故仅实现resolver不满足06/PUB-RD01；这是目标文档的接口缺口，不是要求未接受057实现新规格。",
+      "minimal_revision": "在04明确新增受信媒体请求read-scope/同步final guard的私有合同，绑定当前caller/session、owner、package/run、receipt与双marker以及需要的S01读租约；由CreationApplication装配并由media transport调用，不由wire提供回调或授权。把src/host/agent-driven/review-media-http.ts的窄修改列入候选路径（或明确等价且真正携带caller的既有适配接口）；describe/openMedia/HTTP在异步open、最终binding读取、bounded read及backpressure等待后、交付descriptor/后续字节前检查，close/drain归属明确。guard与交付间不得再有未覆盖await；descriptor finally中的异步close也要计入。已写入socket的旧字节不能撤回，不承诺撤回；只拒绝陈旧后的新交付。无需改公共DTO、底层renderer或重写审批。",
+      "case_mapping": [
+        "PUB-RD01",
+        "PUB-DB02",
+        "NW-API03",
+        "S01-L01",
+        "S01-L02"
+      ],
+      "acceptance_addendum": "PUB-RD01分实际reader.open、binding await、handle.read、socket backpressure及descriptor close等待窗口；每次单独撤销session/切换package/破坏marker，断言无陈旧后新增交付、GET零写零render、raw read与close排空且DB最后关；零变更对照正常交付。全部运行仍NOT_RUN。"
+    },
+    {
+      "id": "NW6-A02",
+      "severity": "MINOR",
+      "classification": "HANDOFF_TEXT",
+      "title": "Claude必读清单遗漏06/07",
+      "sources": [
+        {
+          "path": "next-wiring-draft/03_CLAUDE_HANDOFF.md",
+          "line": 5
+        }
+      ],
+      "trigger": "后续实现者按交接提示只阅读00–05及manifest引用的原合同。",
+      "contract_conflict": "06是逐字DDL/双marker/旧binding拒绝的规范，07约束实际候选签名；它们不应只通过间接引用被发现。",
+      "minimal_revision": "把03第5行的00–05改为00–07，并明确06是W3目标、07待重锚最终接受commit；不改变当前未release状态。",
+      "case_mapping": [
+        "PUB-DB01",
+        "PUB-DB02",
+        "PUB-RD01",
+        "NW-API01"
+      ],
+      "runtime": "NOT_RUN"
+    }
+  ],
+  "release_reanchor_tasks": [
+    {
+      "id": "NW6-T01",
+      "classification": "PRE_RELEASE_REANCHOR_NOT_DEFECT",
+      "task": "060修复及N1N2独立接受后绑定accepted_native_commit，重锚07签名/资源owner/关闭语义和05的sharedbrowser/cachequarantine措辞；057只能是历史证据。",
+      "cases": [
+        "NW-API01",
+        "NW-API02",
+        "NW-API03",
+        "NW-API04",
+        "NW-API06"
+      ]
+    },
+    {
+      "id": "NW6-T02",
+      "classification": "PRE_RELEASE_FREEZE_NOT_DEFECT",
+      "task": "最终ReleaseAssignment展开所有路径、批准新增私有DDL/外部marker唯一行、逐项错误码、精确argv/cwd/资源/capture；选择兼容build关闭入口作为实际支持回退，旧binary不默认支持。",
+      "cases": [
+        "PUB-DB01",
+        "PUB-DB02",
+        "PUB-RC01"
+      ]
+    },
+    {
+      "id": "NW6-T03",
+      "classification": "FUTURE_ACCEPTANCE_NOT_DEFECT",
+      "task": "原S01 28项、HC/A/H/J、真实Studio及两条60–180秒中文影片/导出/人工门保留；逐case实际证明仍待运行，不能由草案审查替代。",
+      "cases": [
+        "S01-P01",
+        "NW-API05",
+        "PUB-TX01"
+      ]
+    }
+  ],
+  "runtime": "ALL_NOT_RUN"
+}

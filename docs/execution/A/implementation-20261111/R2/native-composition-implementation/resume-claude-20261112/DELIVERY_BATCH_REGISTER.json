@@ -1,0 +1,1323 @@
+{
+  "format": "narralens.delivery-batch-register@1",
+  "created_at": "2026-11-15T07:13:54.732850+00:00",
+  "status": "PLAN_AND_FINDING_INVENTORY_NOT_ACCEPTANCE",
+  "scope": "N1/N2原范围；不释放新源码/运行、不改变现有R5C票",
+  "source_binding": "Finding文档固定SHA；当前R5C源码在写，不以此台账冻结或验收移动源码",
+  "active_task": {
+    "stage": "R6 stopped on fresh429, incomplete candidate preserved",
+    "receipt": {
+      "dispatchId": "ctx_17cf94883a53",
+      "taskId": "task_8f3cf88b44bc",
+      "runId": "run_399f9dd3ce5a",
+      "state": "ready",
+      "agent": "claude",
+      "terminal": "term_237147d43cbacc5d4858d8355ade6696"
+    },
+    "release": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p6-protocol-and-settlement/RELEASE_CONTINUATION.json",
+    "source_write_release": false,
+    "actual_kernel_runtime_release": false,
+    "state": "STOPPED_NEW_429_AWAIT_USER_EXPLICIT_RESUME",
+    "checkpoint": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p6-protocol-and-settlement/NEW_429_STOP/STOP_CHECKPOINT.json"
+  },
+  "groups": [
+    {
+      "id": "R5C-AUTHORITY",
+      "finding_ids": [
+        "R5B-S01",
+        "R3-C05"
+      ],
+      "layer": "进程所有权",
+      "invariant": "原fork/epoch与wait权限不可逆；fresh未知拒绝signal；动作债不等于责任到期",
+      "decisive_verification": "实际KernelSettlementOperations反例：原N reap后同PID替换、未知group、尚未发出KILL的恢复；逐个验证真实raw kill/killpg边界",
+      "owner": "MAIN合并裁决；ClaudeCode按release实施；未参与实现者独立复核",
+      "state": "OPEN",
+      "change_impact_required": [
+        "modified producer",
+        "direct consumers",
+        "dependent cleanup/eligibility invariants",
+        "matching negative cases",
+        "affected prior gates"
+      ],
+      "evidence": []
+    },
+    {
+      "id": "R5C-STARTUP",
+      "finding_ids": [
+        "R5B-S02",
+        "R5B-S05",
+        "R5B-O05",
+        "R3-C04"
+      ],
+      "layer": "进程所有权",
+      "invariant": "无birth/未授权fork/已授权但证明缺失分别建模；late close可收敛原责任，unknown不可假作gone",
+      "decisive_verification": "实际supervisor noPID error+late close、born/noAuthorize late exit+close、freshunknown→freshgone；原promise只结算一次",
+      "owner": "MAIN合并裁决；ClaudeCode按release实施；未参与实现者独立复核",
+      "state": "OPEN",
+      "change_impact_required": [
+        "modified producer",
+        "direct consumers",
+        "dependent cleanup/eligibility invariants",
+        "matching negative cases",
+        "affected prior gates"
+      ],
+      "evidence": []
+    },
+    {
+      "id": "R5C-OWNER",
+      "finding_ids": [
+        "R5B-S03",
+        "R5B-O01",
+        "R3-C02",
+        "R3-I05"
+      ],
+      "layer": "验收工具/作业所有权",
+      "invariant": "分配即登记，所有异常finally等待同一原startPromise和新鲜终局",
+      "decisive_verification": "构造/reserve/start/部分事件/EIO异常；cleanup仍unknown时runner必须保持pending，后续证明才返回",
+      "owner": "MAIN合并裁决；ClaudeCode按release实施；未参与实现者独立复核",
+      "state": "OPEN",
+      "change_impact_required": [
+        "modified producer",
+        "direct consumers",
+        "dependent cleanup/eligibility invariants",
+        "matching negative cases",
+        "affected prior gates"
+      ],
+      "evidence": []
+    },
+    {
+      "id": "R5C-REPORTING",
+      "finding_ids": [
+        "R5B-S04",
+        "R5B-O04"
+      ],
+      "layer": "验收工具",
+      "invariant": "真实CLI与默认Writable共用受审reporting boundary，异步错误不可使资源所有者提前退出",
+      "decisive_verification": "actual main/default-shaped Writable延迟callback/error与仍存活owner；报告失败不得取得通过资格",
+      "owner": "MAIN合并裁决；ClaudeCode按release实施；未参与实现者独立复核",
+      "state": "OPEN",
+      "change_impact_required": [
+        "modified producer",
+        "direct consumers",
+        "dependent cleanup/eligibility invariants",
+        "matching negative cases",
+        "affected prior gates"
+      ],
+      "evidence": []
+    },
+    {
+      "id": "R5C-CANCEL-ELIGIBILITY",
+      "finding_ids": [
+        "R5B-S06",
+        "R5B-O02",
+        "R5B-O03"
+      ],
+      "layer": "作业与验收工具",
+      "invariant": "取消保原cause，注入绑定同handle/GO摘要与即时完整活epoch；预期失败不吞 unrelated error",
+      "decisive_verification": "真实supervisor取消与runner组合；不同startticks/Z/外来GO/先发原生错误/晚到结果均不可冒充预期故障",
+      "owner": "MAIN合并裁决；ClaudeCode按release实施；未参与实现者独立复核",
+      "state": "OPEN",
+      "change_impact_required": [
+        "modified producer",
+        "direct consumers",
+        "dependent cleanup/eligibility invariants",
+        "matching negative cases",
+        "affected prior gates"
+      ],
+      "evidence": []
+    },
+    {
+      "id": "R5C-LEGACY",
+      "finding_ids": [
+        "R5B-O06"
+      ],
+      "layer": "旧验收入口",
+      "invariant": "禁止动态self-pin、timeout冒充close或Host计数冒充C证明",
+      "decisive_verification": "固定pin与受控runner实际接线静态审查；本票不执行mixed lifecycle",
+      "owner": "MAIN合并裁决；ClaudeCode按release实施；未参与实现者独立复核",
+      "state": "OPEN",
+      "change_impact_required": [
+        "modified producer",
+        "direct consumers",
+        "dependent cleanup/eligibility invariants",
+        "matching negative cases",
+        "affected prior gates"
+      ],
+      "evidence": []
+    },
+    {
+      "id": "R5A-RECEIPT-SNAPSHOT",
+      "finding_ids": [
+        "R3-C01"
+      ],
+      "layer": "进程协议",
+      "invariant": "只读state不破坏累计Hash",
+      "decisive_verification": "保留R5A静态关闭记录；当前字节需受影响回归，历史静态关闭不是内核验收",
+      "owner": "MAIN合并裁决；ClaudeCode按release实施；未参与实现者独立复核",
+      "state": "HISTORICAL_STATIC_ONLY",
+      "change_impact_required": [
+        "modified producer",
+        "direct consumers",
+        "dependent cleanup/eligibility invariants",
+        "matching negative cases",
+        "affected prior gates"
+      ],
+      "evidence": []
+    },
+    {
+      "id": "R5A-WRITABLE",
+      "finding_ids": [
+        "R3-C03"
+      ],
+      "layer": "进程协议",
+      "invariant": "使用真实受控fd4等待写就绪",
+      "decisive_verification": "保留R5A静态关闭；R6真实背压补全",
+      "owner": "MAIN合并裁决；ClaudeCode按release实施；未参与实现者独立复核",
+      "state": "HISTORICAL_STATIC_ONLY",
+      "change_impact_required": [
+        "modified producer",
+        "direct consumers",
+        "dependent cleanup/eligibility invariants",
+        "matching negative cases",
+        "affected prior gates"
+      ],
+      "evidence": []
+    },
+    {
+      "id": "R6-RECEIPT-SEMANTICS",
+      "finding_ids": [
+        "R3-C06"
+      ],
+      "layer": "进程所有权/协议",
+      "invariant": "wait身份/终态/N-last/segment绑定而非只校验摘要自洽",
+      "decisive_verification": "合法摘要但错PID/epoch/order/status的负例；实际C/N/adopted wait与raw receipt独立对照",
+      "owner": "MAIN合并裁决；ClaudeCode按release实施；未参与实现者独立复核",
+      "state": "OPEN",
+      "change_impact_required": [
+        "modified producer",
+        "direct consumers",
+        "dependent cleanup/eligibility invariants",
+        "matching negative cases",
+        "affected prior gates"
+      ],
+      "evidence": []
+    },
+    {
+      "id": "R6-DIAGNOSTICS",
+      "finding_ids": [
+        "R3-C07"
+      ],
+      "layer": "进程所有权",
+      "invariant": "settlement/recovery全阶段读流预算和EOF；失败与资源结束分离",
+      "decisive_verification": "候选后/TERM handler late stdout/stderr、边界和溢出、真实背压与EOF",
+      "owner": "MAIN合并裁决；ClaudeCode按release实施；未参与实现者独立复核",
+      "state": "OPEN",
+      "change_impact_required": [
+        "modified producer",
+        "direct consumers",
+        "dependent cleanup/eligibility invariants",
+        "matching negative cases",
+        "affected prior gates"
+      ],
+      "evidence": []
+    },
+    {
+      "id": "R6-OVERFLOW",
+      "finding_ids": [
+        "R3-C08"
+      ],
+      "layer": "进程所有权",
+      "invariant": "有界库存溢出拒绝成功，但实际可证reap后不能永久空持责",
+      "decisive_verification": "真实结束失败模型与仍有unknown/live的对照；不得加责任超时",
+      "owner": "MAIN合并裁决；ClaudeCode按release实施；未参与实现者独立复核",
+      "state": "OPEN",
+      "change_impact_required": [
+        "modified producer",
+        "direct consumers",
+        "dependent cleanup/eligibility invariants",
+        "matching negative cases",
+        "affected prior gates"
+      ],
+      "evidence": []
+    },
+    {
+      "id": "R6-ADOPTED-READINESS",
+      "finding_ids": [
+        "R3-C09"
+      ],
+      "layer": "进程fixture",
+      "invariant": "先证明子进程handler就绪、收养、TERM后仍活，再验证KILL及N-last",
+      "decisive_verification": "真实barrier/epoch/事件；原nofork不覆盖本项",
+      "owner": "MAIN合并裁决；ClaudeCode按release实施；未参与实现者独立复核",
+      "state": "OPEN",
+      "change_impact_required": [
+        "modified producer",
+        "direct consumers",
+        "dependent cleanup/eligibility invariants",
+        "matching negative cases",
+        "affected prior gates"
+      ],
+      "evidence": []
+    },
+    {
+      "id": "R7-WORKSPACE-PROOF",
+      "finding_ids": [
+        "R3-I01",
+        "R3-I02",
+        "R3-I03",
+        "R3-I04"
+      ],
+      "layer": "项目资源边界",
+      "invariant": "private阶段事实、原promise保留、allocation至多一次close、idempotent no-op非fresh证明、late handle可恢复",
+      "decisive_verification": "真实workspace/parent/PRE/POST/witness/scope/close/dispose及原bridge晚handle；生产调用和负例成组验证",
+      "owner": "MAIN合并裁决；ClaudeCode按release实施；未参与实现者独立复核",
+      "state": "OPEN",
+      "change_impact_required": [
+        "modified producer",
+        "direct consumers",
+        "dependent cleanup/eligibility invariants",
+        "matching negative cases",
+        "affected prior gates"
+      ],
+      "evidence": []
+    }
+  ],
+  "findings": [
+    {
+      "id": "R5B-S01",
+      "source": "docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p5b-startup-and-owner/independent-review/startup-reaper-review/FINDINGS.json",
+      "source_sha256": "8685b468ad0864cb4c494f0c3cc5d67d899c5dd0721358f7c0a7ad689e71f087",
+      "original_severity": "MAJOR",
+      "title": "Real signal adapter can reacquire a reaped N number or use stale group identity during recovery",
+      "group": "R5C-AUTHORITY",
+      "original_locations": [
+        "src/adapters/openfilm/cache-process-custodian.py:786",
+        "src/adapters/openfilm/cache-process-custodian.py:924",
+        "src/adapters/openfilm/cache-process-custodian.py:1517",
+        "src/adapters/openfilm/cache-process-custodian.py:1605",
+        "src/adapters/openfilm/cache-process-custodian.py:1659",
+        "src/adapters/openfilm/cache-process-custodian.py:1738"
+      ],
+      "original_status": "STILL_OPEN",
+      "current_closure": "OPEN_PENDING_HANDBACK_OR_FUTURE_BATCH",
+      "implementation_evidence": null,
+      "review_evidence": null,
+      "kernel_evidence": null
+    },
+    {
+      "id": "R5B-S02",
+      "source": "docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p5b-startup-and-owner/independent-review/startup-reaper-review/FINDINGS.json",
+      "source_sha256": "8685b468ad0864cb4c494f0c3cc5d67d899c5dd0721358f7c0a7ad689e71f087",
+      "original_severity": "MAJOR",
+      "title": "Held no-N/no-birth startup still cannot reconcile a late genuine C close",
+      "group": "R5C-STARTUP",
+      "original_locations": [
+        "src/adapters/openfilm/cache-process-supervisor.ts:1585",
+        "src/adapters/openfilm/cache-process-supervisor.ts:1831",
+        "src/adapters/openfilm/cache-process-supervisor.ts:2600"
+      ],
+      "original_status": "STILL_OPEN",
+      "current_closure": "OPEN_PENDING_HANDBACK_OR_FUTURE_BATCH",
+      "implementation_evidence": null,
+      "review_evidence": null,
+      "kernel_evidence": null
+    },
+    {
+      "id": "R5B-S03",
+      "source": "docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p5b-startup-and-owner/independent-review/startup-reaper-review/FINDINGS.json",
+      "source_sha256": "8685b468ad0864cb4c494f0c3cc5d67d899c5dd0721358f7c0a7ad689e71f087",
+      "original_severity": "MAJOR",
+      "title": "Positive pilot exception path returns while cleanup is unknown instead of owning a terminal finally",
+      "group": "R5C-OWNER",
+      "original_locations": [
+        "tools/native-cache-normal-pilot.ts:537",
+        "tools/native-cache-normal-pilot.ts:592",
+        "tools/native-cache-normal-pilot.ts:651",
+        "tools/native-cache-normal-pilot.ts:663",
+        "tools/native-cache-normal-pilot.ts:758"
+      ],
+      "original_status": "STILL_OPEN",
+      "current_closure": "OPEN_PENDING_HANDBACK_OR_FUTURE_BATCH",
+      "implementation_evidence": null,
+      "review_evidence": null,
+      "kernel_evidence": null
+    },
+    {
+      "id": "R5B-S04",
+      "source": "docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p5b-startup-and-owner/independent-review/startup-reaper-review/FINDINGS.json",
+      "source_sha256": "8685b468ad0864cb4c494f0c3cc5d67d899c5dd0721358f7c0a7ad689e71f087",
+      "original_severity": "MAJOR",
+      "title": "Typed reporting boundary exists but actual CLI/default stderr bypasses it",
+      "group": "R5C-REPORTING",
+      "original_locations": [
+        "tools/native-cache-normal-pilot.ts:234",
+        "tools/native-cache-normal-pilot.ts:282",
+        "tools/native-cache-normal-pilot.ts:537",
+        "tools/native-cache-normal-pilot.ts:773",
+        "tools/native-cache-normal-pilot.ts:787"
+      ],
+      "original_status": "STILL_OPEN",
+      "current_closure": "OPEN_PENDING_HANDBACK_OR_FUTURE_BATCH",
+      "implementation_evidence": null,
+      "review_evidence": null,
+      "kernel_evidence": null
+    },
+    {
+      "id": "R5B-S05",
+      "source": "docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p5b-startup-and-owner/independent-review/startup-reaper-review/FINDINGS.json",
+      "source_sha256": "8685b468ad0864cb4c494f0c3cc5d67d899c5dd0721358f7c0a7ad689e71f087",
+      "original_severity": "MINOR",
+      "title": "Unknown original C epoch observation is treated as gone in shared proof",
+      "group": "R5C-STARTUP",
+      "original_locations": [
+        "src/adapters/openfilm/cache-process-supervisor.ts:2623"
+      ],
+      "original_status": "STILL_OPEN",
+      "current_closure": "OPEN_PENDING_HANDBACK_OR_FUTURE_BATCH",
+      "implementation_evidence": null,
+      "review_evidence": null,
+      "kernel_evidence": null
+    },
+    {
+      "id": "R5B-S06",
+      "source": "docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p5b-startup-and-owner/independent-review/startup-reaper-review/FINDINGS.json",
+      "source_sha256": "8685b468ad0864cb4c494f0c3cc5d67d899c5dd0721358f7c0a7ad689e71f087",
+      "original_severity": "MAJOR",
+      "title": "Expected-fault gate accepts unrelated settlement failure and does not bind live observation to the same N epoch",
+      "group": "R5C-CANCEL-ELIGIBILITY",
+      "original_locations": [
+        "tools/native-cache-normal-pilot.ts:443",
+        "tools/native-cache-normal-pilot.ts:687",
+        "src/adapters/openfilm/cache-process-supervisor.ts:1648"
+      ],
+      "original_status": "STILL_OPEN",
+      "current_closure": "OPEN_PENDING_HANDBACK_OR_FUTURE_BATCH",
+      "implementation_evidence": null,
+      "review_evidence": null,
+      "kernel_evidence": null
+    },
+    {
+      "id": "R5B-O01",
+      "source": "docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p5b-startup-and-owner/independent-review/positive-owner-review/FINDINGS.json",
+      "source_sha256": "6ed1f4a0ce9872a09f2f8760b9fdd38719943437d99415491b38fbc007dd2f21",
+      "original_severity": "MAJOR",
+      "title": "Persistent owner is registered after start, and the exceptional finally never completes cleanup",
+      "group": "R5C-OWNER",
+      "original_locations": [
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 186
+        },
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 551
+        },
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 579
+        },
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 594
+        },
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 604
+        },
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 651
+        },
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 663
+        }
+      ],
+      "original_status": "STILL_OPEN",
+      "current_closure": "OPEN_PENDING_HANDBACK_OR_FUTURE_BATCH",
+      "implementation_evidence": null,
+      "review_evidence": null,
+      "kernel_evidence": null
+    },
+    {
+      "id": "R5B-O02",
+      "source": "docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p5b-startup-and-owner/independent-review/positive-owner-review/FINDINGS.json",
+      "source_sha256": "6ed1f4a0ce9872a09f2f8760b9fdd38719943437d99415491b38fbc007dd2f21",
+      "original_severity": "MAJOR",
+      "title": "Original cancel error is replaced, arbitrary failure can qualify as expected, and held recovery drops the raw outcome",
+      "group": "R5C-CANCEL-ELIGIBILITY",
+      "original_locations": [
+        {
+          "path": "src/adapters/openfilm/cache-process-supervisor.ts",
+          "line": 1648
+        },
+        {
+          "path": "src/adapters/openfilm/cache-process-supervisor.ts",
+          "line": 1796
+        },
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 629
+        },
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 634
+        },
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 651
+        },
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 687
+        }
+      ],
+      "original_status": "NEW",
+      "current_closure": "OPEN_PENDING_HANDBACK_OR_FUTURE_BATCH",
+      "implementation_evidence": null,
+      "review_evidence": null,
+      "kernel_evidence": null
+    },
+    {
+      "id": "R5B-O03",
+      "source": "docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p5b-startup-and-owner/independent-review/positive-owner-review/FINDINGS.json",
+      "source_sha256": "6ed1f4a0ce9872a09f2f8760b9fdd38719943437d99415491b38fbc007dd2f21",
+      "original_severity": "MAJOR",
+      "title": "Known PID is mistaken for same live N epoch when injecting the deliberate fault",
+      "group": "R5C-CANCEL-ELIGIBILITY",
+      "original_locations": [
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 217
+        },
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 437
+        },
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 446
+        },
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 462
+        },
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 611
+        }
+      ],
+      "original_status": "NEW",
+      "current_closure": "OPEN_PENDING_HANDBACK_OR_FUTURE_BATCH",
+      "implementation_evidence": null,
+      "review_evidence": null,
+      "kernel_evidence": null
+    },
+    {
+      "id": "R5B-O04",
+      "source": "docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p5b-startup-and-owner/independent-review/positive-owner-review/FINDINGS.json",
+      "source_sha256": "6ed1f4a0ce9872a09f2f8760b9fdd38719943437d99415491b38fbc007dd2f21",
+      "original_severity": "MAJOR",
+      "title": "Reporting boundary is unused and does not guard the actual CLI stderr writes",
+      "group": "R5C-REPORTING",
+      "original_locations": [
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 282
+        },
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 537
+        },
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 738
+        },
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 772
+        },
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 787
+        }
+      ],
+      "original_status": "NEW",
+      "current_closure": "OPEN_PENDING_HANDBACK_OR_FUTURE_BATCH",
+      "implementation_evidence": null,
+      "review_evidence": null,
+      "kernel_evidence": null
+    },
+    {
+      "id": "R5B-O05",
+      "source": "docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p5b-startup-and-owner/independent-review/positive-owner-review/FINDINGS.json",
+      "source_sha256": "6ed1f4a0ce9872a09f2f8760b9fdd38719943437d99415491b38fbc007dd2f21",
+      "original_severity": "MAJOR",
+      "title": "No-birth and pre-authorisation held failures cannot reconcile even after real close becomes available",
+      "group": "R5C-STARTUP",
+      "original_locations": [
+        {
+          "path": "src/adapters/openfilm/cache-process-supervisor.ts",
+          "line": 1573
+        },
+        {
+          "path": "src/adapters/openfilm/cache-process-supervisor.ts",
+          "line": 1585
+        },
+        {
+          "path": "src/adapters/openfilm/cache-process-supervisor.ts",
+          "line": 2585
+        },
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 505
+        }
+      ],
+      "original_status": "STILL_OPEN",
+      "current_closure": "OPEN_PENDING_HANDBACK_OR_FUTURE_BATCH",
+      "implementation_evidence": null,
+      "review_evidence": null,
+      "kernel_evidence": null
+    },
+    {
+      "id": "R5B-O06",
+      "source": "docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p5b-startup-and-owner/independent-review/positive-owner-review/FINDINGS.json",
+      "source_sha256": "6ed1f4a0ce9872a09f2f8760b9fdd38719943437d99415491b38fbc007dd2f21",
+      "original_severity": "MAJOR",
+      "title": "Legacy wrapper retarget still self-pins current C, substitutes Host group count and treats timeout as runner close",
+      "group": "R5C-LEGACY",
+      "original_locations": [
+        {
+          "path": "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts",
+          "line": 145
+        },
+        {
+          "path": "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts",
+          "line": 157
+        },
+        {
+          "path": "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts",
+          "line": 160
+        },
+        {
+          "path": "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts",
+          "line": 179
+        },
+        {
+          "path": "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts",
+          "line": 202
+        }
+      ],
+      "original_status": "STILL_OPEN",
+      "current_closure": "OPEN_PENDING_HANDBACK_OR_FUTURE_BATCH",
+      "implementation_evidence": null,
+      "review_evidence": null,
+      "kernel_evidence": null
+    },
+    {
+      "id": "R3-C01",
+      "source": "docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p1r4-nofork/OPEN_PRODUCTION_FINDINGS.json",
+      "source_sha256": "73aeeee410706c9f0743d75407aac55e243921c284cf6416cd44ad0e03639e42",
+      "original_severity": "BLOCKER",
+      "title": "Read-only receipt snapshots destructively finalize hashes and break every normal positive proof",
+      "group": "R5A-RECEIPT-SNAPSHOT",
+      "original_locations": [
+        "src/adapters/openfilm/cache-process-supervisor.ts:584",
+        "src/adapters/openfilm/cache-process-supervisor.ts:589",
+        "src/adapters/openfilm/cache-process-supervisor.ts:1389",
+        "src/adapters/openfilm/cache-process-supervisor.ts:2228",
+        "src/adapters/openfilm/cache-process-supervisor.ts:2306"
+      ],
+      "original_status": "NEW",
+      "current_closure": "HISTORICAL_STATIC_ONLY_RECHECK_REQUIRED",
+      "implementation_evidence": null,
+      "review_evidence": null,
+      "kernel_evidence": null
+    },
+    {
+      "id": "R3-C02",
+      "source": "docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p1r4-nofork/OPEN_PRODUCTION_FINDINGS.json",
+      "source_sha256": "73aeeee410706c9f0743d75407aac55e243921c284cf6416cd44ad0e03639e42",
+      "original_severity": "MAJOR",
+      "title": "The nofork pilot still declares cleanup complete after timeout and lacks asynchronous startup ownership",
+      "group": "R5C-OWNER",
+      "original_locations": [
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts:97",
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts:139",
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts:146",
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts:154",
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts:161",
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts:231",
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts:254",
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts:302"
+      ],
+      "original_status": "STILL_OPEN",
+      "current_closure": "OPEN_PENDING_HANDBACK_OR_FUTURE_BATCH",
+      "implementation_evidence": null,
+      "review_evidence": null,
+      "kernel_evidence": null
+    },
+    {
+      "id": "R3-C03",
+      "source": "docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p1r4-nofork/OPEN_PRODUCTION_FINDINGS.json",
+      "source_sha256": "73aeeee410706c9f0743d75407aac55e243921c284cf6416cd44ad0e03639e42",
+      "original_severity": "MAJOR",
+      "title": "Real writable wait references a nonexistent custodian field",
+      "group": "R5A-WRITABLE",
+      "original_locations": [
+        "src/adapters/openfilm/cache-process-custodian.py:967",
+        "src/adapters/openfilm/cache-process-custodian.py:2003",
+        "src/adapters/openfilm/cache-process-custodian.py:2115",
+        "src/adapters/openfilm/cache-process-custodian.py:2146"
+      ],
+      "original_status": "STILL_OPEN",
+      "current_closure": "HISTORICAL_STATIC_ONLY_RECHECK_REQUIRED",
+      "implementation_evidence": null,
+      "review_evidence": null,
+      "kernel_evidence": null
+    },
+    {
+      "id": "R3-C04",
+      "source": "docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p1r4-nofork/OPEN_PRODUCTION_FINDINGS.json",
+      "source_sha256": "73aeeee410706c9f0743d75407aac55e243921c284cf6416cd44ad0e03639e42",
+      "original_severity": "MAJOR",
+      "title": "Resource-ended proof still rejects legitimate failed startup and cannot reconcile preHELLO failures",
+      "group": "R5C-STARTUP",
+      "original_locations": [
+        "src/adapters/openfilm/cache-process-supervisor.ts:822",
+        "src/adapters/openfilm/cache-process-supervisor.ts:1422",
+        "src/adapters/openfilm/cache-process-supervisor.ts:1640",
+        "src/adapters/openfilm/cache-process-supervisor.ts:1934",
+        "src/adapters/openfilm/cache-process-supervisor.ts:2291",
+        "src/adapters/openfilm/cache-process-custodian.py:1377",
+        "src/adapters/openfilm/cache-process-custodian.py:2082"
+      ],
+      "original_status": "STILL_OPEN",
+      "current_closure": "OPEN_PENDING_HANDBACK_OR_FUTURE_BATCH",
+      "implementation_evidence": null,
+      "review_evidence": null,
+      "kernel_evidence": null
+    },
+    {
+      "id": "R3-C05",
+      "source": "docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p1r4-nofork/OPEN_PRODUCTION_FINDINGS.json",
+      "source_sha256": "73aeeee410706c9f0743d75407aac55e243921c284cf6416cd44ad0e03639e42",
+      "original_severity": "MAJOR",
+      "title": "Unknown N identity can skip escalation and make a live TERM-ignore domain unrecoverable",
+      "group": "R5C-AUTHORITY",
+      "original_locations": [
+        "src/adapters/openfilm/cache-process-custodian.py:1468",
+        "src/adapters/openfilm/cache-process-custodian.py:1498",
+        "src/adapters/openfilm/cache-process-custodian.py:1639",
+        "src/adapters/openfilm/cache-process-custodian.py:771",
+        "src/adapters/openfilm/cache-process-custodian.py:1884"
+      ],
+      "original_status": "STILL_OPEN",
+      "current_closure": "OPEN_PENDING_HANDBACK_OR_FUTURE_BATCH",
+      "implementation_evidence": null,
+      "review_evidence": null,
+      "kernel_evidence": null
+    },
+    {
+      "id": "R3-C06",
+      "source": "docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p1r4-nofork/OPEN_PRODUCTION_FINDINGS.json",
+      "source_sha256": "73aeeee410706c9f0743d75407aac55e243921c284cf6416cd44ad0e03639e42",
+      "original_severity": "MAJOR",
+      "title": "Matching digests/counts still do not validate actual wait/identity semantics",
+      "group": "R6-RECEIPT-SEMANTICS",
+      "original_locations": [
+        "src/adapters/openfilm/cache-process-supervisor.ts:552",
+        "src/adapters/openfilm/cache-process-supervisor.ts:559",
+        "src/adapters/openfilm/cache-process-supervisor.ts:822",
+        "src/adapters/openfilm/cache-process-supervisor.ts:827",
+        "src/adapters/openfilm/cache-process-custodian.py:1965"
+      ],
+      "original_status": "STILL_OPEN",
+      "current_closure": "OPEN_PENDING_HANDBACK_OR_FUTURE_BATCH",
+      "implementation_evidence": null,
+      "review_evidence": null,
+      "kernel_evidence": null
+    },
+    {
+      "id": "R3-C07",
+      "source": "docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p1r4-nofork/OPEN_PRODUCTION_FINDINGS.json",
+      "source_sha256": "73aeeee410706c9f0743d75407aac55e243921c284cf6416cd44ad0e03639e42",
+      "original_severity": "MAJOR",
+      "title": "Diagnostic accounting stops as soon as settlement begins",
+      "group": "R6-DIAGNOSTICS",
+      "original_locations": [
+        "src/adapters/openfilm/cache-process-custodian.py:1192",
+        "src/adapters/openfilm/cache-process-custodian.py:1805",
+        "src/adapters/openfilm/cache-process-custodian.py:856",
+        "src/adapters/openfilm/cache-process-custodian.py:880",
+        "src/adapters/openfilm/cache-process-custodian.py:1761"
+      ],
+      "original_status": "STILL_OPEN",
+      "current_closure": "OPEN_PENDING_HANDBACK_OR_FUTURE_BATCH",
+      "implementation_evidence": null,
+      "review_evidence": null,
+      "kernel_evidence": null
+    },
+    {
+      "id": "R3-C08",
+      "source": "docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p1r4-nofork/OPEN_PRODUCTION_FINDINGS.json",
+      "source_sha256": "73aeeee410706c9f0743d75407aac55e243921c284cf6416cd44ad0e03639e42",
+      "original_severity": "MAJOR",
+      "title": "Identity budget failure becomes an irreversible responsibility hold even after all children end",
+      "group": "R6-OVERFLOW",
+      "original_locations": [
+        "src/adapters/openfilm/cache-process-custodian.py:1246",
+        "src/adapters/openfilm/cache-process-custodian.py:1607",
+        "src/adapters/openfilm/cache-process-custodian.py:1672",
+        "src/adapters/openfilm/cache-process-custodian.py:1860",
+        "src/adapters/openfilm/cache-process-supervisor.ts:783"
+      ],
+      "original_status": "STILL_OPEN",
+      "current_closure": "OPEN_PENDING_HANDBACK_OR_FUTURE_BATCH",
+      "implementation_evidence": null,
+      "review_evidence": null,
+      "kernel_evidence": null
+    },
+    {
+      "id": "R3-C09",
+      "source": "docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p1r4-nofork/OPEN_PRODUCTION_FINDINGS.json",
+      "source_sha256": "73aeeee410706c9f0743d75407aac55e243921c284cf6416cd44ad0e03639e42",
+      "original_severity": "MINOR",
+      "title": "Adopted TERM-ignore helper still has no ready/liveness barrier before leader leaves",
+      "group": "R6-ADOPTED-READINESS",
+      "original_locations": [
+        "tests/agent-driven/integration/helpers/cache-worker-fixture.mjs:235",
+        "tests/agent-driven/integration/helpers/cache-worker-fixture.mjs:321"
+      ],
+      "original_status": "STILL_OPEN",
+      "current_closure": "OPEN_PENDING_HANDBACK_OR_FUTURE_BATCH",
+      "implementation_evidence": null,
+      "review_evidence": null,
+      "kernel_evidence": null
+    },
+    {
+      "id": "R3-I01",
+      "source": "docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p1r4-nofork/OPEN_PRODUCTION_FINDINGS.json",
+      "source_sha256": "73aeeee410706c9f0743d75407aac55e243921c284cf6416cd44ad0e03639e42",
+      "original_severity": "MAJOR",
+      "title": "普通拒绝及真实失败拿不到完整阶段凭证，永久占住 whole-production scope",
+      "group": "R7-WORKSPACE-PROOF",
+      "original_locations": [
+        {
+          "path": "src/host/agent-driven/created-native-workspace.ts",
+          "line": 805
+        },
+        {
+          "path": "src/host/agent-driven/created-native-workspace.ts",
+          "line": 821
+        },
+        {
+          "path": "src/host/agent-driven/created-native-workspace.ts",
+          "line": 953
+        },
+        {
+          "path": "src/host/agent-driven/created-native-workspace.ts",
+          "line": 989
+        },
+        {
+          "path": "src/adapters/openfilm/openfilm-upstream.ts",
+          "line": 1782
+        }
+      ],
+      "original_status": "STILL_OPEN",
+      "current_closure": "OPEN_PENDING_HANDBACK_OR_FUTURE_BATCH",
+      "implementation_evidence": null,
+      "review_evidence": null,
+      "kernel_evidence": null
+    },
+    {
+      "id": "R3-I02",
+      "source": "docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p1r4-nofork/OPEN_PRODUCTION_FINDINGS.json",
+      "source_sha256": "73aeeee410706c9f0743d75407aac55e243921c284cf6416cd44ad0e03639e42",
+      "original_severity": "MAJOR",
+      "title": "原生成功但 tree release 失败仍提前 reject，绕过原 promise barrier",
+      "group": "R7-WORKSPACE-PROOF",
+      "original_locations": [
+        {
+          "path": "src/host/agent-driven/created-native-workspace.ts",
+          "line": 1085
+        },
+        {
+          "path": "src/host/agent-driven/created-native-workspace.ts",
+          "line": 1107
+        },
+        {
+          "path": "src/host/agent-driven/created-native-workspace.ts",
+          "line": 1110
+        },
+        {
+          "path": "src/host/agent-driven/created-native-workspace.ts",
+          "line": 1277
+        },
+        {
+          "path": "src/host/agent-driven/created-native-workspace.ts",
+          "line": 1288
+        }
+      ],
+      "original_status": "STILL_OPEN",
+      "current_closure": "OPEN_PENDING_HANDBACK_OR_FUTURE_BATCH",
+      "implementation_evidence": null,
+      "review_evidence": null,
+      "kernel_evidence": null
+    },
+    {
+      "id": "R3-I03",
+      "source": "docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p1r4-nofork/OPEN_PRODUCTION_FINDINGS.json",
+      "source_sha256": "73aeeee410706c9f0743d75407aac55e243921c284cf6416cd44ad0e03639e42",
+      "original_severity": "MAJOR",
+      "title": "reconcile 把 release 的幂等 no-op 当 fresh tree 结束证明",
+      "group": "R7-WORKSPACE-PROOF",
+      "original_locations": [
+        {
+          "path": "src/host/agent-driven/created-native-workspace.ts",
+          "line": 548
+        },
+        {
+          "path": "src/host/agent-driven/created-native-workspace.ts",
+          "line": 556
+        },
+        {
+          "path": "src/host/agent-driven/created-native-workspace.ts",
+          "line": 560
+        },
+        {
+          "path": "src/host/agent-driven/retained-native-closure.ts",
+          "line": 1321
+        },
+        {
+          "path": "src/host/agent-driven/retained-native-closure.ts",
+          "line": 1359
+        }
+      ],
+      "original_status": "NEW",
+      "current_closure": "OPEN_PENDING_HANDBACK_OR_FUTURE_BATCH",
+      "implementation_evidence": null,
+      "review_evidence": null,
+      "kernel_evidence": null
+    },
+    {
+      "id": "R3-I04",
+      "source": "docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p1r4-nofork/OPEN_PRODUCTION_FINDINGS.json",
+      "source_sha256": "73aeeee410706c9f0743d75407aac55e243921c284cf6416cd44ad0e03639e42",
+      "original_severity": "MAJOR",
+      "title": "direct bridge 的 handle 在 await 获准后创建，未进入可恢复 map",
+      "group": "R7-WORKSPACE-PROOF",
+      "original_locations": [
+        {
+          "path": "src/adapters/openfilm/openfilm-upstream.ts",
+          "line": 647
+        },
+        {
+          "path": "src/adapters/openfilm/openfilm-upstream.ts",
+          "line": 672
+        },
+        {
+          "path": "src/adapters/openfilm/openfilm-upstream.ts",
+          "line": 1692
+        },
+        {
+          "path": "src/adapters/openfilm/openfilm-upstream.ts",
+          "line": 1722
+        }
+      ],
+      "original_status": "STILL_OPEN",
+      "current_closure": "OPEN_PENDING_HANDBACK_OR_FUTURE_BATCH",
+      "implementation_evidence": null,
+      "review_evidence": null,
+      "kernel_evidence": null
+    },
+    {
+      "id": "R3-I05",
+      "source": "docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p1r4-nofork/OPEN_PRODUCTION_FINDINGS.json",
+      "source_sha256": "73aeeee410706c9f0743d75407aac55e243921c284cf6416cd44ad0e03639e42",
+      "original_severity": "MAJOR",
+      "title": "首个 nofork pilot 仍把 timeout 当 close；positive pilot 未登记完整 supervisor owner",
+      "group": "R5C-OWNER",
+      "original_locations": [
+        {
+          "path": "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts",
+          "line": 127
+        },
+        {
+          "path": "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts",
+          "line": 139
+        },
+        {
+          "path": "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts",
+          "line": 146
+        },
+        {
+          "path": "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts",
+          "line": 154
+        },
+        {
+          "path": "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts",
+          "line": 161
+        },
+        {
+          "path": "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts",
+          "line": 254
+        },
+        {
+          "path": "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts",
+          "line": 260
+        }
+      ],
+      "original_status": "STILL_OPEN",
+      "current_closure": "OPEN_PENDING_HANDBACK_OR_FUTURE_BATCH",
+      "implementation_evidence": null,
+      "review_evidence": null,
+      "kernel_evidence": null
+    }
+  ],
+  "original_gate_inventory": {
+    "source": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/N1N2_ACCEPTANCE_PLAN_CURRENT.json",
+    "original17": "17 exact original requirements imported; new-candidate verification pending",
+    "ISO01..18": "18 exact original scenario rows imported; current rev3 precedence explicit",
+    "warning": "35规划映射不是35已通过；待交还后填实际assertion/capture/产物/独立结论。"
+  },
+  "next_actions": [
+    "新429已确认停工：保留当前dirty/挂起测试真实终止证据，等待用户明确恢复；不重试/重启/切供应商/由Codex接实现",
+    "以当前源码填三层调用图、反例和同根因修复证据，不重开已验历史范围",
+    "两类独立安全复核合并裁决；修复后按影响重验",
+    "安全通过后另发精确固定当前摘要的N正常/故意失败运行票",
+    "R6/R7保留原case按生命周期联合推进，R8全量/真实媒体/新冻结独立审查",
+    "接受N1/N2后重锚next-wiring；在下一接线开工门停止"
+  ],
+  "new429": "STOP_NO_RETRY_NO_TAKEOVER",
+  "pending_main_observations": [
+    {
+      "id": "MAIN-R5C-NORMAL-EARLY-CANCEL",
+      "source": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p5c-owner-and-authority/independent-review/MAIN_NORMAL_PATH_COUNTEREXAMPLE.json",
+      "state": "STATIC_COUNTEREXAMPLE_PENDING_INDEPENDENT_DISPOSITION",
+      "related_group": "R5C-OWNER",
+      "disposition": "等待本轮两独立复审合并，不单独再发返修票，不签已修。"
+    }
+  ],
+  "R5C_review_progress": {
+    "startup": "REQUEST_CHANGES",
+    "owner": "REQUEST_CHANGES",
+    "startup_report": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p5c-owner-and-authority/independent-review/startup-reaper-review/FINDINGS.json",
+    "closure": "BOTH_VERIFIED_CONSOLIDATED",
+    "scope": "Original8 retained; no new runtime",
+    "owner_report": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p5c-owner-and-authority/independent-review/positive-owner-review/FINDINGS.json",
+    "next_release": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p5d-lifecycle-and-final-qualification/RELEASE.json"
+  },
+  "active_task_history": [
+    {
+      "superseded_at": "2026-11-15T08:51:04.545370+00:00",
+      "record": {
+        "task": "task_e200d7c555da",
+        "dispatch": "ctx_3f37cd7eb6c5",
+        "last_observed": "ready/input_accepted/live；以最新Orca事实为准",
+        "writer": "ClaudeCode",
+        "release": "repair-060p5c-owner-and-authority/RELEASE.json"
+      }
+    },
+    {
+      "superseded_at": "2026-11-15T14:07:22.733225+00:00",
+      "record": {
+        "task": "task_cee119e0c0e4",
+        "dispatch": "ctx_56269a1975dc",
+        "writer": "ClaudeCode",
+        "last_observed": "worker-start ready/terminal keptOpen",
+        "release": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p5e-proof-and-publication/RELEASE.json",
+        "stage": "R5E_INTERNAL_SELFVALIDATION_VERIFIED_TWO_INDEPENDENT_REVIEWS_PENDING",
+        "guard_approval": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p5e-proof-and-publication/MAIN_STAGE_A_APPROVAL.json",
+        "approval_reply": "msg_ba614742777d",
+        "updated_at": "2026-11-15T09:04:53.489154+00:00",
+        "runtime_release": false,
+        "source_write_release": false,
+        "stop_evidence": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p5e-proof-and-publication/429_PRESERVATION.json",
+        "resume_preflight": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p5e-proof-and-publication/USER_RESUME_001_PREFLIGHT.json",
+        "worker_done": "msg_32243a6ba755"
+      }
+    },
+    {
+      "at": "2026-11-15T14:53:46.205280+00:00",
+      "record": {
+        "task": "task_c8cd1822fb5a",
+        "dispatch": "ctx_26f931d899f4",
+        "writer": "ClaudeCode",
+        "stage": "R5F_SELFVALIDATION_FINAL2_VERIFIED_AFFECTED_REVIEW_PENDING",
+        "release": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p5f-joint-byte-check/RELEASE.json",
+        "last_observed": "ready via Orca send receipt",
+        "runtime_release": false,
+        "actualN": false,
+        "source_write_release": false
+      }
+    },
+    {
+      "at": "2026-11-15T15:00:07.346542+00:00",
+      "record": {
+        "task": "task_ca3cf8233a53",
+        "dispatch": "ctx_f3317764d1b0",
+        "writer": "IndependentCodex plan review only",
+        "stage": "MAIN full result schema and matrix F01..F10/C01..C10 reviewed before implementation",
+        "source_write_release": false,
+        "runtime_release": false,
+        "document": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p5g-result-contract/RESULT_CONTRACT_AND_CASE_MATRIX.md"
+      }
+    },
+    {
+      "at": "2026-11-15T15:38:42.978676+00:00",
+      "record": {
+        "task": "task_b825c9ccf24e",
+        "dispatch": "ctx_d9e6b0045d65",
+        "writer": "ClaudeCode",
+        "stage": "R5G_FINAL6_VERIFIED_SOURCE_FROZEN_CODE_REVIEW_PENDING",
+        "source_write_release": false,
+        "runtime_release": false,
+        "release": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p5g-result-contract/RELEASE.json",
+        "actualN": false,
+        "worker_done": "msg_ef1d210e1d4e"
+      }
+    },
+    {
+      "at": "2026-11-15T16:10:27.751072+00:00",
+      "record": {
+        "task": "task_c4c2fc5108aa",
+        "dispatch": "ctx_13fa8c9312fe",
+        "writer": "ClaudeCode",
+        "stage": "R5H_FINAL6_VERIFIED_SOURCE_FROZEN_CODE_REVIEW_PENDING",
+        "release": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p5h-required-nullable/RELEASE.json",
+        "source_write_release": false,
+        "runtime_release": false,
+        "actualN": false,
+        "worker_done": "msg_4f9f18fb3ba9"
+      }
+    },
+    {
+      "task": "task_abdd1dac7ceb",
+      "dispatch": "ctx_0540d5fc8146",
+      "writer": "ClaudeCode",
+      "stage": "R5I normal transport ordering precisecounterexample+minimalfix",
+      "release": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p5i-normal-transport/RELEASE.json",
+      "source_write_release": "original8max, minimal scope",
+      "runtime_release": "six pure/type/generate forms only",
+      "actualN": false
+    },
+    {
+      "stage": "R6 contract revision2 affected recheck",
+      "source_write_release": false,
+      "runtime_release": false,
+      "review_receipt": {
+        "dispatchId": "ctx_b3be2f145bc3",
+        "taskId": "task_2c1a04bc5465",
+        "runId": "run_399f9dd3ce5a",
+        "state": "ready",
+        "agent": "codex",
+        "terminal": "term_5d4d2f198ce6fabfa46ce174884e7a89"
+      },
+      "spec": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p6-protocol-and-settlement/SPEC.md",
+      "contract": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p6-protocol-and-settlement/MAIN_PRIVATE_CONTRACT_DRAFT.md",
+      "plan": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p6-protocol-and-settlement/MAIN_DEVELOPMENT_ACCEPTANCE_DRAFT.md"
+    },
+    {
+      "stage": "R6 C06..08 consolidated source/pure implementation",
+      "receipt": {
+        "dispatchId": "ctx_4cc02f3f2417",
+        "taskId": "task_d6998927a394",
+        "runId": "run_399f9dd3ce5a",
+        "state": "ready",
+        "agent": "claude",
+        "terminal": "term_6c97eb5314351e13dd96df0e8ff6c84c"
+      },
+      "release": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p6-protocol-and-settlement/RELEASE.json",
+      "source_write_release": true,
+      "actual_kernel_runtime_release": false
+    }
+  ],
+  "R5D_review_progress": {
+    "startup": "REQUEST_CHANGES",
+    "owner": "REQUEST_CHANGES",
+    "verified_inputs": [
+      91,
+      228
+    ],
+    "consolidation": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p5e-proof-and-publication/MAIN_COMBINED_ADJUDICATION.json",
+    "root_groups": [
+      "PURE_OS_GUARDS",
+      "ORIGINAL_GROUP_PROOF",
+      "REQUIRED_ARTIFACT_HASHES",
+      "FINAL_PUBLICATION_AND_CONSUMERS"
+    ],
+    "scope": "same8; no actualN permission",
+    "private_protocol": "positive-pilot-publication-v2 approved design, implementation and proof pending"
+  },
+  "R5E_review_progress": {
+    "state": "BOTH_VERIFIED_REQUEST_CHANGES_MAIN_ADJUDICATED",
+    "receipts": {
+      "startup-reaper-review": {
+        "delivery": "reopened",
+        "followUpOf": "ctx_576923d15f32",
+        "dispatchId": "ctx_a168b1218e41",
+        "taskId": "task_32be669a8e69",
+        "runId": "run_399f9dd3ce5a",
+        "state": "ready",
+        "agent": "codex",
+        "terminal": "term_e639754c173514092e6c1e0e513956be",
+        "workspace": "2e732423-9bcc-494c-a0ed-e27a9488f313::\\\\wsl.localhost\\Ubuntu-24.04\\home\\administrator\\orca\\workspaces\\Narralens\\Narralens-A-R1-MEDIA",
+        "next": "Orca wakes you when workers report; end your turn when you're done."
+      },
+      "positive-owner-review": {
+        "delivery": "reopened",
+        "followUpOf": "ctx_3f2ff07a92c8",
+        "dispatchId": "ctx_040cf9cee40b",
+        "taskId": "task_1a1a7c968b1f",
+        "runId": "run_399f9dd3ce5a",
+        "state": "ready",
+        "agent": "codex",
+        "terminal": "term_b6d55acff7fe51740af42c369010211c",
+        "workspace": "2e732423-9bcc-494c-a0ed-e27a9488f313::\\\\wsl.localhost\\Ubuntu-24.04\\home\\administrator\\orca\\workspaces\\Narralens\\Narralens-A-R1-BRIDGE",
+        "next": "Orca wakes you when workers report; end your turn when you're done."
+      }
+    },
+    "snapshot": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p5e-proof-and-publication/independent-review/INPUT_SNAPSHOT.json",
+    "six_capture_inputs": 651,
+    "selfvalidation_counts": {
+      "identity": 86,
+      "python": 59,
+      "pilot": 54
+    },
+    "acceptance": false,
+    "startup_verdict": "CONDITIONAL_STATIC_SAFE",
+    "startup_verified_inputs": 95,
+    "owner_verdict": "REQUEST_CHANGES_2MAJOR_1MINOR",
+    "owner_verified_inputs": 705,
+    "new_release": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p5f-joint-byte-check/RELEASE.json"
+  },
+  "R5F_review_progress": {
+    "state": "OWNER_VERIFIED_REQUEST_CHANGES_2MAJOR_STARTUP_NOT_REVIEWED",
+    "receipts": {
+      "startup-reaper-review": {
+        "delivery": "reopened",
+        "followUpOf": "ctx_a168b1218e41",
+        "dispatchId": "ctx_03db4f9bd2f6",
+        "taskId": "task_8cdb40b03614",
+        "runId": "run_399f9dd3ce5a",
+        "state": "outcome_unknown",
+        "agent": "codex",
+        "terminal": "term_d6e9dd456dd735bdb4c4a6626742b039",
+        "workspace": "2e732423-9bcc-494c-a0ed-e27a9488f313::\\\\wsl.localhost\\Ubuntu-24.04\\home\\administrator\\orca\\workspaces\\Narralens\\Narralens-A-R1-MEDIA",
+        "next": "Task typed in but the worker hasn't been seen starting; don't resend or abandon it. End your turn; Orca wakes you when it reports. If nothing arrives, run \"orca-ide\" \"orchestration\" \"worker-show\" \"--dispatch\" \"ctx_03db4f9bd2f6\"."
+      },
+      "positive-owner-review": {
+        "delivery": "reopened",
+        "followUpOf": "ctx_040cf9cee40b",
+        "dispatchId": "ctx_ef8ad1d1486d",
+        "taskId": "task_88b5c70d41e9",
+        "runId": "run_399f9dd3ce5a",
+        "state": "ready",
+        "agent": "codex",
+        "terminal": "term_571872d971db11ec65c3d4fe6a2d63ca",
+        "workspace": "2e732423-9bcc-494c-a0ed-e27a9488f313::\\\\wsl.localhost\\Ubuntu-24.04\\home\\administrator\\orca\\workspaces\\Narralens\\Narralens-A-R1-BRIDGE",
+        "next": "Orca wakes you when workers report; end your turn when you're done."
+      }
+    },
+    "selfvalidation_counts": {
+      "identity": 87,
+      "python": 59,
+      "pilot": 69
+    },
+    "six_final2_inputs": 651,
+    "timeout_adjustment": "Known failed final-pilot retained; 5s->20s test budget not yet accepted as root-cause proof",
+    "snapshot": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p5f-joint-byte-check/independent-review/INPUT_SNAPSHOT.json",
+    "owner_verified_inputs": 702,
+    "owner_review_sha256": "72edc0a9124045f0621eb17099f04a68c11b058f1e37e10d60585623282698cf",
+    "startup_failure": "routing initialization error; exact stopped/exited; no reviewPASS"
+  },
+  "R5G_plan_review": {
+    "state": "PLAN_READY_INPUTS_VERIFIED",
+    "read_inputs": 20,
+    "review_sha256": "721bb217a5bea8f1e84fc78f9b84f7db4bc69596cd03c67a73de0d810c60ef58",
+    "contract_sha256": "493f86e334b25a4d2fa240b2248f485c910f379747b9c7e1e91ec4b82f124319",
+    "implementation_findings": "STILL_OPEN until code review"
+  },
+  "R5G_code_review": {
+    "state": "VERIFIED_REQUEST_CHANGES_ONE_COMMON_MANDATORY_PRESENCE_GAP",
+    "receipt": {
+      "delivery": "reopened",
+      "followUpOf": "ctx_f3317764d1b0",
+      "dispatchId": "ctx_2a7c37059b82",
+      "taskId": "task_9cd115961cb0",
+      "runId": "run_399f9dd3ce5a",
+      "state": "ready",
+      "agent": "codex",
+      "terminal": "term_d211d826e1937aa6d25e1858066db147",
+      "workspace": "2e732423-9bcc-494c-a0ed-e27a9488f313::\\\\wsl.localhost\\Ubuntu-24.04\\home\\administrator\\orca\\workspaces\\Narralens\\Narralens-A-R1-BRIDGE",
+      "next": "Orca wakes you when workers report; end your turn when you're done."
+    },
+    "snapshot": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p5g-result-contract/code-review/INPUT_SNAPSHOT.json",
+    "selfvalidation_counts": {
+      "identity": 87,
+      "python": 59,
+      "pilot": 186
+    },
+    "actualN": false,
+    "timeout": "known20s and prior5s failures retained; unknown rootcause, not closed by greens",
+    "reviewed_inputs": 710,
+    "review_sha256": "3d8a001295529c2b96722221ecb84c8be00f710ed8b82fc55d2dcf489481651d",
+    "original_result_object_and_diagnostic_findings": "closed_static for named triggers; F07/F10 mandatory existence remain"
+  },
+  "R5H_code_review": {
+    "state": "STATIC_SAFE_VERIFIED_702_INPUTS",
+    "receipt": {
+      "delivery": "reopened",
+      "followUpOf": "ctx_2a7c37059b82",
+      "dispatchId": "ctx_bbd2701f911f",
+      "taskId": "task_a3dd7f4e2202",
+      "runId": "run_399f9dd3ce5a",
+      "state": "ready",
+      "agent": "codex",
+      "terminal": "term_86d6abc7f7e51dfe6d1de95df369f7fc",
+      "workspace": "2e732423-9bcc-494c-a0ed-e27a9488f313::\\\\wsl.localhost\\Ubuntu-24.04\\home\\administrator\\orca\\workspaces\\Narralens\\Narralens-A-R1-BRIDGE",
+      "next": "Orca wakes you when workers report; end your turn when you're done."
+    },
+    "snapshot": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p5h-required-nullable/code-review/INPUT_SNAPSHOT.json",
+    "selfvalidation_counts": {
+      "identity": 87,
+      "python": 59,
+      "pilot": 254
+    },
+    "scope": "twofiles changed; unchangedkernel/guards do not reopen",
+    "actualN": false,
+    "review_inputs": 702,
+    "review_sha256": "1c2b621c6e71eb7600d76e3f736161f0885fc9f7d9391ea70b041156c8a32dfc",
+    "production_major": 0,
+    "test_minor": "R5H-O01 carry and fix in R5I",
+    "count_correction": {
+      "candidate": 19,
+      "manifest": 8,
+      "final": 27,
+      "total": 54
+    }
+  },
+  "minimal_n_execution": {
+    "at": "2026-11-15T16:46:57.416376+00:00",
+    "state": "MINIMAL_NORMAL_AND_EXPECTED_FAULT_ACCEPTED",
+    "normal": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/pilot-060p5i-real-n/normal-002/MAIN_ACCEPTANCE.json",
+    "fault": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/pilot-060p5i-real-n/fault-001/MAIN_ACCEPTANCE.json",
+    "normal001_remains": "FAILED_PRESERVED",
+    "observer_normal002_defect": "Original NameError preserved; separate readonly supplement verified same execution, no product rerun",
+    "source_write_release": false,
+    "runtime_release": false,
+    "heavy_slot_reserved": false,
+    "next": "R6 current source gap audit and exact consolidated plan, no current code/runtime grant",
+    "not_accepted": [
+      "N1N2",
+      "R6",
+      "R7",
+      "R8",
+      "original17+ISO18",
+      "new frozen commit",
+      "NEXT wiring",
+      "video/Chrome/V1"
+    ]
+  }
+}

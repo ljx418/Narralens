@@ -1,0 +1,46 @@
+{
+  "at": "2026-11-15T07:44:17.982489+00:00",
+  "status": "REAL_RECORDED_RED_BASELINE_NOT_FINAL_ACCEPTANCE",
+  "captures": [
+    {
+      "capture": "n1n2-claude-060p5d-red-identity",
+      "exit": 1,
+      "log_sha256_matches": true,
+      "source_changed": [],
+      "source_added": [],
+      "production_before_fix_matches": {
+        "src/adapters/openfilm/cache-process-supervisor.ts": true,
+        "src/adapters/openfilm/cache-process-custodian.py": true,
+        "tools/native-cache-normal-pilot.ts": true
+      },
+      "log_tail": "tance.inspectCleanup(handle).cleanup_required).toBe(true…\n    1369|   });\n\n⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/6]⎯\n\n FAIL  tests/agent-driven/integration/cache-process-identity.test.ts > a startup whose original epoch was NEVER bound > exposes the ACTUAL terminal proof observations of the custodian\nAssertionError: expected undefined to be defined\n ❯ tests/agent-driven/integration/cache-process-identity.test.ts:1401:23\n    1399|     const observations = snapshot.terminal_proof?.observations ?? [];\n    1400|     const custodian = observations.find(entry => entry.kind === \"custo…\n    1401|     expect(custodian).toBeDefined();\n       |                       ^\n    1402|     expect(custodian?.presence).toBe(\"gone\");\n    1403|     expect(typeof custodian?.at).toBe(\"number\");\n\n⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/6]⎯\n\n\n Test Files  1 failed (1)\n      Tests  6 failed | 77 passed (83)\n   Start at  15:43:11\n   Duration  5.58s (transform 249ms, setup 0ms, collect 947ms, tests 2.35s, environment 0ms, prepare 1.56s)\n\n"
+    },
+    {
+      "capture": "n1n2-claude-060p5d-red-pilot",
+      "exit": 1,
+      "log_sha256_matches": true,
+      "source_changed": [],
+      "source_added": [],
+      "production_before_fix_matches": {
+        "src/adapters/openfilm/cache-process-supervisor.ts": true,
+        "src/adapters/openfilm/cache-process-custodian.py": true,
+        "tools/native-cache-normal-pilot.ts": true
+      },
+      "log_tail": "    |                                      ^\n    840|     expect(final?.reporting_failure).not.toBeNull();\n    841|     expect(outcome.faultCasePassed).toBe(false);\n\n⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/12]⎯\n\n FAIL  tests/agent-driven/integration/native-cache-normal-pilot.test.ts > the final qualification of a run > is NOT green when the manifest of the artifacts could not be built\nAssertionError: expected 'ok' not to be 'ok' // Object.is equality\n ❯ tests/agent-driven/integration/native-cache-normal-pilot.test.ts:861:30\n    859|     // green and the final record says why.\n    860|     expect(final?.kind).not.toBe(\"ok\");\n    861|     expect(outcome.kind).not.toBe(\"ok\");\n       |                              ^\n    862|     expect(outcome.exitCode).toBe(1);\n    863|   });\n\n⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/12]⎯\n\n\n Test Files  1 failed (1)\n      Tests  12 failed | 27 passed (39)\n   Start at  15:43:31\n   Duration  2.86s (transform 182ms, setup 0ms, collect 278ms, tests 98ms, environment 0ms, prepare 1.65s)\n\n"
+    },
+    {
+      "capture": "n1n2-claude-060p5d-red-python",
+      "exit": 1,
+      "log_sha256_matches": true,
+      "source_changed": [],
+      "source_added": [],
+      "production_before_fix_matches": {
+        "src/adapters/openfilm/cache-process-supervisor.ts": true,
+        "src/adapters/openfilm/cache-process-custodian.py": true,
+        "tools/native-cache-normal-pilot.ts": true
+      },
+      "log_tail": "                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAttributeError: module 'narralens_cache_custodian' has no attribute 'MAX_RETAINED_SIGNAL_FACTS'\n\n======================================================================\nFAIL: test_a_revoked_authority_still_proves_that_the_original_domain_ended (__main__.TheRevokedAuthorityStillProvesTheDomain.test_a_revoked_authority_still_proves_that_the_original_domain_ended)\nTERM ends N; N is really reaped; the group probe is unknown.\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/helpers/cache-custodian-unit.py\", line 1724, in test_a_revoked_authority_still_proves_that_the_original_domain_ended\n    self.assertIn(200, self.waits)\nAssertionError: 200 not found in []\n\n----------------------------------------------------------------------\nRan 54 tests in 0.060s\n\nFAILED (failures=1, errors=1)\n"
+    }
+  ],
+  "limits": "证明新增断言在当时源上的失败，不证明已修、不证明内核；部分测试可能基于新增接口不存在而失败，需交还逐项区分语义反例与缺接口。"
+}

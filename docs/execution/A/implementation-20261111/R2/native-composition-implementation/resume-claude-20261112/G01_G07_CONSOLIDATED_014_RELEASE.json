@@ -1,0 +1,53 @@
+{
+  "release_id": "N1N2-G01-G07-CONSOLIDATED-014",
+  "at": "2026-11-12T13:43:21.710957+00:00",
+  "writer": "ctx_b4086093cd96",
+  "task": "task_5dcbe8192764",
+  "source_root": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+  "base_head": "e2eff61b464d75d36598103d718cd2a75db5dfda",
+  "pre_edit_hashes": {
+    "src/host/agent-driven/committed-snapshot-authority.ts": "f8470afddb8e8732edb112379902c3e28f51892a0104d6182f13207d473906c9",
+    "src/host/agent-driven/created-native-workspace.ts": "b57bed5df0ea600a2aa1a5b2dc3df2873f794389ee5274f32efb52a6f3d653ad",
+    "src/host/m5/openfilm-native-expected.ts": "19110e45a83b6d5b611b4260620ce873f923f1e5a5b907bc6176c4b734fbeed3",
+    "src/host/agent-driven/retained-native-closure.ts": "ab6697759a85c4a0b787ad00ce57b2a25680c5fb9630cf6a7797a10aa775a48e",
+    "src/host/agent-driven/created-native-source-reader.ts": "b386615cb4036f0ce3d2bc65a5d9aa99ee8bc9c191f3468eb15baf65b2a33aa1",
+    "tests/agent-driven/integration/created-native-workspace.test.ts": "439d469032c9af2b83ceb826e0aead7cf5c2fe5c5693be7cbf18c8e67f0f615f",
+    "tests/agent-driven/integration/committed-snapshot-host.test.ts": "bfd0c6373b254050d32a6a99e7b6f8b9827dc24b6b2587515ab4c5aad2cd9037",
+    "tests/agent-driven/integration/created-native-ack.test.ts": "5f50db85c7c07a2ecf4faefc20ec2ec6c7ad4910fafe549c2edc76bbad729c7c",
+    "tests/agent-driven/integration/created-native-source-reader.test.ts": "bf1a7e3394142a07aa08ea3799fbe9ed3e2e9276ecbc0f6786e945ea40f72b6b",
+    "tests/agent-driven/integration/helpers/native-source-fixture.ts": "19cb73cb9d69394e550699d3363128a4ea60e96a3f28f22e1ea4fce01c6dda0a"
+  },
+  "proposal_sha256": "eedc56388ebfcd833256b92be364a89258105a9fc285e57205585b02daaa79f3",
+  "writable_paths": [
+    "src/host/agent-driven/retained-native-closure.ts",
+    "src/host/agent-driven/committed-snapshot-authority.ts",
+    "src/host/agent-driven/created-native-source-reader.ts",
+    "src/host/agent-driven/created-native-workspace.ts",
+    "src/host/agent-driven/native-cache-witness.ts",
+    "src/adapters/openfilm/openfilm-upstream.ts",
+    "tests/agent-driven/integration/created-native-source-reader.test.ts",
+    "tests/agent-driven/integration/helpers/native-source-fixture.ts",
+    "tests/agent-driven/integration/committed-snapshot-host.test.ts",
+    "tests/agent-driven/integration/native-cache-witness.test.ts"
+  ],
+  "baseline_additional": {
+    "src/host/agent-driven/native-cache-witness.ts": "NOT_EXISTING_NEW_RELEASE",
+    "src/adapters/openfilm/openfilm-upstream.ts": "7593c4d7e0cbffeb309d29dd8204aa765b769d7d7c6ffffa3f1b32bcffcb19ca",
+    "tests/agent-driven/integration/native-cache-witness.test.ts": "NOT_EXISTING_NEW_RELEASE"
+  },
+  "scope": "ALLoriginalG01G07+17requirements; no scopewaiver; MAINconstraints and explicitreplyoverrideearlierdrafts",
+  "constraints": "G01_G07_CONSOLIDATED_014_RELEASE.md",
+  "runtime": "ONLYstandingexactrecordedserialtsc; no vitest/Host/media/browser/build untilfreshgrant",
+  "protected": [
+    "AGENTS.md",
+    "Expectedimplementation",
+    "oldlegacyassertions",
+    "publiccontracts/DTO",
+    "EnginePort7",
+    "sourceArtifact/pin/vendor/deps/config",
+    "gitindex/HEAD exceptMAINfreeze"
+  ],
+  "git": "noadd/commit/reset/stash/checkout/push",
+  "new429": "STOP noretry/noalternativewriter",
+  "implementation_state": "RELEASED_NOT_IMPLEMENTED_NOT_TESTED"
+}

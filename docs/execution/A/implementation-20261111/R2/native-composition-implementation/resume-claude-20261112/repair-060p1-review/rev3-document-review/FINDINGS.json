@@ -1,0 +1,177 @@
+{
+  "format": "narralens.independent-ADR060-rev3-review@1",
+  "verdict": "DOCUMENT_PLAN_READY",
+  "scope": "Architecture/repair-contract document review only",
+  "counts": {
+    "BLOCKER": 0,
+    "MAJOR": 0,
+    "MINOR": 0
+  },
+  "findings": [],
+  "target_adr_sha256": "326bed74476956e363a1168460803f35b57e088259cf30e6a6c1315583d395ac",
+  "binding_status": "ADR plus all five normative references match exact SHA256; prior rev2 matches",
+  "P1_design_coverage": [
+    {
+      "id": "P1-F01",
+      "adr_lines": "37",
+      "design_answer": "正确PID/state解析及UNKNOWN分支、真实自身identity测试",
+      "status": "DESIGN_COVERED_IMPLEMENTATION_NOT_VERIFIED"
+    },
+    {
+      "id": "P1-F02",
+      "adr_lines": "38",
+      "design_answer": "C真实close/reap、目标reaped回执与新鲜身份/组证明，deadline不替代结束",
+      "status": "DESIGN_COVERED_IMPLEMENTATION_NOT_VERIFIED"
+    },
+    {
+      "id": "P1-F03",
+      "adr_lines": "39",
+      "design_answer": "具体issuer、仅held且run让出责任，完整execution证明",
+      "status": "DESIGN_COVERED_IMPLEMENTATION_NOT_VERIFIED"
+    },
+    {
+      "id": "P1-F04",
+      "adr_lines": "40,49,51",
+      "design_answer": "真实生产owner账本/opaque handle、失败锁存、分层恢复与原finally一次释放",
+      "status": "DESIGN_COVERED_IMPLEMENTATION_NOT_VERIFIED"
+    },
+    {
+      "id": "P1-F05",
+      "adr_lines": "17,25,41",
+      "design_answer": "两级真实spawn/fork绑定、未reap锚、正确PGID/SID，先验证再采纳",
+      "status": "DESIGN_COVERED_IMPLEMENTATION_NOT_VERIFIED"
+    },
+    {
+      "id": "P1-F06",
+      "adr_lines": "31,42",
+      "design_answer": "完整候选/close等所有阻塞点受实际deadline/cancel控制",
+      "status": "DESIGN_COVERED_IMPLEMENTATION_NOT_VERIFIED"
+    },
+    {
+      "id": "P1-F07",
+      "adr_lines": "27,29,43",
+      "design_answer": "两通道单writer、增量总buffer/帧阶段预算、背压及正向合法最大输入",
+      "status": "DESIGN_COVERED_IMPLEMENTATION_NOT_VERIFIED"
+    },
+    {
+      "id": "P1-F08",
+      "adr_lines": "44",
+      "design_answer": "首await前accepted登记、未GO取消、获准后重验与共享close promise",
+      "status": "DESIGN_COVERED_IMPLEMENTATION_NOT_VERIFIED"
+    },
+    {
+      "id": "P1-F09",
+      "adr_lines": "45",
+      "design_answer": "单调outcome/exit/finalize真值表，不由candidate+组空推成功",
+      "status": "DESIGN_COVERED_IMPLEMENTATION_NOT_VERIFIED"
+    },
+    {
+      "id": "P1-F10",
+      "adr_lines": "46",
+      "design_answer": "真实source close门与原error/destroy异常，父drain未知不释放",
+      "status": "DESIGN_COVERED_IMPLEMENTATION_NOT_VERIFIED"
+    },
+    {
+      "id": "P1-F11",
+      "adr_lines": "47",
+      "design_answer": "实际pgid枚举及detached独立实证",
+      "status": "DESIGN_COVERED_IMPLEMENTATION_NOT_VERIFIED"
+    }
+  ],
+  "counterexamples_considered": [
+    {
+      "scenario": "目标N/Chrome TERM-ignore，最终需KILL N组",
+      "analysis": "C位于另一SID/PGID且存活，N死亡后收养孤儿，C waitpid非N后代，保留WNOWAIT N锚至所有组信号已结束，再最后reap；文档没有依赖已死worker或WSL PID1完成正常回收。",
+      "limit": "实际内核/Chrome行为未运行证明。"
+    },
+    {
+      "scenario": "N在setsid前/exec失败，或N身份不匹配",
+      "analysis": "两级握手与CLOEXEC状态、未GO约束，规范引用明确区分尚未确认N组时只处置真实未reap直接child，不能误杀C组；Host不采纳未验证leader。"
+    },
+    {
+      "scenario": "N已是zombie，组未空",
+      "analysis": "保锚阶段不要求ESRCH；先reap其他child，最后reap N再查ECHILD/组ESRCH/known IDs，顺序没有自相矛盾。"
+    },
+    {
+      "scenario": "Host不读控制输出/断管",
+      "analysis": "C selectors/有界队列继续清理，不被flush或ACK阻塞；Host断管不准C先死。精确队列/EOF映射列入R3-R02的release展开。"
+    },
+    {
+      "scenario": "C自身意外SIGKILL或权限/身份未知",
+      "analysis": "明确保全异常，不声明自动恢复wait父权威，不用旧数字signal，不签draw完成；不把正常TERM-ignore归入该例外。"
+    },
+    {
+      "scenario": "reconcile时ref已失效、仅execution已结束但父probe/源流/PRE仍持有",
+      "analysis": "51行将cleanup权威与创作授权分开，并选择supervisor仅execution、bridge继续父drain、workspace保留树；可按R3-R01展开非循环分阶段接口。不得把completion理解为supervisor可直接clear整个scope。"
+    },
+    {
+      "scenario": "正常stdio-close与execFile error callback被混淆",
+      "analysis": "55–59及完整规范引用均纠正该混淆；默认保留上游probe，真实事件pilot及条件owner是明确裁决，无预授权改公开路由。"
+    }
+  ],
+  "release_requirements": [
+    {
+      "id": "R3-R01",
+      "topic": "F04精确completion与held解除顺序",
+      "basis": [
+        "ADR:19",
+        "ADR:40",
+        "ADR:51"
+      ],
+      "status": "EXPLICIT_RELEASE_INTERFACE_FREEZE_REQUIRED_NOT_NEW_ARCHITECTURE_BLOCKER",
+      "minimum_expansion": [
+        "为同一responsibility标明execution gate与整个production settlement是不同阶段：supervisor拿到匹配C receipt+实际C close/reap+新鲜证明后，只解除execution等待，让原bridge continuation继续；scope仍active且cleanup-held，不能在supervisor层归还根/容量。",
+        "原bridge继续freeze/drain真实HTTP/source/probe，再endDraw；workspace原operation随后处理其锁存失败或POST及两tree释放。任何parent/tree释放未知仍留同一责任，不得以execution结束清掉这些unknown。",
+        "最终私有completion必须绑定issuer、同一reservation/draw、实际scope对象及generation/root身份、各阶段真实receipt和锁存outcome；由完整scope owner在所有所需资源真正结束后一次消费。先清同一cleanup-held标记，再由原outer finally释放active scope一次；两步间不得让出事件循环、开放新准入或接受外部callback。不得提供裸clear(scope)给diagnostic或caller。",
+        "若具体实现把execution与whole production共用一个promise，必须拆分或提供等价的owner内部continuation，禁止reconcile等待父drain、父drain又等待同一个未解除execution barrier的自锁。ref过期允许cleanup；不允许因此恢复witness/创作权限。"
+      ],
+      "validation": "ISO-11/06/12/13/16：真实held恢复后parent drain仍阻塞、PRE真实close仍阻塞时无新draw/root release；全部结束后一次释放且下一draw成功；失败reconcile保持原失败无witness。"
+    },
+    {
+      "id": "R3-R02",
+      "topic": "通道EOF与两级权限的具体实现映射",
+      "basis": [
+        "ADR:25",
+        "ADR:27",
+        "ADR:29",
+        "lifecycle-design/REVIEW.md 两通道节"
+      ],
+      "status": "RELEASE_PROTOCOL_FREEZE_REQUIRED",
+      "minimum_expansion": [
+        "列明Host/C/N各自持有的socket端、dup2/close/CLOEXEC表与实际identity receipt字段/seq；C关闭N绘制端后，不应声称C自己直接观测该通道EOF。由Host观测N绘制EOF并发C取消；Host控制断管由C本地观测并按本地deadline清理。",
+        "pre-setsid/exec失败只在确认未GO/无后代且真实未reap直接child范围做精确信号，不误发C组。",
+        "固定每帧、未消费buffer、控制队列、diagnostic/身份记录的上限/超限状态，以及final receipt保留/背压/失联路径；flush受阻不能阻塞kill/wait。"
+      ],
+      "validation": "两通道端点/inode泄漏、Host失联、绘制EOF、控制背压、预算洪水与正常最大请求对照。"
+    },
+    {
+      "id": "R3-R03",
+      "topic": "环境/回收能力与兼容基线",
+      "basis": [
+        "ADR:15",
+        "ADR:17",
+        "ADR:59",
+        "ADR:65",
+        "ADR:69–73"
+      ],
+      "status": "RUNTIME_AND_RELEASE_PREREQUISITES_NOT_EXECUTED",
+      "minimum_expansion": [
+        "固定已有解释器绝对路径/版本/字节及-I -S -B、Python/libc/wait能力校验和manifest；Python语法parse与真实执行分票。",
+        "先完成P2a真实C/prctl/fork/setsid/WNOWAIT/reap/peer/EOF/C死亡负例，P2b当前Chrome两帧+poster、原预算和原17/ISO18不减；小helper不能替代Chrome。",
+        "保持上游probe默认，Q2事件pilot后MAIN才条件决定窄owner；保持同key缓存、argv、20s、错误/输出语义，helper/injected error明确标注。",
+        "冻结精确路径、私有类型/调用点、初始argv/cwd/资源/捕获与停止条件；原记录器不改，旧失败仍UNRECORDED，后续失败先recorder。"
+      ],
+      "validation": "按ADR P2a/P2b及原17/ISO-01..18；当前全部NOT_RUN。"
+    }
+  ],
+  "runtime": "ALL_NOT_RUN",
+  "not_accepted": [
+    "P1 source fixes",
+    "Python/prctl/wait/FD runtime",
+    "P2a/P2b",
+    "N1N2",
+    "NativeAck/Studio",
+    "A/V1",
+    "human acceptance"
+  ]
+}

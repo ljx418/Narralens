@@ -1,0 +1,358 @@
+{
+  "format": "narralens.R5C.positive-owner.static-review@1",
+  "verdict": "REQUEST_CHANGES",
+  "binding": {
+    "accepted_handback": "msg_0e1f69a0c119",
+    "implementation_task": "task_e200d7c555da",
+    "implementation_dispatch": "ctx_3f37cd7eb6c5",
+    "review_task": "task_8c84448c6623",
+    "review_dispatch": "ctx_3f1bdc35536b",
+    "historical_head": "1d348d419120f23f45d958112ea8c43df5a04675",
+    "accepted_new_commit": null
+  },
+  "counts": {
+    "BLOCKER": 0,
+    "MAJOR": 6,
+    "MINOR": 1
+  },
+  "prior_findings": [
+    {
+      "prior_id": "R5B-O01",
+      "status": "STILL_OPEN",
+      "basis": "Partial registry/allocated-root ownership and original-promise finally improved; normal premature cancellation and missing-root evidence remain R5C-O01/O06."
+    },
+    {
+      "prior_id": "R5B-O02",
+      "status": "STILL_OPEN",
+      "basis": "First Error identity and late raw result capture fixed; repeated primary provenance and ignored raw cleanup remain R5C-O03/O04."
+    },
+    {
+      "prior_id": "R5B-O03",
+      "status": "CLOSED_STATIC",
+      "basis": "Actual full tuple/state and GO pid/ticket digest + final synchronous no-await comparison wired; distinct initial-readiness defect is R5C-O02."
+    },
+    {
+      "prior_id": "R5B-O04",
+      "status": "STILL_OPEN",
+      "basis": "Actual protected R4B factory/default listener+callback/same instance now wired, but late report error leaves a passing expected-fault artifact: R5C-O05."
+    },
+    {
+      "prior_id": "R5B-O05",
+      "status": "CLOSED_STATIC",
+      "basis": "Original ledger chooses no-birth/no-authorise proof and actual late-close mocks settle original promise; authorised-without-proof still held. Limited to old issue, no blanket startup/kernel acceptance."
+    },
+    {
+      "prior_id": "R5B-O06",
+      "status": "CLOSED_STATIC",
+      "basis": "Legacy explicit pin/real runner close/receipt remove self-pin, timer and Host group-count surrogate; standalone positive tool still has new defects."
+    }
+  ],
+  "focused_requirements": [
+    {
+      "id": "S03",
+      "status": "STILL_OPEN",
+      "basis": "R5C-O01/O06; improved original-promise barrier does not permit cancelling ordinary pending work."
+    },
+    {
+      "id": "S04",
+      "status": "STILL_OPEN",
+      "basis": "Actual factory wiring closed statically, final persistent reporting qualification R5C-O05 remains."
+    },
+    {
+      "id": "S06",
+      "status": "STILL_OPEN",
+      "basis": "R5C-O02/O03/O04; comparator improvement is not initial readiness or idempotent primary provenance."
+    }
+  ],
+  "findings": [
+    {
+      "id": "R5C-O01",
+      "severity": "MAJOR",
+      "status": "NEW",
+      "prior_ids": [
+        "R5B-O01",
+        "S03"
+      ],
+      "title": "Normal mode cancels its own real asynchronous start before waiting for the normal result",
+      "locations": [
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 930
+        },
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 935
+        },
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 950
+        },
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 678
+        },
+        {
+          "path": "src/adapters/openfilm/cache-process-supervisor.ts",
+          "line": 1541
+        }
+      ],
+      "reachable_trigger": "Run the exact --mode normal CLI with REAL_DEPENDENCIES and valid pins.",
+      "actual_call": "start() invokes asynchronous #run and returns the original pending settlement promise. normal has no mode await at935–938, so finally immediately calls continueToTerminal; inspect is not settled, so683 requestCancel(DRAW_NOT_SETTLED) latches a failure and sends CANCEL before normal C/N handshake/draw can finish.",
+      "impact": "The exact positive control cannot normally reach exit0/exact image: it initiates its own failure. Existing normal stub settles synchronously inside start168–173, hiding the real event-loop ordering.",
+      "contract": "SPEC3 normal-path canonical continuation must follow original production, not synthesize a failure merely because asynchronous work is not already complete; SPEC6 exact normal success remains required.",
+      "minimal_fix": "Wait for the normal result/held transition within the owning continuation without cancelling merely-pending valid work. Keep error/cancellation and held recovery inside the same unconditional finally/barrier; cancel only when a real owner failure/explicit cancellation or production deadline requires it. Do not introduce a responsibility expiry.",
+      "direct_counterexample": "Actual runPositivePilot + a deferred supervisor whose start remains pending for several turns and then completes normal exact image: before release of that result, cancelErrors must stay empty and tool promise pending; after resolution expect ok/exit0. Add the same orchestration over real supervisor with child/protocol adapters so HELLO occurs after start returns.",
+      "runtime": "NOT_RUN; static reachable counterexample, not a captured old-code failure"
+    },
+    {
+      "id": "R5C-O02",
+      "severity": "MAJOR",
+      "status": "NEW",
+      "prior_ids": [
+        "R5B-O03",
+        "S06"
+      ],
+      "title": "Assertion-failure mode refuses before waiting for a real worker HELLO",
+      "locations": [
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 771
+        },
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 772
+        },
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 783
+        },
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 937
+        },
+        {
+          "path": "src/adapters/openfilm/cache-process-supervisor.ts",
+          "line": 1541
+        }
+      ],
+      "reachable_trigger": "Run exact --mode assertion-failure with real asynchronously starting C/N and valid silent fixture.",
+      "actual_call": "Immediately after start the mode calls acceptedWorker; at this point real supervisor has not received asynchronous C_HELLO/FORKED/N_HELLO. worker=null goes straight to refuse(WORKER_NOT_OBSERVED), requestCancel and return. waitForLiveWorker is reached only after worker already exists and waitForAuthorisation, so it cannot bridge this initial state.",
+      "impact": "The real expected-fault case is cancelled before same-N HELLO+GO+live, and can never qualify as the intended deliberate failure. Stub diagnosticSnapshot advertises worker from construction, so its passing case does not model startup.",
+      "contract": "SPEC5: observe same accepted live N and root-bound GO before intentional injection; an absent worker before asynchronous startup is not itself a failed observation deadline.",
+      "minimal_fix": "First wait for an accepted N epoch with bounded observation/deadline plus owner failure detection; then wait for matching GO and perform final synchronous fresh full-tuple/live check immediately before intentional cancel. Preserve the final no-await guard and same raw promise/finally on any real failure.",
+      "direct_counterexample": "Initially diagnostic worker=null, asynchronously publish accepted epoch, later append complete matching GO. Assert no cancel before those events, one EXPECTED_ASSERTION_FAILURE after fresh live check, and proper timeout/error controls if readiness truly fails. Use real supervisor event adapters as well as delayed stub.",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "id": "R5C-O03",
+      "severity": "MAJOR",
+      "status": "STILL_OPEN",
+      "prior_ids": [
+        "R5B-O02",
+        "S06"
+      ],
+      "title": "Repeated owned cancellation destroys accepted primary provenance",
+      "locations": [
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 812
+        },
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 683
+        },
+        {
+          "path": "src/adapters/openfilm/cache-process-supervisor.ts",
+          "line": 1740
+        },
+        {
+          "path": "src/adapters/openfilm/cache-process-supervisor.ts",
+          "line": 1754
+        },
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 1000
+        }
+      ],
+      "reachable_trigger": "Call requestCancel twice with the same issued handle and same original Error while unsettled; the tool itself does this after intentional cancellation whenever cleanup has not completed before finally. The tool path is presently masked by O02, but the actual private method is directly reachable and repetition is expressly supported.",
+      "actual_call": "First call preserves Error and accepted_as_primary=true. Second call sees latched.kind=failure and overwrites cancelProvenance with accepted_as_primary=false/superseded=true even when facts.error is that very same cancellation. finally repeats cancel; judge then requires accepted_as_primary=true.",
+      "impact": "The raw error remains correct but diagnostic/provenance falsely describes an earlier unrelated primary, so a properly cancelled expected failure is disqualified. The stub's repeated requestCancel leaves its provenance unchanged and therefore disagrees with production.",
+      "contract": "SPEC5 and RELEASE private cancel surface: earliest original cause and idempotence preserved; repeated calls cannot rewrite whether the accepted original cancellation was primary.",
+      "minimal_fix": "Persist the first accepted cancellation provenance separately from later cancel requests. Same accepted cause repeated must be an idempotent observation; distinguish genuinely earlier native/transport failures or different later cancel reasons without rewriting primary history.",
+      "direct_counterexample": "Actual CacheProcessSupervisor reserve -> requestCancel(handle,E) twice -> start (no spawn). Assert error===E, accepted_as_primary=true and superseded=false after both calls; separate earlier native failure keeps accepted=false. Then compose actual cancellation with tool finally during deferred cleanup.",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "id": "R5C-O04",
+      "severity": "MAJOR",
+      "status": "STILL_OPEN",
+      "prior_ids": [
+        "R5B-O02",
+        "S06"
+      ],
+      "title": "Raw cleanup failures are counted then discarded instead of qualifying either case",
+      "locations": [
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 701
+        },
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 720
+        },
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 996
+        },
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 1002
+        },
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 1011
+        },
+        {
+          "path": "src/adapters/openfilm/cache-process-supervisor.ts",
+          "line": 1895
+        },
+        {
+          "path": "src/adapters/openfilm/cache-process-supervisor.ts",
+          "line": 2008
+        }
+      ],
+      "reachable_trigger": "A settlement has the intended error/null image and raw cleanup errors; or normal has exact image/no business error but a cleanup/removal failure is recorded. This remains relevant once O01/O02 allow real modes to progress.",
+      "actual_call": "continueToTerminal only stores picture/error; value.cleanup is reduced to a timeline count and not retained in state. Neither judge branch reads it, and noUnrelatedFailure omits snapshot.cleanup_failures and other unexpected native cleanup diagnostics. Post-settlement private-run-directory rm failures can be visible only in diagnostic cleanup_failures, which is also ignored.",
+      "impact": "The tool can qualify fault-observed or normal ok despite unrelated cleanup failure, contrary to exact pilot acceptance. A valid raw domain proof does not erase failed cleanup actions or their original errors.",
+      "contract": "SPEC5/6 require original raw settlement and no unrelated native/transport/cleanup/evidence/report failures; counts do not replace those facts.",
+      "minimal_fix": "Keep the original settlement and bounded serialized cleanup facts in run state/evidence. Both qualification branches require no unexpected cleanup failures, including later owner/run-directory cleanup diagnostics; distinguish expected deliberate error from additional failed cleanup. Do not erase or replace original Error objects in memory.",
+      "direct_counterexample": "Actual tool orchestration returns exact image/error=null/cleanup=[E] -> never ok; exact intentional Error + null image + accepted provenance but cleanup=[E] -> never fault-observed. Also snapshot.cleanup_failures>0 with raw cleanup=[] must be disqualified and recorded. Exercise real supervisor fs-removal error adapter before final diagnostic.",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "id": "R5C-O05",
+      "severity": "MAJOR",
+      "status": "STILL_OPEN",
+      "prior_ids": [
+        "R5B-O04",
+        "S04"
+      ],
+      "title": "Late reporting failure leaves a qualifying expected-fault artifact with the same expected exit1",
+      "locations": [
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 1052
+        },
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 1053
+        },
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 1068
+        },
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 1125
+        },
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 1138
+        },
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 1141
+        }
+      ],
+      "reachable_trigger": "Expected-fault execution and cleanup are valid, summary/outcome writes succeed, then actual final stderr report callback/error emits EPIPE or other failure.",
+      "actual_call": "The actual reviewed boundary is now wired correctly, but runPositivePilot persists fault_case_passed=true/reporting_failure=null before main's first final report. main awaits callback and returns1 on failure without updating/revoking persisted qualification. exit1 is also the expected success-of-fault exit, so stored artifacts plus exit are indistinguishable from accepted expected fault.",
+      "impact": "The gate can falsely qualify a reporting failure as the intended assertion failure. Normal exit changes from0 to1, but the deliberate mode's exit does not distinguish it and its artifact remains green. Existing test uses normal, already-settled stub and a callback-only fake, not held original owner plus real Writable/error event or persisted expected-fault qualification.",
+      "contract": "SPEC4/6: pending callbacks participate in final qualification; candidate artifact is not authority; expected exit1 requires no report failure and final artifact/report/exit must agree.",
+      "minimal_fix": "Commit final qualification after required report callbacks, with a final evidence/qualification record explicitly recording report failure and revoking candidate pass. Include all mandatory evidence errors and actual artifact hashes; no unmarked stale outcome may remain authoritative. Use the same reviewed boundary and keep original owner until terminal; do not retry broken destination or add new kill authority.",
+      "direct_counterexample": "Actual main + actual factory + asynchronous Writable: drive valid expected fault then fail final output callback and error event. Exit1 is unavoidable, but the final persisted record must fault_case_passed=false/reporting_failure set. Add error while original raw settlement remains pending to prove owner barrier, not just post-terminal normal case.",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "id": "R5C-O06",
+      "severity": "MAJOR",
+      "status": "NEW",
+      "prior_ids": [
+        "R5B-O01",
+        "S03"
+      ],
+      "title": "Failed root allocation writes evidence into the repository working directory",
+      "locations": [
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 877
+        },
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 882
+        },
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 947
+        },
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 1052
+        },
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 265
+        }
+      ],
+      "reachable_trigger": "createRoot throws before returning a run root, e.g. var/native-cache-positive-pilot is not writable while W itself is writable.",
+      "actual_call": "root remains empty string. catch preserves failure and finally correctly sees no started child, but unconditionally calls writeEvidence('', 'summary.json'/ 'outcome.json'). REAL writeEvidence uses join(root,name), so writes land at W/summary.json and W/outcome.json rather than an owned runtime root.",
+      "impact": "The exact CLI's ordinary setup failure can create/overwrite files outside its assigned runtime root, with no matching registry ownership. The existing preparation-failure test starts after a fake root was already assigned and misses allocation failure.",
+      "contract": "SPEC3/6: each resource/evidence belongs to actual allocated owned root; no phantom allocation and no source/worktree mutation outside authorized runtime artifacts.",
+      "minimal_fix": "When no root was actually allocated, emit only the guarded bounded refusal/report and retain a no-root state; do not write root-relative evidence. Never substitute cwd for a missing root. If a fixed separate failure journal is needed, MAIN must explicitly assign it and register ownership before use.",
+      "direct_counterexample": "Inject createRoot throwing EACCES while REAL-shaped writeEvidence captures resolved paths. Assert no writes to summary/outcome relative to cwd, no phantom supervisor/handle, and correctly guarded failed CLI outcome. Keep prepareRoot failure as separate positive ownership control.",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "id": "R5C-O07",
+      "severity": "MINOR",
+      "status": "NEW",
+      "prior_ids": [
+        "R5B-O04",
+        "SPEC6 evidence"
+      ],
+      "title": "Saved evidence omits the final fresh observations and hashes only pre-summary files",
+      "locations": [
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 720
+        },
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 727
+        },
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 963
+        },
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 1048
+        },
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 1049
+        }
+      ],
+      "reachable_trigger": "Any terminal pilot run after startup-flow repairs.",
+      "actual_call": "timeline records terminal-proof with detail=null, raw cleanup only as count; diagnosticSnapshot does not expose/store the actual final C/group/known-ID fresh observations and timestamps used by #proveDomainGone. artifact enumeration happens before summary/outcome writes, so those outputs cannot be in its hash list; listRootFiles/sha helpers hide read errors as empty/null.",
+      "impact": "The emitted artifacts do not yet meet this ticket's direct evidence contract for the two future CLIs, even if source settlement proof is sound. This is an evidence preparation gap, not a claim that a count proves wrong cleanup or a demand for R6 full raw segments.",
+      "contract": "SPEC6 requires raw settlement, actual fresh C/N/group/known-epoch observations with ordering, receipt summary/segment digest limits, and actual artifact SHA list.",
+      "minimal_fix": "Persist bounded copies of actual final proof observations with timestamps from the real proof path, the raw outcome/cleanup facts, and a final manifest after required artifacts exist; qualify any required evidence read/write/hash failure explicitly. State that raw segments are unavailable if only summaries are saved.",
+      "direct_counterexample": "Inspect serialized evidence from a delayed terminal control: assert fresh group presence/known-ID outcomes and timestamps are actual adapter results, not hardcoded; final required-file hashes match bytes. Read/list/hash EIO must be recorded rather than silently green.",
+      "runtime": "NOT_RUN"
+    }
+  ],
+  "parallel_startup_limit": "Reviewed actual no-birth/no-authorisation, original-epoch raw dispatch guard and tests; this owner review does not substitute for independent startup-reaper safety conclusion.",
+  "unrelated_requirements": "R6/R7/original17/ISO18/N1N2/NEXT remain OPEN; no new requirement to finish unrelated workspace findings before this slice.",
+  "runtime": "ALL_REVIEWER_BUSINESS_RUNTIME_NOT_RUN",
+  "no_runtime_grant": true
+}

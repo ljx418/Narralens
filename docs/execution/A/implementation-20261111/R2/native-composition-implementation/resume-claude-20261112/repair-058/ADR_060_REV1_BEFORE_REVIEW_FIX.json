@@ -1,0 +1,20 @@
+{
+  "status": "MAIN_ARCHITECTURE_DIRECTION_APPROVED_IMPLEMENTATION_NOT_RELEASED",
+  "at": "2026-11-14T03:14:23.036234+00:00",
+  "base_commit": "1d348d419120f23f45d958112ea8c43df5a04675",
+  "finding": "A057-04",
+  "direction": "per-draw exclusive worker/process-group using exact pinned producer bytes",
+  "adr_sha256": "3dafa8c381fdc1a763c5075b073ae678f05a91e458997137604368e86fee949a",
+  "source_write_release": false,
+  "runtime_release": false,
+  "dependencies": [
+    "059 scoped repair selfverification and writer handback",
+    "Exact060 path/interface/case/runtime release",
+    "Independent ADR060 architecture review before final implementation release"
+  ],
+  "evidence_inputs": {
+    "isolated-process-feasibility.md": "dade7b14358b3107ab8733868801320830d7b57bb3c74f2ca39741523034ef16",
+    "isolated-process-feasibility.json": "36c16ca03ddfc1a8f5a59ffe6a6bc4159348493c233fd40a20d03202d6231c5a",
+    "independent-settlement-design-b.md": "ff0d01175a5438ac1f5e03188b925d0d34de3aa9b620f611e381f9175ce85364"
+  }
+}

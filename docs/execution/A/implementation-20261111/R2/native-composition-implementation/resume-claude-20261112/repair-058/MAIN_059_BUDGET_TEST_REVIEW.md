@@ -1,0 +1,9 @@
+MAIN当前预算测试审查（不扩路径/命令，不需停别项）：budget002虽7/7，但不能据此关闭A057-02/03。已读retained-native-budget.test.ts及两个helper：
+1 observer.ledger仅累计closure自己的onReadChunk，非独立底层readSyscall观测；新helper注释说“委托真实IO”，实际没有包裹readSync，只是Map。源早期hash不通知就仍看似零。请按059原裁决直接观察真实fd读取，而非给hook换名字。
+2 initial grow/truncate的marker在open回调、fstat之前写；child固定sleep5ms不能保证写入一定在stat之后/实际hash期间，且测试只<=size+1，零读也算通过。rehash的sleep50ms同样只是猜时序。原始要求是确定性窗口，不是机器上碰巧过。
+
+同范围可执行的建议：在Vitest测试层vi.mock/vi.importActual(node:fs)仅包裹真实readSync，先委托actual.readSync、不改返回字节，再按真实FD→自有target身份记录实际moved；所有旧/新closure命名import都走同一观测。测试代码在目标的首次非零真实read之后，spawnSync自有node helper仅做一次真实append/truncate并exit；断言该child status0与外部文件确变，父readSync wrapper返回前已reap。这样真实增长确定在捕获stat后、第一块读后、后续hash前；旧代码没有onReadChunk也仍会触发。不要在Host/生产安装全局mock，不注入媒体事实。可以改本票据已有helpers，无需新路径、无浏览器/工具资源。
+对retainFile/hashFile/verifyFile/verify四条普通路径分别做它，观测真实data>0且外部mutation hit恰1、读量<=capt获size+1，增长/截短拒绝；测试实际source guard/hashing不是只测newhelper。full verify目前无单独during-hash用例，也要补。
+单文件和累计文本拒绝的零读由同一真实syscallobserver对被拒fd计数证明；原onReadChunk保留作交叉证据。旧实现必须在同样hook/fixture下真语义红（新API缺失/compile红不算）。实现反例之前别把7/7计为该重大问题已关。所有失败日志保留，仍只四条exact串行命令，fixture子进程属于budget命令内owned child，超时/输出上限、status与实际回收明确。
+
+源retainFile catch当前先退text charge再尝试close；若close真失败，原票要求容量按真实所有权释放且uncertain不得清零，请一并核实异常路径，不仅正常路径。不要改public合同/源pin或A04架构；这仍属059已释放根因修复。

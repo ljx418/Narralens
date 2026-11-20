@@ -1,0 +1,20 @@
+{
+  "at": "2026-11-13T05:00:34.399634+00:00",
+  "status": "STOPPED_NEW_429_NO_RETRY_NO_TAKEOVER",
+  "dispatch": "ctx_297f7b8da2e1",
+  "task": "task_5dcbe8192764",
+  "terminal": "term_1537c11b-273b-403d-ba3a-7185edaacea4",
+  "evidence_source": "Orca terminal --screen read in this turn before guarded stop",
+  "observed_exact_lines": [
+    "API Error: Request rejected (429) · 已达到 Token Plan 用量上限：请升级 Token Plan 套餐或购买积分补充用量。 (2056)",
+    "429 已达到 Token Plan 用量上限：请升级 Token Plan 套餐或购买积分补… · Retrying in 22s · attempt 8/10"
+  ],
+  "stop_receipt": "dispatchId=ctx_297f7b8da2e1 state=stopped alreadySettled=false processAction=closed_agent_terminal close.handle=term_1537c11b-273b-403d-ba3a-7185edaacea4 close.tabId=93c85399-1e66-4057-95ee-38ea9a3f683f close.ptyKilled=true mutation.requestId=06eb2a41-a7c8-47ba-98d2-feeff6501baf mutation.replayed=false",
+  "worker_show_exit": 0,
+  "worker_show_stdout": "dispatchId=ctx_297f7b8da2e1 taskId=task_5dcbe8192764 runId=run_399f9dd3ce5a state=stopped stage=process_stopped liveness=exited terminal=term_1537c11b-273b-403d-ba3a-7185edaacea4 terminalState=retained workspace=2e732423-9bcc-494c-a0ed-e27a9488f313::C:\\workspace\\videoworkline\\Narralens-agents\\main-integration attention=failure waitingOnHuman=unknown\n",
+  "worker_show_stderr": "",
+  "full_gate_truth": "final-check-001 exit1,47failed,2513passed,1skipped. CLI background wrapper showed exit0 because its shell echo succeeded; that does not override recorded command result1.",
+  "pending": "Owned cleanup independent proof incomplete; unified plan revision not received; PF01..03 and LF01..05 open; no source release037; no frozen acceptance or next-wiring implementation",
+  "resume_condition": "Explicit user authorization after quota recovery or explicit takeover authorization; never auto retry/provider switch/replacement writer",
+  "blocked_audit": "First confirmed new429 blocking turn; goal remains incomplete. No automatic retries."
+}

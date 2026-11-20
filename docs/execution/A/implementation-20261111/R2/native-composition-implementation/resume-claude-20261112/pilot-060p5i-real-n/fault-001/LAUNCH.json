@@ -1,0 +1,26 @@
+{
+  "at": "2026-11-15T16:44:51.551677+00:00",
+  "recorder_pid": 1381524,
+  "recorder_identity": {
+    "pid": 1381524,
+    "ppid": 1381344,
+    "pgid": 1381344,
+    "sid": 1381344,
+    "start_ticks": 5312556,
+    "state": "R"
+  },
+  "observer_pid": 1381344,
+  "argv": [
+    "corepack",
+    "pnpm",
+    "exec",
+    "tsx",
+    "tools/native-cache-normal-pilot.ts",
+    "--mode",
+    "assertion-failure",
+    "--expected-custodian-sha256",
+    "bd06d7d7f79d6d2ccf2204a4e27ed5aba5364cbcda71785a67ac3ab887306b79",
+    "--expected-fixture-sha256",
+    "e3f4ccb1c4016a54356ce04be344b4ffff23f2f88698efe191570ad8407d03ab"
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "argv": [
+    "corepack",
+    "pnpm",
+    "exec",
+    "vitest",
+    "run",
+    "--config",
+    "vitest.config.ts",
+    "tests/agent-driven/integration/created-source-recovery.test.ts",
+    "-t",
+    "commits the original published transaction exactly once|reconstructs a missing published journal|marker-only request|published author bytes were tampered|receipt names another principal|resource cleanup failed"
+  ],
+  "cwd": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+  "matched_names": [
+    "D10 recovery commits the original published transaction exactly once and replays its receipt",
+    "D10 recovery reconstructs a missing published journal from the actual resources and commits once",
+    "D10 recovery preserves the published source and refuses a marker-only request with a real attention",
+    "D10 recovery preserves everything when the published author bytes were tampered with",
+    "D10 recovery refuses a replay whose receipt names another principal, key or correlation",
+    "D10 recovery refuses further work for a project whose resource cleanup failed"
+  ]
+}

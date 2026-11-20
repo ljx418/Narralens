@@ -1,0 +1,14 @@
+READ_ONLY_REPAIR_DESIGN_058。你是原N1/N2 Claude实现者；MAIN现在只释放只读方案分析，不释放源码、测试运行、服务或构建。保持当前冻结commit 1d348d419120f23f45d958112ea8c43df5a04675 和用户工作原样。下一阶段接线未获许可。新429立即停止、保留原始状态，不重试/切provider/Codex接手。
+
+W=/mnt/c/workspace/videoworkline/Narralens-agents/main-integration。唯一允许输出 W/docs/parallel/lane-product/A-R2-20261112/N1N2-native-source/n1n2-claude-058-repair-plan.md 和 .json。可以gitshow/rg/read/hash等只读分析，不得gitadd/commit/reset/stash/checkout、不读配置credentials/.env或全量env，不联网/安装/付费/J盘。不得测试/tsx import生产代码/Host/browser/media工具，也不得改任何源码、测试、vendor/pin/approved015/dist。不要启动新worker。
+
+独立review B已完成REQUEST_CHANGES；A仍在继续，MAIN会后续补充正式报告，当前请先为下列五项提出统一最小实施方案及会打红旧实现的直接测试方案，不要开写实现：
+1 B01：tests/m2.1/openfilm-upstream-lock.test.ts::buildScopes只遍历顶层FunctionDeclaration与ExpressionStatement，类方法/constructor/顶层arrow initializer漏掉。实际server/authority/workspace/supervisor调用不被枚举。需词法scope参数身份、类/箭头/函数表达式/嵌套实际调用覆盖与真实生产sites枚举，保留旧alias/namespace/local/helper/同名shadow断言；不是发现当前vendorRoot可由HTTP控制。
+2 URL：adapter654 new URL(req.url)无catch，正确loopback Host+raw //[ 通过前置guards但URL抛ERR_INVALID_URL，createServer943..962异常外逸。MAIN只运行内置URL纯解析，未运行HTTP。设计真实原handler与owned serving请求负例、正确拒绝与后续合法请求仍成功，不能只测另写parser；保留headers/范围/越界拒绝。
+3 BUDGET：retained-native-closure.retainFile先#hash至EOF才readText预算；#hash/#hashSync无捕获size增长上界。F06的onReadChunk只覆盖#readAll，不证明前置hash零读。需文本预算在第一次数据读取前执行，所有媒体/同步哈希受捕获size边界约束，截短/增长明确拒绝；真实字节读取观测不能再漏hash。原text/total/path/depth/FD/output/time门限不放宽，实际来源与UTF8/identity语义保持。
+4 DRAW_SETTLEMENT：固定V pageframes268..299的Promise.race(work,late)在JOB45s与seek FRAME15s超时会wrapper先拒绝，void closeBrowser/forget page.close未await；adapter仅跟踪loaded.pageFrame promise，bridge finally endDraw，workspace释放PRE。需证明真实raw page/browser及input/serving lifetime，不把wrapper settled等价raw settled。尤其closeBrowser已把browser=null而真实close可能仍进行，此时再调closePageFrames不自动证明先前close已结束。不得改固定vendor或pin、不能杀共享peer browser、不能添加sleep或吞异常当成功。请明确在现有公开固定模块API下能否取得真实settlement；若需host内部适配/最小私有hook或有架构路线选择，列准确调用链、原行为兼容、精确文件、优缺点和真实验证；不要擅自降范围或放弃原producer。仅方案，待MAIN审定。
+5 DURATION：reader1226..1247 film-duration只核output identity+film mtime:size，未核witness.dependencies。真实draw film.html ms0不写poster，删三件frame triple，film改后恢复bytes+mtime(ctime变)，duration仍在；fresh闭包拿到新状态不修复historical witness依赖。需duration-alone依赖/输出/最新授权完整核对，保留last poster非author语义与多frame当前授权撤销。测试须真fixed draw/去triple/改复还原，正常duration-only是否允许按原规则明确，不能靠强制所有cache不存在来绕过。
+
+正式独立B报告在 /mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/independent-frozen-review-057/review-b/。MAIN初步核对JSON同级MAIN_PRELIMINARY_FINDINGS.json；原17逐字在冻结docs/evidence/N1N2/freeze-057/ORIGINAL_REQUIREMENTS.json，当前7条gate和全部失败证据保留。0626源码输入已经与冻结Gitbytes一致。
+
+输出修复依赖/精确建议路径/每项现状反例和断言/预计测试分区与精确建议argv/实际runtime前置与资源owner清理/风险，特别第4项必须有可实施且不自欺的技术说明。不以测试总数或后一次绿代替证明。未运行标NOT_RUN；不要写验收PASS；不推进S01/NativeAck/Studio/A影片/V1。完成worker_done返回方案路径，等待MAIN唯一writer与运行授权。

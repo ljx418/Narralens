@@ -1,0 +1,74 @@
+{
+  "format": "narralens.independent-ADR060-rev3-inputs@1",
+  "verdict": "DOCUMENT_PLAN_READY",
+  "target_adr_sha256": "326bed74476956e363a1168460803f35b57e088259cf30e6a6c1315583d395ac",
+  "files": [
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p1-review/ADR_060_REV3_BINDING.json",
+      "kind": "binding",
+      "bytes": 987,
+      "sha256": "f77e8df24e8f471cd05c9fdc35053d420c859d93e0d083062dc9fe11c4987346"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p1-review/ADR_060_REV3_CUSTODIAN_AND_REPAIR.md",
+      "kind": "target_ADR",
+      "bytes": 12929,
+      "sha256": "326bed74476956e363a1168460803f35b57e088259cf30e6a6c1315583d395ac"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p1-review/lifecycle-design/REVIEW.md",
+      "kind": "normative_reference",
+      "bytes": 21907,
+      "sha256": "a7106a97196ef9158bf9978d88557d4234cecaf507b6fed986cbdab99937bd45"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p1-review/lifecycle-design/PROPOSAL.json",
+      "kind": "normative_reference",
+      "bytes": 5728,
+      "sha256": "f0ea3f53dd1ccf1c8bc8ece5e4134275a0d6f741978c3dd086b6ebb45bd8db7d"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p1-review/code-review/REVIEW.md",
+      "kind": "normative_reference",
+      "bytes": 8041,
+      "sha256": "0e9958e05224a4aca381e6a6708d6a4cbaeab0512c259b846fb0231630d992bc"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p1-review/code-review/FINDINGS.json",
+      "kind": "normative_reference",
+      "bytes": 43105,
+      "sha256": "688f8f407b82119643e2cf8734e18480c5e680718080f7a999f90e0fd55babae"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p1-review/INPUT_SNAPSHOT.json",
+      "kind": "normative_reference",
+      "bytes": 3815,
+      "sha256": "88395fca434a578d8bb326b26dff67174ca77b9e52fef58489eb1847dac33331"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-058/ADR_060_ISOLATED_CACHE_DRAW.md",
+      "kind": "prior_ADR_rev2",
+      "bytes": 17680,
+      "sha256": "27c6bcbc46ab5473716cc04a92ac3f50a1ee027d68045db72048af488168d6f2"
+    }
+  ],
+  "bindings_verified": "Target ADR, five normative references and prior rev2 match exact bound hashes",
+  "input_recheck": "8/8 recorded inputs unchanged raw bytes",
+  "verified_unchanged_at_utc": "2026-11-14T08:44:37.237620+00:00",
+  "source_write_release": false,
+  "runtime_release": false,
+  "runtime": "ALL_NOT_RUN",
+  "claim_limit": "Architecture/contract document direction only; P1 code findings remain implementation-unverified; no N1N2/P2/phase PASS",
+  "outputs": [
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p1-review/rev3-document-review/REVIEW.md",
+      "bytes": 5921,
+      "sha256": "52a09d01648d0e31e663a0e7ccccdea64148b2dc94b1cf714a82f37ed20b78f5"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p1-review/rev3-document-review/FINDINGS.json",
+      "bytes": 9106,
+      "sha256": "304f5e602558b655eb5446249452ea693ce72ab15d410ed5330758fe6547e52d"
+    }
+  ]
+}

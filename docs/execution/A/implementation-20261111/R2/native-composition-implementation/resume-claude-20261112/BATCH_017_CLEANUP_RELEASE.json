@@ -1,0 +1,22 @@
+{
+  "at": "2026-11-12T15:10:36.109127+00:00",
+  "grant": "N1N2-RESUME-FOCUSED-017",
+  "status": "140_FAILED_OWNCLEANUP_READ_SLOT_RELEASED",
+  "receipt": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/parallel/lane-product/A-R2-20261112/N1N2-native-source/n1n2-claude-resume-140-cleanup-evidence.txt",
+  "sha256": "974fddefa2c324f15e27170c7a53f3c81672889b25db90e5447d2456fa13a8c5",
+  "pid1863011": "ABSENT_CURRENT_OBSERVATION",
+  "capture13inputhashes": "MATCH_GRANT",
+  "current_source_changes_after_capture": [
+    "src/host/agent-driven/committed-snapshot-authority.ts",
+    "src/host/agent-driven/created-native-source-reader.ts",
+    "src/host/agent-driven/created-native-workspace.ts",
+    "src/host/agent-driven/native-cache-witness.ts",
+    "tests/agent-driven/integration/created-native-source-reader.test.ts",
+    "tests/agent-driven/integration/native-cache-witness.test.ts"
+  ],
+  "current_source_not_same_as_tested": true,
+  "index": "EMPTY",
+  "AGENTS": "UNCHANGED",
+  "source_correction_observed": "Same Claude writer began fixes after terminal+owncleanup; current observation not historical claim. All runtime remains ungranted except standing serialtsc.",
+  "limit": "No historical/globalabsence/FDlifetime claim; no current-source acceptance"
+}

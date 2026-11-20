@@ -1,0 +1,2787 @@
+{
+  "at": "2026-11-15T16:44:58.187328+00:00",
+  "outer_wait_returncode": 1,
+  "recorder_identity": {
+    "pid": 1381524,
+    "ppid": 1381344,
+    "pgid": 1381344,
+    "sid": 1381344,
+    "start_ticks": 5312556,
+    "state": "R"
+  },
+  "samples": 512,
+  "observed": [
+    {
+      "pid": 1381524,
+      "ppid": 1381344,
+      "pgid": 1381344,
+      "sid": 1381344,
+      "start_ticks": 5312556,
+      "state": "R",
+      "role": "pipeline",
+      "first_seen_at": "2026-11-15T16:44:51.562731+00:00",
+      "cmdline_sha256": "0e9009aacc08767cb156ddadf361bbde54fd3fcf67d1f881c7ac7f3b36f1b056"
+    },
+    {
+      "pid": 1381584,
+      "ppid": 1381524,
+      "pgid": 1381344,
+      "sid": 1381344,
+      "start_ticks": 5312868,
+      "state": "D",
+      "role": "pipeline",
+      "first_seen_at": "2026-11-15T16:44:54.675640+00:00",
+      "cmdline_sha256": "d74c8fb8359ca5fa45da7dc9d7beff92f2e55a1ac5b8a85fe648a268245657a0"
+    },
+    {
+      "pid": 1381585,
+      "ppid": 1381524,
+      "pgid": 1381344,
+      "sid": 1381344,
+      "start_ticks": 5312873,
+      "state": "R",
+      "role": "pipeline",
+      "first_seen_at": "2026-11-15T16:44:54.736766+00:00",
+      "cmdline_sha256": "1af7d78cf75ef08e53b7cb3e916e5139d9099a0918ae10d0951b7e049fc76aee"
+    },
+    {
+      "pid": 1381597,
+      "ppid": 1381585,
+      "pgid": 1381344,
+      "sid": 1381344,
+      "start_ticks": 5312890,
+      "state": "D",
+      "role": "pipeline",
+      "first_seen_at": "2026-11-15T16:44:54.908305+00:00",
+      "cmdline_sha256": "56065b4230f33d6c5bff085824628b7e88eac8dacb7ffb66344b7070816f8a90"
+    },
+    {
+      "pid": 1381613,
+      "ppid": 1381597,
+      "pgid": 1381344,
+      "sid": 1381344,
+      "start_ticks": 5312910,
+      "state": "R",
+      "role": "pipeline",
+      "first_seen_at": "2026-11-15T16:44:55.095808+00:00",
+      "cmdline_sha256": "ce9f2017da4fc238404c8179ee36818da7492370e38531456321a6b999002979"
+    },
+    {
+      "pid": 1381827,
+      "ppid": 1381613,
+      "pgid": 1381827,
+      "sid": 1381827,
+      "start_ticks": 5313002,
+      "state": "D",
+      "role": "C",
+      "first_seen_at": "2026-11-15T16:44:56.025431+00:00",
+      "cmdline_sha256": "9affabcd4dcb649539dc3cbfd99c2a740c3160e84e3d0f962e9db7f26f2fb49a"
+    },
+    {
+      "pid": 1381828,
+      "ppid": 1381827,
+      "pgid": 1381828,
+      "sid": 1381828,
+      "start_ticks": 5313007,
+      "state": "R",
+      "role": "N",
+      "first_seen_at": "2026-11-15T16:44:56.063002+00:00",
+      "cmdline_sha256": "18bec717192247df132e2ee4baa35923789ce829aac41e0fb0adf33860d5ec33"
+    }
+  ],
+  "state_changes": [
+    {
+      "at": "2026-11-15T16:44:51.562759+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:51.592096+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:51.649774+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:51.663860+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:51.694101+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:51.736680+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:51.781472+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:51.811908+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:51.825872+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:51.856383+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:51.885235+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:51.914236+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:51.930209+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:51.960237+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:51.976805+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:51.991300+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:52.047294+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:52.062067+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:52.136289+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:52.150212+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:52.166958+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:52.182254+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:52.238827+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:52.253420+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:52.270929+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:52.312998+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:52.361073+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:52.374196+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:52.389030+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:52.419271+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:52.434488+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:52.463565+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:52.509652+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:52.527663+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:52.543748+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:52.557745+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:52.632763+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:52.676453+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:52.722146+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:52.735568+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:52.750453+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:52.764292+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:52.848713+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:52.864737+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:52.878401+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:52.892245+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:52.990068+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:53.003999+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:53.019760+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:53.058208+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:53.100538+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:53.115177+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:53.142989+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:53.155502+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:53.224485+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:53.239569+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:53.295417+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:53.327712+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:53.358798+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:53.371786+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:53.436132+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:53.449366+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:53.499752+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:53.511808+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:53.524085+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:53.536107+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:53.548230+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:53.560317+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:53.657765+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:53.669976+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:53.723923+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:53.736142+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:53.772653+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:53.784758+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:53.845871+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:53.858238+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:53.883138+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:53.895316+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:53.907485+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:53.919581+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:54.040667+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:54.052919+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:54.101132+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:54.113396+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:54.125460+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:54.162190+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:54.223235+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:54.247417+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:54.319630+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:54.347488+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:54.395663+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:54.407966+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:54.420094+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:54.432270+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:54.444431+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:54.456581+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:54.480879+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:54.505025+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:54.590422+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:54.602597+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:54.651232+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:54.663363+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:54.675659+00:00",
+      "identity": {
+        "pid": 1381584,
+        "ppid": 1381524,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312868,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:54.675662+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "S"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:54.687900+00:00",
+      "identity": {
+        "pid": 1381584,
+        "ppid": 1381524,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312868,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:54.712214+00:00",
+      "identity": {
+        "pid": 1381584,
+        "ppid": 1381524,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312868,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:54.736789+00:00",
+      "identity": {
+        "pid": 1381585,
+        "ppid": 1381524,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312873,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:54.883955+00:00",
+      "identity": {
+        "pid": 1381585,
+        "ppid": 1381524,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312873,
+        "state": "S"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:54.908325+00:00",
+      "identity": {
+        "pid": 1381597,
+        "ppid": 1381585,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312890,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:54.932723+00:00",
+      "identity": {
+        "pid": 1381597,
+        "ppid": 1381585,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312890,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:54.948319+00:00",
+      "identity": {
+        "pid": 1381597,
+        "ppid": 1381585,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312890,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:54.985191+00:00",
+      "identity": {
+        "pid": 1381597,
+        "ppid": 1381585,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312890,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:54.997334+00:00",
+      "identity": {
+        "pid": 1381597,
+        "ppid": 1381585,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312890,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:55.095828+00:00",
+      "identity": {
+        "pid": 1381613,
+        "ppid": 1381597,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312910,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:55.095832+00:00",
+      "identity": {
+        "pid": 1381597,
+        "ppid": 1381585,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312890,
+        "state": "S"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:55.107965+00:00",
+      "identity": {
+        "pid": 1381613,
+        "ppid": 1381597,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312910,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:55.120174+00:00",
+      "identity": {
+        "pid": 1381613,
+        "ppid": 1381597,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312910,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:55.144502+00:00",
+      "identity": {
+        "pid": 1381613,
+        "ppid": 1381597,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312910,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:55.144513+00:00",
+      "identity": {
+        "pid": 1381597,
+        "ppid": 1381585,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312890,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:55.156700+00:00",
+      "identity": {
+        "pid": 1381597,
+        "ppid": 1381585,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312890,
+        "state": "S"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:55.181125+00:00",
+      "identity": {
+        "pid": 1381613,
+        "ppid": 1381597,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312910,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:55.193407+00:00",
+      "identity": {
+        "pid": 1381613,
+        "ppid": 1381597,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312910,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:55.267195+00:00",
+      "identity": {
+        "pid": 1381613,
+        "ppid": 1381597,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312910,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:55.279346+00:00",
+      "identity": {
+        "pid": 1381613,
+        "ppid": 1381597,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312910,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:55.330724+00:00",
+      "identity": {
+        "pid": 1381613,
+        "ppid": 1381597,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312910,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:55.343192+00:00",
+      "identity": {
+        "pid": 1381613,
+        "ppid": 1381597,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312910,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:55.368198+00:00",
+      "identity": {
+        "pid": 1381613,
+        "ppid": 1381597,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312910,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:55.380620+00:00",
+      "identity": {
+        "pid": 1381613,
+        "ppid": 1381597,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312910,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:55.405013+00:00",
+      "identity": {
+        "pid": 1381613,
+        "ppid": 1381597,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312910,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:55.417456+00:00",
+      "identity": {
+        "pid": 1381613,
+        "ppid": 1381597,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312910,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:55.454452+00:00",
+      "identity": {
+        "pid": 1381613,
+        "ppid": 1381597,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312910,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:55.479194+00:00",
+      "identity": {
+        "pid": 1381613,
+        "ppid": 1381597,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312910,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:55.604840+00:00",
+      "identity": {
+        "pid": 1381613,
+        "ppid": 1381597,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312910,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:55.616946+00:00",
+      "identity": {
+        "pid": 1381613,
+        "ppid": 1381597,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312910,
+        "state": "S"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:55.951010+00:00",
+      "identity": {
+        "pid": 1381613,
+        "ppid": 1381597,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312910,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:55.975759+00:00",
+      "identity": {
+        "pid": 1381613,
+        "ppid": 1381597,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312910,
+        "state": "S"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:56.000464+00:00",
+      "identity": {
+        "pid": 1381613,
+        "ppid": 1381597,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312910,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:56.025453+00:00",
+      "identity": {
+        "pid": 1381827,
+        "ppid": 1381613,
+        "pgid": 1381827,
+        "sid": 1381827,
+        "start_ticks": 5313002,
+        "state": "D"
+      },
+      "role": "C"
+    },
+    {
+      "at": "2026-11-15T16:44:56.025456+00:00",
+      "identity": {
+        "pid": 1381613,
+        "ppid": 1381597,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312910,
+        "state": "S"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:56.038089+00:00",
+      "identity": {
+        "pid": 1381827,
+        "ppid": 1381613,
+        "pgid": 1381827,
+        "sid": 1381827,
+        "start_ticks": 5313002,
+        "state": "R"
+      },
+      "role": "C"
+    },
+    {
+      "at": "2026-11-15T16:44:56.062963+00:00",
+      "identity": {
+        "pid": 1381827,
+        "ppid": 1381613,
+        "pgid": 1381827,
+        "sid": 1381827,
+        "start_ticks": 5313002,
+        "state": "S"
+      },
+      "role": "C"
+    },
+    {
+      "at": "2026-11-15T16:44:56.063013+00:00",
+      "identity": {
+        "pid": 1381828,
+        "ppid": 1381827,
+        "pgid": 1381828,
+        "sid": 1381828,
+        "start_ticks": 5313007,
+        "state": "R"
+      },
+      "role": "N"
+    },
+    {
+      "at": "2026-11-15T16:44:56.075477+00:00",
+      "identity": {
+        "pid": 1381828,
+        "ppid": 1381827,
+        "pgid": 1381828,
+        "sid": 1381828,
+        "start_ticks": 5313007,
+        "state": "D"
+      },
+      "role": "N"
+    },
+    {
+      "at": "2026-11-15T16:44:56.087771+00:00",
+      "identity": {
+        "pid": 1381828,
+        "ppid": 1381827,
+        "pgid": 1381828,
+        "sid": 1381828,
+        "start_ticks": 5313007,
+        "state": "S"
+      },
+      "role": "N"
+    },
+    {
+      "at": "2026-11-15T16:44:56.124473+00:00",
+      "identity": {
+        "pid": 1381828,
+        "ppid": 1381827,
+        "pgid": 1381828,
+        "sid": 1381828,
+        "start_ticks": 5313007,
+        "state": "Z"
+      },
+      "role": "N"
+    },
+    {
+      "at": "2026-11-15T16:44:56.149162+00:00",
+      "identity": {
+        "pid": 1381613,
+        "ppid": 1381597,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312910,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:56.161610+00:00",
+      "identity": {
+        "pid": 1381613,
+        "ppid": 1381597,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312910,
+        "state": "S"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:56.173962+00:00",
+      "identity": {
+        "pid": 1381613,
+        "ppid": 1381597,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312910,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:56.190008+00:00",
+      "identity": {
+        "pid": 1381613,
+        "ppid": 1381597,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312910,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:56.202456+00:00",
+      "identity": {
+        "pid": 1381613,
+        "ppid": 1381597,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312910,
+        "state": "S"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:56.202468+00:00",
+      "identity": {
+        "pid": 1381597,
+        "ppid": 1381585,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312890,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:56.215025+00:00",
+      "identity": {
+        "pid": 1381585,
+        "ppid": 1381524,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312873,
+        "state": "Z"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:56.227464+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:56.239681+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:56.251942+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:56.264119+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:56.288679+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:56.300912+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:56.313168+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:56.325551+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:56.337807+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:56.460883+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:56.485620+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:56.510109+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:56.522583+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:56.547087+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:56.559487+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:56.608409+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:56.632803+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:56.657319+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:56.669501+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:56.694058+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:56.706410+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:56.767856+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:56.780068+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:56.832928+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:56.857898+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:56.882430+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:56.894671+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:57.004155+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:57.016278+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:57.138140+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:57.162584+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:57.174768+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:57.199043+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:57.235695+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:57.259760+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:57.272056+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:57.284189+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:57.333079+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:57.345400+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:57.357561+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:57.369805+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:57.382111+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:57.394344+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:57.409282+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:57.425224+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:57.449960+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:57.462123+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:57.596522+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:57.608727+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:57.645587+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:57.658013+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:57.682828+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:57.695041+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:57.805789+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:57.818059+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:57.830327+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:57.854871+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:57.867175+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:57.891640+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:57.903806+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:57.916076+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:57.952774+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:57.965102+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:57.990000+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:58.002311+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:58.042183+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:58.054479+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:58.066818+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:58.091407+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:58.152640+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "R"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:58.164794+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "D"
+      },
+      "role": "pipeline"
+    },
+    {
+      "at": "2026-11-15T16:44:58.177117+00:00",
+      "identity": {
+        "pid": 1381524,
+        "ppid": 1381344,
+        "pgid": 1381344,
+        "sid": 1381344,
+        "start_ticks": 5312556,
+        "state": "R"
+      },
+      "role": "pipeline"
+    }
+  ],
+  "events_truncated": false,
+  "recorder_stdout": "{\"exit\": 1, \"source_changed\": [], \"source_added\": [], \"log_sha256\": \"c3725312344e2d448c0b5d000c6204cd2670dd18ff70f4509ae9332be5fa859f\", \"finished_at\": \"2026-11-15T16:44:58.172896+00:00\"}\n",
+  "recorder_stderr": "",
+  "destructive_signals_sent": [],
+  "scope": "Own recorder descendant observation only; not a raw protocol transcript"
+}

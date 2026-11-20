@@ -1,0 +1,26 @@
+{
+  "cwd": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+  "argv": [
+    "corepack",
+    "pnpm",
+    "exec",
+    "vitest",
+    "run",
+    "--config",
+    "vitest.config.ts",
+    "tests/agent-driven/integration/created-source-recovery.test.ts",
+    "-t",
+    "MAIN lifecycle|MAIN authorization|MAIN cleanup|commits the original published transaction exactly once|resource cleanup failed"
+  ],
+  "selected_names": [
+    "D10 recovery commits the original published transaction exactly once and replays its receipt",
+    "D10 recovery refuses further work for a project whose resource cleanup failed",
+    "MAIN lifecycle keeps abort truthful and cleanup uncertainty sticky until close",
+    "MAIN lifecycle keeps failed constructor cleanup sticky instead of treating it as an ordinary retry",
+    "MAIN lifecycle preserves the primary operation error and also exposes cleanup uncertainty",
+    "MAIN lifecycle close waits for the complete accepted startup sweep and rejects new admissions",
+    "MAIN authorization checks existing authorization before any source proof when adoption is missing",
+    "MAIN authorization still permits a proven early abort with matching surviving authorization",
+    "MAIN cleanup records guard uncertainty in the prepared adoption branch without hiding the abort"
+  ]
+}

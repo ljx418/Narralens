@@ -1,0 +1,11 @@
+{
+  "at": "2026-11-12T06:07:27.612940+00:00",
+  "file": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/helpers/native-source-fixture.ts",
+  "observed_sha256": "1c5abe20352165ea9209732a8c655fa1d251c1b2261723648fcf740d23059dc3",
+  "finding": "acquireExpectedLease on unregistered pending-ref occurs before registerWorkspaceRef; setup fails before actual reader",
+  "status": "OPEN_PENDING_CORRECTION_AND_RUNTIME_EVIDENCE",
+  "supervisor_message": "msg_0137f424f6fb",
+  "required": "obtain actual generation via issuing service capability; keep unknown-ref refusal; prove fixture reaches committed source and registered workspace before negative checks",
+  "latest_compile": "resume006 exit0 is compile-only, not setup success",
+  "acceptance": "NOT_CLAIMED"
+}

@@ -1,0 +1,35 @@
+{
+  "status": "MAIN_SOLE_CORRECTION_WRITER",
+  "reason": "MEDIA rework3; explicit child and parent stop reported msg7686397030da/msg0b4e2ba74e72",
+  "candidate": "c8a06729c2a58d0e79c40042f3155c558ca6fd11",
+  "source_files": [
+    {
+      "path": "src/host/agent-driven/created-draft-processor.ts",
+      "sha256": "bafb71ffdbf41aab2f2d7779bfa0f42e0127ccee661f7a3631b0427220c62de2"
+    },
+    {
+      "path": "src/host/agent-driven/prepared-draft-verifier.ts",
+      "sha256": "f69770afba85137d0dfd7a33be6115093538a411c2a4308295b523a018bbe93f"
+    },
+    {
+      "path": "src/host/render/assembly-ports.ts",
+      "sha256": "5d216cb00662bb002ba44b18a4c15dced7c90e27d88d8c0162d81926d4ef1c67"
+    },
+    {
+      "path": "src/host/render/preview-prepared-source.ts",
+      "sha256": "7fd0a779b3560b96b63780e856fa34b8895b6694aaac11b0bd5525e472880b4c"
+    },
+    {
+      "path": "tests/agent-driven/integration/created-draft-processor.test.ts",
+      "sha256": "aa463077083021c42e1705993b37a9811a0861c79c07eb5befeac2e97aae8fd5"
+    },
+    {
+      "path": "tests/agent-driven/media/preview-prepared-source.test.ts",
+      "sha256": "38ae72afdf7283b85c712aaa8c599ce51c231cd49739232010664aff450db050"
+    }
+  ],
+  "scope": "shared actual processor fixture, preview defects if proven; no second production prepared writer without demonstrated need",
+  "additional_main_test_helper": "tests/agent-driven/integration/helpers/created-draft-fixture.ts",
+  "media_lane": "held; no edits/tests until explicit handoff",
+  "evidence": "original failed preview log preserved"
+}

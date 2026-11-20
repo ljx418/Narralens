@@ -1,0 +1,13 @@
+{
+  "at": "2026-11-12T02:49:54.948414+00:00",
+  "capture": "d10-business-repairedfull-004",
+  "result": {
+    "exit": 1,
+    "source_changed": [],
+    "source_added": [],
+    "log_sha256": "10364619ca1de993ce7264fd4aaed08cd1aa2762aa474b285783ecbb69015133",
+    "finished_at": "2026-11-12T02:49:15.213768+00:00"
+  },
+  "observed": "19 actual PASS;1 failed at new fixture upsertLock CHECK(lock_type in visual/narration/duration), before business lock assertion",
+  "decision": "Keep failure, same writer fix fixture against actual frozen lock contract, no DDL/assertion relaxation, then fresh full20 and old50 captures; not phase PASS"
+}

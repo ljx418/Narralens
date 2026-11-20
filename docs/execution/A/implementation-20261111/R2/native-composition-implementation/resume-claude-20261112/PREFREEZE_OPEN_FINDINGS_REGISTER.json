@@ -1,0 +1,93 @@
+{
+  "at": "2026-11-13T03:34:16.039563+00:00",
+  "status": "OPEN_FINDINGS_NO_FREEZE_OR_ACCEPTANCE",
+  "report_sha256": "56a77de41399fe6d0de13ff57418a28090ed13ea45985a18df201130652d95d9",
+  "candidate_commit": null,
+  "implementation_writer": "ClaudeCode ctx_297f7b8da2e1",
+  "active_runtime": "036 ended exit1; ownedcleanup verification pending",
+  "source_release_for_findings": null,
+  "findings": [
+    {
+      "id": "PF01",
+      "severity": "MAJOR",
+      "kind": "CODE_DEFECT_STATIC_INFERENCE",
+      "state": "OPEN",
+      "requirement": "native_cache",
+      "problem": "Arbitrary base URL is not bound to issued workspace root",
+      "closure_required": "Host-private actual serving/listener/root capability; real different-root negative before draw/no effects; retain legitimate actualdraw/close behavior"
+    },
+    {
+      "id": "PF02",
+      "severity": "MAJOR",
+      "kind": "CODE_DEFECT_STATIC_INFERENCE",
+      "state": "OPEN",
+      "requirement": "native_cache",
+      "problem": "Unwitnessed film-duration accepted from plausible stamp and finite duration",
+      "closure_required": "Actual guarded-producer output identity via existing witness authority; forged negative and actual produced/serial legitdraw positives; no oldframe permanent invalidation"
+    },
+    {
+      "id": "PF03",
+      "severity": "MAJOR",
+      "kind": "EXPLICIT_FAULT_COVERAGE_GAP",
+      "state": "OPEN",
+      "requirement": "cleanup_uncertainty",
+      "problem": "Cache wrapper PRE+POST multiple genuine cleanup errors not jointly proven",
+      "closure_required": "Real reachable producer/post-validation fault combinations, exact primary and all independent genuine objects once, allocations settled, no visible witness and sticky refusal"
+    },
+    {
+      "id": "LF01",
+      "severity": "GATE_BLOCKING_PREREQUISITE",
+      "state": "OPEN",
+      "requirement": "existing_behavior/fullgate",
+      "problem": "Two declared visual and one descriptor narration fixture absent in worktree",
+      "closure_required": "Reproducible full referenced fixture inventory with provenance/hash; do not mutate current run or silently adopt canonical placeholders",
+      "additional_observed_failure": "migration-real-export.test.ts 2/2 ENOENT opening source/assets/generated/visual-10s.mp4; no render acceptance produced",
+      "snapshot_store_observed_failure": "m2.2/snapshot-store.test.ts9/9: missing assets/generated/narration-30s.wav; one intended SOURCE_CHANGED assertion blocked earlier by unresolved reference",
+      "additional_fixture_failures": [
+        "openfilm-migrator6/7 missing visual",
+        "snapshot-store9/9 missing narration",
+        "host-coordinator-integration1/2 missing visual"
+      ]
+    },
+    {
+      "id": "LF02",
+      "severity": "EVIDENCE_CLAIM_RISK",
+      "state": "OPEN",
+      "requirement": "truthful media acceptance",
+      "problem": "17/18byte legacy placeholders and stub900 input not evidence of real source video/audio export",
+      "closure_required": "Separate opaque component fixture from actual media/render acceptance; real fixture/probe/decode where claimed; append historical clarification, preserve oldrecords"
+    },
+    {
+      "id": "LF03",
+      "severity": "FULL_GATE_FAILURE_ROOT_CAUSE_PENDING",
+      "state": "OPEN",
+      "requirement": "existing_behavior/concurrent local import",
+      "problem": "Full036 observed one local-assets-host concurrent same-content import failure: Local asset facts or bytes changed",
+      "closure_required": "Wait for full stack; deterministic lifecycle-aware reproduction; distinguish actual content/path drift from owned same-byte hardlink ctime changes; retain hash/path/owner assertions and concurrency2/cancel/no-slot-leak behavior",
+      "observation": "BATCH_036_LOCAL_ASSET_CONCURRENCY_READONLY_OBSERVATION.json"
+    },
+    {
+      "id": "LF04",
+      "severity": "FULL_GATE_ARCHITECTURE_FAILURE_PENDING_DIAGNOSIS",
+      "state": "OPEN",
+      "requirement": "existing_behavior/state machine write ownership",
+      "problem": "m2.2-fitness rule1 reports 2 offenders; full final diff still pending",
+      "closure_required": "Identify exact production statements and AST method owners from final stack; verify intended owner and state CAS; never broad-whitelist or weaken scanner to green. Scope any code/gate correction with direct negative evidence."
+    },
+    {
+      "id": "LF05",
+      "severity": "FULL_GATE_FAILURE_REQUIRES_AUTHORITY_RECONCILIATION",
+      "state": "OPEN",
+      "requirement": "pinned upstream path authority",
+      "problem": "openfilm-upstream-lock.test.ts14tests/1fail: whole-module forbidden request/req/body property regex now matches HTTP serving additions in openfilm-upstream.ts",
+      "closure_required": "Inspect exact old assertion and new entry points. Prove fixed vendor path is Host-only and opaque serving capability cannot supply/override it. Preserve direct negative evidence; no cosmetic rename, broad exemption or deleting old gate to green."
+    }
+  ],
+  "known_run_failure": "036 final:8failed files,47failed tests,2513passed,1skipped; see BATCH_036_MAIN_FINAL_FAILURE_VERIFICATION.json",
+  "constraints": [
+    "No code/test mutation while036active",
+    "No automatic retry/provider switch/takeover on new429",
+    "Original17 remainfullscope, no fixture or MAJOR waivers from testcounts",
+    "Actual frozencommit independent review and nextcontract reanchor stillrequired"
+  ]
+}

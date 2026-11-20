@@ -1,0 +1,27 @@
+{
+  "at": "2026-11-13T19:26:41.817976+00:00",
+  "full_actual": {
+    "exit": 1,
+    "source_changed": [],
+    "source_added": [],
+    "log_sha256": "6c1f873507550cc9ce834d4d5e3a35cba7b947432c0413ff3fed46eb3b9aabc4",
+    "finished_at": "2026-11-13T19:18:16.664595+00:00"
+  },
+  "test_files": 188,
+  "tests": 2593,
+  "passed": 2591,
+  "failed": 1,
+  "skipped": 1,
+  "tsc": "PASS",
+  "vitest": "FAIL owned-project-entry:31",
+  "python_golden": "NOT_RUN",
+  "vite_build": "NOT_RUN",
+  "vite_m5_build": "NOT_RUN",
+  "normal_current626_inputs_match": true,
+  "source35_originalguards_match": true,
+  "expected85_and_two_counterfactuals": "MAIN_VERIFIED",
+  "new_findings": [
+    "owned UI panelready does not itself prove native .tl-scroll readiness; actual DOM/hash/response diagnostics needed",
+    "Two remaining legacy tests directly invoke unisolated interactive fixedCLIrender; proven source pattern same autoStudio branch, exact previous orphan attribution not yet independentlyproven."
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "at": "2026-11-12T15:25:01.700597+00:00",
+  "status": "ACTIVE_CORRECTION_TEST_DELETION_MUST_RESTORE",
+  "source_sha256": "ca5accc25ab00c75c35346b501c90402396984778db7db17846125754ff2c17a",
+  "current_it_count": 76,
+  "expected_previous79_plus_new1": 80,
+  "missing_current": [
+    "G07 invalidates an old proof when an external hardlink appears after it",
+    "G07 holds both trees and a parallel proof under one descriptor pool",
+    "G07 holds every nested and empty directory of both trees independently",
+    "P07 keeps the named primary and every cleanup cause of the real unpack path"
+  ],
+  "baseline_145_sha256": "411d3f77bd33bb0ebc4d0099fe26304e3c5d0028040beb1fd5a0ee797a05df6c",
+  "notification": "msg_ac66364a9aca",
+  "requirements": "Restore exactexisting assertions/bodies from actualpre-editbackup/transcript; no countpadding/weakenedreconstruction; repair replacementhelper and localclosingbraces. Genuinealias+cleanup requires injected actualreleasefailure, notordinarycause count.",
+  "runtime": "Onlyrecordedserialtsc; gateblockeduntilrestoration; no takeover/sourcewrites byMAIN"
+}

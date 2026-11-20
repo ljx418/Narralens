@@ -1,0 +1,17 @@
+{
+  "at": "2026-11-13T00:38:46.196772+00:00",
+  "dispatch": "ctx_297f7b8da2e1",
+  "task": "task_5dcbe8192764",
+  "terminal": "term_1537c11b-273b-403d-ba3a-7185edaacea4",
+  "state": "ready",
+  "keptOpen": true,
+  "prior_dispatch": "ctx_b4086093cd96",
+  "prior_state": "stopped/exited",
+  "restart_reason": "User confirmed Claude quota restored; prior terminal agent no longer configured; same task and same worktree reused",
+  "preflight_failures": [
+    "selector_not_found before dispatch; corrected to verified identity selector",
+    "agent_unconfigured for stopped old terminal; no agent started"
+  ],
+  "source_release": "ROUND3_K01_K06_CORRECTIVE_RELEASE_021.md",
+  "runtime": "recorded serialtsc only; no business runtime grant"
+}

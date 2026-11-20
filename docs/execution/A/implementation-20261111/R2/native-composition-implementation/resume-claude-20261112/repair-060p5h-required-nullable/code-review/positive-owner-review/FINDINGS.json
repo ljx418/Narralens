@@ -1,0 +1,136 @@
+{
+  "format": "narralens.R5H.positive-owner.static-review@1",
+  "verdict": "SAFE_FOR_SEPARATELY_PINNED_MINIMAL_N_PILOT",
+  "counts": {
+    "BLOCKER": 0,
+    "MAJOR": 0,
+    "MINOR": 1,
+    "NOTE": 1
+  },
+  "binding": {
+    "review_task": "task_a3dd7f4e2202",
+    "review_dispatch": "ctx_bbd2701f911f",
+    "implementation_handback": "msg_4f9f18fb3ba9",
+    "historical_head": "1d348d419120f23f45d958112ea8c43df5a04675",
+    "accepted_new_commit": null
+  },
+  "prior_findings": [
+    {
+      "prior_id": "R5G-O01",
+      "status": "CLOSED_STATIC",
+      "basis": "All 54 top-level published keys match actual writers and independent test tables; Object.hasOwn plus undefined check precedes mode/baseline/ordinary decisions; each row requires all4 keys and explicit null or bounded error; F10 strictly rejects non-null; null snapshot requires all4 summaries/observations explicitly null, nonnull comparisons are unconditional. Current production code closes the known counterexamples. Specific null-baseline test targeting remains a nonblocking MINOR below."
+    }
+  ],
+  "findings": [
+    {
+      "id": "R5H-O01",
+      "severity": "MINOR",
+      "status": "NEW_NONBLOCKING_TEST_TARGETING",
+      "title": "Null-snapshot parameter labels do not select the field actually mutated",
+      "locations": [
+        {
+          "path": "tests/agent-driven/integration/native-cache-normal-pilot.test.ts",
+          "line": 2966
+        },
+        {
+          "path": "tests/agent-driven/integration/native-cache-normal-pilot.test.ts",
+          "line": 2973
+        },
+        {
+          "path": "tests/agent-driven/integration/native-cache-normal-pilot.test.ts",
+          "line": 2998
+        },
+        {
+          "path": "tests/agent-driven/integration/native-cache-normal-pilot.test.ts",
+          "line": 3005
+        }
+      ],
+      "reachable_precondition": "Both parameterized no-snapshot loops run after helper copy and intentional supervisor-construction error. The serialized candidate has receipt_summary:null and accumulator_summary:null, so both are defined.",
+      "actual_call_path": "The callback ignores _id for field choice and only examines record/where plus whether existing values are undefined. For every candidate row, both conditions are false and field becomes receipt_summary. Thus labels candidate.accumulator_summary and candidate.terminal_proof_observations repeat the receipt_summary deletion/string mutation; only final.terminal_proof_observations targets its named field.",
+      "impact": "The reported four distinct null-baseline missing/wrong-type targets are not all exercised. This is not a current production acceptance defect: missingRequiredKeys covers all listed keys and the explicit four-tuple production loop independently rejects every non-null value. It therefore does not block the exact separately pinned synthetic pilot recommendation, but limits exhaustive test-coverage claims.",
+      "contract": "R5H SPEC requires null-baseline four fields individually tested. Author report §2 overstates their distinct coverage.",
+      "minimal_fix": "Put the actual field key directly into each tuple, pass it as a callback argument, and delete/assign data[field]. Assert the targeted field corresponds to the label. Add explicit undefined and valid non-null object controls as required by the case matrix; do not alter the production predicate to accommodate tests.",
+      "direct_counterexample_design": "Instrument only the pure change function to record which own key is modified before delegating the real writer. The accumulator/proof-labeled candidate rows currently report receipt_summary. Corrected cases must mutate their own key and require unreliable3 while the unchanged explicit-null ordinary1 control remains reliable/not-accepted. No C/N needed.",
+      "runtime": "NOT_RUN; static test-path evaluation only"
+    },
+    {
+      "id": "R5H-NOTE01",
+      "severity": "NOTE",
+      "status": "REPORT_COUNT_CORRECTION_ONLY",
+      "title": "The writer, required-key table and deletion tests contain final27/total54, not final28/total55",
+      "locations": [
+        {
+          "path": "docs/parallel/lane-product/A-R2-20261112/N1N2-native-source/n1n2-claude-060p5h-report.md",
+          "line": 42
+        },
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 172
+        },
+        {
+          "path": "tests/agent-driven/integration/native-cache-normal-pilot.test.ts",
+          "line": 2790
+        }
+      ],
+      "actual_count": {
+        "candidate": 19,
+        "manifest": 8,
+        "final": 27,
+        "total_main_record_keys": 54,
+        "artifact_row": 4
+      },
+      "impact": "Report arithmetic only. All writer keys and test key tables match with no omission; actual final log254 is valid as a captured result. Additions are54 deletion cases +1 row-error +3 non-null errors +9 null-baseline cases including control +1 no-root =68, so186+68=254.",
+      "minimal_fix": "Correct OWN final28→27 and55→54 when MAIN next records documentation corrections; do not overwrite this frozen handback or alter tests just to match the mistaken count.",
+      "runtime": "NOT_RUN"
+    }
+  ],
+  "closure_checks": [
+    {
+      "topic": "own-field gate",
+      "source": "tool152/164/172/189 tables and199 helper; checker2371-2382",
+      "result": "Exact writer/table/test-key sets19/8/27; Object.hasOwn and value!==undefined enforced before baseline/mode/ordinary."
+    },
+    {
+      "topic": "nullable row/F10",
+      "source": "artifactRowProblems252 and276; checker2397/2610/2616",
+      "result": "Every row key mandatory; row.error must be explicit null or bounded error and any nonnull disqualifies. Listing/report/manifest error must be null."
+    },
+    {
+      "topic": "null baseline",
+      "source": "tool2514-2535",
+      "result": "Final snapshot null and all4 published summaries/observations null, with prior own gate. Ordinary setup-failure control retained. Tests targeting caveat O01."
+    },
+    {
+      "topic": "nonnull baseline",
+      "source": "tool2537-2558",
+      "result": "Full frozen actual baseline compared and all summaries/observations unconditionally compared, no optional skip."
+    },
+    {
+      "topic": "original/mode/byte predicates",
+      "source": "resultFactsOf/errorFactDifference/cleanupFactsDifference; checker2634-2737; main2824; legacy273",
+      "result": "One once-captured actual snapshot; Error identity/direct cause, full cleanup, image bytes/hash/exact, cancel provenance, actual artifact bytes/links, normal/fault/ordinary classification retained. Shared actual checker remains sole consumer predicate."
+    },
+    {
+      "topic": "no root",
+      "source": "checker pre-read root refusal; producer no-root branch; test2743",
+      "result": "Unreliable3 before reading nonexistent records, no cwd fallback; direct actual main regression test present."
+    }
+  ],
+  "pins": {
+    "tool_sha256": "e4db3499f715d5b6b5634568677a6688cf80a897c9321c45e93cda98c6a19ebb",
+    "custodian_sha256": "bd06d7d7f79d6d2ccf2204a4e27ed5aba5364cbcda71785a67ac3ab887306b79",
+    "helper_sha256": "e3f4ccb1c4016a54356ce04be344b4ffff23f2f88698efe191570ad8407d03ab",
+    "source_integrity_manifest_sha256": "7bb4bd1813987a6860bb9eb7a332ccbedb237c009a8767bc75e6418f1595c2db",
+    "supervisor_sha256": "7706449e8f259a6e17e9ca2a40af8a5c344cef827a01c7881fc04a4a570b9b63"
+  },
+  "safety_scope": "Static prerequisite recommendation only for separately pinned normal and assertion-failure synthetic1024x0x4a pilots. MAIN must separately release exact argv/resources/current byte pins. No execution authorized here.",
+  "remaining_limits": [
+    "All reviewer runtime NOT_RUN; existing capture is author pure/type/generation, not real C/N.",
+    "Known5s/20s failures and pending fake promise/timer isolation limitation remain; raw deny remains persistent, child mocked, no new real OS escape established; green is not rootcause proof.",
+    "21red is helper-neutralization mutant, not exact archived R5G replay; reported21 is not21 historical semantic failures.",
+    "Nonblocking null-baseline test-target bug and report arithmetic require accurate disclosure; do not call all distinct targets dynamically verified.",
+    "No kernel/N1N2/R6/R7/R8/original17/ISO18/freeze/NEXT/V1 acceptance."
+  ],
+  "no_runtime_grant": true,
+  "all_reviewer_business_runtime": "NOT_RUN"
+}

@@ -1,0 +1,68 @@
+{
+  "status": "SCOPED_SELF_VALIDATION_PASS",
+  "main_head": "cca95020ee4ede16ef133ecd6e08b6a27632adaa",
+  "inputs": [
+    {
+      "path": "src/host/projects/revision-store.ts",
+      "sha256": "95a2158d8bf69a680227a525090724d2e0721aba7bf08b9332a7f3dbfd4c8c0f"
+    },
+    {
+      "path": "src/host/projects/project-creation-store.ts",
+      "sha256": "2ca8d5cea9dc3148f90d46d44f419bc87c9466027641172daf725e61d6e05e8e"
+    },
+    {
+      "path": "src/host/projects/migrated-asset-ledger.ts",
+      "sha256": "67cf33e938ad98c3a995ae02759d6f1fd82e1110775a6da1c3e6710916e814f9"
+    },
+    {
+      "path": "tests/architecture/m2.2-fitness.test.ts",
+      "sha256": "58928cf9f84d19005f8054283e3baa03c027bc8e5558dbf03253bedf72e03c47"
+    },
+    {
+      "path": "tests/agent-driven/integration/job-recovery-authority.test.ts",
+      "sha256": "2140d19334d6b66381af99616349ad588f7438757e13fc98276e09d9725aae14"
+    }
+  ],
+  "baseline_reproduction": {
+    "session": 40340,
+    "exit": 1,
+    "failures": [
+      "rule1 bootstrap state writes",
+      "rule13 inline Job SQL in creation/task stores"
+    ]
+  },
+  "partial_validation": {
+    "tsc_session": 47561,
+    "tsc_exit": 0,
+    "test_session": 43490,
+    "test_exit": 1,
+    "passed": 23,
+    "failed": 2,
+    "detail": "8 new real SQLite guard tests pass; syntax-aware scan surfaced genuine hidden #seed ledger state writer plus still-unmodified BRIDGE task-store clause"
+  },
+  "after_partial_changes": "ledger #seed now delegates original transitionBootstrap in same atomic transaction; NOT_YET_RETESTED",
+  "remaining": [
+    "independent review for new scanner scope if needed",
+    "whole R1 application combination/UX not covered"
+  ],
+  "independent_transport_review": {
+    "dispatch": "ctx_1869a3ba7f26",
+    "task": "task_3c9a957f1215",
+    "terminal": "term_59ebb849ba13b2003edaefeee918a063",
+    "frozen": "cca95020ee4ede16ef133ecd6e08b6a27632adaa",
+    "status": "READY_PENDING_RESULT"
+  },
+  "final_light": {
+    "session": 41331,
+    "exit": 0,
+    "files": 3,
+    "tests": 64,
+    "log_sha256": "27891d00f505c8ec329b2f8b8723bbe9b45341b3dadb6e290d03932a5dd11f9c"
+  },
+  "recovery_regression": {
+    "files": 4,
+    "tests": 87,
+    "exit": 0
+  },
+  "bridge_clause": "exact owner-produced one-line delta c89a906 consumed into MAIN; no other BRIDGE source imported"
+}

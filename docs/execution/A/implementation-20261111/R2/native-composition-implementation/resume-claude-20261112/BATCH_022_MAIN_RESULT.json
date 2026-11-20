@@ -1,0 +1,22 @@
+{
+  "at": "2026-11-12T07:08:22.150680+00:00",
+  "result": {
+    "exit": 1,
+    "source_changed": [],
+    "source_added": [],
+    "log_sha256": "58f3114a15ce4c69cc60a4e718b879b983e88a13989a1a54a816b4837d727a13",
+    "finished_at": "2026-11-12T07:06:11.414305+00:00"
+  },
+  "counts": {
+    "exit": 1,
+    "passed": 17,
+    "failed": 1,
+    "filtered": 8,
+    "unhandled_errors": 1,
+    "source_changed": [],
+    "source_added": []
+  },
+  "verdict": "FAIL including unhandled rejection",
+  "root_review": "isCurrent callback closes reader; missing subsequent closed fence calls authority; adopt closed earlyreturn abandons raw Promise",
+  "next": "after fullbatch terminal fix reentrancy/raw acquisition ownership and deterministic API settlement oracle"
+}

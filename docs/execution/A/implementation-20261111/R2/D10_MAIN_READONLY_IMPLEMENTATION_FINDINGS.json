@@ -1,0 +1,27 @@
+{
+  "at": "2026-11-12T02:52:43.593606+00:00",
+  "source_sha256": "0fa52f3c75d2f8704af7ed507eeb369b3e195356b56a39a0841f98355cd1f7fe",
+  "status": "CODE_FINDINGS_SENT_TO_SAME_AUTHORIZED_WRITER_NOT_INDEPENDENT_FINAL_REVIEW",
+  "message": "msg_e568d07ac430",
+  "findings": [
+    {
+      "id": "D10-RO-01",
+      "location": "#verifyCommitted",
+      "fact": "receipt.principal_id/idempotency_key/correlation_id omitted though original closed commit emits and online replay validates authority fields",
+      "requested": "original principal,key,correlation guards and negative actual receipt tests, preserve historical valid receipt after later commit"
+    },
+    {
+      "id": "D10-RO-02",
+      "location": "#guard",
+      "fact": "constructed RetainedSourceTree then additional verify; catch fails to close allocated guard if second verify fails",
+      "requested": "ownership-safe cleanup or remove redundant verification; keep primary+cleanup errors and actualFD regression"
+    },
+    {
+      "id": "D10-RO-03",
+      "location": "#uncertain map and #recover",
+      "fact": "map written on publisher/files cleanup failure and read only by close, not later recovery admission",
+      "requested": "sticky project defer subsequent recovery after uncertain cleanup; never fake attention/rollback completed commit or retry rawFD"
+    }
+  ],
+  "constraints": "MAIN readonly four source/test paths/index; current capture must finish before same writer repairs; keep all failures and exact frozen contracts; full gates after repairs"
+}

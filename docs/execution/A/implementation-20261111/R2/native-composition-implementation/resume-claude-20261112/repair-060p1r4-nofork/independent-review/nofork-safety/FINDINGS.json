@@ -1,0 +1,130 @@
+{
+  "verdict": "REQUEST_CHANGES",
+  "scope": "ONLY exact standalone nofork identity and assertion-failure commands; no production lifecycle re-review",
+  "counts": {
+    "MAJOR": 3,
+    "MINOR": 1,
+    "NOTE": 2
+  },
+  "findings": [
+    {
+      "id": "NF-01",
+      "severity": "MAJOR",
+      "classification": "NEW",
+      "title": "Evidence-write failure after an unknown cleanup escapes the only owner",
+      "locations": [
+        "tools/native-cache-nofork-pilot.mjs:873",
+        "tools/native-cache-nofork-pilot.mjs:903",
+        "tools/native-cache-nofork-pilot.mjs:948",
+        "tools/native-cache-nofork-pilot.mjs:965",
+        "tools/native-cache-nofork-pilot.mjs:986"
+      ],
+      "trigger": "The C remains live and cleanup returns unknown (for example fresh /proc EIO, an undeliverable signal, or no close). Writing outcome.json then throws ENOSPC/EIO/EACCES, or main's held.json write throws. Both happen after spawn and outside the owned try/finally/exception boundary.",
+      "impact": "runPilot/main rejects into unhandled top-level await. The detached nofork C can remain waiting forever for authorization with its owner gone. This is an ordinary evidence-I/O failure path, not an excluded external kill/OOM and not a production-N issue.",
+      "contract": "R4 SPEC unknown must retain the actual child/closePromise/root and must not top-level throw/exit losing C; original and cleanup failures retained.",
+      "minimal_fix": "In the two new files only, make the post-spawn owner survive every evidence/logging failure through terminal proof; retain primary plus evidence errors in memory and use a nonthrowing reporting path. The CLI must enter the same persistent owned unknown state before any exception can escape, and may return nonzero only after actual terminal proof. Do not add a responsibility timeout or delete the root.",
+      "actual_branch_counterfactual": "Import and invoke actual main/runPilot with injected deps and a fake child kept live; make writeEvidence throw only for outcome.json, then held.json. Assert no rejected top-level owner, the same child/closePromise/root remain retained and no premature terminal return; later actual fake exit+close+gone completes a failed result. Current tests invoke runPilot with writes that never fail and do not import main.",
+      "runtime": "NOT_RUN; static counterfactual, not a captured execution"
+    },
+    {
+      "id": "NF-02",
+      "severity": "MAJOR",
+      "classification": "NEW",
+      "title": "Recorded diagnostic and channel failures do not disqualify either mode",
+      "locations": [
+        "tools/native-cache-nofork-pilot.mjs:380",
+        "tools/native-cache-nofork-pilot.mjs:414",
+        "tools/native-cache-nofork-pilot.mjs:430",
+        "tools/native-cache-nofork-pilot.mjs:822",
+        "tools/native-cache-nofork-pilot.mjs:865",
+        "tools/native-cache-nofork-pilot.mjs:886",
+        "tools/native-cache-nofork-pilot.mjs:890",
+        "tools/native-cache-nofork-pilot.mjs:972"
+      ],
+      "trigger": "A valid HELLO is received, but stdout/stderr exceeds64KiB or emits an error, or a malformed/oversize/error control event is recorded before final result. Ledger sets diagnosticsLost/stream errors/controlError, yet runPilot never uses those facts as a failure latch. identity kind depends only on primary, while assertion-failure passing checks only deliberate error+cleanup closed+epoch gone.",
+      "impact": "The exact CLI can report identity ok/exit0 or fault_case_passed=true despite a known required budget/transport failure. A decoder partial-buffer bound exists, but decoded frames can also accumulate without a frame/byte cap. Fixed reviewed noauthorize C has a small normal transcript, so this is not claimed as an observed or arbitrary external flood; the actual error-entry/result route nevertheless contradicts the required failure handling.",
+      "contract": "R4 SPEC stdout/control bounded and overflow/error fails while cleanup continues; deliberate assertion passes only its intended full verified case, not a different recorded failure.",
+      "minimal_fix": "Add one bounded first-failure latch wired from actual ledger event handlers and checked during HELLO, cleanup and final eligibility; preserve the intended primary plus cleanup/transport errors. Bound decoded queue/error storage without dropping needed first HELLO. Identity success must explicitly require proved closed+exit+original epoch gone and no disqualifying failure; expected assertion must be the sole intended primary with all required facts.",
+      "actual_branch_counterfactual": "Through actual runPilot/main, deliver legal HELLO followed by each stdout overflow, stderr error, invalid control data and socket error, including in the same turn as TERM/close. Assert safe cleanup still completes, but neither identity ok nor fault_case_passed can be emitted. Test decoded many-frame arrivals for a real bounded queue. Existing stream-error/budget tests only inspect ledger fields.",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "id": "NF-03",
+      "severity": "MAJOR",
+      "classification": "NEW",
+      "title": "HELD branch treats a close promise alone as the final terminal proof",
+      "locations": [
+        "tools/native-cache-nofork-pilot.mjs:516",
+        "tools/native-cache-nofork-pilot.mjs:574",
+        "tools/native-cache-nofork-pilot.mjs:949",
+        "tools/native-cache-nofork-pilot.mjs:968",
+        "tools/native-cache-nofork-pilot.mjs:969"
+      ],
+      "trigger": "cleanup is unknown because fresh original-epoch presence is unknown (or a close was seen while its epoch still appears present). main awaits the shared closePromise and immediately writes closed-after-held/returns1. If close was already seen, this await resolves immediately; there is no new exit/no-birth consistency or fresh epoch-gone check.",
+      "impact": "A deadline initially returns honest unknown, but the CLI later retires that unknown without proving the specified complete terminal facts. main never re-finalizes the tagged cleanup or checks exitSeen. This finding does not assert that ordinary Node close is a stream-only event or that a live normal child naturally emits close: Node close usually follows exit, but the task explicitly requires independent fresh epoch confirmation and truthful continued ownership on uncertainty.",
+      "contract": "R4 SPEC true close plus exit/no-birth and fresh original epoch gone before completion; receipt EOF/error/timeout is not process end; unknown keeps the owner until proved.",
+      "minimal_fix": "Continue the same owner state machine after close until exit/no-birth facts and fresh epoch-gone are all confirmed, using bounded referenced polling and nonthrowing evidence handling. Reuse the persistent close ledger; do not signal an exited/reaped child, do not treat the already-resolved closePromise as a new proof, and do not add finite responsibility expiry.",
+      "actual_branch_counterfactual": "Drive actual main with close already observed but proc unknown, then restored known-same epoch, then gone; it must not return or write final before the required terminal proof. Separately cover close-before-cleanup and no-birth error+close/no-exit using actual runner rather than cleanupChild alone.",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "id": "NF-04",
+      "severity": "MINOR",
+      "classification": "NEW",
+      "title": "Actual runner's no-child asynchronous failure dereferences a null epoch",
+      "locations": [
+        "tools/native-cache-nofork-pilot.mjs:815",
+        "tools/native-cache-nofork-pilot.mjs:816",
+        "tools/native-cache-nofork-pilot.mjs:817",
+        "tests/agent-driven/integration/helpers/native-cache-nofork-pilot.test.mjs:575"
+      ],
+      "trigger": "spawn returns a ChildProcess with pid undefined and later emits EAGAIN/ENOENT plus close and no exit. runPilot makes epoch=null then reads epoch.presence synchronously, before the normal async error can arrive.",
+      "impact": "The primary becomes a TypeError instead of the real startup failure; cleanup initially returns unknown because errorSeen has not yet fired. main later uses its generic held path instead of the otherwise implemented no-child-confirmed route. The ledger does retain the later error/close, so this defect alone is not claimed to orphan a never-born child.",
+      "contract": "R4 SPEC actual no-child async error+close/no-exit route, original failure preservation and correct tagged no-child outcome.",
+      "minimal_fix": "Handle no PID without dereferencing null; wait for the actual error/close facts through the owned ledger, then finish no-child-confirmed with original startup error. Keep born/unknown distinct and preserve NF-01 safeguards.",
+      "actual_branch_counterfactual": "Exercise actual runPilot/main with pid undefined and error+close scheduled next tick. Assert original EAGAIN/ENOENT, no-child-confirmed and no TypeError; not only the current cleanupChild helper test with events pre-emitted.",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "id": "NF-05",
+      "severity": "NOTE",
+      "classification": "NEW",
+      "title": "Fresh identity verification omits its PPID comparison",
+      "locations": [
+        "tools/native-cache-nofork-pilot.mjs:238",
+        "tools/native-cache-nofork-pilot.mjs:245",
+        "tools/native-cache-nofork-pilot.mjs:254"
+      ],
+      "trigger": "A mocked fresh identity has the correct PID/startticks/group/session but a different PPID; hello.ppid still equals toolPid. verifyCustodianIdentity accepts it because only hello.ppid, not fresh.identity.ppid, is checked against the tool.",
+      "impact": "The strict identity assertion is weaker than reported. For this exact fixed nofork ChildProcess with the tool alive, the direct-child relationship already strongly constrains real PPID; I do not invent a current foreign-parent signalling exploit. The later live-child signal check does compare fresh PPID against its recorded epoch.",
+      "contract": "Exact task requires genuine fresh full C epoch including PPID, not only the HELLO claim.",
+      "minimal_fix": "Compare fresh.identity.ppid to toolPid and the recorded spawned child epoch; add the missing wrong-fresh-PPID counterfactual in the new test only.",
+      "actual_branch_counterfactual": "Actual verifier with wrong fresh PPID must refuse even when HELLO claims the correct parent.",
+      "runtime": "NOT_RUN; nonblocking evidence precision gap"
+    },
+    {
+      "id": "NF-06",
+      "severity": "NOTE",
+      "classification": "NEW",
+      "title": "Four captured failed runs are mislabeled as five",
+      "locations": [
+        "docs/parallel/lane-product/A-R2-20261112/N1N2-native-source/n1n2-claude-060p1r4-report.md:172"
+      ],
+      "trigger": "Report says five failed captures, but raw result/exit/log records test001..004 are exit1 and test005 is exit0/38 of38; both syntax checks are exit0.",
+      "impact": "A count error in the report, not a fabricated code safety blocker. Historical failures remain valid retained evidence and earlier UNRECORDED trials remain unreconstructable.",
+      "contract": "Actual capture metadata/raw logs determine history; success must not be counted as failure or erase earlier failures.",
+      "minimal_fix": "Append an evidence correction to the author's own new report when separately authorized; do not overwrite captures. This reviewer leaves all old reports/evidence unchanged.",
+      "actual_branch_counterfactual": "No runtime needed: compare the seven recorded result/exit/log SHA256 triples and TAP totals.",
+      "runtime": "NOT_RUN by reviewer; existing artifacts read and hashed"
+    }
+  ],
+  "production_findings": "All existing14 remain OPEN; legacy mixed harness is not proposed for execution",
+  "candidate": {
+    "tool_sha256": "bc8970400dcea1cfa33cc60dd6dbbc6a1129b250233bc53ed073f8d0b8d0a2ab",
+    "test_sha256": "33b46653410821fe8e876fd236bb50516f9ae13d90525625391d3f7cd6786134",
+    "custodian_sha256": "6b8d6df32b1958b3cf53e05152e9b04abf6c010d58ae6e672fcd7fa4c9511618",
+    "python_sha256": "e50d468e8b0adfb05733f5b87b3cff34829c4a8c1aea50c865aa8bdfe4bb150f"
+  },
+  "runtime": "All actual C/prctl/signal/close/kernel and acceptance NOT_RUN; no runtime permission",
+  "prior_harness_assessment": "Shared immediate ledger/tagged cleanup and no-control-write structure improved; old R3-C02/R3-I05 not used as independent reasons to reject this new tool"
+}

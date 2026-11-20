@@ -1,0 +1,42 @@
+{
+  "status": "BATCH_TERMINAL_WITH_FAILURES_AWAIT_CLEANUP",
+  "counts": {
+    "passed": 145,
+    "failed": 3
+  },
+  "input_manifests_equal": true,
+  "all_ten_current_match_grant": true,
+  "results": [
+    {
+      "capture": "n1n2-claude-resume-057-corrective-pure",
+      "result": {
+        "exit": 0,
+        "source_changed": [],
+        "source_added": [],
+        "log_sha256": "c8851618f7ea0d5d10694bf84e9475418fdeec1f7a5bc829361300feca558056",
+        "finished_at": "2026-11-12T08:34:24.441617+00:00"
+      }
+    },
+    {
+      "capture": "n1n2-claude-resume-058-corrective-component",
+      "result": {
+        "exit": 1,
+        "source_changed": [],
+        "source_added": [],
+        "log_sha256": "c2e492cad57569a0dc84827ebacd3434e4471513a0588a8a3e2bad72eb40d464",
+        "finished_at": "2026-11-12T08:42:04.363265+00:00"
+      }
+    },
+    {
+      "capture": "n1n2-claude-resume-059-corrective-regressions",
+      "result": {
+        "exit": 0,
+        "source_changed": [],
+        "source_added": [],
+        "log_sha256": "4976c25a3a0584efb74ae6247cbdc2b0bf8277abc1f645164ba3e88549eab3c5",
+        "finished_at": "2026-11-12T08:47:23.416001+00:00"
+      }
+    }
+  ],
+  "scope": "interim evidence only; original uncovered requirements not waived"
+}

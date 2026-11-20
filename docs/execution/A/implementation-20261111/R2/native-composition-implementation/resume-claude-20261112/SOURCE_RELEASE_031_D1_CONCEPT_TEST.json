@@ -1,0 +1,37 @@
+{
+  "id": "N1N2_021_D1_CONCEPT_CONTRACT_TEST_RELEASE_031",
+  "at": "2026-11-13T02:19:49.195082+00:00",
+  "status": "SOURCE_ONLY_NO_BUSINESS_RUNTIME",
+  "dispatch": "ctx_297f7b8da2e1",
+  "request": "msg_e4a2acbc86aa",
+  "write_paths": {
+    "tests/agent-driven/integration/created-draft-processor.test.ts": "51da71f510271fa63e66c2b740ee9f680fa5f51b7c756b3afaf72ba2f9d304f0"
+  },
+  "protected_other14": {
+    "src/host/agent-driven/native-cache-witness.ts": "85b1e804b3956165a6f8e171aa1fb8800cd8337290ad2d16ac05d3906ba2501a",
+    "src/host/agent-driven/created-native-workspace.ts": "32d5adae9d737b6799f20531e50956413a619e048a8f2f225fccb064205afbd2",
+    "src/host/agent-driven/committed-snapshot-authority.ts": "1c53360e3c618c603cfcbe61d0c2d57004c5bd33dc26a92c2fdec72a1844bd6d",
+    "src/host/m5/openfilm-native-expected.ts": "19110e45a83b6d5b611b4260620ce873f923f1e5a5b907bc6176c4b734fbeed3",
+    "src/adapters/openfilm/openfilm-upstream.ts": "29a0827a6130c2f382de93d1738b1be003c5ef15ded253d256585e6214d2aa69",
+    "tests/agent-driven/integration/created-native-source-reader.test.ts": "8d740f83883fd42c13f8e0e2ea63bee406f8d9edf19ea02a1005c72e26616e60",
+    "tests/agent-driven/integration/helpers/native-source-fixture.ts": "7160a285930e61b7927d90bb517e7d9575f5f0888394d228b192baff80daf622",
+    "tests/agent-driven/integration/helpers/created-draft-fixture.ts": "59788a8f9c08415a808b2418e86b4dac6bb7de65297ad5d1cb19b5f26eb22d27",
+    "tests/agent-driven/integration/created-native-workspace.test.ts": "439d469032c9af2b83ceb826e0aead7cf5c2fe5c5693be7cbf18c8e67f0f615f",
+    "tests/agent-driven/integration/committed-snapshot-host.test.ts": "bfd0c6373b254050d32a6a99e7b6f8b9827dc24b6b2587515ab4c5aad2cd9037",
+    "tests/agent-driven/integration/created-native-ack.test.ts": "5f50db85c7c07a2ecf4faefc20ec2ec6c7ad4910fafe549c2edc76bbad729c7c",
+    "src/host/agent-driven/retained-native-closure.ts": "776331d6397191ee7fc97a4859f8d3ff95031efaf2d4fe7a7ee875451d85eb30",
+    "src/host/agent-driven/created-native-source-reader.ts": "f00e02781c8531a74a1034a6a1c992c463f49ff1cbf9c49b203e8449d8360d7d",
+    "tests/agent-driven/integration/native-cache-witness.test.ts": "eb5c71c99b749509b304bc925ec47469099f1049746e63f145ae851c6281bcb1"
+  },
+  "prior_bytes": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/51da71f510271fa63e66c2b740ee9f680fa5f51b7c756b3afaf72ba2f9d304f0.txt",
+  "reason": "Baseline assembler/verifier/test equal HEAD; baseline default plan already includes independent concept overlay; expected four-clip list is inconsistent with existing contract",
+  "requirements": [
+    "Change only D1 first-case assertion to exact five native-parser-order IDs including concept-s1; preserve frame_count/subtitle/assets/digest/no-author-commit assertions",
+    "Add actual produced source proof that shot-s1 video and concept-s1 iframe are distinct editable clips, overlay points to expected scene file, shares correct first-shot timing, narration and three base shots remain; use fixed upstream existing read seam if needed, no fake facts or expected derived from same assembler helper",
+    "No new conceptOverlay option: unused and unnecessary; default fixture and production behavior remain byte-identical",
+    "All14 current candidate source/test paths frozen; save15 actual byte blobs/hash and next unique recorded tsc before requesting fresh D1b runtime",
+    "Before every later runtime, inspect previous result in a separate orchestration/tool step; no shell chain that reads failure then starts next command. Failed command withdraws remaining work",
+    "No business tests/build/fullgate/commit until new grant; preserve all failed captures and disclose D2 deviation"
+  ],
+  "stop": "New429 immediateSTOP no retry/takeover"
+}

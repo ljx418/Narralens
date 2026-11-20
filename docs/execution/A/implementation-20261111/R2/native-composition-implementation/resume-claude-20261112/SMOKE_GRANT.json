@@ -1,0 +1,22 @@
+{
+  "grant_id": "N1N2-RESUME-SMOKE-001",
+  "holder": "ctx_e5e736e1846b",
+  "request_message": "msg_3a4a81344a72",
+  "argv": [
+    "corepack",
+    "pnpm",
+    "exec",
+    "vitest",
+    "run",
+    "--config",
+    "vitest.config.ts",
+    "tests/agent-driven/integration/created-native-source-reader.test.ts",
+    "-t",
+    "R00 smoke"
+  ],
+  "cwd": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+  "capture": "n1n2-claude-resume-008-smoke",
+  "source_fence": "All source/test/tool/config/index inputs frozen until recorder and child command actually terminal; preserve original capture008 even on failure",
+  "grant_state": "GRANTED_NOT_STARTED",
+  "no_public_or_film_acceptance": true
+}

@@ -1,0 +1,9 @@
+MAIN架构定向补充：058 Claude方案采用永久unsettled/abandon不能闭环，已拒绝实施。MAIN现让唯一Claude先修清晰的其他项（059），A057-04代码仍未释放；你继续只读设计，不改W或运行probe。
+
+MAIN倾向选“每draw受控独占子进程执行固定producer原字节”，避免大面积AST变换和改vendor，也避免原JOB全局browser影响peer。重要既有实现可复用：W/src/host/render/native-renderer.ts有workerEnvironment、awaitChildExit、signalProcessGroup、groupExistsOfProcess，真实render已采用detached group；W/src/host/render/media-process-policy.mjs::installMediaProcessPolicy在worker内把Playwright spawn detached覆为false以防browser逃组（只worker局部，不污染Host），其余媒体协议限制沿用；W/src/host/render/openfilm-render-worker.mjs已示范guard/policy与固定上游；tools/agent-driven/media/process-group-probe.mjs和tests/agent-driven/media/process-group-inheritance.test.ts已有实测/测试形态。只读核对这些原文件及已有证据，不运行它们，不改已通过正式render路径。
+
+请给一份精确可实施的小方案，仅写C/repair-058/isolated-process-feasibility.md和.json（C同前任务）。沿用不变OpenFilmCacheProducerOwner.pageFrame/close和issued品牌，内部每draw独占Node worker+owned group，raw固定pageframes文件hash验证后直接import，不改原算法/key/预算；结果buffer只在worker真实退出+整组无残留+parent serving/probe真实排空后交付，PRE始终持有，正常成功也不可留cached page未来读输入。支持晚到launch/seek15s/JOB45s/capture30s/父close/取消/peer同时draw，stderr/stdout/IPC bounded，不用elapsed估结算。worker.closePageFrames可能空返回时仍由独占group终止证明，不靠wrapper。
+
+具体说明：spawn前归属登记，PID/startticks/pgid/sid和随机私有IPC ticket；worker子孙不逃group如何证明；已有signalProcessGroup的fallback是否足够，若不能就明确不可照抄；kill只针对确切owned group，不按名字全局杀。Linux/proc与当前真实运行环境兼容前提、非Linux不能冒充已验证；Windows用户经WSL的真实基线不要误写全平台支持。保护原renderer源码/锁/合同/Approved015/vendor，最小拟新增cache-worker/supervisor私有文件与调用点，精确测试/诊断及上层资源状态协议。任何不确定的清理都留真实owned责任、不得伪造settled；但要有实际正常/超时均可闭环的路线，不以永远failclosed收口。
+
+请比较这条路线相对于你前一派生observer方案的运行成本/行为变动（跨draw page缓存复用会丢失，真实cache文件仍保留），指出必要的MAIN ADR边界。只读设计，runtime全部NOT_RUN，不授权Claude或新worker；完成worker_done。

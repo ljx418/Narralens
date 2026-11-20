@@ -1,0 +1,10 @@
+# MAIN审查S01的同步/持久化核对点（设计交付前只读补充）
+
+当前BRIDGE live设计已明确区分epoch可读与映射待证、提出持久记录未完成异步映射事件。MAIN据当前实际原接口列交付审查条件；未实施、未改变SOURCE接口或发DDL写权。
+
+- pending映射提交屏障必须覆盖实际Change/FactsReader、normal adoption、Publisher和Recovery的最终同步门，而非只拦Ack/Context。现有业务消费者只有currentSelectionVersion接口，精确设计需说明该face何时拒绝，以及Expected/Observation读epoch face如何独立保持可启动；不能版本相等就绕过pending。
+- 普通重复同一有效mapping不增epoch。若先持久记pending但尚未算出mapping，不能靠先加版本再减回保持重复语义；必须不可逆单调。需给事件接受、异步mapper、同库最终CAS和并发apply的线性化顺序。
+- crash留下已接受的pending事件时，重启没有live session不能假称没变化，也不能永远保留提交屏障让项目无法恢复/打开。可以用原同库确定的accepted-event记录进行保守生命周期invalidate/清空live映射，理由要诚实为未完成观察而非伪称已知用户选了哪个镜头；单次收敛、幂等，old plan不会ABA。
+- EIO/损坏schema/未知owner不能被当“缺行”，也不能任意初始化0。真实确认absent与资源失败分别证明；新healthy项目不受旧unknown项目全局影响。
+- 关闭顺序：新公开admission先封闭，已受理recoveries/mappings仍持依赖到完成；随后authority关闭。若invalidate会影响当前pending write，必须在同队列/当前原事务检查范围内作真实决定，不在close中偷偷补批或改source。
+- 此审查不阻塞N1N2真实reader/retained闭包实现；BRIDGE仍仅设计两文档，ROOT最终审核后才给N3 exact release。

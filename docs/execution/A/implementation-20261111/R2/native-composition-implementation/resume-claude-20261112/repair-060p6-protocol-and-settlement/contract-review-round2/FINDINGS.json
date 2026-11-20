@@ -1,0 +1,63 @@
+{
+  "verdict": "PLAN_READY",
+  "review_kind": "Affected independent document recheck of revision2 only",
+  "counts": {
+    "BLOCKER": 0,
+    "MAJOR": 0,
+    "MINOR": 0
+  },
+  "findings": [],
+  "prior_dispositions": [
+    {
+      "id": "R6-DOC-01",
+      "status": "CLOSED_DOCUMENT",
+      "evidence": [
+        "MAIN_PRIVATE_CONTRACT_DRAFT.md §1A",
+        "§2 startup exception",
+        "§3.1/§3.2 no-fork nullable/ECHILD branches",
+        "MAIN_DEVELOPMENT_ACCEPTANCE_DRAFT.md C06-EXEC"
+      ],
+      "assessment": "Host-only no-child/no-authorize is separate from bound failed-fork certificate; no fake C/ticket/N wait/EOF required. Explicit group dispositions, stream ownership and never-inherited closure, zero-segment bound empty state, structured bounded setup-stage with same-errno distinction make the previous contradictory startup requirements implementable. Authorize already sent but invalid C binding does not gain no-authorize exemption."
+    },
+    {
+      "id": "R6-DOC-02",
+      "status": "CLOSED_DOCUMENT",
+      "evidence": [
+        "MAIN_PRIVATE_CONTRACT_DRAFT.md §1B",
+        "§1A invalid authorization paragraph",
+        "§4A",
+        "MAIN_DEVELOPMENT_ACCEPTANCE_DRAFT.md C06-ONESHOT/C07-EIO/C08-END/HOLD"
+      ],
+      "assessment": "Monotonic authorization state, one consumed fork attempt before resource effects, original root registration immediately at fork success, no rebinding/late fork in same batch, unified wait ordinal/ECHILD invalidation are specified at actual producer seam. C local raw-tree evidence precedes real stream finish, then certificate/wire, then Host C-close; unknown/close-uncertain retains owner without circular proof or responsibility expiry."
+    },
+    {
+      "id": "R6-DOC-03",
+      "status": "CLOSED_DOCUMENT",
+      "evidence": [
+        "MAIN_DEVELOPMENT_ACCEPTANCE_DRAFT.md C08-FORGE"
+      ],
+      "assessment": "creative_eligible:false explicitly valid failed-terminal positive control; true/missing/wrongtype are negatives, distinct from false on required-true proof booleans."
+    }
+  ],
+  "counterexample_rechecks": [
+    "Host returned-child spawn error+actual close/no-exit needs no impossible wire; C no-authorize has no trusted draw/ticket and remains Host-only.",
+    "Accepted bound authorize but fork definitively fails uses explicit no-child certificate/ECHILD/null ordinals and real partial-FD closure, no invented N wait.",
+    "Same errno setsid and exec errors require actual bounded child progress/setup records and original errno, not errno-based group guessing.",
+    "AUTH,AUTH / CANCEL,AUTH / AUTH,CANCEL actual-loop cases require at most1/0/1 attempts; illegal unbound reordered branch may be held/protocol failure, cannot exploit Host-only exemption. Ordinary normal/fault must fully return.",
+    "All raw children gone with EIO reader still owned: local raw_tree_terminal is available without Host close or final certificate, actual reader close then permits failed-terminal; raw unknown/reader close uncertain still held.",
+    "Overflow proof is failed-only, issued from actual sole-root/subreaper/wait registry plus post-wait ECHILD/original group/retained epochs, not ECHILD-only or a public claim. Parent-reaped category asserts only original epoch disappearance."
+  ],
+  "remaining_requirements": [
+    "MAIN must issue exact same8 writer release with immutable draft/source bindings, first-recorder commands and resource/stop ownership; this review itself grants none.",
+    "Implementation must actually connect producer/accumulator/domain/eligibility/snapshot/unique publication mapper and direct guarded callbacks, including ordinary normal and exact intentional failure positives; current source still historical R5I dirty baseline.",
+    "Keep fixture/protected7 unchanged and C09 OPEN; separate new-pin helper and actual adoption/TERM-survival gate remains necessary.",
+    "After source handback independent static safety then separately pinned runtime tickets; six lightweight captures are internal evidence, not actual C/N or full ISO proof.",
+    "R7/R8/original17+ISO18/N1N2/new freeze/NEXT/V1 unaccepted; old failures/NameError/INCOMPLETE/mock timeout cause limits preserved."
+  ],
+  "binding_revision": 2,
+  "source651_hash_match": true,
+  "runtime_this_review": "ALL_NOT_RUN",
+  "source_edits": false,
+  "subagents": false,
+  "implementation_acceptance": false
+}

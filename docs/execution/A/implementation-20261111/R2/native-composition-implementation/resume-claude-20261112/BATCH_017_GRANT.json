@@ -1,0 +1,70 @@
+{
+  "grant_id": "N1N2-RESUME-FOCUSED-017",
+  "at": "2026-11-12T15:03:17.172924+00:00",
+  "request": "msg_7aaef10b2244",
+  "holder": "ctx_b4086093cd96",
+  "cwd": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+  "frozen_sha256": {
+    "src/host/agent-driven/retained-native-closure.ts": "3bd37ab6eaaf0201c6fc78a339fe4cd1267dea6e2c75a96baaa4ad200d2774df",
+    "src/host/agent-driven/committed-snapshot-authority.ts": "43d8e2c91dc11346fb8fad8479bda9920379e9f361b2471114dc87248cbdb264",
+    "src/host/agent-driven/created-native-source-reader.ts": "49b99049dc9d493d1417d601d5c57a689a79db5446641276d5a4792a2630705f",
+    "src/host/agent-driven/created-native-workspace.ts": "a23ed94b5625593c2a6f10af656b69070e58502ad1753e5917aab6755e23c10c",
+    "src/host/agent-driven/native-cache-witness.ts": "c54a12a36d66516b107b6cbbf4a1ee9e920f05c0582d224a86dc33a49f69e742",
+    "src/adapters/openfilm/openfilm-upstream.ts": "850234a5c29a0dd742f51d7a8d591abe4ba01e68a0b3755838099f94b1bf9b16",
+    "tests/agent-driven/integration/created-native-source-reader.test.ts": "43fbeb67bd2925ff58329383dd05e671964cedbcf71e327d4f934dae442ae460",
+    "tests/agent-driven/integration/helpers/native-source-fixture.ts": "19cb73cb9d69394e550699d3363128a4ea60e96a3f28f22e1ea4fce01c6dda0a",
+    "tests/agent-driven/integration/committed-snapshot-host.test.ts": "bfd0c6373b254050d32a6a99e7b6f8b9827dc24b6b2587515ab4c5aad2cd9037",
+    "tests/agent-driven/integration/native-cache-witness.test.ts": "232963f6a7d80a107857009eacae2fdec6c5ad06cc5eca45ab13338dadbc42dd",
+    "src/host/m5/openfilm-native-expected.ts": "19110e45a83b6d5b611b4260620ce873f923f1e5a5b907bc6176c4b734fbeed3",
+    "tests/agent-driven/integration/created-native-workspace.test.ts": "439d469032c9af2b83ceb826e0aead7cf5c2fe5c5693be7cbf18c8e67f0f615f",
+    "tests/agent-driven/integration/created-native-ack.test.ts": "5f50db85c7c07a2ecf4faefc20ec2ec6c7ad4910fafe549c2edc76bbad729c7c"
+  },
+  "commands": [
+    {
+      "capture": "n1n2-claude-resume-140-gate-regression-focused",
+      "argv": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "vitest",
+        "run",
+        "--config",
+        "vitest.config.ts",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts",
+        "-t",
+        "F03 refuses a source leaf|F04 refuses a hardlink|G01 adopts|G01 keeps the reader|G02 refuses the round when|G03 refuses a film|G05 proves a real child|G06 accepts an absent|G06 refuses an isolated|P07 hands a non-lexical|G07 holds every nested"
+      ],
+      "expected_cases": 16,
+      "filtered": 62
+    }
+  ],
+  "selected_cases": [
+    "F03 refuses a source leaf and a source parent replaced during the acquisition",
+    "F04 refuses a hardlink alias and an unknown directory in the working copy",
+    "G01 adopts the genuine cleanup uncertainty of a rejected source acquisition",
+    "G01 keeps the reader usable after an ordinary failure of the acquisition",
+    "G01 adopts the genuine uncertainty of a raw rejection that arrives after the caller was cancelled",
+    "G02 refuses the round when the binding goes stale during the read",
+    "G02 refuses the round when the reader is closed during the final verification",
+    "G02 refuses the round when the working copy view is invalidated during the read",
+    "G02 refuses the round when another delivered proof fails to release",
+    "G03 refuses a film that is replaced between the bounded digest and the parse",
+    "G05 proves a real child that dies by a signal and a real child that is cancelled",
+    "P07 hands a non-lexical caption order to the actual consumer without changing it",
+    "G06 accepts an absent heard transcript and refuses its later birth",
+    "G06 refuses an isolated parent swap that leaves no extra file behind",
+    "G07 holds every nested and empty directory of both trees independently",
+    "G02 refuses the round when the last liveness callback closes the reader"
+  ],
+  "inventory_correction": "Actual16 selected, not child14; sameproposedfilter, no forcingcount",
+  "compile139": {
+    "exit": 0,
+    "source_changed": [],
+    "source_added": [],
+    "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "finished_at": "2026-11-12T15:00:46.934349+00:00"
+  },
+  "cleanup_receipt_sha256": "ed6ecc851d8496f0934e6cd47059d4511df2bda9ddb4ee6b245c07b4cb2e2339",
+  "execution": "Unchangedrecorderonce;freezeALLsrc/tests/tools/config/indexuntilterminal+owncleanup; noothergate/browser;new429STOP",
+  "scope": "Focused regression only, knownG04registrytrust still unresolved; not final acceptance"
+}

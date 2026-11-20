@@ -1,0 +1,20 @@
+{
+  "at": "2026-11-12T05:53:22.324300+00:00",
+  "source_message": "msg_stop_bb526ca9e7d931e79332c1cd",
+  "reviewer": "ctx_3f52de60cbc1",
+  "status": "OPEN_PENDING_IMPLEMENTATION_AND_EVIDENCE",
+  "reported_findings": [
+    "releasing a single lease revokes whole workspace reference",
+    "lease issuer instance verification missing",
+    "current guard does not cover closure drift"
+  ],
+  "required_oracles": [
+    "repeated proof works while workspace reference remains valid",
+    "parallel independent leases do not revoke one another",
+    "foreign-instance lease is refused",
+    "closure drift invalidates current proof"
+  ],
+  "source": "supervisor read-only review; not yet independently reproduced by MAIN",
+  "scope": "existing N1N2 release; no new execution grant",
+  "acceptance": "NOT_CLAIMED"
+}

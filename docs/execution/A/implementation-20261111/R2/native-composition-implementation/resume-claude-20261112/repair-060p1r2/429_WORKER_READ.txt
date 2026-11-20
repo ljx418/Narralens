@@ -1,0 +1,361 @@
+Source: transcript (provider=claude)
+Worker: ready
+Archived: false
+Terminal liveness: live
+Agent liveness: live
+Source exact: true
+Content complete: false
+Clipping: message_limit_or_scan_window, transcript_payload
+Continuation cursor (opaque; pass unchanged to --cursor): owr1_eyJ2IjoxLCJkIjoiY3R4XzlhZGIwYTJiN2QwYSIsInMiOiJ0cmFuc2NyaXB0IiwiaSI6IjlLaUNiMjhSNFpWNkd3b3dqSkhyakNGQUp2M29LSi1IIiwicCI6OTAwNzQ4MiwiYyI6InJLbV9TOVM5R3hKRU5CVHlOdTNzWFFpZkVhcTRISXhVIn0
+Warning: Oversized transcript text was clipped.
+Warning: Oversized tool input was clipped.
+
+[assistant] [tool Bash] {"command":"node tools/openfilm-cache-worker-integrity.mjs --generate && node tools/openfilm-cache-worker-integrity.mjs --check && corepack pnpm exec tsc --noEmit && echo \"TSC OK\" && corepack pnpm exec vitest run --config vitest.config.ts tests/agent-driven/integration/cache-production-scope.test.ts tests/agent-driven/integration/cache-process-identity.test.ts 2>&1 | tail -8","description":"Regenerate manifest and run the gates","timeout":600000}
+
+[tool] [tool result] {"ok":true,"generated":{"path":"src/adapters/openfilm/cache-worker-integrity.json","sha256":"20fb57009495a7cacbff8f1e2501f5e4eef3c147348de8ed3608086d8a55834a"}}
+{"ok":true,"checked":8}
+TSC OK
+ ✓ tests/agent-driven/integration/cache-production-scope.test.ts (11 tests) 21ms
+ ✓ tests/agent-driven/integration/cache-process-identity.test.ts (29 tests) 21ms
+
+ Test Files  2 passed (2)
+      Tests  40 passed (40)
+   Start at  17:21:32
+   Duration  11.06s (transform 200ms, setup 0ms, collect 613ms, tests 42ms, environment 0ms, prepare 8.19s)
+
+[reasoning] Everything is green. Note the manifest sha is the same as before (20fb5700...) — because the sources that the manifest covers (the .py, the .mjs files, the supervisor .ts) haven't changed since the last generation. Wait — the supervisor .ts DID change (the latched outcome fix was before the last generation?). Let me check the order:
+- I generated the manifest (20fb5700) at 17:15.
+- Then I patched: the upstream (not in the manifest), the workspace (not in the manifest), the policy (0d2b2b38 — in the manifest!), the fixture (not in the manifest), the custodian (d03e4bde — in the manifest!).
+- Then I patched the custodian (self-verification) — that's AFTER the generation at 17:15? Let me check: the custodian self-verification patch was at ~17:14, before the generation at 17:15 ✓.
+- The policy patch (execFileSync) was at ~17:14 too ✓.
+- After the generation at 17:15, I patched: the identity test (not in the manifest), the upstream, the workspace (not in the manifest).
+
+So the manifest's covered files are unchanged ✓ → the same sha ✓ and --check passes ✓.
+
+Good. Now the recorded captures. Let me run all 10 allowed runtime commands + the generation, in order, with the recorder.
+
+The capt
+… (truncated)
+
+[assistant] All gates green. Now the ten recorded runtime commands:
+
+[assistant] [tool Bash] {"command":"cd /mnt/c/workspace/videoworkline/Narralens-agents/main-integration\nR=docs/execution/A/implementation-20261111/integration/e1-main-takeover/run-recorded.py\npython3 -I $R n1n2-claude-060p1r-generate-001 node tools/openfilm-cache-worker-integrity.mjs --generate 2>&1 | tail -1\npython3 -I $R n1n2-claude-060p1r-typecheck-001 corepack pnpm exec tsc --noEmit 2>&1 | tail -1\npython3 -I $R n1n2-claude-060p1r-syntax-worker-001 node --check src/adapters/openfilm/openfilm-cache-worker.mjs 2>&1 | tail -1\npython3 -I $R n1n2-claude-060p1r-syntax-policy-001 node --check src/adapters/openfilm/cache-worker-policy.mjs 2>&1 | tail -1","description":"Recorded generation, typecheck and syntax checks","timeout":600000}
+
+[tool] [tool result] {"exit": 0, "source_changed": [], "source_added": [], "log_sha256": "3a061efbd84352db280b0d1dd68b2f7df1992d518d3b9ff8292cc56f780645fd", "finished_at": "2026-11-14T09:22:22.281320+00:00"}
+{"exit": 0, "source_changed": [], "source_added": [], "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855", "finished_at": "2026-11-14T09:23:01.454907+00:00"}
+{"exit": 0, "source_changed": [], "source_added": [], "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855", "finished_at": "2026-11-14T09:23:07.012597+00:00"}
+{"exit": 0, "source_changed": [], "source_added": [], "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855", "finished_at": "2026-11-14T09:23:11.328674+00:00"}
+
+[assistant] [tool Bash] {"command":"cd /mnt/c/workspace/videoworkline/Narralens-agents/main-integration\nR=docs/execution/A/implementation-20261111/integration/e1-main-takeover/run-recorded.py\npython3 -I $R n1n2-claude-060p1r-custodian-syntax-001 /usr/bin/python3.12 -I -S -B -c \"import ast,pathlib; ast.parse(pathlib.Path('src/adapters/openfilm/cache-process-custodian.py').read_text(encoding='utf-8')); print('CUSTODIAN_SYNTAX_OK')\" 2>&1 | tail -1\npython3 -I $R n1n2-claude-060p1r-integrity-check-001 node tools/openfilm-cache-worker-integrity.mjs --check 2>&1 | tail -1\npython3 -I $R n1n2-claude-060p1r-scheduler-001 corepack pnpm exec vitest run --config vitest.config.ts tests/agent-driven/integration/cache-production-scope.test.ts 2>&1 | tail -1\npython3 -I $R n1n2-claude-060p1r-identity-001 corepack pnpm exec vitest run --config vitest.config.ts tests/agent-driven/integration/cache-process-identity.test.ts 2>&1 | tail -1\npython3 -I $R n1n2-claude-060p1r-m21-lock-001 corepack pnpm exec vitest run --config vitest.config.ts tests/m2.1/openfilm-upstream-lock.test.ts 2>&1 | tail -1\npython3 -I $R n1n2-claude-060p1r-syntax-worker-fixture-001 node --check tests/agent-driven/integration/helpers/cache-worker-fixture.mjs 2>&… (truncated)","…":"truncated"}
+
+[tool] [tool result] {"exit": 0, "source_changed": [], "source_added": [], "log_sha256": "dd8ee964b960e83ee2ed8f892492ac84dc2c0ea3c9ddb84f9b29e3922f08b97c", "finished_at": "2026-11-14T09:23:38.577357+00:00"}
+{"exit": 0, "source_changed": [], "source_added": [], "log_sha256": "7480083d801311b007ec2f2a6c4717621f8aed33de5e17dd7ba35815b0d68e68", "finished_at": "2026-11-14T09:23:42.408351+00:00"}
+{"exit": 0, "source_changed": [], "source_added": [], "log_sha256": "a59a2057ad26195974a86af5a2b368fb7390b55b6a42d78b81b97b6bd1f3c120", "finished_at": "2026-11-14T09:23:53.537405+00:00"}
+{"exit": 0, "source_changed": [], "source_added": [], "log_sha256": "fa7358a3773a9754e288dbdae67569351e133e8bf7858dd4ec029cafe83d58c8", "finished_at": "2026-11-14T09:24:03.360064+00:00"}
+{"exit": 0, "source_changed": [], "source_added": [], "log_sha256": "7b00699e22b9a130d2614885d9b545ac6e84c752a85f29bd7ff6908a0a1b35b6", "finished_at": "2026-11-14T09:24:16.735681+00:00"}
+{"exit": 0, "source_changed": [], "source_added": [], "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855", "finished_at": "2026-11-14T09:24:20.980310+00:00"}
+{"exit": 0, "source_changed": [], "source_added": [], "log_sha256": "e3b0c4429
+… (truncated)
+
+[reasoning] All 11 captures (1 generation + 10 runtime) are exit 0 with source_changed=[].
+
+Note the generate capture shows source_changed=[] — because the manifest was already up to date (I generated it before). That's honest: the generation produced identical bytes. Hmm — but the release says "生成清单只允许具名--generate单独源生成且只写该JSON，必须真实记录source_changed". The recorded source_changed=[] means the file did not change (the bytes were already correct). The command DID run and DID write the file (writeFile always writes) — but the content was identical → the digest is the same → source_changed=[] ✓.
+
+That's honest and correct. I should note in the report that the generation was already up to date at the time of the recorded run (the manifest had been generated earlier in the same session, after the last source edit), so the recorded source_changed is empty; the generation command itself ran and exited 0.
+
+Hmm — to be fully transparent, let me note that the earlier (unrecorded) generation in the same session produced the manifest, and the recorded one confirmed it. The recorded generate's log shows the same sha.
+
+Hmm, is that a problem? The release says the generation must be a separate recorded source c
+… (truncated)
+
+[assistant] All eleven captures are green. Collecting the final evidence:
+
+[assistant] [tool Bash] {"command":"cd /mnt/c/workspace/videoworkline/Narralens-agents/main-integration\necho \"=== final source digests ===\"\nsha256sum src/adapters/openfilm/cache-process-custodian.py src/adapters/openfilm/cache-process-supervisor.ts src/adapters/openfilm/cache-production-scope.ts src/adapters/openfilm/openfilm-cache-worker.mjs src/adapters/openfilm/cache-worker-policy.mjs src/adapters/openfilm/cache-worker-integrity.json tools/openfilm-cache-worker-integrity.mjs src/adapters/openfilm/openfilm-upstream.ts src/host/agent-driven/created-native-workspace.ts src/host/agent-driven/created-native-source-reader.ts tests/agent-driven/integration/cache-production-scope.test.ts tests/agent-driven/integration/cache-process-identity.test.ts tests/agent-driven/integration/cache-process-settlement.test.ts tests/agent-driven/integration/cache-custodian-lifecycle.test.ts tests/agent-driven/integration/cache-frame-duration-lifetime.test.ts tests/agent-driven/integration/cache-serving-drain.test.ts tests/agent-driven/integration/helpers/cache-worker-fixture.mjs tests/agent-driven/integration/helpers/cache-probe-fixture.mjs tests/agent-driven/integration/native-cache-witness.test.ts tests/m2.1/openfilm-upstream-lo… (truncated)","…":"truncated"}
+
+[tool] [tool result] === final source digests ===
+d03e4bde0c44b5a3c38cc6716310b2fad8e42c770a33ca0e7d13c048178e6f56  src/adapters/openfilm/cache-process-custodian.py
+26998ef372777172083034ec2e9f3be3cb9203248b92044c31fd17d012d68bc2  src/adapters/openfilm/cache-process-supervisor.ts
+dec0ab0ce2052e7f0c1e4c2287bf8dacfaf20e5e14860c0ca631187a80785e01  src/adapters/openfilm/cache-production-scope.ts
+18bd7a3a752d94be1f01881c2d5b20e41efce03615cc8fcef099584a3100581d  src/adapters/openfilm/openfilm-cache-worker.mjs
+0d2b2b38eea9922b0348ae2dbbbfbe1c2bc7715fc923879776696110015b1214  src/adapters/openfilm/cache-worker-policy.mjs
+20fb57009495a7cacbff8f1e2501f5e4eef3c147348de8ed3608086d8a55834a  src/adapters/openfilm/cache-worker-integrity.json
+8f59fb5951a1f83dc360413ac1b71e7914bc98f65c1efa71af909751b7d509d0  tools/openfilm-cache-worker-integrity.mjs
+ca3e089032ec6deb8c34769b041ec81a06528c4aeb34b3a1fcb490186556205e  src/adapters/openfilm/openfilm-upstream.ts
+eafd88ed060aa49579b68b9fb7fb88afe9319d05acfae2480f5aad3459b7d49c  src/host/agent-driven/created-native-workspace.ts
+0a52b8ff16652cf4bf439ef19812b05a4a417396a9139dd4ee4ce7df8505289e  src/host/agent-driven/created-native-source-reader.ts
+6f6c1f67090ccd1c0821e948c041669
+… (truncated)
+
+[assistant] [tool Bash] {"command":"cd /mnt/c/workspace/videoworkline/Narralens-agents/main-integration\necho \"=== upstream private interfaces ===\"\ngrep -n \"function registerProductionResponsibility\\|function productionResponsibilitiesOf\\|function responsibilityOfRoot\\|  inspectCleanup:\\|  reconcileCleanup:\\|  pageFrame: async\\|  close: async\\|const productionResponsibilities\\|readonly failures\\|sourceFailures.push\" src/adapters/openfilm/openfilm-upstream.ts | head -20\necho \"=== workspace private interfaces ===\"\ngrep -n \"inspectNativeCacheCleanup\\|reconcileNativeCacheCleanup\\|mintCacheProductionCompletion\\|completeCacheProductionScope\\|releaseCacheProductionScope\\|#nativeCacheCleanupHandles\" src/host/agent-driven/created-native-workspace.ts | head -20\necho \"=== custodian key lines ===\"\ngrep -n \"PR_SET_CHILD_SUBREAPER\\|PR_GET_CHILD_SUBREAPER\\|def enable_subreaper\\|def _settle_domain\\|def _final_reap\\|def _reap_adopted\\|def _wait_for_worker_exit\\|def _echild\\|def _known_identities_gone\\|def verify_own_integrity\\|DRAW_FD = 3\\|CONTROL_FD = 4\\|def _spawn_worker\" src/adapters/openfilm/cache-process-custodian.py","description":"Collect interface line numbers"}
+
+[tool] [tool result] === upstream private interfaces ===
+435:const productionResponsibilities = new WeakMap<object, ProductionResponsibility[]>();
+438:function registerProductionResponsibility(
+465:function productionResponsibilitiesOf(owner: OpenFilmCacheProducerOwner): readonly ProductionResponsibility[] {
+516:    pageFrame: async (request: { readonly root: string; readonly base: string; readonly rel: string; readonly ms: number; readonly width: number; readonly overrides?: unknown[] | null }) => {
+595:    close: async () => {
+737:  readonly failures: () => readonly unknown[];
+952:          sourceFailures.push(error);
+970:          catch (error) { sourceFailures.push(error); }
+1147:function responsibilityOfRoot(
+1420:    close: async (): Promise<void> => {
+1507:    inspectCleanup: inspect,
+1508:    reconcileCleanup: async (handle: unknown): Promise<OpenFilmCleanupView> => {
+=== workspace private interfaces ===
+19:import {acquireCacheProductionScope,completeCacheProductionScope,isLiveCacheProductionScope,mintCacheProductionCompletion,releaseCacheProductionScope,runWithCacheProductionScope} from '../../adapters/openfilm/cache-production-scope.js';
+213: readonly #nativeCacheCleanupHandles=new WeakMap<ob
+… (truncated)
+
+[reasoning] I have everything I need. Let me write the report.
+
+The report must include:
+1. The ACK + baseline (done separately).
+2. The per-finding response (F01..F11) + the R3-R01..03.
+3. The complete commands/exit/log sha/input sha.
+4. The per-ISO implementation/NOT_RUN.
+5. The private interfaces + the FD table with the actual line numbers.
+6. The remaining risks.
+7. The next P2a's exact commands/fixtures/resource cleanup steps.
+8. The correction of the old report's argument about stdio close.
+9. The UNRECORDED/UNKNOWN note about the old two failures.
+
+Let me write it. It should be thorough but not endless.
+
+Let me get the capture list with the log shas first (I have them from the output).
+
+Captures:
+- generate-001: exit 0, log 3a061efb..., source_changed []
+- typecheck-001: exit 0, log e3b0c442... (empty output), source_changed []
+- syntax-worker-001: exit 0, e3b0c442
+- syntax-policy-001: exit 0, e3b0c442
+- custodian-syntax-001: exit 0, dd8ee964
+- integrity-check-001: exit 0, 7480083d
+- scheduler-001: exit 0, a59a2057
+- identity-001: exit 0, fa7358a3
+- m21-lock-001: exit 0, 7b00699e
+- syntax-worker-fixture-001: exit 0, e3b0c442
+- syntax-probe-fixture-001: exit 0, e3b0c442
+
+Let me writethe 
+… (truncated)
+
+[assistant] Now the report:
+
+[assistant] [tool Write] {"file_path":"/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/parallel/lane-product/A-R2-20261112/N1N2-native-source/n1n2-claude-060p1r-report.md","content":"# n1n2-claude-060p1r — rev3 独占回收者与 P1 修订报告\n\n- release_id: `MAIN_RELEASE_060P1R_REV3_CUSTODIAN_REPAIR`\n- task_id: `task_10c4ac8146ae` / dispatch_id: `ctx_95f1131694b8`\n- 依据: `ADR_060_REV3_CUSTODIAN_AND_REPAIR.md` rev3（sha256 `326bed74…95ac`）、`060P1R_PRIVATE_CONTRACT.md`、`ADR_060_REV3_BINDING.json`、`REV3_DOCUMENT_APPROVAL.json`（DOCUMENT_PLAN_READY）、`rev3-document-review/REVIEW.md`、`code-review/FINDINGS.json` + `code-review/REVIEW.md`（REQUEST_CHANGES：1 BLOCKER / 9 MAJOR / 1 MINOR / 2 NOTE）、`lifecycle-design/REVIEW.md` + `PROPOSAL.json`、`PYTHON_ENVIRONMENT_BASELINE.json`\n- ACK 与基线: `n1n2-claude-060p1r-ack-baseline.md`（14 个 existing 文件原字节、7 个新文件不存在、AGENTS、HEAD、branch、index、9 份规范文档摘要**逐项实测一致**）\n- 旧报告不覆盖：060P1 的 `n1n2-claude-060p1-report.md` 原样保留；本报告逐编号回应原 finding。\n- **旧两次开发期失败**：按 `code-review/FINDINGS.json` P1-N02 记为 **UNRECORDED / UNKNOWN** —— 060P1 的原命令/exit/log/inputs 没有留存，本票**不补造**那两份历史日志；本波的新反事实一律是新日期、新 argv 的新捕获。\n- 实施者自签：**不是外审**。源码冻结、最终全量门与独立验收由 MAIN 组织。\n\n## 0. 结论\n\n按 rev3 完整重写了 P1 的执行拓扑：**Host → 每 draw 一个 Python 标… (truncated)"}
+
+[tool] [tool result] File created successfully at: /mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/parallel/lane-product/A-R2-20261112/N1N2-native-source/n1n2-claude-060p1r-report.md (file state is current in your context — no need to Read it back)
+
+[reasoning] Now let me do a final verification of the whole state before sending worker_done:
+1. git status — confirm the changed files are exactly the allowed ones (plus the pre-existing dirty).
+2. The index is empty.
+3. No git operations were performed.
+
+Let me check that I haven't touched anything outside the allowed set.
+
+The files I modified:
+- src/adapters/openfilm/openfilm-upstream.ts ✓ (allow_existing)
+- src/adapters/openfilm/cache-process-supervisor.ts ✓
+- src/adapters/openfilm/cache-production-scope.ts ✓
+- src/adapters/openfilm/openfilm-cache-worker.mjs ✓
+- src/adapters/openfilm/cache-worker-policy.mjs ✓
+- src/adapters/openfilm/cache-worker-integrity.json ✓
+- tools/openfilm-cache-worker-integrity.mjs ✓
+- src/host/agent-driven/created-native-workspace.ts ✓
+- tests/agent-driven/integration/cache-production-scope.test.ts ✓
+- tests/agent-driven/integration/cache-process-settlement.test.ts ✓
+- NEW: src/adapters/openfilm/cache-process-custodian.py ✓
+- NEW: tests/agent-driven/integration/helpers/cache-worker-fixture.mjs ✓
+- NEW: tests/agent-driven/integration/helpers/cache-probe-fixture.mjs ✓
+- NEW: tests/agent-driven/integration/cache-custodian-lifecycle.test.ts ✓
+- NEW: tests/agent-driven
+… (truncated)
+
+[assistant] [tool Bash] {"command":"cd /mnt/c/workspace/videoworkline/Narralens-agents/main-integration\necho \"=== index empty? ===\"; git diff --cached --stat | wc -l\necho \"=== changed tracked files ===\"; git status --porcelain | grep -E \"^ M|^M \" \necho \"=== new source files (untracked, non-docs) ===\"; git status --porcelain | grep \"^??\" | grep -vE \"docs/execution|docs/parallel\"\necho \"=== protected digests unchanged? ===\"\nsha256sum AGENTS.md src/host/agent-driven/created-native-source-reader.ts tests/agent-driven/integration/native-cache-witness.test.ts tests/m2.1/openfilm-upstream-lock.test.ts tests/agent-driven/integration/created-native-source-reader.test.ts src/host/agent-driven/committed-snapshot-authority.ts src/host/agent-driven/retained-native-closure.ts","description":"Final state verification"}
+
+[tool] [tool result] === index empty? ===
+0
+=== changed tracked files ===
+ M AGENTS.md
+ M src/adapters/openfilm/openfilm-upstream.ts
+ M src/host/agent-driven/committed-snapshot-authority.ts
+ M src/host/agent-driven/created-native-source-reader.ts
+ M src/host/agent-driven/created-native-workspace.ts
+ M src/host/agent-driven/retained-native-closure.ts
+ M tests/agent-driven/integration/created-native-source-reader.test.ts
+ M tests/agent-driven/integration/native-cache-witness.test.ts
+ M tests/m2.1/openfilm-upstream-lock.test.ts
+=== new source files (untracked, non-docs) ===
+?? src/adapters/openfilm/cache-process-custodian.py
+?? src/adapters/openfilm/cache-process-supervisor.ts
+?? src/adapters/openfilm/cache-production-scope.ts
+?? src/adapters/openfilm/cache-worker-integrity.json
+?? src/adapters/openfilm/cache-worker-policy.mjs
+?? src/adapters/openfilm/openfilm-cache-worker.mjs
+?? tests/agent-driven/integration/cache-custodian-lifecycle.test.ts
+?? tests/agent-driven/integration/cache-frame-duration-lifetime.test.ts
+?? tests/agent-driven/integration/cache-process-identity.test.ts
+?? tests/agent-driven/integration/cache-process-settlement.test.ts
+?? tests/agent-driven/integration/cache-production-scope.test.
+… (truncated)
+
+[reasoning] Everything checks out:
+- The index is empty.
+- The changed tracked files are exactly the pre-existing 060P1/059/P0 dirty set plus `created-native-workspace.ts` (which I modified, and it's in allow_existing). The other four (AGENTS.md, committed-snapshot-authority.ts, created-native-source-reader.ts, retained-native-closure.ts, created-native-source-reader.test.ts, native-cache-witness.test.ts, m2.1 lock test) have UNCHANGED digests ✓ — they are dirty from before, not from me.
+- The new files are exactly my 7 new + the 7 from 060P1 ✓.
+- The protected digests are unchanged ✓.
+
+Now let me send worker_done. The body must be three sentences: what I did, what I found, what's left.
+
+Let me construct it carefullyand completely.
+
+[assistant] All state verified. Sending the completion report:
+
+[assistant] [tool Bash] {"command":"orca-ide orchestration send --from term_14fffbb69175959725768f1e252f4988 --type worker_done --subject \"060P1R rev3 implemented: group-outside Python custodian C, two-level handshake, F01-F11 closed; 11 recorded gates green; all real-process evidence NOT_RUN\" --body \"按 ADR rev3 与 PRIVATE_CONTRACT 完整重写了 P1 的执行拓扑与 11 项 finding：新增 src/adapters/openfilm/cache-process-custodian.py（每 draw 一个位于目标组之外的 Python 标准库 custodian，fork 前 prctl(PR_SET_CHILD_SUBREAPER)+GET 回读核验、单线程 fork/setsid/execve、waitid(P_PID,N,WEXITED|WNOHANG|WNOWAIT) 保住 N 的未 reap 锚、所有组信号在最后 waitpid(N) 之前发完、最后验 ECHILD/组 ESRCH/known(pid,startticks) 消失含 Z，Host 只 reap 自己的直接 child C），supervisor 改为 rev3 双通道两级握手（C_HELLO 校验 spawn child.pid/ppid/pgid/sid、N_HELLO 校验 FORKED pid 与 ppid=C、绘制 fd3 与控制 fd4 各自单 writer）、三态内核查询 gone/known/unknown、DrawHandle 绑定签发实例（另一实例的真实 handle 也被拒）、reserve/start 分离、单调锁存第一处失败、原生错误改为有界结构化 envelope、每阶段 deadline 与有界 decoder（F07 允许同一次 read 里 metadata+整图）；openfilm-upstream 增生产责任私有账本（pageFrame 首个 await 前登记、close 封准入并取消未 GO 排队且共享同一 promise、bridge 的 inspect/reconcile）、源 error 与真实 close 分离并保留 destroy 异常，scope 增私有 ProductionCompletion（清 held 标记与释放之间无 await），workspace 增 Host-only inspectNativeCacheCleanup/reconcileNa… (truncated)","…":"truncated"}
+
+[tool] [tool result] messageId=msg_2ba63ee5312d lifecycle=completed
+Next: Recorded. End your turn.
+
+[assistant] 060P1R is complete and handed back to MAIN (`msg_2ba63ee5312d`).
+
+## What I did
+
+Rewrote the P1 execution topology per ADR rev3 and closed all 11 findings:
+
+**New — `cache-process-custodian.py`**: a per-draw Python stdlib custodian living *outside* the draw's process group. It verifies `PR_SET_CHILD_SUBREAPER` (and reads it back) before forking anything, forks the Node worker into its own session/group, keeps the worker's exit visible *without reaping it* via `waitid(P_PID, N, WEXITED|WNOHANG|WNOWAIT)`, sends every needed group signal **before** the final `waitpid(N)`, then proves ECHILD + group ESRCH + known `(pid,startticks)` gone (zombies included). The Host only reaps its own direct child C.
+
+**Rewritten — supervisor**: rev3 two-level handshake (C_HELLO vs spawn `child.pid`; N_HELLO vs FORKED pid and `ppid == C`), separate draw (fd3) and control (fd4) channels with single writers, tri-state kernel queries (`gone`/`known`/`unknown` — unreadable is never "gone"), handles bound to their issuing supervisor (a *real* foreign handle is refused), `reserve`/`start` split, monotonic latching of the first failure, bounded structured native-error envelope, per-stage deadlines, and a bound
+… (truncated)
+
+[user] Please carry out this task from my Orca coordinator by following the brief I pasted below. You are working inside Orca, a multi-agent IDE. You are a dispatched worker.
+Your coordinator's terminal handle is: term_de470342-773c-497a-a654-1a16a159eaca
+Your task ID is: task_4ba8760231b0
+
+The coordinator cannot see this terminal. Reach it with the `orca-ide orchestration` commands
+below, and message it only to ask, report a blocker, or finish; it needs no progress updates
+unless the task asks.
+Do only this task, yourself: no subagents or helper workers unless the task asks.
+
+=== CLI COMMANDS ===
+
+```sh
+  # Ask the coordinator, then end your turn; Orca wakes you with the answer.
+  # Never use a local question prompt such as AskUserQuestion; the
+  # coordinator cannot see or answer it.
+  orca-ide orchestration ask --from term_88e67cac3791dbec5f15fc184055421a --question "<your question>"
+
+  # Blocked, and the coordinator must act before you can continue:
+  orca-ide orchestration send --from term_88e67cac3791dbec5f15fc184055421a --type escalation --subject "Blocked: <reason>" --body "<details>" --task-id task_4ba8760231b0 --dispatch-id ctx_9adb0a2b7d0a
+
+  # Finish: send exactly once. --body
+… (truncated)
+
+[assistant] I'll start by reading the release documents and both review folders.
+
+[assistant] [tool Bash] {"command":"cd \"/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112\" && ls -la repair-060p1r2/ && echo \"=== review folder ===\" && ls -la repair-060p1r-review/","description":"List the new release and review folders"}
+
+[tool] [tool result] total 72
+drwxrwxrwx 1 administrator administrator  4096 Nov 14 17:47 .
+drwxrwxrwx 1 administrator administrator  4096 Nov 14 17:45 ..
+-rwxrwxrwx 1 administrator administrator   443 Nov 14 17:47 DISPATCH_RECEIPT.json
+-rwxrwxrwx 1 administrator administrator  1081 Nov 14 17:47 MAIN_COMBINED_DECISION.json
+-rwxrwxrwx 1 administrator administrator 43052 Nov 14 17:45 PREFLIGHT.json
+-rwxrwxrwx 1 administrator administrator  9681 Nov 14 17:47 RELEASE.json
+-rwxrwxrwx 1 administrator administrator 12008 Nov 14 17:47 SPEC.md
+=== review folder ===
+total 24
+drwxrwxrwx 1 administrator administrator 4096 Nov 14 17:44 .
+drwxrwxrwx 1 administrator administrator 4096 Nov 14 17:45 ..
+-rwxrwxrwx 1 administrator administrator 4203 Nov 14 17:28 INPUT_SNAPSHOT.json
+-rwxrwxrwx 1 administrator administrator 3633 Nov 14 17:28 MAIN_CAPTURE_AUDIT.json
+-rwxrwxrwx 1 administrator administrator  269 Nov 14 17:41 MAIN_CUSTODIAN_REVIEW_RECEIPT.json
+-rwxrwxrwx 1 administrator administrator  269 Nov 14 17:44 MAIN_INTEGRATION_REVIEW_RECEIPT.json
+-rwxrwxrwx 1 administrator administrator 1138 Nov 14 17:42 MAIN_PARTIAL_REVIEW_DECISION.json
+-rwxrwxrwx 1 administrator administrator  481 Nov 14 17:33 custodian-dispatch-rec
+… (truncated)
+
+[assistant] [tool Read] {"file_path":"/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p1r2/RELEASE.json"}
+
+[tool] [tool result] 1	{
+2	  "release_id": "MAIN_RELEASE_060P1R2_CONSOLIDATED_REPAIR",
+3	  "at": "2026-11-14T09:45:14.889446+00:00",
+4	  "status": "APPROVED_PENDING_DISPATCH",
+5	  "cwd": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+6	  "base_head": "1d348d419120f23f45d958112ea8c43df5a04675",
+7	  "branch": "agent-driven/main-a-integration",
+8	  "allow_existing": [
+9	    "src/adapters/openfilm/openfilm-upstream.ts",
+10	    "src/host/agent-driven/created-native-workspace.ts",
+11	    "src/host/agent-driven/created-native-source-reader.ts",
+12	    "tests/m2.1/openfilm-upstream-lock.test.ts",
+13	    "tests/agent-driven/integration/native-cache-witness.test.ts",
+14	    "tests/agent-driven/integration/created-native-source-reader.test.ts",
+15	    "src/adapters/openfilm/cache-production-scope.ts",
+16	    "src/adapters/openfilm/cache-process-supervisor.ts",
+17	    "src/adapters/openfilm/openfilm-cache-worker.mjs",
+18	    "src/adapters/openfilm/cache-worker-policy.mjs",
+19	    "src/adapters/openfilm/cache-worker-integrity.json",
+20	    "tools/openfilm-cache-worker-integrity.mjs",
+21	    "tests/agent-driven/integration/cache-production-scope.test.ts",
+22	    "tests/agent-driven/integration/c
+… (truncated)
+
+[assistant] [tool Read] {"file_path":"/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p1r2/SPEC.md"}
+
+[tool] [tool result] 1	# 060P1R2：合并修复与轻量自验证，非P2
+2	
+3	你是原Claude唯一源码实施者。P1R任务已正常交还；两位独立Codex均REQUEST_CHANGES。MAIN未接手实现。现在批准本票修复及JSON十一条轻量命令，不批准真实custodian/子进程故障/Chrome/Host/ffmpeg/probe实验。普通缺陷自行闭环，不再让用户选择逐条工程修法；任何新429立即停工并报告，不自动重试/重启/换provider或Codex代实现。
+4	
+5	W=/mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+6	C=/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112
+7	R=C/repair-060p1r-review；当前票C/repair-060p1r2/RELEASE.json。
+8	
+9	## 权威、基线与写入
+10	
+11	完整读RELEASE.json及R下两份独立custodian-review与integration-review的REVIEW.md/FINDINGS.json；读C/repair-060p1-review/ADR_060_REV3_CUSTODIAN_AND_REPAIR.md、060P1R_PRIVATE_CONTRACT.md及binding/批准记录。旧rev3合同不降格，不因修复困难另造简化架构。HEAD仍1d348d419120f23f45d958112ea8c43df5a04675，只是历史base；dirty P1R字节以本票21份start_sha256为起点，不reset/stash。适用AGENTS仍受保护。原17与ISO01..18全部保留。历史报告/快照/失败和新两次UNRECORDED承认不覆盖。
+12	
+13	只有JSON 21个现有路径和1个新增纯Python单元文件可写；OWN docs/parallel/lane-product/A-R2-20261112/N1N2-native-source下仅新增n1n2-claude-060p1r2-*报告/映射。recorder只新增同prefix证据。实际业务var不准新建实验。不得新增其它协议模块/测试/config/包脚本/依赖/路由/公共DTO/EnginePort方法；确有缺口先具名向MAIN ask。不得git add/commit/reset/stash/checkout/push/merge。V及Approved01
+… (truncated)
+
+[reasoning] This is a very substantial and specific spec. Let me read the two review folders' FINDINGS.json and REVIEW.md files.
+
+Let me read the custodian-review andintegration-review findings.
+
+[assistant] [tool Bash] {"command":"cd \"/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p1r-review\" && ls -la custodian-review integration-review && cat MAIN_PARTIAL_REVIEW_DECISION.json MAIN_COMBINED_DECISION.json 2>/dev/null; cat ../repair-060p1r2/MAIN_COMBINED_DECISION.json","description":"List the review folders and read the decisions"}
+
+[tool] [tool result] custodian-review:
+total 80
+drwxrwxrwx 1 administrator administrator  4096 Nov 14 17:40 .
+drwxrwxrwx 1 administrator administrator  4096 Nov 14 17:44 ..
+-rwxrwxrwx 1 administrator administrator 31424 Nov 14 17:41 FINDINGS.json
+-rwxrwxrwx 1 administrator administrator 18933 Nov 14 17:41 INPUTS.json
+-rwxrwxrwx 1 administrator administrator 27115 Nov 14 17:41 REVIEW.md
+
+integration-review:
+total 92
+drwxrwxrwx 1 administrator administrator  4096 Nov 14 17:42 .
+drwxrwxrwx 1 administrator administrator  4096 Nov 14 17:44 ..
+-rwxrwxrwx 1 administrator administrator 39169 Nov 14 17:42 FINDINGS.json
+-rwxrwxrwx 1 administrator administrator 42609 Nov 14 17:43 INPUTS.json
+-rwxrwxrwx 1 administrator administrator  7120 Nov 14 17:42 REVIEW.md
+{
+  "at": "2026-11-14T09:42:05.544600+00:00",
+  "status": "REQUEST_CHANGES_CUSTODIAN_INTEGRATION_REVIEW_PENDING",
+  "worker_done": "msg_db5e84ac3379",
+  "custodian_findings": {
+    "BLOCKER": 2,
+    "MAJOR": 9
+  },
+  "main_verified_inputs": 32,
+  "main_current_mismatches": [],
+  "main_source_confirmed": [
+    "P1R-C01: c_ulong argument signature with byref GET, missing sequence initialization",
+    "P1R-C02: parent exec-write retained and blocking os.read; 
+… (truncated)
+
+[assistant] [tool Bash] {"command":"cd \"/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p1r-review\" && python3 -c \"\nimport json\nd=json.load(open('custodian-review/FINDINGS.json'))\nprint('VERDICT',d.get('verdict'),d.get('counts'))\nfor f in d['findings']:\n    print('---',f['id'],f['severity'],'|',f['title'])\n    print('  locs:',[(l['path'],l['line']) for l in f.get('locations',[])][:6])\n    print('  trigger:',str(f.get('trigger'))[:400])\n    print('  fix:',str(f.get('minimal_fix'))[:700])\n\"","description":"Read the custodian review findings"}
+
+[tool] [tool result error] MiniMax-M3.1-Flash-Preview[1m] is temporarily unavailable (rate-limited), so auto mode cannot determine the safety of Bash right now. Wait a moment and then try this action again. If it keeps failing, continue with other tasks that don't require this action and come back to it later. Note: reading files, searching code, and other read-only operations do not require the classifier and can still be used.
+
+[assistant] API Error: Request rejected (429) · 已达到 Token Plan 用量上限：请升级 Token Plan 套餐或购买积分补充用量。 (2056)
+
+STDERR

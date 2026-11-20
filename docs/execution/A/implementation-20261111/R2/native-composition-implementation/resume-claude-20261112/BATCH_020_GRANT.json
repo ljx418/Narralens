@@ -1,0 +1,180 @@
+{
+  "grant_id": "N1N2-RESUME-CONDITIONAL-BATCH-020",
+  "at": "2026-11-12T15:46:06.251893+00:00",
+  "request": "msg_f758cd52be7c",
+  "holder": "ctx_b4086093cd96",
+  "cwd": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+  "frozen_sha256": {
+    "src/host/agent-driven/retained-native-closure.ts": "3bd37ab6eaaf0201c6fc78a339fe4cd1267dea6e2c75a96baaa4ad200d2774df",
+    "src/host/agent-driven/committed-snapshot-authority.ts": "f6b791bfac3105fad4f400de3b62d15cb5e297a3414eae99e0e518f6333e4e44",
+    "src/host/agent-driven/created-native-source-reader.ts": "a8ad22df324ad8c721919ff4462d73a20583b79e2bedc338cabeb7805335ffe7",
+    "src/host/agent-driven/created-native-workspace.ts": "5f19b43d9b345dc345b6f0c8562a0f08b07a9fbd42a489de4d46a1c6cca2e2f8",
+    "src/host/agent-driven/native-cache-witness.ts": "078bc3071ce1d57f05e4bb74e8aa85a9e33c516ac3fcc3c07a9dd0a7afda8435",
+    "src/adapters/openfilm/openfilm-upstream.ts": "850234a5c29a0dd742f51d7a8d591abe4ba01e68a0b3755838099f94b1bf9b16",
+    "tests/agent-driven/integration/created-native-source-reader.test.ts": "6fd0555e494f8c775d71ad12f28dc2a85371da3bfaf4a23edef98b97dcb36463",
+    "tests/agent-driven/integration/helpers/native-source-fixture.ts": "19cb73cb9d69394e550699d3363128a4ea60e96a3f28f22e1ea4fce01c6dda0a",
+    "tests/agent-driven/integration/committed-snapshot-host.test.ts": "bfd0c6373b254050d32a6a99e7b6f8b9827dc24b6b2587515ab4c5aad2cd9037",
+    "tests/agent-driven/integration/native-cache-witness.test.ts": "a73fee186f6aad3df16e9c9e510245af57d8b40673e3985d8e7fb0e2afb45143",
+    "src/host/m5/openfilm-native-expected.ts": "19110e45a83b6d5b611b4260620ce873f923f1e5a5b907bc6176c4b734fbeed3",
+    "tests/agent-driven/integration/created-native-workspace.test.ts": "439d469032c9af2b83ceb826e0aead7cf5c2fe5c5693be7cbf18c8e67f0f615f",
+    "tests/agent-driven/integration/created-native-ack.test.ts": "5f50db85c7c07a2ecf4faefc20ec2ec6c7ad4910fafe549c2edc76bbad729c7c"
+  },
+  "source_byte_backups": {
+    "src/host/agent-driven/retained-native-closure.ts": {
+      "sha256": "3bd37ab6eaaf0201c6fc78a339fe4cd1267dea6e2c75a96baaa4ad200d2774df",
+      "blob": "source-captures/3bd37ab6eaaf0201c6fc78a339fe4cd1267dea6e2c75a96baaa4ad200d2774df.txt",
+      "bytes": 53813
+    },
+    "src/host/agent-driven/committed-snapshot-authority.ts": {
+      "sha256": "f6b791bfac3105fad4f400de3b62d15cb5e297a3414eae99e0e518f6333e4e44",
+      "blob": "source-captures/f6b791bfac3105fad4f400de3b62d15cb5e297a3414eae99e0e518f6333e4e44.txt",
+      "bytes": 39116
+    },
+    "src/host/agent-driven/created-native-source-reader.ts": {
+      "sha256": "a8ad22df324ad8c721919ff4462d73a20583b79e2bedc338cabeb7805335ffe7",
+      "blob": "source-captures/a8ad22df324ad8c721919ff4462d73a20583b79e2bedc338cabeb7805335ffe7.txt",
+      "bytes": 73510
+    },
+    "src/host/agent-driven/created-native-workspace.ts": {
+      "sha256": "5f19b43d9b345dc345b6f0c8562a0f08b07a9fbd42a489de4d46a1c6cca2e2f8",
+      "blob": "source-captures/5f19b43d9b345dc345b6f0c8562a0f08b07a9fbd42a489de4d46a1c6cca2e2f8.txt",
+      "bytes": 25117
+    },
+    "src/host/agent-driven/native-cache-witness.ts": {
+      "sha256": "078bc3071ce1d57f05e4bb74e8aa85a9e33c516ac3fcc3c07a9dd0a7afda8435",
+      "blob": "source-captures/078bc3071ce1d57f05e4bb74e8aa85a9e33c516ac3fcc3c07a9dd0a7afda8435.txt",
+      "bytes": 20324
+    },
+    "src/adapters/openfilm/openfilm-upstream.ts": {
+      "sha256": "850234a5c29a0dd742f51d7a8d591abe4ba01e68a0b3755838099f94b1bf9b16",
+      "blob": "source-captures/850234a5c29a0dd742f51d7a8d591abe4ba01e68a0b3755838099f94b1bf9b16.txt",
+      "bytes": 20696
+    },
+    "tests/agent-driven/integration/created-native-source-reader.test.ts": {
+      "sha256": "6fd0555e494f8c775d71ad12f28dc2a85371da3bfaf4a23edef98b97dcb36463",
+      "blob": "source-captures/6fd0555e494f8c775d71ad12f28dc2a85371da3bfaf4a23edef98b97dcb36463.txt",
+      "bytes": 138492
+    },
+    "tests/agent-driven/integration/helpers/native-source-fixture.ts": {
+      "sha256": "19cb73cb9d69394e550699d3363128a4ea60e96a3f28f22e1ea4fce01c6dda0a",
+      "blob": "source-captures/19cb73cb9d69394e550699d3363128a4ea60e96a3f28f22e1ea4fce01c6dda0a.txt",
+      "bytes": 20219
+    },
+    "tests/agent-driven/integration/committed-snapshot-host.test.ts": {
+      "sha256": "bfd0c6373b254050d32a6a99e7b6f8b9827dc24b6b2587515ab4c5aad2cd9037",
+      "blob": "source-captures/bfd0c6373b254050d32a6a99e7b6f8b9827dc24b6b2587515ab4c5aad2cd9037.txt",
+      "bytes": 12061
+    },
+    "tests/agent-driven/integration/native-cache-witness.test.ts": {
+      "sha256": "a73fee186f6aad3df16e9c9e510245af57d8b40673e3985d8e7fb0e2afb45143",
+      "blob": "source-captures/a73fee186f6aad3df16e9c9e510245af57d8b40673e3985d8e7fb0e2afb45143.txt",
+      "bytes": 19208
+    },
+    "src/host/m5/openfilm-native-expected.ts": {
+      "sha256": "19110e45a83b6d5b611b4260620ce873f923f1e5a5b907bc6176c4b734fbeed3",
+      "blob": "source-captures/19110e45a83b6d5b611b4260620ce873f923f1e5a5b907bc6176c4b734fbeed3.txt",
+      "bytes": 47279
+    },
+    "tests/agent-driven/integration/created-native-workspace.test.ts": {
+      "sha256": "439d469032c9af2b83ceb826e0aead7cf5c2fe5c5693be7cbf18c8e67f0f615f",
+      "blob": "source-captures/439d469032c9af2b83ceb826e0aead7cf5c2fe5c5693be7cbf18c8e67f0f615f.txt",
+      "bytes": 12700
+    },
+    "tests/agent-driven/integration/created-native-ack.test.ts": {
+      "sha256": "5f50db85c7c07a2ecf4faefc20ec2ec6c7ad4910fafe549c2edc76bbad729c7c",
+      "blob": "source-captures/5f50db85c7c07a2ecf4faefc20ec2ec6c7ad4910fafe549c2edc76bbad729c7c.txt",
+      "bytes": 134160
+    }
+  },
+  "commands": [
+    {
+      "capture": "n1n2-claude-resume-156-gate-alias-focused",
+      "argv": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "vitest",
+        "run",
+        "--config",
+        "vitest.config.ts",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts",
+        "-t",
+        "G01 keeps the alias reason|F04 refuses a working copy leaf|G07 refuses a workspace leaf"
+      ],
+      "expected_cases": 3,
+      "filtered": 77
+    },
+    {
+      "capture": "n1n2-claude-resume-157-gate-pure",
+      "argv": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "vitest",
+        "run",
+        "--config",
+        "vitest.config.ts",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts",
+        "-t",
+        "P0|F01|F10 lists|F10 keeps"
+      ],
+      "expected_cases": 19,
+      "filtered": 61
+    },
+    {
+      "capture": "n1n2-claude-resume-158-gate-component",
+      "argv": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "vitest",
+        "run",
+        "--config",
+        "vitest.config.ts",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts",
+        "-t",
+        "R0|F02|F03|F04|F05|F06|F07|F08|F09|F10 shows|G0"
+      ],
+      "expected_cases": 61,
+      "filtered": 19
+    },
+    {
+      "capture": "n1n2-claude-resume-159-gate-legacy",
+      "argv": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "vitest",
+        "run",
+        "--config",
+        "vitest.config.ts",
+        "tests/agent-driven/integration/created-native-ack.test.ts",
+        "tests/agent-driven/integration/committed-snapshot-host.test.ts",
+        "tests/agent-driven/integration/created-native-workspace.test.ts"
+      ],
+      "expected_cases_reported": 107
+    }
+  ],
+  "compile155": {
+    "exit": 0,
+    "source_changed": [],
+    "source_added": [],
+    "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "finished_at": "2026-11-12T15:43:21.456668+00:00"
+  },
+  "preceding_cleanup": {
+    "at": "2026-11-12T15:46:06.251893+00:00",
+    "grant": "N1N2-RESUME-FOCUSED-019",
+    "status": "154_FAILED_CLEANUP_VERIFIED",
+    "receipt": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/parallel/lane-product/A-R2-20261112/N1N2-native-source/n1n2-claude-resume-154-cleanup-evidence.txt",
+    "sha256": "478bcf023d6ebfac8cbfc2c1bce26f95544f84d7864c25e967271ac41be05a36",
+    "capture13inputs_match": true,
+    "recorded_pid1915186": "ABSENT",
+    "current_test_changed_after_capture": true,
+    "index": "EMPTY",
+    "AGENTS": "UNCHANGED",
+    "limit": "Current owncleanup observation only; notglobal/historical FDabsence;154notgreen"
+  },
+  "execution": "Sequential156\u2192157\u2192158\u2192159 only if previousactualexit0/noinputdrift. Stopremainingonanyfailure/new429. Unchangedrecorderoncepername. FreezeALLsrc/tests/tools/config/index untilallstartedcommands terminal+owncleanup; nobrowser/extra runtime. NotifyMAIN beforepostcapturechanges.",
+  "scope": "Interim originalscope regression; notfinalacceptance. Independentstatic019reviewpending, sourceunchangedexcepttestoracle."
+}

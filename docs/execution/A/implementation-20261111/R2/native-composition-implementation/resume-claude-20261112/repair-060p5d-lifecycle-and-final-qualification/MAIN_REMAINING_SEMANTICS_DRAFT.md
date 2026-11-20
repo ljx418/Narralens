@@ -1,0 +1,31 @@
+# MAIN剩余语义修复草案：待两正式复审合并，不是release
+
+候选为R5D已交还八路径。源码仍冻结，两reviewer在工作。以下来自MAIN实际源码读取及startup reviewer中间观察，用于减少后续实施歧义；不是独立结论，不签通过，不批准任何代码/运行。
+
+## 1. 原进程组证明义务独立于signal capability
+
+当前Custodian._settle_domain仅在original!=null且signal_authority!=revoked时设置group_established/group_id，导致权限撤销后传TargetSettlement的group义务变0。修复必须分离两种事实：原已建立的域身份/证明义务是持久事实，不能随权限撤销消失；本轮是否可signal仍由worker_group_id/_authorise_signal实时核。不要简单把旧group重新当可signal fallback。
+
+实现位置：从已绑定original_worker_epoch中保存/读取经核的原group，构造TargetSettlement时不以signal_authority作为是否存在证明义务的条件。原group需fresh观察，unknown/仍有原target时不能释放；group查询被拒不可用ECHILD替代。即使N已真实reap、所有已知targetgone，原group未知仍held；later真正groupgone后同责任收敛。_target_census也不能因不可signal而抹去原域观察。原epoch不可重绑，replacement不能signal。
+
+决定性反例：实际_settle_domain+KernelSettlementOperations/rawOS mock，先原group已建立、N waitpid消费、signal权撤销；原group probe=unknown或存在的负对照保持held，并assert group_state确实收到原group ID；随后gone才settled。旧测试仅用无group的新pass会假绿，必须证明查询命中与不释放。
+
+## 2. 所有必需产物读取都参与资格
+
+当前artifactFacts逐项digest=null会写artifact.error，但顶层error始终null；judge只看顶层。必须让任何必需条目缺hash/有error都进入唯一failure汇总，再参与judge；保留每条原错误。不能只测试顶层listingerror而不测单项hashEIO。
+
+当前final.candidate_sha256/manifest_sha256是在finalJudgement之后读取，null不会改变judge。应先取得这两份必需文件的完整非空SHA并校验读取成功，发生错误时记录evidenceerror并拒绝绿，再计算finalqualification。勿用hash匹配期望常量替代实际文件读取。
+
+反例分别注入：顶层listing成功但某条artifact hash=null；candidate文件hash读取失败；manifest文件hash读取失败。normal和fault都必须不通过，诊断记录真实错误，不凭expectedexit1判fault成功。
+
+## 3. 最终写入失败必须同步撤销返回值和消费者资格
+
+当前finalJudgement先计算，writeEvidence捕获final写错后只authoritative=false，返回kind/exit/faultCasePassed仍保留绿。main读authoritative能拒绝部分路径，但legacy normal直接看kind/exit/picture，不检查authoritative，从而错误通过。
+
+修复：写入最终文件失败或任何新必需证据失败时，返回结果的kind/faultCasePassed/exit共同不绿，同时保留原创作结果和错误；不能只新增一个消费者可能不看的flag。最终文件是权威，消费者同时验证有效最终记录、manifest/candidate引用、actual哈希和退出语义；不存在或无效最终记录不能因为返回值/候选行绿而通过。legacy在当前既有文件内同步消费新协议，不能碰保护nofork工具。
+
+决定性反例：final.json写入throw，之前正常exactpicture或预期fault均成功，也不能返回ok/fault-observed；legacy normal不得取得通过。对final写入后的未知/部分落盘诚实判不接受，不伪造“已成功提交”；原owner已经资源终局可如实报告证据失败。
+
+## 4. 实施与验证仍按原约束
+
+正式两审齐备后合并重复和新增问题，再发布精确同八路径修复票；不现在改源、不启动第三writer。先记录上述直接反例再修，不将缺接口/夹具不达/MAIN主动stop视作旧业务语义红。修后受影响pure/type/integrity同源捕获，再独立聚焦这些不变量。测试OS泄漏事故完整保留，并核当前fake对所有信号边界不能落真实内核；不重跑危险漏mock实验。R6/R7/原17/ISO18/N1N2/NEXT均未接受，新429即停。

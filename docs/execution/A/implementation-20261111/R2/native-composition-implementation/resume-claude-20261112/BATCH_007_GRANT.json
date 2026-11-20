@@ -1,0 +1,59 @@
+{
+  "grant_id": "N1N2-RESUME-PURE-007",
+  "at": "2026-11-12T09:23:06.683506+00:00",
+  "request": "msg_f8f08963cd03",
+  "holder": "ctx_e5e736e1846b",
+  "cwd": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+  "frozen_sha256": {
+    "src/host/agent-driven/committed-snapshot-authority.ts": "f8470afddb8e8732edb112379902c3e28f51892a0104d6182f13207d473906c9",
+    "src/host/agent-driven/created-native-workspace.ts": "b57bed5df0ea600a2aa1a5b2dc3df2873f794389ee5274f32efb52a6f3d653ad",
+    "src/host/m5/openfilm-native-expected.ts": "19110e45a83b6d5b611b4260620ce873f923f1e5a5b907bc6176c4b734fbeed3",
+    "src/host/agent-driven/retained-native-closure.ts": "f9774c0f4bfa2f6cfb39fdf28d64b1e295a47101ef8805fc4968ad13433d5e1c",
+    "src/host/agent-driven/created-native-source-reader.ts": "b386615cb4036f0ce3d2bc65a5d9aa99ee8bc9c191f3468eb15baf65b2a33aa1",
+    "tests/agent-driven/integration/created-native-workspace.test.ts": "439d469032c9af2b83ceb826e0aead7cf5c2fe5c5693be7cbf18c8e67f0f615f",
+    "tests/agent-driven/integration/committed-snapshot-host.test.ts": "bfd0c6373b254050d32a6a99e7b6f8b9827dc24b6b2587515ab4c5aad2cd9037",
+    "tests/agent-driven/integration/created-native-ack.test.ts": "5f50db85c7c07a2ecf4faefc20ec2ec6c7ad4910fafe549c2edc76bbad729c7c",
+    "tests/agent-driven/integration/created-native-source-reader.test.ts": "4bd9acf6620f142b8e82ff84f37d0e2b18127fdee83b6cf0bd2a0294d58ac7a6",
+    "tests/agent-driven/integration/helpers/native-source-fixture.ts": "19cb73cb9d69394e550699d3363128a4ea60e96a3f28f22e1ea4fce01c6dda0a"
+  },
+  "commands": [
+    {
+      "capture": "n1n2-claude-resume-080-gate-pure",
+      "argv": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "vitest",
+        "run",
+        "--config",
+        "vitest.config.ts",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts",
+        "-t",
+        "P0|F01|F10 lists|F10 keeps"
+      ],
+      "expected_cases": 16,
+      "filtered": 34
+    }
+  ],
+  "selected_assertions": [
+    "F01 keeps a temporary release failure and reports it once at the final release",
+    "F10 lists the media as the pinned consumer lists it",
+    "F10 keeps the caption directory in the platform order",
+    "P07 refuses a grown file, the cumulative text, the deep tree and the descriptor budget",
+    "P07 keeps the primary error when an open fails and releases everything else",
+    "P06 normalises a missing and a picture duration as no duration",
+    "P06 resolves a clip without a place as the native does and refuses a disagreement",
+    "P06 places a clip without a place where the pinned consumer places it",
+    "P07 refuses a symbolic link, a same-bytes replacement and a restored change time",
+    "P07 refuses a text file above the budget and bounds the total",
+    "P07 refuses to release while work is in flight and releases every allocation once",
+    "P07 refuses a reentrant release from inside an accepted read",
+    "P07 keeps the failure of the walk release with the failure that stopped it",
+    "P07 proves an empty directory and sees the file that appears in it",
+    "P06 reproduces the five pinned native revision vectors",
+    "P06 lists the media in the numeric order of the host"
+  ],
+  "scope": "PURE ONLY interim;081component/082regressions NOT_GRANTED; coverage/finalacceptance still unproven",
+  "effects": "real localFS and read-only fixedapprovedpure modules; no Host/media subprocess/browser/network/provider/J/config/index/build",
+  "execution": "unchangedrecorder once; freezeallsrc/tests/tools/config/index untilactualterminal andcleanup; new429STOP"
+}

@@ -1,0 +1,1603 @@
+{
+  "path": "/mnt/c/workspace/videoworkline/Narralens-agents/bridge-observability",
+  "slug": "bridge-observability",
+  "head": "50f4e19309d81ad0bf6ddc986494c2d34f32bea1",
+  "branch": "agent-driven/lane-bridge",
+  "status_entries": 5,
+  "untracked": 310,
+  "runtime_entries": [
+    "node_modules",
+    "var"
+  ],
+  "archive_ref": "refs/heads/archive/20261120/bridge-observability",
+  "dirty_files": [
+    {
+      "path": "docs/parallel/lane-bridge/requests/A03-CREATED-TASK-STORE-CANDIDATE/DESIGN-v1.md",
+      "sha256": "c6334a49e593b069623b4ed938222291e5d8da2854afe442d7c13fe33a5e99ec",
+      "bytes": 6525
+    },
+    {
+      "path": "docs/parallel/lane-bridge/requests/A03-CREATED-TASK-STORE-CANDIDATE/HANDOFF.md",
+      "sha256": "00dfcfe9969a9e6be34bd21c41e07d956859d6c3fdfc3f56889c8f89efa2fd98",
+      "bytes": 2174
+    },
+    {
+      "path": "docs/parallel/lane-bridge/requests/A03-CREATED-TASK-STORE-CANDIDATE/INTERFACE-ADDENDUM-v1.md",
+      "sha256": "66a286058c35d6df526bb779043da938352e1b079a99155c8ccbdcee70365b99",
+      "bytes": 2343
+    },
+    {
+      "path": "docs/parallel/lane-bridge/requests/A03-CREATED-TASK-STORE-CANDIDATE/MAIN-PORTS.md",
+      "sha256": "17e9506fa49d86d9d24866f348945d5aa4c7470ea11309672787ff42895671ee",
+      "bytes": 4505
+    },
+    {
+      "path": "docs/parallel/lane-bridge/requests/A03-CREATED-TASK-STORE-CANDIDATE/ReleaseAssignment.json",
+      "sha256": "0afca4c9057f178128141b9a1608c97639a84eee5d8f8f9c585cefb1f3b1ef89",
+      "bytes": 1496
+    },
+    {
+      "path": "docs/parallel/lane-bridge/requests/A03-CREATED-TASK-STORE-CANDIDATE/SOURCE-INSPECTION.json",
+      "sha256": "9763a4c48f12cc2be41a95ad6761916eeaa110151c1bce327dcc35fa2d33f1eb",
+      "bytes": 736
+    },
+    {
+      "path": "docs/parallel/lane-bridge/requests/A03-CREATED-TASK-STORE-CANDIDATE/TASK.md",
+      "sha256": "b260aaa0c08128fcb1d62403637a09f3e8296a4dd1c4cf9614af0f39b9a4c4f6",
+      "bytes": 195
+    },
+    {
+      "path": "docs/parallel/lane-bridge/requests/A03-CREATED-TASK-STORE-CANDIDATE/VALIDATION.md",
+      "sha256": "39f9229a3e2a6af6956c420269c237679206b25af65e7d102c84fefbdab72a3e",
+      "bytes": 4430
+    },
+    {
+      "path": "docs/parallel/lane-bridge/requests/A03-CREATED-TASK-STORE-CANDIDATE/base-source.tar",
+      "sha256": "c439890bf9f15fef8787b7c0b9faea3cbffb724055b692517b61ace7749aac30",
+      "bytes": 189286400
+    },
+    {
+      "path": "docs/parallel/lane-bridge/requests/A03-CREATED-TASK-STORE-CANDIDATE/candidate-files/created-task-store.test.ts",
+      "sha256": "92a560a51594e37da8ee347090f5da2e2058232dd3f15c57c0744f900e29359c",
+      "bytes": 13804
+    },
+    {
+      "path": "docs/parallel/lane-bridge/requests/A03-CREATED-TASK-STORE-CANDIDATE/candidate-files/created-task-store.ts",
+      "sha256": "f7c4c74c86a8e38c74673ab9656f751162436cba2325bfeb82ad1dd9639b8012",
+      "bytes": 18401
+    },
+    {
+      "path": "docs/parallel/lane-bridge/requests/A03-CREATED-TASK-STORE-CANDIDATE/candidate-manifest.json",
+      "sha256": "f76e05be3107c32e22967713d18d107516dfd4840939c86bce744ca4eb452731",
+      "bytes": 5662
+    },
+    {
+      "path": "docs/parallel/lane-bridge/requests/A03-CREATED-TASK-STORE-CANDIDATE/candidate.patch",
+      "sha256": "79c4fe8a7e4d121304127ec5a24221458fc8647bf1165510f7b387968aa63ece",
+      "bytes": 33040
+    },
+    {
+      "path": "docs/parallel/lane-bridge/requests/A03-CREATED-TASK-STORE-CANDIDATE/capture-hashes.json",
+      "sha256": "f515d9123690e8281f74a9a6751920dfb07303bbc54bbd90e8dcbbe64ed8dd97",
+      "bytes": 9647
+    },
+    {
+      "path": "docs/parallel/lane-bridge/requests/A03-CREATED-TASK-STORE-CANDIDATE/design-freeze.json",
+      "sha256": "8100ac773618eca7c34c289cdea92b4a330ebbdf0fe3df5603bbe2d13ceab327",
+      "bytes": 263
+    },
+    {
+      "path": "docs/parallel/lane-bridge/requests/A03-CREATED-TASK-STORE-CANDIDATE/history/source-v1/HANDOFF.md",
+      "sha256": "a250af672b9fb21987acbad5cdf00c2452e24bf051c6e0fb3ca0dc3eb429086d",
+      "bytes": 3028
+    },
+    {
+      "path": "docs/parallel/lane-bridge/requests/A03-CREATED-TASK-STORE-CANDIDATE/history/source-v1/ReleaseAssignment.json",
+      "sha256": "52982288db86b33b21aab12aa260cd694732f813de1248cea690a618eb1f1b00",
+      "bytes": 1320
+    },
+    {
+      "path": "docs/parallel/lane-bridge/requests/A03-CREATED-TASK-STORE-CANDIDATE/history/source-v1/SOURCE-INSPECTION.json",
+      "sha256": "07a85f31fcaae77e58545bdaea2977b0b0084a1d09ab6cb91a9a9b5cf1837565",
+      "bytes": 493
+    },
+    {
+      "path": "docs/parallel/lane-bridge/requests/A03-CREATED-TASK-STORE-CANDIDATE/history/source-v1/candidate-files/created-task-store.test.ts",
+      "sha256": "d22f400633b8e50597dc17d1ccb0dee8efe586b8a2d34aa8212a5371e0cdcf3e",
+      "bytes": 11231
+    },
+    {
+      "path": "docs/parallel/lane-bridge/requests/A03-CREATED-TASK-STORE-CANDIDATE/history/source-v1/candidate-files/created-task-store.ts",
+      "sha256": "f7c4c74c86a8e38c74673ab9656f751162436cba2325bfeb82ad1dd9639b8012",
+      "bytes": 18401
+    },
+    {
+      "path": "docs/parallel/lane-bridge/requests/A03-CREATED-TASK-STORE-CANDIDATE/history/source-v1/candidate-manifest.json",
+      "sha256": "c6329022e58115357a82478f3cb545332289efcbe98f7a065435d282a5c849ab",
+      "bytes": 5029
+    },
+    {
+      "path": "docs/parallel/lane-bridge/requests/A03-CREATED-TASK-STORE-CANDIDATE/history/source-v1/candidate.patch",
+      "sha256": "da1ead95367ae6af910f4bc5a3a873bc54fed94960e2f12cea33e01a8f65f18a",
+      "bytes": 30437
+    },
+    {
+      "path": "docs/parallel/lane-bridge/requests/A03-CREATED-TASK-STORE-CANDIDATE/preparation-r1/PREPARATION.md",
+      "sha256": "c2338df3071599bba5617ff5b87d405a98e7d3c93368257408aab357eed48ed3",
+      "bytes": 2316
+    },
+    {
+      "path": "docs/parallel/lane-bridge/requests/A03-CREATED-TASK-STORE-CANDIDATE/preparation-r1/archive.cmd.json",
+      "sha256": "1d390809c1c0bfc64283a65ee7c0583b5f8faf7af4232a8c13cefc1c41694f65",
+      "bytes": 173
+    },
+    {
+      "path": "docs/parallel/lane-bridge/requests/A03-CREATED-TASK-STORE-CANDIDATE/preparation-r1/archive.exit",
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "bytes": 2
+    },
+    {
+      "path": "docs/parallel/lane-bridge/requests/A03-CREATED-TASK-STORE-CANDIDATE/preparation-r1/archive.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "docs/parallel/lane-bridge/requests/A03-CREATED-TASK-STORE-CANDIDATE/preparation-r1/cleanup-owned-temp.py",
+      "sha256": "9649936cd43cbfef6131a3a1f06bff651f1130eb3f2ce48535462db4ee435bb9",
+      "bytes": 857
+    },
+    {
+      "path": "docs/parallel/lane-bridge/requests/A03-CREATED-TASK-STORE-CANDIDATE/preparation-r1/cleanup-result.json",
+      "sha256": "8d20f01700a4eb4c10d2cb812b1b480fc472b04eb28660d927506c31e71577e7",
+      "bytes": 141
+    },
+    {
+      "path": "docs/parallel/lane-bridge/requests/A03-CREATED-TASK-STORE-CANDIDATE/preparation-r1/extract.cmd.json",
+      "sha256": "43c9e82e6527c6735932e0df2f57ba70b7263803f937147a351ca0dd327140f6",
+      "bytes": 173
+    },
+    {
+      "path": "docs/parallel/lane-bridge/requests/A03-CREATED-TASK-STORE-CANDIDATE/preparation-r1/extract.exit",
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "bytes": 2
+    },
+    {
+      "path": "docs/parallel/lane-bridge/requests/A03-CREATED-TASK-STORE-CANDIDATE/preparation-r1/extract.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "docs/parallel/lane-bridge/requests/A03-CREATED-TASK-STORE-CANDIDATE/preparation-r1/extract.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "docs/parallel/lane-bridge/requests/A03-CREATED-TASK-STORE-CANDIDATE/preparation-r1/input.json",
+      "sha256": "cf8449f3f0c0703de815df47534e6cfaf3b9dc6a9b894cb6d143583b28a5c6e8",
+      "bytes": 997
+    },
+    {
+      "path": "docs/parallel/lane-bridge/requests/A03-CREATED-TASK-STORE-CANDIDATE/preparation-r1/install-cached-store.cmd.json",
+      "sha256": "e6126e91b2df4260c761eaee5e910016ffe33fba7cb17eb2e34e45d930ab862f",
+      "bytes": 483
+    },
+    {
+      "path": "docs/parallel/lane-bridge/requests/A03-CREATED-TASK-STORE-CANDIDATE/preparation-r1/install-cached-store.exit",
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "bytes": 2
+    },
+    {
+      "path": "docs/parallel/lane-bridge/requests/A03-CREATED-TASK-STORE-CANDIDATE/preparation-r1/install-cached-store.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "docs/parallel/lane-bridge/requests/A03-CREATED-TASK-STORE-CANDIDATE/preparation-r1/install-cached-store.stdout",
+      "sha256": "1390b92acf1b5da28f9db6782b63df60139cf1100762db6e970040e1b73549c1",
+      "bytes": 1158
+    },
+    {
+      "path": "docs/parallel/lane-bridge/requests/A03-CREATED-TASK-STORE-CANDIDATE/preparation-r1/install.cmd.json",
+      "sha256": "71e1234128e3cdd97e8826c99a62eee1adfe03769afda958e54be5ead77a3b43",
+      "bytes": 275
+    },
+    {
+      "path": "docs/parallel/lane-bridge/requests/A03-CREATED-TASK-STORE-CANDIDATE/preparation-r1/install.exit",
+      "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+      "bytes": 2
+    },
+    {
+      "path": "docs/parallel/lane-bridge/requests/A03-CREATED-TASK-STORE-CANDIDATE/preparation-r1/install.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "docs/parallel/lane-bridge/requests/A03-CREATED-TASK-STORE-CANDIDATE/preparation-r1/install.stdout",
+      "sha256": "9990e2bfa3b7d000ee399dc98f707213d8d9b6e2e0239ce0130cec896fd685a5",
+      "bytes": 485
+    },
+    {
+      "path": "docs/parallel/lane-bridge/requests/A03-CREATED-TASK-STORE-CANDIDATE/preparation-r1/original-base-hashes.json",
+      "sha256": "41182b551e5415ba00be1162302103a38cfed733562aa389dd58e1af4f7408c2",
+      "bytes": 959178
+    },
+    {
+      "path": "docs/parallel/lane-bridge/requests/A03-CREATED-TASK-STORE-CANDIDATE/preparation-r1/overlay-before-hashes.json",
+      "sha256": "86af55a28eedeee66f2da5c6f9b3f4aca29439f2072164268058370435e45621",
+      "bytes": 251
+    },
+    {
+      "path": "docs/parallel/lane-bridge/requests/A03-CREATED-TASK-STORE-CANDIDATE/preparation-r1/preparation-final-hashes.json",
+      "sha256": "e990bb37daa09011d1db55d163eac3a9225f5ecf5bed8fc5a2e06256d0c7e454",
+      "bytes": 387
+    },
+    {
+      "path": "docs/parallel/lane-bridge/requests/A03-CREATED-TASK-STORE-CANDIDATE/preparation-r1/result-cached-store.json",
+      "sha256": "a8eadc949f12aea8671ff59ab4170496ff44fa861e7e4d5d56b8f9e2d74140d9",
+      "bytes": 717
+    },
+    {
+      "path": "docs/parallel/lane-bridge/requests/A03-CREATED-TASK-STORE-CANDIDATE/preparation-r1/result.json",
+      "sha256": "5355e9fcddf8323a3695690947c55d218535db17461199b809e6733cb2987621",
+      "bytes": 449
+    },
+    {
+      "path": "docs/parallel/lane-bridge/requests/A03-CREATED-TASK-STORE-CANDIDATE/validation-r1/tests.cmd.json",
+      "sha256": "b305dee98f9c15f73c17fffbfa615bedc9240dda7e751df199bf264416f27a5d",
+      "bytes": 340
+    },
+    {
+      "path": "docs/parallel/lane-bridge/requests/A03-CREATED-TASK-STORE-CANDIDATE/validation-r1/tests.exit",
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "bytes": 2
+    },
+    {
+      "path": "docs/parallel/lane-bridge/requests/A03-CREATED-TASK-STORE-CANDIDATE/validation-r1/tests.stderr",
+      "sha256": "fd146b9b1788db3b7e38883b112998c646a9de0afe5788d528803a9f462d86b0",
+      "bytes": 169
+    },
+    {
+      "path": "docs/parallel/lane-bridge/requests/A03-CREATED-TASK-STORE-CANDIDATE/validation-r1/tests.stdout",
+      "sha256": "9d24e49711803630da5de685e3ff9e01a241ed55552bb47679da2cfcf0376fca",
+      "bytes": 328
+    },
+    {
+      "path": "docs/parallel/lane-bridge/requests/A03-CREATED-TASK-STORE-CANDIDATE/validation-r1/tsc.cmd.json",
+      "sha256": "0afcf2fc2b8d6704cead8652a96a0fe71daea3d0b348fbad7c8c503f2bd48e47",
+      "bytes": 233
+    },
+    {
+      "path": "docs/parallel/lane-bridge/requests/A03-CREATED-TASK-STORE-CANDIDATE/validation-r1/tsc.exit",
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "bytes": 2
+    },
+    {
+      "path": "docs/parallel/lane-bridge/requests/A03-CREATED-TASK-STORE-CANDIDATE/validation-r1/tsc.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "docs/parallel/lane-bridge/requests/A03-CREATED-TASK-STORE-CANDIDATE/validation-r1/tsc.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "docs/parallel/lane-bridge/requests/A03-CREATED-TASK-STORE-CANDIDATE/validation-r2/final-hashes.json",
+      "sha256": "50e98017e08a9d6907daa811bdce807f61ed8769cb7b50acd4b2c049d4e40088",
+      "bytes": 551
+    },
+    {
+      "path": "docs/parallel/lane-bridge/requests/A03-CREATED-TASK-STORE-CANDIDATE/validation-r2/input-hashes.json",
+      "sha256": "ed4195a9d74f91a22ced29f4793c3498d87005c1406da69babd3277e516f5cf2",
+      "bytes": 251
+    },
+    {
+      "path": "docs/parallel/lane-bridge/requests/A03-CREATED-TASK-STORE-CANDIDATE/validation-r2/tests.cmd.json",
+      "sha256": "b305dee98f9c15f73c17fffbfa615bedc9240dda7e751df199bf264416f27a5d",
+      "bytes": 340
+    },
+    {
+      "path": "docs/parallel/lane-bridge/requests/A03-CREATED-TASK-STORE-CANDIDATE/validation-r2/tests.exit",
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "bytes": 2
+    },
+    {
+      "path": "docs/parallel/lane-bridge/requests/A03-CREATED-TASK-STORE-CANDIDATE/validation-r2/tests.stderr",
+      "sha256": "4b993bb6126e68df5402cb7934c952f7681265388b7335f02ab8b2ffa16c0547",
+      "bytes": 169
+    },
+    {
+      "path": "docs/parallel/lane-bridge/requests/A03-CREATED-TASK-STORE-CANDIDATE/validation-r2/tests.stdout",
+      "sha256": "3e7b92697d87e3ace4613d64c5fe76c17d24758e1be642b70888d5a672430689",
+      "bytes": 328
+    },
+    {
+      "path": "docs/parallel/lane-bridge/requests/A03-CREATED-TASK-STORE-CANDIDATE/validation-r2/tsc.cmd.json",
+      "sha256": "0afcf2fc2b8d6704cead8652a96a0fe71daea3d0b348fbad7c8c503f2bd48e47",
+      "bytes": 233
+    },
+    {
+      "path": "docs/parallel/lane-bridge/requests/A03-CREATED-TASK-STORE-CANDIDATE/validation-r2/tsc.exit",
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "bytes": 2
+    },
+    {
+      "path": "docs/parallel/lane-bridge/requests/A03-CREATED-TASK-STORE-CANDIDATE/validation-r2/tsc.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "docs/parallel/lane-bridge/requests/A03-CREATED-TASK-STORE-CANDIDATE/validation-r2/tsc.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "docs/parallel/lane-bridge/requests/A03-PREPARED-DRAFT-VERIFIER-CANDIDATE/HANDOFF.md",
+      "sha256": "7e37bd0cd5b75a732017ff9a03513d1c704a73a88c46289e6728e7ee4b425e79",
+      "bytes": 6948
+    },
+    {
+      "path": "docs/parallel/lane-bridge/requests/A03-PREPARED-DRAFT-VERIFIER-CANDIDATE/SOURCE-MAP.json",
+      "sha256": "a9b4a9b91c0bc74a9ba125b2b291a2fc0895c91483f536a815b987954bcbee97",
+      "bytes": 385
+    },
+    {
+      "path": "docs/parallel/lane-bridge/requests/A03-PREPARED-DRAFT-VERIFIER-CANDIDATE/TASK.md",
+      "sha256": "176d833f9f6c0f6e0bf493e341f2bfe594eed7513b82d8794d8815ab1340019c",
+      "bytes": 275
+    },
+    {
+      "path": "docs/parallel/lane-bridge/requests/A03-PREPARED-DRAFT-VERIFIER-CANDIDATE/candidate-manifest.json",
+      "sha256": "4a3c19f400c728a1a898e7d8e901967aeae8f6923c05f684abb22ce65cd73ecd",
+      "bytes": 2320
+    },
+    {
+      "path": "docs/parallel/lane-bridge/requests/A03-PREPARED-DRAFT-VERIFIER-CANDIDATE/candidate.patch",
+      "sha256": "8e700a8898b4859d449284872d06c02c265d701ce98511ca1a4acd168137c5aa",
+      "bytes": 25526
+    },
+    {
+      "path": "docs/parallel/lane-bridge/requests/A03-PREPARED-DRAFT-VERIFIER-CANDIDATE/prepared-draft-verifier.ts",
+      "sha256": "380b235ff8ccc2bfe6ce8d5aaacd6ee78a10816060ef3cba389df2c7197a0bba",
+      "bytes": 25042
+    },
+    {
+      "path": "docs/parallel/lane-bridge/requests/A03-STEP-ATTEMPT-TX-CANDIDATE/CASES-PLAN.md",
+      "sha256": "2e9b6f72fd212e4a7e3495d01646d94784471c14336c02396a12600f129cd790",
+      "bytes": 2871
+    },
+    {
+      "path": "docs/parallel/lane-bridge/requests/A03-STEP-ATTEMPT-TX-CANDIDATE/EXISTING-PATH-EVENT-NOTE.md",
+      "sha256": "338851d1491194580eb6faed9237b89332ea0151f07b0aad5b9be26c5054552b",
+      "bytes": 1153
+    },
+    {
+      "path": "docs/parallel/lane-bridge/requests/A03-STEP-ATTEMPT-TX-CANDIDATE/HANDOFF.md",
+      "sha256": "35c2e759f2ef4215d2a9b6a5da218cf5645b06e766ee01af0318b09fae4b556c",
+      "bytes": 3228
+    },
+    {
+      "path": "docs/parallel/lane-bridge/requests/A03-STEP-ATTEMPT-TX-CANDIDATE/ReleaseAssignment.json",
+      "sha256": "1ede83f2cbe5e27e7741a9a5e6d6cb0c605b52083b91528251ae432fb0a6d744",
+      "bytes": 760
+    },
+    {
+      "path": "docs/parallel/lane-bridge/requests/A03-STEP-ATTEMPT-TX-CANDIDATE/SOURCE-PARITY.json",
+      "sha256": "99b31e521591b937e3a74acb4e83057f9ef16160fa27f13e936584820d3a7713",
+      "bytes": 380
+    },
+    {
+      "path": "docs/parallel/lane-bridge/requests/A03-STEP-ATTEMPT-TX-CANDIDATE/TASK.md",
+      "sha256": "28a0cb2d83bf0cfd5685903cd3360565edaf543acf72a8bca7a99cf5f9896e48",
+      "bytes": 357
+    },
+    {
+      "path": "docs/parallel/lane-bridge/requests/A03-STEP-ATTEMPT-TX-CANDIDATE/candidate-manifest.json",
+      "sha256": "384e8a3e4a57593d41ef5b6e6c0efe6b8fe49a4f4ab75edb2d775c6e43734715",
+      "bytes": 1411
+    },
+    {
+      "path": "docs/parallel/lane-bridge/requests/A03-STEP-ATTEMPT-TX-CANDIDATE/candidate.patch",
+      "sha256": "ad488c905061dea5b80885dc2699b9b131f5f0b28b3bc1050818a94065df835c",
+      "bytes": 2527
+    },
+    {
+      "path": "docs/parallel/lane-bridge/requests/A03-STEP-ATTEMPT-TX-CANDIDATE/capture-hashes.json",
+      "sha256": "02761621df22138f86fbde07571b923e84297882b5ebf0432827a9289d98750a",
+      "bytes": 1750
+    },
+    {
+      "path": "docs/parallel/lane-bridge/requests/A03-STEP-ATTEMPT-TX-CANDIDATE/fixed-workflow-service.ts",
+      "sha256": "214b4697011b55efc32db5bea12d84d39e61574e62c2f0da03a4ddb3264e6356",
+      "bytes": 75464
+    },
+    {
+      "path": "docs/parallel/lane-bridge/requests/A03-STEP-ATTEMPT-TX-CANDIDATE/original-fixed-workflow-service.ts",
+      "sha256": "87d32389c94613e96e7835a953dd072c05507a39722e7425660031356838c10f",
+      "bytes": 74871
+    },
+    {
+      "path": "docs/parallel/lane-bridge/requests/A03-STEP-ATTEMPT-TX-CANDIDATE/original-recordStepAttempt.txt",
+      "sha256": "e438fadf5d16bb3f281817a71f646ca05807d47a10fe263f3efc1f34a1894aee",
+      "bytes": 5593
+    },
+    {
+      "path": "docs/parallel/lane-bridge/requests/A03-STEP-ATTEMPT-TX-CANDIDATE/shared-callback-body.txt",
+      "sha256": "9a5201141e788f4b0e7e0a68c2940b75f571d9d1a4cec16e98d8376e93ee814c",
+      "bytes": 4962
+    },
+    {
+      "path": "docs/parallel/lane-bridge/requests/A03-STEP-PROGRESSION-EVENT-CANDIDATE/HANDOFF.md",
+      "sha256": "eaa832dbe175a986c5db41acb473100ae62729607470eddae8c265ac5dcb60f5",
+      "bytes": 3265
+    },
+    {
+      "path": "docs/parallel/lane-bridge/requests/A03-STEP-PROGRESSION-EVENT-CANDIDATE/STATIC-SOURCE-MAP.json",
+      "sha256": "c30dc3ad9f55f4afc2f19e0b7985561cb7a2da12bdc25806c8e56c3616d2ee20",
+      "bytes": 831
+    },
+    {
+      "path": "docs/parallel/lane-bridge/requests/A03-STEP-PROGRESSION-EVENT-CANDIDATE/TASK.md",
+      "sha256": "05a212dec8e1dcaac98ec29ce2636192f2019f8ec14945de7d8206d17c7dca52",
+      "bytes": 354
+    },
+    {
+      "path": "docs/parallel/lane-bridge/requests/A03-STEP-PROGRESSION-EVENT-CANDIDATE/candidate-manifest.json",
+      "sha256": "c7461c10004bf4832b64d51ac8039c85bc76ef4f320eb7eda8b9817413646173",
+      "bytes": 1426
+    },
+    {
+      "path": "docs/parallel/lane-bridge/requests/A03-STEP-PROGRESSION-EVENT-CANDIDATE/capture-hashes.json",
+      "sha256": "a9db79e6f8f3ae4302807a231c7070c275a121dccb44fdfe458444c113760e44",
+      "bytes": 1172
+    },
+    {
+      "path": "docs/parallel/lane-bridge/requests/A03-STEP-PROGRESSION-EVENT-CANDIDATE/fixed-workflow-service.ts",
+      "sha256": "affb339613036d4b7a6572d63247f53754725a98488ae671c76b7317995aaf7e",
+      "bytes": 76104
+    },
+    {
+      "path": "docs/parallel/lane-bridge/requests/A03-STEP-PROGRESSION-EVENT-CANDIDATE/history/unused-sqlite-test-draft.ts",
+      "sha256": "4dc1259fdf7ddf91775bcce1094dde3e07d1a6a7b8d664cad1c680061d8588c0",
+      "bytes": 8117
+    },
+    {
+      "path": "docs/parallel/lane-bridge/requests/A03-STEP-PROGRESSION-EVENT-CANDIDATE/original-fixed-workflow-service.ts",
+      "sha256": "214b4697011b55efc32db5bea12d84d39e61574e62c2f0da03a4ddb3264e6356",
+      "bytes": 75464
+    },
+    {
+      "path": "docs/parallel/lane-bridge/requests/A03-STEP-PROGRESSION-EVENT-CANDIDATE/service.patch",
+      "sha256": "b3587edb8b888a1be69d38005932896d32afed0ae637a01fb120f281c06bc754",
+      "bytes": 1124
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/A04-review.md",
+      "sha256": "ec699bece34206803213de9593ba75f2ebc9316b386ef15e99cf59be91117a3b",
+      "bytes": 26521
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/MAIN-kernel-review.md",
+      "sha256": "e002f3d5740e07e2678154edf8109fdcfef2b3df8e8086bd0d408cac3b1038f2",
+      "bytes": 23819
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/controlled-native-entry-pre-review/R1-FIX-RECHECK.md",
+      "sha256": "0ae57af1b1ab9af406affd9c3f8e1f32db2f8bd901cb71b982a5a001f0143ded",
+      "bytes": 2658
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/controlled-native-entry-pre-review/REVIEW.md",
+      "sha256": "e022e3a87765beb5e340a19432a11e1cbe17eb8ca9b3174d35d76d50f6ebb8a7",
+      "bytes": 4683
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/controlled-native-entry-pre-review/input-hashes.json",
+      "sha256": "ee719bab6b17d550bcdaad08b2862ab86bf0c03790a06a692f1d5e9e7f219b68",
+      "bytes": 1942
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/controlled-native-entry-pre-review/input-status.txt",
+      "sha256": "4fee378048a1fb845c2a5811d1f0a348a4c82b75064f280c5f58a90c31148957",
+      "bytes": 1165
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/controlled-native-entry-pre-review/r1-fix-input-hashes.json",
+      "sha256": "7d089f0f9c4df69cca0ff9f9cd5a397dd0a7a42cfde5f987e8fdb635f6c713ef",
+      "bytes": 880
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/created-native-workspace-pre-review/REVIEW.md",
+      "sha256": "4a5fa5d6a8a70e38756bd5e0e5d4bfef8618041c981a1428c427df2de5e382ed",
+      "bytes": 11596
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/created-native-workspace-pre-review/frozen-8638ee1-readonly/READONLY-BEFORE-VALIDATION.md",
+      "sha256": "f0206bbccf61630e0aefb8af4b3bc0140a5a37e3c221c944fd21849767dce9ba",
+      "bytes": 3916
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/created-native-workspace-pre-review/frozen-8638ee1-readonly/REVIEW.md",
+      "sha256": "974d29e6f23f57b515ee1f475f7d2216f14cafc045bc4e2dfeb6b198a383edcb",
+      "bytes": 6107
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/created-native-workspace-pre-review/frozen-8638ee1-readonly/archive.cmd",
+      "sha256": "e9d31d4b5ffe45c1cdf8ce27933207e87506f7203c28d29ee64d643e87fd16d8",
+      "bytes": 256
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/created-native-workspace-pre-review/frozen-8638ee1-readonly/archive.exit",
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "bytes": 2
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/created-native-workspace-pre-review/frozen-8638ee1-readonly/archive.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/created-native-workspace-pre-review/frozen-8638ee1-readonly/artifact-hashes.json",
+      "sha256": "be85da67f7c16c423ee0f6d1eb3533f41ff6dc4809c16b229de022d810c86c2f",
+      "bytes": 2424
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/created-native-workspace-pre-review/frozen-8638ee1-readonly/build.cmd",
+      "sha256": "05ed65c53b8e51918c689b4785514b5e864fd9ba675628a02872ec3eb54daf86",
+      "bytes": 46
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/created-native-workspace-pre-review/frozen-8638ee1-readonly/build.exit",
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "bytes": 2
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/created-native-workspace-pre-review/frozen-8638ee1-readonly/build.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/created-native-workspace-pre-review/frozen-8638ee1-readonly/build.stdout.txt",
+      "sha256": "d5750db80d55e50fafed077b4f19f101e7db99e99c63f614cdc39d8c4224b6a1",
+      "bytes": 795
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/created-native-workspace-pre-review/frozen-8638ee1-readonly/evidence.json",
+      "sha256": "56e4f35821cb06daba9e939e8863463aa4f6564ceaf158e1a6dc758a218f9e3f",
+      "bytes": 3047
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/created-native-workspace-pre-review/frozen-8638ee1-readonly/install.cmd",
+      "sha256": "1a05dc00a2bd94364b5a743871c35097b6b5b16607b9a5674fa4f2501be9b99f",
+      "bytes": 93
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/created-native-workspace-pre-review/frozen-8638ee1-readonly/install.exit",
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "bytes": 2
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/created-native-workspace-pre-review/frozen-8638ee1-readonly/install.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/created-native-workspace-pre-review/frozen-8638ee1-readonly/install.stdout.txt",
+      "sha256": "8a56af7faeb637224fa38e185813c68acd1b3d93bab6311ef6068f3aa601aedd",
+      "bytes": 1576
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/created-native-workspace-pre-review/frozen-8638ee1-readonly/isolated-source-check.json",
+      "sha256": "4544fc3309173f4436f53f164a161f8a0e4cf7d13fe23e07167d9f096be2afef",
+      "bytes": 3270
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/created-native-workspace-pre-review/frozen-8638ee1-readonly/manifest-check.json",
+      "sha256": "59fd75dfde3aae3d3e33b30898309885dffc62221faf74a71500c4147e5a8404",
+      "bytes": 5841
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/created-native-workspace-pre-review/frozen-8638ee1-readonly/preparation.json",
+      "sha256": "6fa3430f3926c6299168a8a8a5158fb5822bd6f2799c7bba981e872bd4858d19",
+      "bytes": 319
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/created-native-workspace-pre-review/frozen-8638ee1-readonly/tests.cmd",
+      "sha256": "995c16992532a1da77b4fb208cf7aeb41a05daee4063f5d9c3bce01cd5ccce90",
+      "bytes": 236
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/created-native-workspace-pre-review/frozen-8638ee1-readonly/tests.exit",
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "bytes": 2
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/created-native-workspace-pre-review/frozen-8638ee1-readonly/tests.stderr.txt",
+      "sha256": "e9a0eb8dafc81eda32178e71fd46eb8432a785d9eb09e1e8f59767476d04b8b0",
+      "bytes": 342
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/created-native-workspace-pre-review/frozen-8638ee1-readonly/tests.stdout.txt",
+      "sha256": "d44d4c283d262fc528172706ccc09094188a8f09f500ccb776b27ca8582a4c6a",
+      "bytes": 1689
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/created-native-workspace-pre-review/frozen-8638ee1-readonly/typecheck.cmd",
+      "sha256": "9e079765fe6cdfa8585e5dcb6aad6442410257ccc6f13b10113d9ac376f017d9",
+      "bytes": 58
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/created-native-workspace-pre-review/frozen-8638ee1-readonly/typecheck.exit",
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "bytes": 2
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/created-native-workspace-pre-review/frozen-8638ee1-readonly/typecheck.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/created-native-workspace-pre-review/frozen-8638ee1-readonly/typecheck.stdout.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/created-native-workspace-pre-review/frozen-8638ee1-readonly/validation-final.json",
+      "sha256": "b95eade2e1aa7444a2d3e1cc5018b930efa2f50ee83e67cb276cbc825cc0c0a6",
+      "bytes": 3664
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/created-native-workspace-pre-review/frozen-8638ee1-readonly/validation-start.json",
+      "sha256": "38ab04ed599463fc5e60cdc9ef0d00368709a683ec7d2e741e46cdf8b59d02fd",
+      "bytes": 363
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/created-native-workspace-pre-review/input-hashes.json",
+      "sha256": "3cc32b60f39baa8b38d66a217a02cd7d7d5658f442189703c0dcc8fd16b508d8",
+      "bytes": 1720
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/created-native-workspace-pre-review/main-r4-tests-reported.txt",
+      "sha256": "ca8028b7662b6f21d2ddb3f9ff6b97ae535d3105049a4ca7f16ada84835be430",
+      "bytes": 1738
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/created-native-workspace-pre-review/r4-input-hashes.json",
+      "sha256": "a1431d3ed2960adbb02bec902fac16fc0e9f06abb661490b13a98fe597828a8b",
+      "bytes": 1816
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/creative-context-pre-review/REVIEW.md",
+      "sha256": "146332a14add348f23b1e7d7b4902100def10cff62a61358aea8058061c14d12",
+      "bytes": 20926
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/creative-context-pre-review/c-r5-fix-input-hashes.json",
+      "sha256": "4f7a3f717726078f474c42b32d5fd8347a16966841d05a67a43b40668a4069b8",
+      "bytes": 826
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/creative-context-pre-review/input-hashes.json",
+      "sha256": "f7a421ee1df13f532c68e8f9d84fbc1c76834af1ca66284067990e511b21d1fb",
+      "bytes": 1371
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/creative-context-pre-review/r4-input-hashes.json",
+      "sha256": "1d22d1eaee8966c1bd409cf9619f24d4f7529a978e03714e81209b96bcec1003",
+      "bytes": 1188
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/creative-context-pre-review/r6-input-hashes.json",
+      "sha256": "91c9aaa824cad0a756a69612676601f007a0052ce1d19a8e194a25393947d5fd",
+      "bytes": 1164
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/creative-context-pre-review/safe-control-fix-input-hashes.json",
+      "sha256": "c066e629acb7a6e4c1d35ae68309306dc937de040e97dd251c55aebe97222257",
+      "bytes": 1174
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-01c2340/PREPARATION.md",
+      "sha256": "5013655749e78d7ef4521acbf46c54272ae0e91add8253122191fd443a07184d",
+      "bytes": 2064
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-01c2340/REVIEW.md",
+      "sha256": "b0f9d4f709af4b122eb2ae160d81058061c24d003cf82b1e06e9edd4eadcbc73",
+      "bytes": 5566
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-01c2340/archive-before-hashes.json",
+      "sha256": "65b7005fc9ee508e80d39b91876b6cdd03a7f96bf920dfce2d381cef418d0fe2",
+      "bytes": 939625
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-01c2340/archive-final-check.json",
+      "sha256": "62d503e5156b62134b14f25cb9db1cd7f06e8de4561f6c157ac7d50e2e846782",
+      "bytes": 145
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-01c2340/archive.cmd.json",
+      "sha256": "620041f411932a5970abdc06f8f9a65f2730dd4fb9eb1254f7417b85c5be673a",
+      "bytes": 215
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-01c2340/archive.exit",
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "bytes": 2
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-01c2340/archive.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-01c2340/build.cmd.json",
+      "sha256": "7bf1483cc10bd27b18f79b70923a9df7c51173e45b951a947f0f1ca2f63f429e",
+      "bytes": 271
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-01c2340/build.exit",
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "bytes": 2
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-01c2340/build.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-01c2340/build.stdout",
+      "sha256": "a216c0a36b7a9de3522025399cf3e70f206daa64ec0165369dd56df638e17e1b",
+      "bytes": 936
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-01c2340/capture-hashes.json",
+      "sha256": "ef0e2dd93ae1e9686a7842854fef62b9497d064fc28dbc17fa23bb7ebaaf11bf",
+      "bytes": 5619
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-01c2340/dist-hashes.json",
+      "sha256": "8be243c8c55d808fc08bf1c60771934675832e22ad7af4257e5c60b525bbf9dd",
+      "bytes": 920
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-01c2340/extract.cmd.json",
+      "sha256": "ea4a00c8995c7ec71f2c999f9a6e8b5e4fcd3b8cf718e5e50721f6c6e01c71bf",
+      "bytes": 475
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-01c2340/extract.exit",
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "bytes": 2
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-01c2340/extract.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-01c2340/extract.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-01c2340/final-evidence.json",
+      "sha256": "cb2194d0bdec24b95497e0d331f8814f33ba572d594cbcb8b339fd4eb5af8f3b",
+      "bytes": 271
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-01c2340/generated-headless-hashes.json",
+      "sha256": "b910bbc48454bfeabff05fa8ccb08dc2514443794fd89ce804480bf7dec07367",
+      "bytes": 1187
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-01c2340/generated-headless/owned-project-entry-1794268522493/observed.json",
+      "sha256": "2d1495ff918379716c1d07d759f32f708507fc496bf66d7ed83dfe97ac541a8c",
+      "bytes": 325
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-01c2340/generated-headless/owned-project-entry-1794268522493/opened-native.png",
+      "sha256": "bdc9391419b6df0f465c1e5cf0eea5ee19bdb9429aa7133308e0183a02a9bd7f",
+      "bytes": 78859
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-01c2340/generated-headless/owned-project-entry-1794268522493/owned-dark.png",
+      "sha256": "2d823f9aff425b6687f2bd987fdfa2afe95dd1960b75294e8a641db29bb8fbd4",
+      "bytes": 35126
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-01c2340/generated-headless/owned-project-entry-1794268522493/owned-light.png",
+      "sha256": "95fd63fd672eb181f1b1c73f7a421e7a985da99fc40f610d892f099f2f1d00f3",
+      "bytes": 35098
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-01c2340/input.json",
+      "sha256": "0f613c32972b90fcdb179cdf23cb1c318aaa08bb1090476aa15f56d37ce9c9a7",
+      "bytes": 351
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-01c2340/install.cmd.json",
+      "sha256": "e8e3793017f4146c08717343e834ffbcdf5772ad5bfa4a2e822535f0b0dfb657",
+      "bytes": 297
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-01c2340/install.exit",
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "bytes": 2
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-01c2340/install.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-01c2340/install.stdout",
+      "sha256": "2f9c889cf2c1390ccf6a9af8972d3de5a950b55cff868e1c8b375b8f208cd0b8",
+      "bytes": 1691
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-01c2340/main-final-observation.json",
+      "sha256": "09bde175012fa05a1737fc13dc58ebc66614c64c8194c1f586f5e576fa367854",
+      "bytes": 742
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-01c2340/manifest-check.json",
+      "sha256": "007fb83a53c97e78ee2009e0995b2ff4d471c41815cd56f5b8fd1317ef103511",
+      "bytes": 12495
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-01c2340/run-after-grant.py",
+      "sha256": "38839804fbc180b85ed5e1f19e59080d9ade1ce90008787e0499694fccef65cc",
+      "bytes": 1371
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-01c2340/source.tar",
+      "sha256": "af3ed5926551abdaf84e2cfd29252ff9a2986f8b0b2aee2561854f8b68b32c16",
+      "bytes": 184115200
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-01c2340/tests.cmd.json",
+      "sha256": "c6227494e870aba4fe761b7c156c711a009f832faa049da8415e0d590b523a7c",
+      "bytes": 597
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-01c2340/tests.exit",
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "bytes": 2
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-01c2340/tests.stderr",
+      "sha256": "7473d7cc3a0a9326f3f30b3f2811c5342077acc59d6a0803484a01f3358dbeef",
+      "bytes": 504
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-01c2340/tests.stdout",
+      "sha256": "82cb024b4e9ddc5f58fb8725fa395fd1c8aa64376098b24eb208f5cc610b2b50",
+      "bytes": 1500
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-01c2340/tsc.cmd.json",
+      "sha256": "68001a065647e326d0a4941a8d266693e1930a271ce69ee440c612b97150612e",
+      "bytes": 297
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-01c2340/tsc.exit",
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "bytes": 2
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-01c2340/tsc.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-01c2340/tsc.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-2a196ed/REVIEW.md",
+      "sha256": "28057fc4647c873e495ea5043a4bac163e855bf204fa2df1bb786a626e8cdc36",
+      "bytes": 5982
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-2a196ed/archive-before-hashes.json",
+      "sha256": "0013c8e89a41ce41ec3f26d734f298033ae84c9c72f5c4bed371c03ed6e8c67b",
+      "bytes": 928631
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-2a196ed/archive-final-check.json",
+      "sha256": "4fb4569054987d996851028f29b580490742cfc39ea68a195b1a2a1537b1866c",
+      "bytes": 205
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-2a196ed/build.cmd.json",
+      "sha256": "3f8eaeb3f1d5669d59d661947e240504b1a1be916f6ad2102e6ec608ab418b92",
+      "bytes": 272
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-2a196ed/build.exit",
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "bytes": 2
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-2a196ed/build.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-2a196ed/build.stdout",
+      "sha256": "6d2fba7e3b6f3e93fd73db2071c1ec5f1f5dc7bb162af9cfe8801531711660ec",
+      "bytes": 935
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-2a196ed/capture-hashes.json",
+      "sha256": "f126a69c1f46b2806cc43ba131ebb0f6b0c875db577f92b2289fbf5d59bd1301",
+      "bytes": 6051
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-2a196ed/dist-hashes.json",
+      "sha256": "96b0ae53df47cfa7a697d7bb36e51584b5a9845332267070d230cb059afc9811",
+      "bytes": 919
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-2a196ed/final-evidence.json",
+      "sha256": "af3c9ea2973ad83ca8c35fa5be7ff65f8e5ba926083aec357d06ecbd71b900ee",
+      "bytes": 320
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-2a196ed/generated-headless-hashes.json",
+      "sha256": "9041256610787d5f0dea146cb20aa4580167f59845a42cf06ca5472c1f7fea4d",
+      "bytes": 625
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-2a196ed/generated-headless/controlled-native-headless-1794266756645/native-created.png",
+      "sha256": "50e28f4b2f8d01728a72bbca82deea28c5af5019f754c8058de8e6749f4de3cb",
+      "bytes": 78694
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-2a196ed/generated-headless/controlled-native-headless-1794266756645/observed.json",
+      "sha256": "efbb8bf989ebf437a33e2f96e1df90666088bd0eb5976b6c840ca746468dde5b",
+      "bytes": 465
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-2a196ed/input-main-status.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-2a196ed/input.json",
+      "sha256": "6e5f6bafdf7cbf15e78172588e5bffa26924436a73734936ff0f20c661b88390",
+      "bytes": 309
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-2a196ed/install.cmd.json",
+      "sha256": "77b3682d7c7fed7de66b322aff21eaf2bed7c882b7e501e397db9556d1935e22",
+      "bytes": 340
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-2a196ed/install.exit",
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "bytes": 2
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-2a196ed/install.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-2a196ed/install.stdout",
+      "sha256": "d153b31b81c46969adac23de13d5006e5b17d1a6870d1a5e45968171bf9b12f1",
+      "bytes": 1456
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-2a196ed/main-final-observation.json",
+      "sha256": "1a5a1028cdc758467a7ce164439fa43ceef5a015f89b8643ec47fae452577c3c",
+      "bytes": 189
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-2a196ed/manifest-check.json",
+      "sha256": "dfd8cd605b5225739682c30ef6594611830632b056af4aaa906b7989d9572a1b",
+      "bytes": 26971
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-2a196ed/mutations.cmd.json",
+      "sha256": "ad5dfe7b80872f8e3f0d071ffa907cd5a5eaa83f4589a94c1c9b9fc3ad7e245d",
+      "bytes": 465
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-2a196ed/mutations.exit",
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "bytes": 2
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-2a196ed/mutations.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-2a196ed/mutations.stdout",
+      "sha256": "87eeb7d4dfb7cc3a4c16aa08d7034b35392fe11bb18d95ab0fdb22da4859a80e",
+      "bytes": 94
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-2a196ed/mutations/CNE-RECLAIM.cmd.json",
+      "sha256": "1fa08b90791ef6d13547f7dfbbfc2682d537877ed91288b8d2adcf4cf5b99493",
+      "bytes": 400
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-2a196ed/mutations/CNE-RECLAIM.exit",
+      "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+      "bytes": 2
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-2a196ed/mutations/CNE-RECLAIM.txt",
+      "sha256": "963109a92db1a44864b88c56a0e5393e4b5a6e4a523a6f8524800e46e8b59438",
+      "bytes": 1365
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-2a196ed/mutations/CNE-REUSE.cmd.json",
+      "sha256": "934415a6ae9edcc81b45c3ae266df09e6486825bb312ef1976dc20c77d0c0d85",
+      "bytes": 412
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-2a196ed/mutations/CNE-REUSE.exit",
+      "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+      "bytes": 2
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-2a196ed/mutations/CNE-REUSE.txt",
+      "sha256": "044a0c2ffe7a723cd9a82916e98ee68146f90d31473b9f2d717b4000223a2116",
+      "bytes": 1349
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-2a196ed/mutations/original-controlled-studio-access.ts",
+      "sha256": "3564079d0d18caf6f4a191eb24746aa2501047820af7935ce672790589d91bc5",
+      "bytes": 9916
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-2a196ed/mutations/result.json",
+      "sha256": "630b5c0cc85c01f1c0ff7d3a8d9a4c41e064daff3cfc7d6d3f47054afd4871a8",
+      "bytes": 302
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-2a196ed/run.py",
+      "sha256": "bf2d839c27966a10b899074bfe8571aa66557cacd2cdf5a50366d90cbfa3b52d",
+      "bytes": 1585
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-2a196ed/source.tar",
+      "sha256": "5ddd634347fb81d2a4f1dc137791f4a1da9c4e155f2012ea96fdca2e417ea5f5",
+      "bytes": 182732800
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-2a196ed/tests.cmd.json",
+      "sha256": "120ffaeed715c16ef3375f872abb46ed6b647aa697f42e9d12e03b4d1fc6fe5f",
+      "bytes": 607
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-2a196ed/tests.exit",
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "bytes": 2
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-2a196ed/tests.stderr",
+      "sha256": "0b9a67e7cc8979a5a121161103e1eb43f0e8dcf80bb784afcad5b68175150931",
+      "bytes": 342
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-2a196ed/tests.stdout",
+      "sha256": "f471315e5f338afe970f544113f3d6084f4dab477aa83c48be27804cd37c727d",
+      "bytes": 1315
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-2a196ed/tsc.cmd.json",
+      "sha256": "9cb53726121528882277835274ffdcd7d560e422d9747fa594c33834c4c9ce09",
+      "bytes": 298
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-2a196ed/tsc.exit",
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "bytes": 2
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-2a196ed/tsc.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-2a196ed/tsc.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-76607c1/REVIEW.md",
+      "sha256": "9fb8f66c7b1eab3bbe37e878eae6451502e2d569c2b4925b81b06925be01d3c1",
+      "bytes": 5641
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-76607c1/artifact-hashes.json",
+      "sha256": "d25cdcf8f889cf24690240075cfa89008e785fbe0788d2ddb6a1f21d60584773",
+      "bytes": 610
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-76607c1/evidence-check.json",
+      "sha256": "dcac71db0b017d7edbdb3d6b3ebaf2d9cf43fa92d89fa1d7c2ed1ad011a06ee7",
+      "bytes": 5069
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-76607c1/input.json",
+      "sha256": "b586597ef61c264fdea7d606365fae2419956622bb975e30bc9206ce6f21b180",
+      "bytes": 125
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-76607c1/tests.cmd",
+      "sha256": "657a0e4db57c1903e1811eb2c99f37a75e32190d885f5a2b54aa0133889402f0",
+      "bytes": 181
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-76607c1/tests.exit",
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "bytes": 2
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-76607c1/tests.stderr.txt",
+      "sha256": "1a73bc58102bf4ee14fabc1adbe16662111b098c259800863785aaec302b7d11",
+      "bytes": 342
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-76607c1/tests.stdout.txt",
+      "sha256": "a5e2c4ec26caaf0000fbf8ce6cad73f80f0af88dac7d2ef92b121f639a40ff43",
+      "bytes": 2050
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-791fd1d/REVIEW.md",
+      "sha256": "3c022096b496d549ae39340c89a036dc8f7c0f521386b8319423a5170ce7ffcf",
+      "bytes": 5759
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-791fd1d/artifact-hashes.json",
+      "sha256": "b0f5a5549df706ff2d4752c329ab1666147890614d59f7a896fd7de9c78fb081",
+      "bytes": 1414
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-791fd1d/evidence-check.json",
+      "sha256": "154b82569ffb99b2956e9fe27d314331643f1f3716bf47cb9dcecdc4bff8582b",
+      "bytes": 22498
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-791fd1d/final-state.json",
+      "sha256": "ecfb35b124d955046fbef2be8a6a01cb4f0e5fb7a483492e22c37e7298be49f7",
+      "bytes": 411
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-791fd1d/golden.cmd",
+      "sha256": "45b928a1e1825514fac8431b647d0f380f3068e5a59e25d80357c4c672b36a7c",
+      "bytes": 104
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-791fd1d/golden.exit",
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "bytes": 2
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-791fd1d/golden.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-791fd1d/golden.stdout.txt",
+      "sha256": "8f2c5a37249b1947e403135b6a25029eeb1190b4d094cbb927cc9a3c81c97525",
+      "bytes": 1713
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-791fd1d/input.json",
+      "sha256": "64c3bde24c1e48f1ca3c1e158c4a0b1d565b680f03f948f569bab98a4d150a80",
+      "bytes": 125
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-791fd1d/tests.cmd",
+      "sha256": "d176d6dfc3cb4f3205597094f1d5e361d55dc24f5cf1445527cdd79703387504",
+      "bytes": 178
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-791fd1d/tests.exit",
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "bytes": 2
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-791fd1d/tests.stderr.txt",
+      "sha256": "9afc9bc08734ba7700260a46919d7022ec2ff145b5f7cbeb6d03a78f8b999b30",
+      "bytes": 342
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-791fd1d/tests.stdout.txt",
+      "sha256": "b0d8e0cbb9392b5fded5fe5731ea45d6d4051580b73d753d2ee196fccef04e12",
+      "bytes": 2041
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-791fd1d/typecheck.cmd",
+      "sha256": "6b6087c06a32b6477001151f4dcc51807d906046f7693fa7db65413b3f663f05",
+      "bytes": 32
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-791fd1d/typecheck.exit",
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "bytes": 2
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-791fd1d/typecheck.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-791fd1d/typecheck.stdout.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-bb5a29b/REVIEW.md",
+      "sha256": "cd80c0f037cfc64f2129a0881cad10ffd88943eb7014cdb36e9c9f85ea4c76e1",
+      "bytes": 7509
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-bb5a29b/artifact-hashes.json",
+      "sha256": "f2d0237df616ca528ac17c54c42e33083a9b20dad917823b2821c0ce4e56186a",
+      "bytes": 1384
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-bb5a29b/build-check.json",
+      "sha256": "acd6efaa5f61d5bff72d7270d2db2ec61b3521b71d818791db8b88d71143a8c2",
+      "bytes": 1099
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-bb5a29b/evidence-check.json",
+      "sha256": "f0a236c946fe04dd34ba657732e0573b2b2b25acb2aa348984585f9d53305e3d",
+      "bytes": 31206
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-bb5a29b/final-state.json",
+      "sha256": "4f73f247cd60583c78bf1c79356a147d9228098d408bfde3f07de4e6b00620b6",
+      "bytes": 1636
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-bb5a29b/generated-headless/workbench-headless-1794256130421/result.json",
+      "sha256": "63f3e5c9111282eba085fb67cd012df78ac9d53283011f35685770bd8f00fdb5",
+      "bytes": 434
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-bb5a29b/input.json",
+      "sha256": "0d89efab4401fcff2af05d80995786df18ead30335007a31a4d986464e3c53d8",
+      "bytes": 125
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-bb5a29b/post-test-state.json",
+      "sha256": "4370b139c7a6dd6907bab3f9a46b6b15fc1aebbb3691278e8e5a718141784512",
+      "bytes": 1087
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-bb5a29b/tests.cmd",
+      "sha256": "55382f8a6ca9630ab6f37f1c92e54ab229dd449edaba75f5e68a7538f0e34a53",
+      "bytes": 486
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-bb5a29b/tests.exit",
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "bytes": 2
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-bb5a29b/tests.stderr.txt",
+      "sha256": "17de414a140a9685527a47a3deb2110a78913976bcbde7e248810e6a9034364c",
+      "bytes": 684
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-bb5a29b/tests.stdout.txt",
+      "sha256": "a4dbaf408e6c4241e6c60201d1f8072b1f0c5e2d5d20956715e3a585b99258ee",
+      "bytes": 1833
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-bb5a29b/typecheck.cmd",
+      "sha256": "6b6087c06a32b6477001151f4dcc51807d906046f7693fa7db65413b3f663f05",
+      "bytes": 32
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-bb5a29b/typecheck.exit",
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "bytes": 2
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-bb5a29b/typecheck.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-bb5a29b/typecheck.stdout.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-cb44422/REVIEW.md",
+      "sha256": "8787b6e28654406277b52bd45a9cb4e4fcae0f24d59ed695c0f4f44b547ae7d2",
+      "bytes": 6784
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-cb44422/artifact-hashes.json",
+      "sha256": "889bc44527c47b65c5a63ec131382bbf8a58efbcf3d9537dce77e2d9e940fa56",
+      "bytes": 1063
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-cb44422/evidence-check.json",
+      "sha256": "0e4ea6e0effbdc4f4119100527e0f45657c1297e4330bf796968fca4b296018f",
+      "bytes": 20995
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-cb44422/final-state.json",
+      "sha256": "46941842d0550bf19ccaea561350613ac02559833a64048a985b41eb18272f66",
+      "bytes": 288
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-cb44422/input.json",
+      "sha256": "7ff14f19717ad526b1c30abad1d287f50de5a9018c9c8b5956eca7db22ca5477",
+      "bytes": 125
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-cb44422/tests.cmd",
+      "sha256": "472de7a6c08085661ff697501f50641403e9ebbdc7fe27020558d89ac4b97b3e",
+      "bytes": 242
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-cb44422/tests.exit",
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "bytes": 2
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-cb44422/tests.stderr.txt",
+      "sha256": "1ff12b3f77a54c059a1b812b1881c2e370ff2ab675cb27d75f2665d61642f486",
+      "bytes": 513
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-cb44422/tests.stdout.txt",
+      "sha256": "f94febaffd6b67fca80093a1121db45c80530a5d2fdd63dbbde7e2c3efd97b78",
+      "bytes": 3100
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-cb44422/typecheck.cmd",
+      "sha256": "6b6087c06a32b6477001151f4dcc51807d906046f7693fa7db65413b3f663f05",
+      "bytes": 32
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-cb44422/typecheck.exit",
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "bytes": 2
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-cb44422/typecheck.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-cb44422/typecheck.stdout.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/local-assets-pre-review/REVIEW.md",
+      "sha256": "f671d82725ae88b3fd71aec49056196a9b7eb1db61b163df840a08652fa8de1d",
+      "bytes": 15305
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/local-assets-pre-review/input-hashes.json",
+      "sha256": "fabeb7f988877d0f51768de70b881204593ce35d19fa2e186dc0ce89ea49978b",
+      "bytes": 1014
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/local-assets-pre-review/r10-input-hashes.json",
+      "sha256": "9122a0de5a059a3ee8400bcbdf594882fcd7ddf8851e9cb8348da4adef978a73",
+      "bytes": 822
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/local-assets-pre-review/r8-input-hashes.json",
+      "sha256": "9dc3643ad26f7d1fc0ffd07dd2045aaa9778a13308ef1c5cf08305ccd5efb0cb",
+      "bytes": 822
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/managed-editor-pre-review/REVIEW.md",
+      "sha256": "19d3e0a67906c999e2ffb4884e85e1c7c32b6dba5b92df636dbc409c165ff03e",
+      "bytes": 5990
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/managed-editor-pre-review/input-hashes.json",
+      "sha256": "b2441e85415080f334e1f5a53185282b98f3daf9da0047ada90631df75017fc2",
+      "bytes": 1462
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/managed-editor-pre-review/r1-fix-hashes.json",
+      "sha256": "d201e32285cee244ba9ea82fa7124b4bb9a1d489428452c24f05c7e638a84729",
+      "bytes": 1720
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/managed-editor-pre-review/tar-readonly-inspection.json",
+      "sha256": "9a4eadc248b98ec48a7c5098598b1236d0c43a5dac8031c5a6dc1a27765c640c",
+      "bytes": 2383
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/native-draft-afa8627-static/REVIEW.md",
+      "sha256": "39b08e640a5b4565a9a1e67054ac71c02fd08974237b8f135471c8ecc67bc482",
+      "bytes": 7476
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/native-draft-afa8627-static/input-hashes.json",
+      "sha256": "f2531fcfb4ef5a7f62be4f6018e6c8ee9394c97ffbb608c4ab325d1289770b2e",
+      "bytes": 1349
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/native-draft-afa8627-static/main-reported-closure/NESTED_IDENTITY.exit",
+      "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+      "bytes": 2
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/native-draft-afa8627-static/main-reported-closure/NESTED_IDENTITY.txt",
+      "sha256": "3392a54b29d16805f51da5c45887f85265cc35576d3f6aeef408de17497d7962",
+      "bytes": 3477
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/native-draft-afa8627-static/main-reported-closure/ROOT_IDENTITY.exit",
+      "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+      "bytes": 2
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/native-draft-afa8627-static/main-reported-closure/ROOT_IDENTITY.txt",
+      "sha256": "bca54f8442d9180ac1468c21b13fad80c96b61c82a6c5208a19b0fab50427db9",
+      "bytes": 3587
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/native-draft-afa8627-static/main-reported-closure/baseline.exit",
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "bytes": 2
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/native-draft-afa8627-static/main-reported-closure/baseline.txt",
+      "sha256": "f50747b283602c7a34e3c2f4c27c29c98a6565f37d7956ac090f65b6ae8e6ada",
+      "bytes": 534
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/native-draft-afa8627-static/main-reported-closure/directory-mutations-r1.exit",
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "bytes": 2
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/native-draft-afa8627-static/main-reported-closure/original-native-draft-io.ts",
+      "sha256": "4228400591b5561b795a72cfab551bed9b214378e6222b49f415b91ac0d7436a",
+      "bytes": 15293
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/native-draft-afa8627-static/main-reported-closure/result.json",
+      "sha256": "b7db51047182324f654f3ddd0ac9f38168938bf811cbbaac74db2e4cbe8fdd78",
+      "bytes": 333
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/native-draft-afa8627-static/nd-r1-closure-hashes.json",
+      "sha256": "be285195482f953ac02ef383362243739747c49098ea7b2eacf3ddc6fb56475d",
+      "bytes": 2336
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/native-ui-transport-support/FINDINGS.md",
+      "sha256": "2ca2822b350ab8f24890376920250164482041fd5f5050442c7f3185bf0ab8db",
+      "bytes": 9177
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/native-ui-transport-support/vendor-input-hashes.json",
+      "sha256": "72f7c975ff2f7c53ed4ef21ad857826ab1e5583758640da1273aa206e37de723",
+      "bytes": 3492
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/owned-project-entry-pre-review/REVIEW.md",
+      "sha256": "7ecd322ac722c49c647e4dd50da698365f6fcd52f1dd7c72e98e7191af836c5c",
+      "bytes": 5096
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/owned-project-entry-pre-review/input-hashes.json",
+      "sha256": "b981a762bc4ba14abc374f72d5a8a3367b89ca85f194a1547b5717015ff46b0a",
+      "bytes": 3659
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/owned-project-entry-pre-review/input-status.txt",
+      "sha256": "42c6c1d9b986f24dabaff54dd68aa94574f009dcee2e6903bad7c0b7204f302b",
+      "bytes": 1114
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/product-013-hydration-static/REVIEW.md",
+      "sha256": "3f49cd25f6b37b54ab2f2c12d712ccd413305dc89df84bd02c4b2f1a36069c5f",
+      "bytes": 8864
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/product-013-hydration-static/h-r1-fix-hashes.json",
+      "sha256": "2d3cf0ef825bea4493992b64d79d787d2a9190781dd6d25363915806a768e8f9",
+      "bytes": 4711
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/product-013-hydration-static/input-hashes.json",
+      "sha256": "8380cfb08685d6a80c854287a0a30c48599a61796b9071515f75abed77883edd",
+      "bytes": 3292
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/runtime-pre-review/REVIEW.md",
+      "sha256": "61ac2dc39681256dac268f16314878764bf7cf51ff1fa0b6faff2907f6c563d4",
+      "bytes": 7978
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/runtime-pre-review/SUPERVISOR-ADAPTER-REVIEW.md",
+      "sha256": "6a34a7e24a737ab385826f75273880b247960896cf6aa97b64e2dbea5c5080a1",
+      "bytes": 5310
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/runtime-pre-review/input-hashes.json",
+      "sha256": "1ff11fa6f77a93a65a44a4c57a7ea52dc4a05656e27d551ffc4aebaedd0b8bdd",
+      "bytes": 1303
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/runtime-pre-review/r3-input-hashes.json",
+      "sha256": "078f12d30962137bb82aedfc0a7b4c1cfea1c65668911352319c5682b65bebef",
+      "bytes": 1439
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/runtime-pre-review/supervisor-adapter-input-hashes.json",
+      "sha256": "25903466e5552336d7f8f340e7f889f768cf9f7f54f449e0df47192cfb37fd95",
+      "bytes": 966
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/workbench-session-pre-review/REVIEW.md",
+      "sha256": "1828772fbd85f40d6df6e2e1a2073c4afd35ec2d30ebf134ffaa951b6cc8476c",
+      "bytes": 10444
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/workbench-session-pre-review/input-hashes.json",
+      "sha256": "a58fc1e24cb18d4b551bc0e779686c0cf55d5cfbfc13168fe19e08624d26f76b",
+      "bytes": 2047
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/workbench-session-pre-review/proof-fix-input-hashes.json",
+      "sha256": "0efe09fe298d975e8c2d0a34f6d3f8991c67f0cd0a922b99cdd5d1a99e09c0c9",
+      "bytes": 1475
+    }
+  ],
+  "local_full_backup": "/mnt/c/workspace/videoworkline/Narralens-migration-backups/workspace-cleanup-20261120/bridge-observability.tar.gz",
+  "local_backup_sha256": "6b5ed8c213c4428c18040ae60da2e91e102f9ec66d59b84bb0329b3cecac5b18",
+  "local_backup_bytes": 984945386,
+  "backup_regular_files_verified": 31395,
+  "excluded_reproducible": [
+    ".git",
+    ".pnpm-store",
+    ".pytest_cache",
+    "__pycache__",
+    "node_modules"
+  ],
+  "removed": true,
+  "restore": "Checkout archive_ref at a new flat path; apply tracked-changes.patch/index-changes.patch as appropriate, extract dirty-files.tar.gz and copy files/ into checkout. Local full backup restores ignored runtime; credentials/dependencies are not uploaded.",
+  "dirty_payload": {
+    "file": "dirty-files.tar.gz",
+    "sha256": "dbe144fd743d2ea920b4f2a3396791a0ab0b11d6a4e0b28fedf25e34540182c5",
+    "verified_files": 307
+  },
+  "local_only_redundant_source_bundles": [
+    {
+      "path": "docs/parallel/lane-bridge/requests/A03-CREATED-TASK-STORE-CANDIDATE/base-source.tar",
+      "sha256": "c439890bf9f15fef8787b7c0b9faea3cbffb724055b692517b61ace7749aac30",
+      "bytes": 189286400
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-01c2340/source.tar",
+      "sha256": "af3ed5926551abdaf84e2cfd29252ff9a2986f8b0b2aee2561854f8b68b32c16",
+      "bytes": 184115200
+    },
+    {
+      "path": "docs/parallel/lane-bridge/reviews/frozen-2a196ed/source.tar",
+      "sha256": "5ddd634347fb81d2a4f1dc137791f4a1da9c4e155f2012ea96fdca2e417ea5f5",
+      "bytes": 182732800
+    }
+  ],
+  "local_only_reason": "Three redundant 180MB+ historical source tar bundles are preserved byte-exact in the verified full local backup; archive Git refs preserve source history. They are not uploaded again as duplicate large blobs.",
+  "remote_archive_verified": true,
+  "removal_note": "Initial Orca wait ended with worktree_removal_in_progress; subsequent exact show selector_not_found plus path absent and Git worktree unregistered proves completed. No removal retry."
+}

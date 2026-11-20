@@ -1,0 +1,17 @@
+{
+  "at": "2026-11-15T08:54:16.354874+00:00",
+  "status": "IN_PROGRESS_STATIC_OBSERVATIONS_NOT_APPROVAL",
+  "relay": "msg_3e599fafbe04",
+  "observed_sha256": {
+    "tests/agent-driven/integration/cache-process-identity.test.ts": "2d1ceaff374ae2fa3f7de94badce5807d5bf095a9505483959eac8437fc67460",
+    "tests/agent-driven/integration/native-cache-normal-pilot.test.ts": "063fb7bc683b51b11d57d8eba1a7ede40c96d18de25111aa898a1d6bccbb9bc5",
+    "tests/agent-driven/integration/helpers/cache-custodian-unit.py": "98bd37e90a98c50a232d900435bc5b91c325edb651589ddc382b712535c4209e"
+  },
+  "findings": [
+    "vi.hoisted callback references nonhoisted RAW_EDGE_STATE_KEY: callback runtime TDZ; keep symbol creation inside hoisted block",
+    "identity teardown ledger registration not yet present in observed partial edit; verify on formal handback",
+    "Python actual ctypes/prctl paths and inherited/overridden unittest hooks must be checked"
+  ],
+  "runtime_release": false,
+  "source_write_by_MAIN": false
+}

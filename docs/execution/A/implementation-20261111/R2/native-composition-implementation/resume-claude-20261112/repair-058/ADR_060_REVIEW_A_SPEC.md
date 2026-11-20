@@ -1,0 +1,7 @@
+你前次独立A057审查已完成，本次MAIN要求对ADR060做独立文档/架构可实施性审查，不修改实现。只允许写C/repair-058/ADR_060_INDEPENDENT_REVIEW_A.md和.json；C=/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112。先读ADR_060_ISOLATED_CACHE_DRAW.md/json、isolated-process-feasibility.md、原A057-04及原17要求。CLAUDE059同时修其他项，架构源基线一律git show 1d348d419120f23f45d958112ea8c43df5a04675:路径，不读取变动中W字节当冻结。固定V可只读。不得改W/V/Git/var、不运行业务/测试/编译/HTTP/Chrome/probe、不读secret/env/config、不联网或启动worker。
+
+MAIN选择每draw独占Node组直接执行固定pageframes原字节，复用既有worker-local media-process-policy和原helper模式，保留producer品牌/签名，真实group消失+父folder/probe drain后交付。全局最多2draw，同实际workspace串行；丢跨draw内存page缓存，保留磁盘cache。不能照抄signalProcessGroup的只杀leader fallback。正常和seek/JOB/capture超时都需真实清理闭环，不用永久unsettled算完成；异常权限/身份不确定保全。保住leader锚、启动前reservation与HELLO/GO门、私有boundedpipe、迟到launch/重入close/取消、peer不被kill、PRE交付以及不得递归serving.close死锁都在ADR。没有写代码/运行授权，060要等059交还writer。
+
+请判断这份ADR能否完整指导最小实施且闭环A057-04，不以有风险就泛拒，也不省略具体不可达/不可能边界。重点：现有renderer/policy可复用与不可照搬处；pid/startticks/pgid/sid归属与数字signal信任边界是否诚实；成功candidate强制finalize是否能与未知crash区分；worker异常退出遗留group不能静默释放PRE的真实owner策略；原sharedbrowser语义改动与peer实现是否一致；新私有预算及平台能力未伪装全平台；精确建议接口/文件/测试是否缺必要项。若缺少足以指导自动开发的细节，给最小可执行补充，不要求无关架构重写。
+
+输出 verdict DOCUMENT_PLAN_READY或REQUEST_CHANGES/REVIEW_PENDING，逐BLOCKER/MAJOR/MINOR列来源/触发/修改建议，说明仅文档审查runtime全NOT_RUN，不签实现验收。写实际输入文件SHA256，完成worker_done向MAIN报告。

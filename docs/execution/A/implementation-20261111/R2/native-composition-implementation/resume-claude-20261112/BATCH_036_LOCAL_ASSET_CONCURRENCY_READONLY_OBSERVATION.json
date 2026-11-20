@@ -1,0 +1,17 @@
+{
+  "status": "READ_ONLY_HYPOTHESIS_NOT_ROOT_CAUSE",
+  "capture": "n1n2-claude-021-final-check-001",
+  "observed_failure": "bounds real concurrent imports to two and removes a cancelled queued request without leaking a slot: Local asset facts or bytes changed",
+  "source_hashes": {
+    "src/host/agent-driven/local-asset-registry.ts": "2d8e087ae0f57c72db418433ef7c6237e67d97d2e54cd4f2272d32e0eb141823",
+    "tests/agent-driven/integration/local-assets-host.test.ts": "068a0051ac423f21d5d32cca29ccc521502b52884f74c0309935e697c7d71dee"
+  },
+  "inspection": [
+    "Two same-input imports with different idempotency keys run concurrently; expected one asset and two receipts.",
+    "Publication hard-links each staging inode to one content-addressed destination; EEXIST uses existing destination.",
+    "hashFile compares full dev/ino/size/mtimeNs/ctimeNs before/after asynchronous reads. Finally unlinks each staging path.",
+    "assertBlob explicitly handles same-byte ctime changes from successful publisher staging unlink by rehashing, but hashFile has no equivalent documented distinction."
+  ],
+  "hypothesis": "A successful sibling publisher unlink may change destination ctime during the other import hashFile proof. This is only a reachable static hypothesis; pending full stack and a deterministic reproduction. Do not weaken content or path checks on this basis.",
+  "permission": "No source change or runtime granted; existing full run remains frozen."
+}

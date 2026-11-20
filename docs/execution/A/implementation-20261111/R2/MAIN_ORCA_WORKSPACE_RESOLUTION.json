@@ -1,0 +1,21 @@
+{
+  "format": "narralens.orca-workspace-resolution@1",
+  "observed_at": "2026-11-12T00:33:59.992979+00:00",
+  "reason": "BRIDGE initial Claude start failed selector_not_found, no child Task/Dispatch/terminal receipt",
+  "original_request": "10d33ae4-6f2e-4cd6-a9cd-1ef3ec31fbfa",
+  "question": "msg_97585110125b",
+  "repo": "2e732423-9bcc-494c-a0ed-e27a9488f313",
+  "metadata_action": "repo set --external-worktree-visibility show",
+  "previous_visibility": "hide",
+  "current_visibility": "show",
+  "worktree_identity": "identity:wt2:local:3e906924-8c30-4dd8-bd81-cbebd88eb807",
+  "worktree_id": "2e732423-9bcc-494c-a0ed-e27a9488f313::C:\\workspace\\videoworkline\\Narralens-agents\\main-integration",
+  "wsl_path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+  "head": "de438d17dfc777a9d113c7207b98e1923ab72e6c",
+  "branch": "refs/heads/agent-driven/main-a-integration",
+  "verification": "worktree list exactrecord and worktree show by identity matched expected existingcheckout",
+  "reply": "msg_81807ac7daa0",
+  "source_mutation": "NONE; no git create/checkout/reset/move",
+  "child_launch_status": "CORRECTED_SELECTOR_AUTHORIZED_NO_NEW_RECEIPT_YET",
+  "claude_429": "STOP; this selector correction is not an authorization to retry a quota429 or replace writer"
+}

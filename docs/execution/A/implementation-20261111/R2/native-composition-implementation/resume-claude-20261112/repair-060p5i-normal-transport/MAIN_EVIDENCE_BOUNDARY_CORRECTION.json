@@ -1,0 +1,12 @@
+{
+  "at": "2026-11-15T16:33:36.965953+00:00",
+  "status": "MAIN_EVIDENCE_BOUNDARY_CORRECTION_NOT_SOURCE_CHANGE",
+  "report_section": "OWN1.1/1.2",
+  "correction": [
+    "The saved helper event file lacks finalized; this alone does not prove Host never sent FINALIZE, because Host sends FINALIZE on the C control channel, not the N draw channel.",
+    "C accepts either FINALIZE or CANCEL before settling. Receipt+exit0 does not uniquely prove which one triggered termination. No raw controlframes saved fornormal001.",
+    "Confirmed pure actual-supervisor callback test can establish old control writes AUTHORIZE_FORK/FINALIZE/CANCEL, but is not the actualnormal001 frame transcript.",
+    "ECONNRESET causal direction remains inferred; source fix removes a proven redundant-command path without certifying complete historical causality.",
+    "Reporting boundary EPIPE tests are not identical to actualdraw/controlstream resets aftercandidate. Handler unchanged static inspection may support nonregression, dynamiccoverage must be described accurately."
+  ]
+}

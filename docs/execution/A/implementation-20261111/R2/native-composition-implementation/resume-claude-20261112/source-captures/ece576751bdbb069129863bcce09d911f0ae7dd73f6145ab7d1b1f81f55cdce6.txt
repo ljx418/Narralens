@@ -1,0 +1,141 @@
+# N1N2 021 合并修复：纠偏合并映射（K01–K06 → 源码 → 用例）
+
+状态：实现前的合并映射。输入 = msg_9fa55cdb1660（我的 prewrite ACK）+
+`/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/PREWRITE_021_MAIN_REVIEW_20261113.md`（MAIN 纠偏）+ `ROUND3_K01_K06_CORRECTIVE_RELEASE_021.md`。
+本文件不是验收 PASS，不授 runtime。
+
+现场：cwd `/mnt/c/workspace/videoworkline/Narralens-agents/main-integration`，HEAD `e2eff61b464d75d36598103d718cd2a75db5dfda`，索引空，13 源码 SHA256 与 `NEW_429_STOP_20261113_0007.json` 逐个相同，AGENTS.md `37300463a72a612ae16e0a5fcfb496502c57c722b83781e0e2e8c9480594542b` 未动。
+
+---
+
+## 0. MAIN 三处纠偏如何并入（与我的草案的差异）
+
+| MAIN 纠偏 | 我的草案（被否决部分） | 并入后的实现 |
+|---|---|---|
+| K01 公开 `NativeCacheWitnessLedger` 构造器 + `issueProductionLease(token, roots callback)` 不是真实 service 签发门；未知/伪造能力必须在**真实 producer 副作用前**拒绝；生产入口用**模块私有表**解析的事实；隐藏签发者不经公共 getter 泄露原始 token；`service.record` 用**自己的私有 lease 表**+当前 binding 验证；假 ledger/另一真实 service/clone 各自在 production 前独立验证；**调用者不得注入另一 descriptor pool** | 我原草案：ledger 公开 `issueProductionLease`，wrapper 收 `workspaces` registry + caller 传 ref/gen/root | **生产入口整体移入 `created-native-workspace.ts`**，成为 `CreatedNativeWorkspaceService.produceNativeCacheEntry(production, request)`；production lease 的私有表 `productionLeases` 是 **workspace 模块级 WeakMap**；只有真实 service 方法能登记；`produceNativeCacheEntry` **没有任何 caller 注入的 registry/ref/generation/root/pool**；`record` 用 service 自己的 `#witnessLeases`+`#productionLeases` 私有表 + 当前 binding 验证；pool 由真实 lease 所属 owner（service 自己）确定，调用者无从注入 |
+| K04 `mtime_ms` 仅供上游 stamp；Host 身份另存 **纳秒整数** `mtime_ns`/`ctime_ns` + nlink/dev/ino/size；hash 必须 bounded streaming，不把大型 binary 当 text/整文件 Buffer；读取前后比对 held FD 与路径身份；最终 held/path/root/parent 校验必须在**最后一个可重入 callback 之后** | 我原草案：只比 ms 精度 + `verifyFileExact` 未区分 text/binary | `RetainedNativeFile` 增 `mtime_ns`/`ctime_ns`（十进制纳秒字符串）与 `nlink`；新增 `verifyFileExact(file)`（held FD + 路径身份，前后各一次，bounded streaming hash）与 `verifyRootChain()`（root+祖先链，不做整树 membership）；最终身份观察排在 lease/control 复核**之后**、激活**之前** |
+| K05 final fence→release→record 仍有释放窗口；必须 **private pending/active/revoked**；pending 不可被 lookup/reader 接受；全部结算后以真实路径/父根身份+先前 held 身份重验，再同步复核真实 lease/control，最后**无 await 无外部 callback** 激活；任何 cleanup 不确定不得留下可 lookup 记录；primary 与全部 genuine cause 保留 | 我原草案：release 成功后再 record | ledger 三态：`stage`=pending（lookup 不可见）→`activate`=active→`revoke`；顺序 = PRE/POST 全部结算 → 路径/父根身份重验 → lease/control 同步复核 → **最后一次同步身份观察** → 无 await/无外部 callback 激活；任一 cleanup 失败 → revoke（无 active 记录）+ primary 与全部 genuine cause 保留 + owner 粘滞 |
+
+---
+
+## 1. 逐项实现映射（文件 → 改动 → 用例）
+
+### K01 — 真实签发者能力防晋升（`src/host/agent-driven/created-native-workspace.ts`、`src/host/agent-driven/native-cache-witness.ts`）
+
+源码：
+1. `created-native-workspace.ts` 模块级私有表：
+   - `productionLeases: WeakMap<object, ProductionLeaseFacts>`，`ProductionLeaseFacts = {workspace_ref, generation, root, lease:NativeWorkspaceLease, pool:RetainedDescriptorPool, service:CreatedNativeWorkspaceService}`。
+   - `witnessLeases: WeakMap<object, object>`（witness → production lease 对象）。
+2. `CreatedNativeWorkspaceService.acquireCacheProductionLease(ref, expectation)`：
+   - ref 必须已登记且未失效；expectation 逐字段全等；`#check(binding)`（owner/base/control/revision）；`#prepared.get(project)===record`（view 仍是当前）；`isPrepared(view)`（root/目录身份）；再取**真实** `acquireExpectedLease` 作为 lease 事实。
+   - 签发的 lease 对象只在 `productionLeases` 里；复制品/JSON/他人对象查不到。
+3. `CreatedNativeWorkspaceService.produceNativeCacheEntry(production, request)`：
+   - **先**从私有表解析 `production`（查不到 → `NATIVE_CACHE_PRODUCTION_FOREIGN`），**先**拒绝 foreign service（`facts.service!==this`），**先**拒绝 `assertCurrent()!==true`；**以上全部发生在调用真实 producer 之前**。
+   - request 只剩 `{producer, base, rel, ms, width, overrides, kind}`；**没有** registry/ref/generation/root/pool 参数。
+   - pool = `facts.pool`（真实 lease 所属 owner 的那个），调用者无从另造。
+4. `CreatedNativeWorkspaceService.record(witness)`：
+   - `isIssuedNativeCacheWitness`（模块品牌，拒绝 JSON/克隆）→ `witnessLeases.get(witness)`（本服务生产过）→ `productionLeases.get(lease)`（本服务签发）→ `facts.service===this` → `facts.lease.assertCurrent()` → 登记 ref/generation/root → `#check(binding)` → stage 到 ledger（**pending**）。
+   - `activateWitness`/`revokeWitness` 为私有，激活前 pending 不可见。
+5. `native-cache-witness.ts`：`NativeCacheWitnessLedger` 改为三态容器（`stage`/`activate`/`revoke`/`lookup` 只返回 active）；删除 token/roots 构造参数与 `issuedRoot` 结构回调；`issueNativeCacheWitness` 导出给真实 service 使用（品牌只由本模块加）。
+
+用例（`native-cache-witness.test.ts`）：
+- **K01-a 伪 ledger**：结构 lookalike registry 不再是入口（入口是 service 方法）→ 用例证明 lookalike/假 ledger 无法让 service.record 晋升。
+- **K01-b clone**：production lease 的浅拷贝 → `NATIVE_CACHE_PRODUCTION_FOREIGN`，**且真实 producer 未被调用**（用 producer 调用计数断言副作用为 0）。
+- **K01-c 另一真实 service**：service B 签发的 lease 交给 service A → A 拒绝，且 producer 未被调用。
+- **K01-d 同 root/ref/gen 的后续 record 晋升**：service.record 一个外来 witness → false；reader 拒绝该 cache 项。
+- **K01-e 失效/释放/新 generation**：view 被重新 prepare（新 generation、旧 ref 失效）后，旧 production lease 的 `assertCurrent()` 失败 → 拒绝。
+
+### K02 — 解析副本成功/失败同结算（`src/host/agent-driven/committed-snapshot-authority.ts`）
+
+源码：
+- `#parseRetainedFilm` 重写为显式所有权：`mkdtemp` → `writeFile` → parser settle → **无论成功失败**都由副本 owner 执行 `rm`；成功路径也清理。
+- 成功但清理失败 → **不交付成功事实**（抛 genuine cleanup 失败，上级 reader 收到真实不确定）。
+- 失败路径：primary 保留，cleanup cause 用 `mergeRetainedCleanupCauses` 合并并标记 genuine，finally 不覆盖 primary。
+- 新增 Host-private 生命周期观察：`NativeFactsTestHooks.onParseCopy({kind:'allocated'|'released', folder})` + `nativeFactsLiveParseCopies()`（在用副本计数）；分配路径是本次真实 `mkdtemp` 路径。
+
+用例（`created-native-source-reader.test.ts`）：
+- **K02-a 成功路径清除**：一次成功 acquisition 后，hook 观察到 allocated+released 且同一路径 `existsSync===false`，`nativeFactsLiveParseCopies()===0`。
+- **K02-b 失败路径**：注入真实 parser 失败（坏 film）→ 副本仍被清除；primary 保留，cleanup cause 附于其上。
+- **K02-c rm 失败**：注入真实 `rm` 边界失败 → 成功事实**不交付**（拒绝），genuine cause 可见，owner 粘滞。
+- **K02-d 历史目录**：170 个历史 `narralens-n1n2-film-*` 只如实列明归属，不盲删（记录在证据文件）。
+
+### K03 — 精确 key / 海报配对 / 既存保留（`src/host/agent-driven/created-native-workspace.ts` 的生产例程）
+
+源码：
+- film-poster 请求收窄并**验证**为上游 exact request：`rel==='film.html'`、`ms===-1`、规范化 `width===480`（上游 `POSTER_W`）。
+- pageframe 形态若请求会连带写海报（`rel==='film.html' && ms<0 && width===480`）→ 拒绝并**引导**内部 caller 走 poster 分支（不永久禁用整个 family）。
+- 既存拒绝面扩大到**整个三件套成员**（`.jpg`/`.json`/`.stamp` 任一存在即 `NATIVE_CACHE_PREEXISTING`）**+** 本次会被覆盖的旧 `.film/cache/film-poster.jpg`（字节保留、不删不清 cache）。
+- 海报成功必须 `sha256(poster file)===sha256(produced)` 且对应 exact request；不使用早返回 `filmPoster` race。
+
+用例（`native-cache-witness.test.ts`）：
+- **K03-a partial triple**：只有 `.json`/`.stamp` 存在 → 拒绝 + 旧字节保留。
+- **K03-b 旧 poster**：只有 `film-poster.jpg` 存在 → 拒绝 + 旧字节保留（不被覆盖）。
+- **K03-c wrong request**：film-poster 分支用 `ms=0` 或 `rel!=='film.html'` → 拒绝。
+- **K03-d 正向**：pageframe 正向（ms=0）与 poster 正向（ms=-1）各自成立，poster 文件摘要等于本次返回 JPEG 摘要。
+
+### K04 — 最终身份与消费时身份闭合（`retained-native-closure.ts` / 生产例程 / `created-native-source-reader.ts`）
+
+源码：
+- `RetainedNativeFile` 增 `mtime_ns`/`ctime_ns`（十进制纳秒）与 `nlink`；`mtime_ms` 仅供上游 stamp。
+- 新增 `verifyFileExact(file)`：held FD 与**路径**身份（dev/ino/size/mtime_ns/ctime_ns/nlink）在**读前后**各比一次 + bounded streaming hash（64KiB 缓冲，不整文件 Buffer、不当 text）。
+- 新增 `verifyRootChain()`：root 与祖先链身份，不做整树 membership 比较（合法 cache 生成不被整树漂移拒绝）。
+- 生产例程末尾：依赖与输出（含 poster）的 exact 身份复核 + root/parent 链复核 + lease `assertCurrent()`；**最后一次同步身份观察排在 lease 复核之后**。
+- witness 增 `outputs: readonly {path, sha256, bytes, mtime_ms, mtime_ns, ctime_ns, dev, ino, nlink}[]`（jpg/json/stamp/poster），`dependencies` 同步增纳秒与 nlink。
+- reader `#proveWitnessedCache` 改为**全身份**比对（sha256/bytes/dev/ino/mtime_ns/ctime_ms/nlink），不再只比 sha/bytes。
+
+用例：
+- **K04-a same bytes / new inode**：同字节新 inode → 消费侧拒绝。
+- **K04-b same inode → 改回 bytes+mtime**：`ctime_ns` 变化 → 拒绝。
+- **K04-c 三件套替换 / 父根换位**：拒绝。
+- **K04-d 正向**：合法 witnessed 项在下一稳定轮被接受（全身份一致）。
+
+### K05 — 清理确定后才激活见证（生产例程 + ledger 三态）
+
+源码：
+- 顺序：PRE/POST 全部结算（all-attempt）→ 真实路径/父根身份 + 先前 held 身份重验 → lease/control 同步复核 → **最后一次同步身份观察** → **无 await、无外部 callback** 激活（pending→active）。
+- 任一 cleanup 失败：pending 撤销（revoke），**ledger 不留可 lookup 记录**，primary + 全部 genuine cause 保留，已回收数值 FD 不重试，owner 粘滞（后续生产被拒）。
+- 释放后的复核只做**路径身份**（lstat dev/ino/size/mtime_ns/ctime_ns/nlink）比对，不重新持有资源，因此没有新的未结算分配。
+
+用例：
+- **K05-a producer 错误 + PRE cleanup 故障**：primary 保留、genuine cause 齐全、无 active 记录。
+- **K05-b PRE/POST 各自 cleanup 故障（多重）**：全部 cause 保留，不互相覆盖。
+- **K05-c 成功生成但清理失败**：不交付 witness、lookup 为 null、reader 拒绝该 cache 项。
+- **K05-d 记录/激活前后边界**：pending 阶段 lookup 为 null；激活后为可见。
+- **K05-e 后续生产受不确定状态约束**：粘滞拒绝。
+
+### K06 — 真实无旁白 heard 与真实权威变动窗口（测试/fixture）
+
+源码/夹具：
+- `tests/agent-driven/integration/helpers/created-draft-fixture.ts`：**条件性最小扩展**，当前哈希 `a584e60359237c3bb45a54640f8320aa9827bd2d474be2770f1ea410d9feb218`；新增**可选**参数（默认行为逐字段不变）：`options?:{narration?:boolean; videoWithAudio?:boolean}`。`narration:false` → `brief.narration_asset_id=null`（上游 assembler/publisher 已支持）；`videoWithAudio:true` → 生成**真实含音轨**的诊断 mp4（ffmpeg lavfi color+sine，aac），storyboard 使用它。**不改**已提交 author bytes、不伪造媒体权利/prepared 事实。
+- `tests/agent-driven/integration/helpers/native-source-fixture.ts`：把 service 的 descriptor pool 传给 reader（同一实例一个 count）；新增可选 `noNarration` 开关透传。
+- 受影响测试清单：`created-native-source-reader.test.ts`（新增 K06 用例）、`native-cache-witness.test.ts`（fixture 复用同一默认路径，行为不变）。
+
+用例（`created-native-source-reader.test.ts`）：
+- **K06-a 真实 heard 命中**：无旁白 + 含音轨视频 → `sidecars.negative_lookups` 真实包含该视频的 `.vtt`（实际 consumer 查询命中）→ 再 birth 该 `.vtt` → 旧 proof 失效。
+- **K06-b owner 窗口**：真实 DB 权威变更（project_state/revision 改变）→ 持有 lease 变旧 → 拒绝。
+- **K06-c base/control 窗口**：真实 control revision 推进 → 拒绝。
+- **K06-d ref/generation 窗口**：真实重新 prepare → 旧 ref 失效、generation 变 → 拒绝。
+
+---
+
+## 2. R01–R07 覆盖对照（不替代 MAIN 的 17 项账本）
+
+| 原项 | 本轮触点 | 用例 |
+|---|---|---|
+| R01 producer chain / independent trees | K06 无旁白真实 producer 链；双树 descriptor 共享一个 pool | K06-a、G07 pool 用例（既有） |
+| R02 tamper & authority | K01（签发者能力）、K04（身份闭合）、K06-b/c/d（真实 owner/base/control/ref/gen 窗口） | K01-a..e、K04-a..d、K06-b..d |
+| R03 complete dependencies | K06-a（真实 heard consumer 负向查询） | K06-a |
+| R04 native cache | K01、K03、K04、K05 全族 | K01-*, K03-*, K04-*, K05-* |
+| R05 actual probe / child lifetime | 不改（既有 154 证据保留） | 既有 R05/F05/G05 用例 |
+| R06 bytes & order | K04 身份比较（bytes 仍精确） | K04-* |
+| R07 budgets / fd lifetime / cleanup uncertainty / drain | K02（副本结算）、K05（pending/active/revoked、粘滞、全部 cause） | K02-*, K05-* |
+
+---
+
+## 3. 资源与证据
+
+- 仅 `run-recorded.py` 唯一新 capture 名的**串行** `corepack pnpm exec tsc --noEmit`（提交前冻结输入）。
+- 任何 vitest / Host / media / ffmpeg / ffprobe / browser / build：另向 MAIN 提交**精确 argv + cwd + case 名 + 十路径 SHA + 源码字节备份**的 runtime 申请，拿到精确 grant 才运行。
+- 保留全部旧失败捕获；新捕获用 `n1n2-claude-021-*` 前缀，不覆盖 001..006 与既有 resume 捕获。
+- 不 add/commit/reset/stash/checkout/push；不外联/付费/J 盘/配置/凭据；不动受保护 Expected/ack/workspace 回归/pin/EnginePort/公共合同/DDL/Observation/Ack/Context。
+- 新 429：立即停工，保全源码/日志/调用与子进程身份，不自动重试、不换 provider/凭据、不自行接手。

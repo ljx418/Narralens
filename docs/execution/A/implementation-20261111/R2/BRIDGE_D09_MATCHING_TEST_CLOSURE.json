@@ -1,0 +1,23 @@
+{
+  "source_commit": "5d99e47c750aea7c8cd0fd0adfc60bd93222a38e",
+  "files": [
+    {
+      "path": "tests/agent-driven/integration/created-source-adoption.test.ts",
+      "sha256": "640279551752cc96fe2e73db61cdbc1e74f80defefee69c7c1aff6592546a454"
+    },
+    {
+      "path": "tests/agent-driven/integration/created-source-change.test.ts",
+      "sha256": "9d82c3c47b23a44ee27cf129ea51aa61c7e29259e94d6d14a27ed43fc6817860"
+    },
+    {
+      "path": "tests/agent-driven/integration/helpers/created-draft-fixture.ts",
+      "sha256": "a584e60359237c3bb45a54640f8320aa9827bd2d474be2770f1ea410d9feb218"
+    },
+    {
+      "path": "src/host/agent-driven/created-source-change-service.ts",
+      "sha256": "65d123e91866ea1a6e3096a062daabf73bcfad778eec280e5689d25f7dd564fe"
+    }
+  ],
+  "change_service_special_rule": "MAIN inspected old local constructor: revisions/ports, unlike matching tests requiring host/authority/concrete reader. To avoid a predictable second typecheck failure, matching dependency service replacement is authorized ONLY after preserving original full81249c77503bd20b1e52fa37756e8f80ec64248b3bb82c07f74ec12738e924a6 bytes as own immutable docs/parallel/lane-bridge/A-R2-20261112/archive/created-source-change-service-81249.ts.txt, verify archive SHA, record original untracked status + before path hash. Require original local exact81249 and no process/writer; fail closed otherwise. This explicitly supersedes previous MAIN no-replacement instruction for this one dependency; content retained unchanged in archive and historical MAIN journals. Then copy exact5d service read-only, never edit dependency. Not authorized to delete/drop draft, reset/stash or rewrite history.",
+  "other_paths": "Same whole-set before checks (local==HEAD no staged change, or already target; new absent/exact); dependency import and tests remain read-only MAIN ownership. Retain source/status hashes. No heavy/runtime tests; typecheck and own pure authority tests only."
+}

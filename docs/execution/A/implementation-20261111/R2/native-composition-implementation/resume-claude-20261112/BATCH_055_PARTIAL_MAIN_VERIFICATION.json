@@ -1,0 +1,70 @@
+{
+  "at": "2026-11-13T17:45:21.754068+00:00",
+  "status": "EXPECTED85PASS_TWO_SEMANTIC_MUTATIONS_PROVEN_AND_RESTORED_FULL_RUNNING",
+  "actual_results": [
+    {
+      "capture": "n1n2-claude-055-expected-regression-001",
+      "exit": 0,
+      "source_changed": [],
+      "source_added": [],
+      "log_sha256": "aac4c1096f5909ca9501a302427948d08076f5196df47c0dcf20b334d5b4c110",
+      "finished_at": "2026-11-13T17:37:33.009341+00:00"
+    },
+    {
+      "capture": "n1n2-claude-055-lf03-baseline-001",
+      "exit": 0,
+      "source_changed": [],
+      "source_added": [],
+      "log_sha256": "5b5255e04afbeacffa7be8eb7f58763f3a83429c37c751218c989f9fe238799b",
+      "finished_at": "2026-11-13T17:39:02.547821+00:00"
+    },
+    {
+      "capture": "n1n2-claude-055-lf03-mutant-001",
+      "exit": 1,
+      "source_changed": [],
+      "source_added": [],
+      "log_sha256": "84eb469bbd4cc3d3b99891c4245720b191071eaf039271b0dd1193121d5803b0",
+      "finished_at": "2026-11-13T17:39:42.166245+00:00"
+    },
+    {
+      "capture": "n1n2-claude-055-lf03-restored-001",
+      "exit": 0,
+      "source_changed": [],
+      "source_added": [],
+      "log_sha256": "0ff630c24e0403b52ea24975f8c640f74757970cb1931a56834a4da597d0f2b7",
+      "finished_at": "2026-11-13T17:40:42.378503+00:00"
+    },
+    {
+      "capture": "n1n2-claude-055-pf03-baseline-001",
+      "exit": 0,
+      "source_changed": [],
+      "source_added": [],
+      "log_sha256": "9acf7a065286389eb9524bc187411a8b95a542059c26338d740555daaffa6a9a",
+      "finished_at": "2026-11-13T17:41:26.985640+00:00"
+    },
+    {
+      "capture": "n1n2-claude-055-pf03-mutant-001",
+      "exit": 1,
+      "source_changed": [],
+      "source_added": [],
+      "log_sha256": "23313743061d7bbdc6558ced3eb68b2b57ba24bdedece70a0bd654df0407088e",
+      "finished_at": "2026-11-13T17:42:24.228273+00:00"
+    },
+    {
+      "capture": "n1n2-claude-055-pf03-restored-001",
+      "exit": 0,
+      "source_changed": [],
+      "source_added": [],
+      "log_sha256": "f0d4ad3741c719aade05e963893016fd731700b218ff451460be5ef83fc7559d",
+      "finished_at": "2026-11-13T17:43:30.980752+00:00"
+    }
+  ],
+  "normal35sourceguards_match": true,
+  "semantic_failure_proof": {
+    "LF03": "REVISION_CONFLICT at injected strict publishedctime guard; real valid publish refused; baseline/restoredexit0",
+    "PF03": "genuine cause count expected2 actual1 at test1131 after dropping POSTcapture; baseline/restoredexit0"
+  },
+  "full_capture": "n1n2-claude-055-final-check-001",
+  "full_result": "NOT_YET_AVAILABLE",
+  "scope_limit": "Not a frozen commit or final independent acceptance; no full/build PASS claimed"
+}

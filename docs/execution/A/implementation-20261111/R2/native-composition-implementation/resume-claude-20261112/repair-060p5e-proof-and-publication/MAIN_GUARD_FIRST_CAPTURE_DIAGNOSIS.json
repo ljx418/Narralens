@@ -1,0 +1,23 @@
+{
+  "at": "2026-11-15T09:07:51.997085+00:00",
+  "capture": "n1n2-claude-060p5e-guard-identity",
+  "result": {
+    "exit": 1,
+    "source_changed": [],
+    "source_added": [],
+    "log_sha256": "162ea46377b65cb2905f725f2f0e840a755d6d7e72a52d86095eaf90fad01fed",
+    "finished_at": "2026-11-15T09:06:50.791118+00:00"
+  },
+  "counts": {
+    "passed": 23,
+    "failed": 63
+  },
+  "diagnosis": "first unmocked synthetic group probe refusal; teardown assertion aborts before reset and cascades ledger state; isolate with finally preserving failed assertion",
+  "relay": {
+    "ok": true,
+    "result": {
+      "messageId": "msg_8fe58e1a3115"
+    }
+  },
+  "runtime_scope_unchanged": true
+}

@@ -1,0 +1,43 @@
+{
+  "operation": "COPY_EXACT_APPROVED_MODULES_NO_BUILD",
+  "at": "2026-11-12T04:57:24.731705+00:00",
+  "source": "/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-PRODUCT/var/native-hydration-r2/managed-native-expected/dist",
+  "destination": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/var/native-hydration-r2/managed-native-expected/dist",
+  "source_base": "e2eff61b464d75d36598103d718cd2a75db5dfda",
+  "pin_sha256": "ebb3072522aee6220b4cf2ea6fd69913aa1ea71cb338b0524d5c6e51801b8bb5",
+  "approved_inputs_sha256": "c5b53099b2f94fc12b5f9d184c0c8c2b12c51349051eddf67794fb0866e8dfd1",
+  "approved_build_sha256": "13c803b00dc4d0dc40d62209dc03b7f0d2707404a7cce6fcd4c3739a8daf8c95",
+  "upstream_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+  "files": {
+    "NATIVE_LICENSE.txt": {
+      "sha256": "4f39fecc5d074a4795bb7c55c5aaad1a4505b5e022ae6c2c3b55b4f26e7c43fc",
+      "bytes": 1078,
+      "destination": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/var/native-hydration-r2/managed-native-expected/dist/NATIVE_LICENSE.txt"
+    },
+    "build-manifest.json": {
+      "sha256": "13c803b00dc4d0dc40d62209dc03b7f0d2707404a7cce6fcd4c3739a8daf8c95",
+      "bytes": 927,
+      "destination": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/var/native-hydration-r2/managed-native-expected/dist/build-manifest.json"
+    },
+    "expected-projection.d.ts": {
+      "sha256": "0f5f565a3d8b70de995aeb0dfdfb6052acad53cbf452c8d70168f555a8937f80",
+      "bytes": 4691,
+      "destination": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/var/native-hydration-r2/managed-native-expected/dist/expected-projection.d.ts"
+    },
+    "expected-projection.mjs": {
+      "sha256": "3500b1d6485791b13ec9364c6eb80740531142c16754877e21923ad73e9d494e",
+      "bytes": 14342,
+      "destination": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/var/native-hydration-r2/managed-native-expected/dist/expected-projection.mjs"
+    },
+    "native-pure-library.mjs": {
+      "sha256": "9cb18aebe9a5daf08a2c92259b6314493fe98e40fe8a1b410bad444671a9904c",
+      "bytes": 28064,
+      "destination": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/var/native-hydration-r2/managed-native-expected/dist/native-pure-library.mjs"
+    }
+  },
+  "portable_archive": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/approved-015-provision/approved-modules",
+  "source_observation_tree_copied": false,
+  "source_or_index_writes": false,
+  "build_or_network_or_provider": false,
+  "runtime_business_verification": "NOT_RUN; child must use real verified loader under appropriate grant; this proves approved byte provisioning only"
+}

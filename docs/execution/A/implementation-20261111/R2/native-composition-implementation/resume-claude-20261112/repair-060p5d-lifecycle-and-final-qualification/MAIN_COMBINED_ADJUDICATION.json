@@ -1,0 +1,119 @@
+{
+  "at": "2026-11-15T07:35:17.895217+00:00",
+  "verdict": "REQUEST_CHANGES_CONSOLIDATED_NO_N_RUNTIME",
+  "reviews": {
+    "startup": {
+      "message": "msg_1af75e539d0e",
+      "inputs_verified": 61,
+      "review_sha256": "d27912c47f3b17b5bcbd98af5ba050911136f516e1fb889c5117e03a78945cc9"
+    },
+    "owner": {
+      "message": "msg_7d1feac39462",
+      "inputs_verified": 149,
+      "review_sha256": "1297b0aca7ae0c491c6448d0c421eb9caea1c17baed9595d805a62869c525264"
+    },
+    "notification_followup": {
+      "message": "msg_825289b005f3",
+      "task": "task_43be0949ff51",
+      "dispatch": "ctx_37d53318336d",
+      "meaning": "已消费收敛提醒，不是新审计或修复；其后不重复send"
+    }
+  },
+  "groups": [
+    {
+      "id": "ASYNC-NORMAL",
+      "finding_ids": [
+        "R5C-N01",
+        "R5C-O01"
+      ],
+      "required_semantics": "normal pending不是异常，不主动取消；同原promise自然结果/held恢复/真正finally",
+      "status": "OPEN"
+    },
+    {
+      "id": "ASYNC-FAULT",
+      "finding_ids": [
+        "R5C-N01",
+        "R5C-O02"
+      ],
+      "required_semantics": "等待late acceptedWorker→boundGO→同步全epoch活态再注入",
+      "status": "OPEN"
+    },
+    {
+      "id": "CANCEL-IDEMPOTENCE",
+      "finding_ids": [
+        "R5C-N02",
+        "R5C-O03"
+      ],
+      "required_semantics": "primary cause/provenance一次接受后不可改；后续同/异取消不重发不覆盖",
+      "status": "OPEN"
+    },
+    {
+      "id": "STARTUP-UNBOUND",
+      "finding_ids": [
+        "R5C-N03",
+        "R5C-NOTE-01"
+      ],
+      "required_semantics": "born+noAuthorize+真实exit/close后freshgone可终局，unboundknown/unknown/sameZ不能假证",
+      "status": "OPEN"
+    },
+    {
+      "id": "REVOKED-PROOF",
+      "finding_ids": [
+        "R5C-N04"
+      ],
+      "required_semantics": "信号权限永久撤销但原域终局证据继续收集；不丢原group义务，不信号替代进程",
+      "status": "OPEN"
+    },
+    {
+      "id": "BOUNDED-REFUSALS",
+      "finding_ids": [
+        "R5C-N05"
+      ],
+      "required_semantics": "长期EPERM/refusal记录有界且保动作债、首失败和持责",
+      "status": "OPEN"
+    },
+    {
+      "id": "RAW-CLEANUP",
+      "finding_ids": [
+        "R5C-O04",
+        "R5C-NOTE-02"
+      ],
+      "required_semantics": "保原settlement/cleanup，raw及最终diagnosticcleanup错误均阻止normal/fault通过",
+      "status": "OPEN"
+    },
+    {
+      "id": "FINAL-QUALIFICATION",
+      "finding_ids": [
+        "R5C-O05"
+      ],
+      "required_semantics": "必要reportcallback完成后才最终落资格，expectedexit1不能掩盖lateEPIPE",
+      "status": "OPEN"
+    },
+    {
+      "id": "ROOT-OWNERSHIP",
+      "finding_ids": [
+        "R5C-O06"
+      ],
+      "required_semantics": "root分配失败绝不将空root写为cwd证据，无phantomchild",
+      "status": "OPEN"
+    },
+    {
+      "id": "DIRECT-EVIDENCE",
+      "finding_ids": [
+        "R5C-O07"
+      ],
+      "required_semantics": "生产证明路径真实fresh观察/时间、原settlement、有界receipt、最终产物hash清单；读写hash失败不假绿",
+      "status": "OPEN"
+    }
+  ],
+  "preserve_closed_subclaims": [
+    "replacement PID rawsignal guard corrected; must remain",
+    "partial registry/canonical original promise barrier",
+    "real R4B factory wired",
+    "full epoch and boundGO comparator",
+    "legacy explicitpin/realclose/runnerreceipt",
+    "R5A non-destructive state and true writable fd"
+  ],
+  "scope": "Same original8paths; noR6/R7 expansion or newactualN/runtime",
+  "severity": "Overlapping two reviews are not summed into independent defects; all listed fixes including minor/notes included."
+}

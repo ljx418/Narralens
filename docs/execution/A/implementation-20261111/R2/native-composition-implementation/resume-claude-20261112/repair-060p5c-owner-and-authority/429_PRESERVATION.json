@@ -1,0 +1,32 @@
+{
+  "at": "2026-11-15T03:35:00.569557+00:00",
+  "escalation": "msg_stop_f5d848bf290a73974bc62fb4",
+  "reason": "429 TokenPlan quota2056",
+  "dispatch": "ctx_e3d9a7caa5c1",
+  "task": "task_e200d7c555da",
+  "source_changes": [],
+  "protected7_changes": [],
+  "head": "1d348d419120f23f45d958112ea8c43df5a04675",
+  "index": "",
+  "AGENTS_sha256": "37300463a72a612ae16e0a5fcfb496502c57c722b83781e0e2e8c9480594542b",
+  "captures": [],
+  "stop_confirmed": true,
+  "worker_state": {
+    "dispatchId": "ctx_e3d9a7caa5c1",
+    "taskId": "task_e200d7c555da",
+    "runId": "run_399f9dd3ce5a",
+    "followUpOf": "ctx_f6b0485fe1f0",
+    "state": "stopped",
+    "stage": "process_stopped",
+    "liveness": "exited",
+    "terminal": "term_79030899a208de97e0670129f2da1594",
+    "terminalState": "retained",
+    "workspace": "2e732423-9bcc-494c-a0ed-e27a9488f313::C:\\workspace\\videoworkline\\Narralens-agents\\main-integration",
+    "attention": [
+      "failure"
+    ],
+    "waitingOnHuman": "unknown",
+    "next": "\"orca-ide\" \"orchestration\" \"worker-release\" \"--dispatch\" \"ctx_e3d9a7caa5c1\""
+  },
+  "next": "Await explicit user quota-restored resume or explicit takeover. No auto retry/restart/provider change/Codex takeover."
+}

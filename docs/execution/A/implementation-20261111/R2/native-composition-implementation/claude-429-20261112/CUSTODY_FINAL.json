@@ -1,0 +1,20 @@
+{
+  "at": "2026-11-12T05:10:36.055070+00:00",
+  "child": "ctx_283e4028fc76",
+  "state": "released",
+  "agent_exit_confirmed": true,
+  "pty_killed_confirmed": true,
+  "transcript_archive": "captured",
+  "all6_discovered_capture_commands_terminal": true,
+  "arbitrary_descendants_absence": "NOT_CLAIMED",
+  "supervisor": "ctx_b68ba2408385",
+  "supervisor_done": "msg_507ddce660be outcome failed, no new writer or source edits",
+  "reply_to_closed_question": {
+    "id": "msg_d2a134a7fa8d",
+    "exit": 1,
+    "error": "dispatch_inactive question closed because supervisor already finished",
+    "mutation_requestId": "c9e41ae2-deec-4bca-b931-0cb483c64e8d",
+    "action": "No retry/reopen/task-start; final custody persisted here"
+  },
+  "next_required": "Explicit user authorization for this429 takeover/retry occurrence; no implementation proceeds on oldgoal fallback"
+}

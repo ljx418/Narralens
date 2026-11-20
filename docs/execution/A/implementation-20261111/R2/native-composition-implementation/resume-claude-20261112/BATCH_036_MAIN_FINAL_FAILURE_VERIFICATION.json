@@ -1,0 +1,59 @@
+{
+  "at": "2026-11-13T04:55:58.502684+00:00",
+  "status": "FULL_GATE_FAILED_NO_SOURCE_RELEASE",
+  "grant": "N1N2_021_FULL_GATE_RUNTIME_036",
+  "capture": "n1n2-claude-021-final-check-001",
+  "actual": {
+    "exit": 1,
+    "source_changed": [],
+    "source_added": [],
+    "log_sha256": "3a58fadcd86ed1e269089d107d4243318208c18210dd796b5f0135d3e1895d02",
+    "finished_at": "2026-11-13T04:55:04.804939+00:00"
+  },
+  "log_sha_verified": true,
+  "guarded22_all_match": true,
+  "protected_agents_match": true,
+  "index_empty": true,
+  "test_files": {
+    "failed": 8,
+    "passed": 180,
+    "total": 188
+  },
+  "tests": {
+    "failed": 47,
+    "passed": 2513,
+    "skipped": 1,
+    "total": 2561
+  },
+  "duration_seconds": 6742.38,
+  "failed_suite_log_lines": [
+    "❯ tests/m2.3/migration-service.test.ts (26 tests | 26 failed) 753ms",
+    "❯ tests/agent-driven/integration/local-assets-host.test.ts (23 tests | 1 failed) 62202ms",
+    "❯ tests/architecture/m2.2-fitness.test.ts (17 tests | 1 failed) 2436ms",
+    "❯ tests/m2.3/migration-real-export.test.ts (2 tests | 2 failed) 1526ms",
+    "❯ tests/m2.1/openfilm-upstream-lock.test.ts (14 tests | 1 failed) 129ms",
+    "❯ tests/m2.2/snapshot-store.test.ts (9 tests | 9 failed) 167ms",
+    "❯ tests/m2.3/openfilm-migrator.test.ts (7 tests | 6 failed) 36ms",
+    "❯ tests/m2.2/host-coordinator-integration.test.ts (2 tests | 1 failed) 118ms"
+  ],
+  "fitness_exact_offenders": [
+    "src/host/agent-driven/created-source-change-service.ts impact (in #replay)",
+    "src/host/projects/revision-store.ts impact (in commitPreparedCreatedSource)"
+  ],
+  "local_import_failure_stack": [
+    "LocalAssetRegistry.#hashFile:515",
+    "LocalAssetRegistry.#import:452",
+    "LocalAssetRegistry.#importWithSlot:368"
+  ],
+  "processes_observed_absent": [
+    "2523230 recorder",
+    "2523547 vitest"
+  ],
+  "remaining_cleanup": "Writer owned-child/resource cleanup report and MAIN verification still required; do not infer global cleanup from parent exit",
+  "phases_not_run_due_to_and_chain": [
+    "Python impact-hash golden",
+    "vite build",
+    "vite build --config vite.m5.config.ts"
+  ],
+  "next": "Read-only scoped correction plan for PF01..03 and full gate findings; then MAIN-reviewed source release. No rerun or source change granted."
+}

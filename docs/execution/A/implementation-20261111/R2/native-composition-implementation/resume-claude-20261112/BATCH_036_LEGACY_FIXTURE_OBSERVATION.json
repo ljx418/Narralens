@@ -1,0 +1,38 @@
+{
+  "at": "2026-11-13T03:12:51.098044+00:00",
+  "status": "READ_ONLY_FIXTURE_PREREQUISITE_OBSERVATION_NOT_FINAL_FAILURE_ATTRIBUTION",
+  "capture": "n1n2-claude-021-final-check-001 still running",
+  "assets": [
+    {
+      "path": "assets/generated/visual-10s.mp4",
+      "implementation_exists": false,
+      "canonical_exists": true,
+      "canonical_bytes": 17,
+      "canonical_sha256": "0427d617584264ac2875243d6cf711dd985577566f71db6b9d5faf051575989c",
+      "manifest_sha256": "0427d617584264ac2875243d6cf711dd985577566f71db6b9d5faf051575989c",
+      "canonical_matches_manifest": true
+    },
+    {
+      "path": "assets/generated/visual-alt-10s.mp4",
+      "implementation_exists": false,
+      "canonical_exists": true,
+      "canonical_bytes": 17,
+      "canonical_sha256": "40d825e66ee7e69ae53dfdc8d5195fbb9ffc3af7eb07452a5081c51e24115cff",
+      "manifest_sha256": "40d825e66ee7e69ae53dfdc8d5195fbb9ffc3af7eb07452a5081c51e24115cff",
+      "canonical_matches_manifest": true
+    },
+    {
+      "path": "assets/narration.vtt",
+      "implementation_exists": true,
+      "canonical_exists": true,
+      "canonical_bytes": 172,
+      "canonical_sha256": "98c2d00b754ea34de6431b5d830f24759301670fa76347bb060fabfb47dc146e",
+      "manifest_sha256": "98c2d00b754ea34de6431b5d830f24759301670fa76347bb060fabfb47dc146e",
+      "canonical_matches_manifest": true
+    }
+  ],
+  "risk": "Missing two referenced assets in implementation. Canonical matching17-byte files are structural opaque fixtures, not valid MP4/video exports; do not copy and call real media acceptance. Legacy migration-real-export source export callback labels one recordedD1 artifact; must inspect truth of that claim before relying on it.",
+  "next": "Wait actual terminal failure stacks, distinguish missing prerequisite from source regression and fixture evidence weakness; do not mutate running inputs or authorize repair yet",
+  "gitignore": "*.mp4 globally ignored, so fixture binaries not carried by worktree checkout",
+  "changes": "NONE"
+}

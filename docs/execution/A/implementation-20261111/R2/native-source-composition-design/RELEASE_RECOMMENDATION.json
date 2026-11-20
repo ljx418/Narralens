@@ -1,0 +1,381 @@
+{
+  "status": "DESIGN_DELIVERED_NOT_IMPLEMENTATION_RELEASE",
+  "baseline_sha": "4f2bb06be6d26dab240e1faeed0163f3edb7c920",
+  "cwd": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+  "observed_head_at_delivery": "e2eff61b464d75d36598103d718cd2a75db5dfda",
+  "baseline_is_authority_even_if_head_moves": true,
+  "upstream_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+  "source_hashes": {
+    "src/host/m5/openfilm-native-expected.ts": {
+      "git_blob_sha256": "0d59ee891c9a1d3bf491e479639c67d61e35271f5af6b0e4bd708c34eece0795",
+      "working_bytes_match": true
+    },
+    "src/host/m5/native-effective-sidecars.ts": {
+      "git_blob_sha256": "5178b7599024f0a3aeab13919fe2f83d964ececcd9f63d0f25f9301cd6a85c65",
+      "working_bytes_match": true
+    },
+    "src/host/m5/native-observation.ts": {
+      "git_blob_sha256": "7d246c7a518fcbaecf4f9e569c5d78c47ad5cd0860ef36af49112d22471074f4",
+      "working_bytes_match": true
+    },
+    "src/host/m5/native-ack-store.ts": {
+      "git_blob_sha256": "d42a38f6b56d9912130f90559b94ff8ae0004e6937fd5e9862034790f0a32ee2",
+      "working_bytes_match": true
+    },
+    "src/host/m5/controlled-studio-access.ts": {
+      "git_blob_sha256": "cf4ceedcf212fd0313a4706823047c818f2b283dfb815a9ab2402148fd752403",
+      "working_bytes_match": true
+    },
+    "src/host/m5/openfilm-studio-gateway.ts": {
+      "git_blob_sha256": "a154ab81dcddfec00752337a4ff3858f099e860dd39bed93b65f616ff152d68e",
+      "working_bytes_match": true
+    },
+    "src/host/m5/studio-host-bridge.ts": {
+      "git_blob_sha256": "02ff4292306dcd5a059612bd27e5e74f20652a517453b63eeaa1501437a7391f",
+      "working_bytes_match": true
+    },
+    "src/host/m5/managed-editor-pin.json": {
+      "git_blob_sha256": "5849de0dcfb18c9d4e4e8f7e1d533310f419ee75391666a170789a42fa274ccc",
+      "working_bytes_match": true
+    },
+    "src/host/m5/openfilm-studio-ui-pin.json": {
+      "git_blob_sha256": "ebb3072522aee6220b4cf2ea6fd69913aa1ea71cb338b0524d5c6e51801b8bb5",
+      "working_bytes_match": true
+    },
+    "src/host/agent-driven/committed-snapshot-authority.ts": {
+      "git_blob_sha256": "80088c1cac9c87817dee9f944c6a15e35f90800c4db4df84678483a4d4ce7740",
+      "working_bytes_match": true
+    },
+    "src/host/agent-driven/created-native-workspace.ts": {
+      "git_blob_sha256": "90fa46ca3bc677bd687060ed7f3fb89f653b7cea89688641b0a43cd63ab467f4",
+      "working_bytes_match": true
+    },
+    "src/host/agent-driven/creation-application.ts": {
+      "git_blob_sha256": "774749bfab1f13f8a6ecad6ac5c85e157daa2f0a97f0385b2798229b16f50333",
+      "working_bytes_match": true
+    },
+    "src/host/agent-driven/project-context-service.ts": {
+      "git_blob_sha256": "27a9e09f7647148443ad549f386e3aa6175f7a3de0f362886ef981769b440b7e",
+      "working_bytes_match": true
+    },
+    "src/host/agent-driven/created-source-publisher.ts": {
+      "git_blob_sha256": "72d0bb32143eebdf630c386795c95be0411bb5b43498307db0128c8a424600fd",
+      "working_bytes_match": true
+    },
+    "src/host/agent-driven/created-source-recovery.ts": {
+      "git_blob_sha256": "392ffe1dcb64bfd3478287524996fc774e001d3b3ea8f61cae296a3e12289f97",
+      "working_bytes_match": true
+    },
+    "src/host/agent-driven/created-source-adoption-service.ts": {
+      "git_blob_sha256": "9e140f5887b6e8ad5f406517504043ade1eaaa9df8978fee8a2d99d82c46ddb7",
+      "working_bytes_match": true
+    },
+    "src/host/agent-driven/retained-source-tree.ts": {
+      "git_blob_sha256": "19e60f86e776738d4a42e47c0575aafda2e43f103046861cfd34fc4cad6b8a26",
+      "working_bytes_match": true
+    },
+    "src/host/agent-driven/product-sqlite-repository.ts": {
+      "git_blob_sha256": "d2233cae1669f42f3236cb793c7f4a2864bb9d2fc467be2bb56531cef09f9226",
+      "working_bytes_match": true
+    },
+    "src/host/server.ts": {
+      "git_blob_sha256": "f1b9029158730bd24967361f4cd677b1d37c8c9474c1b0af7049e9ca5dd5025d",
+      "working_bytes_match": true
+    },
+    "src/contracts/agent-driven-types.ts": {
+      "git_blob_sha256": "54356697802c0bf048e5cbcde1f54eb33713d4fe58943b346406804011cb3644",
+      "working_bytes_match": true
+    },
+    "tools/agent-driven/product/native-inputs/expected-projection.d.ts": {
+      "git_blob_sha256": "0f5f565a3d8b70de995aeb0dfdfb6052acad53cbf452c8d70168f555a8937f80",
+      "working_bytes_match": true
+    },
+    "tools/agent-driven/product/native-inputs/expected-projection.mjs": {
+      "git_blob_sha256": "3500b1d6485791b13ec9364c6eb80740531142c16754877e21923ad73e9d494e",
+      "working_bytes_match": true
+    }
+  },
+  "upstream_hashes": {
+    "packages/openfilm/studio/server/film.mjs": {
+      "git_blob_sha256": "eb0aab3a4770082a0b273f448b6bda3b0ca043aee791d5444148c459af855d85",
+      "working_bytes_match": true
+    },
+    "packages/openfilm/studio/server/files.mjs": {
+      "git_blob_sha256": "93d65bb02d76ab09e112588d7a852b3d4ada3083ebcd1d9ea2e7d216e82dcf99",
+      "working_bytes_match": true
+    },
+    "packages/openfilm/studio/server/server.mjs": {
+      "git_blob_sha256": "c2da2fcf3b8cab3c6758a8d50a660b9d8d0543b917d9927e52b4cda4f2344a0f",
+      "working_bytes_match": true
+    },
+    "packages/openfilm/studio/server/projects.mjs": {
+      "git_blob_sha256": "f2905720ecc890c4f27a36eb579bfdd4a754774720a03d53b965d3ea0a3c7c3f",
+      "working_bytes_match": true
+    },
+    "packages/openfilm/studio/server/project-settings.mjs": {
+      "git_blob_sha256": "c1e794bd481022ad61e8306bb16e5e3d8304c6787b4285641bb36a3605432e39",
+      "working_bytes_match": true
+    },
+    "packages/openfilm/studio/server/markers.mjs": {
+      "git_blob_sha256": "a16e25078d185b0ca49a9be40336a69c4f0627cff610ec97c4a5951b9bff7b52",
+      "working_bytes_match": true
+    },
+    "packages/openfilm/studio/server/captions.mjs": {
+      "git_blob_sha256": "7a9bd076c307b6296be6e3d05153bf3f386aa01e97503d23f5d5deac1f0d2df0",
+      "working_bytes_match": true
+    },
+    "packages/openfilm/studio/server/transcripts.mjs": {
+      "git_blob_sha256": "ff2c765bec47e7238a56f787c88da7cd1eea3ce893c8fe2959f0a1bdc6da50d3",
+      "working_bytes_match": true
+    },
+    "packages/openfilm/studio/server/derived.mjs": {
+      "git_blob_sha256": "fdc4ae961d25735a87fe1d6e1012cb55278c4c04073a2a5f804548ab06384a99",
+      "working_bytes_match": true
+    },
+    "packages/openfilm/studio/server/pageframes.mjs": {
+      "git_blob_sha256": "87d82f73add17d699aab963a99e45b4406cf68ecf547389b61a24083658f2828",
+      "working_bytes_match": true
+    },
+    "packages/openfilm/studio/server/proxies.mjs": {
+      "git_blob_sha256": "e384d8d590351cf9a3993d36f30631a1c739e63550cc36e37d9045a79f539047",
+      "working_bytes_match": true
+    },
+    "packages/openfilm/studio/server/atomic.mjs": {
+      "git_blob_sha256": "61374e50c67d76e03d70d73e05ed307378d866d579847c316c4203fbc9cde94f",
+      "working_bytes_match": true
+    },
+    "packages/openfilm/studio/ui/src/lib/workspace-resources.ts": {
+      "git_blob_sha256": "99793fcd72071b015a3323ca2dc7be5e58c1b3631ebff22601607476342bfc6d",
+      "working_bytes_match": true
+    }
+  },
+  "read_evidence_sha256": {
+    "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/NATIVE_SOURCE_COMPOSITION_DESIGN_TICKET.md": "12a7b1e4b98273e36733d02205002fd67bc006b21da938292340a806c4edba35",
+    "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/NATIVE_EXPECTED_READER_INTEGRATION_CHECKLIST.md": "a93f2ee99cbec254e7f614a8df65a611f2d95b04512721969d9c6379f48667cc",
+    "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-reader-preflight/READER_BOUNDARY.md": "b7b80a74b11c4e0df37be3716ee28e0ec41d9f98b86fa208311538b84ca7295f",
+    "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-reader-preflight/verification.json": "b3448640a75b78c36ffbe23349a550062bfbc2de1b022c30eac0642e05628693",
+    "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-reader-preflight/listing-semantics.json": "114797c4c63f565f994a4bc0ba768a8facb81e9340f63ebb0f31d53c3e832180",
+    "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/main-d10-full-execution-20261112/COMPOSITION_NEXT_TICKETS.md": "a5ceaf68ca7644d82f38456ce38bc2c4bb32793db796467b505d7c8db74df4c4",
+    "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/PRODUCT_NATIVE_COMPOSITION_PLAN.md": "e89b095edc23ef41823c7e7e88ef72b7028783725fce09efa0953eb5eb828fe1",
+    "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/PRODUCT_LIFECYCLE_MAIN_IMPORT_REPORT.md": "e4d6e330fede7dac3ceb842fa021bf9cb7f37748dbd2951104f13faef72b3d3f",
+    "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/PRODUCT_LIFECYCLE_MAIN_IMPORT_VERIFICATION.json": "f298d115759796b9c10faf38ef4551eacdf58d55273da64d283f56a4cd8eaf24",
+    "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/relaunch-20261111/00_READ_FIRST.md": "aecc91dc478d0a3d8e6c611531f8a9e87a3ba3783ccdf7123bb98715fbb72f28",
+    "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/relaunch-20261111/05_MAIN_ACCEPTANCE_AND_REVIEW.md": "e54e142510bdd48a4772d19225ffd1e4e2bc733a5616cf4d00244a55ad780d7b",
+    "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/relaunch-20261111/product/ACCEPTANCE.md": "225137b8ef04eead4a64d67375f622fefa2d75c81feddd1ec00da42cfbdfaea1",
+    "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/host-recovery-composition-review/ACCEPTANCE_CASES.md": "8420bd50a0bd0beab85cca13c5abf3c4687e48117433e3c2a7615fe0932b2595",
+    "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/host-recovery-composition-review/CODE_MAP.json": "bce88630644ae077d3664d3e78595b3a38f3d809dabd7bda0c3d1fb33fd2bfb4",
+    "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/host-recovery-composition-review/RELEASE_RECOMMENDATION.json": "d34dd7ac4b6a8587f25928b118d78c68211205fb5b07c712bcca334df96febde",
+    "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/host-recovery-composition-review/REVIEW.md": "f14bd204ec5b3c0a9ca20c8c437af0b75cf31d8f1deab8b4874c1eb8cdc1a64c"
+  },
+  "protected_agents_sha256": "37300463a72a612ae16e0a5fcfb496502c57c722b83781e0e2e8c9480594542b",
+  "actual_actions": [
+    "read-only Git/source/evidence inspection",
+    "write these four canonical design files only"
+  ],
+  "not_run": [
+    "tests",
+    "tsc",
+    "Host",
+    "media/ffprobe",
+    "browser",
+    "build",
+    "Claude",
+    "other workers",
+    "network/provider",
+    "all proposed acceptance cases"
+  ],
+  "release_readiness": {
+    "N1_N2": "CONDITIONAL_ON_MAIN_F01_AND_EXACT_RELEASE",
+    "N3_N4_N5": "BLOCKED_ON_S01_L01_AND_REAL_PRODUCERS",
+    "whole_composition": "NOT_RELEASED_NOT_ACCEPTED"
+  },
+  "recommended_write_allowlist_not_current_authorization": {
+    "single_implementation_writer_existing": [
+      "src/host/agent-driven/committed-snapshot-authority.ts",
+      "src/host/agent-driven/created-native-workspace.ts",
+      "src/host/agent-driven/project-context-service.ts",
+      "src/host/m5/openfilm-native-expected.ts",
+      "src/host/m5/native-observation.ts",
+      "src/host/m5/native-ack-store.ts",
+      "src/host/m5/controlled-studio-access.ts"
+    ],
+    "single_implementation_writer_new": [
+      "src/host/agent-driven/retained-native-closure.ts",
+      "src/host/agent-driven/created-native-source-reader.ts",
+      "src/host/agent-driven/created-native-selection.ts"
+    ],
+    "exact_tests": [
+      "tests/agent-driven/integration/created-native-source-reader.test.ts",
+      "tests/agent-driven/integration/created-native-composition.test.ts",
+      "tests/agent-driven/integration/created-native-ack.test.ts",
+      "tests/agent-driven/integration/created-native-workspace.test.ts",
+      "tests/agent-driven/integration/committed-snapshot-host.test.ts",
+      "tests/agent-driven/integration/creative-context-host.test.ts",
+      "tests/agent-driven/integration/created-native-ui-transport.test.ts",
+      "tests/agent-driven/headless/created-native-entry.test.ts"
+    ],
+    "main_only_public_composition": [
+      "src/host/agent-driven/creation-application.ts",
+      "src/host/server.ts"
+    ],
+    "main_bridge_only_conditional_selection": [
+      "src/host/agent-driven/created-native-selection-state.ts",
+      "tests/agent-driven/integration/created-native-selection-state.test.ts"
+    ]
+  },
+  "ownership": {
+    "main": "final ReleaseAssignment, shared source overlap resolution, artifact approval, heavy resource slot and integration",
+    "product_codex": "design/review; not implementation self-sign",
+    "claude": "only after precise release, one writer at a time",
+    "bridge_ctx410": "Host recovery/generic/scheduler/runtime plus shared selection contract, no duplicated service",
+    "media": "real actual-media producer/probe semantics cooperation under MAIN, no mocked production facts"
+  },
+  "protected_paths_and_prefixes": [
+    "AGENTS.md",
+    "CLAUDE.md",
+    "contracts/",
+    "src/contracts/",
+    "src/host/projects/revision-store.ts",
+    "src/host/projects/project-coordinator.ts",
+    "src/host/projects/controlled-recovery-scheduler.ts",
+    "src/host/agent-driven/created-source-recovery.ts",
+    "src/host/agent-driven/created-source-publisher.ts",
+    "src/host/agent-driven/created-publication-recovery-files.ts",
+    "src/host/agent-driven/retained-source-tree.ts",
+    "src/host/agent-driven/created-source-adoption-service.ts",
+    "src/host/m5/native-effective-sidecars.ts",
+    "src/host/m5/openfilm-studio-gateway.ts",
+    "src/host/m5/managed-editor-pin.json",
+    "src/host/m5/managed-editor-dist.tar.gz",
+    "src/host/m5/openfilm-studio-ui-pin.json",
+    "tools/",
+    "vendor/",
+    "package.json",
+    "pnpm-lock.yaml",
+    "tsconfig.json",
+    "vitest.config.ts",
+    "all prior evidence and review directories",
+    ".git/index",
+    "PRODUCT checkout and all user dirty files"
+  ],
+  "default_deny_outside_exact_allowlist": true,
+  "decisions_before_composition_release": [
+    {
+      "id": "S-01",
+      "recommendation": "MAIN-owned persistent private selection epoch ledger; same authority for prepare/apply/publisher/recovery; restore epoch without claiming live Ack; no session-local ABA or fallback0",
+      "unresolved": "Explicit conflict with BRIDGE reboot no-session=0 / no-DDL proposal; MAIN must select proven no-ABA recovery policy and exact schema/migration scope before either composition ticket"
+    },
+    {
+      "id": "F-01",
+      "recommendation": "Host-private retained parent-PID FD probe with child drain, bounded output, stream hashing; exact derived cache rules",
+      "unresolved": "Approve internal probe authority and enumerate actual required GET-derived cache filenames; no public path exposure or broad metadata exemption"
+    },
+    {
+      "id": "L-01",
+      "recommendation": "MAIN sole CreationApplication/server writer and one shutdown plan aligned with BRIDGE; stop ingress before drain; DB last",
+      "unresolved": "MAIN owns shared files and startup/close promises; preserve internal selection reads during accepted recovery drain while rejecting external ingress; assign exact serialized release"
+    }
+  ],
+  "production_dependencies": [
+    "real change.prepare/change.apply handlers and reviewed-package binding producer",
+    "authorized real local Chinese media/recording and immutable source lineage",
+    "actual original Studio approved artifacts copied and reverified privately",
+    "shared selection authority",
+    "single original runtime and DB; recovery integration independently accepted"
+  ],
+  "not_covered_by_design": [
+    "production Host/generic/scheduler acceptance",
+    "real SIGKILL",
+    "real legal committed successor",
+    "NativeAck/Studio product PASS",
+    "two films/dual exports/full decode/T20",
+    "A human acceptance/B release"
+  ],
+  "design_files": {
+    "DESIGN.md": "c13c2ea3006309e724fabd2ad22b4c8426127c25007b89f0b78dd63fd67a99ac",
+    "CONTRACTS_AND_OWNERSHIP.md": "6f0ab26b819dbd9b2be1a91f434b9b0b877b105662b7bbfd687e048806a13beb",
+    "DEVELOPMENT_AND_ACCEPTANCE.md": "3bf0925a2dc4b46ba21856a0156361994ee04c2eb8f428b6f4dfe417db9fc508"
+  },
+  "post_baseline_changes": {
+    "full_name_status": [
+      "A\tdocs/execution/A/implementation-20261111/integration/e1-main-takeover/RECOVERY_OWNERSHIP_MAIN_REPORT.md",
+      "A\tdocs/execution/A/implementation-20261111/integration/e1-main-takeover/RECOVERY_OWNERSHIP_MAIN_VERIFICATION.json",
+      "A\tdocs/execution/A/implementation-20261111/integration/e1-main-takeover/recovery-ownership-fixed-002.claim.json",
+      "A\tdocs/execution/A/implementation-20261111/integration/e1-main-takeover/recovery-ownership-fixed-002.cmd.json",
+      "A\tdocs/execution/A/implementation-20261111/integration/e1-main-takeover/recovery-ownership-fixed-002.exit",
+      "A\tdocs/execution/A/implementation-20261111/integration/e1-main-takeover/recovery-ownership-fixed-002.inputs.json",
+      "A\tdocs/execution/A/implementation-20261111/integration/e1-main-takeover/recovery-ownership-fixed-002.result.json",
+      "A\tdocs/execution/A/implementation-20261111/integration/e1-main-takeover/recovery-ownership-fixed-002.txt",
+      "A\tdocs/execution/A/implementation-20261111/integration/e1-main-takeover/recovery-ownership-fixed-005.claim.json",
+      "A\tdocs/execution/A/implementation-20261111/integration/e1-main-takeover/recovery-ownership-fixed-005.cmd.json",
+      "A\tdocs/execution/A/implementation-20261111/integration/e1-main-takeover/recovery-ownership-fixed-005.exit",
+      "A\tdocs/execution/A/implementation-20261111/integration/e1-main-takeover/recovery-ownership-fixed-005.inputs.json",
+      "A\tdocs/execution/A/implementation-20261111/integration/e1-main-takeover/recovery-ownership-fixed-005.result.json",
+      "A\tdocs/execution/A/implementation-20261111/integration/e1-main-takeover/recovery-ownership-fixed-005.txt",
+      "A\tdocs/execution/A/implementation-20261111/integration/e1-main-takeover/recovery-ownership-host-004.claim.json",
+      "A\tdocs/execution/A/implementation-20261111/integration/e1-main-takeover/recovery-ownership-host-004.cmd.json",
+      "A\tdocs/execution/A/implementation-20261111/integration/e1-main-takeover/recovery-ownership-host-004.exit",
+      "A\tdocs/execution/A/implementation-20261111/integration/e1-main-takeover/recovery-ownership-host-004.inputs.json",
+      "A\tdocs/execution/A/implementation-20261111/integration/e1-main-takeover/recovery-ownership-host-004.result.json",
+      "A\tdocs/execution/A/implementation-20261111/integration/e1-main-takeover/recovery-ownership-host-004.txt",
+      "A\tdocs/execution/A/implementation-20261111/integration/e1-main-takeover/recovery-ownership-host-007.claim.json",
+      "A\tdocs/execution/A/implementation-20261111/integration/e1-main-takeover/recovery-ownership-host-007.cmd.json",
+      "A\tdocs/execution/A/implementation-20261111/integration/e1-main-takeover/recovery-ownership-host-007.exit",
+      "A\tdocs/execution/A/implementation-20261111/integration/e1-main-takeover/recovery-ownership-host-007.inputs.json",
+      "A\tdocs/execution/A/implementation-20261111/integration/e1-main-takeover/recovery-ownership-host-007.result.json",
+      "A\tdocs/execution/A/implementation-20261111/integration/e1-main-takeover/recovery-ownership-host-007.txt",
+      "A\tdocs/execution/A/implementation-20261111/integration/e1-main-takeover/recovery-ownership-old-001.claim.json",
+      "A\tdocs/execution/A/implementation-20261111/integration/e1-main-takeover/recovery-ownership-old-001.cmd.json",
+      "A\tdocs/execution/A/implementation-20261111/integration/e1-main-takeover/recovery-ownership-old-001.exit",
+      "A\tdocs/execution/A/implementation-20261111/integration/e1-main-takeover/recovery-ownership-old-001.inputs.json",
+      "A\tdocs/execution/A/implementation-20261111/integration/e1-main-takeover/recovery-ownership-old-001.result.json",
+      "A\tdocs/execution/A/implementation-20261111/integration/e1-main-takeover/recovery-ownership-old-001.txt",
+      "A\tdocs/execution/A/implementation-20261111/integration/e1-main-takeover/recovery-ownership-type-003.claim.json",
+      "A\tdocs/execution/A/implementation-20261111/integration/e1-main-takeover/recovery-ownership-type-003.cmd.json",
+      "A\tdocs/execution/A/implementation-20261111/integration/e1-main-takeover/recovery-ownership-type-003.exit",
+      "A\tdocs/execution/A/implementation-20261111/integration/e1-main-takeover/recovery-ownership-type-003.inputs.json",
+      "A\tdocs/execution/A/implementation-20261111/integration/e1-main-takeover/recovery-ownership-type-003.result.json",
+      "A\tdocs/execution/A/implementation-20261111/integration/e1-main-takeover/recovery-ownership-type-003.txt",
+      "A\tdocs/execution/A/implementation-20261111/integration/e1-main-takeover/recovery-ownership-type-006.claim.json",
+      "A\tdocs/execution/A/implementation-20261111/integration/e1-main-takeover/recovery-ownership-type-006.cmd.json",
+      "A\tdocs/execution/A/implementation-20261111/integration/e1-main-takeover/recovery-ownership-type-006.exit",
+      "A\tdocs/execution/A/implementation-20261111/integration/e1-main-takeover/recovery-ownership-type-006.inputs.json",
+      "A\tdocs/execution/A/implementation-20261111/integration/e1-main-takeover/recovery-ownership-type-006.result.json",
+      "A\tdocs/execution/A/implementation-20261111/integration/e1-main-takeover/recovery-ownership-type-006.txt",
+      "M\tsrc/host/adoption/adoption-coordinator.ts",
+      "M\tsrc/host/history/history-service.ts",
+      "M\tsrc/host/projects/project-coordinator.ts",
+      "M\ttests/agent-driven/integration/controlled-recovery-families.test.ts",
+      "M\ttests/wave2/m4b/adoption-route.test.ts"
+    ],
+    "non_document_paths": [
+      "M\tsrc/host/adoption/adoption-coordinator.ts",
+      "M\tsrc/host/history/history-service.ts",
+      "M\tsrc/host/projects/project-coordinator.ts",
+      "M\ttests/agent-driven/integration/controlled-recovery-families.test.ts",
+      "M\ttests/wave2/m4b/adoption-route.test.ts"
+    ],
+    "action": "Analyze immutable4f2 only; MAIN must reconcile latest Coordinator/history/adoption changes with BRIDGE before N4 release; no claim of reviewing later implementation"
+  },
+  "delivery_status_porcelain": "M AGENTS.md",
+  "bridge_alignment": {
+    "message": "msg_c59175e27004",
+    "bridge_base": "abf34c9a04ae31639ce9ea2180fda32458413a17",
+    "native_base": "4f2bb06be6d26dab240e1faeed0163f3edb7c920",
+    "baseline_src_delta": [
+      "src/host/m5/openfilm-native-expected.ts"
+    ],
+    "status": "DESIGN_ALIGNED_EXCEPT_EXPLICIT_S01_DECISION_NOT_RELEASED",
+    "unresolved_conflict": "BRIDGE reboot no-session=0 and no-DDL versus proposed durable private epoch; MAIN must resolve ABA and migration semantics before composition release",
+    "shared_writer": "MAIN only creation-application.ts/server.ts; BRIDGE start-runtime and recovery ticket distinct; no duplicate reader/mapping files",
+    "joint_acceptance": [
+      "J01",
+      "J02",
+      "J03",
+      "J04",
+      "J05"
+    ],
+    "execution": "ALL_NOT_RUN",
+    "observed_head": "e2eff61b464d75d36598103d718cd2a75db5dfda"
+  }
+}

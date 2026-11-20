@@ -1,0 +1,100 @@
+{
+  "release_id": "MAIN_R5B_FAILED_START_AND_POSITIVE_OWNER",
+  "at": "2026-11-15T02:34:55.852984+00:00",
+  "cwd": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+  "base_head": "1d348d419120f23f45d958112ea8c43df5a04675",
+  "allow_existing": [
+    "src/adapters/openfilm/cache-process-supervisor.ts",
+    "src/adapters/openfilm/cache-process-custodian.py",
+    "src/adapters/openfilm/cache-worker-integrity.json",
+    "tests/agent-driven/integration/cache-process-identity.test.ts",
+    "tests/agent-driven/integration/helpers/cache-custodian-unit.py",
+    "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts"
+  ],
+  "allow_new": [
+    "tools/native-cache-normal-pilot.ts",
+    "tests/agent-driven/integration/native-cache-normal-pilot.test.ts"
+  ],
+  "start_sha256": {
+    "src/adapters/openfilm/cache-process-supervisor.ts": "d6e582b2cf9b21e6eb29646ccc3a9078bdab86d76730a71330e6b4ea98ac7f20",
+    "src/adapters/openfilm/cache-process-custodian.py": "8c7847bc65e9335654d6de571827252f16c5ac9533adff25804474dc1ac7e403",
+    "src/adapters/openfilm/cache-worker-integrity.json": "43b507e5b3d8bdad41da6a889aa42a44f0eccd9994964e9953a6c8ffa888a0b8",
+    "tests/agent-driven/integration/cache-process-identity.test.ts": "1e5032b7fa5ae7a68e033156eefddbac6c985229a02af3a8418dd2a68f214a54",
+    "tests/agent-driven/integration/helpers/cache-custodian-unit.py": "77c67215b168c6adfc9344dbd48f2d5c281e656b97973f3f5010ff50f81ef946",
+    "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts": "5491f60ef72a55486dd270fb97c680690cedfbb65d62f1d3a6f29902d77c35d0"
+  },
+  "protected_exact_sha256": {
+    "tools/native-cache-nofork-pilot.mjs": "73fed24c66ec310ccd811fdd7e4dfb51be6d22875ce81a50e1a86a47072fe00d",
+    "tests/agent-driven/integration/helpers/native-cache-nofork-pilot.test.mjs": "feb9786b4f38044382ab6ac2ca8435f3bdf89ae83c0882b47177573136deb5ce",
+    "tests/agent-driven/integration/helpers/cache-worker-fixture.mjs": "e3f4ccb1c4016a54356ce04be344b4ffff23f2f88698efe191570ad8407d03ab",
+    "src/host/agent-driven/retained-native-closure.ts": "fd896104149d6cd2663b63a59d50beabbeee546f3e3f46a5d6bf07fbe662ede9",
+    "src/host/agent-driven/created-native-workspace.ts": "d83edbdac8cd6dd7db6b5d18f1d0f5d3beb028279297a822f59f97f6504d562c",
+    "src/adapters/openfilm/openfilm-upstream.ts": "17fe1138e50bc30df5c26b74e1e0ff9393140c070e1233676d2811485890a2b6",
+    "AGENTS.md": "37300463a72a612ae16e0a5fcfb496502c57c722b83781e0e2e8c9480594542b"
+  },
+  "recorder": "docs/execution/A/implementation-20261111/integration/e1-main-takeover/run-recorded.py",
+  "recorder_sha256": "88cd47ec732a340f54cdd4bb05b05878887697eebb0ddc94b1ccd7d0e434fd10",
+  "capture_prefix": "n1n2-claude-060p5b-",
+  "allowed_runtime": [
+    [
+      "corepack",
+      "pnpm",
+      "exec",
+      "tsc",
+      "--noEmit"
+    ],
+    [
+      "corepack",
+      "pnpm",
+      "exec",
+      "vitest",
+      "run",
+      "--config",
+      "vitest.config.ts",
+      "tests/agent-driven/integration/cache-process-identity.test.ts"
+    ],
+    [
+      "/usr/bin/python3.12",
+      "-I",
+      "-S",
+      "-B",
+      "tests/agent-driven/integration/helpers/cache-custodian-unit.py"
+    ],
+    [
+      "corepack",
+      "pnpm",
+      "exec",
+      "vitest",
+      "run",
+      "--config",
+      "vitest.config.ts",
+      "tests/agent-driven/integration/native-cache-normal-pilot.test.ts"
+    ],
+    [
+      "node",
+      "tools/openfilm-cache-worker-integrity.mjs",
+      "--generate"
+    ],
+    [
+      "node",
+      "tools/openfilm-cache-worker-integrity.mjs",
+      "--check"
+    ]
+  ],
+  "generation_writable_only": "src/adapters/openfilm/cache-worker-integrity.json",
+  "scope_findings": [
+    "R3-C04",
+    "R3-C05",
+    "R3-C02 positive-domain owner part",
+    "R3-I05 positive-domain owner part"
+  ],
+  "explicit_internal_surface_additions": [
+    "CacheProcessSupervisor.requestCancel(issuedHandle,originalError) Host-private, no publicroute/MCP/EnginePort",
+    "CacheProcessSupervisor.diagnosticSnapshot(issuedHandle) boundedreadonly facts, no rawticket or mutablecapability"
+  ],
+  "runtime_limit": "Six recordedtype/pure/generation only; no actualC/N/fork/exec/signal/prctl/media/Host/browser/pilot or mixedlifecycle file execution",
+  "source_writer": "existingClaude only",
+  "new429": "STOP_NO_RETRY_TAKEOVER",
+  "next": "Sourcehandback+targetedindependentstartup/positiveownerreview; then exactnormal N+expectedassertfail runtime separately; otherR6/R7 findings remainOPEN",
+  "spec_sha256": "0411e3d17c6d3b60ea463ffff1ec3f22f46bcb3df966d4cae97929ebb7eb9c8a"
+}

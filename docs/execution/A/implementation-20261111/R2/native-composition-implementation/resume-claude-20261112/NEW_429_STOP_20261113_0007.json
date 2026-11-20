@@ -1,0 +1,45 @@
+{
+  "observed_at": "2026-11-12T16:08:12.472659+00:00",
+  "event": "NEW_CLAUDE_429_STOP",
+  "message": "msg_stop_85a7fbf1c0206be2cc2d2bf4",
+  "run": "run_399f9dd3ce5a",
+  "task": "task_5dcbe8192764",
+  "dispatch": "ctx_b4086093cd96",
+  "provider_error": "API Error: Request rejected (429); Token Plan limit; code 2056",
+  "guarded_stop": {
+    "exit": 0,
+    "state": "stopped",
+    "processAction": "closed_agent_terminal",
+    "ptyKilled": true,
+    "requestId": "a860f97d-3385-49e2-9142-cf36d3019a5a"
+  },
+  "HEAD": "e2eff61b464d75d36598103d718cd2a75db5dfda",
+  "index_empty": true,
+  "AGENTS_sha256": "37300463a72a612ae16e0a5fcfb496502c57c722b83781e0e2e8c9480594542b",
+  "observed_source_sha256": {
+    "src/host/agent-driven/retained-native-closure.ts": "3bd37ab6eaaf0201c6fc78a339fe4cd1267dea6e2c75a96baaa4ad200d2774df",
+    "src/host/agent-driven/committed-snapshot-authority.ts": "f6b791bfac3105fad4f400de3b62d15cb5e297a3414eae99e0e518f6333e4e44",
+    "src/host/agent-driven/created-native-source-reader.ts": "a8ad22df324ad8c721919ff4462d73a20583b79e2bedc338cabeb7805335ffe7",
+    "src/host/agent-driven/created-native-workspace.ts": "5f19b43d9b345dc345b6f0c8562a0f08b07a9fbd42a489de4d46a1c6cca2e2f8",
+    "src/host/agent-driven/native-cache-witness.ts": "078bc3071ce1d57f05e4bb74e8aa85a9e33c516ac3fcc3c07a9dd0a7afda8435",
+    "src/adapters/openfilm/openfilm-upstream.ts": "850234a5c29a0dd742f51d7a8d591abe4ba01e68a0b3755838099f94b1bf9b16",
+    "tests/agent-driven/integration/created-native-source-reader.test.ts": "6fd0555e494f8c775d71ad12f28dc2a85371da3bfaf4a23edef98b97dcb36463",
+    "tests/agent-driven/integration/helpers/native-source-fixture.ts": "19cb73cb9d69394e550699d3363128a4ea60e96a3f28f22e1ea4fce01c6dda0a",
+    "tests/agent-driven/integration/committed-snapshot-host.test.ts": "bfd0c6373b254050d32a6a99e7b6f8b9827dc24b6b2587515ab4c5aad2cd9037",
+    "tests/agent-driven/integration/native-cache-witness.test.ts": "a73fee186f6aad3df16e9c9e510245af57d8b40673e3985d8e7fb0e2afb45143",
+    "src/host/m5/openfilm-native-expected.ts": "19110e45a83b6d5b611b4260620ce873f923f1e5a5b907bc6176c4b734fbeed3",
+    "tests/agent-driven/integration/created-native-workspace.test.ts": "439d469032c9af2b83ceb826e0aead7cf5c2fe5c5693be7cbf18c8e67f0f615f",
+    "tests/agent-driven/integration/created-native-ack.test.ts": "5f50db85c7c07a2ecf4faefc20ec2ec6c7ad4910fafe549c2edc76bbad729c7c"
+  },
+  "changed_since_020": {},
+  "acceptance": "NOT_ACCEPTED; K01 BLOCKER and K02-K06 MAJOR remain open pending corrections and independent verification",
+  "runtime_grant": null,
+  "limits": [
+    "No restart or provider switch",
+    "No Codex implementation takeover without explicit user authorization",
+    "No business tests or builds started by MAIN",
+    "Prior failure evidence and uncommitted work preserved",
+    "Specific worker termination confirmed; not a global descendant process absence claim"
+  ],
+  "last_child_report": "Preparing consolidated implementation/acceptance mapping; no implementation completion or worker_done received"
+}

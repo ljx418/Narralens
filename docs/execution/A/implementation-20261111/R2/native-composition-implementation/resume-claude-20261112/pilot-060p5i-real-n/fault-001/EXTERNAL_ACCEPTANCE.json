@@ -1,0 +1,94 @@
+{
+  "at": "2026-11-15T16:44:59.466760+00:00",
+  "verdict": "BYTE_CHAIN_AND_OUTER_EXIT_AND_FRESH_TERMINAL_PASSED",
+  "mode": "assertion-failure",
+  "actual_outer_exit": 1,
+  "runtime_root": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/var/native-cache-positive-pilot/run-wHALdm",
+  "artifacts": {
+    "cache-worker-fixture.events": {
+      "sha256": "389d3a006c0a39a7570aaef3d82c7349ceef559c9dd7c2c64525deaad0b444c3",
+      "bytes": 225
+    },
+    "cache-worker-fixture.mjs": {
+      "sha256": "e3f4ccb1c4016a54356ce04be344b4ffff23f2f88698efe191570ad8407d03ab",
+      "bytes": 15045
+    },
+    "cache-worker-fixture.scenario": {
+      "sha256": "cb58aac1c4c9f9f317986971b7f4d8fdb36d9f5ca9ce9d2deb538f3a37a8c97f",
+      "bytes": 7
+    },
+    "candidate.json": {
+      "sha256": "832b7ed835dcbe7cf263b56effe1fd783cb03862905df99efe7ce2913cb9e95f",
+      "bytes": 4807
+    },
+    "final.json": {
+      "sha256": "c3d95ca2436e838a56b093aa12ffd6d23af6fffbe377141cbbd47da640eb7ab6",
+      "bytes": 5926
+    },
+    "manifest.json": {
+      "sha256": "aada7417f1e9289c74b4ebb14dba737dd589dd41695dcde3516ba92647dde910",
+      "bytes": 1191
+    }
+  },
+  "independent_terminal": {
+    "C": {
+      "original": {
+        "pid": 1381827,
+        "ppid": 1381613,
+        "pgid": 1381827,
+        "sid": 1381827,
+        "start_ticks": 5313002,
+        "state": "S"
+      },
+      "current": null,
+      "at": "2026-11-15T16:44:59.379737+00:00"
+    },
+    "N": {
+      "original": {
+        "pid": 1381828,
+        "ppid": 1381827,
+        "pgid": 1381828,
+        "sid": 1381828,
+        "start_ticks": 5313007,
+        "state": "S"
+      },
+      "current": null,
+      "at": "2026-11-15T16:44:59.379770+00:00"
+    }
+  },
+  "independent_original_group_probes": {
+    "C": "ESRCH",
+    "N": "ESRCH"
+  },
+  "independent_alive_observations": {
+    "C": [
+      {
+        "pid": 1381827,
+        "ppid": 1381613,
+        "pgid": 1381827,
+        "sid": 1381827,
+        "start_ticks": 5313002,
+        "state": "D",
+        "role": "C",
+        "first_seen_at": "2026-11-15T16:44:56.025431+00:00",
+        "cmdline_sha256": "9affabcd4dcb649539dc3cbfd99c2a740c3160e84e3d0f962e9db7f26f2fb49a"
+      }
+    ],
+    "N": [
+      {
+        "pid": 1381828,
+        "ppid": 1381827,
+        "pgid": 1381828,
+        "sid": 1381828,
+        "start_ticks": 5313007,
+        "state": "R",
+        "role": "N",
+        "first_seen_at": "2026-11-15T16:44:56.063002+00:00",
+        "cmdline_sha256": "18bec717192247df132e2ee4baa35923789ce829aac41e0fb0adf33860d5ec33"
+      }
+    ]
+  },
+  "all_original_roles_seen_alive": true,
+  "source651_unchanged": true,
+  "scope": "Minimal synthetic protocol only; not video/Chrome/N1N2/full acceptance; actual same-Error/cause checked inside reviewed CLI, not reconstructed from JSON"
+}

@@ -1,0 +1,297 @@
+Source: transcript (provider=claude)
+Worker: ready
+Archived: false
+Terminal liveness: live
+Agent liveness: live
+Source exact: true
+Content complete: false
+Clipping: message_limit_or_scan_window, transcript_payload
+Continuation cursor (opaque; pass unchanged to --cursor): owr1_eyJ2IjoxLCJkIjoiY3R4XzE3Y2Y5NDg4M2E1MyIsInMiOiJ0cmFuc2NyaXB0IiwiaSI6Ii1FOUhkWUY0T05Lb200dXRaY01LOTFTZFhSUTBFVEtqIiwicCI6MTYxMTY4MzcsImMiOiJyS21fUzlTOUd4SkVOQlR5TnUzc1hRaWZFYXE0SEl4VSJ9
+Warning: Oversized transcript text was clipped.
+Warning: Oversized tool input was clipped.
+
+[reasoning] Two issues ✓:
+1. The wait item's "order" ✗ — the C's `_receipt_items` ✓ uses `self.waits` ✓ — and my test set `instance._worker_wait` ✓ but `instance.waits` ✓ got the copy ✓ (with "ordinal" ✓ not "order" ✗). Hmm — the C's `_worker_wait` uses "ordinal" ✓ and the waits list ✓ gets the same dict ✓ → the item's v = {pid, status, ordinal, category, epoch} ✗ — the contract's §2 says the w item's `order` ✓ ✗.
+
+Hmm — so the C's wait records ✓ use "ordinal" ✓ (my design ✓) but the contract says "order" ✗. Let me align the C's WAIT RECORD to use "order" ✓ (and the certificate's worker_wait keeps "ordinal" ✓ — hmm, inconsistent ✗).
+
+Hmm, let me think: the contract §2: "w项含实际waitpid结果的epoch、terminal status和类别（worker/adopted），`order`为递增wait序号" ✓ — so the RECEIPT ITEM's w has "order" ✓.
+And §3.2: the certificate's `worker_wait` has "wait ordinal" ✓ (the word "ordinal" ✓ — hmm, it says "含forked_pid、已知原epoch、完整status与wait ordinal" ✓ — the field name isn't specified ✓).
+
+Hmm — to keep the two ends consistent ✓, let me use "order" in BOTH ✓ (the item ✓ and the certificate ✓) ✓ — hmm, but I already wrote the Host's validator to check `wait.ordinal` ✗.
+
+Hmm. Simplest ✓: use "order" everywhere ✓ (the i
+… (truncated)
+
+[assistant] [tool Bash] {"command":"python3 - <<'PY'\nfrom pathlib import Path\n\n# 1. the C: the wait record carries \"order\" everywhere\np = Path(\"src/adapters/openfilm/cache-process-custodian.py\")\nt = p.read_text()\nold = '''                self._worker_wait = {\n                    \"pid\": reaped,\n                    \"status\": status_of(status),\n                    \"ordinal\": self._wait_ordinal,\n                    \"category\": \"worker\",\n                    \"epoch\": self._epoch_of(reaped),\n                }'''\nnew = '''                self._worker_wait = {\n                    \"pid\": reaped,\n                    \"status\": status_of(status),\n                    \"order\": self._wait_ordinal,\n                    \"category\": \"worker\",\n                    \"epoch\": self._epoch_of(reaped),\n                }'''\nassert t.count(old) == 1\nt = t.replace(old, new)\np.write_text(t)\n\n# 2. the Host: the certificate's worker wait carries the same \"order\"\np2 = Path(\"src/adapters/openfilm/cache-process-supervisor.ts\")\nt2 = p2.read_text()\nold2 = '''    if (typeof wait.ordinal !== \"number\" || !Number.isInteger(wait.ordinal) || wait.ordinal <= 0) {\n      return refuse(\"the certificate carries no ordinal of the wait\");\n    }'''\nnew2 = '''   … (truncated)","…":"truncated"}
+
+[tool] [tool result] ok
+src/adapters/openfilm/cache-process-custodian.py:1430:        self._wait_ordinal = 0
+src/adapters/openfilm/cache-process-custodian.py:1435:        #: The ordinal of the last wait when the ECHILD was really seen. Any
+src/adapters/openfilm/cache-process-custodian.py:1437:        self._echild_after_wait_ordinal: int | None = None
+src/adapters/openfilm/cache-process-custodian.py:2420:            self._wait_ordinal += 1
+src/adapters/openfilm/cache-process-custodian.py:2422:            self._echild_after_wait_ordinal = None
+src/adapters/openfilm/cache-process-custodian.py:2429:                "order": self._wait_ordinal,
+src/adapters/openfilm/cache-process-custodian.py:2454:                self._wait_ordinal += 1
+src/adapters/openfilm/cache-process-custodian.py:2455:                self._echild_after_wait_ordinal = None
+src/adapters/openfilm/cache-process-custodian.py:2460:                    "order": self._wait_ordinal,
+src/adapters/openfilm/cache-process-custodian.py:2477:                self._echild_after_wait_ordinal = self._wait_ordinal
+
+[assistant] [tool Bash] {"command":"timeout 200 python3 docs/execution/A/implementation-20261111/integration/e1-main-takeover/run-recorded.py n1n2-claude-060p6-complete-python-005 /usr/bin/python3.12 -I -S -B tests/agent-driven/integration/helpers/cache-custodian-unit.py 2>&1 | tail -1; tail -20 docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p6-complete-python-005.txt","description":"Re-run the python suite","timeout":300000}
+
+[tool] [tool result] {"exit": 1, "source_changed": [], "source_added": [], "log_sha256": "e440c37a87348abcaab75f533dfd3a05d854d3d6281ab4172ca7dd6426553f2a", "finished_at": "2026-11-15T18:47:22.323255+00:00"}
+.....................................................................E......
+======================================================================
+ERROR: test_the_wait_item_carries_its_order_and_its_category (__main__.TheShapesOfTheReceipt.test_the_wait_item_carries_its_order_and_its_category)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/helpers/cache-custodian-unit.py", line 2467, in test_the_wait_item_carries_its_order_and_its_category
+    self.assertEqual(value["order"], 3)
+                     ~~~~~^^^^^^^^^
+KeyError: 'order'
+
+----------------------------------------------------------------------
+Ran 76 tests in 0.059s
+
+FAILED (errors=1)
+
+[reasoning] The wait item still lacks "order" ✓ — because my test sets `instance._worker_wait` ✓ manually (with "ordinal" ✓ — hmm, I wrote the test with "ordinal" ✓) and then `instance.waits.append(dict(instance._worker_wait))` ✓ → the item's v = the test's dict ✓ (with "ordinal" ✗).
+
+Let me update the test's fixture ✓ to use "order" ✓.
+
+Let me fix ✓.
+
+[assistant] [tool Bash] {"command":"python3 - <<'PY'\nfrom pathlib import Path\np = Path(\"tests/agent-driven/integration/helpers/cache-custodian-unit.py\")\nt = p.read_text()\nold = '''        instance._worker_wait = {\n            \"pid\": 200,\n            \"status\": {\"kind\": \"exited\", \"code\": 0},\n            \"ordinal\": 3,\n            \"category\": \"worker\",\n            \"epoch\": instance._epoch_of(200),\n        }'''\nnew = '''        instance._worker_wait = {\n            \"pid\": 200,\n            \"status\": {\"kind\": \"exited\", \"code\": 0},\n            \"order\": 3,\n            \"category\": \"worker\",\n            \"epoch\": instance._epoch_of(200),\n        }'''\nassert t.count(old) == 1\nt = t.replace(old, new)\np.write_text(t)\nprint(\"ok\")\nPY\ntimeout 200 python3 docs/execution/A/implementation-20261111/integration/e1-main-takeover/run-recorded.py n1n2-claude-060p6-complete-python-006 /usr/bin/python3.12 -I -S -B tests/agent-driven/integration/helpers/cache-custodian-unit.py 2>&1 | tail -1; tail -8 docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p6-complete-python-006.txt","description":"Fix the wait fixture and re-run","timeout":300000}
+
+[tool] [tool result] ok
+{"exit": 0, "source_changed": [], "source_added": [], "log_sha256": "c1ee3e31573b4a282bd335b51ace6896698ae24a58efdaafd3b4b930b6c5b4ce", "finished_at": "2026-11-15T18:47:51.116062+00:00"}
+............................................................................
+----------------------------------------------------------------------
+Ran 76 tests in 0.057s
+
+OK
+
+[reasoning] 76 python tests pass ✓ (69 → 76: +7 new C-side cases ✓).
+
+Now let me run the identity and pilot suites ✓ (the fixtures changed ✓).
+
+Then I'll add the Host-side direct cases (RC7) ✓:
+- C06-BOUND: >256 adopted waits ✓ (the N's facts survive ✓).
+- The foreign segment ✓ (the binding ✓) — partially covered ✓ (the binding check ✓ — let me add a direct case ✓).
+- The non-terminal status ✓.
+- The epoch with the wrong ticks ✓.
+- The terminal replay ✓ (covered ✓).
+- The C06-EXEC's Host-only branches ✓.
+
+Let me first run the suites✓.
+
+[assistant] [tool Bash] {"command":"timeout 300 python3 docs/execution/A/implementation-20261111/integration/e1-main-takeover/run-recorded.py n1n2-claude-060p6-complete-identity-008 corepack pnpm exec vitest run --config vitest.config.ts tests/agent-driven/integration/cache-process-identity.test.ts 2>&1 | tail -2; grep -E \"×|Tests  \" docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p6-complete-identity-008.txt | head -6; timeout 300 python3 docs/execution/A/implementation-20261111/integration/e1-main-takeover/run-recorded.py n1n2-claude-060p6-complete-pilot-006 corepack pnpm exec vitest run --config vitest.config.ts tests/agent-driven/integration/native-cache-normal-pilot.test.ts 2>&1 | tail -2; grep -E \"×|Tests  \" docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p6-complete-pilot-006.txt | head -6","description":"Run the identity and pilot suites","timeout":600000}
+
+[tool] [tool result] {"exit": 0, "source_changed": [], "source_added": [], "log_sha256": "06e4c3d0a1dd2322a29cf32aeec7635b68b80f0c55eb1c807aab2e87ee63ec34", "finished_at": "2026-11-15T18:48:31.856460+00:00"}
+      Tests  97 passed (97)
+{"exit": 1, "source_changed": [], "source_added": [], "log_sha256": "eead48534520e8a560e7ed7733dd202f7f1e3a7f489095c60fe102ea183859a6", "finished_at": "2026-11-15T18:48:45.131167+00:00"}
+   × the JOINT publication of a run > the REAL filesystem: the final is published in the root of the run 21ms
+   × the JOINT publication of a run > a CONSUMER that applies the joint judgement rejects a run whose publication failed 7ms
+   × the JOINT checker of a published run > accepts a normal run that really succeeded 6ms
+   × the JOINT checker of a published run > accepts the deliberate fault that was really observed 5ms
+   × the JOINT checker of a published run > does NOT accept an ordinary business failure 6ms
+   × the JOINT checker of a published run > does NOT accept a fault that carries an extra failure 5ms
+
+[reasoning] The identity suite passes ✓ (97 ✓) but the pilot fails ✓ — the custodian's pin ✗ (the C changed again ✓ — the "order" rename ✓).
+
+Let me update the pin again ✓ and re-run ✓. (This pin churn is inherent to the C's byte changes ✓.)
+
+Let me create a small helper to update the pins ✓ — or just do it inline each time ✓.
+
+Let me update andre-run ✓.
+
+[assistant] [tool Bash] {"command":"NEW=$(sha256sum src/adapters/openfilm/cache-process-custodian.py | cut -d' ' -f1); OLD=$(grep -A 1 \"REVIEWED_CUSTODIAN_SHA256 =\" tests/agent-driven/integration/native-cache-normal-pilot.test.ts | tail -1 | tr -d ' \";'); python3 - \"$NEW\" \"$OLD\" <<'PY'\nimport sys\nfrom pathlib import Path\nnew, old = sys.argv[1], sys.argv[2]\nfor path in [\n    \"tests/agent-driven/integration/native-cache-normal-pilot.test.ts\",\n    \"tests/agent-driven/integration/cache-custodian-lifecycle.test.ts\",\n]:\n    p = Path(path)\n    t = p.read_text()\n    assert t.count(old) == 1, (path, t.count(old))\n    p.write_text(t.replace(old, new))\nprint(\"pins updated to\", new)\nPY\ntimeout 300 python3 docs/execution/A/implementation-20261111/integration/e1-main-takeover/run-recorded.py n1n2-claude-060p6-complete-pilot-007 corepack pnpm exec vitest run --config vitest.config.ts tests/agent-driven/integration/native-cache-normal-pilot.test.ts 2>&1 | tail -2; grep -E \"×|Tests  \" docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p6-complete-pilot-007.txt | head -6","description":"Update the pin and re-run the pilot suite","timeout":600000}
+
+[tool] [tool result] pins updated to 40947936b36f94ea53b00ecf4f851c528484cea457f1ed4fef7aa031bba896a9
+{"exit": 0, "source_changed": [], "source_added": [], "log_sha256": "35a6d922212ea86045a4043f1066f9011f5f17980c56d9c81a7142f4bfa76f99", "finished_at": "2026-11-15T18:49:24.626658+00:00"}
+      Tests  264 passed (264)
+
+[reasoning] All three suites pass ✓:
+- identity: 97 ✓
+- python: 76 ✓
+- pilot: 264 ✓
+
+Now let me add the remaining Host-side direct cases (RC7) ✓:
+1. **C06-BOUND**: >256 adopted waits but ≤512 identities → the N's facts survive ✓ (the N's dedicated slot ✓ + the truncation flag ✓).
+2. **C06-EPOCH**: the identity item with the wrong ticks ✓ (a string instead of a number ✓ — covered ✓), a foreign segment ✓ (the binding ✓), the same PID with a different epoch ✓ (the contract: "重复PID不同epoch" ✓ — hmm, the accumulator refuses the same PID twice ✓ (the epoch semantics would allow a different epoch ✓ — the contract says "重复PID不同epoch" must be handled by the EPOCH semantics ✓ — i.e. the same PID with a DIFFERENT epoch is NOT a duplicate ✓ (it's a different process ✓). Hmm! My accumulator refuses the same PID twice ✗ — the contract says the identity is (pid, start_ticks) ✓ → the same PID with a different epoch is a DIFFERENT identity ✓ → it must be allowed ✓ (with the 512-identity budget ✓).
+
+   So the accumulator's duplicate check ✓ must be by (pid, start_ticks) ✓ not by pid ✗.
+
+   Let me fix that ✓: the identity set → a Set of "pid:start_ticks" ✓.
+
+3. **C06-EXEC's Host-only branches**: the no-child ✓ / 
+… (truncated)
+
+[assistant] [tool Bash] {"command":"python3 - <<'PY'\nfrom pathlib import Path\np = Path(\"src/adapters/openfilm/cache-process-supervisor.ts\")\nt = p.read_text()\n\ndef sub(old, new, count=1):\n    global t\n    assert t.count(old) == count, (t.count(old), old[:70])\n    t = t.replace(old, new)\n\n# the identity of a process is its number AND its ticks\nsub('''  readonly #identityPids = new Set<number>();''',\n'''  /** The identities that arrived, by their EPOCH: the number AND the ticks. */\n  readonly #identityEpochs = new Set<string>();''')\n\nsub('''        const pid = identity.epoch.pid;\n        if (this.#identityPids.has(pid)) {\n          return this.#refuse(\"the receipt carries the same identity twice\");\n        }''',\n'''        const pid = identity.epoch.pid;\n        // The identity of a process is its number AND its ticks: the same\n        // number that was given to somebody else is NOT the same identity.\n        const key = `${pid}:${identity.epoch.start_ticks}`;\n        if (this.#identityEpochs.has(key)) {\n          return this.#refuse(\"the receipt carries the same identity twice\");\n        }''')\n\nsub('''        this.#identityPids.add(pid);''', '''        this.#identityEpochs.add(key);''')\n\np.write_text(t)\nprint(\"… (truncated)","…":"truncated"}
+
+[tool] [tool result] ok
+{"exit": 0, "source_changed": [], "source_added": [], "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855", "finished_at": "2026-11-15T18:50:12.448252+00:00"}
+
+[reasoning] tsc passes ✓.
+
+Now let me add the Host-side direct cases (RC7) to the identity test ✓:
+1. C06-BOUND: >256 adopted waits, ≤512 identities → the N's facts survive ✓.
+2. C06-EPOCH: the same PID with a DIFFERENT epoch ✓ (allowed ✓ — a different identity ✓); the same epoch twice ✓ (refused ✓).
+3. A foreign segment (another draw) ✓ → refused ✓.
+4. A non-terminal status ✓ → refused ✓.
+5. The C06-EXEC Host-only branches: the no-child ✓ (the receipt is absent ✓ → the domain proof is false ✓) and the no-authorize ✓.
+
+Let me write these ✓.
+
+For C06-BOUND ✓: 300 adopted waits ✓ + the N's wait ✓ (the last ✓) → the accumulator ✓ → the wait facts are truncated ✓ (256 ✓) but the N's slot survives ✓ and the last_wait_order ✓ = the N's ✓ → the domain proof ✓ (with the N's slot ✓ and the last order ✓) ✓.
+
+Hmm — the identity count ✓ (1 ✓ ≤512 ✓).
+
+Let me write the cases ✓.
+
+[assistant] [tool Bash] {"command":"python3 - <<'PY'\nfrom pathlib import Path\np = Path(\"tests/agent-driven/integration/cache-process-identity.test.ts\")\nt = p.read_text()\n\nanchor = '''  it(\"refuses a receipt that does not carry the version\", () => {'''\nassert t.count(anchor) == 1\n\nblock = '''  it(\"keeps the wait of the WORKER when the retained facts did not fit\", () => {\n    // C06-BOUND: more than 256 adopted waits and no more than 512\n    // identities. The retained facts are bounded, and the wait of the worker\n    // has a slot of its own: it is never lost to that bound.\n    const accumulator = new CacheReceiptAccumulator();\n    const adopted = Array.from({ length: 300 }, (_value, index) => ({\n      t: \"w\",\n      v: {\n        pid: 1000 + index,\n        status: { kind: \"exited\", code: 0 },\n        order: index + 1,\n        category: \"adopted\",\n        epoch: { pid: 1000 + index, ppid: 100, pgid: 1000 + index, sid: 1000 + index, start_ticks: String(index + 1) },\n      },\n    }));\n    const worker = {\n      t: \"w\",\n      v: {\n        pid: 200,\n        status: { kind: \"exited\", code: 0 },\n        order: 301,\n        category: \"worker\",\n        epoch: { pid: 200, ppid: 100, pgid: 200, sid: 200, start_ticks: \"20\" … (truncated)","…":"truncated"}
+
+[tool] [tool result] ok
+{"exit": 1, "source_changed": [], "source_added": [], "log_sha256": "b8330c78203da6dee091da9a1475bedb0c81161a686502b22861f01f189b7340", "finished_at": "2026-11-15T18:50:46.134150+00:00"}
+   × the proof of the domain and the eligibility of a success > the receipt of the version 2 of this protocol > treats the same number with another epoch as ANOTHER identity 2ms
+   × the proof of the domain and the eligibility of a success > the receipt of the version 2 of this protocol > refuses a segment that belongs to ANOTHER draw 1ms
+      Tests  2 failed | 99 passed (101)
+
+[assistant] [tool Bash] {"command":"sed -n '/Failed Tests/,$p' docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p6-complete-identity-009.txt | grep -E \"AssertionError|Error|❯|expected\" | head -12","description":"Read the two new failures"}
+
+[tool] [tool result] AssertionError: expected 'the receipt segments disagree about t…' to be null
+ ❯ tests/agent-driven/integration/cache-process-identity.test.ts:1041:9
+AssertionError: expected 'the receipt segments disagree about t…' to match /another draw/
+ ❯ tests/agent-driven/integration/cache-process-identity.test.ts:1067:9
+
+[reasoning] The "count" mismatch ✓ — my test used count: 1 then count: 2 ✓ (the accumulator requires the same count ✓). Let me use count: 2 for both ✓ (the segments' count must agree ✓).
+
+Let me fix: the first segment count: 2 ✓ and the second count: 2 ✓ ✓.
+
+Hmm, but the first segment has 1 item ✓ with count 2 ✓ (the count is what the receipt DECLARES ✓ — the segments may carry fewer items ✓).
+
+Let me fix bothcases ✓.
+
+[assistant] [tool Bash] {"command":"python3 - <<'PY'\nfrom pathlib import Path\np = Path(\"tests/agent-driven/integration/cache-process-identity.test.ts\")\nt = p.read_text()\n# the epoch case: both segments declare the SAME count\nold = \"\"\"    expect(accumulator.take({\n      index: 0, count: 1, items: [first], items_digest: itemsDigest([first]),\n      protocol: CACHE_PROCESS_PROTOCOL, draw_id: \"draw-1\", ticket_digest: \"ticket-1\",\n    })).toBeNull();\n    // Another epoch of the same number is another process: it is accepted.\n    expect(accumulator.take({\n      index: 1, count: 2, items: [second], items_digest: itemsDigest([second]),\n      protocol: CACHE_PROCESS_PROTOCOL, draw_id: \"draw-1\", ticket_digest: \"ticket-1\",\n    })).toBeNull();\"\"\"\nnew = \"\"\"    expect(accumulator.take({\n      index: 0, count: 2, items: [first], items_digest: itemsDigest([first]),\n      protocol: CACHE_PROCESS_PROTOCOL, draw_id: \"draw-1\", ticket_digest: \"ticket-1\",\n    })).toBeNull();\n    // Another epoch of the same number is another process: it is accepted.\n    expect(accumulator.take({\n      index: 1, count: 2, items: [second], items_digest: itemsDigest([second]),\n      protocol: CACHE_PROCESS_PROTOCOL, draw_id: \"draw-1\", ticket_digest: \"ti… (truncated)","…":"truncated"}
+
+[tool] [tool result] ok
+{"exit": 0, "source_changed": [], "source_added": [], "log_sha256": "db837bab1de50b62c3fe122f5eb91133618c72156138a7dcbe86030a0c3126ce", "finished_at": "2026-11-15T18:51:39.471338+00:00"}
+      Tests  101 passed (101)
+
+[reasoning] 101 identity tests pass ✓ (97 → 101 ✓).
+
+Now let me add the remaining RC7 cases:
+- **C06-EXEC's Host-only branches**: the no-child ✓ (the receipt is absent ✓ → the domain proof is false ✓) and the no-authorize ✓.
+- **C08-LATEWAIT**: the Host accepts a failed-terminal certificate whose worker was NOT the last wait ✓ (the catch-up branch ✓) ✓ — the contract: "worker_wait_was_last===true强加于failed模式，反而拒绝合同明确允许的'实际N后catch-up、全终局但仅失败'分支" ✓ → my validator no longer forces it ✓ → let me add the positive case ✓ (a certificate with worker_wait_was_last=false + post_worker_wait_count=1 ✓ → the domain proof ✓ true ✓).
+- **C07-EIO/CHANNEL**: the actual late draw/control/child error ✓ — the existing cases ✓ (the supervisor's late error cases ✓).
+
+Let me add these ✓.
+
+Then: the red-light mutant ✓ + the final six captures ✓ + the report ✓.
+
+Let me write the cases✓.
+
+[assistant] [tool Bash] {"command":"python3 - <<'PY'\nfrom pathlib import Path\np = Path(\"tests/agent-driven/integration/cache-process-identity.test.ts\")\nt = p.read_text()\n\nanchor = '''  it(\"refuses a receipt that does not carry the version\", () => {'''\nassert t.count(anchor) == 1\n\nblock = '''  it(\"accepts the FAILED proof of a draw whose worker was NOT the last wait\", () => {\n    // C08-LATEWAIT: the worker was really waited for, and a LATER wait\n    // happened - the domain really ended, and the draw really failed. The\n    // complete result is refused, and the FAILED proof of the resources still\n    // holds.\n    const accumulator = new CacheReceiptAccumulator();\n    const worker = {\n      t: \"w\",\n      v: {\n        pid: 200,\n        status: { kind: \"exited\", code: 0 },\n        order: 1,\n        category: \"worker\",\n        epoch: { pid: 200, ppid: 100, pgid: 200, sid: 200, start_ticks: \"20\" },\n      },\n    };\n    const late = {\n      t: \"w\",\n      v: {\n        pid: 201,\n        status: { kind: \"exited\", code: 0 },\n        order: 2,\n        category: \"adopted\",\n        epoch: { pid: 201, ppid: 100, pgid: 201, sid: 201, start_ticks: \"21\" },\n      },\n    };\n    const items = [worker, late];\n    expect(accumulato… (truncated)","…":"truncated"}
+
+[tool] [tool result] ok
+{"exit": 1, "source_changed": [], "source_added": [], "log_sha256": "c4f0e790c6f335f5c16b2680c3a45bfb1880a119605850f8a9f415fa7980cb7c", "finished_at": "2026-11-15T18:52:21.364773+00:00"}
+   × the proof of the domain and the eligibility of a success > the receipt of the version 2 of this protocol > accepts the FAILED proof of a draw whose worker was NOT the last wait 2ms
+      Tests  1 failed | 102 passed (103)
+
+[assistant] [tool Bash] {"command":"sed -n '/Failed Tests/,$p' docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p6-complete-identity-011.txt | head -22","description":"Read the late-wait case failure"}
+
+[tool] [tool result] ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/cache-process-identity.test.ts > the proof of the domain and the eligibility of a success > the receipt of the version 2 of this protocol > accepts the FAILED proof of a draw whose worker was NOT the last wait
+AssertionError: expected false to be true // Object.is equality
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- true[39m
+[31m+ false[39m
+
+ ❯ tests/agent-driven/integration/cache-process-identity.test.ts:1148:68
+    1146|     // The DOMAIN really ended, and the draw really failed: the FAILED…
+    1147|     // holds even though the worker was not the last wait.
+    1148|     expect(validateCacheDomainReceipt(receipt, unbound, state).ok).toB…
+       |                                                                    ^
+    1149|     // And it is NEVER a result.
+    1150|     expect(validateCacheExecutionReceipt(receipt, unbound, state).ok).…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+[reasoning] The domain proof is false ✗ — the reason ✗: probably my new check in the failed-terminal branch:
+```ts
+      if (accumulated.last_wait_order !== echildOrdinal) {
+        return refuse("the ECHILD of the certificate did not come after the last wait");
+      }
+```
+→ the accumulated's last_wait_order = 2 ✓ (the late wait ✓) and the certificate's echild_after_wait_ordinal = 2 ✓ → equal ✓ ✓.
+
+Hmm. Or:
+```ts
+      const real = accumulated.worker_wait;
+      if (real === null || real.pid !== expected.forked_pid || real.order !== Number(wait.order)) {
+```
+→ the real's order = 1 ✓ and the certificate's wait.order = 1 ✓ ✓.
+
+Hmm. Or the domain validation's NEW check (the worker must be the LAST wait ✓):
+```ts
+    if (accumulated.last_wait_order !== workerWait.order) {
+      return { ok: false, reason: "the worker was not the last process that was waited for" };
+    }
+```
+→ that's in the COMPLETE branch ✓ — but the failed-terminal branch returns EARLIER ✓ (before that ✓)... hmm, let me check the ORDER ✓: the domain validation's flow:
+1. the binding ✓
+2. the segments ✓
+3. the version ✓
+4. the proof kind branch → the failed-terminal → validateCacheFailedTerminalReceipt ✓ → returns ✓.
+5. the star
+… (truncated)
+
+[assistant] [tool Bash] {"command":"python3 - <<'PY'\nfrom pathlib import Path\np = Path(\"tests/agent-driven/integration/cache-process-identity.test.ts\")\nt = p.read_text()\nold = \"\"\"    expect(validateCacheDomainReceipt(receipt, unbound, state).ok).toBe(true);\n    // And it is NEVER a result.\n    expect(validateCacheExecutionReceipt(receipt, unbound, state).ok).toBe(false);\n  });\n\n  it(\"refuses the DOMAIN of a draw that never had a receipt\", () => {\"\"\"\nnew = \"\"\"    expect(validateCacheDomainReceipt(receipt, unbound, state).reason).toBe(null);\n    expect(validateCacheDomainReceipt(receipt, unbound, state).ok).toBe(true);\n    // And it is NEVER a result.\n    expect(validateCacheExecutionReceipt(receipt, unbound, state).ok).toBe(false);\n  });\n\n  it(\"refuses the DOMAIN of a draw that never had a receipt\", () => {\"\"\"\nassert t.count(old) == 1\nt = t.replace(old, new)\np.write_text(t)\nprint(\"ok\")\nPY\ntimeout 300 python3 docs/execution/A/implementation-20261111/integration/e1-main-takeover/run-recorded.py n1n2-claude-060p6-complete-identity-012 corepack pnpm exec vitest run --config vitest.config.ts tests/agent-driven/integration/cache-process-identity.test.ts 2>&1 | tail -2; sed -n '/Failed Tests/,$p' docs/execution/A/impl… (truncated)","…":"truncated"}
+
+[tool] [tool result] ok
+{"exit": 1, "source_changed": [], "source_added": [], "log_sha256": "e39d060c77958a2b85ca51a714e809cf12fedc1d2850ae94a6f69f7a52c3dd70", "finished_at": "2026-11-15T18:54:05.527871+00:00"}
+AssertionError: expected 'the worker was not the last process t…' to be null // Object.is equality
+[31m+ Received:[39m 
+"the worker was not the last process that was waited for"
+
+[reasoning] The refusal comes from the COMPLETE branch's check ✗ — so the failed-terminal branch did NOT return first ✗!
+
+Hmm — why? Because the proof kind branch is BEFORE... let me check the order in validateCacheDomainReceipt ✓:
+1. kind/protocol/draw/ticket/seq/outcome ✓
+2. the segments ✓
+3. the version ✓
+4. **the proof kind branch** ✓ — hmm, did my edit put it there ✓? Let me check ✓ — I inserted the version/proof-kind/startup-kind block right after the outcome check ✓ — but then I MOVED the segments block before the version ✓ → so the order is: outcome ✓ → segments ✓ → version ✓ → proof kind ✓ → startup ✓ → echild ✓ ...
+
+Hmm, so the proof kind branch ✓ IS before the worker's last-wait check ✓ — so why did the complete branch's check fire ✗?
+
+OH! The failed-terminal branch → `validateCacheFailedTerminalReceipt(receipt, expected, accumulated)` ✓ → hmm, and that returned ✓ TRUE ✓ (no refusal ✓) → then the domain validation CONTINUES ✗ → the complete branch's checks ✗ → the worker's last-wait check ✗ → refused ✗✗.
+
+Hmm! The failed-terminal branch should RETURN the verdict ✗ — hmm, it does: `return validateCacheFailedTerminalReceipt(...)` ✓ — hmm, but the refusal came from the complete branch 
+… (truncated)
+
+[assistant] [tool Bash] {"command":"python3 - <<'PY'\nfrom pathlib import Path\np = Path(\"src/adapters/openfilm/cache-process-supervisor.ts\")\nt = p.read_text()\n\nblock = '''  // The wait of the WORKER has a slot of its own: it is never lost to the\n  // bound of the retained facts, and it is the ONLY wait that proves that the\n  // worker of the draw really ended.\n  const workerWait = accumulated.worker_wait;\n  if (expected.forked_pid !== null) {\n    if (workerWait === null || workerWait.pid !== expected.forked_pid) {\n      return { ok: false, reason: \"the receipt carries no wait of the worker\" };\n    }\n    if (workerWait.kind !== \"exited\" && workerWait.kind !== \"signaled\") {\n      return { ok: false, reason: \"the wait of the worker is not a terminal one\" };\n    }\n    if (accumulated.last_wait_order !== workerWait.order) {\n      // The worker was NOT the last one that was waited for: the complete\n      // proof of a result is refused, and the FAILED proof still holds.\n      return { ok: false, reason: \"the worker was not the last process that was waited for\" };\n    }\n  }\n'''\nassert t.count(block) == 1\nt = t.replace(block, \"\")\n\nanchor = '''  if (receipt.echild !== true) return { ok: false, reason: \"the receipt does … (truncated)","…":"truncated"}
+
+[tool] [tool result] ok
+{"exit": 0, "source_changed": [], "source_added": [], "log_sha256": "c6952ad56a04fbe2f393314f5f8467d8c641cd76e306eb624b403f104bbd46f0", "finished_at": "2026-11-15T18:54:43.619001+00:00"}
+      Tests  103 passed (103)
+
+[reasoning] 103 identity tests pass ✓.
+
+Now let me:
+1. Run the pilot + python ✓ (the supervisor changed ✓ → the pilot's fake ✓ — no pin change ✓ since the C didn't change ✓).
+2. Add the remaining RC7 case: the "raw-tree unknown / EIO close unknown" ✓ and the "not receipt / not C close" ✓ — hmm.
+3. The red-light mutant ✓.
+4. The final six captures ✓.
+5. The report ✓.
+
+Let me run the suites ✓ first.
+
+[assistant] [tool Bash] {"command":"timeout 300 python3 docs/execution/A/implementation-20261111/integration/e1-main-takeover/run-recorded.py n1n2-claude-060p6-complete-pilot-008 corepack pnpm exec vitest run --config vitest.config.ts tests/agent-driven/integration/native-cache-normal-pilot.test.ts 2>&1 | tail -2; grep -E \"×|Tests  \" docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p6-complete-pilot-008.txt | head -5; timeout 300 python3 docs/execution/A/implementation-20261111/integration/e1-main-takeover/run-recorded.py n1n2-claude-060p6-complete-python-007 /usr/bin/python3.12 -I -S -B tests/agent-driven/integration/helpers/cache-custodian-unit.py 2>&1 | tail -1","description":"Run the pilot and python suites","timeout":600000}
+
+[tool] [tool result error] MiniMax-M3.1-Flash-Preview[1m] is temporarily unavailable (rate-limited), so auto mode cannot determine the safety of Bash right now. Wait a moment and then try this action again. If it keeps failing, continue with other tasks that don't require this action and come back to it later. Note: reading files, searching code, and other read-only operations do not require the classifier and can still be used.
+
+[assistant] API Error: Request rejected (429) · 已达到 Token Plan 用量上限：请升级 Token Plan 套餐或购买积分补充用量。 (2056)

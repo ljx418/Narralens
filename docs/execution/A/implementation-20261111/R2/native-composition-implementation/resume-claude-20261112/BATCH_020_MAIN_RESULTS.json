@@ -1,0 +1,66 @@
+{
+  "at": "2026-11-12T16:03:11.324247+00:00",
+  "status": "020_ALL_ACTUAL_GATES_PASS_K01_K06_REQUEST_CHANGES",
+  "grant": "N1N2-RESUME-CONDITIONAL-BATCH-020",
+  "results": [
+    {
+      "capture": "n1n2-claude-resume-156-gate-alias-focused",
+      "result": {
+        "exit": 0,
+        "source_changed": [],
+        "source_added": [],
+        "log_sha256": "feb386e692afc04ceca73387baa1bab2a4cf0db0bc42b8d961a0a86ed90a0f83",
+        "finished_at": "2026-11-12T15:47:17.269153+00:00"
+      },
+      "passed": 3
+    },
+    {
+      "capture": "n1n2-claude-resume-157-gate-pure",
+      "result": {
+        "exit": 0,
+        "source_changed": [],
+        "source_added": [],
+        "log_sha256": "8cc2591108744e2a90d139fd456bc51c96dbabb906a8171347827784baa7f664",
+        "finished_at": "2026-11-12T15:47:42.990549+00:00"
+      },
+      "passed": 19
+    },
+    {
+      "capture": "n1n2-claude-resume-158-gate-component",
+      "result": {
+        "exit": 0,
+        "source_changed": [],
+        "source_added": [],
+        "log_sha256": "e81de0b781d65c158ff9c7f011d01575c7becb6f371cdf6a1dd52275a012a4f3",
+        "finished_at": "2026-11-12T15:58:15.280919+00:00"
+      },
+      "passed": 61
+    },
+    {
+      "capture": "n1n2-claude-resume-159-gate-legacy",
+      "result": {
+        "exit": 0,
+        "source_changed": [],
+        "source_added": [],
+        "log_sha256": "6c6af114c67cd641a0ead3c49c03206a26eafc5e7405999e49d6d420e2a45bee",
+        "finished_at": "2026-11-12T16:00:37.332131+00:00"
+      },
+      "passed": 107
+    }
+  ],
+  "current13hashes": "MATCH",
+  "recorded_node_pids_absent": [
+    1928955,
+    1930438,
+    1930697,
+    1947777,
+    1949466,
+    1950461
+  ],
+  "own_cleanup_receipt": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/parallel/lane-product/A-R2-20261112/N1N2-native-source/n1n2-claude-resume-020-cleanup-evidence.txt",
+  "own_cleanup_sha256": "f603b22ca9799c02e714d48bb407621f3c856b843e32b22e8dee61f0e2938a5a",
+  "cleanup_limit": "Runtimequiescentboundedobservation; K02 privateparsecopyremainder NOT cleaned; no global/historicalabsenceclaim",
+  "parse_copy_prefix_count": 170,
+  "independent_review": "1BLOCKER5MAJOR; no finalacceptance",
+  "next_source_release": "ROUND3_K01_K06_CORRECTIVE_RELEASE_021.md"
+}

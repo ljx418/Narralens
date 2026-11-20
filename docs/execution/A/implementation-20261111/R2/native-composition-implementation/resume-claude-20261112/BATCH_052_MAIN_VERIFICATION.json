@@ -1,0 +1,36 @@
+{
+  "at": "2026-11-13T16:57:04.477357+00:00",
+  "four_groups_actual": [
+    {
+      "capture": "n1n2-claude-052-authority-001",
+      "exit": 0,
+      "pass": 54,
+      "log_sha256": "c9ccff23a66790bf64dd2089111a5fdd782537397a7a9ec19cca0307d19ccbe3"
+    },
+    {
+      "capture": "n1n2-claude-052-real-export-001",
+      "exit": 0,
+      "pass": 2,
+      "log_sha256": "9f8f0d9c6c53f64ab4bb3ef498afcd5330f6577948cb06970dbfbd359452ec77"
+    },
+    {
+      "capture": "n1n2-claude-052-native-reader-001",
+      "exit": 0,
+      "pass": 91,
+      "log_sha256": "9ab744d350230dd261cc32189a65024239191e59196fe905ca3ce0bf9c8060ef"
+    },
+    {
+      "capture": "n1n2-claude-052-legacy-fixtures-001",
+      "exit": 0,
+      "pass": 44,
+      "log_sha256": "6bc3fbff1bd5acf352a6e8b5664dbf3029390d7580e94d55ace35f8ef4e533da"
+    }
+  ],
+  "current_all_four_inputs626_match": true,
+  "sole_changed_guard": "tests/agent-driven/integration/created-source-adoption.test.ts",
+  "open_issues": [
+    "Pinned CLI bin/openfilm.mjs:205..219 intentionally calls open(project) if .film/opened absent; studio/client.mjs ensureStudio spawns detached supervisor. Test harness sideeffects/lifetime not isolated. Scope not proof production Host close fails.",
+    "Real export MP4 hashes asserted in memory but actual digest values/artifacts not durably delivered. Elapsed runtime itself is not proof of media decode/quality."
+  ],
+  "stage_pass": false
+}

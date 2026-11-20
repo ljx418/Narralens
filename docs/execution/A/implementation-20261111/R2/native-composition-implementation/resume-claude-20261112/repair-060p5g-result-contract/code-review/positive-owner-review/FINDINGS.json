@@ -1,0 +1,214 @@
+{
+  "format": "narralens.R5G.code-review.positive-owner@1",
+  "verdict": "REQUEST_CHANGES",
+  "counts": {
+    "BLOCKER": 0,
+    "MAJOR": 1,
+    "MINOR": 0
+  },
+  "binding": {
+    "review_task": "task_9cd115961cb0",
+    "review_dispatch": "ctx_2a7c37059b82",
+    "implementation_handback": "msg_ef1d210e1d4e",
+    "historical_head": "1d348d419120f23f45d958112ea8c43df5a04675",
+    "accepted_new_commit": null,
+    "contract_sha256": "493f86e334b25a4d2fa240b2248f485c910f379747b9c7e1e91ec4b82f124319"
+  },
+  "prior_findings": [
+    {
+      "prior_id": "R5F-O01",
+      "status": "CLOSED_STATIC_FOR_ORIGINAL_COUNTEREXAMPLES",
+      "basis": "Original/candidate/final error, raw cleanup, terminal/image facts and actual diagnostic baseline are now compared; normal extra transport/latched failure refuses3. Whole contract still incomplete under R5G-O01."
+    },
+    {
+      "prior_id": "R5F-O02",
+      "status": "CLOSED_STATIC",
+      "basis": "Actual Error identity/direct cause is checked on outcome objects; serialized facts/provenance are bound, null image bytes required; legitimate wrapper-cause and coherent ordinary failed1 positive controls read."
+    }
+  ],
+  "findings": [
+    {
+      "id": "R5G-O01",
+      "severity": "MAJOR",
+      "status": "NEW_RESIDUAL_OF_APPROVED_F07_F10",
+      "title": "Mandatory nullable fields still disappear without invalidating a hash-consistent publication",
+      "locations": [
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 199
+        },
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 2292
+        },
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 2409
+        },
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 2492
+        },
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 2498
+        },
+        {
+          "path": "tests/agent-driven/integration/native-cache-normal-pilot.test.ts",
+          "line": 2324
+        }
+      ],
+      "reachable_precondition": "A serialized candidate/manifest/final is missing one mandatory nullable field while its actual bytes and links are otherwise valid. This is the explicitly approved writer/publisher edge fault model and needs no arbitrary public JSON input or real C/N. The ordinary setup-failure variant occurs after helper copy but before supervisor construction succeeds, so there is a complete root/helper/candidate/manifest/final and actual diagnosticSnapshot=null.",
+      "actual_call_path": "runPositivePilot -> actual writeEvidence/publishEvidence -> real mapper/fileFacts produce hashes for the actual changed bytes -> actual main/verifyPublishedRun -> actual legacy uses the same result. F10 retains `x !== null && x !== undefined` for manifest.listing_error, final.reporting_failure and final.manifest_error; artifactRowProblems likewise treats missing row.error as no error. These missing fields therefore pass as null, allowing normal accepted0/fault accepted1. F07 baseline===null only checks final.diagnostic_snapshot===null and skips candidate.receipt_summary, accumulator_summary, terminal_proof_observations and final.terminal_proof_observations. A well-published failed1 with those missing/wrong fields is still called reliable ordinary1.",
+      "contract": "Approved RESULT_CONTRACT_AND_CASE_MATRIX §1: all mandatory fields need own properties and undefined/missing differ from null; F07 requires candidate summaries/proof observations tied to the baseline, including explicit null in setup failure; F10 explicitly preserves the null-versus-missing distinction for report/evidence/manifest/publication. §3 requires all applicable fields' deletion/wrong-type/contradiction classes. SPEC requires the whole table, not only two local if fixes.",
+      "impact": "The sole validator still green-lights incomplete mandatory evidence and misclassifies some malformed failure evidence as reliable ordinary1. Actual main and legacy root-deletion condition consume it. This is evidence/qualification integrity, not a new resource-owner or kernel escape finding.",
+      "minimal_fix": "Add an explicit required-property/type pass covering the already published v2 nullable fields before mode or ordinary-failure decisions. Require explicit null for no-error F10 fields, and explicit row.error=null for error-free rows. In the baseline-null branch require all four published summary/observations fields to exist and be null; in the nonnull branch compare every mandatory summary without optional-skipping. Add the corresponding parameterized cases rather than claiming that the existing selected fields exhaust F01..F10. Keep valid ordinary failed1 and null snapshot controls; do not turn every setup failure into3 or invent a snapshot.",
+      "direct_counterexample_design": [
+        "Use existing guarded normal StubSupervisor and realFsDeps/tamperWith; delete only final.reporting_failure or final.manifest_error before delegating REAL publishEvidence. No hash oracle changes: the publisher returns the actual serialized hash/size. Current checker returns reliable=true/accepted=true/exit0; actual main also returns0. Both must instead return unreliable3/no acceptance.",
+        "Normal realFsDeps: writeEvidence(manifest.json) copies data and deletes listing_error, or deletes artifacts[i].error for one error-free real artifact; delegate actual writer. Mapper and final links naturally match actual bytes, and current checker still accepts. Require3. Existing third-file EIO checks remain intact.",
+        "After real helper copy, inject an Error from createSupervisor so run has root and complete published ordinary failed1 but diagnosticSnapshot=null. At candidate writer delete or mistype receipt_summary/accumulator_summary/terminal_proof_observations; at final publisher delete or mistype terminal_proof_observations. Current baseline-null branch skips them and returns reliable=true/not-accepted/1. Require3 for mutations and preserve reliable ordinary1 for unchanged explicit-null controls. No actual process is launched."
+      ],
+      "test_gap": "RESULT_FACT_CASES tests F10 evidence_errors/reporting_failures arrays but not nullable reporting_failure/manifest_error/listing_error/row.error; F07 summary tests all use the successful nonnull snapshot path. Thus 186 passing assertions do not cover this branch. Some asString 'wrong type' entries for existing string fields test a wrong value rather than a wrong type; do not use those labels to infer exhaustive schema coverage.",
+      "runtime": "NOT_RUN; static branch evaluation and future guarded designs only, not captured old-code failures"
+    }
+  ],
+  "matrix": [
+    {
+      "field": "F01",
+      "status": "CLOSED_STATIC",
+      "source": "verifyPublishedRun:2230-2349 root/mode/protocol plus record/outcome kind/exit/fault agreement and allowed combinations",
+      "test": "RESULT_FACT_CASES F01 and C04 kind/exit/fault; actual main positive/refusal cases"
+    },
+    {
+      "field": "F02",
+      "status": "CLOSED_STATIC_FOR_NAMED_FACTS",
+      "source": "resultFactsOf/errorFactDifference:1918-2140, calls2351-2356",
+      "test": "candidate/final original delete/wrong/contradict, explicit null on actual fault"
+    },
+    {
+      "field": "F03",
+      "status": "CLOSED_STATIC",
+      "source": "errorFactDifference and actualSettlement===actualOriginal/direct cause near2570",
+      "test": "C05 unrelated final error, C06 same text distinct objects, C07 settlementWrapper positive"
+    },
+    {
+      "field": "F04",
+      "status": "CLOSED_STATIC",
+      "source": "cleanupFactsDifference:2148 plus both record comparisons2364-2368 and acceptance empty gates",
+      "test": "candidate/final cleanup matrix; actual outcome cleanup contradiction C04; ordinary failure controls"
+    },
+    {
+      "field": "F05",
+      "status": "CLOSED_STATIC_NONNULL_PATH_PARTIAL_NULL_PATH",
+      "source": "terminal booleans2369; proof observations2427 and proven gate2503; missing null branch under O01",
+      "test": "boolean/proof matrix, no explicit-null baseline observations mutation"
+    },
+    {
+      "field": "F06",
+      "status": "CLOSED_STATIC",
+      "source": "expected constants and actual image2378-2404; full null bytes/hash/exact fault predicate",
+      "test": "image matrix, existing normal/fault controls; outcome byte mismatch follows actual field comparison, not all variants directly tested"
+    },
+    {
+      "field": "F07",
+      "status": "PARTIAL_STILL_OPEN",
+      "source": "once snapshot1513/runSnapshot return1805; actual baseline comparison2408-2432; null branch omissions O01",
+      "test": "nonnull diagnostic/summary matrix; C08 confirms same reference, not Object.isFrozen on StubSupervisor output"
+    },
+    {
+      "field": "F08",
+      "status": "CLOSED_STATIC",
+      "source": "snapshot critical guard2100, full baseline equality, normal/fault cleanup/transport/latched gates",
+      "test": "C03 final extra failure; F08 nested matrix; consistent failed1 transport controls"
+    },
+    {
+      "field": "F09",
+      "status": "CLOSED_STATIC",
+      "source": "isCancelProvenanceRecord2058 plus full baseline and bound name/code/message mode gate",
+      "test": "F09 whole record and individual error_name/error_code/message matrix; identity/cause positive/negative controls"
+    },
+    {
+      "field": "F10",
+      "status": "STILL_OPEN",
+      "source": "real byte chain/all rows/publication retained, nullable-field presence omissions O01",
+      "test": "actual mapper third-file EIO and main rejection; missing required nullable fields not covered"
+    },
+    {
+      "field": "C01",
+      "status": "CLOSED_STATIC",
+      "test": "2424 actual candidate writer mutation and real hash chain"
+    },
+    {
+      "field": "C02",
+      "status": "CLOSED_STATIC_FOR_SELECTED_FIELDS",
+      "test": "errorFactDifference tests delete/string/array/empty object in selected candidate/final variants"
+    },
+    {
+      "field": "C03",
+      "status": "CLOSED_STATIC",
+      "test": "2452 final diagnostic extra error with unchanged outcome baseline"
+    },
+    {
+      "field": "C04",
+      "status": "CLOSED_STATIC_FOR_SELECTED_FIELDS",
+      "test": "2485 cleanup and2512 kind/exit/fault outcome mutations; direct actual-image-byte outcome mutation absent but source comparison present"
+    },
+    {
+      "field": "C05",
+      "status": "CLOSED_STATIC",
+      "test": "2540 final unrelated settlement and individual provenance changes"
+    },
+    {
+      "field": "C06",
+      "status": "CLOSED_STATIC",
+      "test": "2566 distinct Error objects with same bounded facts; actual cause check in checker"
+    },
+    {
+      "field": "C07",
+      "status": "CLOSED_STATIC",
+      "test": "2604 wrapper cause positive;2628 normal ordinary;2650 fault ordinary plus earlier transport control"
+    },
+    {
+      "field": "C08",
+      "status": "PARTIAL",
+      "test": "nonnull summaries/proof matrix and2710 same-reference check; null snapshot variants not covered"
+    },
+    {
+      "field": "C09",
+      "status": "CLOSED_STATIC_FOR_EXISTING_GATES",
+      "test": "main result fact mutation2680 and I/O/publish3, normal0/fault1/args2/no-root existing controls; O01 leaves additional failures untested"
+    },
+    {
+      "field": "C10",
+      "status": "EVIDENCE_LIMIT_RETAINED",
+      "test": "pilot00120s timeout captured; old5s retained; current persistent raw guards read; no causal diagnosis"
+    }
+  ],
+  "evidence_limits": [
+    {
+      "topic": "oldlogicred",
+      "note": "Actual capture exit1 logs26 failed/129 passed with mutant tool SHA b121f45aa7ccb45ace0172822f7efdae2f6133974e6f8b7b662bf4589978e360 and tests SHA d91fab99e56886fbb808819f1679c57057a88e5c619f825978eb284e3f0060ae. Tool differs from archived R5F SHA bb5ab8df... and final R5G b21563aa...; both tool/test input hashes differ from final. It is a helper-neutralization mutant, not exact archived-R5F replay. No complete archived mutant source diff was supplied in the inspected artifacts; do not elevate author equivalence wording or26 count to26 historical failures."
+    },
+    {
+      "topic": "timeout/pending fake tasks",
+      "note": "pilot001 exit1 includes real20000ms mock-supervisor timeout plus four fixture failures. afterEach:273 clears maps/scripts/PILOT_REGISTRY but does not await/settle a timed-out original promise or cancel all FakeCustodian timers; late fake operations can outlive a failed case and affect synthetic state/denial attribution. Persistent process.kill wrapper is never restored and child_process remains mocked, so no current path to real OS signalling was established. No new concrete actual-N cleanup regression from this test-only behavior; rootcause and test isolation evidence remain unresolved, not diagnosed by later green. Actual CLI is a separate process, not the same Vitest fake realm."
+    },
+    {
+      "topic": "mock snapshot freeze",
+      "note": "Actual production diagnosticSnapshot remains frozen/unchanged. StubSupervisor returns an unfrozen explicit mock object and C08 only checks reference stability; do not describe that particular assertion as freezing or real kernel proof. This does not make the actual supervisor mutable."
+    }
+  ],
+  "all_reviewer_business_runtime": "NOT_RUN",
+  "no_runtime_grant": true,
+  "not_accepted": [
+    "real C/N/kernel",
+    "N1N2",
+    "original17",
+    "ISO18",
+    "R6",
+    "R7",
+    "R8/newfreeze",
+    "NEXT",
+    "V1"
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "at": "2026-11-12T15:43:24.276282+00:00",
+  "grant": "N1N2-RESUME-FOCUSED-019",
+  "status": "154_FAILED_AWAIT_OWN_CLEANUP",
+  "result": {
+    "exit": 1,
+    "source_changed": [],
+    "source_added": [],
+    "log_sha256": "3e8f8dc89c25f4735787aad507a6ff90d53228ccadc5989ffe3646afc3d2d905",
+    "finished_at": "2026-11-12T15:40:49.565223+00:00"
+  },
+  "counts": {
+    "passed": 21,
+    "failed": 1,
+    "filtered": 58,
+    "total": 80
+  },
+  "failures": [
+    {
+      "case": "tests/agent-driven/integration/created-native-source-reader.test.ts > G01 keeps the alias reason and the release failure of the same acquisition",
+      "diagnostic_excerpt": "AssertionError: expected [ \u2026(1) ] to include Error: injected source release failure\n \u276f tests/agent-driven/integration/created-native-source-reader.test.ts:2541:25\n    2539|  if(primary!==undefined)withCleanup(primary,reportedCauses);\n    2540|  expect(reported).not.toBeNull();\n    2541|  expect(reportedCauses).toContain(releaseFailure);\n       |                         ^\n    2542| },300000);\n    2543| \n\n\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af[1/1]\u23af\n\n\n Test Files  1 failed (1)\n      Tests  1 failed | 21 passed | 58 skipped (80)"
+    }
+  ],
+  "pid1915186": "ABSENT_CURRENT_OBSERVATION",
+  "notification": "msg_eff62bb984a9",
+  "causal_diagnosis": "Finalassertion inspectsTOPLEVEL fixtureclosecleanup_errors; actualreaderfailure nested byfixtureaggregation; preserveaggregation andassert exactinjectedobject through actualreaderclose/causegraph. Earlierhit/genuineledger/nextreaderUNCERTAIN assertionspassed.",
+  "independent_readonly_review": "ctx_3410a32b611a bound019byteblobs, statuspending; resultsharedmsg_f1f96b4e9a46",
+  "broader_runtime": "NOT_GRANTED"
+}

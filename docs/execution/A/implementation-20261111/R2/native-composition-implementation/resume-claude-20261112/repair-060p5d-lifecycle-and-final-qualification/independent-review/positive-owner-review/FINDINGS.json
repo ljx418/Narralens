@@ -1,0 +1,231 @@
+{
+  "format": "narralens.R5D.positive-owner.static-review@1",
+  "verdict": "REQUEST_CHANGES",
+  "binding": {
+    "implementation_handback": "msg_1747b61422de",
+    "implementation_task": "task_e1899cd17d6a",
+    "implementation_dispatch": "ctx_4a9291435449",
+    "review_task": "task_d6e99541f5a9",
+    "review_dispatch": "ctx_3f2ff07a92c8",
+    "historical_head": "1d348d419120f23f45d958112ea8c43df5a04675",
+    "accepted_new_commit": null
+  },
+  "counts": {
+    "BLOCKER": 0,
+    "MAJOR": 4,
+    "MINOR": 0
+  },
+  "prior_findings": [
+    {
+      "prior_id": "R5C-O01",
+      "status": "CLOSED_STATIC",
+      "basis": "Normal pending no longer synthesizes cancel; same raw promise/finally and actual async supervisor fixture inspected.",
+      "runtime": "NOT_RUN; static conclusions only"
+    },
+    {
+      "prior_id": "R5C-O02",
+      "status": "CLOSED_STATIC",
+      "basis": "Wait accepted N before bound GO and final no-await full live-epoch guard; late-worker scenario inspected.",
+      "runtime": "NOT_RUN; static conclusions only"
+    },
+    {
+      "prior_id": "R5C-O03",
+      "status": "CLOSED_STATIC",
+      "basis": "Original Error/first primary provenance retained, bounded secondary facts, one CANCEL message.",
+      "runtime": "NOT_RUN; static conclusions only"
+    },
+    {
+      "prior_id": "R5C-O04",
+      "status": "CLOSED_STATIC",
+      "basis": "Raw cleanupFacts and final cleanup_failures gate both qualifications; extra-error controls inspected.",
+      "runtime": "NOT_RUN; static conclusions only"
+    },
+    {
+      "prior_id": "R5C-O05",
+      "status": "STILL_OPEN",
+      "basis": "Report-before-final and late EPIPE recording fixed; hash/publication/consumer remain R5D-O01/O02.",
+      "runtime": "NOT_RUN; static conclusions only"
+    },
+    {
+      "prior_id": "R5C-O06",
+      "status": "CLOSED_STATIC",
+      "basis": "No allocated root means no evidence writes/cwd fallback; controlled refusal only.",
+      "runtime": "NOT_RUN; static conclusions only"
+    },
+    {
+      "prior_id": "R5C-O07",
+      "status": "STILL_OPEN",
+      "basis": "Real proof observations/time/truncation and honest summary-only receipt added; incomplete hash and publication/consumer chain remain R5D-O01/O02.",
+      "runtime": "NOT_RUN; static conclusions only"
+    }
+  ],
+  "findings": [
+    {
+      "id": "R5D-O01",
+      "severity": "MAJOR",
+      "status": "STILL_OPEN",
+      "prior_ids": [
+        "R5C-O05",
+        "R5C-O07"
+      ],
+      "title": "Per-artifact and final-link hash errors do not disqualify the final record",
+      "locations": [
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 315
+        },
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 1278
+        },
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 1294
+        },
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 1316
+        }
+      ],
+      "trigger": "Directory listing succeeds but a required file read/hash fails, or candidate/manifest link hashing returns null.",
+      "actual_call": "REAL artifactFacts encodes file hash failure as artifacts[i].digest=null/error=EIO but returns top-level error:null. judge receives only facts.error and never checks artifact errors/null hashes. candidate_sha256/manifest_sha256 are computed after finalJudgement and may also be null without recomputation. Thus normal can return0 and final.kind_of_run=ok/authoritative=true with incomplete manifest; expected-fault may similarly remain passed.",
+      "impact": "A required evidence read/hash error is falsely certified green. Correct external joint validation would reject it, but the producer's asserted authority and exit no longer mean its stated qualification.",
+      "contract": "SPEC G/H: any mandatory read/list/hash/write error must not be treated as empty/null normal; final plus complete non-cyclic manifest required.",
+      "minimal_fix": "Validate every required artifact, non-null digest and error field before judgement, then validate candidate/manifest link hashes and include those failures in the same final judgement. Enforce explicit required names; do not rely solely on top-level listing_error. Keep full failure facts in final.",
+      "direct_counterexample": "Drive actual runner/main with artifactFacts {error:null, artifacts:[{name:'candidate.json',digest:null,error:EIO}]} and separately sha256OfFile returning null only for candidate or manifest at final-link phase. Both modes must fail qualification and normal must not exit0. Current manifest test covers listing failure only.",
+      "runtime": "NOT_RUN; static counterexample only"
+    },
+    {
+      "id": "R5D-O02",
+      "severity": "MAJOR",
+      "status": "STILL_OPEN",
+      "prior_ids": [
+        "R5C-O05",
+        "R5C-O07"
+      ],
+      "title": "Final write failure leaves returned qualification unchanged and legacy ignores publication authority",
+      "locations": [
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 1294
+        },
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 1321
+        },
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 1323
+        },
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 1325
+        },
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 1388
+        },
+        {
+          "path": "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts",
+          "line": 251
+        },
+        {
+          "path": "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts",
+          "line": 273
+        }
+      ],
+      "trigger": "The required final.json write throws after a valid normal/fault judgement; direct runPositivePilot caller consumes returned result. A write can also leave complete bytes before a close/write error is reported.",
+      "actual_call": "writeEvidence catches final-write error, then authoritative becomes false, but finalKind/finalExitCode/faultCasePassed still copy the pre-write judgement. main checks authoritative, but expected-fault rejection is still exit1. Legacy calls runPositivePilot directly and asserts kind/exit/picture/terminal only, never authoritative, final/manifest bytes or their links; finally may mark the root removable by terminalProof alone. final.json is written directly as authoritative:true, without staged publication, so failed writes can leave an apparently valid final; the error is not encoded in those already-written bytes.",
+      "impact": "Direct consumer can accept normal success despite missing final; expected-fault outer exit1 alone cannot distinguish publication failure. Artifact and return/exit qualification diverge. This is precisely the new final protocol's actual consumer path, not a request for unrelated R7 work.",
+      "contract": "SPEC G/H: no valid final+complete manifest means no acceptance; final write errors must not leave valid green authoritative evidence; exact expected fault requires joint final/manifest/candidate/report/exit, not any1.",
+      "minimal_fix": "Recompute returned run qualification after all required writes/hashes and mark kind failed/faultCasePassed false on publication error. Stage authoritative final bytes and publish only after successful write/close (e.g. temp+rename or equivalent explicit publication contract), preserving failures rather than leaving a green final. Update legacy to require successful publication and validate real final/manifest/candidate contract before accepting or deleting evidence. Correct OWN 'final or exit' guidance to joint validation.",
+      "direct_counterexample": "Inject final-only failure before write and after complete byte serialization. runPositivePilot must not return a qualifying kind or fault flag; legacy must reject even if image/terminal are valid. For expected mode require absence or explicit failed final/publication and reject exit1 without verified final-chain success. Validate successful generated hashes against actual serialized bytes.",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "id": "R5D-O03",
+      "severity": "MAJOR",
+      "status": "NEW",
+      "prior_ids": [
+        "raw-signal incident preservation / SPEC pure-only"
+      ],
+      "title": "Current pure identity tests still reach unmocked process.kill using a fabricated C identity",
+      "locations": [
+        {
+          "path": "tests/agent-driven/integration/cache-process-identity.test.ts",
+          "line": 80
+        },
+        {
+          "path": "tests/agent-driven/integration/cache-process-identity.test.ts",
+          "line": 1151
+        },
+        {
+          "path": "tests/agent-driven/integration/cache-process-identity.test.ts",
+          "line": 1168
+        },
+        {
+          "path": "src/adapters/openfilm/cache-process-supervisor.ts",
+          "line": 3037
+        },
+        {
+          "path": "src/adapters/openfilm/cache-process-supervisor.ts",
+          "line": 3055
+        },
+        {
+          "path": "tests/agent-driven/integration/helpers/cache-custodian-unit.py",
+          "line": 602
+        }
+      ],
+      "trigger": "The actual identity test 'ALLOWED to fork and no worker was proved' runs: fake pid4242/C_HELLO and matching mocked /proc remain known; no exit/close until waitUntilHeld completes.",
+      "actual_call": "Actual supervisor accepts fake C epoch, waits READY/cleanup budgets and enters #terminate. #custodianIsStillThisProcess consults the mocked stat and returns true, so process.kill(4242,'SIGTERM') reaches real Node OS boundary. Neither TS suite installs a process.kill guard. Mocking spawn alone does not intercept it. Python incident class now explicitly assigns fake_os.kill, but shared _FakeOs.__getattr__ still forwards unlisted privileged APIs to real os, leaving no fail-closed default against the same class of omission.",
+      "impact": "A claimed-pure rerun can signal an unrelated real process whose number equals the fixture PID. This is a current concrete test path; no rerun was performed and no historical Node effect is asserted. It is not a public HTTP exploit or a reason to weaken production identity checks.",
+      "contract": "Release/SPEC prohibit real signals/fork/wait/prctl in pure gates; task specifically requires auditing remaining raw OS escape paths after the Python incident.",
+      "minimal_fix": "Before any test effect, deny or explicitly script privileged raw operations (Node process.kill; Python kill/killpg/fork/exec/wait/prctl edges). Reject unregistered calls and assert the deny ledger is empty after a case; throwing alone is insufficient if production catches the exception. Replace broad privileged fallthrough in _FakeOs with explicit guarded defaults, while preserving scripted raw-edge tests. Do not rerun the leaked experiment or signal fixed PIDs to investigate.",
+      "direct_counterexample": "Static trace above plus guarded actual supervisor test: record the would-be pid4242 call without dispatch and assert expected scripted cleanup rather than real OS. Deliberately omit one registered mock and require the pure suite to fail before effect. Cover both group and PID paths and wait/fork fallthrough; no real privileged call required.",
+      "runtime": "NOT_RUN; historical os.kill(200,SIGTERM) incident remains separate"
+    },
+    {
+      "id": "R5D-O04",
+      "severity": "MAJOR",
+      "status": "STILL_OPEN",
+      "prior_ids": [
+        "R5C-N04 / SPEC D associated invariant"
+      ],
+      "title": "Revoking signal authority still removes the original group from terminal proof obligations",
+      "locations": [
+        {
+          "path": "src/adapters/openfilm/cache-process-custodian.py",
+          "line": 2131
+        },
+        {
+          "path": "src/adapters/openfilm/cache-process-custodian.py",
+          "line": 2139
+        },
+        {
+          "path": "src/adapters/openfilm/cache-process-custodian.py",
+          "line": 948
+        },
+        {
+          "path": "tests/agent-driven/integration/helpers/cache-custodian-unit.py",
+          "line": 1742
+        }
+      ],
+      "trigger": "Original N has a bound independent group and is reaped; a later pass revokes signal authority, while the final original-group raw probe remains UNKNOWN/EIO even if proc census/children report no targets.",
+      "actual_call": "_settle_domain only sets group_established/group_id when signal_authority!='revoked'. On the resumed revoked pass it builds TargetSettlement with false/0. TargetSettlement then substitutes group='gone' at948 without asking original group_state. Collection is no longer stopped entirely, but this specific original obligation is lost. Existing test couples unknown_group to both proc members and raw probe, then makes both known; it does not independently retain raw group-probe unknown after census clears.",
+      "impact": "C can claim group_esrch/ok without the required fresh original-group proof after revocation. Host may still refuse its own checks, but that does not repair C's premature proof/exit. This is the explicitly scoped N04 original-group invariant, not a demand for all R6 negative coverage.",
+      "contract": "SPEC D: revoke future destructive signal authority but keep original group obligations and fresh collection; current_group=0 cannot mean original group gone.",
+      "minimal_fix": "Carry immutable original-domain/group proof obligation separately from signal permission; continue read-only original-group observations after revocation and keep UNKNOWN until proved gone. Never reacquire destructive authority or signal a replacement. Keep actual waits/reap ledger and original identity checks.",
+      "direct_counterexample": "Extend actual _settle_domain -> KernelSettlementOperations raw-edge mock: TERM, actual fake waitpid consumes N, revoke; proc members=[]/children=[]/old epochs gone but raw original group probe EIO -> must remain held with probe attempted and no nonzero signals. Restore only raw probe ESRCH -> same responsibility settles; replacement control still dispatches no destructive signal.",
+      "runtime": "NOT_RUN"
+    }
+  ],
+  "incident_note": {
+    "historical_raw_os_kill_200_SIGTERM": "Acknowledged implementation incident; author reports ESRCH. Not pure-compliant runtime; later PID absence is not historical no-impact proof.",
+    "current_Node_signal_escape": "Static reachable path only; reviewer did not rerun or claim historical dispatch/effect.",
+    "fix_pilot_004": "Exact MAIN pidfd stop, recorded exit1 preserved as cleanup outcome, not semantic red.",
+    "fix_pilot_005": "INCOMPLETE; no exit/result fabricated."
+  },
+  "scope": "Modified paths/associated invariants only, no demand to complete unrelated R6/R7 first.",
+  "runtime": "ALL_REVIEWER_BUSINESS_RUNTIME_NOT_RUN",
+  "no_runtime_grant": true
+}

@@ -1,0 +1,70 @@
+{
+  "grant_id": "N1N2-RESUME-FOCUSED-018",
+  "at": "2026-11-12T15:14:47.752658+00:00",
+  "request": "msg_0a95d2f252be",
+  "holder": "ctx_b4086093cd96",
+  "cwd": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+  "frozen_sha256": {
+    "src/host/agent-driven/retained-native-closure.ts": "3bd37ab6eaaf0201c6fc78a339fe4cd1267dea6e2c75a96baaa4ad200d2774df",
+    "src/host/agent-driven/committed-snapshot-authority.ts": "9a53bb4ca104519aa05e5caa44e761fcfab353473ef894509ff68e076abb5a6e",
+    "src/host/agent-driven/created-native-source-reader.ts": "47a701d8a948d66e996307c4694d4774c1726f8875a18aefc547abddc96c0dd8",
+    "src/host/agent-driven/created-native-workspace.ts": "5f19b43d9b345dc345b6f0c8562a0f08b07a9fbd42a489de4d46a1c6cca2e2f8",
+    "src/host/agent-driven/native-cache-witness.ts": "078bc3071ce1d57f05e4bb74e8aa85a9e33c516ac3fcc3c07a9dd0a7afda8435",
+    "src/adapters/openfilm/openfilm-upstream.ts": "850234a5c29a0dd742f51d7a8d591abe4ba01e68a0b3755838099f94b1bf9b16",
+    "tests/agent-driven/integration/created-native-source-reader.test.ts": "411d3f77bd33bb0ebc4d0099fe26304e3c5d0028040beb1fd5a0ee797a05df6c",
+    "tests/agent-driven/integration/helpers/native-source-fixture.ts": "19cb73cb9d69394e550699d3363128a4ea60e96a3f28f22e1ea4fce01c6dda0a",
+    "tests/agent-driven/integration/committed-snapshot-host.test.ts": "bfd0c6373b254050d32a6a99e7b6f8b9827dc24b6b2587515ab4c5aad2cd9037",
+    "tests/agent-driven/integration/native-cache-witness.test.ts": "a73fee186f6aad3df16e9c9e510245af57d8b40673e3985d8e7fb0e2afb45143",
+    "src/host/m5/openfilm-native-expected.ts": "19110e45a83b6d5b611b4260620ce873f923f1e5a5b907bc6176c4b734fbeed3",
+    "tests/agent-driven/integration/created-native-workspace.test.ts": "439d469032c9af2b83ceb826e0aead7cf5c2fe5c5693be7cbf18c8e67f0f615f",
+    "tests/agent-driven/integration/created-native-ack.test.ts": "5f50db85c7c07a2ecf4faefc20ec2ec6c7ad4910fafe549c2edc76bbad729c7c"
+  },
+  "commands": [
+    {
+      "capture": "n1n2-claude-resume-145-gate-regression-focused",
+      "argv": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "vitest",
+        "run",
+        "--config",
+        "vitest.config.ts",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts",
+        "-t",
+        "F03 refuses a source leaf|F04 refuses a hardlink|F04 refuses a working copy leaf|G01 adopts|G01 keeps the reader|G02 refuses the round when|G03 refuses a film|G05 proves a real child|G06 accepts an absent|G06 refuses an isolated|P07 hands a non-lexical|G07 holds every nested"
+      ],
+      "expected_cases": 17,
+      "filtered": 62
+    }
+  ],
+  "selected_cases": [
+    "F03 refuses a source leaf and a source parent replaced during the acquisition",
+    "F04 refuses a hardlink alias and an unknown directory in the working copy",
+    "F04 refuses a working copy leaf that is hardlinked to an external file",
+    "G01 adopts the genuine cleanup uncertainty of a rejected source acquisition",
+    "G01 keeps the reader usable after an ordinary failure of the acquisition",
+    "G01 adopts the genuine uncertainty of a raw rejection that arrives after the caller was cancelled",
+    "G02 refuses the round when the binding goes stale during the read",
+    "G02 refuses the round when the reader is closed during the final verification",
+    "G02 refuses the round when the working copy view is invalidated during the read",
+    "G02 refuses the round when another delivered proof fails to release",
+    "G03 refuses a film that is replaced between the bounded digest and the parse",
+    "G05 proves a real child that dies by a signal and a real child that is cancelled",
+    "P07 hands a non-lexical caption order to the actual consumer without changing it",
+    "G06 accepts an absent heard transcript and refuses its later birth",
+    "G06 refuses an isolated parent swap that leaves no extra file behind",
+    "G07 holds every nested and empty directory of both trees independently",
+    "G02 refuses the round when the last liveness callback closes the reader"
+  ],
+  "compile144": {
+    "exit": 0,
+    "source_changed": [],
+    "source_added": [],
+    "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "finished_at": "2026-11-12T15:12:28.014367+00:00"
+  },
+  "cleanup_sha256": "7ca46052fa7559730ed7bf886e9bab3bbdabf92ad6dafd6a6755eb507bff5f8c",
+  "scope": "Focusedregression only; browser/full notgranted; nofinalacceptance",
+  "execution": "Unchangedrecorderonce; freezeALLsrc/tests/tools/config/indexuntilterminal+owncleanup. Before postcapture changes notifyMAIN; serialtsc only aftercleanup. New429STOP."
+}

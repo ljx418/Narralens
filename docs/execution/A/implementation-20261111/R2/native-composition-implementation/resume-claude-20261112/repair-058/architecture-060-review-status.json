@@ -1,0 +1,15 @@
+{
+  "recorded_at": "2026-11-14T04:06:30.756200+00:00",
+  "artifact": "architecture-060.html",
+  "kind": "target architecture, not implementation evidence",
+  "deterministic_validation": "PASS 9/9, showcase, 0 errors, 0 warnings",
+  "browser_evidence": "NOT_RUN: single heavy slot reserved to live ClaudeCode 060P0",
+  "perceptual_review": "NOT_RUN",
+  "implementation_release": "060P1 NOT_RELEASED; prerequisite 060P0 handback and verification pending",
+  "worker_dispatch": "ctx_fb5e1de480f9",
+  "live_observation": "worker-show returned ready/input_accepted/live this turn",
+  "observed_runtime_results": [
+    "n1n2-claude-060p0-tsc-001 exit 0"
+  ],
+  "constraint": "Do not infer browser, A04 runtime, N1N2 acceptance, NativeAck, Studio or V1 readiness from this diagram."
+}

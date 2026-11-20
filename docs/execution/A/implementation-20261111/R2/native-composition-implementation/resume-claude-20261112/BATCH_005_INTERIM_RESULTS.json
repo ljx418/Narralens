@@ -1,0 +1,30 @@
+{
+  "status": "INTERIM_FAILURE_059_PENDING",
+  "results": [
+    {
+      "capture": "n1n2-claude-resume-057-corrective-pure",
+      "result": {
+        "exit": 0,
+        "source_changed": [],
+        "source_added": [],
+        "log_sha256": "c8851618f7ea0d5d10694bf84e9475418fdeec1f7a5bc829361300feca558056",
+        "finished_at": "2026-11-12T08:34:24.441617+00:00"
+      }
+    },
+    {
+      "capture": "n1n2-claude-resume-058-corrective-component",
+      "result": {
+        "exit": 1,
+        "source_changed": [],
+        "source_added": [],
+        "log_sha256": "c2e492cad57569a0dc84827ebacd3434e4471513a0588a8a3e2bad72eb40d464",
+        "finished_at": "2026-11-12T08:42:04.363265+00:00"
+      }
+    }
+  ],
+  "counts": {
+    "passed": 38,
+    "failed": 3
+  },
+  "not_final_acceptance": true
+}

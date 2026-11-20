@@ -1,0 +1,28 @@
+{
+  "at": "2026-11-13T03:02:50.273256+00:00",
+  "status": "EXACT_OLD_READER_LINES_PRESERVED_ADDITIVE_TEST_SUPERSET",
+  "path": "tests/agent-driven/integration/created-native-source-reader.test.ts",
+  "old_sha256": "8d740f83883fd42c13f8e0e2ea63bee406f8d9edf19ea02a1005c72e26616e60",
+  "current_sha256": "f2e7cc847718b52e4937d55be8bc4adcf4372dee055ff170e1c1f49817b7be99",
+  "old_capture": "n1n2-claude-021-run-B1 88PASS on exactoldbytes",
+  "new_focused_capture": "n1n2-claude-021-run-P09G07 3PASS on exactnewbytes",
+  "line_changes": [
+    [
+      "insert",
+      1169,
+      1169,
+      1169,
+      1287
+    ],
+    [
+      "insert",
+      2620,
+      2620,
+      2738,
+      2795
+    ]
+  ],
+  "all_changes_insertions": true,
+  "meaning": "All old reader test lines remain in order, including all original assertions; only new P09 tests and additional G07 assertions inserted. Newfull90 gate remains pending, not inferred from old88+focused3.",
+  "limit": "Line preservation is scope/evidence proof, not runtime or frozen independent acceptance"
+}

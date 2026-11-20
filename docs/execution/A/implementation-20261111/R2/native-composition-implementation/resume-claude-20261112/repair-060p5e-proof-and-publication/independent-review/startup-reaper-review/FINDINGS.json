@@ -1,0 +1,154 @@
+{
+  "schema": "narralens.R5E.startup-reaper.static-review@1",
+  "verdict": "SAFE_FOR_SEPARATELY_PINNED_MINIMAL_N_PILOT",
+  "binding": {
+    "task": "task_32be669a8e69",
+    "dispatch": "ctx_a168b1218e41",
+    "historical_head": "1d348d419120f23f45d958112ea8c43df5a04675",
+    "accepted_new_commit": null,
+    "snapshot_sha256": "32cd03c8aabbfd21f5ca8093777330fafc5897edfbf208ff479a7c61f8e7e233",
+    "custodian_sha256": "bd06d7d7f79d6d2ccf2204a4e27ed5aba5364cbcda71785a67ac3ab887306b79",
+    "supervisor_sha256": "049489317e8f4f37be77556a90698c82027c8d8d4bf0ee51d15c15862b26d553",
+    "tool_sha256": "80f3a68f7c5b828d69a6c00140a98efca1bfb1114387cfd6997647ffe0b0dfe8"
+  },
+  "no_runtime_grant": true,
+  "reviewer_runtime": "NOT_RUN",
+  "findings": [
+    {
+      "id": "R5D-N01",
+      "overlap": [
+        "R5D-O04",
+        "R5C-N04"
+      ],
+      "status": "CLOSED_STATIC",
+      "severity": "MAJOR",
+      "locations": [
+        "src/adapters/openfilm/cache-process-custodian.py:2130",
+        "src/adapters/openfilm/cache-process-custodian.py:948",
+        "src/adapters/openfilm/cache-process-custodian.py:984",
+        "tests/agent-driven/integration/helpers/cache-custodian-unit.py:2021"
+      ],
+      "trigger": "Original N has been consumed by waitpid; destructive authority revoked; proc census and direct children empty, separate original raw group probe EIO.",
+      "actual_call": "_settle_domain derives group_established/group_id from immutable original_worker_epoch regardless of signal_authority; TargetSettlement.run calls KernelSettlementOperations.group_state(originalPGID). Raw nonzero calls still require _authorise_signal and irreversible wait/epoch permission.",
+      "impact": "The former synthetic group='gone' bypass is removed. EIO is held, subsequent raw ESRCH can complete the same owner; no replacement signal authority is acquired.",
+      "contract": "Original-group evidence obligation survives revoked destructive authority; empty census/ECHILD alone is not raw ESRCH.",
+      "minimal_fix": "None required in this slice; retain independent proof and signal branches.",
+      "decisive_test": "Actual _settle_domain/raw-edge mock consumes N through _waitpid, revokes on a later uncertain pass, then separately controls members=[] and probe_unknown=True. It asserts false group proof and actual (group,200,0), then ESRCH completes without nonzero calls. Real-kernel version remains NOT_RUN."
+    },
+    {
+      "id": "R5D-N04",
+      "overlap": [
+        "R5D-O03"
+      ],
+      "status": "CLOSED_STATIC",
+      "severity": "MAJOR",
+      "locations": [
+        "tests/agent-driven/integration/cache-process-identity.test.ts:112",
+        "tests/agent-driven/integration/cache-process-identity.test.ts:211",
+        "tests/agent-driven/integration/cache-process-identity.test.ts:1312",
+        "tests/agent-driven/integration/native-cache-normal-pilot.test.ts:114"
+      ],
+      "trigger": "Actual supervisor accepts synthetic C4242 and enters held no-FORKED termination, formerly reaching real process.kill.",
+      "actual_call": "Both TS suites install persistent process.kill denial before cases; only explicit synthetic scripts dispatch mock answers. node:child_process spawn is mocked and other launch APIs deny. afterEach verifies an independent denial ledger, then clears scripts in finally; production swallowing a throw cannot turn the test green.",
+      "impact": "The specific live syscall escape is now intercepted before effect. Guard wrappers remain installed for late callbacks; revoked per-case scripts revert to denial.",
+      "contract": "Pure gates must not dispatch real target signals/launches.",
+      "minimal_fix": "None required; keep default denial rather than restoring the real function during pending work.",
+      "decisive_test": "The original held actual-supervisor case now explicitly scripts would-be SIGTERM4242; deliberate omitted-script tests record denial even when production catches it. No actual signal was run by reviewer."
+    },
+    {
+      "id": "R5D-NOTE-01",
+      "overlap": [
+        "R5D-O03"
+      ],
+      "status": "CLOSED_STATIC",
+      "severity": "MINOR",
+      "locations": [
+        "tests/agent-driven/integration/helpers/cache-custodian-unit.py:82",
+        "tests/agent-driven/integration/helpers/cache-custodian-unit.py:135",
+        "tests/agent-driven/integration/helpers/cache-custodian-unit.py:751",
+        "tests/agent-driven/integration/helpers/cache-custodian-unit.py:852"
+      ],
+      "trigger": "Missing FakeOs kill/killpg or production wait/fork/exec/prctl/signal-registration mock.",
+      "actual_call": "Global os dangerous methods, ctypes library loaders and signal entry points deny and record; guarded TestCase hooks verify the ledger. FakeOs defaults now deny instead of forwarding kill/fork/exec or synthesizing group ESRCH. Explicit case raw scripts replace only their selected edges.",
+      "impact": "A missed tested privileged mock fails closed before a target effect, including caught exceptions. This is a test harness boundary, not a native sandbox.",
+      "contract": "R5E Stage A pure OS guards; no broad privileged fallback/default-gone.",
+      "minimal_fix": "None required for current reached branches; retain inventory as new syscall paths are added.",
+      "decisive_test": "Missing kill, killpg, ctypes CDLL and signal scripts are asserted denials; actual production adapter branches remain used under scripted raw mocks. No fork/prctl/wait/signal experiment performed."
+    },
+    {
+      "id": "R5D-N02",
+      "overlap": [
+        "R5D-O01"
+      ],
+      "status": "CLOSED_STATIC",
+      "severity": "MAJOR",
+      "locations": [
+        "tools/native-cache-normal-pilot.ts:139",
+        "tools/native-cache-normal-pilot.ts:161",
+        "tools/native-cache-normal-pilot.ts:1556",
+        "tools/native-cache-normal-pilot.ts:1576"
+      ],
+      "trigger": "Listing succeeds but required candidate/helper row is absent/error/null, or candidate/manifest link read fails.",
+      "actual_call": "evidenceProblemsOf checks required names, row errors/nulls, actual candidate/manifest reads and candidate manifest link before judge. REAL fileFacts hashes real bytes; unreliable qualification returns failed/false/exit3.",
+      "impact": "Required artifact/hash failures no longer certify a green normal/fault result.",
+      "contract": "Mandatory evidence failures disqualify joint publication.",
+      "minimal_fix": "None required for concrete former failure; external acceptance must also rehash every required row against captured files.",
+      "decisive_test": "Actual runner cases inject row/read/link errors; default-filesystem cases omit candidate and exercise actual serialization/hash/publication with a synthetic supervisor, not a real C/N."
+    },
+    {
+      "id": "R5D-N03",
+      "overlap": [
+        "R5D-O02"
+      ],
+      "status": "CLOSED_STATIC",
+      "severity": "MAJOR",
+      "locations": [
+        "tools/native-cache-normal-pilot.ts:467",
+        "tools/native-cache-normal-pilot.ts:1627",
+        "tools/native-cache-normal-pilot.ts:1639",
+        "tools/native-cache-normal-pilot.ts:1755",
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts:224",
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts:400"
+      ],
+      "trigger": "Final publication fails before write or after full serialization; direct consumer sees an otherwise successful draw.",
+      "actual_call": "Exclusive same-root temporary file -> full write -> successful close -> rename. Any publication/evidence/report failure revokes returned authoritative/kind/fault and yields3. main awaits reporting and uses publication-v2 qualification. Actual legacy consumer checks authoritative/publication, actual serialized final/manifest/candidate digests and links plus normal exit/kind; failed qualification retains the root.",
+      "impact": "An old green-looking file or exit1 alone cannot establish acceptance. An uncertain write can preserve historical bytes while the returned/outer result is unreliable; that is not proof of a physical orphan.",
+      "contract": "Final+manifest+candidate+original settlement+cleanup+report+outer exit jointly qualify; expected fault is exact cause and terminal proof, not any nonzero.",
+      "minimal_fix": "None required for the former unsafe qualification. Keep external joint verification mandatory; legacy predicate is a separate implementation and its mixed test is NOT_RUN.",
+      "decisive_test": "Actual runner/main before/after-byte failures revoke qualification; real-filesystem consumer-shaped tests reject saved green-looking bytes after a throwing publisher. Legacy production-call-site predicate was statically inspected, not executed or claimed covered by the separate consumer helper."
+    }
+  ],
+  "notes": [
+    {
+      "id": "R5D-NOTE-02",
+      "status": "STILL_OPEN",
+      "severity": "MINOR",
+      "locations": [
+        "src/adapters/openfilm/cache-process-supervisor.ts:1927",
+        "src/adapters/openfilm/cache-process-supervisor.ts:1958",
+        "tools/native-cache-normal-pilot.ts:1527",
+        "docs/parallel/lane-product/A-R2-20261112/N1N2-native-source/n1n2-claude-060p5e-report.md:150"
+      ],
+      "trigger": "Persist a pilot candidate after a receipt/accumulator was actually computed.",
+      "actual_call": "diagnosticSnapshot copies counts/flags but omits receipt events_digest/waits_digest/identities_digest and accumulated digest strings already produced by state(). candidate serializes only those summaries.",
+      "impact": "Summary artifacts cannot independently compare those computed digest strings. raw_segments_saved=false is honest, and this does not make original-group safety or physical cleanup false. Report section6 says minimum NOTE02 met while counts are explicitly not digests.",
+      "contract": "Adjudication asks to include already computed bounded receipt digest facts without inventing saved raw segments.",
+      "minimal_fix": "In the later evidence slice, copy only validated bounded 64-hex digest strings into immutable receipt/accumulator summaries and candidate, or explicitly mark this note pending; no raw transcript expansion required.",
+      "decisive_test": "Drive actual supervisor/runner mock protocol and assert persisted strings match actual receipt/accumulator state and are immutable across later calls; do not construct a duplicate digest oracle.",
+      "blocks_exact_minimal_pilot": false
+    },
+    {
+      "id": "R5D-NOTE-03",
+      "status": "CLOSED_STATIC",
+      "severity": "NOTE",
+      "assessment": "Historical unauthorized Python os.kill(200,SIGTERM) is preserved as an incident, not compliant pure runtime; no retrospective no-impact guarantee. MAIN exact stop004 remains a cleanup event,005 remains INCOMPLETE without exit/result. No historical failure is overwritten or repaired by new green counts."
+    }
+  ],
+  "carried_baselines": {
+    "cancel_primary": "Supervisor is byte-identical to R5D; original Error/first provenance retained, secondary bounded and CANCEL one-shot.",
+    "late_N": "Same reserved handle/start promise and continuing owner; normal pending is not itself a reason to cancel.",
+    "replacement": "Current signal guard still checks immutable original epoch and unreaped wait authority; reaped/ECHILD revocation is irreversible.",
+    "no_root": "Root remains registered before preparation; no root means no cwd evidence fallback.",
+    "full_remaining": "R6/R7/R8/original17/ISO18/N1N2/NEXT remain OPEN/NOT_RUN, independent of this limited safety recommendation."
+  }
+}

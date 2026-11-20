@@ -1,0 +1,10 @@
+{
+  "at": "2026-11-12T14:47:38.069576+00:00",
+  "scope": "original014 G02 delivery linearization, current source under active correction not frozenfinal",
+  "sha256": "6f528b9faf270c62d35085508dfcccd450686c66c536f02fea1676ff137f0591",
+  "excerpt": "if(binding.isCurrent()!==true)refuse('NATIVE_SOURCE_BINDING_STALE','The native binding is no longer current');\n   if(sourceLease.assertCurrent()!==true)refuse('NATIVE_SOURCE_CLOSURE_MOVED','The committed source changed while it was read');\n   if(workspaceLease.assertCurrent()!==true)refuse('NATIVE_SOURCE_WORKSPACE_STALE','The native workspace view is no longer current');\n   // From now on the resources are the owner's: the reader does not close them.\n   owned.delivered=true;\n   return read;",
+  "finding": "Final closed/uncertain fence precedes callbacks; final callback can reenter close/release then returntrue before delivered.",
+  "required": "Final synchronous reader closed/uncertain check after all callback guards and immediately before ownership transfer; regression closes from lastbinding callback yet returns true.",
+  "notification": "msg_cdc47b2466f9",
+  "business_acceptance": "NOT_RUN"
+}

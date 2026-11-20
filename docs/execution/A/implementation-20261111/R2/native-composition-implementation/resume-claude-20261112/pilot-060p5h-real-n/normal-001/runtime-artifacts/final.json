@@ -1,0 +1,218 @@
+{
+  "kind": "positive-pilot-final",
+  "authoritative": true,
+  "publication_protocol": "positive-pilot-publication-v2",
+  "mode": "normal",
+  "root": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/var/native-cache-positive-pilot/run-zfJOqD",
+  "exit_code": 1,
+  "kind_of_run": "failed",
+  "fault_case_passed": false,
+  "terminal_proof": true,
+  "picture_sha256": null,
+  "picture_bytes": null,
+  "picture_is_the_exact_one": false,
+  "original_failure": {
+    "name": "CacheDrawError",
+    "message": "The control channel of the custodian failed: read ECONNRESET",
+    "code": "CHANNEL_ERROR"
+  },
+  "settlement_failure": {
+    "name": "CacheDrawError",
+    "message": "The control channel of the custodian failed: read ECONNRESET",
+    "code": "CHANNEL_ERROR"
+  },
+  "cleanup_facts": [],
+  "reporting_failure": null,
+  "reporting_failures": [],
+  "evidence_errors": [],
+  "evidence_problems": [],
+  "manifest_error": null,
+  "required_artifacts": [
+    "candidate.json",
+    "cache-worker-fixture.mjs"
+  ],
+  "candidate_sha256": "73a439f018b1a5cac323a17219c68920cbed570e863df4bc9ecb02b8938184c5",
+  "candidate_bytes": 4636,
+  "manifest_sha256": "6389a91620eca5eeb88de3f533d1204450b722c0f14ac4e61a8c8e53860af4bb",
+  "manifest_bytes": 1191,
+  "terminal_proof_observations": {
+    "at": 1794758672562,
+    "proven": true,
+    "truncated": false,
+    "observations": [
+      {
+        "at": 1794758672561,
+        "kind": "custodian-epoch",
+        "presence": "gone",
+        "pid": 1287847,
+        "start_ticks": "5083730",
+        "state": null,
+        "reason": "the original epoch of the custodian"
+      },
+      {
+        "at": 1794758672561,
+        "kind": "worker-epoch",
+        "presence": "gone",
+        "pid": 1287850,
+        "start_ticks": null,
+        "state": null,
+        "reason": "the original epoch of the worker"
+      },
+      {
+        "at": 1794758672562,
+        "kind": "group",
+        "presence": "gone",
+        "pid": 1287850,
+        "start_ticks": null,
+        "state": null,
+        "reason": "the group of the worker"
+      },
+      {
+        "at": 1794758672562,
+        "kind": "known-target",
+        "presence": "gone",
+        "pid": 1287850,
+        "start_ticks": null,
+        "state": null,
+        "reason": "a member of the draw that was recorded while it was alive"
+      }
+    ]
+  },
+  "diagnostic_snapshot": {
+    "known": true,
+    "phase": "failed",
+    "settled": true,
+    "cleanup_required": false,
+    "draw_id": "81a8df32e8595853",
+    "ticket_digest": "81a8df32e8595853e8ff8e9af904a284fb8a41ffd2600ddabdcb8bef8c97f4c5",
+    "custodian": {
+      "pid": 1287847,
+      "ppid": 1287802,
+      "pgid": 1287847,
+      "sid": 1287847,
+      "start_ticks": 5083730,
+      "state": "S"
+    },
+    "custodian_born": true,
+    "custodian_closed": true,
+    "custodian_exit": {
+      "code": 0,
+      "signal": null
+    },
+    "worker": {
+      "pid": 1287850,
+      "ppid": 1287847,
+      "pgid": 1287850,
+      "sid": 1287850,
+      "start_ticks": 5083735,
+      "state": "S"
+    },
+    "forked": true,
+    "forked_pid": 1287850,
+    "exec_ok": true,
+    "recorded_targets": [
+      {
+        "pid": 1287850,
+        "start_ticks": "5083735"
+      }
+    ],
+    "receipt_summary": {
+      "kind": "DOMAIN_REAPED",
+      "outcome": "reaped",
+      "seq": 4,
+      "segments": 1,
+      "events_count": 6,
+      "waits_count": 1,
+      "identities_count": 1,
+      "exec_ok": true,
+      "echild": true,
+      "group_esrch": true,
+      "known_ids_gone": true,
+      "anchor_retained": true,
+      "identity_overflow": false,
+      "events_truncated": false,
+      "diagnostics_lost": false,
+      "state": "receipt_flush",
+      "events_digest": "57c090ddc0ac941865f3f65697ed179298d8ed1ae8f7b216432e8fd6a6990081",
+      "waits_digest": "ab0b001b8a29b18296773e259d998bcfa24f4ae2d8efcdbb0829e23e5abadd40",
+      "identities_digest": "a7b8560e8c0a36a5eae4a2682fdc99ccad29bdc898934cdf01b5e3e332ff58f4"
+    },
+    "accumulator_summary": {
+      "segments": 1,
+      "received": 1,
+      "events": 6,
+      "waits": 1,
+      "identities": 1,
+      "refused": false,
+      "events_digest": "57c090ddc0ac941865f3f65697ed179298d8ed1ae8f7b216432e8fd6a6990081",
+      "waits_digest": "ab0b001b8a29b18296773e259d998bcfa24f4ae2d8efcdbb0829e23e5abadd40",
+      "identities_digest": "a7b8560e8c0a36a5eae4a2682fdc99ccad29bdc898934cdf01b5e3e332ff58f4"
+    },
+    "latched_outcome": {
+      "kind": "failure",
+      "code": "CHANNEL_ERROR",
+      "message": "The control channel of the custodian failed: read ECONNRESET",
+      "native_phase": null
+    },
+    "cancel_provenance": null,
+    "cancel_secondary": null,
+    "cleanup_facts": [],
+    "terminal_proof": {
+      "at": 1794758672562,
+      "proven": true,
+      "truncated": false,
+      "observations": [
+        {
+          "at": 1794758672561,
+          "kind": "custodian-epoch",
+          "presence": "gone",
+          "pid": 1287847,
+          "start_ticks": "5083730",
+          "state": null,
+          "reason": "the original epoch of the custodian"
+        },
+        {
+          "at": 1794758672561,
+          "kind": "worker-epoch",
+          "presence": "gone",
+          "pid": 1287850,
+          "start_ticks": null,
+          "state": null,
+          "reason": "the original epoch of the worker"
+        },
+        {
+          "at": 1794758672562,
+          "kind": "group",
+          "presence": "gone",
+          "pid": 1287850,
+          "start_ticks": null,
+          "state": null,
+          "reason": "the group of the worker"
+        },
+        {
+          "at": 1794758672562,
+          "kind": "known-target",
+          "presence": "gone",
+          "pid": 1287850,
+          "start_ticks": null,
+          "state": null,
+          "reason": "a member of the draw that was recorded while it was alive"
+        }
+      ]
+    },
+    "observed_signals": [
+      "CANCEL:custodian:the draw channel closed",
+      "exit:code 0"
+    ],
+    "cleanup_failures": 0,
+    "run_directory": null,
+    "transport_failure": {
+      "name": "Error",
+      "code": "ECONNRESET",
+      "message": "read ECONNRESET",
+      "stack": "Error: read ECONNRESET\n    at Pipe.onStreamRead (node:internal/stream_base_commons:216:20)",
+      "cause": null,
+      "phase": null
+    }
+  }
+}

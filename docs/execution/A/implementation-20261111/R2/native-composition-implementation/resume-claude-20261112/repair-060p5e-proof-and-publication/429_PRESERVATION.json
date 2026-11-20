@@ -1,0 +1,112 @@
+{
+  "at": "2026-11-15T09:13:54.653668+00:00",
+  "stop_reason": "FRESH_CLAUDE_429_TOKEN_PLAN_LIMIT",
+  "dispatch": "ctx_1c99d4e7af73",
+  "task": "task_cee119e0c0e4",
+  "detected_auto_retry": "screen observed attempt7/10; guarded stop immediately upon MAIN detection",
+  "worker_stop": {
+    "ok": true,
+    "result": {
+      "dispatchId": "ctx_1c99d4e7af73",
+      "state": "stopped",
+      "alreadySettled": false,
+      "processAction": "closed_agent_terminal",
+      "close": {
+        "handle": "term_51122738b71692960e82765cca4c2eaa",
+        "tabId": "ea3d7e8c-cb63-46f0-832f-f3a4fd54654e",
+        "ptyKilled": true
+      },
+      "mutation": {
+        "requestId": "72cfad87-4c90-425e-a47a-674d526879a5",
+        "replayed": false
+      }
+    }
+  },
+  "worker_post_stop": "dispatchId=ctx_1c99d4e7af73 taskId=task_cee119e0c0e4 runId=run_399f9dd3ce5a followUpOf=ctx_4a9291435449 state=stopped stage=process_stopped liveness=exited terminal=term_51122738b71692960e82765cca4c2eaa terminalState=retained workspace=2e732423-9bcc-494c-a0ed-e27a9488f313::C:\\workspace\\videoworkline\\Narralens-agents\\main-integration attention=failure waitingOnHuman=unknown\nNext: \"orca-ide\" \"orchestration\" \"worker-release\" \"--dispatch\" \"ctx_1c99d4e7af73\"\n",
+  "scoped_recorder_processes_now": [],
+  "scope_limit": "Empty current recorder matches is not retrospective proof of historical absence or unknown descendants; Orca confirmed exact agent terminal stopped",
+  "source8": {
+    "src/adapters/openfilm/cache-process-supervisor.ts": "049489317e8f4f37be77556a90698c82027c8d8d4bf0ee51d15c15862b26d553",
+    "src/adapters/openfilm/cache-process-custodian.py": "30583caab4024b3e4131183e19d60635b1711735892640c5dc7d7e0db34c34f2",
+    "src/adapters/openfilm/cache-worker-integrity.json": "e916cc632b80794793342aff6b84a02eb6ab1a15a4b637d29d7137bb6180cda1",
+    "tests/agent-driven/integration/cache-process-identity.test.ts": "7933df4c14fdc664740b204f9f854fa0db14df2ff4ebf2a11e92c7d9c4616e05",
+    "tests/agent-driven/integration/helpers/cache-custodian-unit.py": "cf03f691bfa9ac73807effd88c8b5e5b2518dd716a8f69535210174aee4ca33e",
+    "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts": "7293aed94e7ecdefa87208b8611672a6ca429e94efda7aa14cd83dad3243bea5",
+    "tools/native-cache-normal-pilot.ts": "a9e343cc257ddb1dad678be7de8bcb7a5bfdb9c8e99a0cd662b01b54067be3b3",
+    "tests/agent-driven/integration/native-cache-normal-pilot.test.ts": "23725cde8d3ab57c28abd05b83024c6c2380e3495a93d18d8d3009b67ef00dd6"
+  },
+  "protected7_match": {
+    "tools/native-cache-nofork-pilot.mjs": true,
+    "tests/agent-driven/integration/helpers/native-cache-nofork-pilot.test.mjs": true,
+    "tests/agent-driven/integration/helpers/cache-worker-fixture.mjs": true,
+    "src/host/agent-driven/retained-native-closure.ts": true,
+    "src/host/agent-driven/created-native-workspace.ts": true,
+    "src/adapters/openfilm/openfilm-upstream.ts": true,
+    "AGENTS.md": true
+  },
+  "changed_since_release": [
+    "tests/agent-driven/integration/cache-process-identity.test.ts",
+    "tests/agent-driven/integration/helpers/cache-custodian-unit.py",
+    "tests/agent-driven/integration/native-cache-normal-pilot.test.ts"
+  ],
+  "git_head": "1d348d419120f23f45d958112ea8c43df5a04675",
+  "git_index": "",
+  "report_sha256": "7f6ff68625257625359a68a1a0f0702fb63a89e30a90a5be5aeba22904536a5f",
+  "captures": [
+    {
+      "name": "n1n2-claude-060p5e-guard-identity-002",
+      "cmd_sha256": "b006aa22af104dabfc2c48bcc31cdddf79c61d1c0397c0947fff3e1249097ec9",
+      "result": {
+        "exit": 1,
+        "source_changed": [],
+        "source_added": [],
+        "log_sha256": "704e41a69c4aa19bddef6670bac2a98fa7c1820a9a4dd5e6a8cff96ae6269585",
+        "finished_at": "2026-11-15T09:10:49.702206+00:00"
+      }
+    },
+    {
+      "name": "n1n2-claude-060p5e-guard-identity",
+      "cmd_sha256": "baaaefda82f501d512509e8659abc19a2f87968f7163e0d4a839612dc3846933",
+      "result": {
+        "exit": 1,
+        "source_changed": [],
+        "source_added": [],
+        "log_sha256": "162ea46377b65cb2905f725f2f0e840a755d6d7e72a52d86095eaf90fad01fed",
+        "finished_at": "2026-11-15T09:06:50.791118+00:00"
+      }
+    },
+    {
+      "name": "n1n2-claude-060p5e-stage-a-tsc-001",
+      "cmd_sha256": "4b77e5457c2f4c2737a94b7aa41bf42c33486c9e624482c13cfb88300d6305c2",
+      "result": {
+        "exit": 0,
+        "source_changed": [],
+        "source_added": [],
+        "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "finished_at": "2026-11-15T08:56:18.354947+00:00"
+      }
+    },
+    {
+      "name": "n1n2-claude-060p5e-stage-a-tsc-002",
+      "cmd_sha256": "81a106304e329ad062069862f0b7f0de580779cd6531a474889f44045bc7a727",
+      "result": {
+        "exit": 0,
+        "source_changed": [],
+        "source_added": [],
+        "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "finished_at": "2026-11-15T09:00:55.211805+00:00"
+      }
+    }
+  ],
+  "runtime_permission": false,
+  "implementation_resume_permission": false,
+  "not_achieved": [
+    "R5E selfvalidation",
+    "R5E independent safety",
+    "actual N baseline",
+    "R6/R7/R8",
+    "N1N2 frozen review",
+    "NEXT reanchor"
+  ],
+  "next": "Await explicit user restore original task or explicit takeover authorization; no automatic retry/restart/implementation"
+}

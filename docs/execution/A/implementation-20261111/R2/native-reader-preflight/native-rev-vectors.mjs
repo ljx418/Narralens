@@ -1,0 +1,16 @@
+import {createHash} from 'node:crypto';
+import {readFileSync} from 'node:fs';
+import {pathToFileURL} from 'node:url';
+import {join} from 'node:path';
+import {execFileSync} from 'node:child_process';
+const root=process.argv[2];
+const sha=execFileSync('git',['rev-parse','HEAD'],{cwd:root,encoding:'utf8'}).trim();
+if(sha!=='e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3')throw Error('PIN_MISMATCH');
+const rel='packages/openfilm/studio/server/film.mjs';
+const bytes=readFileSync(join(root,rel));
+const pinned=execFileSync('git',['show','HEAD:'+rel],{cwd:root});
+if(!bytes.equals(pinned))throw Error('UPSTREAM_FILM_BYTES_CHANGED');
+const {revOf}=await import(pathToFileURL(join(root,rel)).href);
+const inputs=['','<html>film</html>','第一章：你好，世界。🎬','<html>\r\n第一章\r\n</html>','\ufeff<html>标题</html>'];
+const vectors=inputs.map(text=>({text,utf8_hex:Buffer.from(text,'utf8').toString('hex'),native_rev:revOf(text)}));
+console.log(JSON.stringify({upstream:sha,module:rel,module_sha256:createHash('sha256').update(bytes).digest('hex'),vectors},null,2));

@@ -1,0 +1,14 @@
+{
+  "at": "2026-11-12T06:30:05.306108+00:00",
+  "observed_test_sha256": "e5be31de5845a932a39ec53559299a857cc24e5ca1e16372b160aed6b64ce181",
+  "scope": "static live test review; no execution or final acceptance",
+  "findings": [
+    "shared >=1 release counter cannot prove late source cleanup separately from workspace",
+    "close return before outstanding authority resolution requires explicit dependency-quiescence contract",
+    "sleep50 plus generic rejection does not prove actual probe launched or reaped before FD release",
+    "busy test microtask order may settle synchronous read before close, not genuine in-flight work"
+  ],
+  "requested": "separate exact-once ownership counters, deterministic operation/probe barriers and actual PID/FD ordering; preserve strict real-oracle assertions",
+  "supervisor_message": "msg_346e5780cf4e",
+  "status": "OPEN_PENDING_TEST_REFINEMENT_AND_EXECUTION"
+}

@@ -1,0 +1,16 @@
+{
+  "base": "4f2bb06be6d26dab240e1faeed0163f3edb7c920",
+  "writer": "MAIN",
+  "paths": [
+    "src/host/projects/project-coordinator.ts",
+    "src/host/adoption/adoption-coordinator.ts",
+    "src/host/history/history-service.ts",
+    "tests/agent-driven/integration/controlled-recovery-families.test.ts",
+    "tests/wave2/m4b/adoption-route.test.ts"
+  ],
+  "basis": "BRIDGE architecture review msg_e9cbc9d4efaa; actual core ownership defects confirmed source",
+  "scope": "Only exact owned family filters before counter/parse/mutation; no Host wiring/job reaper/scheduler algorithm/DDL/commit/ignore/force changes; exact legacy regression evolution: keep owned-malformed-request latch, add actual unknown-JSON generic startup case; no Gate history overwrite",
+  "protected_agents_sha256": "37300463a72a612ae16e0a5fcfb496502c57c722b83781e0e2e8c9480594542b",
+  "validation": "existing actual SQLite/family entrypoint component file, plus tsc; no Host/media needed",
+  "at": "2026-11-12T04:27:44.411645+00:00"
+}

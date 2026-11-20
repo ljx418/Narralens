@@ -1,0 +1,118 @@
+{
+  "at": "2026-11-14T14:21:42.888274+00:00",
+  "rows": [
+    {
+      "capture": "n1n2-claude-060p1r3-custodian-syntax-001",
+      "exit": 0,
+      "inputs": 647,
+      "current_mismatches": [],
+      "source_changed": [],
+      "source_added": [],
+      "log_digest_matches": true
+    },
+    {
+      "capture": "n1n2-claude-060p1r3-custodian-unit-001",
+      "exit": 0,
+      "inputs": 647,
+      "current_mismatches": [],
+      "source_changed": [],
+      "source_added": [],
+      "log_digest_matches": true
+    },
+    {
+      "capture": "n1n2-claude-060p1r3-generate-001",
+      "exit": 0,
+      "inputs": 647,
+      "current_mismatches": [
+        "src/adapters/openfilm/cache-worker-integrity.json"
+      ],
+      "source_changed": [
+        "src/adapters/openfilm/cache-worker-integrity.json"
+      ],
+      "source_added": [],
+      "log_digest_matches": true
+    },
+    {
+      "capture": "n1n2-claude-060p1r3-identity-001",
+      "exit": 0,
+      "inputs": 647,
+      "current_mismatches": [],
+      "source_changed": [],
+      "source_added": [],
+      "log_digest_matches": true
+    },
+    {
+      "capture": "n1n2-claude-060p1r3-integrity-check-001",
+      "exit": 0,
+      "inputs": 647,
+      "current_mismatches": [],
+      "source_changed": [],
+      "source_added": [],
+      "log_digest_matches": true
+    },
+    {
+      "capture": "n1n2-claude-060p1r3-m21-lock-001",
+      "exit": 0,
+      "inputs": 647,
+      "current_mismatches": [],
+      "source_changed": [],
+      "source_added": [],
+      "log_digest_matches": true
+    },
+    {
+      "capture": "n1n2-claude-060p1r3-scheduler-001",
+      "exit": 0,
+      "inputs": 647,
+      "current_mismatches": [],
+      "source_changed": [],
+      "source_added": [],
+      "log_digest_matches": true
+    },
+    {
+      "capture": "n1n2-claude-060p1r3-syntax-policy-001",
+      "exit": 0,
+      "inputs": 647,
+      "current_mismatches": [],
+      "source_changed": [],
+      "source_added": [],
+      "log_digest_matches": true
+    },
+    {
+      "capture": "n1n2-claude-060p1r3-syntax-probe-fixture-001",
+      "exit": 0,
+      "inputs": 647,
+      "current_mismatches": [],
+      "source_changed": [],
+      "source_added": [],
+      "log_digest_matches": true
+    },
+    {
+      "capture": "n1n2-claude-060p1r3-syntax-worker-001",
+      "exit": 0,
+      "inputs": 647,
+      "current_mismatches": [],
+      "source_changed": [],
+      "source_added": [],
+      "log_digest_matches": true
+    },
+    {
+      "capture": "n1n2-claude-060p1r3-syntax-worker-fixture-001",
+      "exit": 0,
+      "inputs": 647,
+      "current_mismatches": [],
+      "source_changed": [],
+      "source_added": [],
+      "log_digest_matches": true
+    },
+    {
+      "capture": "n1n2-claude-060p1r3-typecheck-001",
+      "exit": 0,
+      "inputs": 647,
+      "current_mismatches": [],
+      "source_changed": [],
+      "source_added": [],
+      "log_digest_matches": true
+    }
+  ],
+  "limitation": "Only final captured runs verified. Intermediate unrecorded trials remain author admission, not independently proved original results; runtimekernel/browser not accepted."
+}

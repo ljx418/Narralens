@@ -1,0 +1,23 @@
+{
+  "at": "2026-11-12T15:16:21.928431+00:00",
+  "scope": "Existing014/R07 alias and cleanup consistency on frozen145bytes",
+  "frozen_sha256": {
+    "src/host/agent-driven/created-native-source-reader.ts": "47a701d8a948d66e996307c4694d4774c1726f8875a18aefc547abddc96c0dd8",
+    "tests/agent-driven/integration/created-native-source-reader.test.ts": "411d3f77bd33bb0ebc4d0099fe26304e3c5d0028040beb1fd5a0ee797a05df6c"
+  },
+  "message": "msg_68e46fcba476",
+  "findings": [
+    {
+      "id": "ALIAS-ORACLE-CONSISTENCY",
+      "fact": "New F04 externalworkspacehardlink expects readerCOPY_ALIASED, existingG07 externalworkspacehardlink readOnce still expects rawCLOSURE_ALIASED.",
+      "required": "Consistent reader vs directclosure typedboundary; preserve nlink rejection and source/copy distinction."
+    },
+    {
+      "id": "ALIAS-OWNED-REJECTION",
+      "fact": "#adopt rawwork failure ownership observer throws freshCOPY_ALIASED before collecting retainedCleanupFailures; caller rejection is separatework.then so monitor throwing is not callertranslation.",
+      "required": "Ownership observer alwaysadopts genuinecleanup state; correct callertranslation boundary; preserve genuinecause markers on everywrapper and testalias+cleanupfailure."
+    }
+  ],
+  "runtime": "145 currentlygrantedfrozen; corrections onlyafterterminal+cleanup; noadditionalruntimegrant",
+  "acceptance": "NOT_RUN static findings, not finaltestresult"
+}

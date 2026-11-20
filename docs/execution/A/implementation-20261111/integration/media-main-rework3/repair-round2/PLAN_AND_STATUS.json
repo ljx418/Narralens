@@ -1,0 +1,36 @@
+{
+  "scope": "resolve independent report05889M1/M2 and minorsm1/m2, MAIN owns fixes",
+  "status": "IMPLEMENTED_NOT_FULLY_RETESTED",
+  "files": [
+    {
+      "path": "src/host/render/preview-prepared-source.ts",
+      "sha256": "b50016728357c91bb748314297fa9e5e87fbfbf33b48caa7e799c3889032bafc"
+    },
+    {
+      "path": "tests/agent-driven/media/preview-prepared-source.test.ts",
+      "sha256": "739d4f0fc0e7e5362709761431ffd8cd95731f35182b8c29d9ce9e14623039c5"
+    }
+  ],
+  "implemented": [
+    "object directoryFD anchored publishing +named identity checks +owned unpublished object cleanup",
+    "hash open/read before-after fingerprint/cancel checks",
+    "positive short-write loops and copied-content rehash",
+    "final post-publication cancellation/close/proof/current-root check before immutable receipt"
+  ],
+  "tests_added": 7,
+  "light_read_races": "2PASS/9SKIP before final error-message cleanup, old05889negative2FAIL, restored_exactly=true",
+  "typing": "86974exit2 only strict Buffer index in newtest, fixed; finaltsc pending",
+  "heavy_status": "WAIT_BRIDGE003_EXACT_TERMINAL_CLEANUP; bounded log read shows23/24fail; parent asked to report release",
+  "other_lanes": "PRODUCT app repair remains its sole writer; BRIDGE003 inputs untouched",
+  "final_tsc": {
+    "session": 63593,
+    "exit": 0
+  },
+  "source_backup_sha256": "ec575744cbd0b63e0182dd3a72f180fd1a612ec31fac9e9932a5e4e5eed2719d",
+  "read_race_negative": {
+    "test_exit": 1,
+    "failed": 2,
+    "source_restored_exactly": true,
+    "log_sha256": "c97a3e63fda5b214ae7598e3725d7bf261fa5bb0257b68c3c9da3506e0f44817"
+  }
+}

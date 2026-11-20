@@ -1,0 +1,14 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+ ✓ tests/agent-driven/integration/controlled-recovery-families.test.ts (32 tests) 5892ms
+   ✓ actual history queue allows older unpublished work to abort while retaining a younger created row  787ms
+ ✓ tests/agent-driven/integration/controlled-recovery-scheduler.test.ts (23 tests) 3661ms
+   ✓ uses as many progress passes as a long alternating chain actually requires  327ms
+   ✓ refuses lifecycle violation: request mutation  323ms
+
+ Test Files  2 passed (2)
+      Tests  55 passed (55)
+   Start at  12:35:35
+   Duration  21.38s (transform 1.47s, setup 0ms, collect 6.63s, tests 9.55s, environment 0ms, prepare 3.48s)
+

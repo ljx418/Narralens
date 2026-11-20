@@ -70,3 +70,9 @@ MAIN R3日志只读状态：tsc.exit=0；10个Host用例（含parser阶段race�
 | `docs/execution/A/logs/main-parser-fifo-before/tests.exit` | `4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865` |
 | `docs/execution/A/logs/main-committed-snapshot-r3/tests.txt` | `40e756f89db4ac134b0d9031cc049cb91e99e7b062b8c8231c236fa5cd23255d` |
 | `docs/execution/A/logs/main-committed-snapshot-r3/typecheck.exit` | `9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa` |
+
+## 冻结独立复验终态 d15e44d
+
+2026-11-10，精确clean SHA `d15e44d1d9739febdc0f47e260b06b4a3881ab1c`，获独占授权真实执行指定两integration+media preflight/snapshot-copy单worker，4文件30/30、exit0、40.87秒，exec session70222。8源码+43产物共51项与manifest/git tree/worktree核对全一致，结束仍同SHA clean。CSR-R1 FIXED / INDEPENDENT_CASE_PASS。
+
+**已提交快照读取及固定parser读取的本批限定PASS**，不是render/A06整体/T20/A通过。详细范围和实际日志见[冻结复核报告](../committed-snapshot-d15e44d/REVIEW.md)。旧红证据与历史M1B override失败保留，不调绿旧probe，不改原M1B。

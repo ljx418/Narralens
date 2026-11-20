@@ -1,0 +1,36 @@
+{
+  "at": "2026-11-14T04:47:58.446893+00:00",
+  "worker_done": "msg_376e6df56513",
+  "head": "1d348d419120f23f45d958112ea8c43df5a04675",
+  "branch": "agent-driven/main-a-integration",
+  "cached_origin_main": "304c89134fdf9f834f7d69e3f4d5c89a68044c60",
+  "index_paths": [],
+  "source_status": [
+    " M src/adapters/openfilm/openfilm-upstream.ts",
+    " M src/host/agent-driven/committed-snapshot-authority.ts",
+    " M src/host/agent-driven/created-native-source-reader.ts",
+    " M src/host/agent-driven/retained-native-closure.ts",
+    " M tests/agent-driven/integration/created-native-source-reader.test.ts",
+    " M tests/m2.1/openfilm-upstream-lock.test.ts",
+    "?? tests/agent-driven/integration/helpers/native-read-byte-observer.mjs",
+    "?? tests/agent-driven/integration/helpers/native-read-growth-child.mjs",
+    "?? tests/agent-driven/integration/openfilm-serving-url.test.ts",
+    "?? tests/agent-driven/integration/retained-native-budget.test.ts",
+    "?? tests/fixtures/openfilm-serving-url-child.mjs"
+  ],
+  "self_report_file_count": 12,
+  "self_report_hash_mismatches": [],
+  "latest_capture_inputs": 631,
+  "latest_capture_input_mismatches": [],
+  "user_AGENTS_sha256": "37300463a72a612ae16e0a5fcfb496502c57c722b83781e0e2e8c9480594542b",
+  "user_AGENTS_matches": true,
+  "known_test_pids_present": {
+    "271766": false,
+    "340397": false,
+    "372157": false
+  },
+  "media_test_process_name_observation": [],
+  "cleanup_scope_limit": "Known test PIDs absent and current process-name observation; no signal issued or unrelated process touched. Prior raw resource handles were not independently instrumented; do not infer A04 race closure from this normal path.",
+  "status_line_count": 268,
+  "handoff_accepted": true
+}

@@ -1,0 +1,17 @@
+{
+  "at": "2026-11-13T16:11:50.358041+00:00",
+  "local_assets": {
+    "exit": 0,
+    "passed": 24,
+    "log_sha256": "39a29f2124ca30430e46881fd787f23855b22b5c9cf99ca7678cb9796853347c"
+  },
+  "authority": {
+    "exit": 1,
+    "passed": 53,
+    "failed": 1,
+    "log_sha256": "a784c31402777948b8c9a712b6fe173b8697383ea2df9f0356814522d551bea5"
+  },
+  "both_captures_current_inputs626_match": true,
+  "remaining_groups": "NOT_RUN",
+  "diagnosis": "Source shows cloned intake vector retaining initialfixture meta idempotency key; probable replay originalintake then createproject409. Need actual wireerror+intake identity+DBfact proof before attribution."
+}

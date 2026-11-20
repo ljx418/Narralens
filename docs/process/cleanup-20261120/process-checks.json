@@ -1,0 +1,33 @@
+[
+  {
+    "name": "handoff-self-test",
+    "argv": [
+      "python3",
+      "-I",
+      "-S",
+      "-B",
+      "tools/check-delivery-spec.py",
+      "--self-test"
+    ],
+    "exit": 0,
+    "expected_exit": 0,
+    "log_sha256": "47de7ecef7e8d2d3269e601acdf1ee96aa906e76d59b3c3ac630600fde70f39b",
+    "scope": "PROCESS_METADATA_ONLY"
+  },
+  {
+    "name": "current-partial-must-reject",
+    "argv": [
+      "python3",
+      "-I",
+      "-S",
+      "-B",
+      "tools/check-delivery-spec.py",
+      "--packet",
+      "docs/process/current-delivery.json"
+    ],
+    "exit": 2,
+    "expected_exit": 2,
+    "log_sha256": "241b574202c0055283eee34857dc94215c2e30b2adc03f882c94bbe12fb9b442",
+    "scope": "PROCESS_METADATA_ONLY"
+  }
+]

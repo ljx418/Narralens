@@ -1,0 +1,597 @@
+{
+  "verdict": "REQUEST_CHANGES",
+  "historical_head": "1d348d419120f23f45d958112ea8c43df5a04675",
+  "bound9_match": true,
+  "release_protected7_match": true,
+  "all_end_equal": true,
+  "method": "Static text reads/search, filesystem hashing and JSON metadata parsing only; no product import/test/child/kernel/signal/fork/prctl/Host/media/network.",
+  "inputs": [
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p5b-startup-and-owner/RELEASE.json",
+      "start_sha256": "590cb5a0b80185e6cd174eab575561620df919f4b6e3255638797cc7dae6d30e",
+      "start_bytes": 4568,
+      "end_sha256": "590cb5a0b80185e6cd174eab575561620df919f4b6e3255638797cc7dae6d30e",
+      "end_bytes": 4568,
+      "equal": true,
+      "inspection": "text/relevant actual call-path inspection or release-protected hash verification; not a full unrelated-production audit"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p5b-startup-and-owner/SPEC.md",
+      "start_sha256": "0411e3d17c6d3b60ea463ffff1ec3f22f46bcb3df966d4cae97929ebb7eb9c8a",
+      "start_bytes": 8810,
+      "end_sha256": "0411e3d17c6d3b60ea463ffff1ec3f22f46bcb3df966d4cae97929ebb7eb9c8a",
+      "end_bytes": 8810,
+      "equal": true,
+      "inspection": "text/relevant actual call-path inspection or release-protected hash verification; not a full unrelated-production audit"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p5b-startup-and-owner/independent-review/INPUT_SNAPSHOT.json",
+      "start_sha256": "21d4dcd59af1c43a0fbc3e071d2b2f3424f49bbd1e6d179912cbf1532224d396",
+      "start_bytes": 1923,
+      "end_sha256": "21d4dcd59af1c43a0fbc3e071d2b2f3424f49bbd1e6d179912cbf1532224d396",
+      "end_bytes": 1923,
+      "equal": true,
+      "inspection": "text/relevant actual call-path inspection or release-protected hash verification; not a full unrelated-production audit"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p5b-startup-and-owner/independent-review/MAIN_CAPTURE_AUDIT.json",
+      "start_sha256": "04d262c88bb330af1a58c474bdef7795081a1b3da0143f44570d323d5d381f51",
+      "start_bytes": 10965,
+      "end_sha256": "04d262c88bb330af1a58c474bdef7795081a1b3da0143f44570d323d5d381f51",
+      "end_bytes": 10965,
+      "equal": true,
+      "inspection": "text/relevant actual call-path inspection or release-protected hash verification; not a full unrelated-production audit"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p5b-startup-and-owner/independent-review/LIFECYCLE_BINDING.json",
+      "start_sha256": "01dcb35fbeb59ae86d5f173349af2f9db249ecf5080bd6eeb60ece341b06583a",
+      "start_bytes": 456,
+      "end_sha256": "01dcb35fbeb59ae86d5f173349af2f9db249ecf5080bd6eeb60ece341b06583a",
+      "end_bytes": 456,
+      "equal": true,
+      "inspection": "text/relevant actual call-path inspection or release-protected hash verification; not a full unrelated-production audit"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/src/adapters/openfilm/cache-process-supervisor.ts",
+      "start_sha256": "9429ec959cc45715fc2837117bef9cc5b218e1260793cc92d21d97025679481f",
+      "start_bytes": 117199,
+      "end_sha256": "9429ec959cc45715fc2837117bef9cc5b218e1260793cc92d21d97025679481f",
+      "end_bytes": 117199,
+      "equal": true,
+      "inspection": "text/relevant actual call-path inspection or release-protected hash verification; not a full unrelated-production audit"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/src/adapters/openfilm/cache-process-custodian.py",
+      "start_sha256": "01a3636b890ae4b4c929cd4653ab3af0ec8b96c0d2af1242f298bf209967ae12",
+      "start_bytes": 95949,
+      "end_sha256": "01a3636b890ae4b4c929cd4653ab3af0ec8b96c0d2af1242f298bf209967ae12",
+      "end_bytes": 95949,
+      "equal": true,
+      "inspection": "text/relevant actual call-path inspection or release-protected hash verification; not a full unrelated-production audit"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/src/adapters/openfilm/cache-worker-integrity.json",
+      "start_sha256": "b59ebb17805c83929a183f8918040474146284e27bb50ba84f4848141931170e",
+      "start_bytes": 2135,
+      "end_sha256": "b59ebb17805c83929a183f8918040474146284e27bb50ba84f4848141931170e",
+      "end_bytes": 2135,
+      "equal": true,
+      "inspection": "text/relevant actual call-path inspection or release-protected hash verification; not a full unrelated-production audit"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/cache-process-identity.test.ts",
+      "start_sha256": "6c50dca3681c48a8769daae3adae923a461124adcafc4251a450be48b591a7b2",
+      "start_bytes": 44548,
+      "end_sha256": "6c50dca3681c48a8769daae3adae923a461124adcafc4251a450be48b591a7b2",
+      "end_bytes": 44548,
+      "equal": true,
+      "inspection": "text/relevant actual call-path inspection or release-protected hash verification; not a full unrelated-production audit"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/helpers/cache-custodian-unit.py",
+      "start_sha256": "436eb6a854117ccf5540e03a2d0759501a0f982cdac0a87f61ac92cab0ca8789",
+      "start_bytes": 59998,
+      "end_sha256": "436eb6a854117ccf5540e03a2d0759501a0f982cdac0a87f61ac92cab0ca8789",
+      "end_bytes": 59998,
+      "equal": true,
+      "inspection": "text/relevant actual call-path inspection or release-protected hash verification; not a full unrelated-production audit"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/cache-custodian-lifecycle.test.ts",
+      "start_sha256": "2ee89a2cdb157aefcf4b5cb6bbe21df404ec72f69250e367dca85fbd78b0250c",
+      "start_bytes": 9722,
+      "end_sha256": "2ee89a2cdb157aefcf4b5cb6bbe21df404ec72f69250e367dca85fbd78b0250c",
+      "end_bytes": 9722,
+      "equal": true,
+      "inspection": "text/relevant actual call-path inspection or release-protected hash verification; not a full unrelated-production audit"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tools/native-cache-normal-pilot.ts",
+      "start_sha256": "30b01a0eafe295e6d048c88c0c0adcce96ac4b342edcdcf72167dd3ed5282539",
+      "start_bytes": 33368,
+      "end_sha256": "30b01a0eafe295e6d048c88c0c0adcce96ac4b342edcdcf72167dd3ed5282539",
+      "end_bytes": 33368,
+      "equal": true,
+      "inspection": "text/relevant actual call-path inspection or release-protected hash verification; not a full unrelated-production audit"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/native-cache-normal-pilot.test.ts",
+      "start_sha256": "d7ab14329aae848b5a3c3aeae253bf989a5accad10c603c5199b55975145ff40",
+      "start_bytes": 17584,
+      "end_sha256": "d7ab14329aae848b5a3c3aeae253bf989a5accad10c603c5199b55975145ff40",
+      "end_bytes": 17584,
+      "equal": true,
+      "inspection": "text/relevant actual call-path inspection or release-protected hash verification; not a full unrelated-production audit"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/parallel/lane-product/A-R2-20261112/N1N2-native-source/n1n2-claude-060p5b-report.md",
+      "start_sha256": "d3625e7c225088ed5ab46442a18a397dbab59c38da4a49a4731359f442892ba0",
+      "start_bytes": 24587,
+      "end_sha256": "d3625e7c225088ed5ab46442a18a397dbab59c38da4a49a4731359f442892ba0",
+      "end_bytes": 24587,
+      "equal": true,
+      "inspection": "text/relevant actual call-path inspection or release-protected hash verification; not a full unrelated-production audit"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tools/native-cache-nofork-pilot.mjs",
+      "start_sha256": "73fed24c66ec310ccd811fdd7e4dfb51be6d22875ce81a50e1a86a47072fe00d",
+      "start_bytes": 58400,
+      "end_sha256": "73fed24c66ec310ccd811fdd7e4dfb51be6d22875ce81a50e1a86a47072fe00d",
+      "end_bytes": 58400,
+      "equal": true,
+      "inspection": "text/relevant actual call-path inspection or release-protected hash verification; not a full unrelated-production audit"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/helpers/native-cache-nofork-pilot.test.mjs",
+      "start_sha256": "feb9786b4f38044382ab6ac2ca8435f3bdf89ae83c0882b47177573136deb5ce",
+      "start_bytes": 51408,
+      "end_sha256": "feb9786b4f38044382ab6ac2ca8435f3bdf89ae83c0882b47177573136deb5ce",
+      "end_bytes": 51408,
+      "equal": true,
+      "inspection": "text/relevant actual call-path inspection or release-protected hash verification; not a full unrelated-production audit"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/helpers/cache-worker-fixture.mjs",
+      "start_sha256": "e3f4ccb1c4016a54356ce04be344b4ffff23f2f88698efe191570ad8407d03ab",
+      "start_bytes": 15045,
+      "end_sha256": "e3f4ccb1c4016a54356ce04be344b4ffff23f2f88698efe191570ad8407d03ab",
+      "end_bytes": 15045,
+      "equal": true,
+      "inspection": "text/relevant actual call-path inspection or release-protected hash verification; not a full unrelated-production audit"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/src/host/agent-driven/retained-native-closure.ts",
+      "start_sha256": "fd896104149d6cd2663b63a59d50beabbeee546f3e3f46a5d6bf07fbe662ede9",
+      "start_bytes": 75335,
+      "end_sha256": "fd896104149d6cd2663b63a59d50beabbeee546f3e3f46a5d6bf07fbe662ede9",
+      "end_bytes": 75335,
+      "equal": true,
+      "inspection": "text/relevant actual call-path inspection or release-protected hash verification; not a full unrelated-production audit"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/src/host/agent-driven/created-native-workspace.ts",
+      "start_sha256": "d83edbdac8cd6dd7db6b5d18f1d0f5d3beb028279297a822f59f97f6504d562c",
+      "start_bytes": 80984,
+      "end_sha256": "d83edbdac8cd6dd7db6b5d18f1d0f5d3beb028279297a822f59f97f6504d562c",
+      "end_bytes": 80984,
+      "equal": true,
+      "inspection": "text/relevant actual call-path inspection or release-protected hash verification; not a full unrelated-production audit"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/src/adapters/openfilm/openfilm-upstream.ts",
+      "start_sha256": "17fe1138e50bc30df5c26b74e1e0ff9393140c070e1233676d2811485890a2b6",
+      "start_bytes": 87571,
+      "end_sha256": "17fe1138e50bc30df5c26b74e1e0ff9393140c070e1233676d2811485890a2b6",
+      "end_bytes": 87571,
+      "equal": true,
+      "inspection": "text/relevant actual call-path inspection or release-protected hash verification; not a full unrelated-production audit"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/AGENTS.md",
+      "start_sha256": "37300463a72a612ae16e0a5fcfb496502c57c722b83781e0e2e8c9480594542b",
+      "start_bytes": 12665,
+      "end_sha256": "37300463a72a612ae16e0a5fcfb496502c57c722b83781e0e2e8c9480594542b",
+      "end_bytes": 12665,
+      "equal": true,
+      "inspection": "text/relevant actual call-path inspection or release-protected hash verification; not a full unrelated-production audit"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p1r3a/independent-review/custodian-review/FINDINGS.json",
+      "start_sha256": "0f69eea29006ca261f3cd4d470163770f008d473dd170e0767e8f4c8442425f5",
+      "start_bytes": 25006,
+      "end_sha256": "0f69eea29006ca261f3cd4d470163770f008d473dd170e0767e8f4c8442425f5",
+      "end_bytes": 25006,
+      "equal": true,
+      "inspection": "text/relevant actual call-path inspection or release-protected hash verification; not a full unrelated-production audit"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p1r3a/independent-review/integration-review/FINDINGS.json",
+      "start_sha256": "5a4b4aea5ae891f996ce773bc3b0754901665ee1cba40cd1ac4f309b40ab41f0",
+      "start_bytes": 16896,
+      "end_sha256": "5a4b4aea5ae891f996ce773bc3b0754901665ee1cba40cd1ac4f309b40ab41f0",
+      "end_bytes": 16896,
+      "equal": true,
+      "inspection": "text/relevant actual call-path inspection or release-protected hash verification; not a full unrelated-production audit"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p5b-python-001.claim.json",
+      "start_sha256": "47d0301019eb039e63eaa28d9826d741e554ad64362d8b6f6ef394592e859bd3",
+      "start_bytes": 229,
+      "end_sha256": "47d0301019eb039e63eaa28d9826d741e554ad64362d8b6f6ef394592e859bd3",
+      "end_bytes": 229,
+      "equal": true,
+      "inspection": "capture bytes/hash, command/result/log and selected source-hash receipt inspection; no actual config payload reads"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p5b-python-001.cmd.json",
+      "start_sha256": "4caf0130dd2d093c32bb8a050a3085cd993ccae388595111907ad85facd5d71d",
+      "start_bytes": 507,
+      "end_sha256": "4caf0130dd2d093c32bb8a050a3085cd993ccae388595111907ad85facd5d71d",
+      "end_bytes": 507,
+      "equal": true,
+      "inspection": "capture bytes/hash, command/result/log and selected source-hash receipt inspection; no actual config payload reads"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p5b-python-001.inputs.json",
+      "start_sha256": "7a9796759d7eff52f7736efb2eb4328ef6c74bef29f39c350e6d40abac310d9e",
+      "start_bytes": 74782,
+      "end_sha256": "7a9796759d7eff52f7736efb2eb4328ef6c74bef29f39c350e6d40abac310d9e",
+      "end_bytes": 74782,
+      "equal": true,
+      "inspection": "capture bytes/hash, command/result/log and selected source-hash receipt inspection; no actual config payload reads"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p5b-python-001.stop-evidence.json",
+      "start_sha256": "fa0e2517f185af36335c3826c5d40ec98d38d8b2799115eb6881ce881bfb791e",
+      "start_bytes": 2375,
+      "end_sha256": "fa0e2517f185af36335c3826c5d40ec98d38d8b2799115eb6881ce881bfb791e",
+      "end_bytes": 2375,
+      "equal": true,
+      "inspection": "capture bytes/hash, command/result/log and selected source-hash receipt inspection; no actual config payload reads"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p5b-python-001.txt",
+      "start_sha256": "2fc0f883e6c3bf1e4b68c6b5990efc5bd8be65bfac1442f8a0a7e2463fc51c4d",
+      "start_bytes": 32,
+      "end_sha256": "2fc0f883e6c3bf1e4b68c6b5990efc5bd8be65bfac1442f8a0a7e2463fc51c4d",
+      "end_bytes": 32,
+      "equal": true,
+      "inspection": "capture bytes/hash, command/result/log and selected source-hash receipt inspection; no actual config payload reads"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p5b-python-005.claim.json",
+      "start_sha256": "dab5c98fab46582022e8bae898796fc12f1aed79610a09617e5b781b6930969f",
+      "start_bytes": 229,
+      "end_sha256": "dab5c98fab46582022e8bae898796fc12f1aed79610a09617e5b781b6930969f",
+      "end_bytes": 229,
+      "equal": true,
+      "inspection": "capture bytes/hash, command/result/log and selected source-hash receipt inspection; no actual config payload reads"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p5b-python-005.cmd.json",
+      "start_sha256": "3d4d4a2c8b56f2d0c73359117ac72162e0f447cbcc183998cb7c0caed08d9200",
+      "start_bytes": 507,
+      "end_sha256": "3d4d4a2c8b56f2d0c73359117ac72162e0f447cbcc183998cb7c0caed08d9200",
+      "end_bytes": 507,
+      "equal": true,
+      "inspection": "capture bytes/hash, command/result/log and selected source-hash receipt inspection; no actual config payload reads"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p5b-python-005.exit",
+      "start_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "start_bytes": 2,
+      "end_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "end_bytes": 2,
+      "equal": true,
+      "inspection": "capture bytes/hash, command/result/log and selected source-hash receipt inspection; no actual config payload reads"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p5b-python-005.inputs.json",
+      "start_sha256": "d9aa418deacb8a41aee96e75274e15b789ea61813661be9d7d92b42a000695df",
+      "start_bytes": 75028,
+      "end_sha256": "d9aa418deacb8a41aee96e75274e15b789ea61813661be9d7d92b42a000695df",
+      "end_bytes": 75028,
+      "equal": true,
+      "inspection": "capture bytes/hash, command/result/log and selected source-hash receipt inspection; no actual config payload reads"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p5b-python-005.result.json",
+      "start_sha256": "574becd040c05a34400c78419586b4b25ff49411442e008eb694c9d73dc16926",
+      "start_bytes": 198,
+      "end_sha256": "574becd040c05a34400c78419586b4b25ff49411442e008eb694c9d73dc16926",
+      "end_bytes": 198,
+      "equal": true,
+      "inspection": "capture bytes/hash, command/result/log and selected source-hash receipt inspection; no actual config payload reads"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p5b-python-005.txt",
+      "start_sha256": "fe200d97f80f37c657d3d9e35d41080494f36b8a5e940254f18a58b825d10817",
+      "start_bytes": 145,
+      "end_sha256": "fe200d97f80f37c657d3d9e35d41080494f36b8a5e940254f18a58b825d10817",
+      "end_bytes": 145,
+      "equal": true,
+      "inspection": "capture bytes/hash, command/result/log and selected source-hash receipt inspection; no actual config payload reads"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p5b-vitest-identity-004.claim.json",
+      "start_sha256": "5f01b74b5a163752600ae2dee586b9932d45abd49c7444ce73fbe4a1e2aac6a3",
+      "start_bytes": 273,
+      "end_sha256": "5f01b74b5a163752600ae2dee586b9932d45abd49c7444ce73fbe4a1e2aac6a3",
+      "end_bytes": 273,
+      "equal": true,
+      "inspection": "capture bytes/hash, command/result/log and selected source-hash receipt inspection; no actual config payload reads"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p5b-vitest-identity-004.cmd.json",
+      "start_sha256": "c1394832f67046b87b699ec432742029495601f957ddbaa386810a587206d548",
+      "start_bytes": 554,
+      "end_sha256": "c1394832f67046b87b699ec432742029495601f957ddbaa386810a587206d548",
+      "end_bytes": 554,
+      "equal": true,
+      "inspection": "capture bytes/hash, command/result/log and selected source-hash receipt inspection; no actual config payload reads"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p5b-vitest-identity-004.exit",
+      "start_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "start_bytes": 2,
+      "end_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "end_bytes": 2,
+      "equal": true,
+      "inspection": "capture bytes/hash, command/result/log and selected source-hash receipt inspection; no actual config payload reads"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p5b-vitest-identity-004.inputs.json",
+      "start_sha256": "d9aa418deacb8a41aee96e75274e15b789ea61813661be9d7d92b42a000695df",
+      "start_bytes": 75028,
+      "end_sha256": "d9aa418deacb8a41aee96e75274e15b789ea61813661be9d7d92b42a000695df",
+      "end_bytes": 75028,
+      "equal": true,
+      "inspection": "capture bytes/hash, command/result/log and selected source-hash receipt inspection; no actual config payload reads"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p5b-vitest-identity-004.result.json",
+      "start_sha256": "a6cbfa27b11debec991344fbece4bf5a399f605069d2d3758ee45663d35c2fc8",
+      "start_bytes": 198,
+      "end_sha256": "a6cbfa27b11debec991344fbece4bf5a399f605069d2d3758ee45663d35c2fc8",
+      "end_bytes": 198,
+      "equal": true,
+      "inspection": "capture bytes/hash, command/result/log and selected source-hash receipt inspection; no actual config payload reads"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p5b-vitest-identity-004.txt",
+      "start_sha256": "e734d93694eeec2f04af268c781f0476123c69abf6a67d7d2d64940fd0a8d1c2",
+      "start_bytes": 348,
+      "end_sha256": "e734d93694eeec2f04af268c781f0476123c69abf6a67d7d2d64940fd0a8d1c2",
+      "end_bytes": 348,
+      "equal": true,
+      "inspection": "capture bytes/hash, command/result/log and selected source-hash receipt inspection; no actual config payload reads"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p5b-vitest-pilot-005.claim.json",
+      "start_sha256": "1646a108bba4cd6b2775e321379a6068733fc0a0cacfefbf1d6b3b33a37270da",
+      "start_bytes": 273,
+      "end_sha256": "1646a108bba4cd6b2775e321379a6068733fc0a0cacfefbf1d6b3b33a37270da",
+      "end_bytes": 273,
+      "equal": true,
+      "inspection": "capture bytes/hash, command/result/log and selected source-hash receipt inspection; no actual config payload reads"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p5b-vitest-pilot-005.cmd.json",
+      "start_sha256": "7c82bd50f1aa6312d02d7ad9f8b2a5b0e7aab69e7105cc01b6acbed33ce67e4d",
+      "start_bytes": 557,
+      "end_sha256": "7c82bd50f1aa6312d02d7ad9f8b2a5b0e7aab69e7105cc01b6acbed33ce67e4d",
+      "end_bytes": 557,
+      "equal": true,
+      "inspection": "capture bytes/hash, command/result/log and selected source-hash receipt inspection; no actual config payload reads"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p5b-vitest-pilot-005.exit",
+      "start_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "start_bytes": 2,
+      "end_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "end_bytes": 2,
+      "equal": true,
+      "inspection": "capture bytes/hash, command/result/log and selected source-hash receipt inspection; no actual config payload reads"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p5b-vitest-pilot-005.inputs.json",
+      "start_sha256": "d9aa418deacb8a41aee96e75274e15b789ea61813661be9d7d92b42a000695df",
+      "start_bytes": 75028,
+      "end_sha256": "d9aa418deacb8a41aee96e75274e15b789ea61813661be9d7d92b42a000695df",
+      "end_bytes": 75028,
+      "equal": true,
+      "inspection": "capture bytes/hash, command/result/log and selected source-hash receipt inspection; no actual config payload reads"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p5b-vitest-pilot-005.result.json",
+      "start_sha256": "abfaee5b7f728a635cc2c6d85e5b839deecdd389d9d5e3114dc3fc1a979009d3",
+      "start_bytes": 198,
+      "end_sha256": "abfaee5b7f728a635cc2c6d85e5b839deecdd389d9d5e3114dc3fc1a979009d3",
+      "end_bytes": 198,
+      "equal": true,
+      "inspection": "capture bytes/hash, command/result/log and selected source-hash receipt inspection; no actual config payload reads"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p5b-vitest-pilot-005.txt",
+      "start_sha256": "612492483c989f3f0f2ab0b23be73a244da38ea2daa5a3156132e457e6debe2f",
+      "start_bytes": 349,
+      "end_sha256": "612492483c989f3f0f2ab0b23be73a244da38ea2daa5a3156132e457e6debe2f",
+      "end_bytes": 349,
+      "equal": true,
+      "inspection": "capture bytes/hash, command/result/log and selected source-hash receipt inspection; no actual config payload reads"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p5b-tsc-004.claim.json",
+      "start_sha256": "bf4bbb8a28187aa0218deca3a2df708befff8d91c27f27819d61e86151ad6a77",
+      "start_bytes": 166,
+      "end_sha256": "bf4bbb8a28187aa0218deca3a2df708befff8d91c27f27819d61e86151ad6a77",
+      "end_bytes": 166,
+      "equal": true,
+      "inspection": "capture bytes/hash, command/result/log and selected source-hash receipt inspection; no actual config payload reads"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p5b-tsc-004.cmd.json",
+      "start_sha256": "54ddd33ff0467bcf00cd9437a576c451982b27f014ff43b524048371cdf857ba",
+      "start_bytes": 447,
+      "end_sha256": "54ddd33ff0467bcf00cd9437a576c451982b27f014ff43b524048371cdf857ba",
+      "end_bytes": 447,
+      "equal": true,
+      "inspection": "capture bytes/hash, command/result/log and selected source-hash receipt inspection; no actual config payload reads"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p5b-tsc-004.exit",
+      "start_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "start_bytes": 2,
+      "end_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "end_bytes": 2,
+      "equal": true,
+      "inspection": "capture bytes/hash, command/result/log and selected source-hash receipt inspection; no actual config payload reads"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p5b-tsc-004.inputs.json",
+      "start_sha256": "d9aa418deacb8a41aee96e75274e15b789ea61813661be9d7d92b42a000695df",
+      "start_bytes": 75028,
+      "end_sha256": "d9aa418deacb8a41aee96e75274e15b789ea61813661be9d7d92b42a000695df",
+      "end_bytes": 75028,
+      "equal": true,
+      "inspection": "capture bytes/hash, command/result/log and selected source-hash receipt inspection; no actual config payload reads"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p5b-tsc-004.result.json",
+      "start_sha256": "1dd98e3d1e1c1ebe1d787eedaea4a1e19b3ee46dda111430f8d92487f5e68823",
+      "start_bytes": 198,
+      "end_sha256": "1dd98e3d1e1c1ebe1d787eedaea4a1e19b3ee46dda111430f8d92487f5e68823",
+      "end_bytes": 198,
+      "equal": true,
+      "inspection": "capture bytes/hash, command/result/log and selected source-hash receipt inspection; no actual config payload reads"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p5b-tsc-004.txt",
+      "start_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "start_bytes": 0,
+      "end_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "end_bytes": 0,
+      "equal": true,
+      "inspection": "capture bytes/hash, command/result/log and selected source-hash receipt inspection; no actual config payload reads"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p5b-generate-001.claim.json",
+      "start_sha256": "40cb6eb0ba9c7dccd9cec4eb5c6d91a07b6aeb58a64422098a7d86c1e4e0f049",
+      "start_bytes": 191,
+      "end_sha256": "40cb6eb0ba9c7dccd9cec4eb5c6d91a07b6aeb58a64422098a7d86c1e4e0f049",
+      "end_bytes": 191,
+      "equal": true,
+      "inspection": "capture bytes/hash, command/result/log and selected source-hash receipt inspection; no actual config payload reads"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p5b-generate-001.cmd.json",
+      "start_sha256": "cb2df0b15fbe346250cb3c4d3b3416ddb327d4ac699c941168cf18df56d61d8b",
+      "start_bytes": 459,
+      "end_sha256": "cb2df0b15fbe346250cb3c4d3b3416ddb327d4ac699c941168cf18df56d61d8b",
+      "end_bytes": 459,
+      "equal": true,
+      "inspection": "capture bytes/hash, command/result/log and selected source-hash receipt inspection; no actual config payload reads"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p5b-generate-001.exit",
+      "start_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "start_bytes": 2,
+      "end_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "end_bytes": 2,
+      "equal": true,
+      "inspection": "capture bytes/hash, command/result/log and selected source-hash receipt inspection; no actual config payload reads"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p5b-generate-001.inputs.json",
+      "start_sha256": "abe86636ad524f6edb49fd2d3714c51647cb11d3dd57c290de207ed685d76464",
+      "start_bytes": 75028,
+      "end_sha256": "abe86636ad524f6edb49fd2d3714c51647cb11d3dd57c290de207ed685d76464",
+      "end_bytes": 75028,
+      "equal": true,
+      "inspection": "capture bytes/hash, command/result/log and selected source-hash receipt inspection; no actual config payload reads"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p5b-generate-001.result.json",
+      "start_sha256": "11c0c1cafcf79016dd40c7d9c55d978390ef663b20ca08080263471ea3302d37",
+      "start_bytes": 257,
+      "end_sha256": "11c0c1cafcf79016dd40c7d9c55d978390ef663b20ca08080263471ea3302d37",
+      "end_bytes": 257,
+      "equal": true,
+      "inspection": "capture bytes/hash, command/result/log and selected source-hash receipt inspection; no actual config payload reads"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p5b-generate-001.txt",
+      "start_sha256": "4c4f54d40c6627249ebe7517e2c3d4580c66295029a1efe25dff514caaff104e",
+      "start_bytes": 161,
+      "end_sha256": "4c4f54d40c6627249ebe7517e2c3d4580c66295029a1efe25dff514caaff104e",
+      "end_bytes": 161,
+      "equal": true,
+      "inspection": "capture bytes/hash, command/result/log and selected source-hash receipt inspection; no actual config payload reads"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p5b-check-001.claim.json",
+      "start_sha256": "89543032b034402550c648a2688aa63853c919b5e266cdc8e53f45bb07df8128",
+      "start_bytes": 185,
+      "end_sha256": "89543032b034402550c648a2688aa63853c919b5e266cdc8e53f45bb07df8128",
+      "end_bytes": 185,
+      "equal": true,
+      "inspection": "capture bytes/hash, command/result/log and selected source-hash receipt inspection; no actual config payload reads"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p5b-check-001.cmd.json",
+      "start_sha256": "c2b0b311c0cfee8ef55df4080027a9c6b7974b6fd01b4d24e707fe1168b2f605",
+      "start_bytes": 456,
+      "end_sha256": "c2b0b311c0cfee8ef55df4080027a9c6b7974b6fd01b4d24e707fe1168b2f605",
+      "end_bytes": 456,
+      "equal": true,
+      "inspection": "capture bytes/hash, command/result/log and selected source-hash receipt inspection; no actual config payload reads"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p5b-check-001.exit",
+      "start_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "start_bytes": 2,
+      "end_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "end_bytes": 2,
+      "equal": true,
+      "inspection": "capture bytes/hash, command/result/log and selected source-hash receipt inspection; no actual config payload reads"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p5b-check-001.inputs.json",
+      "start_sha256": "d9aa418deacb8a41aee96e75274e15b789ea61813661be9d7d92b42a000695df",
+      "start_bytes": 75028,
+      "end_sha256": "d9aa418deacb8a41aee96e75274e15b789ea61813661be9d7d92b42a000695df",
+      "end_bytes": 75028,
+      "equal": true,
+      "inspection": "capture bytes/hash, command/result/log and selected source-hash receipt inspection; no actual config payload reads"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p5b-check-001.result.json",
+      "start_sha256": "3826a0658dd9875ed2e1b9e3be11837722dd88a548df2c471737a30c3525a3a1",
+      "start_bytes": 198,
+      "end_sha256": "3826a0658dd9875ed2e1b9e3be11837722dd88a548df2c471737a30c3525a3a1",
+      "end_bytes": 198,
+      "equal": true,
+      "inspection": "capture bytes/hash, command/result/log and selected source-hash receipt inspection; no actual config payload reads"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p5b-check-001.txt",
+      "start_sha256": "7480083d801311b007ec2f2a6c4717621f8aed33de5e17dd7ba35815b0d68e68",
+      "start_bytes": 24,
+      "end_sha256": "7480083d801311b007ec2f2a6c4717621f8aed33de5e17dd7ba35815b0d68e68",
+      "end_bytes": 24,
+      "equal": true,
+      "inspection": "capture bytes/hash, command/result/log and selected source-hash receipt inspection; no actual config payload reads"
+    },
+    {
+      "path": "/usr/bin/python3.12",
+      "start_sha256": "e50d468e8b0adfb05733f5b87b3cff34829c4a8c1aea50c865aa8bdfe4bb150f",
+      "start_bytes": 8020928,
+      "end_sha256": "e50d468e8b0adfb05733f5b87b3cff34829c4a8c1aea50c865aa8bdfe4bb150f",
+      "end_bytes": 8020928,
+      "equal": true,
+      "inspection": "binary hash only"
+    }
+  ],
+  "runtime": "All actual runtime NOT_RUN",
+  "note": "Record includes protected hashes; source reasoning is not a captured old-code failure."
+}

@@ -1,0 +1,17 @@
+{
+  "id": "MAIN-R5C-NORMAL-EARLY-CANCEL",
+  "status": "STATIC_COUNTEREXAMPLE_PENDING_INDEPENDENT_DISPOSITION",
+  "severity_proposed": "MAJOR",
+  "at": "2026-11-15T07:22:48.494280+00:00",
+  "paths": {
+    "tools/native-cache-normal-pilot.ts": "2dad75da85ef30c37a600c98a5dc5b644f6e6ccf57907ff0cb89dcb6ee264af8",
+    "src/adapters/openfilm/cache-process-supervisor.ts": "1d069b382324a183dcb7fb0bee19fe464eb39fd4216613b80114fdcbda36caaa"
+  },
+  "trigger": "mode normal; supervisor.start returns original pending settlement while asynchronous #run begins; no await in normal body before finally; continueToTerminal sees unsettled and requestCancel DRAW_NOT_SETTLED before awaiting original promise.",
+  "expected": "正常运行等待原结果或显式失败/取消，不能把正常执行中的未settled本身当失败；exception finally仍须完整持责。",
+  "current_test_gap": "正常路径stub settlesOnStart可能掩盖；需要pending normal后自然结果的生产等价调度反例，cancel不能被调用。",
+  "secondary_check": "raw settlement.cleanup及inspection.cleanup_failures是否真正影响预期故障资格，而非只写入timeline计数。",
+  "runtime": "NOT_RUN",
+  "review_message": "msg_783eb7ad512e",
+  "not_a_fix_release": true
+}

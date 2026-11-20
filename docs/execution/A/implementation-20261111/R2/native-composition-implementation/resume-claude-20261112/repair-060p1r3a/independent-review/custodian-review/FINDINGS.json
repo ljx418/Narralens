@@ -1,0 +1,292 @@
+{
+  "verdict": "REQUEST_CHANGES",
+  "review": "Independent complete R3+R3A targeted custodian static re-review",
+  "binding": "25 dirty snapshot SHA256+bytes matched; historical1d348d419120f23f45d958112ea8c43df5a04675 is not accepted freeze",
+  "counts": {
+    "BLOCKER": 1,
+    "MAJOR": 7,
+    "MINOR": 1
+  },
+  "findings": [
+    {
+      "runtime": "NOT_RUN; static counterfactual only, not captured old-code failure",
+      "id": "R3-C01",
+      "priorIDs": [
+        "R2-C08",
+        "R2-C06"
+      ],
+      "status": "NEW",
+      "severity": "BLOCKER",
+      "title": "Read-only receipt snapshots destructively finalize hashes and break every normal positive proof",
+      "locations": [
+        "src/adapters/openfilm/cache-process-supervisor.ts:584",
+        "src/adapters/openfilm/cache-process-supervisor.ts:589",
+        "src/adapters/openfilm/cache-process-supervisor.ts:1389",
+        "src/adapters/openfilm/cache-process-supervisor.ts:2228",
+        "src/adapters/openfilm/cache-process-supervisor.ts:2306"
+      ],
+      "trigger": "A normal receipt is proven by #proveDomainGone, which calls accumulator.state(); the success path next calls #receiptEligibility, which calls state() on the same three Hash objects again. inspectCleanup also invokes state before later segments/proof.",
+      "impact": "state uses Hash.digest rather than a non-consuming snapshot. Second digest throws ERR_CRYPTO_HASH_FINALIZED, and an earlier inspection also prevents later update(). The catch then invokes #fail -> #proveDomainGone -> state again, so the void #run can reject without settling the issued promise. Small normal ASCII protocol cannot complete even with perfect kernel/receipt behavior.",
+      "contract": "Private contract A inspectCleanup read-only and normal positive route; R3 SPEC3 segmented receipt and SPEC8 actual orchestration tests.",
+      "minimalFix": "Make state a non-mutating immutable snapshot (e.g. copy each hash before digest), preserve live accumulators for later segments, and prevent error-cleanup proof from throwing outside owned handoff.",
+      "actualBranchMock": "Feed real cacheInterpretControlMessage/CacheReceiptAccumulator, call state twice, inspect between segments, then validate domain and eligibility on the same accumulator; drive the supervisor returned-child/event branch to actual settlement. Current tests call state only once per newly created accumulator.",
+      "futureDecisiveRuntime": "After authorization, exact synthetic normal N roundtrip must return the expected buffer and permit repeated active/terminal inspect calls without altering seq/digests or settlement."
+    },
+    {
+      "runtime": "NOT_RUN; static counterfactual only, not captured old-code failure",
+      "id": "R3-C02",
+      "priorIDs": [
+        "R2-C11"
+      ],
+      "status": "STILL_OPEN",
+      "severity": "MAJOR",
+      "title": "The nofork pilot still declares cleanup complete after timeout and lacks asynchronous startup ownership",
+      "locations": [
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts:97",
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts:139",
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts:146",
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts:154",
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts:161",
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts:231",
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts:254",
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts:302"
+      ],
+      "trigger": "Any nofork identity assertion/startup failure or delayed close enters endChild. Its fresh close listener may miss an already emitted close; it races 2/3/5s timers then returns void. terminated===true can never match a close promise resolving void. The case unconditionally sets pilot.settled=true. Direct spawn and channels have no error listeners.",
+      "impact": "It can mark cleanup successful without actual close, attempt a needless KILL after an observed close, or crash on asynchronous spawn/socket error. This is a genuine first-stage safety blocker before any AUTHORIZE_FORK. The positive pilot also has no cancel/reap finally: it merely inspects and may discard its registered owner via owned.splice while resources remain held.",
+      "contract": "R3 SPEC7: first identity pilot must safely fail, immediate child/close ownership, deadline never means ended, live owner/evidence retained.",
+      "minimalFix": "Register persistent error/exit/close facts at spawn, use an unambiguous close result, never signal a proven exited child, and set settled only after real nofork C close/reap. On timeout retain a live owned handle and report unknown, not return successful cleanup. For positive stage, bind supervisor+issued handle+actual child/domain owner into the registry and provide a real exact-owned cleanup/reconcile finally; never KILL a forked C as fallback.",
+      "actualBranchMock": "Returned fake ChildProcess emits close before cleanup, exit before delayed close, error with no PID, and delayed/no close; assert truthful terminal/unknown state and no post-exit signal attempts. Deliberately throw an assertion after birth. Stub the actual endChild ownership flow, not a separate boolean helper.",
+      "futureDecisiveRuntime": "First authorized case sends no AUTHORIZE_FORK, intentionally fails an assertion after HELLO, and still records exact C epoch/exit/close before ending; unknown must preserve owner/output. Positive-N cleanup is a separate later case."
+    },
+    {
+      "runtime": "NOT_RUN; static counterfactual only, not captured old-code failure",
+      "id": "R3-C03",
+      "priorIDs": [
+        "R2-C08"
+      ],
+      "status": "STILL_OPEN",
+      "severity": "MAJOR",
+      "title": "Real writable wait references a nonexistent custodian field",
+      "locations": [
+        "src/adapters/openfilm/cache-process-custodian.py:967",
+        "src/adapters/openfilm/cache-process-custodian.py:2003",
+        "src/adapters/openfilm/cache-process-custodian.py:2115",
+        "src/adapters/openfilm/cache-process-custodian.py:2146"
+      ],
+      "trigger": "A real control write gets EAGAIN and _queue_segment or _flush_receipt calls _wait_writable. It reads self._control_write, which is assigned nowhere (only _control_read and ControlWriter(CONTROL_FD) exist).",
+      "impact": "AttributeError escapes; main returns2 instead of resuming output. Raw resources have already been reaped in this branch, so this is lost settlement proof, not an invented live-child orphan. The current unit replaces _wait_writable with a lambda and masks the error.",
+      "contract": "R3 SPEC3 actual final writable drain and bounded exact receipt delivery.",
+      "minimalFix": "Use the actual owned fd4 write endpoint with lifecycle checks; exercise the real select boundary and classify errors without fabricated success.",
+      "actualBranchMock": "Mock select.select only, leave _wait_writable and _flush_receipt intact; force EAGAIN then a later writable notification and assert fd4, exact frame bytes and successful flush. Test disconnect after raw reaping as explicit non-success.",
+      "futureDecisiveRuntime": "Authorized control backpressure/resume must preserve all segment seq/digests and finish receipt plus C close; Host disconnect still locally reaps first."
+    },
+    {
+      "runtime": "NOT_RUN; static counterfactual only, not captured old-code failure",
+      "id": "R3-C04",
+      "priorIDs": [
+        "R2-C06",
+        "R2-N01"
+      ],
+      "status": "STILL_OPEN",
+      "severity": "MAJOR",
+      "title": "Resource-ended proof still rejects legitimate failed startup and cannot reconcile preHELLO failures",
+      "locations": [
+        "src/adapters/openfilm/cache-process-supervisor.ts:822",
+        "src/adapters/openfilm/cache-process-supervisor.ts:1422",
+        "src/adapters/openfilm/cache-process-supervisor.ts:1640",
+        "src/adapters/openfilm/cache-process-supervisor.ts:1934",
+        "src/adapters/openfilm/cache-process-supervisor.ts:2291",
+        "src/adapters/openfilm/cache-process-custodian.py:1377",
+        "src/adapters/openfilm/cache-process-custodian.py:2082"
+      ],
+      "trigger": "N exec fails with a real errno or setsid fails: C retains/reaps N and emits an outcome=reaped receipt with exec.ok=false. Host domain validator requires successful exec whenever forked_pid is non-null, so cleanup is held despite actual ECHILD/group gone. reconcile then rejects facts.worker===null. Separately asynchronous spawn-no-child emits error/close but no exit; custodianBorn is written but never used by the proof, which requires custodianExit.",
+      "impact": "Normal infrastructure failure cannot return its original failure after complete cleanup; PRE/scope/run directory stay held permanently with no live C to obtain a different receipt. Installed error listeners prevent a Host crash but do not close the no-birth lifecycle.",
+      "contract": "R3 SPEC2 explicitly separates raw execution-ended from result-success; SPEC1/4 preHELLO and asynchronous error branches must finish or retain real unknown responsibility.",
+      "minimalFix": "Model no-birth, failed setup/exec and successful exec as distinct authenticated fork outcomes. Accept complete raw cleanup for a failed exec while refusing picture eligibility; allow reconcile using retained C/fork identity before N_HELLO. For verified no-child spawn error+actual close, do not require an exit event that Node does not emit; never treat arbitrary error as no-birth.",
+      "actualBranchMock": "Drive actual returned ChildProcess error/close-without-exit and actual supervisor FORKED exec-failure message flow. Domain cleanup succeeds as a failed result with original errno; business eligibility remains false. Test preHELLO C death remains held.",
+      "futureDecisiveRuntime": "After positive baseline, authorized missing-worker exec, setsid failure and no-child spawn-error cases must actually reap/close and release once with original error, alongside C-dies-after-fork failclosed control."
+    },
+    {
+      "runtime": "NOT_RUN; static counterfactual only, not captured old-code failure",
+      "id": "R3-C05",
+      "priorIDs": [
+        "R2-C04"
+      ],
+      "status": "STILL_OPEN",
+      "severity": "MAJOR",
+      "title": "Unknown N identity can skip escalation and make a live TERM-ignore domain unrecoverable",
+      "locations": [
+        "src/adapters/openfilm/cache-process-custodian.py:1468",
+        "src/adapters/openfilm/cache-process-custodian.py:1498",
+        "src/adapters/openfilm/cache-process-custodian.py:1639",
+        "src/adapters/openfilm/cache-process-custodian.py:771",
+        "src/adapters/openfilm/cache-process-custodian.py:1884"
+      ],
+      "trigger": "After controlled fork, C's exec/settlement identity reads are unknown so worker_identity is still None. _target_census only reads N when worker_identity exists and skips worker_pid in direct_children. Thus it can claim no live/unknown target despite live N; it goes straight to _reap_worker, times out without sending KILL. Recovery later sees a known TERM-ignoring N, but every _settle_domain(resignal=False) starts escalated and never sends any KILL.",
+      "impact": "C and anchor are retained (R3A expiry fix works), but the domain never actively ends after census readability recovers. This is permanent held substituting for the promised actionable cleanup, not a remaining60s exit. Existing adapter/recovery tests prepopulate worker_identity and miss this branch.",
+      "contract": "R3 SPEC1 unknown must be represented from actual fork authority, and ordinary TERM-ignore must complete via retained owned TERM/KILL/wait rather than permanent held.",
+      "minimalFix": "Always account for the unreaped forked N even before any accepted identity; unknown read must produce unknown census. Retain action/escalation state across recovery and permit the still-required exact-owned KILL after identity/authority becomes known, without resending blind group signals or losing N anchor.",
+      "actualBranchMock": "Use actual _settle_domain -> KernelSettlementOperations with worker_pid set but worker_identity=None, first reads unknown then known live, waitpid returns0 until a verified KILL. Assert N never reaped under uncertainty and eventual KILL/adopted waits/Nlast when readable; do not seed the fake with a ready zombie.",
+      "futureDecisiveRuntime": "Authorized preHELLO/late identity-read failure and restored readability, with actual TERM-ignore N, must complete and preserve peer; no repeated unsafe signals or responsibility deadline."
+    },
+    {
+      "runtime": "NOT_RUN; static counterfactual only, not captured old-code failure",
+      "id": "R3-C06",
+      "priorIDs": [
+        "R2-C06"
+      ],
+      "status": "STILL_OPEN",
+      "severity": "MAJOR",
+      "title": "Matching digests/counts still do not validate actual wait/identity semantics",
+      "locations": [
+        "src/adapters/openfilm/cache-process-supervisor.ts:552",
+        "src/adapters/openfilm/cache-process-supervisor.ts:559",
+        "src/adapters/openfilm/cache-process-supervisor.ts:822",
+        "src/adapters/openfilm/cache-process-supervisor.ts:827",
+        "src/adapters/openfilm/cache-process-custodian.py:1965"
+      ],
+      "trigger": "A receipt segment contains one arbitrary wait value (wrong PID, nonterminal status, or adopted wait after N) and arbitrary identity values. Counts/digests are recomputed consistently and all summary booleans/epochs match. Accumulator stores only counters/hashes/PID uniqueness and validator merely requires waits>=1.",
+      "impact": "The shared domain validator accepts a transcript without N's actual terminal wait, without N-last ordering, or without identity epoch/wait correspondence. Segment protocol/draw/ticket fields are not individually checked either. This is a private protocol/fault seam contract defect, not a claim of an external public attacker or observed kernel false reap.",
+      "contract": "R3 SPEC2/3 require actual fork/wait/identity semantics, full epoch binding, segment binding and complete N-last evidence, not self-consistent body counts.",
+      "minimalFix": "Track bounded semantic wait/identity facts as segments arrive: validate shape/status, full required epochs, N exactly once and last, known target completion or explicit parent-reaped category, sequence/binding and summary agreement. Preserve raw failure cleanup eligibility separately from creative success.",
+      "actualBranchMock": "Use actual accumulator+validator with valid digests but wrong/missing N wait, reordered N/adopted waits, duplicate/nonterminal waits, missing/bad epochs and foreign segment draw/ticket. Each must reject; use one real-shaped normal C transcript as positive fixture.",
+      "futureDecisiveRuntime": "Actual C/N/adopted terminal waits, Nlast, ECHILD/group ESRCH and exact epochs must match the segmented transcript; do not replace the runtime proof with mock transcript validation."
+    },
+    {
+      "runtime": "NOT_RUN; static counterfactual only, not captured old-code failure",
+      "id": "R3-C07",
+      "priorIDs": [
+        "R2-C06"
+      ],
+      "status": "STILL_OPEN",
+      "severity": "MAJOR",
+      "title": "Diagnostic accounting stops as soon as settlement begins",
+      "locations": [
+        "src/adapters/openfilm/cache-process-custodian.py:1192",
+        "src/adapters/openfilm/cache-process-custodian.py:1805",
+        "src/adapters/openfilm/cache-process-custodian.py:856",
+        "src/adapters/openfilm/cache-process-custodian.py:880",
+        "src/adapters/openfilm/cache-process-custodian.py:1761"
+      ],
+      "trigger": "After FINALIZE/CANCEL switches from _run_loop to TargetSettlement, N/descendants write stdout/stderr (e.g. TERM handler), then exit. KernelSettlementOperations.sleep only sleeps and _wait_for_recovery ignores stream events. There is no final stream drain before receipt.",
+      "impact": "Already detected overflow now latches correctly, but bytes emitted during settlement/recovery can remain unread and be omitted from stdout_bytes/stderr_bytes. A candidate can be eligible despite actual cumulative output exceeding64KiB; full diagnostics/FD-drained claims are unsupported by actual code. This is not a claim that elapsed cleanup proves settlement.",
+      "contract": "ADR F07 and R3 SPEC2/4 every-phase diagnostics budget and original failure preservation.",
+      "minimalFix": "Service bounded stream reads throughout settlement/recovery without starving wait/cancel, and prove stream EOF/final bounded drain after targets end before emitting counts. Read failures must be explicit unknown/lost diagnostics and disqualify success while permitting proven raw failure cleanup.",
+      "actualBranchMock": "Drive actual KernelSettlementOperations/Custodian phases with late stdout on TERM and total just over64KiB, then real-shaped waits; assert actual drain/latch/counts, not merely manually setting diagnostics_lost in validator input.",
+      "futureDecisiveRuntime": "Authorized candidate-then-late stdout/stderr and TERM-handler output cases must account every emitted byte, reap domain, and reject success at the limit; normal bounded output remains successful."
+    },
+    {
+      "runtime": "NOT_RUN; static counterfactual only, not captured old-code failure",
+      "id": "R3-C08",
+      "priorIDs": [
+        "R2-C06"
+      ],
+      "status": "STILL_OPEN",
+      "severity": "MAJOR",
+      "title": "Identity budget failure becomes an irreversible responsibility hold even after all children end",
+      "locations": [
+        "src/adapters/openfilm/cache-process-custodian.py:1246",
+        "src/adapters/openfilm/cache-process-custodian.py:1607",
+        "src/adapters/openfilm/cache-process-custodian.py:1672",
+        "src/adapters/openfilm/cache-process-custodian.py:1860",
+        "src/adapters/openfilm/cache-process-supervisor.ts:783"
+      ],
+      "trigger": "More than512 actual target identities are seen. _record_target sets _identity_overflow permanently; _known_targets_gone immediately returnsFalse forever, even after actual adopted/N waits, ECHILD and group ESRCH succeeded.",
+      "impact": "_recover can never return proven cleanup and C remains forever with no children; no original budget failure is latched there. Event truncation similarly makes delivered domain proof permanently inadmissible. Bounded bookkeeping is necessary, but cannot replace a resource-ended failed outcome with permanent held once raw ending is genuinely provable.",
+      "contract": "R3 SPEC2: independent budget failure must not become permanent held after domain is reaped; no new expiry is requested or permitted.",
+      "minimalFix": "Use bounded authoritative wait/target proof and fail budget eligibility at overflow while retaining real ownership until raw cleanup is independently complete. Define a verifiable failed terminal transcript for overflow rather than dropping needed authority or blindly clearing the flag; do not add a responsibility timeout.",
+      "actualBranchMock": "Actual _record_target overflow -> settlement/recovery with all actual children waited, known retained epochs gone, ECHILD and group ESRCH true; assert eventual failed terminal outcome with original budget error. Separately real unknown/live target must still retain C/N authority.",
+      "futureDecisiveRuntime": "Only after smaller pilots, approved bounded overflow stress must end all owned children and return failure without orphan, unbounded memory or permanent empty custodian."
+    },
+    {
+      "runtime": "NOT_RUN; static counterfactual only, not captured old-code failure",
+      "id": "R3-C09",
+      "priorIDs": [
+        "R2-N04"
+      ],
+      "status": "STILL_OPEN",
+      "severity": "MINOR",
+      "title": "Adopted TERM-ignore helper still has no ready/liveness barrier before leader leaves",
+      "locations": [
+        "tests/agent-driven/integration/helpers/cache-worker-fixture.mjs:235",
+        "tests/agent-driven/integration/helpers/cache-worker-fixture.mjs:321"
+      ],
+      "trigger": "If the existing ignore-term-adopted helper mode is selected, it returns immediately after spawn and main process.exit; C may deliver TERM before the grandchild installs its handler/writes child-alive. No ready/adoption/TERM-survival barrier is implemented.",
+      "impact": "The EPIPE source is fixed by ignore stdio plus an owned events sink, but this fault helper can still exercise early TERM death instead of a live adopted TERM-ignoring child. Current lifecycle file contains only nofork and normal stages; this is a scaffold defect to fix before later adoption testing, not an accusation that an existing ISO runtime passed or that missing kernel tests alone are a defect.",
+      "contract": "R3 SPEC7 explicit same-epoch adopted/TERM-survived mode reached before KILL, no accidental simpler branch as ISO proof.",
+      "minimalFix": "Add an owned child-ready handshake and record/require same epoch adopted PPID=C plus post-TERM liveness before escalation; unexpected early child exit must fail the case and still clean precisely.",
+      "actualBranchMock": "Check actual scenario orchestration waits for child readiness and consumes adoption/TERM records; a missing-ready or early-exit branch must be failure.",
+      "futureDecisiveRuntime": "After normal pilot, observe child same startticks live under C and TERM handler recorded before actual KILL/wait; early TERM exit must make adoption case red."
+    }
+  ],
+  "prior_dispositions": [
+    {
+      "priorID": "R2-C04",
+      "status": "STILL_OPEN",
+      "assessment": "Finite expiry and Host KILL are removed; R3-MAIN-01 is CLOSED_STATIC, actual recovery adapters now tested; pre-identity cleanup progress R3-C05 remains.",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "priorID": "R2-C06",
+      "status": "STILL_OPEN",
+      "assessment": "Domain/eligibility separation and detected overflow latch added; failed exec, wait semantics, late diagnostics and budget terminal route remain R3-C04/C06/C07/C08.",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "priorID": "R2-C08",
+      "status": "STILL_OPEN",
+      "assessment": "Segmentation and explicit flush state added; destructive snapshot R3-C01 and missing fd field R3-C03 block actual usage.",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "priorID": "R2-C09",
+      "status": "CLOSED_STATIC",
+      "assessment": "Queued and late postcandidate messages are now interpreted by actual pump; worker sends close-error envelope. Host currently reduces envelope to code/message/phase; full error-detail preservation remains limited.",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "priorID": "R2-C11",
+      "status": "STILL_OPEN",
+      "assessment": "Separate stages and per-run helper copy/hash added; first-stage cleanup remains unproved and positive stage lacks owned cancellation finally R3-C02.",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "priorID": "R2-N01",
+      "status": "CLOSED_STATIC",
+      "assessment": "Actual production child/channel error listeners installed; asynchronous no-birth settlement remains R3-C04, first pilot listeners still R3-C02.",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "priorID": "R2-N02",
+      "status": "CLOSED_STATIC",
+      "assessment": "Host no longer KILLs C; TERM only when no exit and fresh matching custodian epoch; no bare close-absence guarantee.",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "priorID": "R2-N03",
+      "status": "CLOSED_STATIC",
+      "assessment": "One finalize deadline is now passed to actual C-close proof; residual synchronous bookkeeping/fresh checks must still stay within that deadline, no runtime evidence.",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "priorID": "R2-N04",
+      "status": "STILL_OPEN",
+      "assessment": "EPIPE specifically repaired by owned file/ignore stdio; ready/adoption/TERM-survival barrier remains R3-C09.",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "priorID": "R3-MAIN-01",
+      "status": "CLOSED_STATIC",
+      "assessment": "No RECOVERY_SECONDS60 responsibility expiry remains; _recover loops until actual ok, EOF/selector EIO unregisters control and pauses local recovery. Tests drive real recovery+settle adapter beyond60seconds, not only FakeOperations.",
+      "runtime": "NOT_RUN"
+    }
+  ],
+  "pilot_boundary": {
+    "nofork": "NOT_SAFE_AS_CURRENTLY_WRITTEN: R3-C02 must be corrected; other N/receipt defects need not block a tightly owned no-authorize identity-only harness",
+    "positive": "NOT_SAFE_AS_CURRENTLY_WRITTEN: R3-C01/C02/C03 and actual failure ownership/proof corrections required",
+    "authority": "No runtime release granted by this review"
+  },
+  "original17": "NOT_RUN / unaccepted; NEXT pending after N1N2 acceptance",
+  "ISO01_18": "ALL NOT_RUN",
+  "source_edits": false
+}

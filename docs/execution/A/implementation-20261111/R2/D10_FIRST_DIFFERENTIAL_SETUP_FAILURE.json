@@ -1,0 +1,27 @@
+{
+  "at": "2026-11-12T02:40:35.798704+00:00",
+  "capture": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/d10-business-oldsel-001",
+  "classification": "FAILED_SETUP_NOT_VALID_BUSINESS_COUNTEREXAMPLE",
+  "observed": {
+    ".exit": {
+      "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+      "content": "1\n",
+      "foreign_key_failure": null
+    },
+    ".result.json": {
+      "sha256": "c87cd8d9ac514e5527ef2000d53a2610c95e68e2744f1569314ae4b050e00bd8",
+      "content": "{\n  \"exit\": 1,\n  \"source_changed\": [],\n  \"source_added\": [],\n  \"log_sha256\": \"18d81cfaaf6f44e9a178de2dc8c7ebd8675bf9d130e25883eec192d5c299b927\",\n  \"finished_at\": \"2026-11-12T02:38:07.626190+00:00\"\n}",
+      "foreign_key_failure": null
+    },
+    ".txt": {
+      "sha256": "18d81cfaaf6f44e9a178de2dc8c7ebd8675bf9d130e25883eec192d5c299b927",
+      "content": null,
+      "foreign_key_failure": true
+    }
+  },
+  "source_repaired_sha256_now": "0fa52f3c75d2f8704af7ed507eeb369b3e195356b56a39a0841f98355cd1f7fe",
+  "source_note": "Observed read only; no source/index mutation by MAIN. Current hash not alone process-termination proof.",
+  "direction_message": "msg_e54fbed3710a",
+  "parent_message": "msg_a7964d93df00",
+  "decision": "Keep same authorized writer and FK/trigger/business assertions; correct fixture order, freeze and capture uniquely after terminal proof; keep grant002 exclusively reserved/in use; no PASS"
+}

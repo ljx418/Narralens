@@ -1,0 +1,100 @@
+{
+  "verdict": "STATIC_SAFE_FOR_EXACT_NOFORK_IDENTITY_AND_ASSERTION_FAILURE",
+  "scope": "R4B residual standalone nofork tool safety only; static read/hash, no runtime authority",
+  "candidate": {
+    "tool_sha256": "73fed24c66ec310ccd811fdd7e4dfb51be6d22875ce81a50e1a86a47072fe00d",
+    "test_sha256": "feb9786b4f38044382ab6ac2ca8435f3bdf89ae83c0882b47177573136deb5ce",
+    "report_sha256": "fb2bbc264c529b096eb96865ce6735f566ca5921774e7f0e0b3956bb5cdb5902",
+    "custodian_sha256": "6b8d6df32b1958b3cf53e05152e9b04abf6c010d58ae6e672fcd7fa4c9511618",
+    "python_sha256": "e50d468e8b0adfb05733f5b87b3cff34829c4a8c1aea50c865aa8bdfe4bb150f"
+  },
+  "blocking_findings": [],
+  "prior_dispositions": [
+    {
+      "priorID": "R4A-NF01-A",
+      "classification": "CLOSED_STATIC",
+      "severity": "MAJOR",
+      "locations": [
+        "tools/native-cache-nofork-pilot.mjs:887",
+        "tools/native-cache-nofork-pilot.mjs:917",
+        "tools/native-cache-nofork-pilot.mjs:939",
+        "tools/native-cache-nofork-pilot.mjs:1013",
+        "tools/native-cache-nofork-pilot.mjs:1378",
+        "tools/native-cache-nofork-pilot.mjs:1439"
+      ],
+      "actual_trigger": "The HELD report write returns normally then its callback/error event reports EPIPE while owned C remains live.",
+      "assessment": "main's first action installs the real default stderr boundary before any spawn. Both callback and error event latch the failure; the same object is deduplicated, failure summaries capped at8, first failure retained, broken writes not retried. Listener is not removed. HELD keeps same ledger/close promise/root and polls full proof; reporting failure does not signal again or exit early.",
+      "actual_branch_mock": "test:1112 drives actual main with FakeWritable's delayed callback AND emitted error; main remains pending, root stays one, ladder stays TERM/KILL, later exit+close+freshgone permits failed completion and final.json retains EPIPE once.",
+      "minimal_fix": "None required for this exact fixed nofork scope.",
+      "decisive_runtime": "Future separately authorized actual nofork HELD/EPIPE observation; mock does not establish real Writable/kernel event order.",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "priorID": "R4A-NF01-B",
+      "classification": "CLOSED_STATIC",
+      "severity": "MINOR",
+      "locations": [
+        "tools/native-cache-nofork-pilot.mjs:1354",
+        "tests/agent-driven/integration/helpers/native-cache-nofork-pilot.test.mjs:1164"
+      ],
+      "actual_trigger": "Expected assertion has happened and C is terminal, then outcome.json write throws ENOSPC.",
+      "assessment": "Returned result clears identity_proved/fault_case_passed/evidence_published, changes kind to failed and records unexpected evidence-write while preserving original expected assertion and full cleanup proof. Actual runPilot and main are tested. This is result qualification, not physical orphaning.",
+      "minimal_fix": "None for assigned residual; external receipt validator must use the combined acceptance predicate described in REVIEW.",
+      "decisive_runtime": "Separate actual filesystem-failure observation remains NOT_RUN; do not accept arbitrary exit1 or candidate file alone."
+    },
+    {
+      "priorID": "R4A-NF02-A",
+      "classification": "CLOSED_STATIC",
+      "severity": "MINOR",
+      "locations": [
+        "tools/native-cache-nofork-pilot.mjs:180",
+        "tools/native-cache-nofork-pilot.mjs:498",
+        "tools/native-cache-nofork-pilot.mjs:544",
+        "tests/agent-driven/integration/helpers/native-cache-nofork-pilot.test.mjs:1212"
+      ],
+      "actual_trigger": "Oversize header followed by thousands of malformed chunks.",
+      "assessment": "First fatal feed sets failed and releases buffer; later feed returns empty before concatenation. Ledger adds at most one null marker; valid queue budgets remain64frames/256KiB. Taking a payload decrements queue bytes. Test uses actual ledger/decoder, including3000 further chunks and queue-accounting case.",
+      "minimal_fix": "None.",
+      "decisive_runtime": "Real channel/flood NOT_RUN; fixed C small HELLO path unchanged."
+    },
+    {
+      "priorID": "NF-03",
+      "classification": "CLOSED_STATIC",
+      "assessment": "Shared checkTerminalProof still requires actual close plus exit fact/no-birth and fresh original epoch gone; resolved close with unknown proc remains HELD with referenced nonspinning polling and no new signal."
+    },
+    {
+      "priorID": "NF-04",
+      "classification": "CLOSED_STATIC",
+      "assessment": "Null PID/epoch remains guarded; actual runner's async EAGAIN+close/no-exit branch preserves original spawn failure and proves legitimate no-birth."
+    },
+    {
+      "priorID": "NF-05",
+      "classification": "CLOSED_STATIC",
+      "assessment": "Fresh PPID remains compared to actual tool PID/recorded parent along with full C epoch; no new signal authority."
+    },
+    {
+      "priorID": "NF-06",
+      "classification": "CLOSED_STATIC",
+      "assessment": "Prior correction four failed R4 captures001..004 plus005green remains authoritative; no historical rewrite. R4B adds four successful captures, with test001 historical pre-final test bytes and test002 final bytes."
+    }
+  ],
+  "notes": [
+    {
+      "id": "R4B-NOTE-01",
+      "classification": "NOTE",
+      "severity": "NOTE",
+      "locations": [
+        "tools/native-cache-nofork-pilot.mjs:1316",
+        "tools/native-cache-nofork-pilot.mjs:1485",
+        "tools/native-cache-nofork-pilot.mjs:1495"
+      ],
+      "trigger": "A reporting failure is discovered after the candidate outcome.json was written, or an evidence write fails after some bytes became visible.",
+      "impact": "A retained candidate may look green although returned qualification/exit is failed. C is already terminal outside HELD, so this is not an orphan or a fresh safety blocker under MAIN's explicitly stipulated combined validator.",
+      "qualification": "Actual name is reporting.json (best-effort negative record); final.json is for HELD recovery. outcome.json does not serialize evidence_published/evidence_errors/reporting_failure; these are returned-memory fields, so do not claim a positive reporting receipt exists on disk. Require complete matching capture/exit, parseable full outcome, expected mode/error, terminal proof and no reporting/evidence failure or contradictory/missing required records. Failed or ambiguous publication is not an accepted assertion-failure case.",
+      "minimal_fix": "No two-file safety fix requested by this review; enforce stated MAIN validator and record actual artifact availability in the future execution ticket.",
+      "runtime": "NOT_RUN"
+    }
+  ],
+  "runtime": "Reviewer ran no tests/import/CLI/C/prctl/fork/signals/kernel/Host/browser/media/probe/network; all such evidence remains NOT_RUN.",
+  "unchanged_scope": "Production14 remain OPEN; original17/ISO18/N1N2/fullgates/NEXT not accepted or reduced."
+}

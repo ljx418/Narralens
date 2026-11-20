@@ -1,0 +1,25 @@
+{
+  "at": "2026-11-12T05:57:45.526588+00:00",
+  "observed_sha256": "777f286f27d70eff9f06fa9cf1aebbd2cd20beb54ed35dd8b339e5a229301a62",
+  "scope": "static live-source review, no execution or acceptance claim",
+  "source_snapshot": "retained-native-closure.ts.observed",
+  "compile_capture": "n1n2-claude-resume-002-tsc-closure-fixes",
+  "compile_exit": 2,
+  "findings": [
+    "all-time fd number tombstones can skip closing reused allocation",
+    "multiple temporary descriptor cleanup exceptions swallowed",
+    "rootFd acquired before unprotected MembershipOf",
+    "root held fstat identity not paired with pathname identity",
+    "ancestor open failure silently breaks retained chain"
+  ],
+  "required_evidence": [
+    "nested-directory enumeration then reused FD retained leaf closes exactly once per allocation",
+    "temporary close failure preserves primary and cleanup error and sticky refusal",
+    "root post-open stat fault releases acquired resource",
+    "root path/held-object mismatch refuses",
+    "required ancestry acquisition failure refuses"
+  ],
+  "supervisor_message": "msg_ea150d383042",
+  "status": "OPEN_PENDING_CORRECTION_AND_REGRESSION",
+  "source_or_index_mutated": false
+}

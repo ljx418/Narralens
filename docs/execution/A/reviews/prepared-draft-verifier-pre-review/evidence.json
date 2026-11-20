@@ -1,0 +1,93 @@
+{
+  "scope": "Independent read-only verifier/processor/store pre-review. Reviewer did not implement these modules; existing native planner authoring is separate scope. No tests/type/media/import run.",
+  "baseline_sha": "838ba5f2c8500f0103f56dbe51264ea9f70086fc",
+  "head_at_capture": "838ba5f2c8500f0103f56dbe51264ea9f70086fc",
+  "input_state": "dirty evolving candidate after scoped source fixes; no final freeze approval",
+  "source": [
+    {
+      "path": "src/host/agent-driven/prepared-draft-verifier.ts",
+      "sha256": "ffefbd4169dfd07930723e2606997845fc1bc4a1aa9d0f6b60b7bfd6eb5276db"
+    },
+    {
+      "path": "src/host/agent-driven/created-draft-processor.ts",
+      "sha256": "6727b0b64bc07cfdea0346e7f885d0ffcbd74832a66f939056735c66872eeef5"
+    },
+    {
+      "path": "src/host/agent-driven/created-task-store.ts",
+      "sha256": "d7a4734cc9ed5924b7088a4cfaebecdd2ff202c373a9621c21078908f10e7b14"
+    },
+    {
+      "path": "src/host/agent-driven/created-task-worker.ts",
+      "sha256": "41a7658520d68a90be976690a9c27311f4be47a4a58776686e950ce3a563d4c4"
+    },
+    {
+      "path": "src/host/agent-driven/local-asset-registry.ts",
+      "sha256": "84ce639583427de6adfbf4dab892b9a77fd888de1c5f005d824d22bc3aca2e92"
+    },
+    {
+      "path": "src/host/agent-driven/created-task-gate.ts",
+      "sha256": "1a65d8f3e9950847decdea2478a2d8542bb33d5018119282c18144c2694a8860"
+    },
+    {
+      "path": "src/host/engine/source-digest-v1.ts",
+      "sha256": "d32dfc433865865749efd5e5f44f00eceff27b93d7607603c5eb9233708c599d"
+    },
+    {
+      "path": "tests/agent-driven/integration/created-draft-processor.test.ts",
+      "sha256": "a1df47e95f6bb7a8e7825ced877a9a03d74bfe5b899b131821e99c164f7bb3ec"
+    },
+    {
+      "path": "tests/agent-driven/integration/source-digest-resource-boundary.test.ts",
+      "sha256": "b6aa70b3fde614a30a43dbe0505c39d6dec1cae2e90c2c5eabbf6fac073c3ed5"
+    },
+    {
+      "path": "tests/agent-driven/integration/created-task-store.test.ts",
+      "sha256": "1c262f7c87979935c99f63a3aa6ab649f8c91d7af8c07d17b6e1b985943ca002"
+    }
+  ],
+  "verifier_bridge_sha256": "380b235ff8ccc2bfe6ce8d5aaacd6ee78a10816060ef3cba389df2c7197a0bba",
+  "verifier_main_sha256": "ffefbd4169dfd07930723e2606997845fc1bc4a1aa9d0f6b60b7bfd6eb5276db",
+  "verifier_delta": "Only two catch blocks explicitly return failure(error); source equal after that exact transformation",
+  "baseline_digest_sha256": "8ca552094337822d35215742f704b00daac36a69e81a8f12c2650a7736d13a4c",
+  "original_root_fragment_sha256": "3c0e2249c81f6694ff7149386417eb6c5ff1af9e93971526861b75792e41ef9c",
+  "original_root_note": "Exact pre-fix line observed; initial full processor file was not captured before repair, no invented original whole-file hash",
+  "prepared_observation_hashes": [
+    {
+      "path": "docs/execution/A/logs/draft-processor-real-1794277917161/observed.json",
+      "sha256": "a2b5c319d3c95c46e59d7eeb52458bc42a6781202ebc36c83a97eabcf552ea61"
+    },
+    {
+      "path": "docs/execution/A/logs/draft-processor-real-1794278226017/observed.json",
+      "sha256": "7bffd9d74515281c3530f15191531cf3a904edada978f5306a1faecf6e8e0d32"
+    }
+  ],
+  "runtime_validation": "NOT_RUN by reviewer",
+  "MAIN_reported_runs": [
+    {
+      "handle": 60344,
+      "resource_cases": 3,
+      "existing_digest_cases": 18,
+      "processor": "fixture failure before worker; retained"
+    },
+    {
+      "handle": 30961,
+      "tsc_exit": 0,
+      "actual_processor_cases": 5,
+      "exit": 0
+    },
+    {
+      "handle": 71456,
+      "tsc_exit": 0,
+      "files": 7,
+      "tests": 98,
+      "exit": 0,
+      "scope": "before final reaper attempt postcondition/store39 case"
+    },
+    {
+      "handle": 32373,
+      "state": "RUNNING at parent report",
+      "scope": "final type/store39/build/scan; no result inferred"
+    }
+  ],
+  "report_sha256": "d654313c9b6ac58d6e4c86306364ab1da72f8453c1958bf9f3f662451ca9afec"
+}

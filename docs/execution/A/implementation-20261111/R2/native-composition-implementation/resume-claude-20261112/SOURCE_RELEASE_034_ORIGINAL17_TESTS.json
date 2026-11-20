@@ -1,0 +1,43 @@
+{
+  "id": "N1N2_021_ORIGINAL17_EVIDENCE_TEST_RELEASE_034",
+  "at": "2026-11-13T02:52:07.571918+00:00",
+  "status": "TEST_SOURCE_ONLY_NO_BUSINESS_RUNTIME",
+  "request": "msg_cb9d631e1551",
+  "dispatch": "ctx_297f7b8da2e1",
+  "write_paths": {
+    "tests/agent-driven/integration/created-native-source-reader.test.ts": "8d740f83883fd42c13f8e0e2ea63bee406f8d9edf19ea02a1005c72e26616e60"
+  },
+  "protected_other14": {
+    "src/host/agent-driven/native-cache-witness.ts": "85b1e804b3956165a6f8e171aa1fb8800cd8337290ad2d16ac05d3906ba2501a",
+    "src/host/agent-driven/created-native-workspace.ts": "32d5adae9d737b6799f20531e50956413a619e048a8f2f225fccb064205afbd2",
+    "src/host/agent-driven/committed-snapshot-authority.ts": "1c53360e3c618c603cfcbe61d0c2d57004c5bd33dc26a92c2fdec72a1844bd6d",
+    "src/host/m5/openfilm-native-expected.ts": "19110e45a83b6d5b611b4260620ce873f923f1e5a5b907bc6176c4b734fbeed3",
+    "src/adapters/openfilm/openfilm-upstream.ts": "29a0827a6130c2f382de93d1738b1be003c5ef15ded253d256585e6214d2aa69",
+    "tests/agent-driven/integration/helpers/native-source-fixture.ts": "7160a285930e61b7927d90bb517e7d9575f5f0888394d228b192baff80daf622",
+    "tests/agent-driven/integration/helpers/created-draft-fixture.ts": "59788a8f9c08415a808b2418e86b4dac6bb7de65297ad5d1cb19b5f26eb22d27",
+    "tests/agent-driven/integration/created-native-workspace.test.ts": "439d469032c9af2b83ceb826e0aead7cf5c2fe5c5693be7cbf18c8e67f0f615f",
+    "tests/agent-driven/integration/committed-snapshot-host.test.ts": "bfd0c6373b254050d32a6a99e7b6f8b9827dc24b6b2587515ab4c5aad2cd9037",
+    "tests/agent-driven/integration/created-native-ack.test.ts": "5f50db85c7c07a2ecf4faefc20ec2ec6c7ad4910fafe549c2edc76bbad729c7c",
+    "src/host/agent-driven/retained-native-closure.ts": "776331d6397191ee7fc97a4859f8d3ff95031efaf2d4fe7a7ee875451d85eb30",
+    "src/host/agent-driven/created-native-source-reader.ts": "f00e02781c8531a74a1034a6a1c992c463f49ff1cbf9c49b203e8449d8360d7d",
+    "tests/agent-driven/integration/native-cache-witness.test.ts": "eb5c71c99b749509b304bc925ec47469099f1049746e63f145ae851c6281bcb1",
+    "tests/agent-driven/integration/created-draft-processor.test.ts": "684df1c287890a13ecd8b08a4cd32d5053c2868e80494eca2fcc6412cdc4e0b6"
+  },
+  "existing_evidence_mapping_corrections": [
+    "F10 lines1084..1089 already logs actual node/icu/locale and asserts nonempty; B1 log has actual fingerprint, not uncovered",
+    "P07 lines1733..1770 already snapshots released walk FDs and asserts release.some(fd=>walk.includes(fd)); actual B1 passed, not uncovered. Preserve exact original assertions",
+    "R00 real rich producer chain requirement does not invent unbounded combinations; existing smoke/helper realchain andrights/consumer lineage assertions must be cited accurately",
+    "NEXT has canonical next-wiring-draft planning package, still DRAFT_PENDING_N1N2_ACCEPTANCE; final accepted-commit reanchor outstanding, not entirely no work"
+  ],
+  "test_requirements": [
+    "Add distinct P09 path-count limit case using real closureTree and maxPaths small; assert exact refusal reason, actual successful allocation and complete real cleanup; no depth limit accidentally masks path-count gate",
+    "Add distinct P09 named lstat failure case plus genuine independent cleanup failures; real platform error primary retained, every outstanding allocation attempted exactly once and no raw numeric retry. Prefer real disappearing named file after root readdir snapshot using existing open/close observation hooks: actual walk child close can rename/remove an owned later sibling, then lstat yields ENOENT. Do not fake held FDs or close live FDs behind owner; no production stat hook or fake file facts. If safe reproducible design unclear ask with prewrite plan rather than weaken",
+    "Strengthen existing G07 complete independent tree directory case or add named P09: recursively enumerate actual source+workspace directory sets (including roots/nested/empty), compare exact tree/path/identity set; prove each newly held directory has actual live /proc/self/fd descriptor with matching dev/ino, not merely observation record. Distinguish preexisting baseline FDs to avoid proof by another owner. Retain physical separation and proper release",
+    "Do not modify existing88 assertions except additive G07 strengthening; no production/config/contract changes or extra features",
+    "Revise own original17 map against actual assertions/logs; preserve failed and wrong candidate history",
+    "Record next unique serialtsc and15 exact byteblobs/hash, submit precise new case names and runtime request; no business tests until freshgrant"
+  ],
+  "fullgate": "POSTPONED until genuine evidence gaps closed; no pnpmcheck/build/runtime yet",
+  "cleanup_basis": "msg_cb9d631e1551 owncleanup reported, all recorded test PIDs terminal; globalabsence not independentlyclaimed",
+  "stop": "New429 immediateSTOP no retry/provider switch/takeover"
+}

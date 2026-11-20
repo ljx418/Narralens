@@ -1,0 +1,97 @@
+{
+  "at": "2026-11-15T01:45:12.854831+00:00",
+  "rows": [
+    {
+      "capture": "n1n2-claude-060p1r4a-check-test-001",
+      "exit": 0,
+      "inputs": 649,
+      "current_mismatches": [
+        "tools/native-cache-nofork-pilot.mjs"
+      ],
+      "source_changed": [],
+      "source_added": [],
+      "log_matches": true,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "capture": "n1n2-claude-060p1r4a-check-test-002",
+      "exit": 0,
+      "inputs": 649,
+      "current_mismatches": [],
+      "source_changed": [],
+      "source_added": [],
+      "log_matches": true,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "capture": "n1n2-claude-060p1r4a-check-tool-001",
+      "exit": 0,
+      "inputs": 649,
+      "current_mismatches": [
+        "tests/agent-driven/integration/helpers/native-cache-nofork-pilot.test.mjs",
+        "tools/native-cache-nofork-pilot.mjs"
+      ],
+      "source_changed": [],
+      "source_added": [],
+      "log_matches": true,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "capture": "n1n2-claude-060p1r4a-check-tool-002",
+      "exit": 0,
+      "inputs": 649,
+      "current_mismatches": [
+        "tools/native-cache-nofork-pilot.mjs"
+      ],
+      "source_changed": [],
+      "source_added": [],
+      "log_matches": true,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "capture": "n1n2-claude-060p1r4a-check-tool-003",
+      "exit": 0,
+      "inputs": 649,
+      "current_mismatches": [],
+      "source_changed": [],
+      "source_added": [],
+      "log_matches": true,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "capture": "n1n2-claude-060p1r4a-test-001",
+      "exit": 1,
+      "inputs": 649,
+      "current_mismatches": [
+        "tools/native-cache-nofork-pilot.mjs"
+      ],
+      "source_changed": [],
+      "source_added": [],
+      "log_matches": true,
+      "log_sha256": "3750b2d5ca1fb1fe4b34ebb32364db0b4e058da9ca7ebde2160d293569a03a34"
+    },
+    {
+      "capture": "n1n2-claude-060p1r4a-test-002",
+      "exit": 0,
+      "inputs": 649,
+      "current_mismatches": [
+        "tools/native-cache-nofork-pilot.mjs"
+      ],
+      "source_changed": [],
+      "source_added": [],
+      "log_matches": true,
+      "log_sha256": "70c1b99018c51447127a5f3714b128fb86f83a825801cfbc26e01b1464fd5623"
+    },
+    {
+      "capture": "n1n2-claude-060p1r4a-test-003",
+      "exit": 0,
+      "inputs": 649,
+      "current_mismatches": [],
+      "source_changed": [],
+      "source_added": [],
+      "log_matches": true,
+      "log_sha256": "113ae9ff0b5122f6741b6367f8b4b44cb83b0faa2b1d80054660a208ebc672b7"
+    }
+  ],
+  "limit": "Puremock/syntax checks only; realC/prctl/signals/kernel notrun; earlygreenwithinputdrift not finalproof"
+}

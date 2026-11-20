@@ -1,0 +1,101 @@
+{
+  "status": "READONLY_DESIGN_PROPOSAL",
+  "baseline_head": "1d348d419120f23f45d958112ea8c43df5a04675",
+  "input_kind": "uncommitted P1 INPUT_SNAPSHOT bytes; not accepted candidate",
+  "runtime": "ALL_NOT_RUN",
+  "recommendations": {
+    "Q1": {
+      "decision": "ADR_REV3_PER_DRAW_PYTHON_CUSTODIAN_OUTSIDE_TARGET_GROUP",
+      "rejected": [
+        "worker-local subreaper cannot reap after its own SIGKILL",
+        "ordinary ISO-09 permanently CLEANUP_REQUIRED"
+      ],
+      "new_file": "src/adapters/openfilm/cache-process-custodian.py",
+      "dependencies": "Python3 stdlib ctypes/os/selectors/socket; Linux libc prctl and procfs; no native compilation/install",
+      "process_tree": "Host -> C(own SID/PGID) -> N(setsid own SID/PGID) -> Chrome inherits N",
+      "wait_owner": "C only waitpid for N/adopted descendants; Host only reaps C",
+      "anchor": "waitid P_PID N WEXITED|WNOHANG|WNOWAIT retains leader until all necessary group signals and other descendants reaped; reap N last, then group ESRCH",
+      "control": "direct Host-Node draw fd3 plus Host-C fd4, separate sole writers; bounded Node stdout/stderr drained by C",
+      "finish_order": [
+        "target raw execution stopped",
+        "C reaps adopted descendants, retains then reaps leader last",
+        "ECHILD + group ESRCH + knownIDs absent including Z",
+        "C receipt flushed and C itself closes/exits/reaped",
+        "parent HTTP/source close/probe drain",
+        "endDraw/PRE cleanup/final witness/currentness/scope release"
+      ],
+      "exceptions": "unexpected C death/permission/proc uncertainty failclosed with original ownership; normal TERM-ignore must proactively close",
+      "python_entry": "reviewed absolute Python executable with -I -S -B fixed custodian path; allowlisted env, no ticket argv/env"
+    },
+    "Q2": {
+      "decision": "CORRECT_CLOSE_REASONING_KEEP_UPSTREAM_DEFAULT_PILOT_THEN_CONDITIONAL_OWNED_PROBE",
+      "normal_close": "process ended AND stdio closed; self-closing stdio alone cannot make live ChildProcess close",
+      "callback_exception": "execFile also invokes callback from errorhandler and synchronous kill exception without requiring child close",
+      "term_ignore": "normal successful SIGTERM syscall with ignored signal may leave callback/promise pending, not early-resolved",
+      "conditional_new_file": "src/adapters/openfilm/cache-frame-duration-probe.ts",
+      "compatibility": [
+        "same argv and20s baseline",
+        "same stat cache key/one task per version/error deletion",
+        "same rate preference/validation/seconds result",
+        "same route body/status/headers/path guards",
+        "only narrow lifecycle TERM->KILL+real close/reap changes, no global patches"
+      ],
+      "pilot": [
+        "real ffprobe normal/cache",
+        "real helper closes stdio but stays live",
+        "real helper ignores TERM, test owner KILL cleanup",
+        "spawn-no-child error distinct from live signal error injection",
+        "actual route parent probe held across worker/custodian end"
+      ]
+    },
+    "Q3": {
+      "decision": "ALREADY_ADR_APPROVED_NO_REPEAT_USER_CONFIRMATION",
+      "must_verify": [
+        "real two frames/poster under existing budgets",
+        "actual own-origin/iframe/media success and external refusal",
+        "Q02/Q03/K05/reader/Expected",
+        "all17 andISO18 retained"
+      ],
+      "cost": "one additional Python custodian per active scope plus Node/browser startup and IPC; no across-draw page reuse; retain disk cache algorithm"
+    }
+  },
+  "P1_static_prerequisites": [
+    {
+      "path": "src/adapters/openfilm/cache-process-supervisor.ts",
+      "line": 251,
+      "issue": "Number(fields[0]) converts S/R/Z state to NaN and identity function returns null; group scan then treats invalid/unreadable as empty",
+      "required": "parse state as state, PID from argument; distinguish unknown proc errors from ESRCH/confirmed empty"
+    },
+    {
+      "path": "src/adapters/openfilm/openfilm-upstream.ts",
+      "line": 783,
+      "issue": "source error resolves stream lifetime before actual close",
+      "required": "preserve genuine error and still await source close"
+    }
+  ],
+  "rev3_identity": {
+    "custodian": "pid=Host ChildProcess.pid;ppid=Host;sid=pgid=pid;startticks match",
+    "node": "pid=C FORKED;ppid=C.pid;sid=pgid=pid;Host/proc/C/Node HELLO match; no longer ppid=Host",
+    "adoption": "descendant ppid may become C; verify owned kernel-child relationship and recorded identities"
+  },
+  "no_multwriter": {
+    "draw": "Host and Node respective directions, C closes duplicate draw endpoint",
+    "custodian_control": "Host and C respective directions, Node closes it before exec",
+    "stdio": "Node own pipes drained by C, C own diagnostic stdio separate",
+    "backpressure": "bounded frames/queues even when no waiter or Host not consuming; cleanup loop never blocks on write"
+  },
+  "pilot_before_full": [
+    "static identity/proc fix and rev3 review",
+    "non-browser real subreaper+TERM-ignore+WNOWAIT+peer+EOF+C-death pilot",
+    "Q2 decisive event pilot and seam decision",
+    "new actual Chrome containment/picture pilot",
+    "all required seventeen+ISO18 and affected/full verification, then frozen re-review"
+  ],
+  "new_helpers_and_tests": [
+    "tests/agent-driven/integration/helpers/cache-worker-fixture.mjs",
+    "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts",
+    "tests/agent-driven/integration/helpers/cache-probe-fixture.mjs",
+    "tests/agent-driven/integration/cache-frame-duration-lifetime.test.ts"
+  ],
+  "scope": "design only; no source/runtime release; no worker delegation; no formal render/vendor/contracts/locks/Approved015 modifications"
+}

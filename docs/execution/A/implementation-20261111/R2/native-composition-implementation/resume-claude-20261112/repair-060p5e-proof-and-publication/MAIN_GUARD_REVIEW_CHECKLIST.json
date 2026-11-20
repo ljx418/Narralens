@@ -1,0 +1,49 @@
+{
+  "at": "2026-11-15T08:52:41.201321+00:00",
+  "status": "REVIEW_METHOD_ONLY_NOT_APPROVAL",
+  "review_binding": "exact stageA three-file SHA, source8 remaining unchanged, protected7 unchanged, index empty",
+  "checks": [
+    {
+      "id": "G01",
+      "requirement": "TS raw kill and child-process boundaries installed before any tested effect",
+      "method": "Trace import/namespace aliases and all actual production call sites; verify guard or explicit fake intercepts each one"
+    },
+    {
+      "id": "G02",
+      "requirement": "Unexpected OS edge cannot be swallowed into green",
+      "method": "Independent deny ledger checked in teardown; explicit expected denial consumes exact event only; no broad ledger reset before assertion"
+    },
+    {
+      "id": "G03",
+      "requirement": "Guard remains effective for pending fake callbacks",
+      "method": "Trace before/after hooks, mock restores, outstanding settlement and asynchronous cleanup; no real method restoration before quiescence"
+    },
+    {
+      "id": "G04",
+      "requirement": "Python privileged edges cannot delegate real OS",
+      "method": "Inspect _FakeOs fallback and module-level os/ctypes/subprocess alias paths; fork/exec/wait/signal/prctl explicit fake or deny"
+    },
+    {
+      "id": "G05",
+      "requirement": "Synthetic signal0 and destructive signal use explicit scripts",
+      "method": "Review fixedPID tests and actual invoke adapter; no probes or effects on live fixedPID"
+    },
+    {
+      "id": "G06",
+      "requirement": "Missing-mock counterexample is safe by construction",
+      "method": "Static inspect deliberate omitted script case; denial recorded before any OS delegation; do not execute until whole guard approved"
+    },
+    {
+      "id": "G07",
+      "requirement": "Stage A command/scope compliance",
+      "method": "Recorded tsc input/log/exit match; no pure runtime before MAIN approval; no production source/protected drift"
+    },
+    {
+      "id": "G08",
+      "requirement": "Approval preserves guards while StageB tests evolve",
+      "method": "Reply binds exact reviewed hashes; any guard weakening requires new MAIN review before runtime; additional business cases may extend explicit safe scripts only"
+    }
+  ],
+  "on_failure": "Single consolidated specific response to original worker; no test permission",
+  "on_pass": "Persist observed source hashes + rationale, reply exact stageB grant; not independent safety or actualN grant"
+}

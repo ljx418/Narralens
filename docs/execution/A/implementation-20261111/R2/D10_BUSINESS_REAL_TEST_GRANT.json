@@ -1,0 +1,34 @@
+{
+  "grant_id": "R2-BRIDGE-D10-BUSINESS-REAL-001",
+  "granted_at": "2026-11-12T00:49:08.995452+00:00",
+  "owner_dispatch": "ctx_416fe0a4fa5a",
+  "parent_dispatch": "ctx_ba200bd32837",
+  "cwd": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+  "commands": [
+    [
+      "corepack",
+      "pnpm",
+      "exec",
+      "vitest",
+      "run",
+      "--config",
+      "vitest.config.ts",
+      "tests/agent-driven/integration/created-source-recovery.test.ts"
+    ],
+    [
+      "corepack",
+      "pnpm",
+      "exec",
+      "vitest",
+      "run",
+      "--config",
+      "vitest.config.ts",
+      "tests/agent-driven/integration/created-source-adoption.test.ts"
+    ]
+  ],
+  "allowed_extra_evidence_paths": "MAIN e1-main-takeover/run-recorded.py may be invoked READONLY with unique d10-business-* prefixes, and its exact resulting evidence artifacts only in same e1-main-takeover directory; original child docs prefix remains allowed",
+  "constraints": "Freeze src/tests/tools/config/index for each actual capture, complete raw logs/real exit/prepost hashes; no parallel heavy commands; new prefix on retry; no overwrite",
+  "actual_start": "NOT_RUN",
+  "no_other_scope": "Only serial two specified D10 testfiles (actual Host/bootstrap/SOURCE_ONLY/local diagnostic media if fixture uses them); no provider/paid/J/browser/build/full suite",
+  "claude_429": "STOP affected implementation; no replacement writer unless user explicit authorization"
+}

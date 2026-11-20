@@ -1,0 +1,18 @@
+{
+  "at": "2026-11-12T13:17:48.313932+00:00",
+  "capture": "n1n2-claude-resume-098-gate-pure",
+  "result": {
+    "exit": 1,
+    "source_changed": [],
+    "source_added": [],
+    "log_sha256": "e419be828944ab5809bc6f25ccaaa532580f4278daa370302caff0291001a6f9",
+    "finished_at": "2026-11-12T13:15:55.914299+00:00"
+  },
+  "passed": 17,
+  "failed": 1,
+  "filtered": 34,
+  "099": "NOT_RUN_CONDITION_FALSE",
+  "cleanup_sha256": "988f5503d06302cf07bccef26d13ccbe5f30d8f14789ed4187b01b540b5807fa",
+  "main_verified_all10hashes": true,
+  "rootcause": "samechildcleanupobject attachedtwice across recursivecatch andcloseAll ledger; actualexpected4received5"
+}

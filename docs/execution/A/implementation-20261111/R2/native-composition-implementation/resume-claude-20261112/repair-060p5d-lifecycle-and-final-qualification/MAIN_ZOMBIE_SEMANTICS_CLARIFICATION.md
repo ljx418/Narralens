@@ -1,0 +1,1 @@
+MAIN发现你正在解释ADR“known(pid,startticks)消失含Z”：这里是“已知原epoch必须消失，僵尸Z也必须被真实wait/reap后消失”，绝不是“Z算gone”。对C、N及known original targets，同epoch Z均不能当gone；WNOWAIT zombie anchor本来就是有意保留直到N-last真实reap，不能以Z提前放行。请保持现有known-target同epoch拒绝（含Z），不要为你的解释改成Z即可gone。R5C NOTE-01与R5D C项同理；反例加sameepochZ不释放。原wait权限仍可持有exited anchor进行有权信号，这与最终gone是不同阶段。此为既有合同语义澄清，不扩白名单/运行权限。

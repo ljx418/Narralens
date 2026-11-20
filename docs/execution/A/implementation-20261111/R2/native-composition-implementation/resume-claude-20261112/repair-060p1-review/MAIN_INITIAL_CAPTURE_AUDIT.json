@@ -1,0 +1,80 @@
+{
+  "at": "2026-11-14T08:23:18.574775+00:00",
+  "rows": [
+    {
+      "capture": "n1n2-claude-060p1-generate-001",
+      "exit": 0,
+      "source_changed": [
+        "src/adapters/openfilm/cache-worker-integrity.json"
+      ],
+      "source_added": [],
+      "inputs": 639,
+      "current_mismatches": [
+        "src/adapters/openfilm/cache-worker-integrity.json"
+      ],
+      "log_digest_matches": true,
+      "log_sha256": "b126163571b5b74f17bba6ed24789018cf3c72ce7f597c4e95e99ca48b8bfb64"
+    },
+    {
+      "capture": "n1n2-claude-060p1-integrity-check-001",
+      "exit": 0,
+      "source_changed": [],
+      "source_added": [],
+      "inputs": 639,
+      "current_mismatches": [],
+      "log_digest_matches": true,
+      "log_sha256": "80519d2216cfff4c3355a8052cacd64f9dc5023625f27e3e3125b69e2fbae816"
+    },
+    {
+      "capture": "n1n2-claude-060p1-m21-lock-001",
+      "exit": 0,
+      "source_changed": [],
+      "source_added": [],
+      "inputs": 639,
+      "current_mismatches": [],
+      "log_digest_matches": true,
+      "log_sha256": "46d2e2627dec28d66d4fb086762a93ef13ec7c91945ca5f93e516c5114b38d16"
+    },
+    {
+      "capture": "n1n2-claude-060p1-scheduler-001",
+      "exit": 0,
+      "source_changed": [],
+      "source_added": [],
+      "inputs": 639,
+      "current_mismatches": [],
+      "log_digest_matches": true,
+      "log_sha256": "d48d6a8905cbb2e4ed7105d059ce83f41766c8f12f203e0926f536f52344aadc"
+    },
+    {
+      "capture": "n1n2-claude-060p1-syntax-policy-001",
+      "exit": 0,
+      "source_changed": [],
+      "source_added": [],
+      "inputs": 639,
+      "current_mismatches": [],
+      "log_digest_matches": true,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "capture": "n1n2-claude-060p1-syntax-worker-001",
+      "exit": 0,
+      "source_changed": [],
+      "source_added": [],
+      "inputs": 639,
+      "current_mismatches": [],
+      "log_digest_matches": true,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "capture": "n1n2-claude-060p1-typecheck-001",
+      "exit": 0,
+      "source_changed": [],
+      "source_added": [],
+      "inputs": 639,
+      "current_mismatches": [],
+      "log_digest_matches": true,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "limit": "Generation is allowed source mutation, mismatches expected only generated manifest. Runtime passes do not prove process settlement; source/domain review pending."
+}

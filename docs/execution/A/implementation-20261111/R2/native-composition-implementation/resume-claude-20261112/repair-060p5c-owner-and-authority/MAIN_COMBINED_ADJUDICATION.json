@@ -1,0 +1,18 @@
+{
+  "at": "2026-11-15T03:26:46.207440+00:00",
+  "review_messages": [
+    "msg_3972526e3ba2",
+    "msg_d903a1bb92eb"
+  ],
+  "verdict": "REQUEST_CHANGES_BEFORE_N_RUNTIME",
+  "source_review_inputs": {
+    "startup": 65,
+    "positiveowner": 144
+  },
+  "overlaps": "S03/O01 allpathfinally; S04/O04 reporting; S02/O05 startupheld; S06/O02/O03 cause+epoch; S01 immutableauthority; S05 freshunknown; O06 legacy",
+  "C05_disposition": "InitialforkPID census/owedKILL improvements CLOSED_STATIC; entireC05 STILL_OPEN due post-reap reacquisition S01, not a userdecisionconflict",
+  "signal_invariant": "Originalepoch oncebound immutable; anchor reaped or waitauthoritylost permanently revokes numericPID/group signal authority",
+  "closure_invariant": "NOT_OWNED only provenneveracquired; UNKNOWN retains actualoriginalpromise/owner; no idempotentFDrelease asfreshproof",
+  "production_findings": "R6/R7remainOPEN; doesnotreopenR5A C01/C03",
+  "runtime_release": false
+}

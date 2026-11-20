@@ -1,0 +1,377 @@
+import {it,expect} from 'vitest';
+import {createServer} from 'node:http';
+import type {Server} from 'node:http';
+import {createHash} from 'node:crypto';
+import {mkdirSync,readdirSync,readFileSync,realpathSync,rmSync,statSync,writeFileSync} from 'node:fs';
+import {dirname,join,resolve} from 'node:path';
+import {createPinnedOpenFilmCacheProducer} from '../../../src/adapters/openfilm/openfilm-upstream.js';
+import type {OpenFilmCacheProducerOwner} from '../../../src/adapters/openfilm/openfilm-upstream.js';
+import {produceNativeCacheEntry} from '../../../src/host/agent-driven/native-cache-witness.js';
+import {NativeCacheWitnessLedger} from '../../../src/host/agent-driven/native-cache-witness.js';
+import type {NativeCacheProducer,NativeCacheWitnessRegistry} from '../../../src/host/agent-driven/native-cache-witness.js';
+import {nativeSourceFixture} from './helpers/native-source-fixture.js';
+import {vendorRoot} from './helpers/created-project-fixture.js';
+
+/** Attach the cleanup failures to a failure without hiding it. */
+function withCleanup(error:unknown,failures:readonly unknown[]):never{
+ if(failures.length>0&&typeof error==='object'&&error!==null){
+  try{Object.defineProperty(error,'cleanup_errors',{value:failures,enumerable:false,configurable:true});}catch{/* the error carries what it can */}
+ }
+ throw error;
+}
+
+/**
+ * The G04 browser cases.
+ *
+ * They are the only cases that really draw: the FIXED upstream producer runs in the
+ * headless browser it ships with, on a diagnostic local page, and the picture it
+ * draws is the one the witness speaks about.
+ *
+ * Everything is offline and local: the page is served by this test's own loopback
+ * server, the server answers only the files of that one folder, and nothing may
+ * leave the machine. The upstream's own launch stays headless, and its own
+ * `headed` default is not changed.
+ *
+ * TWO FACTS THAT ARE PROVEN, NOT ASSUMED:
+ *
+ * - SILENT: the pinned upstream launches the browser with `headless: !headed` and
+ *   `headed` is false by default, and the INSTALLED Playwright adds `--mute-audio`
+ *   in its headless branch (`playwright-core/lib/coreBundle.js`: `if (options.
+ *   headless) chromeArguments.push('--headless','--hide-scrollbars','--mute-audio',
+ *   ...)`). The browser of this fixture is therefore muted.
+ * - NO EGRESS: the answer carries a content-security-policy that allows this folder
+ *   only, and a file that is not really inside the folder is refused. The LIMITS are
+ *   stated honestly: the request log shows what REACHED this server, so it cannot
+ *   prove that no request went anywhere else - the policy is what forbids it, and
+ *   the page is the native's own film page, whose resources are the folder's.
+ */
+
+/** A local server for ONE folder.
+ *
+ * It answers the files of that folder and nothing else: a request for anything
+ * outside it is refused, so the page the producer draws can never reach out. */
+function localFolderServer(root:string):{readonly ready:Promise<void>;readonly base:string;readonly requests:readonly string[];close:()=>Promise<void>}{
+ // The REAL path of the folder: a file that leaves it through a link is refused.
+ const realRoot=realpathSync(root);
+ const server:Server=createServer((request,response)=>{
+  const requested=decodeURIComponent((request.url??'/').split('?')[0]??'/');
+  requests.push(requested);
+  const relative=requested.replace(/^\/+/,'');
+  // Only the files of THIS folder: nothing above it, and no absolute path.
+  if(relative===''||relative.includes('..')||relative.startsWith('/')||relative.includes('\0')){
+   response.statusCode=403;response.end('forbidden');return;
+  }
+  let body:Buffer;
+  try{
+   const absolute=resolve(realRoot,relative);
+   // A file that is really inside the folder: a link out of it is refused.
+   if(realpathSync(absolute)!==absolute||!absolute.startsWith(realRoot+'/')){
+    response.statusCode=403;response.end('forbidden');return;
+   }
+   body=readFileSync(absolute);
+  }catch{response.statusCode=404;response.end('not found');return;}
+  response.setHeader('content-type',relative.endsWith('.html')?'text/html; charset=utf-8':'application/octet-stream');
+  // The page may not reach anything but this folder: the policy of the answer
+  // itself forbids every other destination.
+  response.setHeader('content-security-policy',"default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; connect-src 'self'; media-src 'self' blob:; frame-src 'self'; font-src 'self' data:; object-src 'none'; base-uri 'none'; form-action 'none'");
+  response.setHeader('cache-control','no-store');
+  response.end(body);
+ });
+ let base='';
+ const requests:string[]=[];
+ const ready=new Promise<void>((resolve,reject)=>{
+  server.once('error',reject);
+  server.listen(0,'127.0.0.1',()=>{
+   const address=server.address();
+   if(address===null||typeof address==='string'){reject(new Error('the local server has no port'));return;}
+   base=`http://127.0.0.1:${address.port}`;
+   resolve();
+  });
+ });
+ return {
+  ready,
+  get base():string{return base;},
+  get requests():readonly string[]{return [...requests];},
+  close:async()=>{await ready;await new Promise<void>(resolve=>server.close(()=>resolve()));},
+ };
+}
+
+/**
+ * B0-1 — the fixed producer really draws, and the witness speaks about that draw.
+ *
+ * The producer runs in the upstream's own headless browser, on the diagnostic local
+ * page of the working copy. The picture it draws appears in the working copy, the
+ * older proof does not verify any more, and the next stable round accepts the
+ * witnessed entry.
+ */
+it('B0-1 the fixed producer really draws and the witness binds the request, the key, the triple and the dependencies',async()=>{
+ const f=await nativeSourceFixture();
+ const server=localFolderServer(f.workspaceRoot);
+ await server.ready;
+ let owner:OpenFilmCacheProducerOwner|undefined;
+ let primary:unknown;
+ try{
+  owner=await createPinnedOpenFilmCacheProducer(vendorRoot);
+  // The older proof: a stable round before the producer drew anything.
+  const first=await f.reader.readSource({binding:f.binding});
+  expect(first.verifyClosure()).toBe(true);
+  // The real producer really runs, on the diagnostic local page.
+  const witness=await produceNativeCacheEntry({
+   workspaces:f.workspace,producer:owner,
+   workspace_ref:f.workspaceRef,generation:f.generation,
+   root:f.workspaceRoot,base:server.base,rel:'film.html',ms:-1,width:480,overrides:null,kind:'film-poster'});
+  // The witness is about this view and this generation, and about nothing else.
+  expect(witness.kind).toBe('film-poster');
+  expect(witness.rel).toBe('film.html');
+  expect(witness.ms).toBe(-1);
+  expect(witness.width).toBe(480);
+  expect(f.workspace.cacheWitness(f.workspaceRef,f.generation,'film-poster')).not.toBeNull();
+  expect(f.workspace.cacheWitness(f.workspaceRef,f.generation+1,'film-poster')).toBeNull();
+  expect(f.workspace.cacheWitness('another-ref',f.generation,'film-poster')).toBeNull();
+  // The picture is really there, and the witness speaks about those bytes.
+  const poster=readFileSync(join(f.workspaceRoot,'.film','cache','film-poster.jpg'));
+  expect(poster.length).toBeGreaterThan(0);
+  expect(createHash('sha256').update(poster).digest('hex')).toBe(witness.jpeg_sha256);
+  // The producer's own dependency is the page it drew from.
+  expect(witness.dependencies.some(entry=>entry.path==='film.html')).toBe(true);
+  // The older proof does not verify any more: the working copy is not the one it
+  // was made against.
+  expect(first.verifyClosure()).toBe(false);
+  for(const handle of first.retained)handle.close();
+  // The next stable round accepts the witnessed entry.
+  const second=await f.reader.readSource({binding:f.binding});
+  expect(second.verifyClosure()).toBe(true);
+  for(const handle of second.retained)handle.close();
+ }catch(error){primary=error;}
+ const failures:unknown[]=[];
+ // The producers are drained BEFORE the server goes: a producer that is still
+ // drawing needs the page that is served.
+ try{if(owner)await owner.close();}catch(error){failures.push(error);}
+ try{await server.close();}catch(error){failures.push(error);}
+ try{await f.close();}catch(error){failures.push(error);}
+ if(primary!==undefined)withCleanup(primary,failures);
+ if(failures.length>0){
+  const failure=new Error('The case could not release everything');
+  Object.defineProperty(failure,'cleanup_errors',{value:failures,enumerable:false,configurable:true});
+  throw failure;
+ }
+},600000);
+
+/**
+ * B0-2 — one owner's close never kills the peer's work in flight.
+ *
+ * The pinned producer keeps ONE browser for the whole process. An owner that stops
+ * admits no new calls and drains the calls it really started, and the browser is
+ * closed only when the LAST owner has drained - so a peer that is still drawing is
+ * untouched.
+ */
+it('B0-2 one owner close never kills the peer work in flight, and the browser goes with the last owner',async()=>{
+ const f=await nativeSourceFixture();
+ const server=localFolderServer(f.workspaceRoot);
+ await server.ready;
+ let first:OpenFilmCacheProducerOwner|undefined;
+ let second:OpenFilmCacheProducerOwner|undefined;
+ let primary:unknown;
+ try{
+  first=await createPinnedOpenFilmCacheProducer(vendorRoot);
+  second=await createPinnedOpenFilmCacheProducer(vendorRoot);
+  // The second owner starts a REAL draw.
+  const drawing=second.pageFrame({root:f.workspaceRoot,base:server.base,rel:'film.html',ms:-1,width:480});
+  // The first owner stops admitting and drains the calls it really started - it has
+  // none of its own.
+  await first.close();
+  // The peer's draw is untouched: it answers with a real picture.
+  const jpeg=await drawing;
+  expect(jpeg.length).toBeGreaterThan(0);
+ }catch(error){primary=error;}
+ const failures:unknown[]=[];
+ // The producers are drained BEFORE the server goes.
+ try{if(second)await second.close();}catch(error){failures.push(error);}
+ try{if(first)await first.close();}catch(error){failures.push(error);}
+ try{await server.close();}catch(error){failures.push(error);}
+ try{await f.close();}catch(error){failures.push(error);}
+ if(primary!==undefined)withCleanup(primary,failures);
+ if(failures.length>0){
+  const failure=new Error('The case could not release everything');
+  Object.defineProperty(failure,'cleanup_errors',{value:failures,enumerable:false,configurable:true});
+  throw failure;
+ }
+},600000);
+
+/**
+ * B0-3 — a cache hit is not a production.
+ *
+ * The triple is already there - the fixed producer may answer from the disk - and
+ * the wrapper refuses the instance instead of witnessing a picture nobody drew. The
+ * old bytes are not deleted and not moved: they stay where the native put them.
+ */
+it('B0-3 refuses a cache entry that was already there and keeps its old bytes',async()=>{
+ const f=await nativeSourceFixture();
+ const server=localFolderServer(f.workspaceRoot);
+ await server.ready;
+ let owner:OpenFilmCacheProducerOwner|undefined;
+ let primary:unknown;
+ try{
+  owner=await createPinnedOpenFilmCacheProducer(vendorRoot);
+  const cache=join(f.workspaceRoot,'.film','cache');
+  mkdirSync(cache,{recursive:true});
+  const poster=join(cache,'film-poster.jpg');
+  const old=Buffer.from('the picture the native kept before');
+  rmSync(poster,{force:true});
+  writeFileSync(poster,old);
+  const before=statSync(poster);
+  // The producer is refused for that instance: the picture there was not drawn by
+  // this call, and a cache hit may never be witnessed as a production.
+  await expect(produceNativeCacheEntry({
+   workspaces:f.workspace,producer:owner,
+   workspace_ref:f.workspaceRef,generation:f.generation,
+   root:f.workspaceRoot,base:server.base,rel:'film.html',ms:-1,width:480,overrides:null,kind:'film-poster'}))
+   .rejects.toMatchObject({code:'NATIVE_CACHE_PREEXISTING'});
+  // No witness was issued for it.
+  expect(f.workspace.cacheWitness(f.workspaceRef,f.generation,'film-poster')).toBeNull();
+  // The old bytes are still there, untouched: nothing was deleted and nothing was
+  // moved out of the workspace.
+  expect(readFileSync(poster).equals(old)).toBe(true);
+  expect(statSync(poster).size).toBe(before.size);
+ }catch(error){primary=error;}
+ const failures:unknown[]=[];
+ // The producers are drained BEFORE the server goes: a producer that is still
+ // drawing needs the page that is served.
+ try{if(owner)await owner.close();}catch(error){failures.push(error);}
+ try{await server.close();}catch(error){failures.push(error);}
+ try{await f.close();}catch(error){failures.push(error);}
+ if(primary!==undefined)withCleanup(primary,failures);
+ if(failures.length>0){
+  const failure=new Error('The case could not release everything');
+  Object.defineProperty(failure,'cleanup_errors',{value:failures,enumerable:false,configurable:true});
+  throw failure;
+ }
+},600000);
+
+/**
+ * B0-4 — the normal page frame family.
+ *
+ * The fixed producer draws a frame of the film's own page, the witness binds the
+ * request, the key, the three files and the dependencies, and the reader accepts the
+ * witnessed entry in a stable round.
+ */
+it('B0-4 the fixed producer draws a page frame and the witness binds it',async()=>{
+ const f=await nativeSourceFixture();
+ const server=localFolderServer(f.workspaceRoot);
+ await server.ready;
+ let owner:OpenFilmCacheProducerOwner|undefined;
+ let primary:unknown;
+ try{
+  owner=await createPinnedOpenFilmCacheProducer(vendorRoot);
+  const witness=await produceNativeCacheEntry({
+   workspaces:f.workspace,producer:owner,
+   workspace_ref:f.workspaceRef,generation:f.generation,
+   root:f.workspaceRoot,base:server.base,rel:'film.html',ms:0,width:480,overrides:null,kind:'pageframe'});
+  // The witness is about this view, this generation and this request.
+  expect(witness.kind).toBe('pageframe');
+  expect(witness.rel).toBe('film.html');
+  expect(witness.ms).toBe(0);
+  expect(witness.frame_key).toMatch(/^[0-9a-f]{24}$/);
+  expect(witness.key).toBe(witness.frame_key);
+  // The three files the producer really wrote are there, and the witness speaks
+  // about those bytes.
+  const triple=join(f.workspaceRoot,'.film','cache','pageframes');
+  expect(readdirSync(triple).length).toBe(3);
+  expect(createHash('sha256').update(readFileSync(join(triple,`${witness.frame_key}.jpg`))).digest('hex')).toBe(witness.jpeg_sha256);
+  // The dependency the producer read is the page itself.
+  expect(witness.dependencies.some(entry=>entry.path==='film.html')).toBe(true);
+  // And the reader accepts the witnessed entry.
+  const facts=await f.reader.readSource({binding:f.binding});
+  expect(facts.verifyClosure()).toBe(true);
+  for(const handle of facts.retained)handle.close();
+ }catch(error){primary=error;}
+ const failures:unknown[]=[];
+ try{if(owner)await owner.close();}catch(error){failures.push(error);}
+ try{await server.close();}catch(error){failures.push(error);}
+ try{await f.close();}catch(error){failures.push(error);}
+ if(primary!==undefined)withCleanup(primary,failures);
+ if(failures.length>0){
+  const failure=new Error('The case could not release everything');
+  Object.defineProperty(failure,'cleanup_errors',{value:failures,enumerable:false,configurable:true});
+  throw failure;
+ }
+},600000);
+
+/**
+ * B0-5 — a producer that is not the fixed one may not draw a witnessed picture.
+ */
+it('B0-5 refuses a producer that the Host did not issue',async()=>{
+ const f=await nativeSourceFixture();
+ const server=localFolderServer(f.workspaceRoot);
+ await server.ready;
+ let owner:OpenFilmCacheProducerOwner|undefined;
+ let primary:unknown;
+ try{
+  owner=await createPinnedOpenFilmCacheProducer(vendorRoot);
+  // A stand-in with the right shape is not the producer.
+  const standIn={pageFrame:async()=>Buffer.alloc(0),close:async()=>{}};
+  await expect(produceNativeCacheEntry({
+   workspaces:f.workspace,producer:standIn as unknown as OpenFilmCacheProducerOwner,
+   workspace_ref:f.workspaceRef,generation:f.generation,
+   root:f.workspaceRoot,base:server.base,rel:'film.html',ms:-1,width:480,overrides:null,kind:'film-poster'}))
+   .rejects.toMatchObject({code:'NATIVE_CACHE_PRODUCER_FOREIGN'});
+  // No witness was issued for it.
+  expect(f.workspace.cacheWitness(f.workspaceRef,f.generation,'film-poster')).toBeNull();
+ }catch(error){primary=error;}
+ const failures:unknown[]=[];
+ try{if(owner)await owner.close();}catch(error){failures.push(error);}
+ try{await server.close();}catch(error){failures.push(error);}
+ try{await f.close();}catch(error){failures.push(error);}
+ if(primary!==undefined)withCleanup(primary,failures);
+ if(failures.length>0){
+  const failure=new Error('The case could not release everything');
+  Object.defineProperty(failure,'cleanup_errors',{value:failures,enumerable:false,configurable:true});
+  throw failure;
+ }
+},600000);
+
+/**
+ * B0-6 — a registry that the Host did not issue may not mint a witness.
+ */
+it('B0-6 refuses a registry that the Host did not issue',async()=>{
+ const f=await nativeSourceFixture();
+ const server=localFolderServer(f.workspaceRoot);
+ await server.ready;
+ let owner:OpenFilmCacheProducerOwner|undefined;
+ let primary:unknown;
+ try{
+  owner=await createPinnedOpenFilmCacheProducer(vendorRoot);
+  // The PUBLIC constructor of the ledger, with a resolver of its own: it can answer
+  // with any root it likes, but it does not hold the service's token, so the ledger
+  // itself refuses the record.
+  const forged=new NativeCacheWitnessLedger(()=>f.workspaceRoot);
+  await expect(produceNativeCacheEntry({
+   workspaces:forged as unknown as NativeCacheWitnessRegistry,producer:owner,
+   workspace_ref:f.workspaceRef,generation:f.generation,
+   root:f.workspaceRoot,base:server.base,rel:'film.html',ms:-1,width:480,overrides:null,kind:'film-poster'}))
+   .rejects.toMatchObject({code:'NATIVE_CACHE_WITNESS_REFUSED'});
+  // A structural registry that answers with the right root and accepts anything:
+  // the witness it records is worth nothing, because the reader only ever asks the
+  // SERVICE it holds.
+  const lookalike={record:()=>true,lookup:()=>null,issuedRoot:()=>f.workspaceRoot};
+  await produceNativeCacheEntry({
+   workspaces:lookalike as unknown as NativeCacheWitnessRegistry,producer:owner,
+   workspace_ref:f.workspaceRef,generation:f.generation,
+   root:f.workspaceRoot,base:server.base,rel:'film.html',ms:-1,width:480,overrides:null,kind:'film-poster'});
+  // The real service holds no witness for it...
+  expect(f.workspace.cacheWitness(f.workspaceRef,f.generation,'film-poster')).toBeNull();
+  // ...and the reader refuses the entry the lookalike recorded: the ACTUAL service
+  // consumption is the gate.
+  await expect(f.reader.readSource({binding:f.binding})).rejects.toMatchObject({code:'NATIVE_SOURCE_CACHE_UNWITNESSED'});
+ }catch(error){primary=error;}
+ const failures:unknown[]=[];
+ try{if(owner)await owner.close();}catch(error){failures.push(error);}
+ try{await server.close();}catch(error){failures.push(error);}
+ try{await f.close();}catch(error){failures.push(error);}
+ if(primary!==undefined)withCleanup(primary,failures);
+ if(failures.length>0){
+  const failure=new Error('The case could not release everything');
+  Object.defineProperty(failure,'cleanup_errors',{value:failures,enumerable:false,configurable:true});
+  throw failure;
+ }
+},600000);

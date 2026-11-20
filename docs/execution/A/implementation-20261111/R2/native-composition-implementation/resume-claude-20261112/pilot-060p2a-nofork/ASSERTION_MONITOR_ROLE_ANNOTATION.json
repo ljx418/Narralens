@@ -1,0 +1,22 @@
+{
+  "issue": "Monitor last-role classification may become provenance-or-other-tool when Node became Z and /proc/cmdline emptied",
+  "raw_receipt_unchanged": true,
+  "basis": "SamePID+startticks earlier bounded transition samples record node-pilot epoch; parentPPID comparison uses those retained observed samples",
+  "derived_node_parents": {
+    "187132": {
+      "identity": {
+        "pid": 187132,
+        "state": "S",
+        "ppid": 187108,
+        "pgid": 187106,
+        "sid": 187106,
+        "start_ticks": "289456"
+      },
+      "kind": "node-pilot",
+      "observed_at": "2026-11-15T02:13:15.812530+00:00",
+      "direct_children": [
+        187139
+      ]
+    }
+  }
+}

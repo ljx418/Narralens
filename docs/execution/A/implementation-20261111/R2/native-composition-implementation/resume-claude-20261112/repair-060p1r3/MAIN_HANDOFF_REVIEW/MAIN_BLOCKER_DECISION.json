@@ -1,0 +1,15 @@
+{
+  "at": "2026-11-14T14:21:42.888274+00:00",
+  "status": "REQUEST_CHANGES_BEFORE_PILOT",
+  "finding": "R3-MAIN-01",
+  "locations": [
+    "cache-process-custodian.py:170 RECOVERY_SECONDS=60",
+    "cache-process-custodian.py:1811 _recover absolute deadline",
+    "cache-process-custodian.py:1852 _wait_for_recovery false on controlEOF/selectorerror"
+  ],
+  "impact": "Deadline or Host transport loss still lets C emit unknown receipt and exit with unresolved children, violating live wait owner and unreapedN anchor contract",
+  "fix": "No finite responsibility expiry. Bounded action/poll/diagnostics, retained owner and anchor until actual target cleanup; controlEOF is not proof; maintain recoverability without busyloop. Add actual _recover-level mocked counterfactual >60seconds/EOF/selectorfault then resolution",
+  "evidence_gap": "Several unrecorded developer trials, approximately ten claimed failures; no fabricated recovery of original logs",
+  "source_implementation_by_MAIN": false,
+  "runtime_release": false
+}

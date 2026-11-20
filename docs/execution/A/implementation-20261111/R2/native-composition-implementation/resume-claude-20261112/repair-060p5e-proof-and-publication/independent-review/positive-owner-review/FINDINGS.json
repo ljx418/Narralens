@@ -1,0 +1,226 @@
+{
+  "format": "narralens.R5E.positive-owner.static-review@1",
+  "verdict": "REQUEST_CHANGES",
+  "binding": {
+    "review_task": "task_1a1a7c968b1f",
+    "review_dispatch": "ctx_040cf9cee40b",
+    "implementation_handback": "msg_32243a6ba755",
+    "historical_head": "1d348d419120f23f45d958112ea8c43df5a04675",
+    "accepted_new_commit": null
+  },
+  "counts": {
+    "BLOCKER": 0,
+    "MAJOR": 2,
+    "MINOR": 1
+  },
+  "prior_findings": [
+    {
+      "prior_ids": [
+        "R5D-N01",
+        "R5D-O04"
+      ],
+      "status": "CLOSED_STATIC",
+      "basis": "_settle_domain:2130 derives the original proof group from immutable original_worker_epoch without consulting revoked permission; actual raw-edge adapter test:2018 independently keeps probe_unknown after census recovers, asserts raw original PGID query/no destructive signal, then ESRCH convergence. Not kernel proof."
+    },
+    {
+      "prior_ids": [
+        "R5D-N04",
+        "R5D-O03",
+        "R5D-NOTE-01"
+      ],
+      "status": "CLOSED_STATIC",
+      "basis": "Persistent Node process.kill denial and child_process mocks plus per-case independent denial ledger; Python global raw OS/ctypes/signal guards and guarded FakeOs fallback now intercept the reviewed actual raw paths. Synthetic late-C/no-FORKED path cannot call real process.kill. No claim that every future raw API is automatically covered."
+    },
+    {
+      "prior_ids": [
+        "R5D-N02",
+        "R5D-O01"
+      ],
+      "status": "STILL_OPEN",
+      "basis": "Missing required names, null required hashes, required-row error and candidate-link mismatch now gate before judge. Remaining listed evidence-row failure bypass is R5E-O01; actual-byte/protocol consumer gap is R5E-O02."
+    },
+    {
+      "prior_ids": [
+        "R5D-N03",
+        "R5D-O02"
+      ],
+      "status": "STILL_OPEN",
+      "basis": "Same-root wx temporary write/close/rename and returned failed/faultfalse/authorityfalse/exit3 on uncertain publication are fixed. Actual validator/consumer chain still incomplete under R5E-O02."
+    },
+    {
+      "prior_ids": [
+        "R5D-NOTE-02"
+      ],
+      "status": "STILL_OPEN",
+      "basis": "Report §6 explicitly supplies counts/flags only; existing accumulator/receipt digest strings are still dropped. R5E-O03."
+    },
+    {
+      "prior_ids": [
+        "R5D-NOTE-03"
+      ],
+      "status": "CLOSED_STATIC",
+      "basis": "Current report explicitly preserves real os.kill incident and uncertainty, MAIN004 exact stop, and005 INCOMPLETE. This closes disclosure only, not retrospective impact or historical permission."
+    },
+    {
+      "prior_ids": [
+        "R5C-O01",
+        "R5C-O02",
+        "R5C-O03",
+        "R5C-O04",
+        "R5C-O06"
+      ],
+      "status": "CLOSED_STATIC",
+      "basis": "Normal awaits same original start promise without self-cancel; fault waits accepted N then same-root GO and last no-await full-tuple/live guard; supervisor first Error/provenance and one-shot CANCEL unchanged; raw+diagnostic cleanup gates retained; no-root writes no evidence."
+    },
+    {
+      "prior_ids": [
+        "R5C-O05",
+        "R5C-O07"
+      ],
+      "status": "STILL_OPEN",
+      "basis": "Publication/row validation residuals below; terminal observations remain actual proof-path facts with time/truncation, not invented raw transcript."
+    }
+  ],
+  "findings": [
+    {
+      "id": "R5E-O01",
+      "severity": "MAJOR",
+      "status": "STILL_OPEN",
+      "prior_ids": [
+        "R5D-N02",
+        "R5D-O01"
+      ],
+      "title": "Listed evidence file hash failures outside the two-name allowlist still certify a green run",
+      "locations": [
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 169
+        },
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 170
+        },
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 518
+        },
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 1578
+        }
+      ],
+      "reachable_precondition": "The real directory contains candidate.json/helper plus the helper's cache-worker-fixture.events or scenario file. A read of that listed evidence file fails during the final artifact scan while the two required rows and candidate/manifest links remain readable. This can be a later EIO after the GO event was already read.",
+      "actual_call_path": "runPositivePilot -> REAL_DEPENDENCIES.artifactFacts maps the failed file to digest:null,error:EIO with top-level error:null -> evidenceProblemsOf builds a map but inspects only REQUIRED_ARTIFACTS (candidate/helper). It ignores the errored events/scenario row -> judge sees no evidence problem -> normal ok/0 or fault-observed/1, authoritative=true. The legacy validator also only checks the same two names.",
+      "contract": "R5E SPEC B2 requires per-row full SHA/error gating; B3 makes mandatory evidence/hash unreliability exit3. The tool's own judge contract at1450 says every row, and its manifest presents these real event records as hashed run evidence rather than optional ignored errors.",
+      "impact": "An explicit failed evidence read remains in the manifest while producer/CLI and legacy consumer qualify the run. A later external checker might reject it, but the claimed repaired producer gate still permits false green. No orphan or malicious-native exploit is alleged.",
+      "minimal_fix": "Check error and /^[0-9a-f]{64}$/ for every published artifact row, reject duplicate/invalid names and incomplete byte facts, separately require the two mandatory names. Alternatively explicitly exclude truly optional evidence before manifest creation under a MAIN contract change; do not silently certify an included errored row. Include these problems in judge before publishing.",
+      "direct_counterexample_design": "Under guarded actual runner/main and real temporary FS, create a real events file; at artifact-scan read only, inject EIO for its read through the fs boundary while leaving candidate/helper/manifest reads real. Require failed/faultfalse/authorityfalse/exit3 in both modes and actual persisted row error. Add malformed full-hash and duplicate-row controls at the private facts boundary. Do not execute a C/N or mutate frozen source for this review.",
+      "test_gap": "New tests1330-1389 cover only missing/error/mismatch of candidate/helper. They do not drive a real mapper error on a third listed evidence file.",
+      "runtime": "NOT_RUN; static branch counterexample, not a captured old-code failure"
+    },
+    {
+      "id": "R5E-O02",
+      "severity": "MAJOR",
+      "status": "STILL_OPEN",
+      "prior_ids": [
+        "R5D-N03",
+        "R5D-O02"
+      ],
+      "title": "The tool's joint validator never reads bytes, and consumer tests exercise a third copy rather than the actual consumer",
+      "locations": [
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 1696
+        },
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 1710
+        },
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 1795
+        },
+        {
+          "path": "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts",
+          "line": 227
+        },
+        {
+          "path": "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts",
+          "line": 289
+        },
+        {
+          "path": "tests/agent-driven/integration/native-cache-normal-pilot.test.ts",
+          "line": 668
+        },
+        {
+          "path": "tests/agent-driven/integration/native-cache-normal-pilot.test.ts",
+          "line": 1470
+        }
+      ],
+      "reachable_precondition": "Publication returns successfully with non-null digests, then a required actual-file read fails or serialized file contents no longer satisfy the linked protocol. Current main never performs that read. A listed errored evidence row from O01 already provides an actual producer path to a bad manifest; helper evidence loss after publication is another checker counterexample.",
+      "actual_call_path": "main -> runPositivePilot -> publishEvidence returns hash of its serialized buffer -> jointQualification(outcome) checks only authoritative/published/protocol/equal internal exit/non-null hash strings. It has no root, fs reads, JSON parsing, byte lengths or content/link checks. It accepts ordinary failed/exit1 as accepted:true as well (main returning ordinary1 is allowed, but accepted:true must never mean expected-fault PASS). Legacy has a separate richer jointQualification; it reads three JSON records, but never reads/rehashes the required helper, accepts any string helper digest and ignores non-required row errors. The executable consumer test invokes its own consumerAccepts copy (668), which lacks the legacy parser/protocol/link logic; it does not invoke either actual joint validator.",
+      "contract": "SPEC B3 requires the eligible returned publication AND actual serialized final/manifest/candidate byte/hash/protocol agreement AND correct exit semantics at consumers; the task explicitly requires actual consumer tests and rejects a comment-only joint claim. Same-root atomic publishing is necessary but is not this validation.",
+      "impact": "The advertised shared private validator is not shared and does not perform its claimed disk/protocol verification. main can retain0/1 eligibility when a mandatory published file is unavailable or corrupted, and legacy can accept/remove a root with missing required helper or an errored evidence row. Pure54 tests cannot establish actual legacy rejection because their copy is a different function.",
+      "minimal_fix": "Implement one internal byte/protocol checker in an allowed existing module and have both real tool and legacy consumer invoke it; tests must invoke that actual checker. Read actual final/manifest/candidate (and required artifacts), validate full hashes/lengths, JSON shapes/mode/root/protocol, final links, all row errors, terminal/original cleanup/report qualification and mode-specific outcome. Parsing/read errors fail closed to unreliable3. Keep ordinary failed1 distinct from accepted expected fault. The CLI cannot observe its own future OS exit: the external recorder/acceptor must separately compare the real observed exit to that validated mode/result. Do not claim an in-memory exit field proves outer exit.",
+      "direct_counterexample_design": "Real temp FS + mocked supervisor: let the real publisher complete, then simulate one final/candidate/helper read EIO or corrupt/remove a record before invoking the actual validator; main/consumer must reject with3/no acceptance/no evidence deletion. Require valid normal0 and exact expected-fault1 controls; ordinary businessfailure1 and extra-error fault1 must reject acceptance. Feed valid byte hashes but invalid JSON protocol/link/mode and require rejection. Mutating the actual legacy checker must fail its consumer tests; currently modifying it cannot affect consumerAccepts tests. These are future guarded test designs, not executed here.",
+      "fixed_subparts": "publishEvidence:467-495 uses same-owned-root exclusive wx temp, full write, successful close, rename; catch:1630-1650 revokes returned kind/fault/authority/exit3 without overwriting a possibly complete final. The byte-backed test harness fixes mutable-reference evidence. Those improvements are accepted statically.",
+      "runtime": "NOT_RUN; no actual CLI/outer exit/kernel evidence granted"
+    },
+    {
+      "id": "R5E-O03",
+      "severity": "MINOR",
+      "status": "STILL_OPEN",
+      "prior_ids": [
+        "R5D-NOTE-02"
+      ],
+      "title": "The requested already-computed receipt digest strings remain absent",
+      "locations": [
+        {
+          "path": "src/adapters/openfilm/cache-process-supervisor.ts",
+          "line": 803
+        },
+        {
+          "path": "src/adapters/openfilm/cache-process-supervisor.ts",
+          "line": 1913
+        },
+        {
+          "path": "src/adapters/openfilm/cache-process-supervisor.ts",
+          "line": 1954
+        },
+        {
+          "path": "docs/parallel/lane-product/A-R2-20261112/N1N2-native-source/n1n2-claude-060p5e-report.md",
+          "line": 162
+        }
+      ],
+      "reachable_precondition": "Any accepted receipt/accumulator goes through diagnosticSnapshot and candidate/final persistence.",
+      "actual_call_path": "CacheReceiptAccumulator.state already computes copied events_digest/waits_digest/identities_digest; diagnosticSnapshot drops them from both receipt_summary and accumulator_summary. runPositivePilot persists only those reduced summaries. Report §6 supplies counts/flags and explicitly admits no digest strings, yet claims NOTE02 satisfied.",
+      "contract": "SPEC B4 and MAIN_COMBINED note require the already-computed bounded receipt digest/accumulator facts, not raw segments or R6 full replay.",
+      "impact": "No new cleanup or signal escape is established; saved minimal receipts cannot be compared by the requested existing digest values. Counts are honest but insufficient to close this specific note.",
+      "minimal_fix": "Copy bounded validated digest strings from the existing receipt and accumulator into the private readonly diagnostic summaries; persist them and report the actual computed values with evidence location. Retain raw_segments_saved=false and do not invent raw segments.",
+      "direct_counterexample_design": "Actual supervisor plus mocked protocol segment with known digests: assert diagnostic/candidate/final strings equal the accumulator/validated receipt values and survive repeated snapshot reads. Confirm report cites computed strings rather than only counts.",
+      "runtime": "NOT_RUN"
+    }
+  ],
+  "preservation": {
+    "os_kill_incident": "Historical real os.kill(200,SIGTERM) remains out-of-scope; author's ESRCH claim and later PID absence do not prove historical no effect.",
+    "main004": "MAIN exact owned stop, not natural semantic timeout.",
+    "capture005": "INCOMPLETE, no exit/result fabricated.",
+    "old_failures": "Retained, including causality limitations: an old fixture/interface failure is not automatically semantic old-code red.",
+    "generation": "Final --generate is idempotent on current bytes; not captured first mutation."
+  },
+  "limits": {
+    "reviewer_runtime": "ALL_BUSINESS_RUNTIME_NOT_RUN",
+    "not_acceptance": [
+      "actual C/N/kernel",
+      "N1N2",
+      "R6",
+      "R7",
+      "R8 freeze",
+      "original17",
+      "ISO18",
+      "NEXT",
+      "V1"
+    ],
+    "no_runtime_grant": true
+  }
+}

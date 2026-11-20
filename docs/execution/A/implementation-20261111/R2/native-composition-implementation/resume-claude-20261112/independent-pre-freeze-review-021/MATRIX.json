@@ -1,0 +1,655 @@
+{
+  "status": "PRE_FREEZE_READONLY_REVIEW",
+  "verdict": "REQUEST_CHANGES_NOT_EXTERNAL_PASS",
+  "candidate_commit": null,
+  "baseline": "e2eff61b464d75d36598103d718cd2a75db5dfda",
+  "bound_grant": "BATCH_036_GRANT.json",
+  "worktree": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+  "end_hash_observed_at": "2026-11-13T03:14:37.282846+00:00",
+  "source_hashes": {
+    "src/host/agent-driven/native-cache-witness.ts": {
+      "expected": "85b1e804b3956165a6f8e171aa1fb8800cd8337290ad2d16ac05d3906ba2501a",
+      "start_observed": "85b1e804b3956165a6f8e171aa1fb8800cd8337290ad2d16ac05d3906ba2501a",
+      "end_observed": "85b1e804b3956165a6f8e171aa1fb8800cd8337290ad2d16ac05d3906ba2501a",
+      "blob_sha256": "85b1e804b3956165a6f8e171aa1fb8800cd8337290ad2d16ac05d3906ba2501a",
+      "matches": true
+    },
+    "src/host/agent-driven/created-native-workspace.ts": {
+      "expected": "32d5adae9d737b6799f20531e50956413a619e048a8f2f225fccb064205afbd2",
+      "start_observed": "32d5adae9d737b6799f20531e50956413a619e048a8f2f225fccb064205afbd2",
+      "end_observed": "32d5adae9d737b6799f20531e50956413a619e048a8f2f225fccb064205afbd2",
+      "blob_sha256": "32d5adae9d737b6799f20531e50956413a619e048a8f2f225fccb064205afbd2",
+      "matches": true
+    },
+    "src/host/agent-driven/committed-snapshot-authority.ts": {
+      "expected": "1c53360e3c618c603cfcbe61d0c2d57004c5bd33dc26a92c2fdec72a1844bd6d",
+      "start_observed": "1c53360e3c618c603cfcbe61d0c2d57004c5bd33dc26a92c2fdec72a1844bd6d",
+      "end_observed": "1c53360e3c618c603cfcbe61d0c2d57004c5bd33dc26a92c2fdec72a1844bd6d",
+      "blob_sha256": "1c53360e3c618c603cfcbe61d0c2d57004c5bd33dc26a92c2fdec72a1844bd6d",
+      "matches": true
+    },
+    "src/host/m5/openfilm-native-expected.ts": {
+      "expected": "19110e45a83b6d5b611b4260620ce873f923f1e5a5b907bc6176c4b734fbeed3",
+      "start_observed": "19110e45a83b6d5b611b4260620ce873f923f1e5a5b907bc6176c4b734fbeed3",
+      "end_observed": "19110e45a83b6d5b611b4260620ce873f923f1e5a5b907bc6176c4b734fbeed3",
+      "blob_sha256": "19110e45a83b6d5b611b4260620ce873f923f1e5a5b907bc6176c4b734fbeed3",
+      "matches": true
+    },
+    "src/adapters/openfilm/openfilm-upstream.ts": {
+      "expected": "29a0827a6130c2f382de93d1738b1be003c5ef15ded253d256585e6214d2aa69",
+      "start_observed": "29a0827a6130c2f382de93d1738b1be003c5ef15ded253d256585e6214d2aa69",
+      "end_observed": "29a0827a6130c2f382de93d1738b1be003c5ef15ded253d256585e6214d2aa69",
+      "blob_sha256": "29a0827a6130c2f382de93d1738b1be003c5ef15ded253d256585e6214d2aa69",
+      "matches": true
+    },
+    "tests/agent-driven/integration/helpers/native-source-fixture.ts": {
+      "expected": "7160a285930e61b7927d90bb517e7d9575f5f0888394d228b192baff80daf622",
+      "start_observed": "7160a285930e61b7927d90bb517e7d9575f5f0888394d228b192baff80daf622",
+      "end_observed": "7160a285930e61b7927d90bb517e7d9575f5f0888394d228b192baff80daf622",
+      "blob_sha256": "7160a285930e61b7927d90bb517e7d9575f5f0888394d228b192baff80daf622",
+      "matches": true
+    },
+    "tests/agent-driven/integration/helpers/created-draft-fixture.ts": {
+      "expected": "59788a8f9c08415a808b2418e86b4dac6bb7de65297ad5d1cb19b5f26eb22d27",
+      "start_observed": "59788a8f9c08415a808b2418e86b4dac6bb7de65297ad5d1cb19b5f26eb22d27",
+      "end_observed": "59788a8f9c08415a808b2418e86b4dac6bb7de65297ad5d1cb19b5f26eb22d27",
+      "blob_sha256": "59788a8f9c08415a808b2418e86b4dac6bb7de65297ad5d1cb19b5f26eb22d27",
+      "matches": true
+    },
+    "tests/agent-driven/integration/created-native-workspace.test.ts": {
+      "expected": "439d469032c9af2b83ceb826e0aead7cf5c2fe5c5693be7cbf18c8e67f0f615f",
+      "start_observed": "439d469032c9af2b83ceb826e0aead7cf5c2fe5c5693be7cbf18c8e67f0f615f",
+      "end_observed": "439d469032c9af2b83ceb826e0aead7cf5c2fe5c5693be7cbf18c8e67f0f615f",
+      "blob_sha256": "439d469032c9af2b83ceb826e0aead7cf5c2fe5c5693be7cbf18c8e67f0f615f",
+      "matches": true
+    },
+    "tests/agent-driven/integration/committed-snapshot-host.test.ts": {
+      "expected": "bfd0c6373b254050d32a6a99e7b6f8b9827dc24b6b2587515ab4c5aad2cd9037",
+      "start_observed": "bfd0c6373b254050d32a6a99e7b6f8b9827dc24b6b2587515ab4c5aad2cd9037",
+      "end_observed": "bfd0c6373b254050d32a6a99e7b6f8b9827dc24b6b2587515ab4c5aad2cd9037",
+      "blob_sha256": "bfd0c6373b254050d32a6a99e7b6f8b9827dc24b6b2587515ab4c5aad2cd9037",
+      "matches": true
+    },
+    "tests/agent-driven/integration/created-native-ack.test.ts": {
+      "expected": "5f50db85c7c07a2ecf4faefc20ec2ec6c7ad4910fafe549c2edc76bbad729c7c",
+      "start_observed": "5f50db85c7c07a2ecf4faefc20ec2ec6c7ad4910fafe549c2edc76bbad729c7c",
+      "end_observed": "5f50db85c7c07a2ecf4faefc20ec2ec6c7ad4910fafe549c2edc76bbad729c7c",
+      "blob_sha256": "5f50db85c7c07a2ecf4faefc20ec2ec6c7ad4910fafe549c2edc76bbad729c7c",
+      "matches": true
+    },
+    "src/host/agent-driven/retained-native-closure.ts": {
+      "expected": "776331d6397191ee7fc97a4859f8d3ff95031efaf2d4fe7a7ee875451d85eb30",
+      "start_observed": "776331d6397191ee7fc97a4859f8d3ff95031efaf2d4fe7a7ee875451d85eb30",
+      "end_observed": "776331d6397191ee7fc97a4859f8d3ff95031efaf2d4fe7a7ee875451d85eb30",
+      "blob_sha256": "776331d6397191ee7fc97a4859f8d3ff95031efaf2d4fe7a7ee875451d85eb30",
+      "matches": true
+    },
+    "src/host/agent-driven/created-native-source-reader.ts": {
+      "expected": "f00e02781c8531a74a1034a6a1c992c463f49ff1cbf9c49b203e8449d8360d7d",
+      "start_observed": "f00e02781c8531a74a1034a6a1c992c463f49ff1cbf9c49b203e8449d8360d7d",
+      "end_observed": "f00e02781c8531a74a1034a6a1c992c463f49ff1cbf9c49b203e8449d8360d7d",
+      "blob_sha256": "f00e02781c8531a74a1034a6a1c992c463f49ff1cbf9c49b203e8449d8360d7d",
+      "matches": true
+    },
+    "tests/agent-driven/integration/native-cache-witness.test.ts": {
+      "expected": "eb5c71c99b749509b304bc925ec47469099f1049746e63f145ae851c6281bcb1",
+      "start_observed": "eb5c71c99b749509b304bc925ec47469099f1049746e63f145ae851c6281bcb1",
+      "end_observed": "eb5c71c99b749509b304bc925ec47469099f1049746e63f145ae851c6281bcb1",
+      "blob_sha256": "eb5c71c99b749509b304bc925ec47469099f1049746e63f145ae851c6281bcb1",
+      "matches": true
+    },
+    "tests/agent-driven/integration/created-draft-processor.test.ts": {
+      "expected": "684df1c287890a13ecd8b08a4cd32d5053c2868e80494eca2fcc6412cdc4e0b6",
+      "start_observed": "684df1c287890a13ecd8b08a4cd32d5053c2868e80494eca2fcc6412cdc4e0b6",
+      "end_observed": "684df1c287890a13ecd8b08a4cd32d5053c2868e80494eca2fcc6412cdc4e0b6",
+      "blob_sha256": "684df1c287890a13ecd8b08a4cd32d5053c2868e80494eca2fcc6412cdc4e0b6",
+      "matches": true
+    },
+    "tests/agent-driven/integration/created-native-source-reader.test.ts": {
+      "expected": "f2e7cc847718b52e4937d55be8bc4adcf4372dee055ff170e1c1f49817b7be99",
+      "start_observed": "f2e7cc847718b52e4937d55be8bc4adcf4372dee055ff170e1c1f49817b7be99",
+      "end_observed": "f2e7cc847718b52e4937d55be8bc4adcf4372dee055ff170e1c1f49817b7be99",
+      "blob_sha256": "f2e7cc847718b52e4937d55be8bc4adcf4372dee055ff170e1c1f49817b7be99",
+      "matches": true
+    }
+  },
+  "guarded_config_hashes": {
+    "package.json": {
+      "expected": "edace26fdfa5a9808f2706fe15ab3935d0512d08f765d4cffec268eb7e783263",
+      "start_observed": "edace26fdfa5a9808f2706fe15ab3935d0512d08f765d4cffec268eb7e783263",
+      "end_observed": "edace26fdfa5a9808f2706fe15ab3935d0512d08f765d4cffec268eb7e783263",
+      "blob_sha256": "edace26fdfa5a9808f2706fe15ab3935d0512d08f765d4cffec268eb7e783263",
+      "matches": true
+    },
+    "pnpm-lock.yaml": {
+      "expected": "66d38478d0b035777472a8cdb53954559a6c1a5f8803f7247caaffce1ac3584d",
+      "start_observed": "66d38478d0b035777472a8cdb53954559a6c1a5f8803f7247caaffce1ac3584d",
+      "end_observed": "66d38478d0b035777472a8cdb53954559a6c1a5f8803f7247caaffce1ac3584d",
+      "blob_sha256": "66d38478d0b035777472a8cdb53954559a6c1a5f8803f7247caaffce1ac3584d",
+      "matches": true
+    },
+    "tsconfig.json": {
+      "expected": "83fbe518b8002a19afcf522215bdd431b9addca24f88771732e123f689acb475",
+      "start_observed": "83fbe518b8002a19afcf522215bdd431b9addca24f88771732e123f689acb475",
+      "end_observed": "83fbe518b8002a19afcf522215bdd431b9addca24f88771732e123f689acb475",
+      "blob_sha256": "83fbe518b8002a19afcf522215bdd431b9addca24f88771732e123f689acb475",
+      "matches": true
+    },
+    "vitest.config.ts": {
+      "expected": "b8cc675ba57ac95cc74b007db787a33b830fe628f7648f902a4dcf8235d787d4",
+      "start_observed": "b8cc675ba57ac95cc74b007db787a33b830fe628f7648f902a4dcf8235d787d4",
+      "end_observed": "b8cc675ba57ac95cc74b007db787a33b830fe628f7648f902a4dcf8235d787d4",
+      "blob_sha256": "b8cc675ba57ac95cc74b007db787a33b830fe628f7648f902a4dcf8235d787d4",
+      "matches": true
+    },
+    "vite.config.ts": {
+      "expected": "6dc4858d37a5ddfac9779371b63b4d3d129641dc485c642de05c17f29a746f2c",
+      "start_observed": "6dc4858d37a5ddfac9779371b63b4d3d129641dc485c642de05c17f29a746f2c",
+      "end_observed": "6dc4858d37a5ddfac9779371b63b4d3d129641dc485c642de05c17f29a746f2c",
+      "blob_sha256": "6dc4858d37a5ddfac9779371b63b4d3d129641dc485c642de05c17f29a746f2c",
+      "matches": true
+    },
+    "vite.m5.config.ts": {
+      "expected": "777295eb5278d162ce549a5fa695618fd68cfb35769b30a9b8c52344a3220ff7",
+      "start_observed": "777295eb5278d162ce549a5fa695618fd68cfb35769b30a9b8c52344a3220ff7",
+      "end_observed": "777295eb5278d162ce549a5fa695618fd68cfb35769b30a9b8c52344a3220ff7",
+      "blob_sha256": "777295eb5278d162ce549a5fa695618fd68cfb35769b30a9b8c52344a3220ff7",
+      "matches": true
+    },
+    "contracts/openfilm-upstream-lock.json": {
+      "expected": "69c4da1decfb27fd6002a030228a2ccadd1a9fb4392e42320cf249ae311b301b",
+      "start_observed": "69c4da1decfb27fd6002a030228a2ccadd1a9fb4392e42320cf249ae311b301b",
+      "end_observed": "69c4da1decfb27fd6002a030228a2ccadd1a9fb4392e42320cf249ae311b301b",
+      "blob_sha256": "69c4da1decfb27fd6002a030228a2ccadd1a9fb4392e42320cf249ae311b301b",
+      "matches": true
+    }
+  },
+  "changed_scope": [],
+  "findings": [
+    {
+      "id": "PF01",
+      "severity": "MAJOR",
+      "kind": "CODE_DEFECT_STATIC_INFERENCE",
+      "requirements": [
+        "native_cache"
+      ],
+      "title": "Rendered origin is not bound to the issued workspace root",
+      "locations": [
+        "src/host/agent-driven/created-native-workspace.ts:475",
+        "src/host/agent-driven/created-native-workspace.ts:515",
+        "src/host/agent-driven/created-native-workspace.ts:530",
+        "src/host/agent-driven/created-native-workspace.ts:573",
+        "src/adapters/openfilm/openfilm-upstream.ts:398",
+        "/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm/packages/openfilm/studio/server/pageframes.mjs:90",
+        "/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm/packages/openfilm/studio/server/pageframes.mjs:101",
+        "/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm/packages/openfilm/studio/server/pageframes.mjs:178",
+        "tests/agent-driven/integration/native-cache-witness.test.ts:136",
+        "tests/agent-driven/integration/native-cache-witness.test.ts:302"
+      ],
+      "counterexample": "With a genuine workspace production lease and genuine fixed producer, supply base of another local folder serving a valid different film.html with the same relative names. Upstream draws base/film.html but stamps and writes under the issued root; loaded URL names are translated to relative names and then identities are read from that root. All PRE/POST identities can remain unchanged and all output digests match the actual wrong-origin draw, so issuer-bound production can activate a witness whose claimed dependencies did not supply the rendered bytes. No exploit was executed.",
+      "assertion_gap": "B0-1 and B0-4 always call localFolderServer(f.workspaceRoot); the binding is arranged by the fixture, never enforced by production. Producer branding proves executable identity, not which folder answered HTTP.",
+      "minimum_same_scope_fix": "Bind the permitted rendering origin to the same issued folder/root using Host-private existing serving ownership, and refuse an unrelated or forged origin before the producer runs; add one actual different-folder origin negative. No public DTO, EnginePort, pin or artifact change is requested."
+    },
+    {
+      "id": "PF02",
+      "severity": "MAJOR",
+      "kind": "CODE_DEFECT_STATIC_INFERENCE",
+      "requirements": [
+        "native_cache"
+      ],
+      "title": "Film duration cache still accepts an unwitnessed finite forgery",
+      "locations": [
+        "src/host/agent-driven/created-native-source-reader.ts:1226",
+        "src/host/agent-driven/created-native-source-reader.ts:1233",
+        "src/host/agent-driven/created-native-workspace.ts:548",
+        "src/host/agent-driven/created-native-workspace.ts:574",
+        "/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm/packages/openfilm/studio/server/pageframes.mjs:103",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:309",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:336"
+      ],
+      "counterexample": "In a stable issued workspace write .film/cache/film-duration.json with film equal to the real film mtime_ms:bytes and duration:999999 (or a negative finite number), without invoking the producer. Classifier returns at1235: no issued witness, actual producer output identity, or duration pairing is consulted. The whole-tree retention detects later mutation but the next stable read accepts these original forged bytes.",
+      "assertion_gap": "The R04 forged-cache negative targets probe JSON; B0-1 proves pageframe/poster pairing, not duration provenance. Existing finite-number/matching stamp guards reject malformed or stale JSON while allowing a fresh plausible forgery.",
+      "minimum_same_scope_fix": "Cover this already listed pageframes output with the same real production/identity pairing (including its exact duration cache output when present), or refuse an unwitnessed duration cache. Preserve actual producer positive behavior; do not use the cache as independent duration evidence. Add separate forged-duration and actual-produced stable-round assertions. CONTRACTS_AND_OWNERSHIP.md:42 explicitly includes film-duration.json in the fixed-producer pairing policy; media posters/frames/waves have a different intentionally non-authority policy at41 and are not defects raised here."
+    },
+    {
+      "id": "PF03",
+      "severity": "MAJOR",
+      "kind": "EXPLICIT_FAULT_COVERAGE_GAP",
+      "requirements": [
+        "cleanup_uncertainty",
+        "native_cache"
+      ],
+      "title": "Cache wrapper PRE/POST multi-failure settlement remains unproven",
+      "locations": [
+        "src/host/agent-driven/created-native-workspace.ts:584",
+        "src/host/agent-driven/created-native-workspace.ts:595",
+        "tests/agent-driven/integration/native-cache-witness.test.ts:678",
+        "tests/agent-driven/integration/native-cache-witness.test.ts:748",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:2814"
+      ],
+      "counterexample": "K05-a closes the producer before invocation, so it never acquires POST. K05-b succeeds but throws only for opened[0] and asserts exactly one hit. An implementation that silently lost after.release failures or retained only one of multiple PRE/POST failures would pass these cache cases; the pure retained-closure three-cause case does not execute the wrapper merge/revoke path. This is an oracle counterexample, not a claimed production failure or executed mutation.",
+      "assertion_gap": "ROUND3_K01_K06_CORRECTIVE_RELEASE_021.md K05 expressly requires original producer error plus PRE/POST cleanup faults and multiple cleanup failures. Current wrapper control flow appears to all-attempt both releases, but the required conjunction is not established by the recorded tests.",
+      "minimum_same_scope_fix": "Extend the existing Host-private production descriptor seam with named allocation identities from PRE and POST and independent release errors, assert each exact genuine object once, primary preserved, all allocations attempted, no visible witness and sticky refusal. Retain current successful production and single-fault cases; only affected evidence needs re-verification after an authorized fix."
+    }
+  ],
+  "severity_counts": {
+    "BLOCKER": 0,
+    "MAJOR": 3,
+    "MINOR": 0
+  },
+  "requirements": [
+    {
+      "group": "R01",
+      "requirement": "producer_chain",
+      "proof_required": "Actual bootstrap, SOURCE_ONLY draft and controlled adoption produce committed rich source; actual workspace/reader consumes it; preserve producer/rights/consumer identities.",
+      "status": "SUPPORTED_COMPONENT_EVIDENCE",
+      "locations": [
+        "src/host/agent-driven/committed-snapshot-authority.ts:362",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:109",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:171",
+        "tests/agent-driven/integration/helpers/native-source-fixture.ts:105"
+      ],
+      "concrete_assertions_and_implementation": "Actual SOURCE_ONLY worker, controlled adoption/commit, real workspace reader and approved Expected projection; four hydration parts and commit identities asserted. Rights/review acceptance is fixture policy, not human approval.",
+      "runtime_evidence": "B1; D1b/D3/D4/D5 regression receipts",
+      "limits_or_gaps": "No new producer-chain defect identified; current full candidate acceptance remains pending.",
+      "findings": []
+    },
+    {
+      "group": "R01",
+      "requirement": "independent_trees",
+      "proof_required": "Committed source and workspace retain independent physical trees; equal relative paths never collapse resource ownership; nested and empty directories are separate evidence.",
+      "status": "SUPPORTED_COMPONENT_EVIDENCE",
+      "locations": [
+        "src/host/agent-driven/created-native-source-reader.ts:740",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:801",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:823",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:2702",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:2723"
+      ],
+      "concrete_assertions_and_implementation": "Both trees retain every file independently, reject cross-tree/external aliases, share per-instance pool. Strengthened G07 compares full directory sets and identities and counts newly live FDs for roots/nested/empty directories.",
+      "runtime_evidence": "B1 older reader test bytes;035 exact current G07",
+      "limits_or_gaps": "Exact current full reader suite has not completed; focused035 establishes strengthened body, not all90.",
+      "findings": []
+    },
+    {
+      "group": "R02",
+      "requirement": "tamper_and_authority",
+      "proof_required": "Same bytes/new inode, parent/root replacement, same-size/restored mtime, symlink, copied/foreign/released capability and stale base/control/owner/generation are refused before authoritative use.",
+      "status": "SUPPORTED_COMPONENT_EVIDENCE",
+      "locations": [
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:737",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:1774",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:2567",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:3183",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:3206",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:3230",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:3260",
+        "tests/agent-driven/integration/native-cache-witness.test.ts:853",
+        "tests/agent-driven/integration/native-cache-witness.test.ts:906"
+      ],
+      "concrete_assertions_and_implementation": "Actual root/parent and byte/inode/restored-time cases; separate owner/base/control DB mutations and actual prepare/register replacement hit named refusal. Cache consumption compares whole identity.",
+      "runtime_evidence": "B1/B2, current implementation bytes unchanged",
+      "limits_or_gaps": "Session callback fixtures supplement real authority windows. Does not establish PF01 origin binding.",
+      "findings": []
+    },
+    {
+      "group": "R03",
+      "requirement": "complete_dependencies",
+      "proof_required": "Positive/negative style/settings/markers/subtitle/translation dependencies, added empty directory and actual listing changes invalidate stale proofs.",
+      "status": "SUPPORTED_COMPONENT_EVIDENCE",
+      "locations": [
+        "src/host/agent-driven/created-native-source-reader.ts:779",
+        "src/host/agent-driven/created-native-source-reader.ts:911",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:285",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:946",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:1633",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:2420",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:2511",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:3152"
+      ],
+      "concrete_assertions_and_implementation": "Positive sidecar reads and consumed/negative/directory/media lookups checked against retained ledger; birth/deletion/translation/empty-directory invalidate proof. K06-a uses lawful no-narration real audio video and asserts native untranscribed answer before birth.",
+      "runtime_evidence": "B1",
+      "limits_or_gaps": "No additional unbounded form-combination gate inferred; production translation reachability limited to created producer, not claimed for entire upstream.",
+      "findings": []
+    },
+    {
+      "group": "R04",
+      "requirement": "native_cache",
+      "proof_required": "Unknown/forged native metadata or cache refused; concrete approved producer derivation invalidates old round, then stable proven native derivation can be read; no broad cache whitelist.",
+      "status": "UNPROVEN_REMAINING_MAJORS",
+      "locations": [
+        "src/host/agent-driven/created-native-workspace.ts:462",
+        "src/host/agent-driven/created-native-source-reader.ts:1173",
+        "tests/agent-driven/integration/native-cache-witness.test.ts:136",
+        "tests/agent-driven/integration/native-cache-witness.test.ts:302",
+        "tests/agent-driven/integration/native-cache-witness.test.ts:471",
+        "tests/agent-driven/integration/native-cache-witness.test.ts:853",
+        "tests/agent-driven/integration/native-cache-witness.test.ts:906"
+      ],
+      "concrete_assertions_and_implementation": "Actual fixed browser pageframe/poster, paired triple and exact frame_key, older proof invalidation and fresh-round acceptance; hand brand cannot be promoted; whole output/dependency identity consumed.",
+      "runtime_evidence": "B2 actual16, A3c actual6; no mocks for positive draws",
+      "limits_or_gaps": "PF01 origin/root split and PF02 unwitnessed film-duration remain; PF03 cache-specific fault conjunction unproven.",
+      "findings": [
+        "PF01",
+        "PF02",
+        "PF03"
+      ]
+    },
+    {
+      "group": "R05",
+      "requirement": "actual_probe",
+      "proof_required": "Fixed local ffprobe uses same held parent-PID FD; normalized duration/first-video/fps/rotation/audio/dimensions and provenance match pinned upstream; no injected facts.",
+      "status": "SUPPORTED_COMPONENT_EVIDENCE",
+      "locations": [
+        "src/host/agent-driven/created-native-source-reader.ts:499",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:361",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:568",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:1020",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:1537"
+      ],
+      "concrete_assertions_and_implementation": "Actual ffprobe same parent-PID held FD and provenance; normalized real duration/audio/fps/dimensions; rotation/two-stream standalone real-media normalizer tests explicitly separate from full reader.",
+      "runtime_evidence": "B1",
+      "limits_or_gaps": "Standalone rotation test is not a claim of a committed rotated created film; no fake successful media response is used.",
+      "findings": []
+    },
+    {
+      "group": "R05",
+      "requirement": "child_lifetime",
+      "proof_required": "Timeout/cancel/abrupt child: actual child exit and reap precede input release; limits refuse rather than truncate; diagnostic media never represents Chinese A films.",
+      "status": "SUPPORTED_COMPONENT_EVIDENCE",
+      "locations": [
+        "src/host/agent-driven/created-native-source-reader.ts:428",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:568",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:2280",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:2307",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:2334",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:2361"
+      ],
+      "concrete_assertions_and_implementation": "Runner close event settles raw child; real OS children drive overflow/hang/nonzero/signal/cancel failure branches. Hung-child exit observation verifies held input live, cancellation exit precedes read rejection.",
+      "runtime_evidence": "B1",
+      "limits_or_gaps": "Failure transport child is Node, not ffprobe pretending to produce media facts; exact live-FD-at-exit asserted in hung/ordinary-tool cases, not independently in every fault case.",
+      "findings": []
+    },
+    {
+      "group": "R06",
+      "requirement": "native_bytes_and_order",
+      "proof_required": "Exact UTF8/BOM/CRLF/native_rev vectors; numeric localeCompare video ordering vs separate actual caption readdir order; Node/ICU/locale recorded.",
+      "status": "SUPPORTED_COMPONENT_EVIDENCE",
+      "locations": [
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:1064",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:1093",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:1663",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:1686",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:2941",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:2975"
+      ],
+      "concrete_assertions_and_implementation": "Video order compares actual pinned listFiles on scrambled input; caption order compares actual readdir separately. Five exact UTF8/BOM/CRLF revision vectors; actual pinned placement and native omitted-at zero.",
+      "runtime_evidence": "B1 logs record Node v22.22.1 ICU78.2 en-US",
+      "limits_or_gaps": "No planStart override or unsupported numeric result treated as native playback proof.",
+      "findings": []
+    },
+    {
+      "group": "R07",
+      "requirement": "budgets",
+      "proof_required": "Size checks precede bounded text read; growth, total bytes, path/depth/FD/output/time bounds have explicit rejection; no unbounded media read.",
+      "status": "SUPPORTED_COMPONENT_EVIDENCE",
+      "locations": [
+        "src/host/agent-driven/retained-native-closure.ts:20",
+        "src/host/agent-driven/retained-native-closure.ts:702",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:1181",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:1294",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:1743",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:1820",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:2280",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:2307"
+      ],
+      "concrete_assertions_and_implementation": "Bounded streaming hash/text reads, size fences before/after read, cumulative/path/depth/FD failures; real stdout/stderr overflow and timeout; sequential media probes satisfy <=2 per proof by construction.",
+      "runtime_evidence": "B1 plus035 exact path-budget/lstat tests",
+      "limits_or_gaps": "No unbounded total probe-count requirement invented; max2 is concurrency per proof. Runtime guards are not developer token/time ceilings.",
+      "findings": []
+    },
+    {
+      "group": "R07",
+      "requirement": "per_allocation_fd_lifetime",
+      "proof_required": "Descriptor allocation generations own closes; recycled integer after temporary directory walk still closes newly retained allocation exactly once; no raw numeric retry.",
+      "status": "SUPPORTED_COMPONENT_EVIDENCE",
+      "locations": [
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:1851",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:1181",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:2814"
+      ],
+      "concrete_assertions_and_implementation": "Actual recycled numeric descriptor from temporary walk is newly retained and released; allocation generations and once-only releases; P09 asserts IDs, no residual live allocations.",
+      "runtime_evidence": "B1 plus035 exact allocation-count bodies",
+      "limits_or_gaps": "Cache-wrapper combined ownership fault remains PF03; pure closure proof does not cover every wrapper.",
+      "findings": []
+    },
+    {
+      "group": "R07",
+      "requirement": "cleanup_uncertainty",
+      "proof_required": "Nth open/stat/verify/close/reentry failures preserve primary and all cleanup errors; every outstanding resource attempted; sticky uncertainty prevents new proof.",
+      "status": "PARTIAL_EXPLICIT_COVERAGE_GAP",
+      "locations": [
+        "src/host/agent-driven/created-native-source-reader.ts:385",
+        "src/host/agent-driven/committed-snapshot-authority.ts:391",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:1230",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:1957",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:2007",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:2030",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:2638",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:2814",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:3028",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:3051",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:3085"
+      ],
+      "concrete_assertions_and_implementation": "Named actual lstat primary/genuine error identity; actual-source acquisition failures; ordinary negative stays usable; late raw rejection adopted; three named unpack close failures; successful/failed parse copy actual path removed, real EACCES removal sticky uncertainty.",
+      "runtime_evidence": "B1 plus035; cache B2 single-fault cases",
+      "limits_or_gaps": "PF03 remains. Late raw promise lifecycle fixture is component-only injection; it is not an actual delayed Host acquisition or media-success substitution.",
+      "findings": [
+        "PF03"
+      ]
+    },
+    {
+      "group": "R07",
+      "requirement": "drain_and_delivery",
+      "proof_required": "Close drains accepted reads and probes; success transfers source/workspace plus directory/negative guards; reader close cannot destroy delivered resources.",
+      "status": "SUPPORTED_COMPONENT_EVIDENCE",
+      "locations": [
+        "src/host/agent-driven/created-native-source-reader.ts:645",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:513",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:628",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:1616",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:2099",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:2173",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:3004"
+      ],
+      "concrete_assertions_and_implementation": "Admission before callbacks, accepted raw work tracked independently of canceled caller, final callback can close reader but no transfer, delivered leaves and owner guards survive reader close until final leaf.",
+      "runtime_evidence": "B1",
+      "limits_or_gaps": "Reentrant lifecycle fixtures are distinguished from actual child events. Cache success-before-cleanup defect is corrected by pending/active/revoked; combined failure proof PF03 remains.",
+      "findings": []
+    },
+    {
+      "group": "R01/R02",
+      "requirement": "lease_isolation",
+      "proof_required": "Releasing one acquired lease does not revoke ref or another lease; repeated proof works; issuing instance checked and replaced generation invalidates prior proof.",
+      "status": "SUPPORTED_COMPONENT_EVIDENCE",
+      "locations": [
+        "src/host/agent-driven/created-native-workspace.ts:337",
+        "src/host/agent-driven/created-native-workspace.ts:698",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:401",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:447",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:2538",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:3260",
+        "tests/agent-driven/integration/native-cache-witness.test.ts:385",
+        "tests/agent-driven/integration/native-cache-witness.test.ts:425",
+        "tests/agent-driven/integration/native-cache-witness.test.ts:471",
+        "tests/agent-driven/integration/native-cache-witness.test.ts:526"
+      ],
+      "concrete_assertions_and_implementation": "Parallel independent leases and repeated acquire; true issuer predicate rejects foreign/copied facts, actualservice.record rejects hand-branded witness, real replacement invalidates old lease/ref/generation.",
+      "runtime_evidence": "B1/B2",
+      "limits_or_gaps": "Historical global-brand promotion K01 is fixed; raw witness public issuer alone no longer grants service insertion.",
+      "findings": []
+    },
+    {
+      "group": "REG",
+      "requirement": "existing_behavior",
+      "proof_required": "Original render SnapshotReadPort, legacy refusal and accepted Expected lifecycle/84 assertions preserved; loader only approved015 minimal exports, no artifact/pin change.",
+      "status": "REGRESSION_EVIDENCE_FULL_GATE_PENDING",
+      "locations": [
+        "src/host/m5/openfilm-native-expected.ts:625",
+        "tests/agent-driven/integration/created-native-ack.test.ts:667",
+        "tests/agent-driven/integration/created-draft-processor.test.ts:72",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:193"
+      ],
+      "concrete_assertions_and_implementation": "Protected Expected/ack/workspace/snapshot hashes match; C1/C2/C3 actual regression captures; D1b independent parsed5 clips checks concept separate from base shots, D3/D4/D5 preserve adoption/recovery/preview.",
+      "runtime_evidence": "C1 11,C2 11,C3 85,D1b7,D3 50,D4 33,D5 14; counts only navigation",
+      "limits_or_gaps": "No candidate-wide full check result yet; approved015 artifact binary equality not independently re-hashed by this reviewer, so not asserted. Follow-up: fullcheck live migration suite26 failures visibly open absent fixture paths; baseline/candidate regression attribution remains unproven, see legacy_fixture_followup. RecordedD1 source-export claim is not supported by canonical opaque17-byte placeholders.",
+      "findings": []
+    },
+    {
+      "group": "EVIDENCE",
+      "requirement": "frozen_capture",
+      "proof_required": "Exact ten-file diff and protected hashes checked; unique captures retain all failures, source/index immutable during commands, actual exits and source/artifact SHA256 verified.",
+      "status": "PARTIAL_BYTE_BOUND_EXPECTED_PENDING",
+      "locations": [
+        "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/BATCH_036_GRANT.json"
+      ],
+      "concrete_assertions_and_implementation": "15 source and7 config inputs match start/end plus saved blobs; captures preserve actual failure history; B1/B2/C3 raw log hashes independently checked.",
+      "runtime_evidence": "036 compile receipt;030/032/033/035 results and raw captures",
+      "limits_or_gaps": "B1/B2 are not current15 byte-identical: processor test51da… and reader test8d740… differ. Production identical;031 and034 separately release later assertions. Full gate result absent on single read. Index/artifact freeze final audit remains MAIN task. Follow-up: fullcheck live migration suite26 failures visibly open absent fixture paths; baseline/candidate regression attribution remains unproven, see legacy_fixture_followup. RecordedD1 source-export claim is not supported by canonical opaque17-byte placeholders.",
+      "findings": []
+    },
+    {
+      "group": "REVIEW",
+      "requirement": "independent_acceptance",
+      "proof_required": "Freeze actual candidate and obtain independent review bound to it; fix then reverify affected gates. No self-signed external pass.",
+      "status": "EXPECTED_PENDING_NOT_THIS_AUDIT",
+      "locations": [
+        "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/independent-pre-freeze-review-021/TASK.md"
+      ],
+      "concrete_assertions_and_implementation": "Independent read-only review bound to036 actual bytes; no implementation participation, no execution grant consumed.",
+      "runtime_evidence": "This report",
+      "limits_or_gaps": "candidate_commit=null; freeze actual candidate then commit-bound independent acceptance remains required; no external PASS issued.",
+      "findings": []
+    },
+    {
+      "group": "NEXT",
+      "requirement": "next_integration_plan",
+      "proof_required": "After N1N2 acceptance freeze compatible next-stage contract and exact implementation/acceptance plan; no premature S01/NativeAck/Studio/film/A readiness claim.",
+      "status": "EXPECTED_PENDING_AFTER_ACCEPTANCE",
+      "locations": [
+        "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/MAIN_ACCEPTANCE_REQUIREMENTS.json"
+      ],
+      "concrete_assertions_and_implementation": "NEXT_WIRING_ENTRY_CHECKLIST preparation is historical evidence of planning; acceptance-dependent reanchor is intentionally later.",
+      "runtime_evidence": "Original ledger NEXT",
+      "limits_or_gaps": "No public Studio/NativeAck/selectionDDL/Chinese A films/fullA/V1 proof claimed; no new code or human gate demanded in N1N2.",
+      "findings": []
+    }
+  ],
+  "raw_captures_verified": [
+    {
+      "capture": "n1n2-claude-021-run-B1",
+      "actual": {
+        "exit": 0,
+        "source_changed": [],
+        "source_added": [],
+        "log_sha256": "685e1523386e4b56b5063e6f3ca1f10907ba73e6226f59757f13539a86e9df64",
+        "finished_at": "2026-11-13T02:07:34.611094+00:00"
+      },
+      "log_hash_independently_verified": true,
+      "differences_from036": {
+        "tests/agent-driven/integration/created-draft-processor.test.ts": "51da71f510271fa63e66c2b740ee9f680fa5f51b7c756b3afaf72ba2f9d304f0",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts": "8d740f83883fd42c13f8e0e2ea63bee406f8d9edf19ea02a1005c72e26616e60"
+      }
+    },
+    {
+      "capture": "n1n2-claude-021-run-B2",
+      "actual": {
+        "exit": 0,
+        "source_changed": [],
+        "source_added": [],
+        "log_sha256": "88ee6dbb8ffcd141b8e7f59188bac613adbdfba6573c66c0467fb79a22e45a06",
+        "finished_at": "2026-11-13T02:11:22.887287+00:00"
+      },
+      "log_hash_independently_verified": true,
+      "differences_from036": {
+        "tests/agent-driven/integration/created-draft-processor.test.ts": "51da71f510271fa63e66c2b740ee9f680fa5f51b7c756b3afaf72ba2f9d304f0",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts": "8d740f83883fd42c13f8e0e2ea63bee406f8d9edf19ea02a1005c72e26616e60"
+      }
+    },
+    {
+      "capture": "n1n2-claude-021-run-C3",
+      "actual": {
+        "exit": 0,
+        "source_changed": [],
+        "source_added": [],
+        "log_sha256": "f9a25574b242cdba126d89ef3fb231baaa167743a5235a127bc1ff9c655632e2",
+        "finished_at": "2026-11-13T02:14:08.413931+00:00"
+      },
+      "log_hash_independently_verified": true,
+      "differences_from036": {
+        "tests/agent-driven/integration/created-draft-processor.test.ts": "51da71f510271fa63e66c2b740ee9f680fa5f51b7c756b3afaf72ba2f9d304f0",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts": "8d740f83883fd42c13f8e0e2ea63bee406f8d9edf19ea02a1005c72e26616e60"
+      }
+    }
+  ],
+  "full_gate_single_observation": {
+    "capture": "n1n2-claude-021-final-check-001",
+    "result": "ABSENT_PENDING",
+    "limit": "Existing log/argv read once; no process probes, no polling, no pass/fail inference."
+  },
+  "K01_K06": {
+    "K01": "PRIVATE_ISSUER_BINDING_FIXED; PF01 render origin still separate",
+    "K02": "SUCCESS_FAILURE_REMOVE_UNCERTAINTY_ASSERTED",
+    "K03": "POSTER_FRAME_PAIRING_FIXED; partial json/wrong ms-width tested, symmetric jpg/stamp/wrong rel not separately exercised",
+    "K04": "WHOLE_IDENTITY_CONSUMPTION_FIXED; PF01/PF02 derivation provenance remains",
+    "K05": "PENDING_ACTIVE_REVOKED_FIXED; PF03 multirelease conjunction unproven",
+    "K06": "REAL_HEARD_ABSENCE_AND_DB_WINDOWS_ASSERTED"
+  },
+  "limits": [
+    "Static inference only; no new exploit/mutation/test run.",
+    "Only authorized REVIEW.md and MATRIX.json written.",
+    "No global orphan/resource-absence claim; no source/config/index mutations or provider operations.",
+    "Full final check, candidate commit, commit-bound review and NEXT reanchor remain expected pending."
+  ],
+  "legacy_fixture_followup": {
+    "dispatch": "ctx_5cd0bcd8a2cd",
+    "observed_at": "2026-11-13T03:16:43.529620+00:00",
+    "status": "READONLY_PREREQUISITE_AND_EVIDENCE_RISK_NOT_CANDIDATE_REGRESSION_ATTRIBUTION",
+    "authority_receipt": "BATCH_036_LEGACY_FIXTURE_OBSERVATION.json",
+    "implementation_paths_independently_absent": [
+      "tests/fixtures/m2.1/snapshot-project/assets/generated/visual-10s.mp4",
+      "tests/fixtures/m2.1/snapshot-project/assets/generated/visual-alt-10s.mp4"
+    ],
+    "canonical_files_independently_verified": [
+      {
+        "name": "visual-10s.mp4",
+        "bytes": 17,
+        "sha256": "0427d617584264ac2875243d6cf711dd985577566f71db6b9d5faf051575989c",
+        "literal_utf8": "SNAPFIX-VISUAL-A\n"
+      },
+      {
+        "name": "visual-alt-10s.mp4",
+        "bytes": 17,
+        "sha256": "40d825e66ee7e69ae53dfdc8d5195fbb9ffc3af7eb07452a5081c51e24115cff",
+        "literal_utf8": "SNAPFIX-VISUAL-B\n"
+      }
+    ],
+    "observed_log": "fullcheck001 live log line44 records migration-service26/26 failures; displayed per-case errors explicitly ENOENT opening copied generated visual files; terminal result/stack not claimed",
+    "locations": [
+      "tests/m2.3/migration-service.test.ts:51",
+      "tests/m2.3/migration-service.test.ts:64",
+      "tests/m2.3/migration-service.test.ts:67",
+      "tests/m2.3/migration-real-export.test.ts:194",
+      "tests/m2.3/migration-real-export.test.ts:209",
+      "tests/m2.3/migration-real-export.test.ts:214",
+      "tests/m2.3/migration-real-export.test.ts:215",
+      "tests/m2.3/migration-real-export.test.ts:237",
+      "tests/fixtures/m2.1/snapshot-project/narralens.assets.json:6",
+      "tests/fixtures/m2.1/snapshot-project/narralens.assets.json:23"
+    ],
+    "distinction": "Explicit constant videoFrames900 in component harness is disclosed stub; separate source-export callback labels opaque17-byte placeholder a recordedD1 artifact and supplies900 without probing it, so cannot substantiate real source-media/export acceptance. Missing fixture inputs explain displayed ENOENT prerequisite failures, but no isolated baseline run/final stack establishes total cause or regression attribution.",
+    "scope": "These tests and migration/asset-registry files have no git diff against baseline and are outside03615 paths; no fixture copied/generated or manifest/code changed.",
+    "final_gate_effect": "Must preserve whole gate failure and resolve prerequisites/evidence scope before acceptance; cannot dismiss as unrelated, relabel opaque bytes real video, weaken gate or rerun while current holder active.",
+    "end_15_and_7_hashes_match": true
+  }
+}

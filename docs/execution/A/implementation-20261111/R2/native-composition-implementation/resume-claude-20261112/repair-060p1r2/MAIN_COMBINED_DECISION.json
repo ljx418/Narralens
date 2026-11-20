@@ -1,0 +1,37 @@
+{
+  "at": "2026-11-14T09:47:49.825561+00:00",
+  "status": "REQUEST_CHANGES_REPAIR_RELEASED",
+  "review_messages": [
+    "msg_db5e84ac3379",
+    "msg_8d09c80ef657"
+  ],
+  "custodian_counts": {
+    "BLOCKER": 2,
+    "MAJOR": 9
+  },
+  "integration_counts": {
+    "MAJOR": 10,
+    "MINOR": 1
+  },
+  "counts_not_deduplicated": true,
+  "mapping": "SPEC A-G maps all P1R-C01..11 and IR01..11; overlapping causes consolidated",
+  "main_verified_inputs": {
+    "custodian": 32,
+    "integration": 87
+  },
+  "current_mismatches": [],
+  "runtime_acceptance": "NOT_RUN",
+  "P2_release": false,
+  "worker": {
+    "delivery": "reopened",
+    "followUpOf": "ctx_95f1131694b8",
+    "dispatchId": "ctx_9adb0a2b7d0a",
+    "taskId": "task_4ba8760231b0",
+    "runId": "run_399f9dd3ce5a",
+    "state": "ready",
+    "agent": "claude",
+    "terminal": "term_88e67cac3791dbec5f15fc184055421a",
+    "workspace": "2e732423-9bcc-494c-a0ed-e27a9488f313::C:\\workspace\\videoworkline\\Narralens-agents\\main-integration",
+    "next": "Orca wakes you when workers report; end your turn when you're done."
+  }
+}

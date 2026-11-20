@@ -1,5 +1,8 @@
 # 并行架构：公共端口、代码所有权和集成接缝
 
+> **2026-11-11 最新执行流程**：用户批准“主Codex → BRIDGE/PRODUCT/MEDIA领域Codex → 各自ClaudeCode（MiniMax）”三级分工。组织、任务释放、合同与验收责任以[11_AGENT_DELIVERY_PROCESS.md](11_AGENT_DELIVERY_PROCESS.md)为准；旧授权状态为历史快照，A实际授权与当前暂停分开判断。本次仅文档更新，不启动实现。
+
+
 > 当前权威：R4体验已批准，见V1_FRONTEND_EXIT_GATE.md；详细实施设计/22实体/35族场景/里程碑与回退见implementation-design/00_READ_FIRST.md。原工作台增量，顶部横向WorkflowTopBar、独立非模态SystemControlPanel；新项目bootstrap/初始commit属MAIN，生产注册属MAIN。旧正文与批准状态见history归档；当前仅文档，CP/生产NOT_RELEASED。
 
 

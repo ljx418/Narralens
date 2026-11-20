@@ -1,0 +1,363 @@
+{
+  "at": "2026-11-14T13:10:51.669583+00:00",
+  "rows": [
+    {
+      "capture": "n1n2-claude-060p1r2-custodian-syntax-001",
+      "exit": 0,
+      "source_changed": [],
+      "source_added": [],
+      "inputs": 646,
+      "current_mismatches": [
+        "src/adapters/openfilm/cache-process-custodian.py",
+        "src/adapters/openfilm/cache-process-supervisor.ts",
+        "src/adapters/openfilm/cache-production-scope.ts",
+        "src/adapters/openfilm/cache-worker-integrity.json",
+        "src/adapters/openfilm/openfilm-cache-worker.mjs",
+        "src/adapters/openfilm/openfilm-upstream.ts",
+        "src/host/agent-driven/created-native-workspace.ts",
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts",
+        "tests/agent-driven/integration/cache-frame-duration-lifetime.test.ts",
+        "tests/agent-driven/integration/cache-process-identity.test.ts",
+        "tests/agent-driven/integration/cache-process-settlement.test.ts",
+        "tests/agent-driven/integration/cache-production-scope.test.ts",
+        "tests/agent-driven/integration/helpers/cache-probe-fixture.mjs",
+        "tests/agent-driven/integration/helpers/cache-worker-fixture.mjs"
+      ],
+      "log_digest_matches": true,
+      "log_sha256": "dd8ee964b960e83ee2ed8f892492ac84dc2c0ea3c9ddb84f9b29e3922f08b97c"
+    },
+    {
+      "capture": "n1n2-claude-060p1r2-custodian-unit-001",
+      "exit": 1,
+      "source_changed": [],
+      "source_added": [],
+      "inputs": 647,
+      "current_mismatches": [
+        "src/adapters/openfilm/cache-worker-integrity.json",
+        "src/adapters/openfilm/openfilm-cache-worker.mjs",
+        "src/adapters/openfilm/openfilm-upstream.ts",
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts",
+        "tests/agent-driven/integration/cache-frame-duration-lifetime.test.ts",
+        "tests/agent-driven/integration/cache-process-identity.test.ts",
+        "tests/agent-driven/integration/cache-process-settlement.test.ts",
+        "tests/agent-driven/integration/cache-production-scope.test.ts",
+        "tests/agent-driven/integration/helpers/cache-custodian-unit.py",
+        "tests/agent-driven/integration/helpers/cache-probe-fixture.mjs",
+        "tests/agent-driven/integration/helpers/cache-worker-fixture.mjs"
+      ],
+      "log_digest_matches": true,
+      "log_sha256": "82f2d376b362ccc8599477ef49df35e771a387c7484ac9bb7d5c7effd67c379b"
+    },
+    {
+      "capture": "n1n2-claude-060p1r2-custodian-unit-002",
+      "exit": 0,
+      "source_changed": [],
+      "source_added": [],
+      "inputs": 647,
+      "current_mismatches": [
+        "src/adapters/openfilm/cache-worker-integrity.json",
+        "src/adapters/openfilm/openfilm-cache-worker.mjs",
+        "src/adapters/openfilm/openfilm-upstream.ts",
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts",
+        "tests/agent-driven/integration/cache-frame-duration-lifetime.test.ts",
+        "tests/agent-driven/integration/cache-process-identity.test.ts",
+        "tests/agent-driven/integration/cache-process-settlement.test.ts",
+        "tests/agent-driven/integration/cache-production-scope.test.ts",
+        "tests/agent-driven/integration/helpers/cache-probe-fixture.mjs",
+        "tests/agent-driven/integration/helpers/cache-worker-fixture.mjs"
+      ],
+      "log_digest_matches": true,
+      "log_sha256": "40c333e8dd3758e33ff7e10e08c136217d357fe3f4db4c24fb6f6ab278306999"
+    },
+    {
+      "capture": "n1n2-claude-060p1r2-final-custodian-syntax-001",
+      "exit": 0,
+      "source_changed": [],
+      "source_added": [],
+      "inputs": 647,
+      "current_mismatches": [],
+      "log_digest_matches": true,
+      "log_sha256": "dd8ee964b960e83ee2ed8f892492ac84dc2c0ea3c9ddb84f9b29e3922f08b97c"
+    },
+    {
+      "capture": "n1n2-claude-060p1r2-final-custodian-unit-001",
+      "exit": 0,
+      "source_changed": [],
+      "source_added": [],
+      "inputs": 647,
+      "current_mismatches": [],
+      "log_digest_matches": true,
+      "log_sha256": "9436669d041fd992a7c7eaf244080a988eb9dea765843dfb3c4af0fa94f0cb70"
+    },
+    {
+      "capture": "n1n2-claude-060p1r2-final-identity-001",
+      "exit": 0,
+      "source_changed": [],
+      "source_added": [],
+      "inputs": 647,
+      "current_mismatches": [],
+      "log_digest_matches": true,
+      "log_sha256": "08318c3fd42284d178c88f6ee7fe1262fb66d5b844a0f3c75c8c97f356b099c0"
+    },
+    {
+      "capture": "n1n2-claude-060p1r2-final-integrity-check-001",
+      "exit": 0,
+      "source_changed": [],
+      "source_added": [],
+      "inputs": 647,
+      "current_mismatches": [],
+      "log_digest_matches": true,
+      "log_sha256": "7480083d801311b007ec2f2a6c4717621f8aed33de5e17dd7ba35815b0d68e68"
+    },
+    {
+      "capture": "n1n2-claude-060p1r2-final-m21-lock-001",
+      "exit": 0,
+      "source_changed": [],
+      "source_added": [],
+      "inputs": 647,
+      "current_mismatches": [],
+      "log_digest_matches": true,
+      "log_sha256": "4936318ad49ff10c4926ccd981b6feae36992c8df7457a5b0c07aebfbc9554fc"
+    },
+    {
+      "capture": "n1n2-claude-060p1r2-final-scheduler-001",
+      "exit": 0,
+      "source_changed": [],
+      "source_added": [],
+      "inputs": 647,
+      "current_mismatches": [],
+      "log_digest_matches": true,
+      "log_sha256": "d9a34a04b0bb070ed79cf586f66b0add37e5859b619f70c1e97da71ddd1dd65a"
+    },
+    {
+      "capture": "n1n2-claude-060p1r2-final-syntax-policy-001",
+      "exit": 0,
+      "source_changed": [],
+      "source_added": [],
+      "inputs": 647,
+      "current_mismatches": [],
+      "log_digest_matches": true,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "capture": "n1n2-claude-060p1r2-final-syntax-probe-fixture-001",
+      "exit": 0,
+      "source_changed": [],
+      "source_added": [],
+      "inputs": 647,
+      "current_mismatches": [],
+      "log_digest_matches": true,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "capture": "n1n2-claude-060p1r2-final-syntax-worker-001",
+      "exit": 0,
+      "source_changed": [],
+      "source_added": [],
+      "inputs": 647,
+      "current_mismatches": [],
+      "log_digest_matches": true,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "capture": "n1n2-claude-060p1r2-final-syntax-worker-fixture-001",
+      "exit": 0,
+      "source_changed": [],
+      "source_added": [],
+      "inputs": 647,
+      "current_mismatches": [],
+      "log_digest_matches": true,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "capture": "n1n2-claude-060p1r2-final-tsc-001",
+      "exit": 0,
+      "source_changed": [],
+      "source_added": [],
+      "inputs": 647,
+      "current_mismatches": [],
+      "log_digest_matches": true,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "capture": "n1n2-claude-060p1r2-generate-001",
+      "exit": 0,
+      "source_changed": [
+        "src/adapters/openfilm/cache-worker-integrity.json"
+      ],
+      "source_added": [],
+      "inputs": 647,
+      "current_mismatches": [
+        "src/adapters/openfilm/cache-worker-integrity.json"
+      ],
+      "log_digest_matches": true,
+      "log_sha256": "958825c41d7e482d785280512535c13558d60012ca26f10d20cad19472bbbcf6"
+    },
+    {
+      "capture": "n1n2-claude-060p1r2-handback-integrity-001",
+      "exit": 0,
+      "source_changed": [],
+      "source_added": [],
+      "inputs": 647,
+      "current_mismatches": [],
+      "log_digest_matches": true,
+      "log_sha256": "7480083d801311b007ec2f2a6c4717621f8aed33de5e17dd7ba35815b0d68e68"
+    },
+    {
+      "capture": "n1n2-claude-060p1r2-identity-001",
+      "exit": 0,
+      "source_changed": [],
+      "source_added": [],
+      "inputs": 647,
+      "current_mismatches": [
+        "src/adapters/openfilm/cache-worker-integrity.json",
+        "src/adapters/openfilm/openfilm-cache-worker.mjs",
+        "src/adapters/openfilm/openfilm-upstream.ts",
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts",
+        "tests/agent-driven/integration/cache-frame-duration-lifetime.test.ts",
+        "tests/agent-driven/integration/cache-process-settlement.test.ts",
+        "tests/agent-driven/integration/cache-production-scope.test.ts",
+        "tests/agent-driven/integration/helpers/cache-probe-fixture.mjs",
+        "tests/agent-driven/integration/helpers/cache-worker-fixture.mjs"
+      ],
+      "log_digest_matches": true,
+      "log_sha256": "ca1fc90018166360b7f1323158daa99c6a3151a8d2aef627f5d411086e9691f4"
+    },
+    {
+      "capture": "n1n2-claude-060p1r2-m21-lock-001",
+      "exit": 0,
+      "source_changed": [],
+      "source_added": [],
+      "inputs": 647,
+      "current_mismatches": [
+        "src/adapters/openfilm/cache-worker-integrity.json",
+        "src/adapters/openfilm/openfilm-cache-worker.mjs",
+        "src/adapters/openfilm/openfilm-upstream.ts",
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts",
+        "tests/agent-driven/integration/cache-frame-duration-lifetime.test.ts",
+        "tests/agent-driven/integration/cache-process-settlement.test.ts",
+        "tests/agent-driven/integration/helpers/cache-probe-fixture.mjs",
+        "tests/agent-driven/integration/helpers/cache-worker-fixture.mjs"
+      ],
+      "log_digest_matches": true,
+      "log_sha256": "52a1a28f3d499624cdb45fb93e6245f10db3e884d5e3afaa8c1e3f017067739a"
+    },
+    {
+      "capture": "n1n2-claude-060p1r2-scheduler-001",
+      "exit": 1,
+      "source_changed": [],
+      "source_added": [],
+      "inputs": 647,
+      "current_mismatches": [
+        "src/adapters/openfilm/cache-worker-integrity.json",
+        "src/adapters/openfilm/openfilm-cache-worker.mjs",
+        "src/adapters/openfilm/openfilm-upstream.ts",
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts",
+        "tests/agent-driven/integration/cache-frame-duration-lifetime.test.ts",
+        "tests/agent-driven/integration/cache-process-settlement.test.ts",
+        "tests/agent-driven/integration/cache-production-scope.test.ts",
+        "tests/agent-driven/integration/helpers/cache-probe-fixture.mjs",
+        "tests/agent-driven/integration/helpers/cache-worker-fixture.mjs"
+      ],
+      "log_digest_matches": true,
+      "log_sha256": "5330d02aa843fa483afd72bf4d8c5a950790b01b9eab15a4791adf5db2e830bf"
+    },
+    {
+      "capture": "n1n2-claude-060p1r2-scheduler-002",
+      "exit": 0,
+      "source_changed": [],
+      "source_added": [],
+      "inputs": 647,
+      "current_mismatches": [
+        "src/adapters/openfilm/cache-worker-integrity.json",
+        "src/adapters/openfilm/openfilm-cache-worker.mjs",
+        "src/adapters/openfilm/openfilm-upstream.ts",
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts",
+        "tests/agent-driven/integration/cache-frame-duration-lifetime.test.ts",
+        "tests/agent-driven/integration/cache-process-settlement.test.ts",
+        "tests/agent-driven/integration/helpers/cache-probe-fixture.mjs",
+        "tests/agent-driven/integration/helpers/cache-worker-fixture.mjs"
+      ],
+      "log_digest_matches": true,
+      "log_sha256": "938621b374e3ad9fdcbc9417935d1edc423791cdd6e6d13cc56bd864078fb75d"
+    },
+    {
+      "capture": "n1n2-claude-060p1r2-syntax-worker-fixture-001",
+      "exit": 0,
+      "source_changed": [],
+      "source_added": [],
+      "inputs": 647,
+      "current_mismatches": [
+        "src/adapters/openfilm/cache-worker-integrity.json",
+        "src/adapters/openfilm/openfilm-cache-worker.mjs",
+        "src/adapters/openfilm/openfilm-upstream.ts",
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts",
+        "tests/agent-driven/integration/cache-frame-duration-lifetime.test.ts",
+        "tests/agent-driven/integration/cache-process-settlement.test.ts",
+        "tests/agent-driven/integration/helpers/cache-probe-fixture.mjs"
+      ],
+      "log_digest_matches": true,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "capture": "n1n2-claude-060p1r2-typecheck-001",
+      "exit": 2,
+      "source_changed": [],
+      "source_added": [],
+      "inputs": 646,
+      "current_mismatches": [
+        "src/adapters/openfilm/cache-process-custodian.py",
+        "src/adapters/openfilm/cache-production-scope.ts",
+        "src/adapters/openfilm/cache-worker-integrity.json",
+        "src/adapters/openfilm/openfilm-cache-worker.mjs",
+        "src/adapters/openfilm/openfilm-upstream.ts",
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts",
+        "tests/agent-driven/integration/cache-frame-duration-lifetime.test.ts",
+        "tests/agent-driven/integration/cache-process-identity.test.ts",
+        "tests/agent-driven/integration/cache-process-settlement.test.ts",
+        "tests/agent-driven/integration/cache-production-scope.test.ts",
+        "tests/agent-driven/integration/helpers/cache-probe-fixture.mjs",
+        "tests/agent-driven/integration/helpers/cache-worker-fixture.mjs"
+      ],
+      "log_digest_matches": true,
+      "log_sha256": "3b7e9f13487559a674439174844e98fb203cfd0ce60e7b1ccd126f2608bc034a"
+    },
+    {
+      "capture": "n1n2-claude-060p1r2-typecheck-002",
+      "exit": 0,
+      "source_changed": [],
+      "source_added": [],
+      "inputs": 646,
+      "current_mismatches": [
+        "src/adapters/openfilm/cache-process-custodian.py",
+        "src/adapters/openfilm/cache-worker-integrity.json",
+        "src/adapters/openfilm/openfilm-cache-worker.mjs",
+        "src/adapters/openfilm/openfilm-upstream.ts",
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts",
+        "tests/agent-driven/integration/cache-frame-duration-lifetime.test.ts",
+        "tests/agent-driven/integration/cache-process-identity.test.ts",
+        "tests/agent-driven/integration/cache-process-settlement.test.ts",
+        "tests/agent-driven/integration/cache-production-scope.test.ts",
+        "tests/agent-driven/integration/helpers/cache-probe-fixture.mjs",
+        "tests/agent-driven/integration/helpers/cache-worker-fixture.mjs"
+      ],
+      "log_digest_matches": true,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "capture": "n1n2-claude-060p1r2-typecheck-003",
+      "exit": 0,
+      "source_changed": [],
+      "source_added": [],
+      "inputs": 647,
+      "current_mismatches": [
+        "src/adapters/openfilm/cache-worker-integrity.json",
+        "src/adapters/openfilm/openfilm-cache-worker.mjs",
+        "src/adapters/openfilm/openfilm-upstream.ts"
+      ],
+      "log_digest_matches": true,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "limits": "Prior development iterations are historical; only final- captures should bind current dirty bytes. Not real kernel/runtime acceptance."
+}

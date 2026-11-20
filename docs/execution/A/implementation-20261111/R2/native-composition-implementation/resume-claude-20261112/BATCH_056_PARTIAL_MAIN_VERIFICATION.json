@@ -1,0 +1,68 @@
+{
+  "at": "2026-11-13T19:45:41.845809+00:00",
+  "actual_runs": [
+    {
+      "capture": "n1n2-claude-056-owned-entry-002",
+      "exit": 0,
+      "source_changed": [],
+      "source_added": [],
+      "log_sha256": "4d80a5db267c3f3df2ec22fd327646ef65195ae83b7d45bb2f32a2dd07262599",
+      "finished_at": "2026-11-13T19:32:33.054670+00:00",
+      "input_count": 626,
+      "current_diff_after_later_authorized_steps": [
+        "tests/wave2/m4b/adoption-route.test.ts",
+        "tests/wave2/m4c/history-media-and-failure.test.ts"
+      ]
+    },
+    {
+      "capture": "n1n2-claude-056-legacy-media-001",
+      "exit": 0,
+      "source_changed": [],
+      "source_added": [],
+      "log_sha256": "9b23f50d6b41eb705a9ba6b9d34eedfc0c4d3a5f4fce0a4f3fa6068f41a7e6fd",
+      "finished_at": "2026-11-13T19:41:37.100602+00:00",
+      "input_count": 626,
+      "current_diff_after_later_authorized_steps": []
+    },
+    {
+      "capture": "n1n2-claude-056-python-golden-001",
+      "exit": 0,
+      "source_changed": [],
+      "source_added": [],
+      "log_sha256": "1d41909b2fc5d374bf90b780e1f6e2d57be7751385ec69213a8b2a1403bdf608",
+      "finished_at": "2026-11-13T19:42:17.847519+00:00",
+      "input_count": 626,
+      "current_diff_after_later_authorized_steps": []
+    },
+    {
+      "capture": "n1n2-claude-056-vite-build-001",
+      "exit": 0,
+      "source_changed": [],
+      "source_added": [],
+      "log_sha256": "7158a9182ae63859d2adf029cc7c0e97fccd3c377451f1f9254231e2bc952676",
+      "finished_at": "2026-11-13T19:42:36.174838+00:00",
+      "input_count": 626,
+      "current_diff_after_later_authorized_steps": []
+    },
+    {
+      "capture": "n1n2-claude-056-vite-m5-build-001",
+      "exit": 0,
+      "source_changed": [],
+      "source_added": [],
+      "log_sha256": "0e89a778c51910581723195b23aa500a23e76988451fc1cc8a2f06dae2720686",
+      "finished_at": "2026-11-13T19:42:51.085891+00:00",
+      "input_count": 626,
+      "current_diff_after_later_authorized_steps": []
+    }
+  ],
+  "only_three_permitted_test_guards_changed": [
+    "tests/agent-driven/headless/owned-project-entry.test.ts",
+    "tests/wave2/m4b/adoption-route.test.ts",
+    "tests/wave2/m4c/history-media-and-failure.test.ts"
+  ],
+  "all_other35_guards_match": true,
+  "historical_ui_capture_limit": "After UI test capture, two authorized legacy harness files changed before their own execution; no run-internal source drift. Latest4capturessnapshot all626currentmatch.",
+  "full_capture": "n1n2-claude-056-final-check-001",
+  "full_result": "NOT_YET_AVAILABLE",
+  "stage_pass": false
+}

@@ -1,0 +1,156 @@
+{
+  "kind": "positive-pilot-candidate",
+  "authoritative": false,
+  "mode": "normal",
+  "root": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/var/native-cache-positive-pilot/run-zfJOqD",
+  "custodian_sha256": "bd06d7d7f79d6d2ccf2204a4e27ed5aba5364cbcda71785a67ac3ab887306b79",
+  "fixture_sha256": "e3f4ccb1c4016a54356ce04be344b4ffff23f2f88698efe191570ad8407d03ab",
+  "copied_fixture_sha256": "e3f4ccb1c4016a54356ce04be344b4ffff23f2f88698efe191570ad8407d03ab",
+  "scenario": "normal",
+  "expected_image": {
+    "sha256": "d592c3cbaf5d17852d9cff7fd0002db9a336e3d41acee2456689b86b5521b238",
+    "bytes": 1024
+  },
+  "actual_image": null,
+  "original_failure": {
+    "name": "CacheDrawError",
+    "message": "The control channel of the custodian failed: read ECONNRESET",
+    "code": "CHANNEL_ERROR"
+  },
+  "settlement_failure": {
+    "name": "CacheDrawError",
+    "message": "The control channel of the custodian failed: read ECONNRESET",
+    "code": "CHANNEL_ERROR"
+  },
+  "cleanup_facts": [],
+  "terminal_proof": true,
+  "terminal_proof_observations": {
+    "at": 1794758672562,
+    "proven": true,
+    "truncated": false,
+    "observations": [
+      {
+        "at": 1794758672561,
+        "kind": "custodian-epoch",
+        "presence": "gone",
+        "pid": 1287847,
+        "start_ticks": "5083730",
+        "state": null,
+        "reason": "the original epoch of the custodian"
+      },
+      {
+        "at": 1794758672561,
+        "kind": "worker-epoch",
+        "presence": "gone",
+        "pid": 1287850,
+        "start_ticks": null,
+        "state": null,
+        "reason": "the original epoch of the worker"
+      },
+      {
+        "at": 1794758672562,
+        "kind": "group",
+        "presence": "gone",
+        "pid": 1287850,
+        "start_ticks": null,
+        "state": null,
+        "reason": "the group of the worker"
+      },
+      {
+        "at": 1794758672562,
+        "kind": "known-target",
+        "presence": "gone",
+        "pid": 1287850,
+        "start_ticks": null,
+        "state": null,
+        "reason": "a member of the draw that was recorded while it was alive"
+      }
+    ]
+  },
+  "receipt_summary": {
+    "kind": "DOMAIN_REAPED",
+    "outcome": "reaped",
+    "seq": 4,
+    "segments": 1,
+    "events_count": 6,
+    "waits_count": 1,
+    "identities_count": 1,
+    "exec_ok": true,
+    "echild": true,
+    "group_esrch": true,
+    "known_ids_gone": true,
+    "anchor_retained": true,
+    "identity_overflow": false,
+    "events_truncated": false,
+    "diagnostics_lost": false,
+    "state": "receipt_flush",
+    "events_digest": "57c090ddc0ac941865f3f65697ed179298d8ed1ae8f7b216432e8fd6a6990081",
+    "waits_digest": "ab0b001b8a29b18296773e259d998bcfa24f4ae2d8efcdbb0829e23e5abadd40",
+    "identities_digest": "a7b8560e8c0a36a5eae4a2682fdc99ccad29bdc898934cdf01b5e3e332ff58f4"
+  },
+  "accumulator_summary": {
+    "segments": 1,
+    "received": 1,
+    "events": 6,
+    "waits": 1,
+    "identities": 1,
+    "refused": false,
+    "events_digest": "57c090ddc0ac941865f3f65697ed179298d8ed1ae8f7b216432e8fd6a6990081",
+    "waits_digest": "ab0b001b8a29b18296773e259d998bcfa24f4ae2d8efcdbb0829e23e5abadd40",
+    "identities_digest": "a7b8560e8c0a36a5eae4a2682fdc99ccad29bdc898934cdf01b5e3e332ff58f4"
+  },
+  "raw_segments_saved": false,
+  "timeline": [
+    {
+      "at": 1794758672411,
+      "what": "root-created",
+      "detail": {
+        "root": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/var/native-cache-positive-pilot/run-zfJOqD"
+      }
+    },
+    {
+      "at": 1794758672420,
+      "what": "root-prepared",
+      "detail": null
+    },
+    {
+      "at": 1794758672424,
+      "what": "pins-checked",
+      "detail": {
+        "custodianDigest": "bd06d7d7f79d6d2ccf2204a4e27ed5aba5364cbcda71785a67ac3ab887306b79",
+        "fixtureDigest": "e3f4ccb1c4016a54356ce04be344b4ffff23f2f88698efe191570ad8407d03ab"
+      }
+    },
+    {
+      "at": 1794758672431,
+      "what": "helper-copied",
+      "detail": {
+        "copiedFixtureDigest": "e3f4ccb1c4016a54356ce04be344b4ffff23f2f88698efe191570ad8407d03ab"
+      }
+    },
+    {
+      "at": 1794758672435,
+      "what": "started",
+      "detail": null
+    },
+    {
+      "at": 1794758672587,
+      "what": "settlement",
+      "detail": {
+        "has_picture": false,
+        "picture_bytes": null,
+        "error": {
+          "name": "CacheDrawError",
+          "message": "The control channel of the custodian failed: read ECONNRESET",
+          "code": "CHANNEL_ERROR"
+        },
+        "cleanup": 0
+      }
+    },
+    {
+      "at": 1794758672589,
+      "what": "terminal-proof",
+      "detail": null
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+# NativeExpected 最终私有校验设计补充
+
+2026-11-12，MAIN在PRODUCT第二次返修内给出；不扩大两文件release或启用Host。实际第二版67测试通过/tsc0仅自验证历史，已由父Codex发现新的重入风险，不接受为阶段通过。
+
+共同根因是受调用代码的callback/getter可同步改变服务或proof状态；只在调用之前判断#closed，不能证明调用之后仍可签发/返回。
+
+- prove先算projection、canonical输入hash、binding字段快照等一切可能调用外部代码的工作。isCurrent返回true仍可能已close，所以其后重验私有closed/cleanup-fault状态。最后一个私有准入检查之后不得再调用外部callback/getter，然后才登记私有facts/status/outstanding。失败路径收到的全部retained资源按既定规则清理。
+- assertCurrent入口校验不足；isCurrent、verifyClosure、最后一个file.verify均可能同步close/release并返回true。所有外部调用及binding字段再比对完成后，最后重验同实例私有status/facts对象身份/outstanding/closed/fault，随后只返回已捕获不可变projection。
+- 回归覆盖isCurrent close+true、canonical callback close、closure verifier release+true、最后file verifier close+true、callback改binding字段；与现有late-loader/source、公开markReleased/getter覆盖、全部清理与sticky失败共同复验。固定原生算法与pin不变，不把unsupported调为loaded。
+
+实现仍只由当前Claude ctx_cf672bcfac44。第三次返修若必要须交MAIN汇总根因，不机械新轮次；任何新429一律停止，不能以返修次数绕过用户明确接手授权。

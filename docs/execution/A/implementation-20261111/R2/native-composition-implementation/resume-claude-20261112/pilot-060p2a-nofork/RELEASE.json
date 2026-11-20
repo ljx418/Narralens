@@ -1,0 +1,50 @@
+{
+  "release_id": "MAIN_060P2A_NOFORK_TWO_EXACT_COMMANDS",
+  "at": "2026-11-15T02:11:15.897991+00:00",
+  "owner": "MAIN Codex actualacceptance only, no implementationwrites",
+  "cwd": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+  "head": "1d348d419120f23f45d958112ea8c43df5a04675",
+  "source_write_release": false,
+  "heavy_slot": "MAIN exclusive serial",
+  "review": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p1r4b-nofork/independent-review/nofork-safety/REVIEW.md",
+  "review_sha256": "150786ed78f9c3c9eaee13c919e1eafcb3760133fefd2d03a05579c9f11d65a6",
+  "verified_review_inputs": 61,
+  "mismatches": [],
+  "tool_sha256": "73fed24c66ec310ccd811fdd7e4dfb51be6d22875ce81a50e1a86a47072fe00d",
+  "custodian_sha256": "6b8d6df32b1958b3cf53e05152e9b04abf6c010d58ae6e672fcd7fa4c9511618",
+  "python_sha256": "e50d468e8b0adfb05733f5b87b3cff34829c4a8c1aea50c865aa8bdfe4bb150f",
+  "recorder": "docs/execution/A/implementation-20261111/integration/e1-main-takeover/run-recorded.py",
+  "recorder_sha256": "88cd47ec732a340f54cdd4bb05b05878887697eebb0ddc94b1ccd7d0e434fd10",
+  "commands": [
+    [
+      "node",
+      "tools/native-cache-nofork-pilot.mjs",
+      "--mode",
+      "identity",
+      "--expected-custodian-sha256",
+      "6b8d6df32b1958b3cf53e05152e9b04abf6c010d58ae6e672fcd7fa4c9511618"
+    ],
+    [
+      "node",
+      "tools/native-cache-nofork-pilot.mjs",
+      "--mode",
+      "assertion-failure",
+      "--expected-custodian-sha256",
+      "6b8d6df32b1958b3cf53e05152e9b04abf6c010d58ae6e672fcd7fa4c9511618"
+    ]
+  ],
+  "capture_names": [
+    "n1n2-main-060p2a-nofork-identity-001",
+    "n1n2-main-060p2a-nofork-assertion-failure-001"
+  ],
+  "expected_exit": [
+    0,
+    1
+  ],
+  "sequence": "Validate identityfullproof before assertionfailure. Anyunexpectedfailure stops secondcommand; no automated retry/sourceedit. UNKNOWN leaves exactliveowner, inspect it, no globalkill.",
+  "acceptance": "Jointactualexit+preflight+outcome+absence/reportingstate+fresh terminalproof, originalerrors; expectedfault only exactEXPECTED_ASSERTION_FAILURE/fullproof/no unexpected/evidence/reportingfailure",
+  "runtime_roots": "Only unique new W/var/native-cache-pilot/run-* tool roots, recorder newnamedoutputs, and MAIN control/proc receipts here; allretained evidence withsha",
+  "no_fork_invariant": "No AUTHORIZE_FORK/GO/controlwrites; never N. Signals only issuedC child noauthorizefreshfull epoch via reviewedtool",
+  "observation": "MAIN read exactrecorder->node->C lineage proc identity; bounded samples, no environment/config, no signalling by monitor; rawHELLO bytes notpersisted bytool and must not invent them",
+  "exclusions": "No N/browser/Host/HTTP/media/provider/network/payment/Jdrive/productionedits/Gitcommit/fullgates; production14/original17/ISO18/N1N2/NEXT remainopen"
+}

@@ -1,0 +1,203 @@
+{
+  "format": "narralens.adr060.rev2-recheck-a@1",
+  "verdict": "DOCUMENT_PLAN_READY",
+  "decision_scope": "Independent architecture/document plan recheck only; no source or runtime release and no implementation acceptance",
+  "base_commit": "1d348d419120f23f45d958112ea8c43df5a04675",
+  "upstream_commit": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+  "revision": 2,
+  "reviewed_adr_sha256": "27c6bcbc46ab5473716cc04a92ac3f50a1ee027d68045db72048af488168d6f2",
+  "reviewed_json_sha256": "a771d12f69b2faf904cd081dc921a67314661135aa30b9f47c5362f67389dd48",
+  "input_sha256": [
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-058/ADR_060_ISOLATED_CACHE_DRAW.md",
+      "kind": "document",
+      "sha256": "27c6bcbc46ab5473716cc04a92ac3f50a1ee027d68045db72048af488168d6f2",
+      "bytes": 17680
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-058/ADR_060_ISOLATED_CACHE_DRAW.json",
+      "kind": "document",
+      "sha256": "a771d12f69b2faf904cd081dc921a67314661135aa30b9f47c5362f67389dd48",
+      "bytes": 1407
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-058/ADR_060_REV1_BEFORE_REVIEW_FIX.md",
+      "kind": "document",
+      "sha256": "3dafa8c381fdc1a763c5075b073ae678f05a91e458997137604368e86fee949a",
+      "bytes": 8524
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-058/ADR_060_REV1_BEFORE_REVIEW_FIX.json",
+      "kind": "document",
+      "sha256": "9ed99a504be09410025157187b31ece358ab6dafb8beea00a2e18afdc70f9786",
+      "bytes": 1022
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-058/ADR_060_INDEPENDENT_REVIEW_A.md",
+      "kind": "document",
+      "sha256": "53197c3d443a4e51886462e8eb706877514d20a6f1e4a82fe947f9587c7950e0",
+      "bytes": 24788
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-058/ADR_060_INDEPENDENT_REVIEW_A.json",
+      "kind": "document",
+      "sha256": "b30d580c11b26982deb505ad04fc24b3db2a8b287b9f88007cd939f5d6e7df96",
+      "bytes": 19966
+    },
+    {
+      "path": "src/host/agent-driven/created-native-source-reader.ts",
+      "repository": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+      "kind": "frozen_git_blob",
+      "commit": "1d348d419120f23f45d958112ea8c43df5a04675",
+      "sha256": "cde88435d61dba1a881bef403e6a013f1d4f2bb93db8e1ffa2b3c15b4c74f82b",
+      "bytes": 77595
+    },
+    {
+      "path": "src/host/agent-driven/created-native-workspace.ts",
+      "repository": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+      "kind": "frozen_git_blob",
+      "commit": "1d348d419120f23f45d958112ea8c43df5a04675",
+      "sha256": "3702917cf6efe09287030435c1883e1cdd57eb6e0da2fdd577bf3879ab965c1e",
+      "bytes": 65816
+    },
+    {
+      "path": "src/adapters/openfilm/openfilm-upstream.ts",
+      "repository": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+      "kind": "frozen_git_blob",
+      "commit": "1d348d419120f23f45d958112ea8c43df5a04675",
+      "sha256": "013f50ce87e04b3ff542e15f3c98d833ae43940fef9d85ccad79ff38e5bd200b",
+      "bytes": 55012
+    }
+  ],
+  "prior_findings": [
+    {
+      "id": "ADR060-A01",
+      "prior_severity": "MAJOR",
+      "status": "CLOSED_IN_DOCUMENT_DESIGN",
+      "rev2_lines": "59-65",
+      "reason": "The selected design has no PRE transfer: the full bridge promise remains pending during CLEANUP_REQUIRED, while a separate bounded diagnostic exposes that state. The lexical PRE owner, beginDraw, production lock, FD and capacity remain live; private WeakMap handle reconciliation requires fresh domain disappearance and parent drain proof and settles the same barrier once. No old numeric PID becomes recovery authority. Normal timeout/TERM-ignore is still required to actively settle, so exception preservation is not substituted for successful cleanup.",
+      "implementation_tests": [
+        "Abrupt leader exit with residual group cannot release PRE, endDraw, scope or quota at a deadline.",
+        "Forged/cross-supervisor/released handle cannot reconcile; two real reconciliation/close calls share one settlement.",
+        "Fresh disappearance plus true parent drain permits exactly one FAILED_SETTLED rejection and release; ordinary seek/JOB paths do not stay pending."
+      ]
+    },
+    {
+      "id": "ADR060-A02",
+      "prior_severity": "MAJOR",
+      "status": "CLOSED_IN_DOCUMENT_DESIGN",
+      "rev2_lines": "67-76",
+      "reason": "The plan now explicitly expands the parent handler ledger beyond the frozen folder.drain promise: source streams are observed through real response pipe events before pinned handler invocation, destination abort destroys only its owned sources and waits for source close, and HTTP/probe originals remain tracked. drainAfterExecutionEnds(scope) freezes admission only after the worker execution domain is gone, then waits actual parent resources without recursive serving.close. The fixed frameDuration/execFile child-close premise is explicitly a source/Node-semantic plus real-child evidence gate; an unproved premise cannot be treated as implementation PASS.",
+      "implementation_tests": [
+        "Aborted real range stream source FD close precedes endDraw and PRE release.",
+        "Parent frame-duration probe remains tracked across worker exit until actual child reap.",
+        "A request at admission freeze creates no new stream or probe; accepted requests still finish."
+      ]
+    },
+    {
+      "id": "ADR060-A03",
+      "prior_severity": "MAJOR",
+      "status": "CLOSED_IN_DOCUMENT_DESIGN",
+      "rev2_lines": "78-86,107-111",
+      "reason": "The canonical path is checked as a fact while dev/ino is the cross-service/owner lock identity. workspace.#produce acquires the scope before output preflight/PRE and retains it through POST, both closure releases, final currentness/identity checks and witness activation/refusal. Bridge and supervisor reuse the same active issued scope, and a direct call goes through the same scheduler. This removes the earlier B-duration-write window during A POST. The new read-side root-quiescence query is explicitly narrow and cannot invalidate the generic production lease used by record/serving/final activation.",
+      "implementation_tests": [
+        "Pause A after worker/drain and before POST/activation: B same physical root cannot write even via another producer/service instance.",
+        "Distinct roots overlap in actual independent groups, and the peer succeeds through A timeout.",
+        "Own active production scope preserves genuine owner/base/control/ref/generation currentness; read proof admission/delivery and held-proof guard refuse/unconfirm a busy or cleanup-required root.",
+        "Released scope in a late ALS continuation is refused; nested bridge/factory work does not recursively acquire the root lock."
+      ]
+    },
+    {
+      "id": "ADR060-A04",
+      "prior_severity": "MINOR",
+      "status": "CLOSED_IN_DOCUMENT_DESIGN",
+      "rev2_lines": "88-97",
+      "reason": "An irreversible ordered FINALIZE_AFTER_OK record is based on a complete validated candidate before requesting termination; no result is inferred from exit0/SIGKILL. Previously observed unexpected exit, native/protocol/cancel/output failure and final source drift prevent delivery; unknown identity or cleanup returns to the barrier. The truth table expressly limits its claim to observed authorized finalization, not unique causal attribution between racing signal sources.",
+      "implementation_tests": [
+        "Unexpected exit/partial candidate before the decision never becomes success.",
+        "Candidate then authorized forced finalize can succeed only after all settlement and witness gates; it is logged as forced finalization, not graceful exit0.",
+        "Late cancel/source drift overrides saved candidate; finalization cannot be backfilled after close."
+      ]
+    },
+    {
+      "id": "ADR060-A05",
+      "prior_severity": "MINOR",
+      "status": "CLOSED_IN_DOCUMENT_DESIGN",
+      "rev2_lines": "99-103",
+      "reason": "There is one Host-module scheduler with at most2 full active production scopes,32 queued reservations and8 queued per physical root. Queue wait is30s and occurs before PRE/worker/pipe allocation. Direct factory/workspace paths share the same quota and scope; passing an existing scope does not double-charge it. Unknown active responsibility retains capacity. These are explicit new resource limits, separately labeled from READY/GO/native deadlines and payable API budgets.",
+      "implementation_tests": [
+        "Queue count/per-root count/time overflow refuses before PRE/child/pipe allocation and does not consume another slot.",
+        "Queued cancellation and repeated cancellation release only their own reservation once.",
+        "Direct factory and workspace calls share the same2 active cap; already-held scope is reused.",
+        "Actual default normal/poster/two-frame fixtures fit the chosen byte/time budgets."
+      ]
+    }
+  ],
+  "new_findings": [],
+  "open_severity_counts": {
+    "BLOCKER": 0,
+    "MAJOR": 0,
+    "MINOR": 0
+  },
+  "scope_and_read_quiescence": {
+    "no_self_lock": "Only workspace outer production or direct entry acquires; nested factory/bridge/supervisor validates and reuses the issued scope. A final check does not wait for the scope it already owns.",
+    "no_authority_waiver": "Physical root scheduling/quiescence never replaces owner/base/control/ref/generation/rights checks. A busy flag is a negative read condition, never a grant.",
+    "no_self_invalidation": "Generic production lease.assertCurrent remains usable while that same production owns the root; quiescence is a separate read-only predicate.",
+    "read_guard_placement": "Query the authenticated held root synchronously at read admission, at the final no-await delivery fence after reentrant liveness callbacks, and in retained proof verifyClosure. Busy or cleanup-required means unconfirmed/refusal, not another proof or a wait under the production mutex.",
+    "close_order": "Stop new draw admission immediately; preserve resources needed by an already accepted executing draw. Freeze new HTTP/file/probe resources only at the post-domain-disappearance drain gate; then await existing sources/probes. Never close the listener early to fabricate settlement."
+  },
+  "release_assignment_paths": {
+    "existing": [
+      "src/adapters/openfilm/openfilm-upstream.ts",
+      "src/host/agent-driven/created-native-workspace.ts",
+      "src/host/agent-driven/created-native-source-reader.ts"
+    ],
+    "new_production": [
+      "src/adapters/openfilm/cache-process-supervisor.ts",
+      "src/adapters/openfilm/openfilm-cache-worker.mjs",
+      "src/adapters/openfilm/cache-worker-policy.mjs",
+      "src/adapters/openfilm/cache-production-scope.ts",
+      "src/adapters/openfilm/cache-worker-integrity.json"
+    ],
+    "new_test": [
+      "tests/agent-driven/integration/cache-process-settlement.test.ts"
+    ],
+    "to_name_exactly_before_release": [
+      "integrity manifest generator/check script",
+      "private protocol and real process fault helpers, if separate files",
+      "real containment evidence script and its exact output schema",
+      "any separate guard facade, unless fully contained in worker/policy"
+    ],
+    "read_only_reuse": [
+      "src/host/render/native-renderer.ts helper exports; no dangerous group-signal fallback or renderer-success classifier",
+      "src/host/render/media-process-policy.mjs",
+      "existing offline wrapper/hooks/guard rules and exact pinned V modules"
+    ],
+    "protected": [
+      "fixed V/vendor/upstream pin/lock",
+      "formal render source and render pin",
+      "Approved015",
+      "public DTO/EnginePort/source transaction and approval contracts"
+    ]
+  },
+  "release_argv_requirements": [
+    "Freeze actual059 handback commit and new060 base/allowed paths before implementation;057 is architecture reference, not an instruction to overwrite059 repairs.",
+    "Lock Node absolute executable, exact worker path/argv/stdio/private pipe layout, worker integrity hashes and fixed runtime executable paths/versions/hashes.",
+    "Primary proposed acceptance argv: corepack pnpm exec vitest run --config vitest.config.ts tests/agent-driven/integration/cache-process-settlement.test.ts --maxWorkers=1 --minWorkers=1; NOT_EXECUTED and not a grant.",
+    "Name and inspect new containment script before supplying its exact supported argv; bind case IDs/unique output root/ports/process+GPU resource slot/stop and cleanup owners; no guessed script CLI is presented as runnable.",
+    "List exact affected Q02/Q03/K05/reader/Expected/renderer/fullcheck/build commands with resource reservation. Preserve old failures and opt-in REAL_TOOLS NOT_RUN; do not count them as new proof."
+  ],
+  "runtime": "ALL_NOT_RUN",
+  "runtime_not_run": [
+    "source imports",
+    "business logic",
+    "tests",
+    "compile/build",
+    "Host/server/HTTP",
+    "Chrome/CDP/browser",
+    "ffmpeg/ffprobe",
+    "new containment/kill/reconcile experiments"
+  ],
+  "modifications": "Only repair-058/ADR_060_REV2_RECHECK_A.md and .json; no W/V/Git/var or archived rev1/prior report changes",
+  "next": "MAIN may issue exact060 release only after059 writer handback; actual code, real runtime evidence and new frozen independent review are still required; original17 and NEXT/A/NativeAck/Studio/V1 gates remain unchanged"
+}

@@ -1,0 +1,178 @@
+{
+  "format": "narralens.R5G.plan-review-inputs@1",
+  "review_task": "task_ca3cf8233a53",
+  "review_dispatch": "ctx_f3317764d1b0",
+  "historical_head": "1d348d419120f23f45d958112ea8c43df5a04675",
+  "accepted_new_commit": null,
+  "source8_match": true,
+  "protected7_match": true,
+  "input_count": 20,
+  "end_equal": true,
+  "end_verification_at": "2026-11-15T14:58:00.662050+00:00",
+  "scope": "Document plan and affected producer/checker/outcome/cancel interfaces, current pure fixture shape, original R5F review; extra source8/protected7 files hash-bound only. Not 651-file semantic review or runtime acceptance.",
+  "runtime": "ALL_TESTS_PRODUCT_IMPORTS_CLI_KERNEL_BUSINESS_RUNTIME_NOT_RUN",
+  "source_write_release": false,
+  "runtime_release": false,
+  "inputs": [
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/AGENTS.md",
+      "start_sha256": "37300463a72a612ae16e0a5fcfb496502c57c722b83781e0e2e8c9480594542b",
+      "end_sha256": "37300463a72a612ae16e0a5fcfb496502c57c722b83781e0e2e8c9480594542b",
+      "current_sha256": "37300463a72a612ae16e0a5fcfb496502c57c722b83781e0e2e8c9480594542b",
+      "equal": true,
+      "scope": "plan/reference text or affected interface inspection"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/src/adapters/openfilm/cache-process-custodian.py",
+      "start_sha256": "bd06d7d7f79d6d2ccf2204a4e27ed5aba5364cbcda71785a67ac3ab887306b79",
+      "end_sha256": "bd06d7d7f79d6d2ccf2204a4e27ed5aba5364cbcda71785a67ac3ab887306b79",
+      "current_sha256": "bd06d7d7f79d6d2ccf2204a4e27ed5aba5364cbcda71785a67ac3ab887306b79",
+      "equal": true,
+      "scope": "binding hash only"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/src/adapters/openfilm/cache-process-supervisor.ts",
+      "start_sha256": "7706449e8f259a6e17e9ca2a40af8a5c344cef827a01c7881fc04a4a570b9b63",
+      "end_sha256": "7706449e8f259a6e17e9ca2a40af8a5c344cef827a01c7881fc04a4a570b9b63",
+      "current_sha256": "7706449e8f259a6e17e9ca2a40af8a5c344cef827a01c7881fc04a4a570b9b63",
+      "equal": true,
+      "scope": "plan/reference text or affected interface inspection"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/src/adapters/openfilm/cache-worker-integrity.json",
+      "start_sha256": "7bb4bd1813987a6860bb9eb7a332ccbedb237c009a8767bc75e6418f1595c2db",
+      "end_sha256": "7bb4bd1813987a6860bb9eb7a332ccbedb237c009a8767bc75e6418f1595c2db",
+      "current_sha256": "7bb4bd1813987a6860bb9eb7a332ccbedb237c009a8767bc75e6418f1595c2db",
+      "equal": true,
+      "scope": "binding hash only"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/src/adapters/openfilm/openfilm-upstream.ts",
+      "start_sha256": "17fe1138e50bc30df5c26b74e1e0ff9393140c070e1233676d2811485890a2b6",
+      "end_sha256": "17fe1138e50bc30df5c26b74e1e0ff9393140c070e1233676d2811485890a2b6",
+      "current_sha256": "17fe1138e50bc30df5c26b74e1e0ff9393140c070e1233676d2811485890a2b6",
+      "equal": true,
+      "scope": "binding hash only"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/src/host/agent-driven/created-native-workspace.ts",
+      "start_sha256": "d83edbdac8cd6dd7db6b5d18f1d0f5d3beb028279297a822f59f97f6504d562c",
+      "end_sha256": "d83edbdac8cd6dd7db6b5d18f1d0f5d3beb028279297a822f59f97f6504d562c",
+      "current_sha256": "d83edbdac8cd6dd7db6b5d18f1d0f5d3beb028279297a822f59f97f6504d562c",
+      "equal": true,
+      "scope": "binding hash only"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/src/host/agent-driven/retained-native-closure.ts",
+      "start_sha256": "fd896104149d6cd2663b63a59d50beabbeee546f3e3f46a5d6bf07fbe662ede9",
+      "end_sha256": "fd896104149d6cd2663b63a59d50beabbeee546f3e3f46a5d6bf07fbe662ede9",
+      "current_sha256": "fd896104149d6cd2663b63a59d50beabbeee546f3e3f46a5d6bf07fbe662ede9",
+      "equal": true,
+      "scope": "binding hash only"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/cache-custodian-lifecycle.test.ts",
+      "start_sha256": "230cbf8882e903a8752d663d2ff58f7cc729d5ab6e129ec2e566ba15a8077258",
+      "end_sha256": "230cbf8882e903a8752d663d2ff58f7cc729d5ab6e129ec2e566ba15a8077258",
+      "current_sha256": "230cbf8882e903a8752d663d2ff58f7cc729d5ab6e129ec2e566ba15a8077258",
+      "equal": true,
+      "scope": "plan/reference text or affected interface inspection"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/cache-process-identity.test.ts",
+      "start_sha256": "d4e60d2d81c78c3c01e62d7bec232a4371cf81b9426ae13ecdf77c91c90ad8bf",
+      "end_sha256": "d4e60d2d81c78c3c01e62d7bec232a4371cf81b9426ae13ecdf77c91c90ad8bf",
+      "current_sha256": "d4e60d2d81c78c3c01e62d7bec232a4371cf81b9426ae13ecdf77c91c90ad8bf",
+      "equal": true,
+      "scope": "binding hash only"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/helpers/cache-custodian-unit.py",
+      "start_sha256": "f35721741cb62afc946b84c507d029ff16746c739d5b63b0335f49d7855efa61",
+      "end_sha256": "f35721741cb62afc946b84c507d029ff16746c739d5b63b0335f49d7855efa61",
+      "current_sha256": "f35721741cb62afc946b84c507d029ff16746c739d5b63b0335f49d7855efa61",
+      "equal": true,
+      "scope": "binding hash only"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/helpers/cache-worker-fixture.mjs",
+      "start_sha256": "e3f4ccb1c4016a54356ce04be344b4ffff23f2f88698efe191570ad8407d03ab",
+      "end_sha256": "e3f4ccb1c4016a54356ce04be344b4ffff23f2f88698efe191570ad8407d03ab",
+      "current_sha256": "e3f4ccb1c4016a54356ce04be344b4ffff23f2f88698efe191570ad8407d03ab",
+      "equal": true,
+      "scope": "binding hash only"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/helpers/native-cache-nofork-pilot.test.mjs",
+      "start_sha256": "feb9786b4f38044382ab6ac2ca8435f3bdf89ae83c0882b47177573136deb5ce",
+      "end_sha256": "feb9786b4f38044382ab6ac2ca8435f3bdf89ae83c0882b47177573136deb5ce",
+      "current_sha256": "feb9786b4f38044382ab6ac2ca8435f3bdf89ae83c0882b47177573136deb5ce",
+      "equal": true,
+      "scope": "binding hash only"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/native-cache-normal-pilot.test.ts",
+      "start_sha256": "991bea38c8c15ba51e1404bb3437117e75706c88dcad6d60c248b99217aad4e1",
+      "end_sha256": "991bea38c8c15ba51e1404bb3437117e75706c88dcad6d60c248b99217aad4e1",
+      "current_sha256": "991bea38c8c15ba51e1404bb3437117e75706c88dcad6d60c248b99217aad4e1",
+      "equal": true,
+      "scope": "plan/reference text or affected interface inspection"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tools/native-cache-nofork-pilot.mjs",
+      "start_sha256": "73fed24c66ec310ccd811fdd7e4dfb51be6d22875ce81a50e1a86a47072fe00d",
+      "end_sha256": "73fed24c66ec310ccd811fdd7e4dfb51be6d22875ce81a50e1a86a47072fe00d",
+      "current_sha256": "73fed24c66ec310ccd811fdd7e4dfb51be6d22875ce81a50e1a86a47072fe00d",
+      "equal": true,
+      "scope": "binding hash only"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tools/native-cache-normal-pilot.ts",
+      "start_sha256": "bb5ab8dfa788629cbcd0762302cb1c595412d9a15d54381e70b92ab4b5207afa",
+      "end_sha256": "bb5ab8dfa788629cbcd0762302cb1c595412d9a15d54381e70b92ab4b5207afa",
+      "current_sha256": "bb5ab8dfa788629cbcd0762302cb1c595412d9a15d54381e70b92ab4b5207afa",
+      "equal": true,
+      "scope": "plan/reference text or affected interface inspection"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p5f-joint-byte-check/independent-review/positive-owner-review/FINDINGS.json",
+      "start_sha256": "11d57cb4d9504b2f2200772c7f18d82f38bf084751ec07ac2ec7000a04091a29",
+      "end_sha256": "11d57cb4d9504b2f2200772c7f18d82f38bf084751ec07ac2ec7000a04091a29",
+      "current_sha256": "11d57cb4d9504b2f2200772c7f18d82f38bf084751ec07ac2ec7000a04091a29",
+      "equal": true,
+      "scope": "plan/reference text or affected interface inspection"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p5f-joint-byte-check/independent-review/positive-owner-review/REVIEW.md",
+      "start_sha256": "72edc0a9124045f0621eb17099f04a68c11b058f1e37e10d60585623282698cf",
+      "end_sha256": "72edc0a9124045f0621eb17099f04a68c11b058f1e37e10d60585623282698cf",
+      "current_sha256": "72edc0a9124045f0621eb17099f04a68c11b058f1e37e10d60585623282698cf",
+      "equal": true,
+      "scope": "plan/reference text or affected interface inspection"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p5g-result-contract/RELEASE_DRAFT.json",
+      "start_sha256": "c4e98791cdaeee6e4908efd3696bb41fe3b36bd3ad1c06075d236284b0310301",
+      "end_sha256": "c4e98791cdaeee6e4908efd3696bb41fe3b36bd3ad1c06075d236284b0310301",
+      "current_sha256": "c4e98791cdaeee6e4908efd3696bb41fe3b36bd3ad1c06075d236284b0310301",
+      "equal": true,
+      "scope": "plan/reference text or affected interface inspection"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p5g-result-contract/RESULT_CONTRACT_AND_CASE_MATRIX.md",
+      "start_sha256": "493f86e334b25a4d2fa240b2248f485c910f379747b9c7e1e91ec4b82f124319",
+      "end_sha256": "493f86e334b25a4d2fa240b2248f485c910f379747b9c7e1e91ec4b82f124319",
+      "current_sha256": "493f86e334b25a4d2fa240b2248f485c910f379747b9c7e1e91ec4b82f124319",
+      "equal": true,
+      "scope": "plan/reference text or affected interface inspection"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p5g-result-contract/START_INPUT_BINDING.json",
+      "start_sha256": "5f0c64fe8e7a5501d63d3812bbf68c54d64644c91e9b30cd261264106488d862",
+      "end_sha256": "5f0c64fe8e7a5501d63d3812bbf68c54d64644c91e9b30cd261264106488d862",
+      "current_sha256": "5f0c64fe8e7a5501d63d3812bbf68c54d64644c91e9b30cd261264106488d862",
+      "equal": true,
+      "scope": "plan/reference text or affected interface inspection"
+    }
+  ]
+}
