@@ -1,0 +1,337 @@
+{
+  "format": "narralens.proc0-baseline-test-catalog@1",
+  "at": "2026-11-20T05:15:06.801654+00:00",
+  "source_commit": "9c2f6237f997c27e3f2d013fec48107a56f862ba",
+  "purpose": "Read-only baseline catalog for checking accidental loss of existing direct branches in the L2 repair; names/counts are not semantic coverage or acceptance. Renaming/restructuring requires same production boundary and positive/negative equivalence mapping, not retaining an implementation predicate.",
+  "files": [
+    {
+      "path": "tests/process/test_delivery_admission.py",
+      "git_blob_source_sha256": "f3b2ec48d58dfae4c5b72858ecd82424f05c2f71865266197b553df741c91cbe",
+      "test_count": 25,
+      "tests": [
+        {
+          "qualified_name": "RunnerCase.test_proc0_01_unknown_command_and_bad_release_are_refused",
+          "line": 361,
+          "sha256_of_ast_source_segment": "72a827031cbe8c2dfe2dc4f45e3b25eafd946aec66291c1c7bc6c248df7c4777"
+        },
+        {
+          "qualified_name": "RunnerCase.test_proc0_01_a_signed_corepack_command_uses_the_fixed_outer_interpreter",
+          "line": 381,
+          "sha256_of_ast_source_segment": "1a28b3d0b543711bbc8750f4be18afb1f78790f6faad5e142406c8b6c29ec267"
+        },
+        {
+          "qualified_name": "RunnerCase.test_proc0_01_the_caller_cannot_inject_a_shell_or_a_raw_argv",
+          "line": 434,
+          "sha256_of_ast_source_segment": "08ae1f4c4fc4eb52d0af05c4414b0c663a8c0ec1871e9605b0c67afae2fd693c"
+        },
+        {
+          "qualified_name": "RunnerCase.test_proc0_02_source_protected_and_recorder_drift_are_refused",
+          "line": 442,
+          "sha256_of_ast_source_segment": "39529e0e3adc90348fae566c0eed411bd86512079fa1112ea5517afe91096724"
+        },
+        {
+          "qualified_name": "RunnerCase.test_proc0_03_existing_capture_and_unsafe_basenames_are_refused",
+          "line": 466,
+          "sha256_of_ast_source_segment": "ad9727b4273ae6f9d0010fb99e661a5c8ac0001b886da87ec4f3eda4f6f8f841"
+        },
+        {
+          "qualified_name": "RunnerCase.test_proc0_04_a_second_client_finds_the_slot_busy",
+          "line": 495,
+          "sha256_of_ast_source_segment": "5021e534fc6b83ad42f3079eda30d20108adaaa08eaf237a3218abf08a92e350"
+        },
+        {
+          "qualified_name": "RunnerCase.test_proc0_05_the_write_lease_identity_is_enforced",
+          "line": 515,
+          "sha256_of_ast_source_segment": "f1454183263518f01f2e878a17645d709a5b1a813d0bf98df7d7e93924dbb79a"
+        },
+        {
+          "qualified_name": "RunnerCase.test_proc0_06_unknown_state_blocks_and_locks_are_never_removed",
+          "line": 552,
+          "sha256_of_ast_source_segment": "6dd676876b0be39c7f60d0706b106b3c71cbd54082207e4085f4f999e0af7d68"
+        },
+        {
+          "qualified_name": "RunnerCase.test_proc0_07_status_never_claims_the_epoch_is_gone",
+          "line": 577,
+          "sha256_of_ast_source_segment": "30d10f1f68bbf6072ae9b7006890481fe630dfc182d06ed44f147d94c16fc0e8"
+        },
+        {
+          "qualified_name": "RunnerCase.test_proc0_08_popen_failure_has_no_child",
+          "line": 594,
+          "sha256_of_ast_source_segment": "1a0e52db51db30b182ab21655f04e738e0bb56a1d793afac2a994596697b4bf2"
+        },
+        {
+          "qualified_name": "RunnerCase.test_proc0_08_a_lost_epoch_after_the_child_was_returned_keeps_the_wait",
+          "line": 604,
+          "sha256_of_ast_source_segment": "27b02665d2f3e5c561d2669804eaf75453c91696c2bbbbfee7a11a4ac11bd3cf"
+        },
+        {
+          "qualified_name": "RunnerCase.test_proc0_09_cancel_only_records_a_request",
+          "line": 618,
+          "sha256_of_ast_source_segment": "b8b52141b5b70789322a0d4bbb978da72fb5c368f05ce9be1f4e97bce963485b"
+        },
+        {
+          "qualified_name": "RunnerCase.test_proc0_10_metadata_and_resource_state_are_separate",
+          "line": 678,
+          "sha256_of_ast_source_segment": "ea6b56f39d076d2cc99eb3b4d15eeabf175123f0220a47cde482cb088f5a45da"
+        },
+        {
+          "qualified_name": "RunnerCase.test_proc0_10_the_inner_and_outer_exit_domains_stay_separate",
+          "line": 686,
+          "sha256_of_ast_source_segment": "33f473b4632aa8f1432f630f380e28a432fda4450a234501f21a44c4dd4d7f5f"
+        },
+        {
+          "qualified_name": "RunnerCase.test_proc0_10_a_recorder_killed_by_a_signal_is_never_decoded",
+          "line": 698,
+          "sha256_of_ast_source_segment": "6f01d2b9ecc9a8a539880889905f43e3f7a8fad4f4cd890c140c3132e447a0f7"
+        },
+        {
+          "qualified_name": "RunnerCase.test_proc0_11_source_drift_during_the_run_is_saved",
+          "line": 706,
+          "sha256_of_ast_source_segment": "ce5288238538f1dd3da2623b5a2957bcb2653c34124e41759270796f1d0a8cbd"
+        },
+        {
+          "qualified_name": "RunnerCase.test_proc0_12_a_live_group_member_keeps_the_slot_unknown",
+          "line": 716,
+          "sha256_of_ast_source_segment": "10faeb6d4dc8cc7d37336b939417768a09952b5dfb4454984778d2d5b9bf5357"
+        },
+        {
+          "qualified_name": "RunnerCase.test_proc0_13_each_exit_is_bound_to_its_own_run",
+          "line": 729,
+          "sha256_of_ast_source_segment": "00c6fea0198cbe717b252c9ca5bfabe11091c89df1b95477840ce26c06f93853"
+        },
+        {
+          "qualified_name": "RunnerCase.test_proc0_13_a_slot_of_another_run_cannot_lend_its_assertion",
+          "line": 764,
+          "sha256_of_ast_source_segment": "059fd52edb3152c6d9363a551d9f54b7b42b3d3d492928b5aac77b41138009b4"
+        },
+        {
+          "qualified_name": "RunnerCase.test_proc0_13_a_slot_of_another_command_cannot_lend_its_assertion",
+          "line": 782,
+          "sha256_of_ast_source_segment": "92650d7074af6d50d24f9fed599742ac4340ecf3e4f7a2617eb7386fa03c78d9"
+        },
+        {
+          "qualified_name": "RunnerCase.test_proc0_16_a_capture_is_never_overwritten_and_rebind_is_exact",
+          "line": 794,
+          "sha256_of_ast_source_segment": "4444a197319ca0c17947cdef408faeb25d704e47d957d8d74260438147376a57"
+        },
+        {
+          "qualified_name": "RunnerCase.test_proc0_16_a_pending_audit_blocks_new_executions",
+          "line": 814,
+          "sha256_of_ast_source_segment": "8ee41886dbb96263874e7fe1e7d4e773bf31640ee660a67c9c281dc2d60adb1f"
+        },
+        {
+          "qualified_name": "RunnerCase.test_proc0_16_a_failed_state_replace_keeps_the_old_state",
+          "line": 824,
+          "sha256_of_ast_source_segment": "eedf62115800695142abc7654a091eee21cd9bf32c570d3fd1440877e9c88429"
+        },
+        {
+          "qualified_name": "RunnerCase.test_the_runner_declares_no_signal_fork_or_reaper_api",
+          "line": 835,
+          "sha256_of_ast_source_segment": "0bf2ab7da7d1a39d9fa2ba099b9cd0468baecd619473de57b47b667ea00f43fe"
+        },
+        {
+          "qualified_name": "RunnerCase.test_all_sixteen_cases_have_a_direct_mapping",
+          "line": 841,
+          "sha256_of_ast_source_segment": "aaef7f5ca544c080d4dd023d763ca4f0abfd75fd5758381707153cf428244776"
+        }
+      ],
+      "literal_case_maps": [
+        {
+          "PROC0-01": [
+            "test_delivery_admission.py",
+            "test_proc0_01_unknown_command_and_bad_release_are_refused"
+          ],
+          "PROC0-02": [
+            "test_delivery_admission.py",
+            "test_proc0_02_source_protected_and_recorder_drift_are_refused"
+          ],
+          "PROC0-03": [
+            "test_delivery_admission.py",
+            "test_proc0_03_existing_capture_and_unsafe_basenames_are_refused"
+          ],
+          "PROC0-04": [
+            "test_delivery_admission.py",
+            "test_proc0_04_a_second_client_finds_the_slot_busy"
+          ],
+          "PROC0-05": [
+            "test_delivery_admission.py",
+            "test_proc0_05_the_write_lease_identity_is_enforced"
+          ],
+          "PROC0-06": [
+            "test_delivery_admission.py",
+            "test_proc0_06_unknown_state_blocks_and_locks_are_never_removed"
+          ],
+          "PROC0-07": [
+            "test_delivery_admission.py",
+            "test_proc0_07_status_never_claims_the_epoch_is_gone"
+          ],
+          "PROC0-08": [
+            "test_delivery_admission.py",
+            "test_proc0_08_popen_failure_has_no_child"
+          ],
+          "PROC0-09": [
+            "test_delivery_admission.py",
+            "test_proc0_09_cancel_only_records_a_request"
+          ],
+          "PROC0-10": [
+            "test_delivery_admission.py",
+            "test_proc0_10_metadata_and_resource_state_are_separate"
+          ],
+          "PROC0-11": [
+            "test_delivery_admission.py",
+            "test_proc0_11_source_drift_during_the_run_is_saved"
+          ],
+          "PROC0-12": [
+            "test_delivery_admission.py",
+            "test_proc0_12_a_live_group_member_keeps_the_slot_unknown"
+          ],
+          "PROC0-13": [
+            "test_delivery_admission.py",
+            "test_proc0_13_each_exit_is_bound_to_its_own_run"
+          ],
+          "PROC0-14": [
+            "test_delivery_handoff.py",
+            "test_proc0_14_a_partial_or_trimmed_packet_is_refused"
+          ],
+          "PROC0-15": [
+            "test_delivery_handoff.py",
+            "test_proc0_15_a_capture_from_another_case_is_refused"
+          ],
+          "PROC0-16": [
+            "test_delivery_admission.py",
+            "test_proc0_16_a_capture_is_never_overwritten_and_rebind_is_exact"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "tests/process/test_delivery_handoff.py",
+      "git_blob_source_sha256": "c9748a59b86e4a284f775607026da1dc69845339e35d6b5f65a99e3e57fdaf32",
+      "test_count": 24,
+      "tests": [
+        {
+          "qualified_name": "HandoffCase.test_the_complete_packet_is_admitted_for_review",
+          "line": 74,
+          "sha256_of_ast_source_segment": "f30d4dcd60825a8f68e9017ed3e64d3cdc2c388c04e7dc53d2646eac148c382e"
+        },
+        {
+          "qualified_name": "HandoffCase.test_the_real_checker_self_test_completes_with_its_established_negatives",
+          "line": 78,
+          "sha256_of_ast_source_segment": "ce369e88c4a0af2f95b19e16eeff11a85d36f1e8fa4da76831a41752a89f5adc"
+        },
+        {
+          "qualified_name": "HandoffCase.test_an_l1_root_only_ever_reports_the_l1_level",
+          "line": 104,
+          "sha256_of_ast_source_segment": "8459c1af8483241daf102e8336f03e3be76dee9478d42ceb33fb03845fc7860d"
+        },
+        {
+          "qualified_name": "HandoffCase.test_the_cli_never_runs_without_the_external_trust_root",
+          "line": 112,
+          "sha256_of_ast_source_segment": "f60664174d6ce39fdb51d3e4435a8419108c25799ae338a5d629e06d114bc487"
+        },
+        {
+          "qualified_name": "HandoffCase.test_a_ready_packet_exits_zero_and_never_claims_business_acceptance",
+          "line": 118,
+          "sha256_of_ast_source_segment": "2fce3e2c06e32b4869e47adec6879d2fbae73abb574e4a9babe0390ff5d6c0af"
+        },
+        {
+          "qualified_name": "HandoffCase.test_an_l1_packet_never_reports_the_overall_ready_state",
+          "line": 132,
+          "sha256_of_ast_source_segment": "d009050e5ceea6edcfe6174961190478a597aa65217dd269c59161d3473d8a13"
+        },
+        {
+          "qualified_name": "HandoffCase.test_proc0_14_a_partial_or_trimmed_packet_is_refused",
+          "line": 146,
+          "sha256_of_ast_source_segment": "a18ed666a682921bccf03d63a89e84d7b1c9a09ee534b7ada4339408a4d05fb9"
+        },
+        {
+          "qualified_name": "HandoffCase.test_proc0_14_an_unapproved_same_source_stage_release_is_refused",
+          "line": 179,
+          "sha256_of_ast_source_segment": "5996adcdb4336fde26280dcbd8ba9e636040bb6367a7fb61170429a07b474aa9"
+        },
+        {
+          "qualified_name": "HandoffCase.test_proc0_14_a_missing_contract_binding_is_refused",
+          "line": 196,
+          "sha256_of_ast_source_segment": "cc98f1c605b5869aa4f69ad7050f018091e025c0526bb2a367fc45720fcd236f"
+        },
+        {
+          "qualified_name": "HandoffCase.test_proc0_15_a_capture_from_another_case_is_refused",
+          "line": 203,
+          "sha256_of_ast_source_segment": "23edbd8563c9d019c5e2908e75a65882f853d2cb602037e9545ceca8870468a5"
+        },
+        {
+          "qualified_name": "HandoffCase.test_proc0_15_a_capture_whose_recorded_cwd_does_not_match_is_refused",
+          "line": 218,
+          "sha256_of_ast_source_segment": "d0d9c84874401a4aa2492c2cc77ef34f482c084d458d4df4d60593567eb50d3f"
+        },
+        {
+          "qualified_name": "HandoffCase.test_proc0_15_a_shared_suite_that_main_explicitly_allowed_is_accepted",
+          "line": 232,
+          "sha256_of_ast_source_segment": "5db679f36cf6875918e98b810ff486caa9af9d2b5fe2fbc22775b3660ba429a8"
+        },
+        {
+          "qualified_name": "HandoffCase.test_an_unused_reserved_capture_needs_no_evidence",
+          "line": 255,
+          "sha256_of_ast_source_segment": "38cbe5da9a4499476ec11693ab8fa124d076b602f7013be449c901ffdae760b7"
+        },
+        {
+          "qualified_name": "ChainCase.test_the_real_runner_output_is_accepted_by_the_real_checker",
+          "line": 511,
+          "sha256_of_ast_source_segment": "0eebb7026935fc9cbfcc937ff82c1095a7edb02c632e4818c4e172a020d6d5de"
+        },
+        {
+          "qualified_name": "ChainCase.test_the_expected_failure_chain_carries_its_credential",
+          "line": 519,
+          "sha256_of_ast_source_segment": "b7a6edc2a268bd29f825b1c0e617981da6b18ae526981c3eee12e49478cd9df5"
+        },
+        {
+          "qualified_name": "ChainCase.test_a_run_without_an_exact_slot_match_is_refused_by_the_real_checker",
+          "line": 537,
+          "sha256_of_ast_source_segment": "e14399813f42a808e685fa0dc16a491b6f3206f9e67cfb31b385ec45eb47afd9"
+        },
+        {
+          "qualified_name": "ChainCase.test_a_missing_sidecar_is_refused_by_the_real_checker",
+          "line": 558,
+          "sha256_of_ast_source_segment": "0faab3ab21b6dfb730fd61cb22689b817b3528fc249d51f42568070929c3d061"
+        },
+        {
+          "qualified_name": "ChainCase.test_a_tampered_capture_piece_is_refused_by_the_real_checker",
+          "line": 566,
+          "sha256_of_ast_source_segment": "07fc2029da5158f6bb4e8a744232d21d0cb16cbd9921aebbd2fc5961390442ae"
+        },
+        {
+          "qualified_name": "ChainCase.test_an_unsettled_resource_never_yields_a_verified_credential",
+          "line": 576,
+          "sha256_of_ast_source_segment": "c6c1e149024a1406b0c24c4b97b40834b55dedb158a3987153830aa60c5ebd45"
+        },
+        {
+          "qualified_name": "ChainCase.test_an_after_return_identity_read_error_keeps_the_wait",
+          "line": 589,
+          "sha256_of_ast_source_segment": "5bf5c9499aeba58b2d07ff4573a87e5032533bd9a1ad7515d49c3545ba0b7af8"
+        },
+        {
+          "qualified_name": "ChainCase.test_a_raw_write_error_keeps_the_wait_and_the_responsibility",
+          "line": 598,
+          "sha256_of_ast_source_segment": "25a0f1053790c09387eedf92b7c98ec628a6c0419fb95fc76daafe1727e3cde8"
+        },
+        {
+          "qualified_name": "ChainCase.test_an_undeterminable_group_is_never_signed_clean",
+          "line": 613,
+          "sha256_of_ast_source_segment": "7ce5d9724c2cb8aeca0cbe97e409dd4ce2b0a3c79581e22d09d2089da8b04a66"
+        },
+        {
+          "qualified_name": "ChainCase.test_a_vanished_entry_is_only_an_observation_limit",
+          "line": 621,
+          "sha256_of_ast_source_segment": "4835325f425f083ecabf0086de71cd57c99606c164061f16a042817603649155"
+        },
+        {
+          "qualified_name": "ChainCase.test_the_finite_helper_exposes_a_bounded_owned_file_barrier",
+          "line": 628,
+          "sha256_of_ast_source_segment": "f11e4ec26a900c4ec8075dbbc69bc4f4e07dfc609dcb0dc949b50ee18cd958bd"
+        }
+      ],
+      "literal_case_maps": []
+    }
+  ],
+  "runtime": false
+}

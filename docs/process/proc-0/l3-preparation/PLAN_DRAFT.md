@@ -20,3 +20,13 @@ MAIN driver为一次性验收仪器，不是新增产品调度器。保持Popen�
 
 ## 交还与后续
 L3结束后仅在原owner actual waits、已观察组资源状态清楚、原始输入和保护项无漂移时汇总。合并L1原003与本L3获准票；FINAL_METADATA外部根显式批准阶段path/SHA/phase/source/保护差异，16项逐required slot交还。L4 metadata只是送审准入，另取独立裁决后才可声明PROC0工具门完成。R6/原17+ISO18/R7/R8/NEXT仍继续，不由本票调绿。
+
+## 优先执行方式：复用原recorder与真实exec句柄，不另建driver框架（补充草案）
+
+若修订后的真实CLI形态与L2结论允许，MAIN采用固定命令分步验收，不新增通用driver/observer源文件。每个实际CLI请求最外层仍先调用不变run-recorded.py，捕获它自己的MAIN外层唯一basename；inner为精确run-delivery.py CLI。run-delivery成功预约后又唯一调用原recorder，生成该获准helper运行的内层basename。两层原六件套必须分名，MAIN外层CLI退出与内层helper退出分别核，绝不互代。CLI拒绝请求可以有MAIN外层原件，必须无内层helper claim/Popen；这是预期行为，不伪造内层六件套。
+
+先由MAIN为所有外层和内层分配具名ID/原始argv及source/protected SHA；原exec_command返回的同一session由MAIN保留至真实退出，需等待时只恢复同一handle，不套timeout或后台脱管。A barrier的外层session保持在途；MAIN只读观察其专有held以及该session真实liveness后，才执行B争抢/cancel/C争抢各自原FIRST命令并完成各自实际wait。随后只写该helper专有release标记，再等待A原session实际退出；终局按内层sidecar/terminal receipt/项目authority/journal加外层原件相互核。
+
+这种方式没有新的待审运行器，减少工具自证循环；只适用于本票有限不fork helper。真实C/N/D2不能因此省独立observer或原epoch证据。若任何exec session观察失败，不能据此重启；核该原件/所属当前进程事实，责任保持未知。若平台无法给实际wait事实，才提出最小精确验收仪器并先独立审查，不默默用脚本假定已结束。
+
+发生任一不合预期结果，除事先批准写A专有release并由原handle实际wait的必要安全收口外，不继续下一验证。A自然有限超时只产生真实失败3，不能当正常取消或资源已无；原结果和源漂移均原样保留。当前此方案仅设计，正式L3票未发，原helper及新runner仍不运行。

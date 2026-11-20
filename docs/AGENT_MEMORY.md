@@ -1,3 +1,19 @@
+## 2026-11-20 R7条件文档已独立闭环
+
+独立ctx_781a69cf54d5已worker_done msg_8aec57846bd9 DOC_CONDITIONAL_READY：D03/D05闭合，D01/D02/D04复用rev2结论。MAIN已核rev3全部6输入实际SHA等于起止记录，原35ID/NOT_RUN保持，正式条件文档回执docs/process/r7-design/MAIN_CONDITIONAL_DOCUMENT_ACCEPTANCE.json。不再无差别重审已核不变部分；取得R6实际接受commit后只重锚责任引用/parent事实来源/受影响私有caller和验收票。R7没有实现/runtime票。后续不要把旧REQUEST_CHANGES当当前未修，不要把本结论当R7_PLAN_READY/产品PASS。
+Claude工具修订仍Task task_1e803fda402b / ctx_ab2f1ac4c732唯一writer；最后真实窗口在分块完成checker与selftest fixture，未交源码冻结、未获测试票，无新429已报。MAIN不改W源码/Git，不运行测试，待其ask后新pin。完整goal继续PROC0→R6→实际验收→R7/R8→NEXT，旧失败保留。
+
+## 2026-11-20 R7条件文档修订并行检查点
+
+独立R7文档预审ctx_2449bae945d3已worker_done msg_50f3a95c2c19 REQUEST_CHANGES，五项R7-D01..D05真实缺口；MAIN已按实际产品caller补candidate/PRIVATE_SEAMS_REV2.md并同步架构/验收/原35case map/MAIN裁决，旧版history/before-independent-revision-001保留。具体为draw调用前opaque attempt及真实parent、未交付PRE/POST acquisition、未发布/未注册根回滚、原operation/队列/新拒绝三类、最终mint/activate/consume/release同步可见性。R7仍没有实施票，35项均NOT_RUN，不签PLAN_READY。
+已官方send新独立增量复核Task task_d258efa814e1 / Dispatch ctx_7b27d06de6bf / term_94bdf24bdd1425090ae114cf53365920；输出docs/process/r7-design/independent-review-rev2/。旧审查原件不动。仅条件文档、与Claude工具五文件隔离。
+Claude Task task_1e803fda402b / ctx_ab2f1ac4c732仍工具修订唯一writer；当前source_frozen=false，旧25/24/28与packet004只对历史9c候选有效，当前修订尚NOT_RUN。MAIN不能改W/Git或运行源码测试。等待其ask冻结后再给原recorder FIRST票；L3/helper/R6仍未放行。目标全范围索引docs/process/GOAL_COMPLETION_INDEX.json已与原35、NEXT计划28逐集合核，不是验收结论。新429即时停规则不变。
+
+## 2026-11-20 PROC0 L2修订最新检查点
+
+独立L2 ctx_bf6e8d803270实际worker_done msg_52a408475e4c：REQUEST_CHANGES，3 BLOCKER/4 MAJOR/2 MINOR；原件docs/process/proc-0/l2-review/三文件不得覆盖。已由MAIN合并接受L2-01..09并写CONTRACT rev4 §7（项目固定authority、Popen后finally wait、身份缺证UNKNOWN、路径先核后读、完整slot与terminal提交证明等），不减少16case。原W候选9c2f6237与历史失败/003/004保持。B文档检查点aa2de37、W9c2f6237均已push各自开发分支，未合main。
+原Claude通过官方send重新派生可见窗口term_8ce0fd38495e75583c94e69607edc5da，新Task task_1e803fda402b / Dispatch ctx_ab2f1ac4c732。已发WRITE_ONLY精确票docs/process/proc-0/implementation/l2-repair-001/RELEASE.json，SHA48fc472720140e62e1587ed87729b6df55f9a8898552f79fd3dfd9014437985f；发送回执WRITE_TRANSPORT.json，msg_8ba4f7196c0d。允许五工具/测试文件与指定OWN_L2两个新报告；其他651 source+保护项不可改。MAIN不再写W、运行测试或Git；待Claude ask已准备代码时MAIN只读核范围、冻结新pin再给原observer B1/B2/B3。当前新wrapper/helper/真实L3/R6仍NOT_RELEASED。新429即时停规则不变，不自动retry或接写。完整goal仍PROC0→R6→真实C09/17+ISO18→R7/R8→NEXT重锚后停。
+
 ## 2026-11-20 04:45 UTC 最新检查点
 
 PROC0 L1三门与实际16case交还包004已核0/CLEAN/零漂移；工具候选W 9c2f6237f997c27e3f2d013fec48107a56f862ba已显式提交，656实际源逐Git blob同源证明。Claude task_d0bbeef5f54f已settled，源码writer=NONE。独立L2 Orca ctx_bf6e8d803270 / task_4103d51533cb / term_11a757f5-55ac-4dcd-8280-50bfd8bf95ac已启动，仅只读审查，回执docs/process/proc-0/l2-review/START_TRANSPORT.json。等待Orca交还，不轮询；未允许L3/helper/R6真实运行，PROC0/R6/N1N2均未完成。新429停工规则不变。

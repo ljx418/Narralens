@@ -1,0 +1,19 @@
+{
+  "verdict": "DOC_CONDITIONAL_READY",
+  "reviewed": [
+    {
+      "id": "R7-D03",
+      "status": "CLOSED_IN_CONDITIONAL_DESIGN",
+      "evidence": "PRIVATE_SEAMS_REV2.md §D03、D03-a..g；验收草案末节",
+      "basis": "prepare、未注册 serving 和未交付工厂各自有原 owner；工厂 attempt 覆盖首次 I/O、责任移交及未知依赖，早拒绝有正控。"
+    },
+    {
+      "id": "R7-D05",
+      "status": "CLOSED_IN_CONDITIONAL_DESIGN",
+      "evidence": "PRIVATE_SEAMS_REV2.md §D05、D05-a..f；验收草案末节",
+      "basis": "隔离 D1 拒绝只证 caller 防御，原 primitive 的凭据拒绝另证；业务失败但资源齐备可消费 failed completion 后归还一次。"
+    }
+  ],
+  "open_findings": [],
+  "scope": "rev3 D03/D05 文档"
+}

@@ -1,0 +1,519 @@
+{
+  "status": "DRAFT_NOT_RELEASED",
+  "cases": [
+    {
+      "id": "producer_chain",
+      "original_group": "R01",
+      "planning_phase": "R8",
+      "production_entry": "bootstrap → SOURCE_ONLY → adopt → prepare/readSource",
+      "trigger_and_control": "rich source 正常采用与 foreign rights",
+      "must_assert": "Actual bootstrap, SOURCE_ONLY draft and controlled adoption produce committed rich source; actual workspace/reader consumes it; preserve producer/rights/consumer identities.",
+      "evidence_level": "D3",
+      "candidate_test_files": [
+        "tests/agent-driven/integration/created-source-adoption.test.ts",
+        "tests/agent-driven/integration/created-native-workspace.test.ts",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts"
+      ],
+      "scope": "保留原阶段门",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "independent_trees",
+      "original_group": "R01",
+      "planning_phase": "R7/R8",
+      "production_entry": "prepare → reader → retainDirectory",
+      "trigger_and_control": "同名双根，替换仅一侧，含空目录/嵌套",
+      "must_assert": "Committed source and workspace retain independent physical trees; equal relative paths never collapse resource ownership; nested and empty directories are separate evidence.",
+      "evidence_level": "D2",
+      "candidate_test_files": [
+        "tests/agent-driven/integration/retained-source-tree.test.ts",
+        "tests/agent-driven/integration/created-native-workspace.test.ts"
+      ],
+      "scope": "R7 接缝及原阶段联合复证",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "tamper_and_authority",
+      "original_group": "R02",
+      "planning_phase": "R7/R8",
+      "production_entry": "acquireExpectedLease → readSource 最终 gate",
+      "trigger_and_control": "稳定原树对照 inode/parent/root/mtime/symlink/foreign lease/stale generation",
+      "must_assert": "Same bytes/new inode, parent/root replacement, same-size/restored mtime, symlink, copied/foreign/released capability and stale base/control/owner/generation are refused before authoritative use.",
+      "evidence_level": "D1+D2",
+      "candidate_test_files": [
+        "tests/agent-driven/integration/created-native-source-reader.test.ts",
+        "tests/agent-driven/integration/native-cache-witness.test.ts",
+        "tests/agent-driven/integration/source-digest-resource-boundary.test.ts"
+      ],
+      "scope": "R7 接缝及原阶段联合复证",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "complete_dependencies",
+      "original_group": "R03",
+      "planning_phase": "R7/R8",
+      "production_entry": "readFacts → sidecars → verify",
+      "trigger_and_control": "逐项改依赖、补 negative、增空目录/改 listing，对照稳定重读",
+      "must_assert": "Positive/negative style/settings/markers/subtitle/translation dependencies, added empty directory and actual listing changes invalidate stale proofs.",
+      "evidence_level": "D2",
+      "candidate_test_files": [
+        "tests/agent-driven/integration/created-native-source-reader.test.ts",
+        "tests/agent-driven/integration/retained-source-tree.test.ts"
+      ],
+      "scope": "R7 接缝及原阶段联合复证",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "native_cache",
+      "original_group": "R04",
+      "planning_phase": "R6/R8",
+      "production_entry": "produceNativeCacheEntry → lookup → readSource",
+      "trigger_and_control": "真实产物对照 forged JSON、foreign、staged 和撤销",
+      "must_assert": "Unknown/forged native metadata or cache refused; concrete approved producer derivation invalidates old round, then stable proven native derivation can be read; no broad cache whitelist.",
+      "evidence_level": "D2+D3",
+      "candidate_test_files": [
+        "tests/agent-driven/integration/native-cache-witness.test.ts",
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts"
+      ],
+      "scope": "保留原阶段门",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "actual_probe",
+      "original_group": "R05",
+      "planning_phase": "R6/R7/R8",
+      "production_entry": "readSource → #runTool",
+      "trigger_and_control": "固定实际媒体、parent FD，对照路径换名与超限",
+      "must_assert": "Fixed local ffprobe uses same held parent-PID FD; normalized duration/first-video/fps/rotation/audio/dimensions and provenance match pinned upstream; no injected facts.",
+      "evidence_level": "D2+D3",
+      "candidate_test_files": [
+        "tests/agent-driven/integration/cache-frame-duration-lifetime.test.ts",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts"
+      ],
+      "scope": "R7 接缝及原阶段联合复证",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "child_lifetime",
+      "original_group": "R05",
+      "planning_phase": "R5C/R6/R7",
+      "production_entry": "readSource → #runTool → child.close",
+      "trigger_and_control": "正常与超时、取消、abrupt、输出过界；延迟 close",
+      "must_assert": "Timeout/cancel/abrupt child: actual child exit and reap precede input release; limits refuse rather than truncate; diagnostic media never represents Chinese A films.",
+      "evidence_level": "D1+D2",
+      "candidate_test_files": [
+        "tests/agent-driven/integration/cache-process-settlement.test.ts",
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts",
+        "tests/agent-driven/integration/cache-frame-duration-lifetime.test.ts"
+      ],
+      "scope": "R7 接缝及原阶段联合复证",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "native_bytes_and_order",
+      "original_group": "R06",
+      "planning_phase": "R8",
+      "production_entry": "authority → native facts → reader",
+      "trigger_and_control": "固定 BOM/CRLF、数字名及独立 caption listing",
+      "must_assert": "Exact UTF8/BOM/CRLF/native_rev vectors; numeric localeCompare video ordering vs separate actual caption readdir order; Node/ICU/locale recorded.",
+      "evidence_level": "D2",
+      "candidate_test_files": [
+        "tests/agent-driven/integration/created-native-source-reader.test.ts"
+      ],
+      "scope": "保留原阶段门",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "budgets",
+      "original_group": "R07",
+      "planning_phase": "R6/R8",
+      "production_entry": "closure → retainFile/read → probe",
+      "trigger_and_control": "每项预算边界与第一个超限、读取中增长",
+      "must_assert": "Size checks precede bounded text read; growth, total bytes, path/depth/FD/output/time bounds have explicit rejection; no unbounded media read.",
+      "evidence_level": "D1+D2",
+      "candidate_test_files": [
+        "tests/agent-driven/integration/retained-native-budget.test.ts",
+        "tests/agent-driven/integration/cache-process-settlement.test.ts"
+      ],
+      "scope": "保留原阶段门",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "per_allocation_fd_lifetime",
+      "original_group": "R07",
+      "planning_phase": "R7",
+      "production_entry": "closure.open → retain → release",
+      "trigger_and_control": "临时 walk 与下一 allocation 共用整数，对照无复用",
+      "must_assert": "Descriptor allocation generations own closes; recycled integer after temporary directory walk still closes newly retained allocation exactly once; no raw numeric retry.",
+      "evidence_level": "D1+D2",
+      "candidate_test_files": [
+        "tests/agent-driven/integration/retained-source-tree.test.ts",
+        "tests/agent-driven/integration/retained-native-budget.test.ts"
+      ],
+      "scope": "R7 接缝及原阶段联合复证",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "cleanup_uncertainty",
+      "original_group": "R07",
+      "planning_phase": "R5C/R7",
+      "production_entry": "workspace.prepare/dispose/produce/reconcile、reader.readSource",
+      "trigger_and_control": "逐项 open/stat/verify/close/reentry，双错误与全成功对照，详见验收矩阵",
+      "must_assert": "Nth open/stat/verify/close/reentry failures preserve primary and all cleanup errors; every outstanding resource attempted; sticky uncertainty prevents new proof.",
+      "evidence_level": "D1+D2",
+      "candidate_test_files": [
+        "tests/agent-driven/integration/cache-process-identity.test.ts",
+        "tests/agent-driven/integration/created-native-workspace.test.ts",
+        "tests/agent-driven/integration/retained-source-tree.test.ts"
+      ],
+      "scope": "R7 接缝及原阶段联合复证",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "drain_and_delivery",
+      "original_group": "R07",
+      "planning_phase": "R7",
+      "production_entry": "readSource → #adopt → reader.close → 末叶 close",
+      "trigger_and_control": "分别在交付前后 close、晚到 resolve/reject/release fault",
+      "must_assert": "Close drains accepted reads and probes; success transfers source/workspace plus directory/negative guards; reader close cannot destroy delivered resources.",
+      "evidence_level": "D1+D2",
+      "candidate_test_files": [
+        "tests/agent-driven/integration/cache-serving-drain.test.ts",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts"
+      ],
+      "scope": "R7 接缝及原阶段联合复证",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "lease_isolation",
+      "original_group": "R01/R02",
+      "planning_phase": "R7/R8",
+      "production_entry": "acquireExpectedLease → assertCurrent/release",
+      "trigger_and_control": "两 lease 同 ref、复制对象、外国实例、换 generation",
+      "must_assert": "Releasing one acquired lease does not revoke ref or another lease; repeated proof works; issuing instance checked and replaced generation invalidates prior proof.",
+      "evidence_level": "D1+D2",
+      "candidate_test_files": [
+        "tests/agent-driven/integration/native-cache-witness.test.ts",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts"
+      ],
+      "scope": "R7 接缝及原阶段联合复证",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "existing_behavior",
+      "original_group": "REG",
+      "planning_phase": "R8",
+      "production_entry": "SnapshotReadPort、原 Expected 生命周期",
+      "trigger_and_control": "原 84 断言、legacy refusal、批准的 loader exports 对照",
+      "must_assert": "Original render SnapshotReadPort, legacy refusal and accepted Expected lifecycle/84 assertions preserved; loader only approved015 minimal exports, no artifact/pin change.",
+      "evidence_level": "D1+D3",
+      "candidate_test_files": [
+        "tests/agent-driven/integration/created-native-ack.test.ts",
+        "tests/agent-driven/integration/created-native-workspace.test.ts"
+      ],
+      "scope": "保留原阶段门",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "frozen_capture",
+      "original_group": "EVIDENCE",
+      "planning_phase": "R8",
+      "production_entry": "MAIN freeze → recorded capture",
+      "trigger_and_control": "当前授权全集与原十路径及新增项、陈旧 pin 负控",
+      "must_assert": "Exact ten-file diff and protected hashes checked; unique captures retain all failures, source/index immutable during commands, actual exits and source/artifact SHA256 verified.",
+      "evidence_level": "D0",
+      "candidate_test_files": [],
+      "scope": "保留原阶段门",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "independent_acceptance",
+      "original_group": "REVIEW",
+      "planning_phase": "R8",
+      "production_entry": "MAIN freeze → independent review",
+      "trigger_and_control": "绑定最终 SHA；实现者自签或陈旧审查作反控",
+      "must_assert": "Freeze actual candidate and obtain independent review bound to it; fix then reverify affected gates. No self-signed external pass.",
+      "evidence_level": "D0+独立审查",
+      "candidate_test_files": [],
+      "scope": "保留原阶段门",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "next_integration_plan",
+      "original_group": "NEXT",
+      "planning_phase": "AFTER_N1N2_ACCEPTANCE",
+      "production_entry": "NEXT contract → 既有接线验收入口",
+      "trigger_and_control": "已接受 commit 与未接受 WIP 对照，重锚 28 case",
+      "must_assert": "After N1N2 acceptance freeze compatible next-stage contract and exact implementation/acceptance plan; no premature S01/NativeAck/Studio/film/A readiness claim.",
+      "evidence_level": "D0",
+      "candidate_test_files": [],
+      "scope": "保留原阶段门",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "ISO-01",
+      "original_group": null,
+      "planning_phase": "R6/R7/R8",
+      "production_entry": "fixed producer → 两次 draw/poster → lookup",
+      "trigger_and_control": "实际两帧和配对 poster 对照 key 不匹配",
+      "must_assert": "真实连续两帧与poster可生成；缓存key/算法不变；跨draw进程隔离不破坏成功体验",
+      "evidence_level": "D3",
+      "candidate_test_files": [
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts",
+        "tests/agent-driven/integration/native-cache-witness.test.ts"
+      ],
+      "scope": "R7 接缝及原阶段联合复证",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "ISO-02",
+      "original_group": null,
+      "planning_phase": "R6/R7/R8",
+      "production_entry": "bridge.draw → seek/JOB → drain",
+      "trigger_and_control": "正常与真实 15/45 秒原超时、外层 60 秒",
+      "must_assert": "真实seek15秒与JOB45秒原始错误可达，外层60秒不遮盖JOB；每项真正结束原生执行域",
+      "evidence_level": "D2+D3",
+      "candidate_test_files": [
+        "tests/agent-driven/integration/cache-process-settlement.test.ts",
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts"
+      ],
+      "scope": "R7 接缝及原阶段联合复证",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "ISO-03",
+      "original_group": null,
+      "planning_phase": "R6/R7/R8",
+      "production_entry": "bridge.draw → transport capture",
+      "trigger_and_control": "实际资源加具名 barrier 与无 barrier",
+      "must_assert": "capture30秒通过真实资源与明确标注transport barrier命中；不得声称自然卡顿",
+      "evidence_level": "D2+D3",
+      "candidate_test_files": [
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts"
+      ],
+      "scope": "R7 接缝及原阶段联合复证",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "ISO-04",
+      "original_group": null,
+      "planning_phase": "R6/R7/R8",
+      "production_entry": "draw → late launch/newPage",
+      "trigger_and_control": "原失败后继续执行与自然完成",
+      "must_assert": "late launch/newPage continuation在错误后也不能越过执行域清理；无旧work继续读PRE",
+      "evidence_level": "D2+D3",
+      "candidate_test_files": [
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts",
+        "tests/agent-driven/integration/created-native-workspace.test.ts"
+      ],
+      "scope": "R7 接缝及原阶段联合复证",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "ISO-05",
+      "original_group": null,
+      "planning_phase": "R6/R7/R8",
+      "production_entry": "workspace/direct → physical scope",
+      "trigger_and_control": "异根实际并行，对比同根别名排队",
+      "must_assert": "不同物理根两个真实worker并行，清理A时B存活并成功；同根别名仍共享锁",
+      "evidence_level": "D2+D3",
+      "candidate_test_files": [
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts",
+        "tests/agent-driven/integration/cache-production-scope.test.ts"
+      ],
+      "scope": "R7 接缝及原阶段联合复证",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "ISO-06",
+      "original_group": null,
+      "planning_phase": "R6/R7/R8",
+      "production_entry": "produceNativeCacheEntry → scope → activate",
+      "trigger_and_control": "在每个 PRE/POST、drain、release、activation 边缘排入同根竞争者；preexisting 早拒绝",
+      "must_assert": "完整同根锁覆盖preexisting-output/PRE/worker/drain/POST/两个tree释放/最终门/witness激活",
+      "evidence_level": "D1+D2",
+      "candidate_test_files": [
+        "tests/agent-driven/integration/cache-production-scope.test.ts",
+        "tests/agent-driven/integration/created-native-workspace.test.ts"
+      ],
+      "scope": "R7 接缝及原阶段联合复证",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "ISO-07",
+      "original_group": null,
+      "planning_phase": "R6/R7/R8",
+      "production_entry": "bridge.draw → close/cancel → reconcile",
+      "trigger_and_control": "GO 前后断管/取消再 close，对比自然结束",
+      "must_assert": "close/cancel/私有断管含GO前、GO后；重复close只结算释放一次；不交付晚到结果",
+      "evidence_level": "D1+D2",
+      "candidate_test_files": [
+        "tests/agent-driven/integration/cache-process-identity.test.ts",
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts"
+      ],
+      "scope": "R7 接缝及原阶段联合复证",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "ISO-08",
+      "original_group": null,
+      "planning_phase": "R6/R7/R8",
+      "production_entry": "R6 producer/parser → workspace failure",
+      "trigger_and_control": "协议/JPEG/两路输出越界与界内",
+      "must_assert": "真实协议、JPEG、stdout/stderr洪水有界拒绝并真正清理；无先反序列化巨对象",
+      "evidence_level": "D1+D2",
+      "candidate_test_files": [
+        "tests/agent-driven/integration/cache-process-settlement.test.ts",
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts"
+      ],
+      "scope": "R7 接缝及原阶段联合复证",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "ISO-09",
+      "original_group": null,
+      "planning_phase": "R6/R7/R8",
+      "production_entry": "R6 execution → parent drain",
+      "trigger_and_control": "真实 TERM-ignore 与普通退出",
+      "must_assert": "TERM-ignore转KILL实际回收；child close+组ESRCH+已知后代消失含Z，信号成功不是结束",
+      "evidence_level": "D2",
+      "candidate_test_files": [
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts"
+      ],
+      "scope": "R7 接缝及原阶段联合复证",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "ISO-10",
+      "original_group": null,
+      "planning_phase": "R6/R7/R8",
+      "production_entry": "production → execution disposition → held",
+      "trigger_and_control": "leader 突退、EPERM、归属未知与原 epoch 确证终局",
+      "must_assert": "leader意外退出、EPERM、未知归属不盲杀/伪settled；PRE、FD、scope、容量均不释放",
+      "evidence_level": "D1+D2",
+      "candidate_test_files": [
+        "tests/agent-driven/integration/cache-process-identity.test.ts",
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts"
+      ],
+      "scope": "R7 接缝及原阶段联合复证",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "ISO-11",
+      "original_group": null,
+      "planning_phase": "R6/R7/R8",
+      "production_entry": "inspectNativeCacheCleanup → reconcileNativeCacheCleanup",
+      "trigger_and_control": "同一 handle 并发、旧 JSON/PID/foreign、晚到真实终局",
+      "must_assert": "真实私有handle reconcile以新鲜证明结算恰好一次；伪handle、旧JSON/PID不能签发成功",
+      "evidence_level": "D1+D2",
+      "candidate_test_files": [
+        "tests/agent-driven/integration/cache-process-identity.test.ts",
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts"
+      ],
+      "scope": "R7 接缝及原阶段联合复证",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "ISO-12",
+      "original_group": null,
+      "planning_phase": "R6/R7/R8",
+      "production_entry": "folder range → source stream close",
+      "trigger_and_control": "响应 abort 时源仍活；完整读取正控",
+      "must_assert": "真实range源流在响应中止后曾存活且最终close；响应close不能替代源FD close",
+      "evidence_level": "D2+D3",
+      "candidate_test_files": [
+        "tests/agent-driven/integration/cache-serving-drain.test.ts"
+      ],
+      "scope": "R7 接缝及原阶段联合复证",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "ISO-13",
+      "original_group": null,
+      "planning_phase": "R6/R7/R8",
+      "production_entry": "folder frame-duration → pinned frameDuration → drain",
+      "trigger_and_control": "父 probe 跨 worker 退出与先结束，对照 callback/close/reap",
+      "must_assert": "真实父frameDuration probe跨worker结束仍被等待并reap；需明确原回调是否覆盖真实child close",
+      "evidence_level": "D2+D3",
+      "candidate_test_files": [
+        "tests/agent-driven/integration/cache-frame-duration-lifetime.test.ts"
+      ],
+      "scope": "R7 接缝及原阶段联合复证",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "ISO-14",
+      "original_group": null,
+      "planning_phase": "R6/R7/R8",
+      "production_entry": "bridge.draw → freezeAdmission → folder.handle",
+      "trigger_and_control": "冻结边缘新请求、已接受请求、下一 draw 重开",
+      "must_assert": "执行域消失后同步封资源准入；冻结边界的新请求不访问源/创建probe；下一draw显式重开",
+      "evidence_level": "D1+D2",
+      "candidate_test_files": [
+        "tests/agent-driven/integration/cache-serving-drain.test.ts",
+        "tests/agent-driven/integration/created-native-workspace.test.ts"
+      ],
+      "scope": "R7 接缝及原阶段联合复证",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "ISO-15",
+      "original_group": null,
+      "planning_phase": "R6/R7/R8",
+      "production_entry": "R6 candidate → finalize → workspace stage/activate",
+      "trigger_and_control": "完整候选、late error、最终换源、仅 SIGKILL",
+      "must_assert": "完整候选→单调FINALIZE_AFTER_OK→授权终止→真实结算→最终源/witness门；不得倒填或由SIGKILL推成功",
+      "evidence_level": "D1+D2+D3",
+      "candidate_test_files": [
+        "tests/agent-driven/integration/native-cache-witness.test.ts",
+        "tests/agent-driven/integration/created-native-workspace.test.ts",
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts"
+      ],
+      "scope": "R7 接缝及原阶段联合复证",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "ISO-16",
+      "original_group": null,
+      "planning_phase": "R6/R7/R8",
+      "production_entry": "scope scheduler → queue → PRE",
+      "trigger_and_control": "2 active、32 global/8 same root、30 秒队列及取消",
+      "must_assert": "两活跃scope、32全局/8同根排队、30秒队列截止；超额/取消在PRE前拒绝且不生child/泄漏FD",
+      "evidence_level": "D1+D2",
+      "candidate_test_files": [
+        "tests/agent-driven/integration/cache-production-scope.test.ts"
+      ],
+      "scope": "R7 接缝及原阶段联合复证",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "ISO-17",
+      "original_group": null,
+      "planning_phase": "R6/R7/R8",
+      "production_entry": "readSource → rootState → final gate；generic lease",
+      "trigger_and_control": "读同根/异根、交付瞬间同根变忙、producer 自身活跃",
+      "must_assert": "reader准入及最终交付同时查对应物理根；generic production lease不因自己的活跃scope自我失效",
+      "evidence_level": "D1+D2",
+      "candidate_test_files": [
+        "tests/agent-driven/integration/created-native-source-reader.test.ts",
+        "tests/agent-driven/integration/native-cache-witness.test.ts"
+      ],
+      "scope": "R7 接缝及原阶段联合复证",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "ISO-18",
+      "original_group": null,
+      "planning_phase": "R6/R7/R8",
+      "production_entry": "pinned Chrome → R6 terminal → workspace drain",
+      "trigger_and_control": "本版 policy/实际后代整组退出，旧 policy 负控",
+      "must_assert": "当前worker/policy原字节下真实Chrome/zygote/renderer/utility继承与整组退出；旧policy证据不复用",
+      "evidence_level": "D2+D3",
+      "candidate_test_files": [
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts"
+      ],
+      "scope": "R7 接缝及原阶段联合复证",
+      "status": "NOT_RUN"
+    }
+  ]
+}

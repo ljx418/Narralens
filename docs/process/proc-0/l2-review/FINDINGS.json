@@ -1,0 +1,96 @@
+{
+  "candidate": "9c2f6237f997c27e3f2d013fec48107a56f862ba",
+  "verdict": "REQUEST_CHANGES",
+  "findings": [
+    {
+      "id": "L2-01",
+      "severity": "BLOCKER",
+      "title": "返回 child 后仍有路径跳过原 owner 的 wait",
+      "locations": "tools/run-delivery.py:1364,1372–1399；tests/process/test_delivery_handoff.py:589–612",
+      "contract": "§3、§6.3 / PROC0-08",
+      "trigger": "Popen 已赋值后，finally 中关闭日志若报 OSError，外层把它写成 TERMINAL/NO_CHILD 并提前返回。身份读取和落盘到 wait 之间也没有贯穿的 finally。此时 child 可能仍活，rebind 可看到虚假终局。",
+      "revision": "把无 child 的启动失败与返回后的所有异常分开；返回即由同一 owner 在 finally 路径负责 wait，并记录异常与物理结果。",
+      "acceptance": "mock 返回可计数 child，令日志关闭、身份读取或落盘分别报错；每项只启动并 wait 一次，从不记 NO_CHILD；对照真正 Popen 失败无需 wait。"
+    },
+    {
+      "id": "L2-02",
+      "severity": "BLOCKER",
+      "title": "未取得完整 epoch 也可被持久化为 CLEAN/READY",
+      "locations": "tools/run-delivery.py:564–584,1086–1112,1290–1299,1434–1459；tools/check-delivery-spec.py:251–283；tests/process/test_delivery_handoff.py:589",
+      "contract": "§3、§6.3 / PROC0-06/08/12",
+      "trigger": "读不到 wrapper 身份仍可启动；recorder identity=None 或 session_not_settled 时，只要 RUNNING 状态写成功就返回 persisted=true。空组采样随即给 CLEAN，checker 不核 epoch、identity_persist 或 metadata_ok。现有丢 epoch 用例只断言 wait 和 inferred。",
+      "revision": "完整 wrapper epoch 才进入 STARTING；持久化成功与原 recorder epoch 已核实分别记账。核 boot、PID、启动时钟和自有会话/组等身份事实；缺证时保原 wait 并置 UNKNOWN/BLOCKED，checker 按 observer/runner 各自格式核对。",
+      "acceptance": "mock 身份消失、会话未稳定、无 boot、空组；核 wrapper 失败不 spawn，返回过的 child 实际 wait，缺失 recorder epoch 的 sidecar 不过 checker。保完整 epoch 正控。"
+    },
+    {
+      "id": "L2-03",
+      "severity": "BLOCKER",
+      "title": "同一项目可形成两个准入权威，旧票也能跳过换绑",
+      "locations": "tools/run-delivery.py:185–209,331–347,847–860,953–983,1039–1073,1304–1317",
+      "contract": "§3、§6.3 / PROC0-04/05/06/16",
+      "trigger": "只要求 state_root 在前缀内，各子目录独立初始化 READY。合法后续票变更子目录即看不到原 UNKNOWN、写租约或 pending_audit。即使根相同，普通入口也未校验已有 release pin，end-write 核 CLI generation 却未核 lease 的 release SHA；run 显式忽略 STALE_PIN_AFTER_AUTHORIZED_SOURCE_CHANGE。缺少字段的空 JSON 对象也没被判损坏。",
+      "revision": "按真实项目固定唯一权威 state/锁，分票目录仅存证。初次绑定之外普通入口须匹配当前票和租约，只有显式新票 rebind 可清 stale；损坏 state 保守拒绝。",
+      "acceptance": "同项目两份受信票/两个证据目录，旧根各置 UNKNOWN、pending 或 WRITING，新票均无第二槽；同根错票/旧 generation/空 state 拒绝，合法 end-write 后新票 rebind 才可继续。"
+    },
+    {
+      "id": "L2-04",
+      "severity": "MAJOR",
+      "title": "checker 在核准产物位置前读取 packet 路径",
+      "locations": "tools/check-delivery-spec.py:194–203,245–247,286–295,320–332,407–435,495–499",
+      "contract": "§2、§6.1–6.2 / PROC0-14/15",
+      "trigger": "sidecar、失败凭据、凭据内嵌 sidecar 均由交还方指定并打开。capture 目录不符仅累加错误，后续仍读文件及计算摘要。即便最终拒绝，也已经读了授权根之外的内容；也容许用另一位置的同形旁证代替原件。写侧的 run_id 也只核非空，却直接参与日志及 sidecar 路径拼接（run-delivery.py:416–419,1161,1362）。",
+      "revision": "从外部获准阶段票、分配及 producer 命名规则导出唯一位置；先核规范路径及各实际后缀目标，再做任何内容读取。凭据须引用同一已验证 sidecar；拒绝后停止该项读取。对作为文件名使用的 run_id 采用同一安全 basename 规则并检查唯一性。",
+      "acceptance": "仅用测试目录中的无害哨兵和读取记录，覆盖外部路径、越界链接、凭据内层路径及错误 capture；断言拒绝且零内容读取，原 bootstrap 与 runtime 产物仍可被消费。"
+    },
+    {
+      "id": "L2-05",
+      "severity": "MAJOR",
+      "title": "slot 身份及原件与旁证的退出事实未闭合",
+      "locations": "tools/check-delivery-spec.py:267–283,395–406,463–499,502–507,616–652；tools/run-delivery.py:805–834,1199–1232",
+      "contract": "§6.1、§6.4–6.5 / PROC0-10/13/14/15",
+      "trigger": "slot_matches 漏 approved_stage_release，check_stage_release 仅证该 alias 在总票中。分配未核 case_ids/phase；空 required_evidence 配空 evidence 也能走完。原件 inner 对命令、sidecar outer 对自身 inner 分别比较，两个 inner 从未相互比较。失败凭据 producer 仅从 slot 抄 assertion 即可写 case_passed，checker 才查日志；cleanup.source 未与同一 sidecar 的实测对象逐项相符。另有合法 JSON 非对象的旁证/凭据会直接 return 且不登记错误（204、296 行），调用方不检查返回值。",
+      "revision": "强制非空、完整、唯一 slots；按 slot 的阶段、case 和精确分配验证，预留不计入必交。把原件 inner、sidecar inner/outer、同一清理观察、日志指定原因和凭据连成一条校验。资格失败只阻塞交还，保留真实物理结果。",
+      "acceptance": "从完整多 slot 正控逐项单改：总票内另一已批准同型阶段、未分配 case、空 slots、sidecar 内外码自洽但不同于原件、错误断言或清理来源。分别拒绝且恢复后通过；producer 对无指定断言的 exit1 不签 case_passed。以空数组替换旁证或凭据也必须明确拒绝。"
+    },
+    {
+      "id": "L2-06",
+      "severity": "MAJOR",
+      "title": "核验与预约之间有竞争窗口",
+      "locations": "tools/run-delivery.py:1261–1273,1301–1317,1353–1365；原 run-recorded.py:7–10",
+      "contract": "§3、§6.3 / PROC0-03/04/11",
+      "trigger": "两个客户都可先通过同一 capture 的不存在检查。一个完成后，滞后的客户才取得短锁，看到 TERMINAL 可再次启动 recorder，直至 recorder 自身发现 claim。类似地，写租约可在锁外 source preflight 与 STARTING 之间完成，source_pre 仍取旧票。",
+      "revision": "在 project 权威事务中把最终校验和唯一 STARTING 预约相连；若昂贵哈希在锁外，提交前验证期间 generation/sequence 未变并重核 capture 占用。",
+      "acceptance": "用两个可控 mock 客户暂停在预检后，先让另一客户完整结束或完成一次写租约，再恢复前者；断言无第二 Popen、无旧 pin 启动，原件不变。"
+    },
+    {
+      "id": "L2-07",
+      "severity": "MAJOR",
+      "title": "审计失败或旁证未落盘仍可显示成功",
+      "locations": "tools/run-delivery.py:212–267,1093–1112,1491–1514,1548–1589,1675–1678",
+      "contract": "§6.1、§6.3 / PROC0-10/16",
+      "trigger": "RUNNING 或并发 cancel 的 journal 在 pending=true 后失败，后续终局直接 read_state/commit_state，可用新事件清掉旧 pending。sidecar 写失败被置 None，仍可 READY；终局 commit 出错仅附 terminal_persist_error，CLI 仍输出 OK/0，返回的 admission 可来自未提交内存。",
+      "revision": "所有后继事务先核原 slot 身份和旧 pending，保留未完成事件；分别记录 wait 与持久化失败，缺必需旁证/终局落盘不得报告交还或准入成功。checker 需绑定确已提交的 runtime 终局。",
+      "acceptance": "mock 在实际第一步 replace 后令 journal 失败，分别覆盖 cancel、RUNNING 和终局，另测 sidecar 写失败；后续保留原 pending，无 READY/成功回执，仍保留 owner wait 事实。"
+    },
+    {
+      "id": "L2-08",
+      "severity": "MINOR",
+      "title": "有限 barrier 的路径与时长约束依赖发票人",
+      "locations": "tests/process/fixtures/admission_helper.py:39–48,69–105；tests/process/test_delivery_handoff.py:628",
+      "contract": "§2、§5 / PROC0-04/09",
+      "trigger": "绝对路径中含 /var/ 即通过，未核唯一 selftest 根；float 时长未核有限性，已有 held 可覆盖，过期 release 可立即放行。对精确新目录和有限参数的正常票，这些分支可以避开。",
+      "revision": "绑定项目自有 selftest 实根，使用唯一未占用标记和有限正时长；清理失败应如实反馈。",
+      "acceptance": "纯验证反例覆盖越界/已占用标记/非有限时长，不创建进程；未来单票只用全新运行目录和有限参数。"
+    },
+    {
+      "id": "L2-09",
+      "severity": "MINOR",
+      "title": "真实保护项路径与 direct fixture 形状不同",
+      "locations": "tools/run-delivery.py:353–362；tests/process/test_delivery_handoff.py:335–342；bootstrap-003/RELEASE.json protected_inputs",
+      "contract": "§2A、§6.1 / PROC0-02",
+      "trigger": "runner 对 protected_inputs 一律要求仓内相对路径；实际 observer 票保护了绝对 Python 和 canonical observer，direct 互通票只含相对 AGENTS。保持这种受信保护项形状的 L3 票会在启动前拒绝。",
+      "revision": "在精确 L3 票明确外部受保护项的合同，支持 MAIN 显式固定的必要绝对 pin，或给出等效且可核的绑定；保留 recorded_source 的仓内限制。",
+      "acceptance": "mock 使用 L3 票实际形状，核固定 Python 摘要正反例，成功与指定失败均经 TOOL_RUNTIME producer→checker。"
+    }
+  ]
+}

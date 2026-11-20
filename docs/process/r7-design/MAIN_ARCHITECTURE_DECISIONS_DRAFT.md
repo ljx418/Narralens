@@ -10,3 +10,7 @@
 6. 真正验证分层：D1直接触发原caller和有界故障接缝；真实FD/stream/probe/Chrome另票记录实际终局。负例UNKNOWN可符合拒绝要求，但隔离测试自身资源必须获准保全或真的结束，不能以挂起测试宣布成功。
 
 此预研与当前Claude三条工具验证修复不冲突。领域草案已完成，源码writer仍只有原Claude，禁止把草案交付称R7开发完成或提前进入实现。
+
+## 独立预审rev2覆盖裁决
+
+R7-D01..05全部接受；具体拟私有接口、状态和直接反例见candidate/PRIVATE_SEAMS_REV2.md。此前“复用原handle/所有后继pending/最后gate只到activate”的简写由该文件取代。R6接受前仍无实施许可，原scope容量、EnginePort七方法与公共DTO不变。

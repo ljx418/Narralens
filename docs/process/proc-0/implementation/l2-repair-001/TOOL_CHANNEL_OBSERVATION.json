@@ -1,0 +1,15 @@
+{
+  "at": "2026-11-20T04:56:11.340858+00:00",
+  "dispatch": "ctx_ab2f1ac4c732",
+  "source": "exact official worker-read source terminal, current active screen",
+  "observed": [
+    "Multiple malformed response stream / invalid Bash JSON tool inputs",
+    "Subsequent successful reads and release48fc4727 ACK",
+    "Worker currently writing runner; no task completion yet"
+  ],
+  "not_observed": [
+    "fresh429"
+  ],
+  "ruling": "Remain same supplier/task/single writer; smaller valid tool payloads, no config changes or auto restart; no test/runtime grant",
+  "steering_message": "msg_9bfc4b797658"
+}

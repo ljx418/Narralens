@@ -1,6 +1,6 @@
 # R7 资源闭环设计草案
 
-**DRAFT_NOT_RELEASED**。适用于 MAIN 审票。源码基线及审查深度见 INPUTS.json。当前 Claude 独占 W 的 PROC-0 工具。R6/C09 的实际接受记录、接受 commit 及对应私有接口仍待 MAIN 绑定。
+**DRAFT_NOT_RELEASED**。适用于 MAIN 审票。源码基线及审查深度见 INPUTS.json。独立预审后的具体条件契约见PRIVATE_SEAMS_REV2.md（R7-D01..05，冲突时优先）。当前 Claude 独占 W 的 PROC-0 工具。R6/C09 的实际接受记录、接受 commit 及对应私有接口仍待 MAIN 绑定。
 
 ## 当前生产责任与可达分支
 
@@ -22,6 +22,6 @@
 
 ## 拟释放范围与回退
 
-第一批建议源码白名单仅 W/src/host/agent-driven/{created-native-workspace.ts,retained-native-closure.ts,created-native-source-reader.ts}。按 CASE_MAP 的 R7 接缝，候选测试改动限 W/tests/agent-driven/integration/{created-native-workspace,created-native-source-reader,retained-source-tree,native-cache-witness,retained-native-budget,cache-serving-drain,cache-frame-duration-lifetime,cache-production-scope}.test.ts。花括号逐文件展开。其余引用为回归/跨阶段证据入口，无写权限。若 R6 接受版缺双方可消费的 parent disposition，需 MAIN 明确加入 src/adapters/openfilm/openfilm-upstream.ts 对应 bridge/serving 私有分支；如 committed lease 的重复 release 本身需报告原错误，单列 committed-snapshot-authority.ts 的 issued release。均须重绑输入和直接案例。
+第一批条件源码白名单为 W/src/host/agent-driven/{created-native-workspace.ts,retained-native-closure.ts,created-native-source-reader.ts}。按 CASE_MAP 的 R7 接缝，候选测试改动限 W/tests/agent-driven/integration/{created-native-workspace,created-native-source-reader,retained-source-tree,native-cache-witness,retained-native-budget,cache-serving-drain,cache-frame-duration-lifetime,cache-production-scope}.test.ts。花括号逐文件展开。其余引用为回归/跨阶段证据入口，无写权限。D01已具体定位现有缺口，拟票必须包含 src/adapters/openfilm/openfilm-upstream.ts 对应attempt/bridge/serving私有分支；R6接受后复核等价能力，精确票前仍无写权限；如 committed lease 的重复 release 本身需报告原错误，单列 committed-snapshot-authority.ts 的 issued release。均须重绑输入和直接案例。
 
 保护 native-cache-witness 的算法/ledger 公共语义、cache-production-scope 的容量与既有 phase API、Host server、creation application、R6 C/Host/worker/policy、上游及 fixtures、Expected 与 EnginePort 七方法、既有 acceptance/历史 Gate、配置、PROC-0 工具。若原 caller 的停机顺序确须改动，提交精确差分和反例给 MAIN，禁止自行扩票。回退以新取得的 R6 接受 commit 为基线，仅撤销本票白名单变化；先核无在途输入与原 owner 已终局，保全失败 capture 与未知 root。不得 reset/stash 或用历史绿灯签当前字节。

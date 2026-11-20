@@ -1,0 +1,194 @@
+{
+  "format": "narralens.active-goal-completion-index@1",
+  "status": "REQUIREMENTS_INDEX_NOT_ACCEPTANCE",
+  "at": "2026-11-20T05:04:08.141495+00:00",
+  "objective": "PROC0 complete admission -> Claude R6 -> independent review and actual scoped acceptance -> R7/R8 freeze -> reanchor NEXT start package and stop",
+  "source_references": [
+    {
+      "path": "docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/N1N2_ACCEPTANCE_PLAN_CURRENT.json",
+      "sha256": "ea7d83bbd453569d5b0f511bd602d32ebcb282069ef524e96dbf972346475001"
+    },
+    {
+      "path": "docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p6-protocol-and-settlement/MAIN_DEVELOPMENT_ACCEPTANCE_DRAFT.md",
+      "sha256": "abc1d3a011c10f29e4c8c185e6e1e03e8177bd02b051271af6682d8d356c6d3a"
+    },
+    {
+      "path": "docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/next-wiring-draft/02_DEVELOPMENT_AND_ACCEPTANCE.md",
+      "sha256": "f7ec48a2ded0053fc512b39d2430f090e289b76f3ef601bd152a0a118e96ca4a"
+    },
+    {
+      "path": "docs/process/01_DELIVERY_SPEC.md",
+      "sha256": "1d796f500a8dcccd157d39d4941eb3c8f1f902be095ffb7b31ca00389b347565"
+    },
+    {
+      "path": "docs/process/02_REMAINING_PLAN.md",
+      "sha256": "265c5e023b1911d10cdc98df5fea649e3f66ae7221fef5e161056bded7cb7ec7"
+    },
+    {
+      "path": "docs/process/proc-0/CASES.json",
+      "sha256": "b1664e1d0a49986e57e6d9052e1ad6e7e278a973c40f5a5d649137b339ec8c24"
+    }
+  ],
+  "requirements": [
+    {
+      "gate": "PROC0",
+      "required_ids": [
+        "PROC0-01",
+        "PROC0-02",
+        "PROC0-03",
+        "PROC0-04",
+        "PROC0-05",
+        "PROC0-06",
+        "PROC0-07",
+        "PROC0-08",
+        "PROC0-09",
+        "PROC0-10",
+        "PROC0-11",
+        "PROC0-12",
+        "PROC0-13",
+        "PROC0-14",
+        "PROC0-15",
+        "PROC0-16"
+      ],
+      "needed": "same-source complete L1 + independent L2 + separately released actual L3 contention/cancel/pass/specified-fail + L4 metadata and independent disposition",
+      "status": "L2_REQUEST_CHANGES_REPAIR_IN_PROGRESS",
+      "evidence_at_finish": null
+    },
+    {
+      "gate": "R6_DIRECT",
+      "required_evidence_keys": [
+        "C06-BIND",
+        "C06-ONESHOT",
+        "C06-ORDER",
+        "C06-WAIT",
+        "C06-EPOCH",
+        "C06-PARENT",
+        "C06-BOUND",
+        "C06-EXEC",
+        "C07-LATE",
+        "C07-EOF",
+        "C07-EIO",
+        "C07-CHANNEL",
+        "C08-OVERFLOW",
+        "C08-END",
+        "C08-HOLD",
+        "C08-LATEWAIT",
+        "C08-FORGE",
+        "R5-REG",
+        "C09-PLAN"
+      ],
+      "needed": "Original rev2 C06-C08 production producer-consumer direct controls, full immutable source commands and original findings; C09-PLAN is preparation, not actual C09 closure",
+      "status": "UNACCEPTED_WIP_PROC0_DEPENDENCY",
+      "evidence_at_finish": null
+    },
+    {
+      "gate": "R6_ACTUAL",
+      "needed": "new accepted source/pins; separately released normal and specified fault, progressive stream/backpressure/overflow/adoption C09 and actual identity terminal evidence; original35 boundary coverage",
+      "status": "NOT_RELEASED",
+      "evidence_at_finish": null
+    },
+    {
+      "gate": "R7",
+      "needed": "closed resources/FD/drain/retained roots/scopes/witness; precise private seam bound to accepted R6; complete affected direct and actual layer evidence plus independent review",
+      "status": "DOC_CONDITIONAL_READY_IMPLEMENTATION_BLOCKED_BY_R6",
+      "evidence_at_finish": null,
+      "conditional_document_evidence": "docs/process/r7-design/MAIN_CONDITIONAL_DOCUMENT_ACCEPTANCE.json"
+    },
+    {
+      "gate": "R8_ORIGINAL35",
+      "required_ids": [
+        "producer_chain",
+        "independent_trees",
+        "tamper_and_authority",
+        "complete_dependencies",
+        "native_cache",
+        "actual_probe",
+        "child_lifetime",
+        "native_bytes_and_order",
+        "budgets",
+        "per_allocation_fd_lifetime",
+        "cleanup_uncertainty",
+        "drain_and_delivery",
+        "lease_isolation",
+        "existing_behavior",
+        "frozen_capture",
+        "independent_acceptance",
+        "next_integration_plan",
+        "ISO-01",
+        "ISO-02",
+        "ISO-03",
+        "ISO-04",
+        "ISO-05",
+        "ISO-06",
+        "ISO-07",
+        "ISO-08",
+        "ISO-09",
+        "ISO-10",
+        "ISO-11",
+        "ISO-12",
+        "ISO-13",
+        "ISO-14",
+        "ISO-15",
+        "ISO-16",
+        "ISO-17",
+        "ISO-18"
+      ],
+      "needed": "For every original item actual evidence covering its required boundary/layer, complete applicable regressions/build/security/actual media/Chrome/Q2 and independent frozen candidate review; no test-count surrogate",
+      "per_item_evidence_requirements": [
+        "exact original ID and intended boundary",
+        "frozen source/contract/upstream/tool SHA256 and actual scope",
+        "actual production producer/consumer or explicit component-only limitation",
+        "command argv/cwd/owner/resource/exit and immutable input binding",
+        "raw logs/artifact hashes plus negative controls/cleanup facts",
+        "independent disposition and known limits"
+      ],
+      "status": "NOT_REVERIFIED_ON_ACCEPTED_CURRENT_CANDIDATE",
+      "evidence_at_finish": null
+    },
+    {
+      "gate": "NEXT_REANCHOR_AND_STOP",
+      "required_planned_case_ids": [
+        "S01-M01",
+        "S01-M02",
+        "S01-B01",
+        "S01-B02",
+        "S01-E01",
+        "S01-E02",
+        "S01-E03",
+        "S01-E04",
+        "S01-E05",
+        "S01-D01",
+        "S01-D02",
+        "S01-C01",
+        "S01-C02",
+        "S01-R01",
+        "S01-R02",
+        "S01-R03",
+        "S01-L01",
+        "S01-L02",
+        "S01-N01",
+        "S01-X01",
+        "S01-I01",
+        "S01-P01",
+        "S01-M03",
+        "S01-M04",
+        "S01-M05",
+        "S01-M06",
+        "S01-B03",
+        "S01-B04"
+      ],
+      "needed": "Reanchor existing NEXT contract/28-case plan/paths/private interfaces/handoff to actually accepted N1N2 commit; independently review changed assumptions. This goal stops before NEXT implementation, so these28 runtime cases remain not run. Preserve historical draft/reviews; do not use old candidate as accepted.",
+      "status": "BLOCKED_BY_UNACCEPTED_N1N2",
+      "evidence_at_finish": null
+    }
+  ],
+  "forbidden_shortcuts": [
+    "Do not complete goal at PROC0/L1 or source-only R6",
+    "Do not replace actual kernel/media with mock or metadata",
+    "Do not inherit old R5I accepted results after R6 protocol changes",
+    "Do not shrink original17 or ISO18 or quietly implement NEXT",
+    "Do not sign human/A/V1 acceptance from this scope",
+    "Fresh429 immediately stop exact Claude task; no automatic retry/provider change/Codex implementation takeover"
+  ],
+  "maintenance_rule": "Index references requirements only; actual completion requires reading authoritative current source/commands/artifacts one by one. Metadata presence and this index itself prove no implementation or acceptance."
+}

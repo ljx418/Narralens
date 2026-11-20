@@ -76,7 +76,11 @@
         "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts"
       ],
       "scope": "保留原阶段门",
-      "status": "NOT_RUN"
+      "status": "NOT_RUN",
+      "required_r7_document_sub_evidence": [
+        "R7-D01",
+        "R7-D05"
+      ]
     },
     {
       "id": "actual_probe",
@@ -107,7 +111,11 @@
         "tests/agent-driven/integration/cache-frame-duration-lifetime.test.ts"
       ],
       "scope": "R7 接缝及原阶段联合复证",
-      "status": "NOT_RUN"
+      "status": "NOT_RUN",
+      "required_r7_document_sub_evidence": [
+        "R7-D01",
+        "R7-D04"
+      ]
     },
     {
       "id": "native_bytes_and_order",
@@ -151,7 +159,10 @@
         "tests/agent-driven/integration/retained-native-budget.test.ts"
       ],
       "scope": "R7 接缝及原阶段联合复证",
-      "status": "NOT_RUN"
+      "status": "NOT_RUN",
+      "required_r7_document_sub_evidence": [
+        "R7-D02"
+      ]
     },
     {
       "id": "cleanup_uncertainty",
@@ -167,7 +178,12 @@
         "tests/agent-driven/integration/retained-source-tree.test.ts"
       ],
       "scope": "R7 接缝及原阶段联合复证",
-      "status": "NOT_RUN"
+      "status": "NOT_RUN",
+      "required_r7_document_sub_evidence": [
+        "R7-D02",
+        "R7-D03",
+        "R7-D04"
+      ]
     },
     {
       "id": "drain_and_delivery",
@@ -182,7 +198,12 @@
         "tests/agent-driven/integration/created-native-source-reader.test.ts"
       ],
       "scope": "R7 接缝及原阶段联合复证",
-      "status": "NOT_RUN"
+      "status": "NOT_RUN",
+      "required_r7_document_sub_evidence": [
+        "R7-D01",
+        "R7-D03",
+        "R7-D04"
+      ]
     },
     {
       "id": "lease_isolation",
@@ -337,7 +358,11 @@
         "tests/agent-driven/integration/created-native-workspace.test.ts"
       ],
       "scope": "R7 接缝及原阶段联合复证",
-      "status": "NOT_RUN"
+      "status": "NOT_RUN",
+      "required_r7_document_sub_evidence": [
+        "R7-D01",
+        "R7-D04"
+      ]
     },
     {
       "id": "ISO-07",
@@ -352,7 +377,12 @@
         "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts"
       ],
       "scope": "R7 接缝及原阶段联合复证",
-      "status": "NOT_RUN"
+      "status": "NOT_RUN",
+      "required_r7_document_sub_evidence": [
+        "R7-D01",
+        "R7-D02",
+        "R7-D03"
+      ]
     },
     {
       "id": "ISO-08",
@@ -396,7 +426,12 @@
         "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts"
       ],
       "scope": "R7 接缝及原阶段联合复证",
-      "status": "NOT_RUN"
+      "status": "NOT_RUN",
+      "required_r7_document_sub_evidence": [
+        "R7-D01",
+        "R7-D02",
+        "R7-D04"
+      ]
     },
     {
       "id": "ISO-11",
@@ -411,7 +446,11 @@
         "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts"
       ],
       "scope": "R7 接缝及原阶段联合复证",
-      "status": "NOT_RUN"
+      "status": "NOT_RUN",
+      "required_r7_document_sub_evidence": [
+        "R7-D02",
+        "R7-D03"
+      ]
     },
     {
       "id": "ISO-12",
@@ -470,7 +509,11 @@
         "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts"
       ],
       "scope": "R7 接缝及原阶段联合复证",
-      "status": "NOT_RUN"
+      "status": "NOT_RUN",
+      "required_r7_document_sub_evidence": [
+        "R7-D01",
+        "R7-D05"
+      ]
     },
     {
       "id": "ISO-16",

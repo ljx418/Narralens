@@ -1,0 +1,65 @@
+# R7条件私有契约 rev2：独立预审五项修订
+
+状态：DRAFT_NOT_RELEASED / DOC_REVISED_PENDING_INDEPENDENT。本文是本阶段条件设计的具体补充，优先于原草案冲突的简写；不是既有API清单，不意味着源码已实现。R6接受commit、真实执行域签名和独立文档结论仍待重锚。五项沿用原35IDs，在CASE_MAP各原行下附sub-evidence，不新增/替换原编号。
+
+## R7-D01：每次draw的独立责任引用，先交接再await
+
+目标实体是现有openfilm-upstream.ts的producer责任注册、OpenFilmServingBridge及workspace的#produceWithinScope/#pendingProductions；不是EnginePort、HTTP合同或第二个调度器。候选私有命名如下，正式票依接受R6核名，不把拟名冒充当前导出：
+
+|动作|输入|同步交还/异步结果|真实owner与约束|
+|bridge.startDraw(request)|现有rel/ms/width/overrides；root/origin仍来自issued serving|同步返回{attempt: opaque object, result: Promise<OpenFilmDrawResult>}，之后调用者await result|在任何beginDraw/producer调用/queue等待/可抛资源步骤前创建本次attempt；连登记前失败也由result拒绝、attempt保存真实never_started，不能返回前次引用|
+|producer启动本次draw|本次bridge关联的原producer责任，不接受caller伪对象或外部PID|本次责任引用先同步登记；supervisor handle允许后续绑定|producer在closing入口也记录本次未启动拒绝；不能调用lastProductionResponsibility推测归属。直接producer调用排队未reserve时，attempt仍存在但execution未启动|
+|bridge.inspectAttempt(attempt)|该bridge自己签发的同一对象|只读{execution,parent,supervisor_handle,primary,diagnostics}快照|execution=never_started/held/terminal；parent=never_started/held/drained/unknown；各自只由原owner写事实。错误本身不证明结束，null handle也不证明未启动|
+|bridge.reconcileAttempt(attempt)|原对象，不接受JSON形似或其他draw|复用本次原work；先推进执行域，再由本次folder owner推进parent|执行域reconcile不await依赖它的parent，不能形成自等。单独folder.drain不以包含本次draw的owner.close替代|
+|workspace消费本次责任|await前保存attempt；成功和失败都读原attempt|原production若资源未知继续held，primary保原对象；确证终局失败才按原cause结算|PRE不可在parent尚有accepted stream/probe时放掉；不进入POST/activation。另一draw即使同根也无效。workspace inspect/reconcile照实际parent，不再硬写true|
+
+beginDraw未接纳时parent=never_started；已接纳但producer未启动时execution=never_started、parent按实际folder drain；producer已开工时只能由接受R6的真实执行域结论变terminal。parent失败但已由folder owner确认所有accepted work终局，与parent仍有活资源/未知分开；前者可失败归还，后者保留。成功result仍兼容当前picture/parent_drained/handle语义，旧draw可作startDraw.result私有兼容门，不能另起生产。
+
+责任摘要必须留到原consumer取得，不因result拒绝或current.phase写settled就删原映射。现有registry只强持有未结责任；终局摘要可跟随opaque对象/WeakMap，不建立永久无界图片/事件账本，不存8MB图片历史。不改变scope容量。consumer错对象必拒，不以root查最后一次，也不从业务错误对象猜handle。
+
+直接必验D01-a..f：有前次draw后closing登记前拒绝（前次对象/计数不变）；beginDraw未接纳；beginDraw已接纳但producer未reserve；业务失败且parent已drained（原scope失败归还）；业务失败且原parent仍held（PRE/原production保留，wrong attempt无效，原parent新事实才推进）；正常成功handle仍同次。D1用真实workspace→bridge→producer接口、受控窄transport，不用两份自造DTO互证。真实accepted源流/probe另票D2/D3。
+
+## R7-D02：PRE/POST open未交付也有原acquisition owner
+
+目标仍为retained-native-closure.ts和workspace，不新增通用FD manager。每次PRE或POST调用在第一项reserve/open之前，workspace先登记一个本次opaque acquisition，绑定生产scope、phase、root namespace和pool。拟私有beginRetainedOpen→attempt.acquire()保持实际open为同步；attempt建立在任何I/O之前，closure及每次已返回FD在下一个可能失败步骤之前接入此attempt。现有open兼容调用不能产生无人认领的失败资源；本票生产PRE/POST必须使用具名owner入口，不能靠catch时before/after变量非空推测取得了什么。
+
+原acquisition记录每个allocation(namespace/id/phase/generation，而非裸fd)：reserved_no_fd、acquired、physical_close_returned、close_unknown；观察回调错误另记diagnostic/genuine cause。reserve后确认open未返回FD才可归还该未取得额度；open一旦返回，后续stat/enumerate/观察器错误不能写no-allocation。底层close成功返回时立刻在生产owner记physical_close_returned并至多一次归还pool；之后观察器抛错保诊断但不能把已确认关闭的FD重关。close本身抛错无新鲜事实则close_unknown、池额度保留；不重试相同整数、不以FD查询/PID/deadline解锁。
+
+workspace先把failed acquisition接入held记录，再合并/传播主因；冻结主因附加属性失败不得跳过登记。before/after未交付closure时也能按同一attempt inspect/reconcile/close；只有原allocation的实际新事实能消减责任，重复release的早返不算新事实。没有合法新事实来源就诚实held，不承诺通用恢复。
+
+直接D02-a..f：PRE无分配早拒；PRE已有FD但open失败；POST已有FD但open失败；owner实际close成功后观察器抛错；真正close_unknown后数字被其他allocation复用（重入不关新allocation）；冻结primary叠加多个genuine错误。每项核原production、phase、pool的逐allocation余额和attempt归属，正控物理全关只归还一次。不能用测试替换closeSync后throw自报物理成功；必须在生产close返回记录与观察器独立边界注入。
+
+## R7-D03：注册前后的同一根责任记录与回滚
+
+prepare的admitted operation在取得source、mkdir/open directory之前就登记临时责任槽；source read完成后#check失败、mkdir成功而#held.add之前失败、directory open/identity读失败均不得泄露资源或靠未发布推定无资源。实际新目录名、父root FD、canonical/dev/ino及已取得source/directory逐步写入同一RootLifecycleRecord（拟私有名），成功发布只是把原record转给#held/prepared，不再重建第二owner。无法读取真实identity时保留原name和父定位FD并UNKNOWN，不能盲rm同名路径。
+
+servingFor在创建owner后、注册#servings之前也先有本次record。绑定检查失败时逐项尝试本owner.close、目录/source处置与诊断记录；只有原owner确证终局才写serving_closed。lifecycle回调抛错单独保存，不短路余项、不吞primary/genuine。工厂自身未返回owner而带genuine cleanup时保留工厂原责任引用，不能伪装成本workspace可关的owner。
+
+全局phase-one尚未结束时Host不能越过closeAfterNative去dispose；这一停机依赖不放松。已允许dispose时，按物理独立根尽力关闭/清理；未知根和所需父FD/注册继续保留，独立安全根继续。共用不可证父路径则都保全。父FD在最后依赖消失后关闭；不删未知根、不全局路径清扫。原primary、全部genuine cleanup和observer diagnostics分栏，普通业务拒绝不写cleanup失败。
+
+直接D03-a..e：source取得后发布前绑定失败叠加source.close错；mkdir成功未#held.add且source.close失败；owner已创建未注册而binding失效，叠加owner.close/lifecycle错；全局phase-one未知时dispose不可达；允许dispose后另一个独立安全根仍收口。正控未发布回滚干净，同根后续准入依原规则继续。
+
+## R7-D04：原operation、排队者、新请求不能一概pending
+
+|对象|未知窗口内期望|不得影响|
+|原已持责production/acquisition/parent work|保原promise/原owner，预算、PRE、root及scope不归还；直到原新鲜终局事实|新请求超时/取消不释放这份责任|
+|此前已排队但未取得scope的reservation|只在原合法等待区间pending；原queue deadline/abort可拒绝其自己|不能启动第二producer，不能伪造前一资源结束，不能消耗/替换前一handle|
+|workspace uncertain后新来的普通请求|按现有明确拒绝，不强改成永久pending|不得借拒绝清旧持责、增加production计数或产出witness|
+
+共同不变量是未知根不复用、无第二producer，并非所有promise都必须pending。直接D04-a..d分别覆盖这三类和原责任证实终局后的正常后续；保留现有scheduler容量、deadline和abort语义。截止只限定该排队请求，不是清理证据。
+
+## R7-D05：最终成功同步提交区间，包括scope completion真实消费
+
+保留现有mintCacheProductionCompletion、completeCacheProductionScope、releaseCacheProductionScope与witness ledger语义，不增加公开方法或修改其容量。最终文件/链/lease/serving核完、PRE/POST与执行/parent原phase真实结束后，仍不能直接交付。最后同步区间不得await、外部callback或发可重入诊断：mint(settled)必须非null；activate(staged)必须true；completeCacheProductionScope(scope,completion)必须true；之后才设置本production成功、scopeFinalized，调用原release并验证原scope已非live，最后return witness。该顺序中activate只是本同步区间的临时内存变化，必须在区间内检查consume结果，失败同步revoke两个索引后才允许任何throw/await/观察者；不得露出半成功。
+
+mint或consume拒绝：本次witness不可交付、lookup(key)和lookupByOutput均无本次项（不回退旧授权）、scope仍held且原工作责任保留；outcome仍failed/cleanup_required，不忽略finalize=false。必须在revoke之后明确以原scope调用既有markCacheProductionCleanupRequired，再登记原held work，禁止finally按旧成功路径release；诊断须在这些持责步骤后发布。重复/并发reconcile只能观察同一工作，不能把失败candidate重新激活。若activate拒绝，同样不消费/交付成功，按真实已结束资源和未完成scope事实保留原cause，不靠finally清掉缺项。只有确实完整成功才release一次。
+
+release为现有void接口，不能拿返回void当已释放；以isLiveCacheProductionScope(原scope)核实际原引用不再live。不能要求全局rootState恒idle，因为release可能合法同步授予同根排队者；那是新scope，不是旧scope仍活。原scope消费前不可提前release给后继。原caller仅在整个同步区间结束后才能收到witness。
+
+直接D05-a..d：真实production最终身份全过但缺一个必要phase receipt令mint=null；有效completion但原合法边界让consume=false；成功完成一次（两个lookup可见、原scope非live、仅一次activate/consume/release）；有同根排队者的成功（新scope可授予但旧已结束，不能错误回滚成功）。前两条都核caller无交付、两个lookup无项、原scope和held登记、重入结果，不只测final file gate。故障注入在同步区间之前建立条件，不在activate与consume之间插入可重入测试hook。
+
+## 拟实施范围与重锚条件
+
+R7当前不实施。后续精确source票除原3个Host文件，按D01明确必须包括src/adapters/openfilm/openfilm-upstream.ts的本次attempt/bridge私有分支；R6接受版若已具备等价能力则只核同一契约并缩减无必要修改，不能无差别重写。retained-native-closure.ts负责D02，created-native-workspace.ts负责D01/03/04/05，created-native-source-reader.ts负责原reader lifecycle。committed-snapshot-authority.ts只在真实issued release直接证据证明需要时另加精确分支；不预先开放全部Host/server、公共DTO、EnginePort、scope容量/witness算法、R6 C/worker、配置或上游vendor。
+
+原35行保留；D01..05只是其cleanup_uncertainty/drain_and_delivery/native_cache/child_lifetime等边界的更细证据键。D1、真实FD/stream/probe、Chrome/media分别具名，R8原层义务不减。R6实际接受后只重锚接受commit/责任引用/parent disposition来源和受影响私有调用，不把本草案提前称PLAN_READY或验收通过。

@@ -1,0 +1,28 @@
+{
+  "verdict": "REQUEST_CHANGES",
+  "closed": [
+    "R7-D01",
+    "R7-D02",
+    "R7-D04"
+  ],
+  "findings": [
+    {
+      "id": "R7-D03",
+      "state": "PARTIAL",
+      "document": "candidate/PRIVATE_SEAMS_REV2.md:34–40,63",
+      "source": "created-native-workspace.ts:336–357,648–665,685–709；openfilm-upstream.ts:1531–1563",
+      "issue": "servingFor 使用已发布的 #prepared record。绑定失败时本次 flight 取得的是新 serving owner，并未取得 prepare 持有的目录或 source FD。第36行要求尝试目录/source处置，可能提前关掉已发布工作区。反过来，工厂在返回 owner 前若出现真实清理错误，仅抛带 failures 的错误；合同要求保留工厂责任引用，却没有给该分支交接入口或直接反例。",
+      "revision": "分别列 prepare 未发布、自建 serving 未注册、工厂尚未返回 owner 三种责任。servingFor 对已发布目录仅保留定位/登记，目录继续由 workspace 在允许 dispose 时处置。对工厂分支，可在调用前建立由工厂更新的私有 attempt，或明确由工厂保有可识别的原工单并给 flight 只读关联；不要把错误数组当资源凭据。",
+      "acceptance": "已创建 owner 的绑定失败只收本 flight 新资源，原 record/目录句柄仍可由原 owner 使用或保全。增加 factory 在发布 owner 前失败的成对反例：listener 已真实关闭后诊断抛错，与真实 listener/folder disposition 未知；分别核原根、工厂 attempt、原始 cause 和处置权限，禁止普通失败泄漏槽。"
+    },
+    {
+      "id": "R7-D05",
+      "state": "PARTIAL",
+      "document": "candidate/PRIVATE_SEAMS_REV2.md:53–59",
+      "source": "cache-production-scope.ts:538–562,577–598,610–619；native-cache-witness.ts:161–211（沿用首轮证据）",
+      "issue": "D05-b 要求在真实 caller 中刚 mint 的有效 completion 由原合法边界 consume=false。成功 mint 已登记同一 scope、owner、generation 与全部 settled phases；activate 只改 witness ledger，无 await、回调或凭据替换。该原始同步路径没有让新凭据变为无效的状态迁移。另，第55行的“只有确实完整成功才release”未区分业务失败和资源结算失败，activate 拒绝但各资源已证终局时可能永久持槽，与第16行的失败归还冲突。",
+      "revision": "将 D05-b 定义成防御分支的 D1 受控返回值，用区间外预装、同步且不可重入的窄故障接缝；另给原 complete 函数真实拒绝已消费/外来凭据的 direct 对照。这两条证据分别注明强度。明确只有完整成功才交付 witness；业务失败且资源齐备可用 failed completion 消费并释放；缺凭据、消费被拒或资源未知则 revoke、标记并保留原 work。",
+      "acceptance": "D1 受控拒绝证明原 caller 在任何可观察边界前同步撤销两种 lookup、标记并登记 held；不伪称合法新 token 自然失效。增加 activate 拒绝但物理 phase 全齐的对照，caller 收原失败、两种 lookup 均不交付本次项、failed completion 仅消费/释放一次。原成功与排队后继两项保持。"
+    }
+  ]
+}

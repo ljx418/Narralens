@@ -1,0 +1,51 @@
+{
+  "verdict": "REQUEST_CHANGES",
+  "subject": "R7 conditional design",
+  "findings": [
+    {
+      "id": "R7-D01",
+      "title": "失败 draw 缺少可执行的逐次交接约定",
+      "document": "ARCHITECTURE_AND_SCOPE_DRAFT.md:12–13,18–19,25；DEVELOPMENT_ACCEPTANCE_DRAFT.md:11–12；MAIN_ARCHITECTURE_DECISIONS_DRAFT.md:6",
+      "source": "src/adapters/openfilm/openfilm-upstream.ts:618–629,649–675,1691–1701,1703–1757,1774–1791；src/host/agent-driven/created-native-workspace.ts:514–519,977–993",
+      "observation": "workspace 在 await fulfilled 后才得 handle。producer 关闭可在登记前拒绝，bridge 仍取 lastProductionResponsibility；若有前次记录可能关联错 draw。直接调用的排队分支先 await scope 后才 reserve，初始 handle 可为空。drain 异常后 bridge 仍删映射，workspace 的 pending 投影还硬写 parent_drained=true。",
+      "minimum_document_change": "给已点名的 bridge.draw 与 workspace caller 补一张私有输入输出表。每次发起时由 producer 交给 caller 本次专属责任引用；原 supervisor handle 可晚绑定，登记前拒绝不得认领上次 handle。区分 serving.beginDraw 已成功与执行域未启动；parent 的 never-started、持有/未知、已 drain 由实际 folder owner 提供。业务 promise 保原 cause，settled 摘要保留至原消费方取得事实；同根不能跨 draw 借证。inspect/reconcile 如实投影实际 parent，执行域 reconcile 不等待自身后续 parent。",
+      "direct_acceptance": "D1 经真实 workspace/bridge：先有前一 draw 再让 producer 登记前拒绝；分别检验 beginDraw 未接纳与已接纳，前一 handle 不被修改。业务失败+已 drain 释放原 scope；业务失败+尚有 accepted stream 保 PRE/原 work、无 POST/激活，另一 handle 的终局无效，只有原 parent 事实可推进。成功对照复用现有 handle；实际 stream/probe 另票。"
+    },
+    {
+      "id": "R7-D02",
+      "title": "失败的 open 尚无接收未交付 allocation 的 owner",
+      "document": "ARCHITECTURE_AND_SCOPE_DRAFT.md:12,18–20；DEVELOPMENT_ACCEPTANCE_DRAFT.md:8–9,16；MAIN_ARCHITECTURE_DECISIONS_DRAFT.md:7",
+      "source": "src/host/agent-driven/retained-native-closure.ts:444–491,1320–1332；src/host/agent-driven/created-native-workspace.ts:837–850,967,993,1084–1108；tests/agent-driven/integration/native-cache-witness.test.ts:655–666,722–734",
+      "observation": "open 内部已造 closure，枚举失败后 closeAll 的异常仅随错误外传；调用者的 before/after 仍为空。pool 计数或 genuine 错误能说明出错，不能定位未交付 allocation。旧测试在替换 close 中 closeSync 后再 throw，生产 owner 无法据此辨别 syscall 与观察器失败。",
+      "minimum_document_change": "给 PRE/POST open 定义私有失败交接：在资源可能取得前建立本次 acquisition 身份；逐项取得、物理 close 返回、观察回调、未知分别记在原 owner 上，未交付也能按该身份查回责任。先登记 held 再传播冻结主因；无原 allocation 新事实就保持 held，不要求实现通用恢复。",
+      "direct_acceptance": "从真实 production 分别触发 PRE 无分配早拒、PRE/POST 已分配但 open 抛错、已由 owner 确认 close 后观察器异常；核 phase、同根占用、主因和每项池余额。重复/并发 reconcile 不重关复用整数；已证物理关闭保留诊断并仅归还一次容量。"
+    },
+    {
+      "id": "R7-D03",
+      "title": "逐根处置漏掉注册成功之前的回滚",
+      "document": "ARCHITECTURE_AND_SCOPE_DRAFT.md:9–10,25；DEVELOPMENT_ACCEPTANCE_DRAFT.md:7；MAIN_ARCHITECTURE_DECISIONS_DRAFT.md:8",
+      "source": "src/host/agent-driven/created-native-workspace.ts:336–359,663–710,1247–1268,1279–1290；src/host/server.ts:783,801–808",
+      "observation": "草案正反例从两份已 held 的 record 开始。实际 prepare 已 mkdir 但 #held.add 前也可失败，source.close 会短路 directory.close/rm。servingFor 已取得 owner 但注册前校验也可失败；close 异常且 lifecycle 再抛时会跳过原 cause 汇总，未注册 owner 在正常 dispose 集合中不可见。",
+      "minimum_document_change": "把未发布目录、已创建未注册 serving 纳入同一物理根责任记录，明确转移时点、观察器/物理失败分类、父 FD 最后关闭及真实停机先决条件。区分全局 phase-one 尚未结束（Host 还到不了 dispose）与已进入 dispose 后独立根逐项清理。",
+      "direct_acceptance": "经 prepare 在 record 发布前失败，同时注入 source.close 错；经 servingFor 在 owner 创建后使 binding 失效并叠加 close/lifecycle 错。观察 primary、全部 genuine、诊断、未知根定位、无 serving_closed 假事实；另一个可独立处置的根在允许 dispose 后正常清理。正控回滚干净，后继可以继续。"
+    },
+    {
+      "id": "R7-D04",
+      "title": "同根后继的 pending 断言与现有准入冲突",
+      "document": "DEVELOPMENT_ACCEPTANCE_DRAFT.md:8,11；ARCHITECTURE_AND_SCOPE_DRAFT.md:21,27",
+      "source": "src/host/agent-driven/created-native-workspace.ts:791,1100,1115；src/adapters/openfilm/cache-production-scope.ts:423–464,610–616；tests/agent-driven/integration/cache-production-scope.test.ts:164–228",
+      "observation": "原持责生产须保留；后来提交的请求则可能已被 workspace.uncertain 拒绝，已排队的预约也有自身的截止和取消。把三者都要求在整个未知窗口 pending，会诱导取消现有拒绝语义或把后继超时当原资源结束。",
+      "minimum_document_change": "分别写原 operation、已排队 reservation、新请求的期望。三者共享的不变量是未知窗口内没有第二个已启动 producer、原 root 未归还。",
+      "direct_acceptance": "D1 检查普通新调用收到既有拒绝；已排队请求仅在合法等待期间 pending，取消或队列截止只结束该请求；原责任、预算、同根启动计数和 witness 可见性均不变。正控已证明结束后按原准入规则继续。"
+    },
+    {
+      "id": "R7-D05",
+      "title": "缺少最终 scope 交还失败时的 witness 可见性对照",
+      "document": "ARCHITECTURE_AND_SCOPE_DRAFT.md:11–12,21；DEVELOPMENT_ACCEPTANCE_DRAFT.md:11",
+      "source": "src/host/agent-driven/created-native-workspace.ts:824–834,863–886,1120–1175；src/host/agent-driven/native-cache-witness.ts:161–211；src/adapters/openfilm/cache-production-scope.ts:538–551,574–598",
+      "observation": "最终文件/身份 gate 和 activate 成功之后，外层 finally 才 mint/complete；当前忽略 finalize 的 false 返回。只验证 gate 换源和正常成功，无法排除 lookup 已可见、caller 已收到 witness，但 scope 仍 cleanup_required。",
+      "minimum_document_change": "将‘最后一项 gate’写为 caller 可以交付的完整条件。对 mint 或 consume 拒绝给出明确可观察结果：无交付、两个 lookup 无本次 witness、持有原 scope 和责任。沿用现有同步边界和私有 API，明确成功 outcome、激活和消费之间不能露出半成功。",
+      "direct_acceptance": "D1 在真实 production 最终身份全通过时令一个应有 phase receipt 不可用，核 caller、按 key/output 的 lookup、scope 和重复 reconcile；成功对照仅激活、完成、交还一次。"
+    }
+  ]
+}

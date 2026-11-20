@@ -1,0 +1,35 @@
+{
+  "at": "2026-11-20T05:14:01.115881+00:00",
+  "status": "DOC_CONDITIONAL_READY",
+  "basis": [
+    {
+      "path": "independent-review-rev2/REVIEW.md",
+      "sha256": "b642e18bb303ed78dbefe9597798516430218e2798215459e15e8491a67db5eb",
+      "closed": [
+        "R7-D01",
+        "R7-D02",
+        "R7-D04"
+      ]
+    },
+    {
+      "path": "independent-review-rev3/REVIEW.md",
+      "sha256": "97aa8aba98e10bebd1cb870a82e2736608338dc7035ba4acd6eccb579126493f",
+      "closed": [
+        "R7-D03",
+        "R7-D05"
+      ]
+    }
+  ],
+  "worker_done_message": "msg_8aec57846bd9",
+  "current_design_file_hashes_match_revision": true,
+  "original35_all_not_run": true,
+  "implementation_release": false,
+  "runtime_release": false,
+  "pending": [
+    "Actual accepted R6 commit",
+    "Precise private interface/source reanchor and affected caller tests",
+    "Exact R7 release after dependencies"
+  ],
+  "independent_rev3_input_current_hashes_match": true,
+  "independent_rev3_input_count": 6
+}
