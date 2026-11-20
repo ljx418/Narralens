@@ -1,0 +1,46 @@
+{
+  "input": {
+    "width": 320,
+    "height": 180,
+    "frame_count": 30,
+    "cues": [
+      {
+        "text": "字幕 </script><script>globalThis.BAD=1</script> & \"quote\"",
+        "startMs": 0,
+        "durMs": 1000
+      }
+    ],
+    "style": {
+      "on": false,
+      "pos": {
+        "x": 0.5,
+        "y": 0.94
+      },
+      "maxWidthPct": 100,
+      "align": "center",
+      "font": {
+        "family": "sans-serif",
+        "sizePct": 4,
+        "weight": 600,
+        "italic": false,
+        "letterSpacingEm": 0,
+        "lineHeight": 1.2,
+        "upper": false
+      },
+      "fill": "#fff",
+      "stroke": null,
+      "shadow": null,
+      "box": null,
+      "karaoke": null,
+      "language": null,
+      "bilingual": false
+    }
+  },
+  "expected_page_sha256": "4d8c3e5cd1fe260482caaab1eca911b2dfecdd09a353de7abeb8302cae369a06",
+  "provenance": {
+    "baseline_sha": "afa862778c5b10c3d068101cd847d58b4d003875",
+    "old_ts_sha256": "f6c5b66a1ccb73bc61cb5e281d4b2a9d7285816da36639666b0cca35935cde12",
+    "template_literal_sha256": "cc89dae0461d0a9f91fed90754f42e9588e7595536176984326b87f0439286c8",
+    "method": "Python static template substitution of exact original TS template, not JS/render execution"
+  }
+}

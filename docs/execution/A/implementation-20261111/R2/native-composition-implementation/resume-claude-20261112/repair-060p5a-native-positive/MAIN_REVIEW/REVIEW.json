@@ -1,0 +1,29 @@
+{
+  "at": "2026-11-15T02:34:55.852984+00:00",
+  "reviewer": "MAIN Codex, design/acceptance only; not source implementer",
+  "status": "CLOSED_STATIC_R3_C01_C03_WITH_RECORDED_PURE_COUNTERFACTUALS",
+  "actual_source_read": [
+    "CacheReceiptAccumulator.state live Hash.copy().digest for all3streams; take stillupdateslive hashes",
+    "productionstatecalls atinspect/domainproof/eligibility preserve repeatedreads",
+    "Custodian singleton_control_fd ->ControlWriter.fd /read endpoint /actual select waiter",
+    "actualPython _queue_segment/_flush_receipt call actual_wait_writable, tests onlyreplace select/write/clock, not waiter"
+  ],
+  "tests_read": [
+    "real empty/partial/final repeatedstate, appendafterread, wrongorder/forgeddigestreject",
+    "same accumulator throughactual validateCacheDomainReceipt and validateCacheExecutionReceipt andinspectread",
+    "shortwrite/EAGAIN→realwait→offsetresume, ownedfdmatch, EBADF false, deadline/segmentfailure"
+  ],
+  "final_captures": [
+    "n1n2-claude-060p5a-check-002",
+    "n1n2-claude-060p5a-python-002",
+    "n1n2-claude-060p5a-tsc-002",
+    "n1n2-claude-060p5a-vitest-002"
+  ],
+  "limits": [
+    "Static source+mock results only, no newC/N/fork or kernelwaitevidence",
+    "Prior actualnofork accepted oldCsha only, cannot rebind to R5Achangedbytes",
+    "Allother12 productionfindings, original17/ISO18/N1N2/fullgate/independentnewfreeze remainOPEN"
+  ],
+  "note": "_wait_writable normal select timeout permits another nonblocking attempt; outerflush deadline remains actuallimit, no readiness==resource-end inference",
+  "handoff": "R5B startupfailure cleanup and ownedpositivepilot now, no automaticruntimegrant"
+}

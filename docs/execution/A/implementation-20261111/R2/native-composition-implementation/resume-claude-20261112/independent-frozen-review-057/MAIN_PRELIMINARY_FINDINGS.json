@@ -1,0 +1,56 @@
+{
+  "at": "2026-11-14T02:41:14.978298+00:00",
+  "commit": "1d348d419120f23f45d958112ea8c43df5a04675",
+  "status": "PRELIMINARY_FINDINGS_INDEPENDENT_REVIEW_IN_PROGRESS",
+  "findings": [
+    {
+      "id": "MAIN-PRELIM-URL",
+      "severity": "MAJOR",
+      "message": "msg_06a0fcef5d1f",
+      "path": "src/adapters/openfilm/openfilm-upstream.ts:654",
+      "observed": "new URL on //[ passes existing string guards and throws ERR_INVALID_URL; production createServer callback lacks exception boundary",
+      "main_verification": "Static full path read plus pure built-in URL parser reproduction; NO actual HTTP/Host runtime",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "id": "MAIN-PRELIM-BUDGET",
+      "severity": "MAJOR",
+      "message": "msg_5009baee7165",
+      "path": "src/host/agent-driven/retained-native-closure.ts:679",
+      "observed": "retainFile hashes before readText budget; #hash and #hashSync read to EOF without captured-size bound; onReadChunk does not observe these hash reads",
+      "main_verification": "Actual frozen source path inspected; original requirement severity/final scope to be bound in reviewer final report",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "id": "MAIN-PRELIM-DRAW-SETTLEMENT",
+      "severity": "MAJOR_CANDIDATE",
+      "message": "msg_f66399848421",
+      "path": "src/adapters/openfilm/openfilm-upstream.ts:399",
+      "observed": "Pinned upstream Promise.race timeout rejects wrapper before unawaited work/page/browser cleanup; adapter tracks wrapper, bridge releases draw count in finally",
+      "main_verification": "Read fixed upstream pageframes268..299 and adapter399..421/1091..1117; real timeout/peer interleaving not yet reproduced",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "id": "MAIN-PRELIM-DURATION",
+      "severity": "MAJOR_CANDIDATE",
+      "message": "msg_d9a378c155f2",
+      "path": "src/host/agent-driven/created-native-source-reader.ts:1226",
+      "observed": "film-duration validates output identity and film mtime:size but not witness.dependencies; deleting draw triple removes the only dependency check, while in-place edit and byte+mtime restore retains stale duration witness",
+      "main_verification": "Read duration branch1226..1247 and triple check1284..1331; actual counterexample runtime NOT_RUN",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "id": "B01",
+      "severity": "MAJOR",
+      "message": "msg_db97186e4da3",
+      "path": "tests/m2.1/openfilm-upstream-lock.test.ts:358",
+      "observed": "buildScopes ignores class methods and variable initializer arrow/function bodies, including actual production loader sites",
+      "main_verification": "Reviewed independent final report and actual AST traversal; runtime mutant NOT_RUN",
+      "runtime": "NOT_RUN"
+    }
+  ],
+  "implementation_release": false,
+  "next": "Both reviewers finish original17; MAIN consolidate exact findings then issue single scoped Claude repair/selfverification release. No main source takeover, no candidate acceptance or next wiring implementation.",
+  "review_b_verdict": "REQUEST_CHANGES",
+  "review_a_verdict": "PENDING"
+}

@@ -1,0 +1,47 @@
+{
+  "at": "2026-11-15T02:12:43.181967+00:00",
+  "status": "PASS_EXACT_NOFORK_IDENTITY",
+  "checks": {
+    "runner_exit0": true,
+    "source_immutable": true,
+    "log_digest": true,
+    "outcome_ok": true,
+    "primary_no_failure": true,
+    "all_assertions": true,
+    "full_cleanup": true,
+    "no_reporting_or_held_error": true,
+    "diagnostics_clean": true,
+    "preflight_pins": true,
+    "observed_C": true,
+    "observed_C_no_children": true,
+    "all_observed_epochs_gone": true
+  },
+  "inputs_verified": 649,
+  "mismatches": [],
+  "runtime_root": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/var/native-cache-pilot/run-wyCcKv",
+  "capture": "n1n2-main-060p2a-nofork-identity-001",
+  "actual_C": {
+    "pid": 186046,
+    "state": "R",
+    "ppid": 186039,
+    "pgid": 186046,
+    "sid": 186046,
+    "start_ticks": "280962"
+  },
+  "exit": {
+    "code": 4,
+    "signal": null
+  },
+  "close": {
+    "code": 4,
+    "signal": null
+  },
+  "artifacts": {
+    "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/var/native-cache-pilot/run-wyCcKv/outcome.json": "fba35af495a58bd05fa8e15819f96bfe9bdf88e092eaf4453c3650387c89ae5e",
+    "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/var/native-cache-pilot/run-wyCcKv/preflight.json": "d71f3898b2a3d2a30693eadcd14fa0cea60aa752af74cc1b4f7147fdea1d5b22",
+    "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/pilot-060p2a-nofork/IDENTITY_PROC_RECEIPT.json": "3ee435075f0a2e2d5c4cfc5367500855c0ad97638f26308b17ec164a127829e9",
+    "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-main-060p2a-nofork-identity-001.inputs.json": "6b0b5a47d1ef5a07eca7a7a5f0826813003d60a5a83c2e99364c381dcdf6d4f0",
+    "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-main-060p2a-nofork-identity-001.result.json": "13d259ac3d02d63209488a1d92c05c283843597cbc8233f88e4545949856cabc"
+  },
+  "limits": "HELLO rawbytes notsaved; actual fixedtool validatedprotocol/seq/subreaper/epoch evidenced by alltrueassertions+immutablepath. No N/fork/adoption/receipt/transcript/media/productionclaim."
+}

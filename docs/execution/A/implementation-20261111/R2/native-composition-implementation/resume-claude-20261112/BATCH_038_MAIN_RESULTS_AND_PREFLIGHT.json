@@ -1,0 +1,33 @@
+{
+  "at": "2026-11-13T07:54:12.751364+00:00",
+  "status": "FAILED_STATIC_GATE_SOURCE_REMAINS_FROZEN",
+  "actual": {
+    "exit": 1,
+    "source_changed": [],
+    "source_added": [],
+    "log_sha256": "09623992127eabd36b8f938c0c725444ffdbc131f8a59efe77af078c8fd0b58f",
+    "finished_at": "2026-11-13T07:51:33.156527+00:00"
+  },
+  "sha_verified": true,
+  "35_inputs_unchanged": true,
+  "counts": {
+    "passed": 32,
+    "failed": 1,
+    "files_passed": 1,
+    "files_failed": 1
+  },
+  "per_suite": {
+    "m2.2-fitness": "18passed",
+    "openfilm-upstream-lock": "14passed1failed"
+  },
+  "finding": "Entry registry expectation includes serving factory but current detector only identifies vendorRoot-named parameter. Proposed owner-TYPE alternative still mismatches actual producer:unknown; use semantic/explicit capability boundary, preserve runtime unknown validation.",
+  "pending_review": "ctx_9614731cbcda independent readonly reviewing same35snapshot; no source release until combined findings",
+  "main_corrections": [
+    "servingFor single-flight admission tracked across async init, final revalidate exactview/closing and cleanup failed owner immediately",
+    "factory listener initialization failure cleanup itself; tracking only after await cannot recover throw after listen",
+    "owner.close must wait actual accepted draw leases, not only folder.drain current HTTP count; keep future requests possible until actual draw settles",
+    "duration: require real producer write rule relfilm.html plus actualnewoutput; unrelated scene cannot bless preexistingfake; N8 actual2draw missing",
+    "static gate serving input producer is unknown, so owner-type-name predicate cannot repair it reliably"
+  ],
+  "scope": "NoPFclosure/fullacceptance from18green fitness. Original failures preserved."
+}

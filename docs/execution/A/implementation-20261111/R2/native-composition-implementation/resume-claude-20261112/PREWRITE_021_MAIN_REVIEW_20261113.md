@@ -1,0 +1,17 @@
+# 恢复后021 prewrite核查与实施裁决
+
+输入：msg_9fa55cdb1660。MAIN实际读取native-cache-witness.ts、created-native-workspace.ts和retained-native-closure.ts当前实现。此为原021内纠偏与写入放行，不是业务验收PASS，也不授runtime。
+
+1. K01草案不能按原样实现。公开NativeCacheWitnessLedger构造器+issueProductionLease(token, roots callback)不是真实service签发门；即便service.record拒绝foreign issuer，未知/伪造能力也必须在真实producer副作用前拒绝。优先复用CreatedNativeWorkspaceService真实acquireExpectedLease，并在workspace模块私有WeakMap登记production lease，仅实际service方法能登记；生产入口使用由该模块私有表解析的事实，不能使用调用者callback/公开ledger工厂自我认证。另一种等价实现须满足同一原则。隐藏签发者关联不经公共getter泄露原始service token；witness可私下绑定真实opaque lease，service.record用自己的私有lease表+当前binding验证同一实例。同root/ref/gen的假ledger、另一真实service或clone不得晋升；production前均独立验证。调用者不得注入另一descriptor pool，pool应由真实lease的已核验所属关系取得，或拒绝不属于该owner的pool。
+
+2. K04需要纳秒整数身份。保留mtime_ms仅用于复现固定上游stamp；Host身份另存mtime_ns/ctime_ns十进制字符串或bigint，含nlink/dev/ino/size与实际root/父链。不得把毫秒double比较当作精确身份。verifyFileExact的hash需bounded streaming、不把大型binary当text或整文件Buffer，并在读取前后比对held FD和路径身份。所有可重入观察hook后再做最终无callback/no-await校验；消费端同样比对完整身份。
+
+3. K05草案final fence→release→record仍有释放窗口。使用私有pending/active/revoked见证；pending不能被lookup/reader接受。完成PRE/POST全部结算后、激活前必须以可复核真实路径/父根身份和先前held身份重验，再同步复核真实lease/控制条件，最后无await/外部callback地激活。若释放后的复核需要重新持有资源，新增资源也必须有完整结算证明，不能无限后移同一漏洞。明确最后一次可能回调位置，最后同步身份观察在其后。全部cleanup故障保留primary与genuine原因，所有尝试均执行，任何不确定使pending撤销且owner粘滞，不允许已reject调用遗留有效ledger记录。
+
+4. K02成功/失败都结算方向同意；故障hook须注入实际parser/rm/release边界，保留真实原始promise settle，不以只有计数或构造Error替代。成功parse副本清除须有本次分配路径证据，历史170目录仅记录，不盲删。
+
+5. K03 exact film-poster film.html/-1/480与JPEG摘要配对、拒绝partial triple/会覆盖旧poster方向同意。pageframe与poster两种合法producer正向均需成立；若pageframe使用保留poster请求则明确引导内部caller走poster分支，不以永久禁用整个family充数。
+
+6. K06 conditional helper已授权，不必再问人类。登记当前a584e60359237c3bb45a54640f8320aa9827bd2d474be2770f1ea410d9feb218、最小可选参数与默认行为不变和全部受影响测试后可使用；不得修改已提交author bytes/伪造媒体权利或prepared事实。缺失heard transcript必须断言实际consumer查询命中后再birth。owner/base/control/ref/generation均真实服务/DB窗口，每边界hit明确。
+
+实施许可：上述纠偏并入021映射后即开始白名单源码修复，无需第二次prewrite批准。保留既有断言，committed-snapshot-host.test.ts允许原021授权的G03新增，既有回归不可修改。仅run-recorded.py唯一新capture名串行tsc可运行；任何vitest/Host/媒体/浏览器/build另交精确argv/cwd/case与候选摘要/源码字节备份申请，不是本文件授权。新429立即停工且不自动重试或接手。

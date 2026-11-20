@@ -1,0 +1,24 @@
+{
+  "slot": "R1-MAIN-MEDIA-004",
+  "argv": [
+    "corepack",
+    "pnpm",
+    "test",
+    "tests/agent-driven/media/preview-prepared-source.test.ts",
+    "--maxWorkers=1",
+    "--minWorkers=1"
+  ],
+  "cwd": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+  "started_at": "2026-11-11T14:58:16.772495+00:00",
+  "wrapper_pid": 888920,
+  "inputs": {
+    "src/host/render/preview-prepared-source.ts": "d87a82cc1658fbe9aeb97047fa143b0c7e5a80d109c6568e0e95298be1e52db1",
+    "tests/agent-driven/media/preview-prepared-source.test.ts": "1694e5fb8149ac7498bf388439788429698a0e0ba9eb85bedec97f34cbf52bda",
+    "tests/agent-driven/integration/helpers/created-draft-fixture.ts": "3e553993afcb4c9364227b86806fb64466e3ce595ed838433ee1cfcbb5b92ffb"
+  },
+  "command_pid": 888921,
+  "exit": 0,
+  "ended_at": "2026-11-11T14:59:06.543707+00:00",
+  "inputs_unchanged": true,
+  "log_sha256": "b8fdf76bf962d272c53a783b3603081c55a8d6cf9923b77a42aade82e22e497b"
+}

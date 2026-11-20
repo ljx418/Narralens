@@ -1,0 +1,16 @@
+{
+  "at": "2026-11-12T06:01:58.654608+00:00",
+  "source_sha256": "57186bebb289dc6ae9fb2090c177b29f3bf79d64725c4f6a9258f12705c325a1",
+  "scope": "live-source static review; not frozen final candidate or executed test",
+  "status": "OPEN_PENDING_FIX_AND_TEST",
+  "supervisor_message": "msg_dbc46197fc1d",
+  "findings": [
+    "root directory listing falls through invalid dot path and sorted file-only fallback",
+    "directory retention errors swallowed into fallback",
+    "absent Map.get transcript handled as null rather than undefined/proven absence",
+    "close tracks probes but not complete admitted reads or version process",
+    "cancelled reason lacks actual signal/child registry implementation",
+    "tool version failure drops original provenance"
+  ],
+  "acceptance": "NOT_CLAIMED"
+}

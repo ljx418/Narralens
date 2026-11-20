@@ -1,0 +1,22 @@
+{
+  "status": "RECOVERY_CANDIDATES_NOT_ASSERTED_ORIGINAL_BYTES",
+  "dispatch": "ctx_b4086093cd96",
+  "returned_messages": 50,
+  "sourceExact": true,
+  "contentComplete": false,
+  "clipping": [
+    "message_limit_or_scan_window",
+    "transcript_payload"
+  ],
+  "fragments": [
+    {
+      "message_id": "3b4c917b-8365-4cde-8d25-468e38c5f0e1",
+      "timestamp": 1794497308618,
+      "names": [
+        "G07 invalidates an old proof when an external hardlink appears after it",
+        "G07 holds both trees and a parallel proof under one descriptor pool"
+      ],
+      "command": "python3 - <<'PY'\np='tests/agent-driven/integration/created-native-source-reader.test.ts'\ns=open(p).read()\nanchor=\"\"\"/**\n * P07 \u2014 the named primary and EVERY cleanup cause of a real failing unpack.\"\"\"\nassert anchor in s\nrestored = '''/**\n * G07 \u2014 a hardlink that appears AFTER the proof invalidates that proof.\n */\nit('G07 invalidates an old proof when an external hardlink appears after it',async()=>{\n await withFacts(async (facts,f)=>{\n  expect(facts.verifyClosure()).toBe(true);\n  linkSync(join(f.workspaceRoot,'film.html'),join(f.root,'external-link.html'));\n  // The file gained a name: it is an alias now, and the proof does not survive it.\n  expect(facts.verifyClosure()).toBe(false);\n });\n},300000);\n\n/**\n * G07 \u2014 one instance budget for both trees and every parallel proof.\n */\nit('G07 holds both trees and a parallel proof under one descriptor pool',async()=>{\n await withFixture(async f=>{\n  const pool=f.reader.descriptorPool;\n  const before=pool.used;\n  const first=await readOnce(f);\n  const afterOne=pool.used;\n  // The two trees of the one acquisition are held by ONE count.\n  expect(afterOne).toBeGreaterThan(before);\n  // A parallel proof draws from the SAME count.\n  const s\u2026 (truncated)"
+    }
+  ]
+}

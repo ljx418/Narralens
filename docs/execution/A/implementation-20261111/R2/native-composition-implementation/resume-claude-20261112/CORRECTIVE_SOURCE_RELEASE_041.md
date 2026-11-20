@@ -1,0 +1,27 @@
+# 041：040实际失败后的集中修复
+
+MAIN已核实040实际exit1，31pass/2fail，完整log摘要8b8d9e83844bf5c1e0730dec51534e8cbca1077252b1717639c5e7f6e2c1db2f；35输入无漂移。失败原样保留，不是业务验收通过。仅同名JSON四路径解除源码冻结，其他路径保持040精确事实。唯一writer仍ctx_ae73a82c85e9。
+
+## C1 工厂与清理闭环
+
+同意把serving_root_verified放进工厂自己的失败结算边界。需要覆盖listen以后所有尚未return的抛出路径；listen失败也有确定的资源归属。工厂保留primary并合并folder.drain、server.close的实际失败，不能catch空吞、不能用aborted观察异常覆盖primary。cleanup应尽力完成所有已拥有资源，某一步失败不跳过后面清理；open>0不得声称clean，不能无限等待一个本就可确定拒绝的路径。service对清理不确定仍应保持粘滞，不把资源异常变成成功。
+
+新增真正serving_root_verified抛出指定Error的反例，断言同一primary对象、自己实际已listen端口终态关闭；另覆工厂post-listen root检验失败路径。测试如需清理故障点，必须实际关闭资源再抛genuine对象，精确对象合并且各一次；不允许mock整个工厂/producer/HTTP。保留Q01构造间close/并发同view/注册拒绝；补构造间dispose或明确覆盖其不同控制流，不用any throw代替身份和归属断言。fixture仅最小Host-private具名观察，不新增公共权限。
+
+## C2 真实draw结算与authority分开
+
+同意纠正Q02：关闭受理时accepted>=1且pending===0必须有实际断言；用真实fixture页面延迟加载某个精确依赖，确保关闭发起后该依赖仍有实际HTTP请求并完成。仅碰巧轮询到0、之后没有任何依赖请求不算达成。可以增加Host-private只读请求路径/完成观察（不赋予authority），或其他确定性真实页面机制；设置有界故障超时并在失败后结算自有资源，禁止永远等requested。
+
+预先给produce promise接好拒绝处理避免unhandled；分别证明raw draw完成（三件真实输出、返回JPEG的证据/实际request completion）、owner.close等待已受理raw draw及其后续请求、重复close共享同一结算，最终生产因closing/closed明确NATIVE_CACHE_ORIGIN_FOREIGN、无可见见证、正常关闭不把服务置sticky。不要把完整production promise settlement顺序当作raw draw顺序：close只等raw draw，production随后POST与最终围栏可能较晚结束。严禁改弱created-native-workspace.ts现有最终closing围栏；本轮该生产文件不在白名单。
+
+## C3/C4 静态分析有效性
+
+入口列表包括真实openFilmServingBridge生产能力参数，事实为六项时明确更新，但不能只改数量。当前registryParameter先扫描全模块拿一个identifier，再按同名形参推每个函数是有限启发式，需避免把无registry路径的同名producer函数误识别；在各函数实际私有registry读/真实能力流的位置识别，并补无关同名参数正控。保留unknown fail-closed签名，不为gate改生产类型。
+
+taint按词法作用域/实际声明身份追踪，而非全文件identifier集合；请求源、局部initializer、helper形参都要防同名函数污染。helper实参在caller作用域求值、影响其对应callee参数，递归分析有有界收敛。保留原10反例每个精确命中，以及无关/装配可信正控；另补两个同名形参函数中只一处实际有请求数据、另一处可信的正控，防止又以过滤计数掩盖错误。已覆盖反例不能删、不能只改expect为5/接受任意非空。有限范围如实记录，不宣称通用静态安全证明。
+
+## 交付和执行
+
+本轮只源码修正及原recorder串行typecheck，唯一capture n1n2-claude-041-tsc-NNN；argv corepack pnpm exec tsc --noEmit。完整候选字节backup/hash，每轮编译期间所有输入冻结，终态后另一次tool读取result/rawlog并核对清理。仅本轮引入的TS语法/类型错误可白名单内修后新capture编译，无次数硬上限，失败均保留。静态vitest/Host/browser/media/ffmpeg/build/mutation/full暂未授权；绿后交完整候选，MAIN再放行静态及最小高判别力真实用例。不要反复只改期望让门变绿。
+
+不动AGENTS、索引、Expected015、公共DTO/EnginePort、pin、配置/运行器/旧Gate；不新增第二writer，不Git reset/stash/checkout/commit/push，不跨下一接线；新429立即停下保全并报告、不重试或切换。没有新的人工决策项，按本裁决实施。

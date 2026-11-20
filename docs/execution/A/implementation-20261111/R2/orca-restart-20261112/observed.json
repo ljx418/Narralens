@@ -1,0 +1,69 @@
+{
+  "observed_at": "2026-11-12T01:41:42.737991+00:00",
+  "old_runtime_id": "f08a7861-2f78-482f-b702-f5bd5bf9c39f",
+  "new_runtime_id": "854c82c2-6710-44db-ad53-7a56fce6074c",
+  "kernel_boot_utc": "2026-11-12T01:33:24+00:00",
+  "original_d10_launch_utc": "2026-11-12T00:34:34.099146+00:00",
+  "os_proof_old_linux_processes_gone": true,
+  "scope": "Original known worker execution was WSL2 Linux on same hostname; no claim about unrelated Windows/user processes",
+  "known_historical_pids_exist": {
+    "738006": false,
+    "925512": false,
+    "735622": false,
+    "2131827": false,
+    "2131828": false
+  },
+  "failed_reply": "msg_b51a407dfdd5 closed due inactive dispatch; mutation7638e3be-69d4-4e1d-b40e-597e80040566",
+  "parent_release": "ctx_ba200bd32837 state released processAction none",
+  "claude_429": "No quota failure inferred from reboot; any new429 STOP with no replacement authorization",
+  "files": [
+    {
+      "root": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+      "path": "src/host/agent-driven/created-source-recovery.ts",
+      "sha256": "702f9b342ba82450c9c99000817732d2c13d4d408a046f32667e1cee044b3106",
+      "bytes": 44891,
+      "archive": "1-created-source-recovery.ts.source.txt",
+      "second_read_matches": true
+    },
+    {
+      "root": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+      "path": "src/host/agent-driven/created-source-adoption-service.ts",
+      "sha256": "2471c2ee40cb7bb8ba21ca92b3629a020b3e3e7b03a61d69750b7af37554bde2",
+      "bytes": 16091,
+      "archive": "2-created-source-adoption-service.ts.source.txt",
+      "second_read_matches": true
+    },
+    {
+      "root": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+      "path": "tests/agent-driven/integration/created-source-adoption.test.ts",
+      "sha256": "04eb25fa45efede7d101878d0c603d96b8947f377c49896dc3422a74ed644548",
+      "bytes": 62322,
+      "archive": "3-created-source-adoption.test.ts.source.txt",
+      "second_read_matches": true
+    },
+    {
+      "root": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+      "path": "tests/agent-driven/integration/created-source-recovery.test.ts",
+      "sha256": "8862ecd70579ce413a4d67764969a9ad17810a1e652854275e207c04f9a8db9f",
+      "bytes": 22556,
+      "archive": "4-created-source-recovery.test.ts.source.txt",
+      "second_read_matches": true
+    },
+    {
+      "root": "/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-PRODUCT",
+      "path": "src/host/m5/openfilm-native-expected.ts",
+      "sha256": "dd458df139cfcf913b76e4d8050291ab84fdcb3fe4723c569f8327650b5b04c5",
+      "bytes": 45529,
+      "archive": "5-openfilm-native-expected.ts.source.txt",
+      "second_read_matches": true
+    },
+    {
+      "root": "/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-PRODUCT",
+      "path": "tests/agent-driven/integration/created-native-ack.test.ts",
+      "sha256": "329def412b417fb69408382c0fdd5807bebe20044bf74860d700d396a5ddb382",
+      "bytes": 123784,
+      "archive": "6-created-native-ack.test.ts.source.txt",
+      "second_read_matches": true
+    }
+  ]
+}

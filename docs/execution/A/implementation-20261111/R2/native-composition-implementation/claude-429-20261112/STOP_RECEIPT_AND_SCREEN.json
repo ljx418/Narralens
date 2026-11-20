@@ -1,0 +1,30 @@
+{
+  "observed_screen_excerpt": "429 已达到 Token Plan 用量上限：请升级 Token Plan 套餐或购买… · Retrying in 21s · attempt 7/10",
+  "observed_from": "MAIN functions.exec terminal read of exact Claude child, current rendered screen; excerpt is preserved observation, not a reconstructed complete transcript",
+  "child_dispatch": "ctx_283e4028fc76",
+  "child_task": "task_5dcbe8192764",
+  "terminal": "term_b4defdac-eb95-4d2a-94d8-33773059282f",
+  "guarded_stop": {
+    "command": "orca-ide orchestration worker-stop --dispatch ctx_283e4028fc76",
+    "exit": 0,
+    "state": "stopped",
+    "processAction": "closed_agent_terminal",
+    "ptyKilled": true,
+    "mutation_requestId": "1c58de9e-8bdf-41d3-8c6e-c6dc9f2f950b"
+  },
+  "subsequent_show": {
+    "state": "stopped",
+    "stage": "process_stopped",
+    "liveness": "exited",
+    "terminalState": "retained"
+  },
+  "receipt_directed_release": {
+    "command": "orca-ide orchestration worker-release --dispatch ctx_283e4028fc76",
+    "exit": 0,
+    "state": "released",
+    "processAction": "none",
+    "archive": "transcript [captured]"
+  },
+  "custody_limit": "Exact agent exit confirmed; all6 discovered capture commands terminal; no heavy grant ever issued. No arbitrary descendant/global process-absence claim. No restart/takeover/retry allowed without user authorization.",
+  "at": "2026-11-12T05:08:21.649565+00:00"
+}

@@ -1,0 +1,1483 @@
+{
+  "format": "narralens.P1R2.integration-inputs@1",
+  "verdict": "REQUEST_CHANGES",
+  "historical_base_head": "1d348d419120f23f45d958112ea8c43df5a04675",
+  "binding": "Current24 dirty bytes, not accepted freeze",
+  "files": [
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p1r2/independent-review/INPUT_SNAPSHOT.json",
+      "kind": "snapshot",
+      "bytes": 4597,
+      "sha256": "8d4bf475686d60473f145b9decb5c4827960373556077f4b5ad4f8af26a0bf28"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/AGENTS.md",
+      "kind": "applicable_AGENTS",
+      "bytes": 12665,
+      "sha256": "37300463a72a612ae16e0a5fcfb496502c57c722b83781e0e2e8c9480594542b"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/src/adapters/openfilm/openfilm-upstream.ts",
+      "kind": "bound_R2_dirty_bytes",
+      "bytes": 84180,
+      "sha256": "706a7489ee8eb133bd93d4f824f5af9e2d952354d1a43db91fd8e9d6b11f45d9",
+      "read_scope": "Full relevant production phase/owner/supervisor/KernelSettlementOperations and new test call chains; unchanged old reader/regression files hash continuity only, not whole requirement reacceptance"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/src/host/agent-driven/created-native-workspace.ts",
+      "kind": "bound_R2_dirty_bytes",
+      "bytes": 74914,
+      "sha256": "7ac2a3333dfee09fe3d9a611de2ceebe5e94bc06a2d8a2daddb35b5d4a1147bd",
+      "read_scope": "Full relevant production phase/owner/supervisor/KernelSettlementOperations and new test call chains; unchanged old reader/regression files hash continuity only, not whole requirement reacceptance"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/src/host/agent-driven/created-native-source-reader.ts",
+      "kind": "bound_R2_dirty_bytes",
+      "bytes": 80202,
+      "sha256": "0a52b8ff16652cf4bf439ef19812b05a4a417396a9139dd4ee4ce7df8505289e",
+      "read_scope": "Full relevant production phase/owner/supervisor/KernelSettlementOperations and new test call chains; unchanged old reader/regression files hash continuity only, not whole requirement reacceptance"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/m2.1/openfilm-upstream-lock.test.ts",
+      "kind": "bound_R2_dirty_bytes",
+      "bytes": 58158,
+      "sha256": "9b2cf8525c7e51da9a7c0d9eb579b65be56a679651fcbb5bfb5bd8e1424c175a",
+      "read_scope": "Full relevant production phase/owner/supervisor/KernelSettlementOperations and new test call chains; unchanged old reader/regression files hash continuity only, not whole requirement reacceptance"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/native-cache-witness.test.ts",
+      "kind": "bound_R2_dirty_bytes",
+      "bytes": 94482,
+      "sha256": "02a7b90f4163e36fd039ee865b15c08860f4ee295c403eed996617b2eca306c1",
+      "read_scope": "Full relevant production phase/owner/supervisor/KernelSettlementOperations and new test call chains; unchanged old reader/regression files hash continuity only, not whole requirement reacceptance"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/created-native-source-reader.test.ts",
+      "kind": "bound_R2_dirty_bytes",
+      "bytes": 173839,
+      "sha256": "6325eab3e4411e77a0b000a084793fb57545d961437c572d0a990625a50d9784",
+      "read_scope": "Full relevant production phase/owner/supervisor/KernelSettlementOperations and new test call chains; unchanged old reader/regression files hash continuity only, not whole requirement reacceptance"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/src/adapters/openfilm/cache-production-scope.ts",
+      "kind": "bound_R2_dirty_bytes",
+      "bytes": 28850,
+      "sha256": "9d33a15e3e8273af5dfecd54c466bab575236acf8d20e195c8dee4b7ae7c2e62",
+      "read_scope": "Full relevant production phase/owner/supervisor/KernelSettlementOperations and new test call chains; unchanged old reader/regression files hash continuity only, not whole requirement reacceptance"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/src/adapters/openfilm/cache-process-supervisor.ts",
+      "kind": "bound_R2_dirty_bytes",
+      "bytes": 77274,
+      "sha256": "1c867100e1ea64ba1ff0f17a97147797a0b9c051a4727237035a2508d8728b4b",
+      "read_scope": "Full relevant production phase/owner/supervisor/KernelSettlementOperations and new test call chains; unchanged old reader/regression files hash continuity only, not whole requirement reacceptance"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/src/adapters/openfilm/openfilm-cache-worker.mjs",
+      "kind": "bound_R2_dirty_bytes",
+      "bytes": 21083,
+      "sha256": "0eaf0bd5bf625d36ebe33c700bbcd51fccad895cc06e225a531f490d9e2a8806",
+      "read_scope": "Full relevant production phase/owner/supervisor/KernelSettlementOperations and new test call chains; unchanged old reader/regression files hash continuity only, not whole requirement reacceptance"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/src/adapters/openfilm/cache-worker-policy.mjs",
+      "kind": "bound_R2_dirty_bytes",
+      "bytes": 5798,
+      "sha256": "0d2b2b38eea9922b0348ae2dbbbfbe1c2bc7715fc923879776696110015b1214",
+      "read_scope": "Full relevant production phase/owner/supervisor/KernelSettlementOperations and new test call chains; unchanged old reader/regression files hash continuity only, not whole requirement reacceptance"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/src/adapters/openfilm/cache-worker-integrity.json",
+      "kind": "bound_R2_dirty_bytes",
+      "bytes": 2135,
+      "sha256": "6489c739841c8897c20641719a5d64e254c20a472ec85753577864c050c27a4a",
+      "read_scope": "Full relevant production phase/owner/supervisor/KernelSettlementOperations and new test call chains; unchanged old reader/regression files hash continuity only, not whole requirement reacceptance"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tools/openfilm-cache-worker-integrity.mjs",
+      "kind": "bound_R2_dirty_bytes",
+      "bytes": 11028,
+      "sha256": "8f59fb5951a1f83dc360413ac1b71e7914bc98f65c1efa71af909751b7d509d0",
+      "read_scope": "Full relevant production phase/owner/supervisor/KernelSettlementOperations and new test call chains; unchanged old reader/regression files hash continuity only, not whole requirement reacceptance"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/cache-production-scope.test.ts",
+      "kind": "bound_R2_dirty_bytes",
+      "bytes": 16772,
+      "sha256": "e44c1a46c414197fd9ec77590528318fa929c90f7259a6f96710aa7539f5f3c8",
+      "read_scope": "Full relevant production phase/owner/supervisor/KernelSettlementOperations and new test call chains; unchanged old reader/regression files hash continuity only, not whole requirement reacceptance"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/cache-process-settlement.test.ts",
+      "kind": "bound_R2_dirty_bytes",
+      "bytes": 12031,
+      "sha256": "ddd557cf50e28d1f7893e4edc90d7714e688015b3ec99d223c4002426e07b115",
+      "read_scope": "Full relevant production phase/owner/supervisor/KernelSettlementOperations and new test call chains; unchanged old reader/regression files hash continuity only, not whole requirement reacceptance"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/src/adapters/openfilm/cache-process-custodian.py",
+      "kind": "bound_R2_dirty_bytes",
+      "bytes": 66220,
+      "sha256": "71826989cef1bed97e4d0d947fcfd2c2df94a18695db4d4a1081d88ef10cbf22",
+      "read_scope": "Full relevant production phase/owner/supervisor/KernelSettlementOperations and new test call chains; unchanged old reader/regression files hash continuity only, not whole requirement reacceptance"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/helpers/cache-worker-fixture.mjs",
+      "kind": "bound_R2_dirty_bytes",
+      "bytes": 13466,
+      "sha256": "0e854bca9a6d676fe76ffe18284c2fe0500375156dc6335efaa55c3a3bba8d58",
+      "read_scope": "Full relevant production phase/owner/supervisor/KernelSettlementOperations and new test call chains; unchanged old reader/regression files hash continuity only, not whole requirement reacceptance"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/helpers/cache-probe-fixture.mjs",
+      "kind": "bound_R2_dirty_bytes",
+      "bytes": 4068,
+      "sha256": "80388baed7275482ea7c4b7273d43706aa143a532aa47b8e0922c53e3c2720ef",
+      "read_scope": "Full relevant production phase/owner/supervisor/KernelSettlementOperations and new test call chains; unchanged old reader/regression files hash continuity only, not whole requirement reacceptance"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/cache-custodian-lifecycle.test.ts",
+      "kind": "bound_R2_dirty_bytes",
+      "bytes": 10376,
+      "sha256": "cfb1e9123fa37134f5855ef7a461e68328f5cde7c8ba4b7a5dbfaaf6eebfc14f",
+      "read_scope": "Full relevant production phase/owner/supervisor/KernelSettlementOperations and new test call chains; unchanged old reader/regression files hash continuity only, not whole requirement reacceptance"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/cache-frame-duration-lifetime.test.ts",
+      "kind": "bound_R2_dirty_bytes",
+      "bytes": 7476,
+      "sha256": "9448123441af711462d8549f4affd51c81243d0031be99f7a4df6a7fb4773281",
+      "read_scope": "Full relevant production phase/owner/supervisor/KernelSettlementOperations and new test call chains; unchanged old reader/regression files hash continuity only, not whole requirement reacceptance"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/cache-process-identity.test.ts",
+      "kind": "bound_R2_dirty_bytes",
+      "bytes": 19181,
+      "sha256": "6ee0fbe5ccc95c6638bd756bcbe8bafe4b741c1c7b7fc8325dfde68b371461c9",
+      "read_scope": "Full relevant production phase/owner/supervisor/KernelSettlementOperations and new test call chains; unchanged old reader/regression files hash continuity only, not whole requirement reacceptance"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/cache-serving-drain.test.ts",
+      "kind": "bound_R2_dirty_bytes",
+      "bytes": 4671,
+      "sha256": "d9734282dd8a67d4a7d0a0bb0531ed2a9db0ca5db6c6d92caa2c9b3895bf1c4d",
+      "read_scope": "Full relevant production phase/owner/supervisor/KernelSettlementOperations and new test call chains; unchanged old reader/regression files hash continuity only, not whole requirement reacceptance"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/helpers/cache-custodian-unit.py",
+      "kind": "bound_R2_dirty_bytes",
+      "bytes": 22684,
+      "sha256": "0da98fd7f203dc675880aae1d4012f34e0acf1241eb119dd61549b4ce3f40343",
+      "read_scope": "Full relevant production phase/owner/supervisor/KernelSettlementOperations and new test call chains; unchanged old reader/regression files hash continuity only, not whole requirement reacceptance"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/parallel/lane-product/A-R2-20261112/N1N2-native-source/n1n2-claude-060p1r2-report.md",
+      "kind": "bound_R2_dirty_bytes",
+      "bytes": 48094,
+      "sha256": "685c8f4005e1b63f41e8a3f02befceb6671bf8f805deff38039dc59e1a05a8b9",
+      "read_scope": "Full relevant production phase/owner/supervisor/KernelSettlementOperations and new test call chains; unchanged old reader/regression files hash continuity only, not whole requirement reacceptance"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/parallel/lane-product/A-R2-20261112/N1N2-native-source/n1n2-claude-060p1r2-evidence-gap.md",
+      "kind": "bound_R2_dirty_bytes",
+      "bytes": 10997,
+      "sha256": "aa6f7ada07b4cd2cfbf1395502ca42452972f090761431b2ea1785efcad7293d",
+      "read_scope": "Full relevant production phase/owner/supervisor/KernelSettlementOperations and new test call chains; unchanged old reader/regression files hash continuity only, not whole requirement reacceptance"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p1r2/RELEASE.json",
+      "kind": "current_release",
+      "bytes": 9681,
+      "sha256": "355bdc6544b93d5ef17f49cbf17a3bd74a14fd878f03e7c883007862ea1a115a"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p1r2/SPEC.md",
+      "kind": "current_release",
+      "bytes": 12008,
+      "sha256": "2f78ccc959778eadb7c931384052160394b565f419309a70e3cd39cd9b39f29d"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p1-review/ADR_060_REV3_CUSTODIAN_AND_REPAIR.md",
+      "kind": "authority",
+      "bytes": 12929,
+      "sha256": "326bed74476956e363a1168460803f35b57e088259cf30e6a6c1315583d395ac"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p1-review/060P1R_PRIVATE_CONTRACT.md",
+      "kind": "authority",
+      "bytes": 8556,
+      "sha256": "bead5edc8547b22521d835a468c75fc88024dce62bb8b3d39ba6fc9406fe3a2e"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p1r-review/custodian-review/REVIEW.md",
+      "kind": "prior_independent_review",
+      "bytes": 27115,
+      "sha256": "7cb1f4c0c06a7f84ada6b27437cad06d33ea06a9d4ef159059d88585f7ec7ffd"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p1r-review/custodian-review/FINDINGS.json",
+      "kind": "prior_independent_review",
+      "bytes": 31424,
+      "sha256": "8f4383e0a7787a9de3b46b1a9805203e40218ec183f98515c4647ee5fd84ace8"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p1r-review/integration-review/REVIEW.md",
+      "kind": "prior_independent_review",
+      "bytes": 7120,
+      "sha256": "bec450ebab6fc966eb4fb7f9a88b0b3e74fad9fcd0d994c2e11692dbd818a260"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p1r-review/integration-review/FINDINGS.json",
+      "kind": "prior_independent_review",
+      "bytes": 39169,
+      "sha256": "8ce172b5abc9a51e705b38cbaff35edf0b104aaf8316918ef95a2779db6ff70d"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-custodian-syntax-001.txt",
+      "kind": "existing_capture",
+      "bytes": 20,
+      "sha256": "dd8ee964b960e83ee2ed8f892492ac84dc2c0ea3c9ddb84f9b29e3922f08b97c"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-custodian-syntax-001.result.json",
+      "kind": "existing_capture",
+      "bytes": 198,
+      "sha256": "701957ff4d5a235cb7a324210be4e6d91c38ddb6d2fea5dce8120fdeed81cfb3"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-custodian-syntax-001.inputs.json",
+      "kind": "existing_capture",
+      "bytes": 74390,
+      "sha256": "a475a208e0dde50d7b90f8444b2e2002e663a8d76ec0643b4d92f4c8c4c73da3"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-custodian-syntax-001.cmd.json",
+      "kind": "existing_capture",
+      "bytes": 608,
+      "sha256": "70ebc21c31659393ed76fd7c1b0a4429af9b2fdde7e7bd23e9c054012f4599ee"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-custodian-syntax-001.exit",
+      "kind": "existing_capture",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-custodian-unit-001.txt",
+      "kind": "existing_capture",
+      "bytes": 714,
+      "sha256": "82f2d376b362ccc8599477ef49df35e771a387c7484ac9bb7d5c7effd67c379b"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-custodian-unit-001.result.json",
+      "kind": "existing_capture",
+      "bytes": 198,
+      "sha256": "0b63c9c56550bad9348f53676afec2450cf625a2605e9b7a18fbcb63a768a1d4"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-custodian-unit-001.inputs.json",
+      "kind": "existing_capture",
+      "bytes": 74526,
+      "sha256": "5f114643c8eec5a6f3441227cbb46548df7529be317e8f91b05d68782720373b"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-custodian-unit-001.cmd.json",
+      "kind": "existing_capture",
+      "bytes": 507,
+      "sha256": "13d8a21c4aae9ffeecb4c10d15590505f1c6e2d2f0fbf2b55299296f8e65df1f"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-custodian-unit-001.exit",
+      "kind": "existing_capture",
+      "bytes": 2,
+      "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-custodian-unit-002.txt",
+      "kind": "existing_capture",
+      "bytes": 127,
+      "sha256": "40c333e8dd3758e33ff7e10e08c136217d357fe3f4db4c24fb6f6ab278306999"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-custodian-unit-002.result.json",
+      "kind": "existing_capture",
+      "bytes": 198,
+      "sha256": "946f2124d6d289cad73a05d3c77ab7db01333cec438645d42f466a3537a8850f"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-custodian-unit-002.inputs.json",
+      "kind": "existing_capture",
+      "bytes": 74526,
+      "sha256": "12e67fcce498876fec1507137b0725fe6cc88842804045a472db2c77c880b004"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-custodian-unit-002.cmd.json",
+      "kind": "existing_capture",
+      "bytes": 507,
+      "sha256": "a99e7097bcf1c07df377a517786e6edf13772a64bdad6df60a8a4cd0f0006984"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-custodian-unit-002.exit",
+      "kind": "existing_capture",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-final-custodian-syntax-001.txt",
+      "kind": "existing_capture",
+      "bytes": 20,
+      "sha256": "dd8ee964b960e83ee2ed8f892492ac84dc2c0ea3c9ddb84f9b29e3922f08b97c"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-final-custodian-syntax-001.result.json",
+      "kind": "existing_capture",
+      "bytes": 198,
+      "sha256": "a4234f1cb1f86ff65b22de72639ecd98dac7a4bf85ff08b173d47ddb1a479bb6"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-final-custodian-syntax-001.inputs.json",
+      "kind": "existing_capture",
+      "bytes": 74526,
+      "sha256": "84cc25da7ca5f2e47d80f5cafe3ce2dbe8e66156e7562f470c80945e3fd69f09"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-final-custodian-syntax-001.cmd.json",
+      "kind": "existing_capture",
+      "bytes": 608,
+      "sha256": "9e94893623c2181c20f1af57b27a9ec188c049b3db8a755e43539e5aa4df5796"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-final-custodian-syntax-001.exit",
+      "kind": "existing_capture",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-final-custodian-unit-001.txt",
+      "kind": "existing_capture",
+      "bytes": 127,
+      "sha256": "9436669d041fd992a7c7eaf244080a988eb9dea765843dfb3c4af0fa94f0cb70"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-final-custodian-unit-001.result.json",
+      "kind": "existing_capture",
+      "bytes": 198,
+      "sha256": "4accc2dc542b329a2a0caef432be57bce9e1e277e28eebafff565a15c01de225"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-final-custodian-unit-001.inputs.json",
+      "kind": "existing_capture",
+      "bytes": 74526,
+      "sha256": "84cc25da7ca5f2e47d80f5cafe3ce2dbe8e66156e7562f470c80945e3fd69f09"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-final-custodian-unit-001.cmd.json",
+      "kind": "existing_capture",
+      "bytes": 507,
+      "sha256": "ab3c5f3789afa9dbc6ee978c054bb9fea6ab3db167774f30337ae126e09a2a1f"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-final-custodian-unit-001.exit",
+      "kind": "existing_capture",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-final-identity-001.txt",
+      "kind": "existing_capture",
+      "bytes": 348,
+      "sha256": "08318c3fd42284d178c88f6ee7fe1262fb66d5b844a0f3c75c8c97f356b099c0"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-final-identity-001.result.json",
+      "kind": "existing_capture",
+      "bytes": 198,
+      "sha256": "d04f4f7fb2f378985e8332c4ca85359e6da1378db928684c51de359ed4a7ef32"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-final-identity-001.inputs.json",
+      "kind": "existing_capture",
+      "bytes": 74526,
+      "sha256": "84cc25da7ca5f2e47d80f5cafe3ce2dbe8e66156e7562f470c80945e3fd69f09"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-final-identity-001.cmd.json",
+      "kind": "existing_capture",
+      "bytes": 554,
+      "sha256": "18b51a904c0676ae4400094ea08b1062900667a53dfdbb1e3babfc336922f244"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-final-identity-001.exit",
+      "kind": "existing_capture",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-final-integrity-check-001.txt",
+      "kind": "existing_capture",
+      "bytes": 24,
+      "sha256": "7480083d801311b007ec2f2a6c4717621f8aed33de5e17dd7ba35815b0d68e68"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-final-integrity-check-001.result.json",
+      "kind": "existing_capture",
+      "bytes": 198,
+      "sha256": "34216f8cf95c4b5cc5eba471c71930fc3fd58904744073f0cf920f8d9643adb7"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-final-integrity-check-001.inputs.json",
+      "kind": "existing_capture",
+      "bytes": 74526,
+      "sha256": "84cc25da7ca5f2e47d80f5cafe3ce2dbe8e66156e7562f470c80945e3fd69f09"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-final-integrity-check-001.cmd.json",
+      "kind": "existing_capture",
+      "bytes": 456,
+      "sha256": "3c0aa0c292e63dfee1cdabbf548573625d7e56a8d379c12fe6b31f9c3536392a"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-final-integrity-check-001.exit",
+      "kind": "existing_capture",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-final-m21-lock-001.txt",
+      "kind": "existing_capture",
+      "bytes": 569,
+      "sha256": "4936318ad49ff10c4926ccd981b6feae36992c8df7457a5b0c07aebfbc9554fc"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-final-m21-lock-001.result.json",
+      "kind": "existing_capture",
+      "bytes": 198,
+      "sha256": "e4fa57be59737a8ba6c92e924143ca8b554051a392dcc7cf3fd68cabd86cce7b"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-final-m21-lock-001.inputs.json",
+      "kind": "existing_capture",
+      "bytes": 74526,
+      "sha256": "84cc25da7ca5f2e47d80f5cafe3ce2dbe8e66156e7562f470c80945e3fd69f09"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-final-m21-lock-001.cmd.json",
+      "kind": "existing_capture",
+      "bytes": 534,
+      "sha256": "4bc92eecc525e1143a1517e97679cb03cf46d336f6cdf0bedc5bae989b519574"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-final-m21-lock-001.exit",
+      "kind": "existing_capture",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-final-scheduler-001.txt",
+      "kind": "existing_capture",
+      "bytes": 347,
+      "sha256": "d9a34a04b0bb070ed79cf586f66b0add37e5859b619f70c1e97da71ddd1dd65a"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-final-scheduler-001.result.json",
+      "kind": "existing_capture",
+      "bytes": 198,
+      "sha256": "4a9bee0a2e563ef4718ecde1bf6fbd22b7d88d269aeef9544d3b15787ee60383"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-final-scheduler-001.inputs.json",
+      "kind": "existing_capture",
+      "bytes": 74526,
+      "sha256": "84cc25da7ca5f2e47d80f5cafe3ce2dbe8e66156e7562f470c80945e3fd69f09"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-final-scheduler-001.cmd.json",
+      "kind": "existing_capture",
+      "bytes": 554,
+      "sha256": "b2d6a3b02572d9f587daab2887667d251b8630d11db0659f4dc2a3030c96fed7"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-final-scheduler-001.exit",
+      "kind": "existing_capture",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-final-syntax-policy-001.txt",
+      "kind": "existing_capture",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-final-syntax-policy-001.result.json",
+      "kind": "existing_capture",
+      "bytes": 198,
+      "sha256": "5e5b796ad9fc01948fc3c41c978ef05e323c99cd11e378f2a0b0edb61d4be6fb"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-final-syntax-policy-001.inputs.json",
+      "kind": "existing_capture",
+      "bytes": 74526,
+      "sha256": "84cc25da7ca5f2e47d80f5cafe3ce2dbe8e66156e7562f470c80945e3fd69f09"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-final-syntax-policy-001.cmd.json",
+      "kind": "existing_capture",
+      "bytes": 460,
+      "sha256": "e12111ac58e1dca507d54eb4b7e258998ab2fd262ef18d61c91666d90d8ae8ad"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-final-syntax-policy-001.exit",
+      "kind": "existing_capture",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-final-syntax-probe-fixture-001.txt",
+      "kind": "existing_capture",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-final-syntax-probe-fixture-001.result.json",
+      "kind": "existing_capture",
+      "bytes": 198,
+      "sha256": "6542a7e1330981303a640c78479c13612ecb107b13f5307da027b118ec4ae315"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-final-syntax-probe-fixture-001.inputs.json",
+      "kind": "existing_capture",
+      "bytes": 74526,
+      "sha256": "84cc25da7ca5f2e47d80f5cafe3ce2dbe8e66156e7562f470c80945e3fd69f09"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-final-syntax-probe-fixture-001.cmd.json",
+      "kind": "existing_capture",
+      "bytes": 477,
+      "sha256": "9692d0bacc07a64e235590aabe0c02abeddf979d403583b36d6938732bb62f67"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-final-syntax-probe-fixture-001.exit",
+      "kind": "existing_capture",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-final-syntax-worker-001.txt",
+      "kind": "existing_capture",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-final-syntax-worker-001.result.json",
+      "kind": "existing_capture",
+      "bytes": 198,
+      "sha256": "2b0ed74f98572e83600eec8a0940f2bbce38b4277daa9d67afc0ce8690742eb3"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-final-syntax-worker-001.inputs.json",
+      "kind": "existing_capture",
+      "bytes": 74526,
+      "sha256": "84cc25da7ca5f2e47d80f5cafe3ce2dbe8e66156e7562f470c80945e3fd69f09"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-final-syntax-worker-001.cmd.json",
+      "kind": "existing_capture",
+      "bytes": 462,
+      "sha256": "3035ad12e35b3b4261f7d2ad2c657864bed9422170a64c734a4b78fd79b6223d"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-final-syntax-worker-001.exit",
+      "kind": "existing_capture",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-final-syntax-worker-fixture-001.txt",
+      "kind": "existing_capture",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-final-syntax-worker-fixture-001.result.json",
+      "kind": "existing_capture",
+      "bytes": 198,
+      "sha256": "85f30e1c19b705c879e4462f75a99e87eadadff8d36f11f2d445ba9bf67865ec"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-final-syntax-worker-fixture-001.inputs.json",
+      "kind": "existing_capture",
+      "bytes": 74526,
+      "sha256": "84cc25da7ca5f2e47d80f5cafe3ce2dbe8e66156e7562f470c80945e3fd69f09"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-final-syntax-worker-fixture-001.cmd.json",
+      "kind": "existing_capture",
+      "bytes": 478,
+      "sha256": "c0b24a3d599c748408460e2a8587b3f3a2b3a7467837ec878036e0e73520a775"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-final-syntax-worker-fixture-001.exit",
+      "kind": "existing_capture",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-final-tsc-001.txt",
+      "kind": "existing_capture",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-final-tsc-001.result.json",
+      "kind": "existing_capture",
+      "bytes": 198,
+      "sha256": "ccf47147deb6f8e9c68f571250afddae26a9726a9fa476076f467a4dd31de2dd"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-final-tsc-001.inputs.json",
+      "kind": "existing_capture",
+      "bytes": 74526,
+      "sha256": "84cc25da7ca5f2e47d80f5cafe3ce2dbe8e66156e7562f470c80945e3fd69f09"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-final-tsc-001.cmd.json",
+      "kind": "existing_capture",
+      "bytes": 447,
+      "sha256": "5ccebe8ac710b34716ef0768a12cd6d4df0015f5431410a6c6703a8fd9178c11"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-final-tsc-001.exit",
+      "kind": "existing_capture",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-generate-001.txt",
+      "kind": "existing_capture",
+      "bytes": 161,
+      "sha256": "958825c41d7e482d785280512535c13558d60012ca26f10d20cad19472bbbcf6"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-generate-001.result.json",
+      "kind": "existing_capture",
+      "bytes": 257,
+      "sha256": "d4d93890492eef73832bd70f1531e9f5947907906e577bc791860314869f150a"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-generate-001.inputs.json",
+      "kind": "existing_capture",
+      "bytes": 74526,
+      "sha256": "81fee1bb5ff9fbcfb0da2cbfff67c364faa42d86a378d34d565120ad0c8d7be2"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-generate-001.cmd.json",
+      "kind": "existing_capture",
+      "bytes": 459,
+      "sha256": "9fdf7261d80f582e2343678dcc2fb69ed7a0f987547c1b85fbac77db1643f90b"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-generate-001.exit",
+      "kind": "existing_capture",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-handback-integrity-001.txt",
+      "kind": "existing_capture",
+      "bytes": 24,
+      "sha256": "7480083d801311b007ec2f2a6c4717621f8aed33de5e17dd7ba35815b0d68e68"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-handback-integrity-001.result.json",
+      "kind": "existing_capture",
+      "bytes": 198,
+      "sha256": "f73b3597f5746619392d53256104bf2601e793d7761431ec1e7b9319fc3ceac0"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-handback-integrity-001.inputs.json",
+      "kind": "existing_capture",
+      "bytes": 74526,
+      "sha256": "84cc25da7ca5f2e47d80f5cafe3ce2dbe8e66156e7562f470c80945e3fd69f09"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-handback-integrity-001.cmd.json",
+      "kind": "existing_capture",
+      "bytes": 456,
+      "sha256": "03dee6b9556f354467e239ded00e03a1ef1e8357ebc6fe54d0dbd10cad7af8e9"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-handback-integrity-001.exit",
+      "kind": "existing_capture",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-identity-001.txt",
+      "kind": "existing_capture",
+      "bytes": 348,
+      "sha256": "ca1fc90018166360b7f1323158daa99c6a3151a8d2aef627f5d411086e9691f4"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-identity-001.result.json",
+      "kind": "existing_capture",
+      "bytes": 198,
+      "sha256": "87692ca8759dd1d4bf7e876f7703bd979c387952e79d8bf4e110cffab659b3b7"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-identity-001.inputs.json",
+      "kind": "existing_capture",
+      "bytes": 74526,
+      "sha256": "6e9669393b5ab031bd65c47cbc940f1340f9004399caf3c983b4efe64f4fa8dd"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-identity-001.cmd.json",
+      "kind": "existing_capture",
+      "bytes": 554,
+      "sha256": "2033c88b40aee080ce25e95514bb959618ef5db86eab866bbc5614d87d917c3b"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-identity-001.exit",
+      "kind": "existing_capture",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-m21-lock-001.txt",
+      "kind": "existing_capture",
+      "bytes": 569,
+      "sha256": "52a1a28f3d499624cdb45fb93e6245f10db3e884d5e3afaa8c1e3f017067739a"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-m21-lock-001.result.json",
+      "kind": "existing_capture",
+      "bytes": 198,
+      "sha256": "39642c960bed066388aaf53fb24eb0f0f21b477db9d4b942cdc14e4864cb86bb"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-m21-lock-001.inputs.json",
+      "kind": "existing_capture",
+      "bytes": 74526,
+      "sha256": "4df8f2341b68c91b6e1071f120537db8e9e368c5a86a5338b39f1315bea426a2"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-m21-lock-001.cmd.json",
+      "kind": "existing_capture",
+      "bytes": 534,
+      "sha256": "52b6473f3adea7c700e9acfdd065f53599fe52d838a88da2a48e0ef52f768cfb"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-m21-lock-001.exit",
+      "kind": "existing_capture",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-scheduler-001.txt",
+      "kind": "existing_capture",
+      "bytes": 2790,
+      "sha256": "5330d02aa843fa483afd72bf4d8c5a950790b01b9eab15a4791adf5db2e830bf"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-scheduler-001.result.json",
+      "kind": "existing_capture",
+      "bytes": 198,
+      "sha256": "66e896e3d256860d7194f252b6d3470502b1b1114dd53c9ad5865b9f23b11ada"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-scheduler-001.inputs.json",
+      "kind": "existing_capture",
+      "bytes": 74526,
+      "sha256": "6e9669393b5ab031bd65c47cbc940f1340f9004399caf3c983b4efe64f4fa8dd"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-scheduler-001.cmd.json",
+      "kind": "existing_capture",
+      "bytes": 554,
+      "sha256": "63b618ae0f1c0a5364cea8727737b91b844d8de495fa40febfa3dc8eae3d53ad"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-scheduler-001.exit",
+      "kind": "existing_capture",
+      "bytes": 2,
+      "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-scheduler-002.txt",
+      "kind": "existing_capture",
+      "bytes": 347,
+      "sha256": "938621b374e3ad9fdcbc9417935d1edc423791cdd6e6d13cc56bd864078fb75d"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-scheduler-002.result.json",
+      "kind": "existing_capture",
+      "bytes": 198,
+      "sha256": "8ce29dae2d5e636b01b587ffa9526622b984c5edef119b04fb74103ba56e6d49"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-scheduler-002.inputs.json",
+      "kind": "existing_capture",
+      "bytes": 74526,
+      "sha256": "4df8f2341b68c91b6e1071f120537db8e9e368c5a86a5338b39f1315bea426a2"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-scheduler-002.cmd.json",
+      "kind": "existing_capture",
+      "bytes": 554,
+      "sha256": "8ea39a708569ab2723331127a979c9ef35bd72a84a89136ebccdfb55470f0e0e"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-scheduler-002.exit",
+      "kind": "existing_capture",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-syntax-worker-fixture-001.txt",
+      "kind": "existing_capture",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-syntax-worker-fixture-001.result.json",
+      "kind": "existing_capture",
+      "bytes": 198,
+      "sha256": "ed58bb2c4871b9ecded1d9d0cf0c14a1e1d2f9cd31bd3e5e3a3fd03c0e8de994"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-syntax-worker-fixture-001.inputs.json",
+      "kind": "existing_capture",
+      "bytes": 74526,
+      "sha256": "d5fd1ab7b58ac5521a72fc6070318e9cd1c5e81938339f1386dacda0bf4d1c5a"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-syntax-worker-fixture-001.cmd.json",
+      "kind": "existing_capture",
+      "bytes": 478,
+      "sha256": "e6b256867b70acca9d321646220f48646aac30db8677fe5c21862c7c9766dca3"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-syntax-worker-fixture-001.exit",
+      "kind": "existing_capture",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-typecheck-001.txt",
+      "kind": "existing_capture",
+      "bytes": 900,
+      "sha256": "3b7e9f13487559a674439174844e98fb203cfd0ce60e7b1ccd126f2608bc034a"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-typecheck-001.result.json",
+      "kind": "existing_capture",
+      "bytes": 198,
+      "sha256": "06bb8b041e6bccd7ab5945a5938039d2fe76bc10d30e4c9cf9e3d49a122acb61"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-typecheck-001.inputs.json",
+      "kind": "existing_capture",
+      "bytes": 74390,
+      "sha256": "d88d775a3276ccfd57e85fed6ed56282a46898777287c645765af5c112d49921"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-typecheck-001.cmd.json",
+      "kind": "existing_capture",
+      "bytes": 447,
+      "sha256": "59aea6343882d6dfc175557a9071dc7ed958a3e401c657530699a8b4ad6a7624"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-typecheck-001.exit",
+      "kind": "existing_capture",
+      "bytes": 2,
+      "sha256": "53c234e5e8472b6ac51c1ae1cab3fe06fad053beb8ebfd8977b010655bfdd3c3"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-typecheck-002.txt",
+      "kind": "existing_capture",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-typecheck-002.result.json",
+      "kind": "existing_capture",
+      "bytes": 198,
+      "sha256": "dd4051e366e19daf687e92e7e8dc929fc226d1d42b85220d3acd9e24631061f9"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-typecheck-002.inputs.json",
+      "kind": "existing_capture",
+      "bytes": 74390,
+      "sha256": "fb1fa5273cc5bbfc28f81f30604f56e88c690600a14193900b4e2a9373f5a7cf"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-typecheck-002.cmd.json",
+      "kind": "existing_capture",
+      "bytes": 447,
+      "sha256": "8bbd3837c6aefd615eba25bfbe1ffcdc0ab573566b9172a2e1264093dd3b8944"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-typecheck-002.exit",
+      "kind": "existing_capture",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-typecheck-003.txt",
+      "kind": "existing_capture",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-typecheck-003.result.json",
+      "kind": "existing_capture",
+      "bytes": 198,
+      "sha256": "54cdc1d84ff371e694bdc1772ae5663eb66c7276f1c33a38835d784bdda4385c"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-typecheck-003.inputs.json",
+      "kind": "existing_capture",
+      "bytes": 74526,
+      "sha256": "754040438aa1c83caf3474d5cb27a5ef018a4ae2ae0ad75520f82e510b13dfb0"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-typecheck-003.cmd.json",
+      "kind": "existing_capture",
+      "bytes": 447,
+      "sha256": "416422dae13ebc957c45f2d364bd2af4040a71f8035a5e19cf38c1a051bddc3d"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r2-typecheck-003.exit",
+      "kind": "existing_capture",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    }
+  ],
+  "snapshot_start_end": "24/24 exact SHA256/size unchanged",
+  "all_inputs_end_equal": true,
+  "verified_unchanged_at_utc": "2026-11-14T13:26:04.083289+00:00",
+  "captures": [
+    {
+      "capture": "n1n2-claude-060p1r2-custodian-syntax-001",
+      "argv": [
+        "/usr/bin/python3.12",
+        "-I",
+        "-S",
+        "-B",
+        "-c",
+        "import ast,pathlib; ast.parse(pathlib.Path('src/adapters/openfilm/cache-process-custodian.py').read_text(encoding='utf-8')); print('CUSTODIAN_SYNTAX_OK')"
+      ],
+      "exit": 0,
+      "log_sha256": "dd8ee964b960e83ee2ed8f892492ac84dc2c0ea3c9ddb84f9b29e3922f08b97c",
+      "source_changed": [],
+      "inputs_count": 646,
+      "mismatch_to_final_bound_subset": [
+        "src/adapters/openfilm/openfilm-upstream.ts",
+        "src/host/agent-driven/created-native-workspace.ts",
+        "src/adapters/openfilm/cache-production-scope.ts",
+        "src/adapters/openfilm/cache-process-supervisor.ts",
+        "src/adapters/openfilm/openfilm-cache-worker.mjs",
+        "src/adapters/openfilm/cache-worker-integrity.json",
+        "tests/agent-driven/integration/cache-production-scope.test.ts",
+        "tests/agent-driven/integration/cache-process-settlement.test.ts",
+        "src/adapters/openfilm/cache-process-custodian.py",
+        "tests/agent-driven/integration/helpers/cache-worker-fixture.mjs",
+        "tests/agent-driven/integration/helpers/cache-probe-fixture.mjs",
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts",
+        "tests/agent-driven/integration/cache-frame-duration-lifetime.test.ts",
+        "tests/agent-driven/integration/cache-process-identity.test.ts"
+      ],
+      "limit": "Early repair/failure captures intentionally bind earlier bytes; final captures distinguished; no test rerun"
+    },
+    {
+      "capture": "n1n2-claude-060p1r2-custodian-unit-001",
+      "argv": [
+        "/usr/bin/python3.12",
+        "-I",
+        "-S",
+        "-B",
+        "tests/agent-driven/integration/helpers/cache-custodian-unit.py"
+      ],
+      "exit": 1,
+      "log_sha256": "82f2d376b362ccc8599477ef49df35e771a387c7484ac9bb7d5c7effd67c379b",
+      "source_changed": [],
+      "inputs_count": 647,
+      "mismatch_to_final_bound_subset": [
+        "src/adapters/openfilm/openfilm-upstream.ts",
+        "src/adapters/openfilm/openfilm-cache-worker.mjs",
+        "src/adapters/openfilm/cache-worker-integrity.json",
+        "tests/agent-driven/integration/cache-production-scope.test.ts",
+        "tests/agent-driven/integration/cache-process-settlement.test.ts",
+        "tests/agent-driven/integration/helpers/cache-worker-fixture.mjs",
+        "tests/agent-driven/integration/helpers/cache-probe-fixture.mjs",
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts",
+        "tests/agent-driven/integration/cache-frame-duration-lifetime.test.ts",
+        "tests/agent-driven/integration/cache-process-identity.test.ts",
+        "tests/agent-driven/integration/helpers/cache-custodian-unit.py"
+      ],
+      "limit": "Early repair/failure captures intentionally bind earlier bytes; final captures distinguished; no test rerun"
+    },
+    {
+      "capture": "n1n2-claude-060p1r2-custodian-unit-002",
+      "argv": [
+        "/usr/bin/python3.12",
+        "-I",
+        "-S",
+        "-B",
+        "tests/agent-driven/integration/helpers/cache-custodian-unit.py"
+      ],
+      "exit": 0,
+      "log_sha256": "40c333e8dd3758e33ff7e10e08c136217d357fe3f4db4c24fb6f6ab278306999",
+      "source_changed": [],
+      "inputs_count": 647,
+      "mismatch_to_final_bound_subset": [
+        "src/adapters/openfilm/openfilm-upstream.ts",
+        "src/adapters/openfilm/openfilm-cache-worker.mjs",
+        "src/adapters/openfilm/cache-worker-integrity.json",
+        "tests/agent-driven/integration/cache-production-scope.test.ts",
+        "tests/agent-driven/integration/cache-process-settlement.test.ts",
+        "tests/agent-driven/integration/helpers/cache-worker-fixture.mjs",
+        "tests/agent-driven/integration/helpers/cache-probe-fixture.mjs",
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts",
+        "tests/agent-driven/integration/cache-frame-duration-lifetime.test.ts",
+        "tests/agent-driven/integration/cache-process-identity.test.ts"
+      ],
+      "limit": "Early repair/failure captures intentionally bind earlier bytes; final captures distinguished; no test rerun"
+    },
+    {
+      "capture": "n1n2-claude-060p1r2-final-custodian-syntax-001",
+      "argv": [
+        "/usr/bin/python3.12",
+        "-I",
+        "-S",
+        "-B",
+        "-c",
+        "import ast,pathlib; ast.parse(pathlib.Path('src/adapters/openfilm/cache-process-custodian.py').read_text(encoding='utf-8')); print('CUSTODIAN_SYNTAX_OK')"
+      ],
+      "exit": 0,
+      "log_sha256": "dd8ee964b960e83ee2ed8f892492ac84dc2c0ea3c9ddb84f9b29e3922f08b97c",
+      "source_changed": [],
+      "inputs_count": 647,
+      "mismatch_to_final_bound_subset": [],
+      "limit": "Early repair/failure captures intentionally bind earlier bytes; final captures distinguished; no test rerun"
+    },
+    {
+      "capture": "n1n2-claude-060p1r2-final-custodian-unit-001",
+      "argv": [
+        "/usr/bin/python3.12",
+        "-I",
+        "-S",
+        "-B",
+        "tests/agent-driven/integration/helpers/cache-custodian-unit.py"
+      ],
+      "exit": 0,
+      "log_sha256": "9436669d041fd992a7c7eaf244080a988eb9dea765843dfb3c4af0fa94f0cb70",
+      "source_changed": [],
+      "inputs_count": 647,
+      "mismatch_to_final_bound_subset": [],
+      "limit": "Early repair/failure captures intentionally bind earlier bytes; final captures distinguished; no test rerun"
+    },
+    {
+      "capture": "n1n2-claude-060p1r2-final-identity-001",
+      "argv": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "vitest",
+        "run",
+        "--config",
+        "vitest.config.ts",
+        "tests/agent-driven/integration/cache-process-identity.test.ts"
+      ],
+      "exit": 0,
+      "log_sha256": "08318c3fd42284d178c88f6ee7fe1262fb66d5b844a0f3c75c8c97f356b099c0",
+      "source_changed": [],
+      "inputs_count": 647,
+      "mismatch_to_final_bound_subset": [],
+      "limit": "Early repair/failure captures intentionally bind earlier bytes; final captures distinguished; no test rerun"
+    },
+    {
+      "capture": "n1n2-claude-060p1r2-final-integrity-check-001",
+      "argv": [
+        "node",
+        "tools/openfilm-cache-worker-integrity.mjs",
+        "--check"
+      ],
+      "exit": 0,
+      "log_sha256": "7480083d801311b007ec2f2a6c4717621f8aed33de5e17dd7ba35815b0d68e68",
+      "source_changed": [],
+      "inputs_count": 647,
+      "mismatch_to_final_bound_subset": [],
+      "limit": "Early repair/failure captures intentionally bind earlier bytes; final captures distinguished; no test rerun"
+    },
+    {
+      "capture": "n1n2-claude-060p1r2-final-m21-lock-001",
+      "argv": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "vitest",
+        "run",
+        "--config",
+        "vitest.config.ts",
+        "tests/m2.1/openfilm-upstream-lock.test.ts"
+      ],
+      "exit": 0,
+      "log_sha256": "4936318ad49ff10c4926ccd981b6feae36992c8df7457a5b0c07aebfbc9554fc",
+      "source_changed": [],
+      "inputs_count": 647,
+      "mismatch_to_final_bound_subset": [],
+      "limit": "Early repair/failure captures intentionally bind earlier bytes; final captures distinguished; no test rerun"
+    },
+    {
+      "capture": "n1n2-claude-060p1r2-final-scheduler-001",
+      "argv": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "vitest",
+        "run",
+        "--config",
+        "vitest.config.ts",
+        "tests/agent-driven/integration/cache-production-scope.test.ts"
+      ],
+      "exit": 0,
+      "log_sha256": "d9a34a04b0bb070ed79cf586f66b0add37e5859b619f70c1e97da71ddd1dd65a",
+      "source_changed": [],
+      "inputs_count": 647,
+      "mismatch_to_final_bound_subset": [],
+      "limit": "Early repair/failure captures intentionally bind earlier bytes; final captures distinguished; no test rerun"
+    },
+    {
+      "capture": "n1n2-claude-060p1r2-final-syntax-policy-001",
+      "argv": [
+        "node",
+        "--check",
+        "src/adapters/openfilm/cache-worker-policy.mjs"
+      ],
+      "exit": 0,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source_changed": [],
+      "inputs_count": 647,
+      "mismatch_to_final_bound_subset": [],
+      "limit": "Early repair/failure captures intentionally bind earlier bytes; final captures distinguished; no test rerun"
+    },
+    {
+      "capture": "n1n2-claude-060p1r2-final-syntax-probe-fixture-001",
+      "argv": [
+        "node",
+        "--check",
+        "tests/agent-driven/integration/helpers/cache-probe-fixture.mjs"
+      ],
+      "exit": 0,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source_changed": [],
+      "inputs_count": 647,
+      "mismatch_to_final_bound_subset": [],
+      "limit": "Early repair/failure captures intentionally bind earlier bytes; final captures distinguished; no test rerun"
+    },
+    {
+      "capture": "n1n2-claude-060p1r2-final-syntax-worker-001",
+      "argv": [
+        "node",
+        "--check",
+        "src/adapters/openfilm/openfilm-cache-worker.mjs"
+      ],
+      "exit": 0,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source_changed": [],
+      "inputs_count": 647,
+      "mismatch_to_final_bound_subset": [],
+      "limit": "Early repair/failure captures intentionally bind earlier bytes; final captures distinguished; no test rerun"
+    },
+    {
+      "capture": "n1n2-claude-060p1r2-final-syntax-worker-fixture-001",
+      "argv": [
+        "node",
+        "--check",
+        "tests/agent-driven/integration/helpers/cache-worker-fixture.mjs"
+      ],
+      "exit": 0,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source_changed": [],
+      "inputs_count": 647,
+      "mismatch_to_final_bound_subset": [],
+      "limit": "Early repair/failure captures intentionally bind earlier bytes; final captures distinguished; no test rerun"
+    },
+    {
+      "capture": "n1n2-claude-060p1r2-final-tsc-001",
+      "argv": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "tsc",
+        "--noEmit"
+      ],
+      "exit": 0,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source_changed": [],
+      "inputs_count": 647,
+      "mismatch_to_final_bound_subset": [],
+      "limit": "Early repair/failure captures intentionally bind earlier bytes; final captures distinguished; no test rerun"
+    },
+    {
+      "capture": "n1n2-claude-060p1r2-generate-001",
+      "argv": [
+        "node",
+        "tools/openfilm-cache-worker-integrity.mjs",
+        "--generate"
+      ],
+      "exit": 0,
+      "log_sha256": "958825c41d7e482d785280512535c13558d60012ca26f10d20cad19472bbbcf6",
+      "source_changed": [
+        "src/adapters/openfilm/cache-worker-integrity.json"
+      ],
+      "inputs_count": 647,
+      "mismatch_to_final_bound_subset": [
+        "src/adapters/openfilm/cache-worker-integrity.json"
+      ],
+      "limit": "Early repair/failure captures intentionally bind earlier bytes; final captures distinguished; no test rerun"
+    },
+    {
+      "capture": "n1n2-claude-060p1r2-handback-integrity-001",
+      "argv": [
+        "node",
+        "tools/openfilm-cache-worker-integrity.mjs",
+        "--check"
+      ],
+      "exit": 0,
+      "log_sha256": "7480083d801311b007ec2f2a6c4717621f8aed33de5e17dd7ba35815b0d68e68",
+      "source_changed": [],
+      "inputs_count": 647,
+      "mismatch_to_final_bound_subset": [],
+      "limit": "Early repair/failure captures intentionally bind earlier bytes; final captures distinguished; no test rerun"
+    },
+    {
+      "capture": "n1n2-claude-060p1r2-identity-001",
+      "argv": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "vitest",
+        "run",
+        "--config",
+        "vitest.config.ts",
+        "tests/agent-driven/integration/cache-process-identity.test.ts"
+      ],
+      "exit": 0,
+      "log_sha256": "ca1fc90018166360b7f1323158daa99c6a3151a8d2aef627f5d411086e9691f4",
+      "source_changed": [],
+      "inputs_count": 647,
+      "mismatch_to_final_bound_subset": [
+        "src/adapters/openfilm/openfilm-upstream.ts",
+        "src/adapters/openfilm/openfilm-cache-worker.mjs",
+        "src/adapters/openfilm/cache-worker-integrity.json",
+        "tests/agent-driven/integration/cache-production-scope.test.ts",
+        "tests/agent-driven/integration/cache-process-settlement.test.ts",
+        "tests/agent-driven/integration/helpers/cache-worker-fixture.mjs",
+        "tests/agent-driven/integration/helpers/cache-probe-fixture.mjs",
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts",
+        "tests/agent-driven/integration/cache-frame-duration-lifetime.test.ts"
+      ],
+      "limit": "Early repair/failure captures intentionally bind earlier bytes; final captures distinguished; no test rerun"
+    },
+    {
+      "capture": "n1n2-claude-060p1r2-m21-lock-001",
+      "argv": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "vitest",
+        "run",
+        "--config",
+        "vitest.config.ts",
+        "tests/m2.1/openfilm-upstream-lock.test.ts"
+      ],
+      "exit": 0,
+      "log_sha256": "52a1a28f3d499624cdb45fb93e6245f10db3e884d5e3afaa8c1e3f017067739a",
+      "source_changed": [],
+      "inputs_count": 647,
+      "mismatch_to_final_bound_subset": [
+        "src/adapters/openfilm/openfilm-upstream.ts",
+        "src/adapters/openfilm/openfilm-cache-worker.mjs",
+        "src/adapters/openfilm/cache-worker-integrity.json",
+        "tests/agent-driven/integration/cache-process-settlement.test.ts",
+        "tests/agent-driven/integration/helpers/cache-worker-fixture.mjs",
+        "tests/agent-driven/integration/helpers/cache-probe-fixture.mjs",
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts",
+        "tests/agent-driven/integration/cache-frame-duration-lifetime.test.ts"
+      ],
+      "limit": "Early repair/failure captures intentionally bind earlier bytes; final captures distinguished; no test rerun"
+    },
+    {
+      "capture": "n1n2-claude-060p1r2-scheduler-001",
+      "argv": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "vitest",
+        "run",
+        "--config",
+        "vitest.config.ts",
+        "tests/agent-driven/integration/cache-production-scope.test.ts"
+      ],
+      "exit": 1,
+      "log_sha256": "5330d02aa843fa483afd72bf4d8c5a950790b01b9eab15a4791adf5db2e830bf",
+      "source_changed": [],
+      "inputs_count": 647,
+      "mismatch_to_final_bound_subset": [
+        "src/adapters/openfilm/openfilm-upstream.ts",
+        "src/adapters/openfilm/openfilm-cache-worker.mjs",
+        "src/adapters/openfilm/cache-worker-integrity.json",
+        "tests/agent-driven/integration/cache-production-scope.test.ts",
+        "tests/agent-driven/integration/cache-process-settlement.test.ts",
+        "tests/agent-driven/integration/helpers/cache-worker-fixture.mjs",
+        "tests/agent-driven/integration/helpers/cache-probe-fixture.mjs",
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts",
+        "tests/agent-driven/integration/cache-frame-duration-lifetime.test.ts"
+      ],
+      "limit": "Early repair/failure captures intentionally bind earlier bytes; final captures distinguished; no test rerun"
+    },
+    {
+      "capture": "n1n2-claude-060p1r2-scheduler-002",
+      "argv": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "vitest",
+        "run",
+        "--config",
+        "vitest.config.ts",
+        "tests/agent-driven/integration/cache-production-scope.test.ts"
+      ],
+      "exit": 0,
+      "log_sha256": "938621b374e3ad9fdcbc9417935d1edc423791cdd6e6d13cc56bd864078fb75d",
+      "source_changed": [],
+      "inputs_count": 647,
+      "mismatch_to_final_bound_subset": [
+        "src/adapters/openfilm/openfilm-upstream.ts",
+        "src/adapters/openfilm/openfilm-cache-worker.mjs",
+        "src/adapters/openfilm/cache-worker-integrity.json",
+        "tests/agent-driven/integration/cache-process-settlement.test.ts",
+        "tests/agent-driven/integration/helpers/cache-worker-fixture.mjs",
+        "tests/agent-driven/integration/helpers/cache-probe-fixture.mjs",
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts",
+        "tests/agent-driven/integration/cache-frame-duration-lifetime.test.ts"
+      ],
+      "limit": "Early repair/failure captures intentionally bind earlier bytes; final captures distinguished; no test rerun"
+    },
+    {
+      "capture": "n1n2-claude-060p1r2-syntax-worker-fixture-001",
+      "argv": [
+        "node",
+        "--check",
+        "tests/agent-driven/integration/helpers/cache-worker-fixture.mjs"
+      ],
+      "exit": 0,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source_changed": [],
+      "inputs_count": 647,
+      "mismatch_to_final_bound_subset": [
+        "src/adapters/openfilm/openfilm-upstream.ts",
+        "src/adapters/openfilm/openfilm-cache-worker.mjs",
+        "src/adapters/openfilm/cache-worker-integrity.json",
+        "tests/agent-driven/integration/cache-process-settlement.test.ts",
+        "tests/agent-driven/integration/helpers/cache-probe-fixture.mjs",
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts",
+        "tests/agent-driven/integration/cache-frame-duration-lifetime.test.ts"
+      ],
+      "limit": "Early repair/failure captures intentionally bind earlier bytes; final captures distinguished; no test rerun"
+    },
+    {
+      "capture": "n1n2-claude-060p1r2-typecheck-001",
+      "argv": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "tsc",
+        "--noEmit"
+      ],
+      "exit": 2,
+      "log_sha256": "3b7e9f13487559a674439174844e98fb203cfd0ce60e7b1ccd126f2608bc034a",
+      "source_changed": [],
+      "inputs_count": 646,
+      "mismatch_to_final_bound_subset": [
+        "src/adapters/openfilm/openfilm-upstream.ts",
+        "src/adapters/openfilm/cache-production-scope.ts",
+        "src/adapters/openfilm/openfilm-cache-worker.mjs",
+        "src/adapters/openfilm/cache-worker-integrity.json",
+        "tests/agent-driven/integration/cache-production-scope.test.ts",
+        "tests/agent-driven/integration/cache-process-settlement.test.ts",
+        "src/adapters/openfilm/cache-process-custodian.py",
+        "tests/agent-driven/integration/helpers/cache-worker-fixture.mjs",
+        "tests/agent-driven/integration/helpers/cache-probe-fixture.mjs",
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts",
+        "tests/agent-driven/integration/cache-frame-duration-lifetime.test.ts",
+        "tests/agent-driven/integration/cache-process-identity.test.ts"
+      ],
+      "limit": "Early repair/failure captures intentionally bind earlier bytes; final captures distinguished; no test rerun"
+    },
+    {
+      "capture": "n1n2-claude-060p1r2-typecheck-002",
+      "argv": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "tsc",
+        "--noEmit"
+      ],
+      "exit": 0,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source_changed": [],
+      "inputs_count": 646,
+      "mismatch_to_final_bound_subset": [
+        "src/adapters/openfilm/openfilm-upstream.ts",
+        "src/adapters/openfilm/openfilm-cache-worker.mjs",
+        "src/adapters/openfilm/cache-worker-integrity.json",
+        "tests/agent-driven/integration/cache-production-scope.test.ts",
+        "tests/agent-driven/integration/cache-process-settlement.test.ts",
+        "src/adapters/openfilm/cache-process-custodian.py",
+        "tests/agent-driven/integration/helpers/cache-worker-fixture.mjs",
+        "tests/agent-driven/integration/helpers/cache-probe-fixture.mjs",
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts",
+        "tests/agent-driven/integration/cache-frame-duration-lifetime.test.ts",
+        "tests/agent-driven/integration/cache-process-identity.test.ts"
+      ],
+      "limit": "Early repair/failure captures intentionally bind earlier bytes; final captures distinguished; no test rerun"
+    },
+    {
+      "capture": "n1n2-claude-060p1r2-typecheck-003",
+      "argv": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "tsc",
+        "--noEmit"
+      ],
+      "exit": 0,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source_changed": [],
+      "inputs_count": 647,
+      "mismatch_to_final_bound_subset": [
+        "src/adapters/openfilm/openfilm-upstream.ts",
+        "src/adapters/openfilm/openfilm-cache-worker.mjs",
+        "src/adapters/openfilm/cache-worker-integrity.json"
+      ],
+      "limit": "Early repair/failure captures intentionally bind earlier bytes; final captures distinguished; no test rerun"
+    }
+  ],
+  "review_runtime": "ALL_NOT_RUN",
+  "no_product_import_or_runtime": true,
+  "outputs": [
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p1r2/independent-review/integration-review/REVIEW.md",
+      "bytes": 7026,
+      "sha256": "919beb8b0c8ad45f22988677dbd5ea6c848d3b80cb07f0f15bbc05528e2e2fba"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p1r2/independent-review/integration-review/FINDINGS.json",
+      "bytes": 41807,
+      "sha256": "1500a95951c9e3e8192c13c18a888a0d0a9a6c7a6a543e9a148d67daaca3a67d"
+    }
+  ]
+}

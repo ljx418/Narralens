@@ -1,0 +1,40 @@
+{
+  "format": "narralens.a-implementation-start-package@1",
+  "status": "PREPARED_NOT_RELEASED",
+  "current_goal_authorization": "preparation and readiness only",
+  "implementation_started": false,
+  "phase": "A",
+  "next_scope": [
+    "R0 preserve/review/freeze common source baseline",
+    "R1 three-lane producers/consumers",
+    "R2 review/adopt/native ack",
+    "R3 formal delivery/recovery",
+    "R4 unified A acceptance and human entry"
+  ],
+  "observed_base_sha": "838ba5f2c8500f0103f56dbe51264ea9f70086fc",
+  "overlay_manifest": "baseline-observed.json",
+  "contract_sha": "ca5b67a8285b130c79055317c6202f73cfbb99c8",
+  "common_implementation_sha": null,
+  "reason_sha_null": "R0 must generate actual reviewed commit; current goal forbids implementation execution",
+  "ownership": "03_OWNERSHIP_AND_DEPENDENCIES.json",
+  "prompts": {
+    "bridge": "implementation-prompts/bridge.md",
+    "product": "implementation-prompts/product.md",
+    "media": "implementation-prompts/media.md"
+  },
+  "preconditions": [
+    "explicit next implementation authorization",
+    "credential owner incident disposition/risk decision",
+    "actual common SHA and per-lane unique-writer ReleaseAssignments before lane feature coding",
+    "heavy resource reservation where required"
+  ],
+  "later_acceptance_input": "authorized real footage and Chinese human recording; not needed to complete documentation; no synthetic substitution for A human gate",
+  "not_authorized": [
+    "B",
+    "paid media/model calls",
+    "new external transfer",
+    "credential/config edits",
+    "J access without scoped permission",
+    "reset/stash/force push"
+  ]
+}

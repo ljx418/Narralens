@@ -1,0 +1,49 @@
+{
+  "at": "2026-11-12T15:08:18.731579+00:00",
+  "grant": "N1N2-RESUME-FOCUSED-017",
+  "status": "140_FAILED_AWAIT_OWN_CLEANUP",
+  "result": {
+    "exit": 1,
+    "source_changed": [],
+    "source_added": [],
+    "log_sha256": "905664c621e594db08fb30d43328476edd85516be46061a932a46f4ef9fb533d",
+    "finished_at": "2026-11-12T15:06:42.047744+00:00"
+  },
+  "counts": {
+    "passed": 11,
+    "failed": 5,
+    "filtered": 62,
+    "total": 78
+  },
+  "failures": [
+    {
+      "case": "tests/agent-driven/integration/created-native-source-reader.test.ts > F04 refuses a hardlink alias and an unknown directory in the working copy",
+      "diagnostic_excerpt": "AssertionError: expected ProductError: The committed snapshot fact\u2026 { \u2026(5) } to match object { code: 'NATIVE_SOURCE_COPY_ALIASED' }\n(5 matching properties omitted from actual)\n\n- Expected\n+ Received\n\n- {\n-   \"code\": \"NATIVE_SOURCE_COPY_ALIASED\",\n+ ProductError {\n+   \"code\": \"REVISION_CONFLICT\",\n  }\n\n \u276f tests/agent-driven/integration/created-native-source-reader.test.ts:788:3"
+    },
+    {
+      "case": "tests/agent-driven/integration/created-native-source-reader.test.ts > G01 adopts the genuine cleanup uncertainty of a rejected source acquisition",
+      "diagnostic_excerpt": "AssertionError: expected RetainedNativeError: The retained file ch\u2026 { \u2026(2) } to match object { code: 'REVISION_CONFLICT' }\n(1 matching property omitted from actual)\n\n- Expected\n+ Received\n\n- {\n-   \"code\": \"REVISION_CONFLICT\",\n+ RetainedNativeError {\n+   \"code\": \"NATIVE_CLOSURE_MEMBERSHIP_MOVED\",\n  }\n\n \u276f tests/agent-driven/integration/created-native-source-reader.test.ts:1826:4"
+    },
+    {
+      "case": "tests/agent-driven/integration/created-native-source-reader.test.ts > G02 refuses the round when the working copy view is invalidated during the read",
+      "diagnostic_excerpt": "AssertionError: expected NativeSourceReaderError: The working copy\u2026 { code: '\u2026' } to match object { Object (code) }\n(1 matching property omitted from actual)\n\n- Expected\n+ Received\n\n- {\n-   \"code\": \"NATIVE_SOURCE_WORKSPACE_STALE\",\n+ NativeSourceReaderError {\n+   \"code\": \"NATIVE_SOURCE_CLOSURE_MOVED\",\n  }\n\n \u276f tests/agent-driven/integration/created-native-source-reader.test.ts:1993:3"
+    },
+    {
+      "case": "tests/agent-driven/integration/created-native-source-reader.test.ts > G03 refuses a film that is replaced between the bounded digest and the parse",
+      "diagnostic_excerpt": "AssertionError: expected RetainedNativeError: The retained file ch\u2026 { code: '\u2026' } to match object { code: 'REVISION_CONFLICT' }\n(1 matching property omitted from actual)\n\n- Expected\n+ Received\n\n- {\n-   \"code\": \"REVISION_CONFLICT\",\n+ RetainedNativeError {\n+   \"code\": \"NATIVE_CLOSURE_MEMBERSHIP_MOVED\",\n  }\n\n \u276f tests/agent-driven/integration/created-native-source-reader.test.ts:2073:4"
+    },
+    {
+      "case": "tests/agent-driven/integration/created-native-source-reader.test.ts > P07 hands a non-lexical caption order to the actual consumer without changing it",
+      "diagnostic_excerpt": "AssertionError: expected 'unsupported' to be 'computed' // Object.is equality\n\nExpected: \"computed\"\nReceived: \"unsupported\"\n\n \u276f tests/agent-driven/integration/created-native-source-reader.test.ts:2306:26\n    2304|  };\n    2305|  const unsorted=await run(supplied);\n    2306|  expect(unsorted.status).toBe('computed');\n       |                          ^\n    2307|  const languagesOf=(result:typeof unsorted):string[]=>{\n    2308|   const cues=(result.status==='computed'&&result.captions.state==='pre\u2026\n"
+    }
+  ],
+  "pid1863011": "ABSENT",
+  "message": "msg_bfce619fe480",
+  "causal_decisions": [
+    "Centralauthorityretainedfailureclassification mustcoverreadText/hash/parse/finalguard; preservegenuinecleanupcauses",
+    "G07 sourcehardlink nlinkfailcanlegitimatelypreemptreaderCOPYalias; preservecross-treealiascoverage and isolatedworkspacealiascase, notsourcepolicyweakening",
+    "Workspaceinvalidated mayvalidlyfail earlierCLOSURE_MOVED; prove actualguard, do notforcefinalWORKSPACE_STALE",
+    "Suppliermissingplainfiletokenprotocol and per-runlisting mustmatchactualconsumer; sortedcontrol not overwritten"
+  ],
+  "remaining": "G04 service\u2192rawledger bypass; noother runtimegrants;final17requirementsunproven"
+}

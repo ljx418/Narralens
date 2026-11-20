@@ -1,0 +1,8 @@
+{
+  "at": "2026-11-12T03:03:43.090142+00:00",
+  "source_test_sha256": "20232b07161becbe1d1c5fd3484190574c7a766f2864175bb5a797386981edc6",
+  "finding": "Test labels direct active_commit UPDATE with fabricated snapshot/source digest as later legal commit; no actual controlled successor/committed source/transaction/state exists. Cannot certify legal later commit replay.",
+  "message": "msg_10794a33fbf3",
+  "required": "Real successor via existing controlled commit or explicitly synthetic pointer-corruption test with legal successor integrated case NOT_RUN; never manufacture coherent authority by updating more tables",
+  "constraints": "Current capture completes before mutations; same four-path writer; preserve failures; final captures on finalbytes"
+}

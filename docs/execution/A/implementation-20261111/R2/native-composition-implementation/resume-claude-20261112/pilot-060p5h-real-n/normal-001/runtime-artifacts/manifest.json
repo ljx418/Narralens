@@ -1,0 +1,41 @@
+{
+  "kind": "positive-pilot-manifest",
+  "authoritative": false,
+  "root": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/var/native-cache-positive-pilot/run-zfJOqD",
+  "artifacts": [
+    {
+      "name": "cache-worker-fixture.events",
+      "digest": "58d42673f83b1748e0ce6bcc509251e91c2bab1c81a4e72203a7527a6fa9ddfe",
+      "bytes": 299,
+      "error": null
+    },
+    {
+      "name": "cache-worker-fixture.mjs",
+      "digest": "e3f4ccb1c4016a54356ce04be344b4ffff23f2f88698efe191570ad8407d03ab",
+      "bytes": 15045,
+      "error": null
+    },
+    {
+      "name": "cache-worker-fixture.scenario",
+      "digest": "83d7d4df18591f6a966c7999355338c625e5a2f7c9cb0c35f11d3ed9f725e022",
+      "bytes": 7,
+      "error": null
+    },
+    {
+      "name": "candidate.json",
+      "digest": "73a439f018b1a5cac323a17219c68920cbed570e863df4bc9ecb02b8938184c5",
+      "bytes": 4636,
+      "error": null
+    }
+  ],
+  "listing_error": null,
+  "excluded": [
+    "manifest.json",
+    "final.json"
+  ],
+  "exclusion_reason": "the manifest may not hash itself, and the final record is written after it",
+  "required_artifacts": [
+    "candidate.json",
+    "cache-worker-fixture.mjs"
+  ]
+}

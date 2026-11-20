@@ -1,0 +1,11 @@
+{
+  "at": "2026-11-12T06:51:19.683293+00:00",
+  "status": "CORRECTION_REQUIRED_NOT_GRANTED",
+  "request": "msg_59aa0df44bd0",
+  "request_hashes_match": true,
+  "finding": "R07 uses parent PID parsed from heldFD path to look up event emitted with child PID",
+  "required": "retain independent actual childPID plus parentheldFD identity, match real exit ordering",
+  "old_grant_released": true,
+  "next": "compact updated test hash and compile then exactserialbatch grant",
+  "acceptance": "UNPROVEN"
+}

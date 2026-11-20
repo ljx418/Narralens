@@ -1,0 +1,27 @@
+{
+  "observed_at": "2026-11-11T16:49:02.865367+00:00",
+  "children": {
+    "media": {
+      "task": "task_e13123e368d3",
+      "dispatch": "ctx_17b224413d57",
+      "terminal": "term_2c707f6b-6c8e-4a00-8264-337c5dcb2a45",
+      "observed": "worker-show ready/input_accepted/live/retained",
+      "writer": "Claude; parent read-only",
+      "scope": "9 released paths, no heavy grant"
+    },
+    "product": {
+      "task": "task_3eaa8996288a",
+      "dispatch": "ctx_e1ce32b44d5c",
+      "terminal": "term_a096c007-df5d-464b-8ca2-3ecf3cd97f01",
+      "observed": "worker-show ready/input_accepted/live/retained",
+      "writer": "Claude; parent read-only",
+      "scope": "31 released paths, no heavy grant"
+    },
+    "bridge": {
+      "parent_dispatch": "ctx_2bf750ebdb18",
+      "observed": "worker-show ready/live/terminalactive; actual child receipt pending",
+      "writer": "Codex documentation/launch preparation; no claimed child yet"
+    }
+  },
+  "limit": "actual ready/live receipt, not proof of completed source implementation or self-tests; self-reported model UNKNOWN until worker text; no configs inspected"
+}

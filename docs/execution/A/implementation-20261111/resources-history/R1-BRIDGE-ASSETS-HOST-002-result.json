@@ -1,0 +1,34 @@
+{
+  "grant": {
+    "format": "narralens.dev-resource-ledger@1",
+    "status": "HELD",
+    "holder": "BRIDGE Claude ctx_b8584d6549f3 via BRIDGE Codex",
+    "queue": [
+      {
+        "lane": "MAIN",
+        "purpose": "MEDIA rework3 actual worker + preview regression; architecture creation/ledger after BRIDGE terminal",
+        "commands": [
+          "corepack pnpm test tests/agent-driven/integration/created-draft-processor.test.ts tests/agent-driven/media/preview-prepared-source.test.ts --maxWorkers=1 --minWorkers=1",
+          "corepack pnpm test tests/agent-driven/integration/project-creation-store.test.ts tests/wave2/w2-asset-ledger.test.ts --maxWorkers=1 --minWorkers=1"
+        ],
+        "status": "QUEUED; resolve actual ledger test filename before executing"
+      }
+    ],
+    "policy": "MAIN grants single heavy slot for Host/media/ffmpeg/Chromium/build/full gate; pure typecheck/unit permitted isolated",
+    "last_main_heavy": "REGRESSION003 terminal exit0 34/34; exact PIDs absent; source restored and frozen cca95020",
+    "evidence_limit": "operational coordination ledger, not proof of unrelated OS process absence",
+    "no_budget_ceiling": true,
+    "grant_id": "R1-BRIDGE-ASSETS-HOST-002",
+    "granted_at": "2026-11-11T14:49:46.208765+00:00",
+    "exact_command": "corepack pnpm exec vitest run tests/agent-driven/integration/local-assets-transport.test.ts tests/agent-driven/integration/host-application.test.ts tests/agent-driven/integration/creative-context-host.test.ts tests/agent-driven/integration/created-task-gate.test.ts --maxWorkers=1 --minWorkers=1",
+    "cwd": "/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE",
+    "scope": "real Host/local assets/probe and current application compatibility",
+    "request_message": "msg_e85d9722e2fd",
+    "source_fence": "freeze corrected tested input before command; no source/index mutation during command"
+  },
+  "terminal_exit": 1,
+  "result": "21/24,3 new transport failures; retained as failures",
+  "raw_log_sha256": "e223619d2f119ac3a52c0a2c266f4e6755b557c082325c6f582b19af72d1241c",
+  "input_candidate": "712bcc55239f8f6748f416a7f2a6b8aead2063d3",
+  "cleanup": "parent/child report no owned survivors, actual command terminal; no global process claim"
+}

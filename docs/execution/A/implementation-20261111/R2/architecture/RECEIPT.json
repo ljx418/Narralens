@@ -1,0 +1,40 @@
+{
+  "format": "narralens.architecture-artifact-receipt@1",
+  "source_revision": "dd2be1f08e65305dac6d0e4ecb05a03e1875e5b2",
+  "diagrams": [
+    {
+      "diagram": "r1-current",
+      "specification": {
+        "sha256": "0047dcb7da1c713dcd04ab0f410071c9109564e83657dfefd16c5d9dcd3ca11d",
+        "bytes": 6415
+      },
+      "artifact": {
+        "sha256": "d9966b59a9ab2a05dfc53390dd2952f97db47ea4b55565be28c0736b00ecca4d",
+        "bytes": 811665
+      },
+      "validation": "9/9 showcase; 0 errors; 0 warnings",
+      "browser_evidence": "passed",
+      "visual_review": "passed for inspected 2048x1320 light and 1440x900 dark screenshots: labels/nodes/cards fit, no crossings or conspicuous lower empty band",
+      "interaction_review": "NOT_RUN beyond visual-check runtime measurements; no focus/search/export behavior claim",
+      "business_acceptance": "NOT_CLAIMED"
+    },
+    {
+      "diagram": "r2-target",
+      "specification": {
+        "sha256": "50ff868baee9affc25507bf731530685c5f1038b8d585b1e37562dd21a8a2323",
+        "bytes": 6625
+      },
+      "artifact": {
+        "sha256": "960da5423dcd11e8d65c0e169dc7d9628aceb41d5059fa2cce696d091a948929",
+        "bytes": 810226
+      },
+      "validation": "9/9 showcase; 0 errors; 0 warnings",
+      "browser_evidence": "passed",
+      "visual_review": "passed for inspected 2048x1320 light and 1440x900 dark screenshots: labels/nodes/cards fit, no crossings or conspicuous lower empty band",
+      "interaction_review": "NOT_RUN beyond visual-check runtime measurements; no focus/search/export behavior claim",
+      "business_acceptance": "NOT_CLAIMED"
+    }
+  ],
+  "environment_note": "First automatic Chrome discovery skipped (exit2); reran using existing local Chromium1248, both exit0. No install, no desktop window. Browser commands terminal.",
+  "semantic_independent_review": "PENDING; diagrams do not stand in for runtime capability or A acceptance"
+}

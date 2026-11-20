@@ -1,0 +1,22 @@
+{
+  "at": "2026-11-12T02:48:35.066262+00:00",
+  "captures": {
+    "d10-business-oldsel-002": {
+      "exit": 1,
+      "source_changed": [],
+      "source_added": [],
+      "log_sha256": "2fa63fda6b592403c53f2267be70ac558a5176c5ae9f2525f77ec816b4a30c65",
+      "finished_at": "2026-11-12T02:44:01.578878+00:00"
+    },
+    "d10-business-repairedsel-003": {
+      "exit": 0,
+      "source_changed": [],
+      "source_added": [],
+      "log_sha256": "dd9da8330a8b56d5020a5d6b7ac4a1458a7ad009f595546af9ddf821f305a686",
+      "finished_at": "2026-11-12T02:44:56.645551+00:00"
+    }
+  },
+  "old_observed": "Two real business assertion failures: marker-only outcome aborted vs required attention; tampered source DB prepared vs required persistent attention. Not fixture/setup failure.",
+  "fixed_observed": "Same selected2 pass with18filtered; full20 and old50 not yet observed",
+  "limit": "Not full recovery/Host wiring/realSIGKILL/A acceptance. Slot and writer remain unchanged."
+}

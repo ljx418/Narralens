@@ -1,0 +1,87 @@
+{
+  "at": "2026-11-14T03:18:51.782915+00:00",
+  "status": "IMPLEMENTATION_IN_PROGRESS_NOT_ACCEPTANCE",
+  "actual_captures": [
+    {
+      "capture": "n1n2-claude-059-lock-001",
+      "exit": 1,
+      "log_sha256": "ee4d2882ae5fce911716f90a01b6cdfd4926f9f55b9f521062534fd4f0cf97ec",
+      "argv": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "vitest",
+        "run",
+        "--config",
+        "vitest.config.ts",
+        "tests/m2.1/openfilm-upstream-lock.test.ts"
+      ],
+      "source_changed": [],
+      "source_added": []
+    },
+    {
+      "capture": "n1n2-claude-059-lock-diag-001",
+      "exit": 1,
+      "log_sha256": "f662a421242c9dc7f030d2e9e412574c08b62505e3d2a97ea7ff1c131394b9de",
+      "argv": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "vitest",
+        "run",
+        "--config",
+        "vitest.config.ts",
+        "tests/m2.1/openfilm-upstream-lock.test.ts"
+      ],
+      "source_changed": [],
+      "source_added": []
+    },
+    {
+      "capture": "n1n2-claude-059-lock-diag-002",
+      "exit": 1,
+      "log_sha256": "f074c38208f68572d4fa775f51252a02f5167a4b5d63fd27ea4aa3d5dda6b443",
+      "argv": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "vitest",
+        "run",
+        "--config",
+        "vitest.config.ts",
+        "tests/m2.1/openfilm-upstream-lock.test.ts"
+      ],
+      "source_changed": [],
+      "source_added": []
+    },
+    {
+      "capture": "n1n2-claude-059-tsc-001",
+      "exit": 2,
+      "log_sha256": "897f08178dfde3589f655e04154cd0305361d0994d16bd57229a02cc45cbefc8",
+      "argv": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "tsc",
+        "--noEmit"
+      ],
+      "source_changed": [],
+      "source_added": []
+    },
+    {
+      "capture": "n1n2-claude-059-tsc-002",
+      "exit": 0,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "argv": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "tsc",
+        "--noEmit"
+      ],
+      "source_changed": [],
+      "source_added": []
+    }
+  ],
+  "observation": "tsc001 actual type error preserved; tsc002 passed at those captured bytes. Lock001/diag001 reveal arrow-helper taint and missing authority enumeration; uniqueClaude continues authorized self-correction. Later source changes are not certified by earlier green.",
+  "ACK_timestamp_note": "059 ACK at is a manually written 00:00 timestamp and is not used as execution evidence. Raw recorder times are authoritative; preserve original ACK."
+}

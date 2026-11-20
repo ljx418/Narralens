@@ -1,0 +1,31 @@
+{
+  "at": "2026-11-12T13:20:28.753289+00:00",
+  "results": {
+    "099-tsc-dedupe": {
+      "exit": 0,
+      "source_changed": [],
+      "source_added": [],
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "finished_at": "2026-11-12T13:18:53.569105+00:00"
+    },
+    "100-gate-pure": {
+      "exit": 0,
+      "source_changed": [],
+      "source_added": [],
+      "log_sha256": "62c7c84b039019dc1a411e55ca7f3892c641982052456955d90453e97a339a9c",
+      "finished_at": "2026-11-12T13:19:16.606130+00:00"
+    },
+    "101-gate-component-focused": {
+      "exit": 0,
+      "source_changed": [],
+      "source_added": [],
+      "log_sha256": "18857c1d892cc3f8a5e191ac6b560d3c7c1b02853b12ea13c3784b9dc8261fb5",
+      "finished_at": "2026-11-12T13:20:03.212769+00:00"
+    }
+  },
+  "pure_passed": 18,
+  "focused_component_passed": 2,
+  "tenhashes_match": true,
+  "cleanup": "PENDING_CLAUDE_OWN_RECEIPT",
+  "limit": "targetedverificationonly;notfullN1N2"
+}

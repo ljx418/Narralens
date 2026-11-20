@@ -1,0 +1,1 @@
+async #rootHandle(){return this.#root??=open(runtimeRoot(this.#path),constants.O_RDONLY|constants.O_DIRECTORY|constants.O_NOFOLLOW);}

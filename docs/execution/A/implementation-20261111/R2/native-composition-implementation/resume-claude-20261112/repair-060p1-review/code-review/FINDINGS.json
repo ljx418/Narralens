@@ -1,0 +1,866 @@
+{
+  "format": "narralens.independent-P1-static-code-review@1",
+  "verdict": "REQUEST_CHANGES",
+  "binding": "INPUT_SNAPSHOT actual uncommitted dirty bytes; base_head is historical only",
+  "base_head": "1d348d419120f23f45d958112ea8c43df5a04675",
+  "counts": {
+    "BLOCKER": 1,
+    "MAJOR": 9,
+    "MINOR": 1,
+    "NOTE": 2
+  },
+  "findings": [
+    {
+      "id": "P1-F01",
+      "severity": "BLOCKER",
+      "title": "两处proc stat解析把状态字符当PID，正常worker不能握手",
+      "locations": [
+        {
+          "path": "src/adapters/openfilm/cache-process-supervisor.ts",
+          "line": 245
+        },
+        {
+          "path": "src/adapters/openfilm/cache-process-supervisor.ts",
+          "line": 250
+        },
+        {
+          "path": "src/adapters/openfilm/openfilm-cache-worker.mjs",
+          "line": 91
+        },
+        {
+          "path": "src/adapters/openfilm/openfilm-cache-worker.mjs",
+          "line": 96
+        },
+        {
+          "path": "src/adapters/openfilm/openfilm-cache-worker.mjs",
+          "line": 291
+        }
+      ],
+      "trigger": "任何合法Linux /proc/<pid>/stat：最后右括号后第一项是S/R/Z等state，不是PID；Number(fields[0])为NaN。",
+      "reachability": "Immediately reachable on every current normal draw, independent of MAIN hypotheses; no reproduction executed",
+      "impact": "supervisor和worker都返回null；worker在HELLO前抛IDENTITY_UNREADABLE，没有正常pageFrame/连续两帧/poster路径。supervisor的组枚举也将所有真实成员漏成空。",
+      "violated_contract": "ADR真实PID/startticks握手、ISO-01/09/18；R04 native_cache、R05 child_lifetime。",
+      "minimal_fix": "从右括号之前解析并验证pid，或使用已知pid参数且验证记录首字段；右侧fields[0]仅作state；严格校验ppid/pgid/sid/startticks及解析错误，不把无法读取当消失。同步修两处解析，不只修worker。",
+      "meaningful_validation_to_run_later": "纯解析fixture覆盖带空格/括号comm、S/R/Z及畸形输入；经授权后实际own pid/真实spawn worker握手、两帧+poster与整组退出。现有identity测试50–59会抓此问题但P1没有运行。",
+      "review_runtime": "NOT_RUN"
+    },
+    {
+      "id": "P1-F02",
+      "severity": "MAJOR",
+      "title": "无法读取内核身份被当作消失，child close也不是强制证明",
+      "locations": [
+        {
+          "path": "src/adapters/openfilm/cache-process-supervisor.ts",
+          "line": 236
+        },
+        {
+          "path": "src/adapters/openfilm/cache-process-supervisor.ts",
+          "line": 269
+        },
+        {
+          "path": "src/adapters/openfilm/cache-process-supervisor.ts",
+          "line": 871
+        },
+        {
+          "path": "src/adapters/openfilm/cache-process-supervisor.ts",
+          "line": 885
+        }
+      ],
+      "trigger": "proc读取/枚举发生EACCES/EIO/解析失败；或closed在killConfirmMs内尚未完成但组瞬时枚举为空。",
+      "reachability": "P1 production chain; some downstream branches are masked by P1-F01 until the parser is repaired",
+      "impact": "readIdentity把所有异常归null，readGroup把枚举失败归[]；无leader分支直接!alive=>true，已知leader分支race超时后也可true，完全没有childClosed布尔门。当前F01还使这一错误分支立即可达。可能在worker仍活着/stdio尚未关闭时使失败返回，PRE被释放。",
+      "violated_contract": "ADR A01/A02、真实child close+group消失+全部记录身份；ISO-09/10；R05 child_lifetime、R07 cleanup_uncertainty/drain_and_delivery。",
+      "minimal_fix": "使用gone/known/unknown三态，只把确定ENOENT等作消失；在DrawFacts持久记录spawn/exit/close，所有结算必须实际close已观察且新鲜组/记录身份均确定消失。未握手失败仅在GO从未发出等事实下证明域上界，再实际reap child；未知保全，不使用child-only结算捷径。",
+      "meaningful_validation_to_run_later": "授权故障注入proc EIO/EPERM、延迟child close/继承stdio、HELLO前失败：wrapper不能settle/PRE不能释放，直到真实close及确定内核证明。",
+      "review_runtime": "NOT_RUN"
+    },
+    {
+      "id": "P1-F03",
+      "severity": "MAJOR",
+      "title": "reconcile不校验本supervisor签发和held状态，且跳过完整结束证明",
+      "locations": [
+        {
+          "path": "src/adapters/openfilm/cache-process-supervisor.ts",
+          "line": 206
+        },
+        {
+          "path": "src/adapters/openfilm/cache-process-supervisor.ts",
+          "line": 409
+        },
+        {
+          "path": "src/adapters/openfilm/cache-process-supervisor.ts",
+          "line": 457
+        },
+        {
+          "path": "src/adapters/openfilm/cache-process-supervisor.ts",
+          "line": 474
+        }
+      ],
+      "trigger": "另一个supervisor收到真实foreign handle；或在原draw尚drawing/terminating时调用reconcile，恰逢组为空；或held draw的已记录进程转到其他组仍存活。",
+      "reachability": "Host-private exported lifecycle API, not public HTTP authority; factory currently also fails to expose its real handle (F04), so do not portray as an existing remote exploit",
+      "impact": "模块全局WeakMap让other supervisor的#factsOf认得foreign handle；reconcile无cleanup_required阶段门，只有组空即settle，跳过recorded身份与child.close，也无父drain证明，可与#run并发抢先交付/结算。",
+      "violated_contract": "ADR rev2 A01要求该supervisor私有真实handle、新鲜身份/组消失及父drain、恰好一次；ISO-10/11。",
+      "minimal_fix": "绑定issuer实例并验证，只允许held且原run已让出责任的reconcile；复用完整且保守的close/group/recorded证明，并通过同一父drain责任完成整个barrier，不由裸组空触发。",
+      "meaningful_validation_to_run_later": "A/B supervisor互传真实handle必须DRAW_FOREIGN；drawing时reconcile不能settle；记录身份仍活于另一组、stdio未close、父drain未完均保持pending；最终一次settle。",
+      "review_runtime": "NOT_RUN"
+    },
+    {
+      "id": "P1-F04",
+      "severity": "MAJOR",
+      "title": "实际生产held draw没有可达reconcile owner，原失败丢失且scope不可恢复",
+      "locations": [
+        {
+          "path": "src/adapters/openfilm/cache-process-supervisor.ts",
+          "line": 345
+        },
+        {
+          "path": "src/adapters/openfilm/cache-process-supervisor.ts",
+          "line": 512
+        },
+        {
+          "path": "src/adapters/openfilm/cache-process-supervisor.ts",
+          "line": 496
+        },
+        {
+          "path": "src/adapters/openfilm/openfilm-upstream.ts",
+          "line": 433
+        },
+        {
+          "path": "src/adapters/openfilm/openfilm-upstream.ts",
+          "line": 441
+        },
+        {
+          "path": "src/adapters/openfilm/cache-production-scope.ts",
+          "line": 319
+        },
+        {
+          "path": "src/adapters/openfilm/cache-production-scope.ts",
+          "line": 338
+        },
+        {
+          "path": "src/adapters/openfilm/openfilm-cache-worker.mjs",
+          "line": 389
+        },
+        {
+          "path": "src/adapters/openfilm/cache-process-supervisor.ts",
+          "line": 775
+        }
+      ],
+      "trigger": "真实绘制清理未证进入#holdForCleanup，然后外部实际资源已结束。",
+      "reachability": "P1 production chain; some downstream branches are masked by P1-F01 until the parser is repaired",
+      "impact": "draw内部reserve的handle只在#run局部事实中，工厂只保存work promise且不保留supervisor/handle诊断账本，生产owner无法拿真实held handle来reconcile；scope.cleanup_required一旦true没有生产清除入口，release永远no-op（只有测试reset能释放）。另#fail在hold前没有写facts.error/facts.picture，reconcile会丢原primary，甚至采用已因flood等拒绝的候选picture。 另worker仅序列化name/message，parent只取message字符串造PRODUCER_FAILED，未保留native error的name/code/stack/cause或cleanup envelope；不要求跨进程保留同一个JS对象身份，但不能把原错误事实缩成一条message。",
+      "violated_contract": "ADR A01保留原primary、实际handle fresh reconcile后原finally释放一次，不以永久pending当正常完成；ISO-07/09/11；R07 cleanup_uncertainty/drain_and_delivery。",
+      "minimal_fix": "在spawn前由生产owner持久登记supervisor+handle+scope+父drain责任，draw应消费该同一reservation；失败发生即锁存原始outcome/取消状态，不能留到settle才赋值。仅在完整fresh execution+parent drain证明后经私有issued completion清除held标记并让原finally释放一次；测试reset不能是唯一恢复路径。 私有IPC定义受限且有界的原错误envelope，保留可传输name/code/stack/cause/cleanup并作为parent cause，区分native错误与supervisor错误；同进程primary和cleanup原对象保持。",
+      "meaningful_validation_to_run_later": "真实工厂路径制造一次可恢复CLEANUP_REQUIRED，再实际结束资源；通过真实owner handle reconcile，原失败原样返回、PRE释放一次、scope/root回idle且下一draw成功。flood后候选不得经reconcile变成功。 seek/JOB/capture故障分别断言可辨原native错误事实与supervisor timeout，不只比一段通用message。",
+      "review_runtime": "NOT_RUN"
+    },
+    {
+      "id": "P1-F05",
+      "severity": "MAJOR",
+      "title": "HELLO未绑定spawn PID且先采纳未验证leader，失去锚仍可组TERM",
+      "locations": [
+        {
+          "path": "src/adapters/openfilm/cache-process-supervisor.ts",
+          "line": 704
+        },
+        {
+          "path": "src/adapters/openfilm/cache-process-supervisor.ts",
+          "line": 710
+        },
+        {
+          "path": "src/adapters/openfilm/cache-process-supervisor.ts",
+          "line": 714
+        },
+        {
+          "path": "src/adapters/openfilm/cache-process-supervisor.ts",
+          "line": 942
+        },
+        {
+          "path": "src/adapters/openfilm/cache-process-supervisor.ts",
+          "line": 945
+        },
+        {
+          "path": "src/adapters/openfilm/cache-process-supervisor.ts",
+          "line": 951
+        },
+        {
+          "path": "src/adapters/openfilm/cache-process-supervisor.ts",
+          "line": 958
+        }
+      ],
+      "trigger": "握手返回另一个进程PID或身份字段不符；或已识别leader意外提前退出，旧数字组仍有成员/被重用。",
+      "reachability": "Latent after F01 repair; requires private worker/protocol fault or leader crash, not attacker-controlled public HTTP fields",
+      "impact": "hello.pid没有与child.pid比较，facts.leader在校验前赋值，失败清理可朝错误进程组发signal；#terminate仅在!leaderIsOurs且组空时return，组非空即发TERM，违背注释的不再signal规则。KILL判断还用未同时绑定pid/sid的start_ticks匹配。",
+      "violated_contract": "ADR发signal前存活leader锚或同样强owned身份，未知/重用/不同SID保全，peer不能被kill；ISO-05/10/18。",
+      "minimal_fix": "只从spawn child.pid读身份，验证全部字段、Host PPID与PGID/SID后才commit leader；验证失败不能采纳候选HELLO身份。每次TERM/KILL前重验完整(pid,startticks,pgid,sid)锚；没有强owned锚就保全，不能用组非空或相同startticks代替归属。",
+      "meaningful_validation_to_run_later": "授权私有protocol fixture使HELLO指向peer/Host、字段不匹配；leader提前exit与数字reuse边界；断言没有给foreign组发任何signal且peer仍存活成功。",
+      "review_runtime": "NOT_RUN"
+    },
+    {
+      "id": "P1-F06",
+      "severity": "MAJOR",
+      "title": "JPEG与closed消息的await不受deadline控制，普通close卡住可永久挂起",
+      "locations": [
+        {
+          "path": "src/adapters/openfilm/cache-process-supervisor.ts",
+          "line": 746
+        },
+        {
+          "path": "src/adapters/openfilm/cache-process-supervisor.ts",
+          "line": 780
+        },
+        {
+          "path": "src/adapters/openfilm/cache-process-supervisor.ts",
+          "line": 813
+        },
+        {
+          "path": "src/adapters/openfilm/openfilm-cache-worker.mjs",
+          "line": 409
+        }
+      ],
+      "trigger": "worker发送合法result元信息后不发送完整JPEG，或producer.closePageFrames()永久pending而不发送closed消息。",
+      "reachability": "P1 production chain; some downstream branches are masked by P1-F01 until the parser is repaired",
+      "impact": "outerDeadline只race第一个result；JPEG await没有race，closedMessage await在finalize计时之前，finalizeMs直到#settleDomain才起效。outerTimer到期仅resolve无人等待的symbol，完全不会触发清理；worker自身finalize等待计时也在closePageFrames后。两槽/PRE/owner.close可永久挂住，普通故障没有主动闭环。",
+      "violated_contract": "ADR outer60s/finalize3s是清理动作截止，不用永久pending替代正常timeout回收；ISO-02/04/07/09。",
+      "minimal_fix": "对完整候选接收与finalize/closed阶段使用统一阶段deadline/取消状态机；每个阻塞read参与race且超时立即封输入/启动owned域清理，drain原始read，真正未知才hold。不能仅增加一个从未参与await的timer。",
+      "meaningful_validation_to_run_later": "真实受控worker发送result后半帧、或合法JPEG后close永不返；到期实际TERM/KILL并证明child/group/父drain完成，普通失败settle且下一draw可继续。",
+      "review_runtime": "NOT_RUN"
+    },
+    {
+      "id": "P1-F07",
+      "severity": "MAJOR",
+      "title": "私有管道和诊断预算没有全生命周期硬门",
+      "locations": [
+        {
+          "path": "src/adapters/openfilm/cache-process-supervisor.ts",
+          "line": 603
+        },
+        {
+          "path": "src/adapters/openfilm/cache-process-supervisor.ts",
+          "line": 617
+        },
+        {
+          "path": "src/adapters/openfilm/cache-process-supervisor.ts",
+          "line": 635
+        },
+        {
+          "path": "src/adapters/openfilm/cache-process-supervisor.ts",
+          "line": 589
+        },
+        {
+          "path": "src/adapters/openfilm/cache-process-supervisor.ts",
+          "line": 794
+        },
+        {
+          "path": "src/adapters/openfilm/openfilm-cache-worker.mjs",
+          "line": 121
+        }
+      ],
+      "trigger": "worker在无frame waiter的阶段连续发送多帧/大payload，或在等待result/closed期间持续stdout/stderr洪水。",
+      "reachability": "P1 production chain; some downstream branches are masked by P1-F01 until the parser is repaired",
+      "impact": "data事件先无上限Buffer.concat，长度只在存在waiter时解析，既无累计未消费上限也无状态帧数量门；worker接收端相同。stdout/stderr超限仅设flooded，且只在收到并验证完整picture后检查一次；卡住或之后洪水不会立即拒绝/清理。",
+      "violated_contract": "ADR私有固定header先验长度、累计stdout/stderr64KiB、超限真实拒绝清理；ISO-08；R07 budgets。",
+      "minimal_fix": "增量有界decoder在每次data时先核当前协议状态/长度/剩余总buffer预算，并pause/关闭拒绝；全阶段flood事件触发同一失败清理状态机，不等候选。出向frame/message也应在父端先按固定预算校验，处理背压而非任意积压。",
+      "meaningful_validation_to_run_later": "协议header超限但payload持续写、无waiter多帧、partial JPEG、result前/closed期stdout-stderr洪水，断言有界峰值与真实回收；保留合法最大JPEG/请求对照。",
+      "review_runtime": "NOT_RUN"
+    },
+    {
+      "id": "P1-F08",
+      "severity": "MAJOR",
+      "title": "producer close未登记仍在等scope的受理调用，close后可新spawn",
+      "locations": [
+        {
+          "path": "src/adapters/openfilm/openfilm-upstream.ts",
+          "line": 418
+        },
+        {
+          "path": "src/adapters/openfilm/openfilm-upstream.ts",
+          "line": 429
+        },
+        {
+          "path": "src/adapters/openfilm/openfilm-upstream.ts",
+          "line": 441
+        },
+        {
+          "path": "src/adapters/openfilm/openfilm-upstream.ts",
+          "line": 445
+        },
+        {
+          "path": "src/adapters/openfilm/openfilm-upstream.ts",
+          "line": 456
+        }
+      ],
+      "trigger": "两个active scope占满后，第三个owner.pageFrame进入await acquireCacheProductionScope；该owner.close先到达。",
+      "reachability": "Immediately reachable at Host-private issued producer API before any worker execution; F01 does not prevent this ordering defect",
+      "impact": "calls.add发生在await准入之后，close快照为空即可返回并删除owner；队列稍后获准，pageFrame不再检查draining而创建supervisor并spawn。即使root空闲，async acquire造成的首次让步也可暴露同样窗口。queued reservation没有用该owner取消signal；workspace也未传自身abort给scheduler。",
+      "violated_contract": "owner.close封准入并等待全部已受理操作，GO前取消队列不生Chrome；ADR A05、ISO-07/16；R07 drain_and_delivery。",
+      "minimal_fix": "进入pageFrame时同步登记覆盖排队到结算的完整责任；owner持AbortController/queue reservation，close封准入后取消未GO排队并等待真实settlement；获准后重新检查owner闭态，不能调用close后birth。共享同一close promise。workspace队列传已有abort并保持租约门。",
+      "meaningful_validation_to_run_later": "两active阻塞第三排队，立即close第三owner，再释放槽：close必须等待取消结算且第三从未spawn；重复close共享结果。另做无阻塞首次await的close竞争。",
+      "review_runtime": "NOT_RUN"
+    },
+    {
+      "id": "P1-F09",
+      "severity": "MAJOR",
+      "title": "FINALIZE成功路径未排除已知异常exit/协议close错误",
+      "locations": [
+        {
+          "path": "src/adapters/openfilm/cache-process-supervisor.ts",
+          "line": 669
+        },
+        {
+          "path": "src/adapters/openfilm/cache-process-supervisor.ts",
+          "line": 807
+        },
+        {
+          "path": "src/adapters/openfilm/cache-process-supervisor.ts",
+          "line": 813
+        },
+        {
+          "path": "src/adapters/openfilm/cache-process-supervisor.ts",
+          "line": 817
+        },
+        {
+          "path": "src/adapters/openfilm/cache-process-supervisor.ts",
+          "line": 828
+        }
+      ],
+      "trigger": "完整候选已缓冲，但parent在记录FINALIZE前已经观察到异常exit；或闭合阶段读到fatal/错误类型。",
+      "reachability": "P1 production chain; some downstream branches are masked by P1-F01 until the parser is repaired",
+      "impact": "exited事件仅追加字符串，void exited从未成为成功资格门；FINALIZE_AFTER_OK无视已知异常exit。closed阶段异常只push cleanup，域消失后仍#settle(picture,null)，将已知故障当成功。不能仅凭candidate+group空推授权成功。",
+      "violated_contract": "ADR A04可观测真值表第一行明确FINALIZE前已观察异常exit/协议失败不得交付；ISO-15。",
+      "minimal_fix": "单调记录原始exit/code/signal/协议/取消/预算错误及其相对finalize顺序，成功判定必须检查真值表；已知失败锁存primary并走真实清理失败结算，只有先记录合法finalize后授权清理的候选可采纳。",
+      "meaningful_validation_to_run_later": "worker写完候选后在parent finalize前异常exit；closed阶段fatal；在不同事件序下验证只有符合A04顺序的一支可交付，其他零witness。",
+      "review_runtime": "NOT_RUN"
+    },
+    {
+      "id": "P1-F10",
+      "severity": "MAJOR",
+      "title": "源流error被当成close完成且原清理原因被吞掉",
+      "locations": [
+        {
+          "path": "src/adapters/openfilm/openfilm-upstream.ts",
+          "line": 777
+        },
+        {
+          "path": "src/adapters/openfilm/openfilm-upstream.ts",
+          "line": 782
+        },
+        {
+          "path": "src/adapters/openfilm/openfilm-upstream.ts",
+          "line": 783
+        },
+        {
+          "path": "src/adapters/openfilm/openfilm-upstream.ts",
+          "line": 798
+        },
+        {
+          "path": "src/adapters/openfilm/openfilm-upstream.ts",
+          "line": 815
+        }
+      ],
+      "trigger": "固定folder的真实Readable发error，或响应中止后destroy抛错/关闭失败。",
+      "reachability": "P1 production chain; some downstream branches are masked by P1-F01 until the parser is repaired",
+      "impact": "source.once(error,settle)与close同样完成账本，track随后删条目；drain只看集合空返回open0，没有保存error对象、close是否真正观测或destroy失败。不能从error事件独立证明source FD已关闭；即便常规fs.ReadStream某些错误路径确已close，也没有满足该精确证据与不确定性合同。",
+      "violated_contract": "ADR A02真实source.close退出门、保留每条error/close原因，response/error不是FD close；ISO-12/14；R07 cleanup_uncertainty。",
+      "minimal_fix": "分开记录source error与真正close；error保留原对象并按owned source发起destroy，仍等待close；close/destroy不确定保留ledger和scope/PRE责任，不能catch即断言已gone。drain返回或抛出完整原因并让bridge/workspace维持相应barrier。",
+      "meaningful_validation_to_run_later": "授权真实源流I/O错误与delayed close、destroy失败测试：error后未close期间ledger仍占有；最终close已证才退出，原因不丢失。不要仅用普通abort响应测试替代。",
+      "review_runtime": "NOT_RUN"
+    },
+    {
+      "id": "P1-F11",
+      "severity": "MINOR",
+      "title": "进程组测试错误假定测试进程是组长",
+      "locations": [
+        {
+          "path": "tests/agent-driven/integration/cache-process-settlement.test.ts",
+          "line": 62
+        }
+      ],
+      "trigger": "vitest测试进程继承runner的PGID，process.pid != process.pgid。",
+      "reachability": "Static assertion defect in the written, explicitly NOT_RUN P2 test",
+      "impact": "readCacheProcessGroup(process.pid)找的是不存在的组，即使修好parser仍可能不含本进程；这不是process-group实现故障。",
+      "violated_contract": "有意义的ISO-09/18直接证据应以实际身份为准。",
+      "minimal_fix": "先读取本进程identity.pgid再枚举；专门验证detached worker则真正spawn detached并记录其组身份。",
+      "meaningful_validation_to_run_later": "实际继承PGID与detached组两种模式，避免把runner假设写成断言。",
+      "review_runtime": "NOT_RUN"
+    },
+    {
+      "id": "P1-N01",
+      "severity": "NOTE",
+      "title": "Q2的close/stdio论证应纠正，不能据此直接批准改路由",
+      "evidence": "提供的Node v22.22.1 execFile源码sha ca0514b9e2933600df637fe8de94ae095e295d0592a5a787e5b976b229122878同时注册close->exithandler和error->errorhandler->exithandler；kill的throw也会exithandler。只关闭stdio且忽略TERM不能凭此证明child close先于exit。固定host.mjs:162–164确实在任意execFile回调error时done(null)。",
+      "recommendation": "正常close/exit路径与error/kill失败提前callback分别做真实child证据，记录原child的close/reap；保留无法证明处，不把错误论证当新public路由/owned seam已必要或已授权。任何扩路径先给MAIN精确方案。",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "id": "P1-N02",
+      "severity": "NOTE",
+      "title": "报告承认开发期失败未留原日志，不能补造历史",
+      "evidence": "docs/parallel/lane-product/A-R2-20261112/N1N2-native-source/n1n2-claude-060p1-report.md §3/§7：声明调度窄拒绝顺序及supervisor早settle等捕获前失败已被替代、旧失败不另存。七个现存capture日志确为exit0，未发现可核实该两次失败的原命令/exit/log/input记录。",
+      "recommendation": "将原失败证据记UNRECORDED/UNKNOWN并保留该承认；后续全部失败独立recorder。可新建反事实复现但必须新时间/新argv，不称恢复旧失败。"
+    }
+  ],
+  "original_17_requirement_map": [
+    {
+      "group": "R01",
+      "requirement": "producer_chain",
+      "original_proof_required": "Actual bootstrap, SOURCE_ONLY draft and controlled adoption produce committed rich source; actual workspace/reader consumes it; preserve producer/rights/consumer identities.",
+      "P1_static_status": "P1_SCOPE_LIMITED_NOT_REACCEPTED",
+      "related_findings": [],
+      "runtime": "NOT_RUN_BY_REVIEWER",
+      "limit": "No inherited whole-goal PASS; historical ten-file/84 wording is not new release scope"
+    },
+    {
+      "group": "R01",
+      "requirement": "independent_trees",
+      "original_proof_required": "Committed source and workspace retain independent physical trees; equal relative paths never collapse resource ownership; nested and empty directories are separate evidence.",
+      "P1_static_status": "P1_SCOPE_LIMITED_NOT_REACCEPTED",
+      "related_findings": [],
+      "runtime": "NOT_RUN_BY_REVIEWER",
+      "limit": "No inherited whole-goal PASS; historical ten-file/84 wording is not new release scope"
+    },
+    {
+      "group": "R02",
+      "requirement": "tamper_and_authority",
+      "original_proof_required": "Same bytes/new inode, parent/root replacement, same-size/restored mtime, symlink, copied/foreign/released capability and stale base/control/owner/generation are refused before authoritative use.",
+      "P1_static_status": "P1_SCOPE_LIMITED_NOT_REACCEPTED",
+      "related_findings": [],
+      "runtime": "NOT_RUN_BY_REVIEWER",
+      "limit": "No inherited whole-goal PASS; historical ten-file/84 wording is not new release scope"
+    },
+    {
+      "group": "R03",
+      "requirement": "complete_dependencies",
+      "original_proof_required": "Positive/negative style/settings/markers/subtitle/translation dependencies, added empty directory and actual listing changes invalidate stale proofs.",
+      "P1_static_status": "P1_SCOPE_LIMITED_NOT_REACCEPTED",
+      "related_findings": [],
+      "runtime": "NOT_RUN_BY_REVIEWER",
+      "limit": "No inherited whole-goal PASS; historical ten-file/84 wording is not new release scope"
+    },
+    {
+      "group": "R04",
+      "requirement": "native_cache",
+      "original_proof_required": "Unknown/forged native metadata or cache refused; concrete approved producer derivation invalidates old round, then stable proven native derivation can be read; no broad cache whitelist.",
+      "P1_static_status": "STATIC_DEFECT",
+      "related_findings": [
+        "P1-F01",
+        "P1-F06",
+        "P1-F09"
+      ],
+      "runtime": "NOT_RUN_BY_REVIEWER",
+      "limit": "No inherited whole-goal PASS; historical ten-file/84 wording is not new release scope"
+    },
+    {
+      "group": "R05",
+      "requirement": "actual_probe",
+      "original_proof_required": "Fixed local ffprobe uses same held parent-PID FD; normalized duration/first-video/fps/rotation/audio/dimensions and provenance match pinned upstream; no injected facts.",
+      "P1_static_status": "P1_SCOPE_LIMITED_NOT_REACCEPTED",
+      "related_findings": [],
+      "runtime": "NOT_RUN_BY_REVIEWER",
+      "limit": "No inherited whole-goal PASS; historical ten-file/84 wording is not new release scope"
+    },
+    {
+      "group": "R05",
+      "requirement": "child_lifetime",
+      "original_proof_required": "Timeout/cancel/abrupt child: actual child exit and reap precede input release; limits refuse rather than truncate; diagnostic media never represents Chinese A films.",
+      "P1_static_status": "STATIC_DEFECT",
+      "related_findings": [
+        "P1-F01",
+        "P1-F02",
+        "P1-F05",
+        "P1-F06"
+      ],
+      "runtime": "NOT_RUN_BY_REVIEWER",
+      "limit": "No inherited whole-goal PASS; historical ten-file/84 wording is not new release scope"
+    },
+    {
+      "group": "R06",
+      "requirement": "native_bytes_and_order",
+      "original_proof_required": "Exact UTF8/BOM/CRLF/native_rev vectors; numeric localeCompare video ordering vs separate actual caption readdir order; Node/ICU/locale recorded.",
+      "P1_static_status": "P1_SCOPE_LIMITED_NOT_REACCEPTED",
+      "related_findings": [],
+      "runtime": "NOT_RUN_BY_REVIEWER",
+      "limit": "No inherited whole-goal PASS; historical ten-file/84 wording is not new release scope"
+    },
+    {
+      "group": "R07",
+      "requirement": "budgets",
+      "original_proof_required": "Size checks precede bounded text read; growth, total bytes, path/depth/FD/output/time bounds have explicit rejection; no unbounded media read.",
+      "P1_static_status": "STATIC_DEFECT",
+      "related_findings": [
+        "P1-F07"
+      ],
+      "runtime": "NOT_RUN_BY_REVIEWER",
+      "limit": "No inherited whole-goal PASS; historical ten-file/84 wording is not new release scope"
+    },
+    {
+      "group": "R07",
+      "requirement": "per_allocation_fd_lifetime",
+      "original_proof_required": "Descriptor allocation generations own closes; recycled integer after temporary directory walk still closes newly retained allocation exactly once; no raw numeric retry.",
+      "P1_static_status": "P1_SCOPE_LIMITED_NOT_REACCEPTED",
+      "related_findings": [],
+      "runtime": "NOT_RUN_BY_REVIEWER",
+      "limit": "No inherited whole-goal PASS; historical ten-file/84 wording is not new release scope"
+    },
+    {
+      "group": "R07",
+      "requirement": "cleanup_uncertainty",
+      "original_proof_required": "Nth open/stat/verify/close/reentry failures preserve primary and all cleanup errors; every outstanding resource attempted; sticky uncertainty prevents new proof.",
+      "P1_static_status": "STATIC_DEFECT",
+      "related_findings": [
+        "P1-F02",
+        "P1-F03",
+        "P1-F04",
+        "P1-F08",
+        "P1-F10"
+      ],
+      "runtime": "NOT_RUN_BY_REVIEWER",
+      "limit": "No inherited whole-goal PASS; historical ten-file/84 wording is not new release scope"
+    },
+    {
+      "group": "R07",
+      "requirement": "drain_and_delivery",
+      "original_proof_required": "Close drains accepted reads and probes; success transfers source/workspace plus directory/negative guards; reader close cannot destroy delivered resources.",
+      "P1_static_status": "STATIC_DEFECT",
+      "related_findings": [
+        "P1-F02",
+        "P1-F03",
+        "P1-F04",
+        "P1-F08",
+        "P1-F10"
+      ],
+      "runtime": "NOT_RUN_BY_REVIEWER",
+      "limit": "No inherited whole-goal PASS; historical ten-file/84 wording is not new release scope"
+    },
+    {
+      "group": "R01/R02",
+      "requirement": "lease_isolation",
+      "original_proof_required": "Releasing one acquired lease does not revoke ref or another lease; repeated proof works; issuing instance checked and replaced generation invalidates prior proof.",
+      "P1_static_status": "P1_SCOPE_LIMITED_NOT_REACCEPTED",
+      "related_findings": [],
+      "runtime": "NOT_RUN_BY_REVIEWER",
+      "limit": "No inherited whole-goal PASS; historical ten-file/84 wording is not new release scope"
+    },
+    {
+      "group": "REG",
+      "requirement": "existing_behavior",
+      "original_proof_required": "Original render SnapshotReadPort, legacy refusal and accepted Expected lifecycle/84 assertions preserved; loader only approved015 minimal exports, no artifact/pin change.",
+      "P1_static_status": "P1_SCOPE_LIMITED_NOT_REACCEPTED",
+      "related_findings": [],
+      "runtime": "NOT_RUN_BY_REVIEWER",
+      "limit": "No inherited whole-goal PASS; historical ten-file/84 wording is not new release scope"
+    },
+    {
+      "group": "EVIDENCE",
+      "requirement": "frozen_capture",
+      "original_proof_required": "Exact ten-file diff and protected hashes checked; unique captures retain all failures, source/index immutable during commands, actual exits and source/artifact SHA256 verified.",
+      "P1_static_status": "PARTIAL_CAPTURE_EVIDENCE",
+      "related_findings": [
+        "P1-N02"
+      ],
+      "runtime": "NOT_RUN_BY_REVIEWER",
+      "limit": "No inherited whole-goal PASS; historical ten-file/84 wording is not new release scope"
+    },
+    {
+      "group": "REVIEW",
+      "requirement": "independent_acceptance",
+      "original_proof_required": "Freeze actual candidate and obtain independent review bound to it; fix then reverify affected gates. No self-signed external pass.",
+      "P1_static_status": "THIS_STATIC_REVIEW_REQUEST_CHANGES",
+      "related_findings": [],
+      "runtime": "NOT_RUN_BY_REVIEWER",
+      "limit": "No inherited whole-goal PASS; historical ten-file/84 wording is not new release scope"
+    },
+    {
+      "group": "NEXT",
+      "requirement": "next_integration_plan",
+      "original_proof_required": "After N1N2 acceptance freeze compatible next-stage contract and exact implementation/acceptance plan; no premature S01/NativeAck/Studio/film/A readiness claim.",
+      "P1_static_status": "PENDING_AFTER_N1N2_ACCEPTANCE",
+      "related_findings": [],
+      "runtime": "NOT_RUN_BY_REVIEWER",
+      "limit": "No inherited whole-goal PASS; historical ten-file/84 wording is not new release scope"
+    }
+  ],
+  "ISO_01_18_map": [
+    {
+      "id": "ISO-01",
+      "static_related_findings": [
+        "P1-F01"
+      ],
+      "implementation_evidence": "See source-path findings and captured implementation report; real mechanism not accepted",
+      "captured_runtime": "REAL_P2_NOT_RUN",
+      "reviewer_runtime": "NOT_RUN"
+    },
+    {
+      "id": "ISO-02",
+      "static_related_findings": [
+        "P1-F01",
+        "P1-F06"
+      ],
+      "implementation_evidence": "See source-path findings and captured implementation report; real mechanism not accepted",
+      "captured_runtime": "REAL_P2_NOT_RUN",
+      "reviewer_runtime": "NOT_RUN"
+    },
+    {
+      "id": "ISO-03",
+      "static_related_findings": [
+        "P1-F06"
+      ],
+      "implementation_evidence": "See source-path findings and captured implementation report; real mechanism not accepted",
+      "captured_runtime": "REAL_P2_NOT_RUN",
+      "reviewer_runtime": "NOT_RUN"
+    },
+    {
+      "id": "ISO-04",
+      "static_related_findings": [
+        "P1-F02",
+        "P1-F06"
+      ],
+      "implementation_evidence": "See source-path findings and captured implementation report; real mechanism not accepted",
+      "captured_runtime": "REAL_P2_NOT_RUN",
+      "reviewer_runtime": "NOT_RUN"
+    },
+    {
+      "id": "ISO-05",
+      "static_related_findings": [
+        "P1-F05",
+        "P1-F08"
+      ],
+      "implementation_evidence": "Shared root scheduler and whole PRE→POST→release→activate wrapper",
+      "captured_runtime": "Scheduler-only 10/10 subset; no real worker evidence",
+      "reviewer_runtime": "NOT_RUN"
+    },
+    {
+      "id": "ISO-06",
+      "static_related_findings": [
+        "P1-F04"
+      ],
+      "implementation_evidence": "Shared root scheduler and whole PRE→POST→release→activate wrapper",
+      "captured_runtime": "REAL_P2_NOT_RUN",
+      "reviewer_runtime": "NOT_RUN"
+    },
+    {
+      "id": "ISO-07",
+      "static_related_findings": [
+        "P1-F04",
+        "P1-F06",
+        "P1-F08"
+      ],
+      "implementation_evidence": "See source-path findings and captured implementation report; real mechanism not accepted",
+      "captured_runtime": "REAL_P2_NOT_RUN",
+      "reviewer_runtime": "NOT_RUN"
+    },
+    {
+      "id": "ISO-08",
+      "static_related_findings": [
+        "P1-F07"
+      ],
+      "implementation_evidence": "See source-path findings and captured implementation report; real mechanism not accepted",
+      "captured_runtime": "REAL_P2_NOT_RUN",
+      "reviewer_runtime": "NOT_RUN"
+    },
+    {
+      "id": "ISO-09",
+      "static_related_findings": [
+        "P1-F01",
+        "P1-F02",
+        "P1-F05"
+      ],
+      "implementation_evidence": "See source-path findings and captured implementation report; real mechanism not accepted",
+      "captured_runtime": "REAL_P2_NOT_RUN",
+      "reviewer_runtime": "NOT_RUN"
+    },
+    {
+      "id": "ISO-10",
+      "static_related_findings": [
+        "P1-F02",
+        "P1-F05"
+      ],
+      "implementation_evidence": "See source-path findings and captured implementation report; real mechanism not accepted",
+      "captured_runtime": "REAL_P2_NOT_RUN",
+      "reviewer_runtime": "NOT_RUN"
+    },
+    {
+      "id": "ISO-11",
+      "static_related_findings": [
+        "P1-F03",
+        "P1-F04"
+      ],
+      "implementation_evidence": "See source-path findings and captured implementation report; real mechanism not accepted",
+      "captured_runtime": "REAL_P2_NOT_RUN",
+      "reviewer_runtime": "NOT_RUN"
+    },
+    {
+      "id": "ISO-12",
+      "static_related_findings": [
+        "P1-F10"
+      ],
+      "implementation_evidence": "See source-path findings and captured implementation report; real mechanism not accepted",
+      "captured_runtime": "REAL_P2_NOT_RUN",
+      "reviewer_runtime": "NOT_RUN"
+    },
+    {
+      "id": "ISO-13",
+      "static_related_findings": [
+        "P1-N01"
+      ],
+      "implementation_evidence": "See source-path findings and captured implementation report; real mechanism not accepted",
+      "captured_runtime": "REAL_P2_NOT_RUN",
+      "reviewer_runtime": "NOT_RUN"
+    },
+    {
+      "id": "ISO-14",
+      "static_related_findings": [
+        "P1-F10"
+      ],
+      "implementation_evidence": "See source-path findings and captured implementation report; real mechanism not accepted",
+      "captured_runtime": "REAL_P2_NOT_RUN",
+      "reviewer_runtime": "NOT_RUN"
+    },
+    {
+      "id": "ISO-15",
+      "static_related_findings": [
+        "P1-F09"
+      ],
+      "implementation_evidence": "See source-path findings and captured implementation report; real mechanism not accepted",
+      "captured_runtime": "REAL_P2_NOT_RUN",
+      "reviewer_runtime": "NOT_RUN"
+    },
+    {
+      "id": "ISO-16",
+      "static_related_findings": [
+        "P1-F04",
+        "P1-F08"
+      ],
+      "implementation_evidence": "Shared root scheduler and whole PRE→POST→release→activate wrapper",
+      "captured_runtime": "Scheduler-only 10/10 subset; no real worker evidence",
+      "reviewer_runtime": "NOT_RUN"
+    },
+    {
+      "id": "ISO-17",
+      "static_related_findings": [],
+      "implementation_evidence": "Reader admission578/delivery681 query same root; generic lease not changed by root state",
+      "captured_runtime": "REAL_P2_NOT_RUN",
+      "reviewer_runtime": "NOT_RUN"
+    },
+    {
+      "id": "ISO-18",
+      "static_related_findings": [
+        "P1-F01",
+        "P1-F02",
+        "P1-F05"
+      ],
+      "implementation_evidence": "See source-path findings and captured implementation report; real mechanism not accepted",
+      "captured_runtime": "REAL_P2_NOT_RUN",
+      "reviewer_runtime": "NOT_RUN"
+    }
+  ],
+  "captures_verified": [
+    {
+      "capture": "n1n2-claude-060p1-generate-001",
+      "exit": 0,
+      "log_sha256": "b126163571b5b74f17bba6ed24789018cf3c72ce7f597c4e95e99ca48b8bfb64",
+      "source_changed": [
+        "src/adapters/openfilm/cache-worker-integrity.json"
+      ],
+      "covered_snapshot_inputs_match": true,
+      "argv": [
+        "node",
+        "tools/openfilm-cache-worker-integrity.mjs",
+        "--generate"
+      ],
+      "claim_limit": "Existing captured result only; reviewer did not rerun; not spawn/Chrome/settlement proof"
+    },
+    {
+      "capture": "n1n2-claude-060p1-typecheck-001",
+      "exit": 0,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source_changed": [],
+      "covered_snapshot_inputs_match": true,
+      "argv": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "tsc",
+        "--noEmit"
+      ],
+      "claim_limit": "Existing captured result only; reviewer did not rerun; not spawn/Chrome/settlement proof"
+    },
+    {
+      "capture": "n1n2-claude-060p1-syntax-worker-001",
+      "exit": 0,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source_changed": [],
+      "covered_snapshot_inputs_match": true,
+      "argv": [
+        "node",
+        "--check",
+        "src/adapters/openfilm/openfilm-cache-worker.mjs"
+      ],
+      "claim_limit": "Existing captured result only; reviewer did not rerun; not spawn/Chrome/settlement proof"
+    },
+    {
+      "capture": "n1n2-claude-060p1-syntax-policy-001",
+      "exit": 0,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source_changed": [],
+      "covered_snapshot_inputs_match": true,
+      "argv": [
+        "node",
+        "--check",
+        "src/adapters/openfilm/cache-worker-policy.mjs"
+      ],
+      "claim_limit": "Existing captured result only; reviewer did not rerun; not spawn/Chrome/settlement proof"
+    },
+    {
+      "capture": "n1n2-claude-060p1-integrity-check-001",
+      "exit": 0,
+      "log_sha256": "80519d2216cfff4c3355a8052cacd64f9dc5023625f27e3e3125b69e2fbae816",
+      "source_changed": [],
+      "covered_snapshot_inputs_match": true,
+      "argv": [
+        "node",
+        "tools/openfilm-cache-worker-integrity.mjs",
+        "--check"
+      ],
+      "claim_limit": "Existing captured result only; reviewer did not rerun; not spawn/Chrome/settlement proof"
+    },
+    {
+      "capture": "n1n2-claude-060p1-scheduler-001",
+      "exit": 0,
+      "log_sha256": "d48d6a8905cbb2e4ed7105d059ce83f41766c8f12f203e0926f536f52344aadc",
+      "source_changed": [],
+      "covered_snapshot_inputs_match": true,
+      "argv": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "vitest",
+        "run",
+        "--config",
+        "vitest.config.ts",
+        "tests/agent-driven/integration/cache-production-scope.test.ts"
+      ],
+      "claim_limit": "Existing captured result only; reviewer did not rerun; not spawn/Chrome/settlement proof"
+    },
+    {
+      "capture": "n1n2-claude-060p1-m21-lock-001",
+      "exit": 0,
+      "log_sha256": "46d2e2627dec28d66d4fb086762a93ef13ec7c91945ca5f93e516c5114b38d16",
+      "source_changed": [],
+      "covered_snapshot_inputs_match": true,
+      "argv": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "vitest",
+        "run",
+        "--config",
+        "vitest.config.ts",
+        "tests/m2.1/openfilm-upstream-lock.test.ts"
+      ],
+      "claim_limit": "Existing captured result only; reviewer did not rerun; not spawn/Chrome/settlement proof"
+    }
+  ],
+  "runtime": "ALL_REVIEWER_BUSINESS_RUNTIME_NOT_RUN",
+  "claim_limit": "No P2/N1N2/NativeAck/Studio/A/V1 PASS; no source edits or tests run"
+}

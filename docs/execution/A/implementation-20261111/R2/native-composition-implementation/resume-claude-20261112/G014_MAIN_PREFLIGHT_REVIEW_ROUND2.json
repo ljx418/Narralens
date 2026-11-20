@@ -1,0 +1,60 @@
+{
+  "at": "2026-11-12T14:26:12.669093+00:00",
+  "status": "REQUEST_CHANGES_BROWSER_NOT_GRANTED",
+  "request": "msg_fe4efba3678a",
+  "runtime_response": "msg_c0dbfe20dc77",
+  "additional_message": "msg_622a37bbd346",
+  "frozen_sha256": {
+    "src/host/agent-driven/retained-native-closure.ts": "bd83a07eb2e9d7ca4acbd30e131a19b225b7f82b50a574b64f178b86ec297c29",
+    "src/host/agent-driven/committed-snapshot-authority.ts": "53321dfe1560b8403d9b78ca643eb24ff4ce6360a619cee30adbff0fc7b8bca5",
+    "src/host/agent-driven/created-native-source-reader.ts": "128fb4d23929faace3c32f12f8e6d98d2001436636357bec60e58f3ac2c9b814",
+    "src/host/agent-driven/created-native-workspace.ts": "3decdc3d826e323a943589b372ccca23560802170b2cebf34904fc2355fbca56",
+    "src/host/agent-driven/native-cache-witness.ts": "87d05c958672e7030a202f75eafc6f2e38f2d79e59e80d28a06d3926f03fdb04",
+    "src/adapters/openfilm/openfilm-upstream.ts": "046cb8bd74a70770b1afc8dc5bf2800a6a54c35961e75254a1b7b5ae2dcb086d",
+    "tests/agent-driven/integration/created-native-source-reader.test.ts": "83d13030b19a6e3bc79eaa2104a53ab31cfc8214b9fbce8047a24cc34bb0d21a",
+    "tests/agent-driven/integration/helpers/native-source-fixture.ts": "19cb73cb9d69394e550699d3363128a4ea60e96a3f28f22e1ea4fce01c6dda0a",
+    "tests/agent-driven/integration/committed-snapshot-host.test.ts": "bfd0c6373b254050d32a6a99e7b6f8b9827dc24b6b2587515ab4c5aad2cd9037",
+    "tests/agent-driven/integration/native-cache-witness.test.ts": "6cb418cd4fa2ed9481ec98130b9133ceb7a20d04f53f8c072b14b19c4aa8ff2c",
+    "src/host/m5/openfilm-native-expected.ts": "19110e45a83b6d5b611b4260620ce873f923f1e5a5b907bc6176c4b734fbeed3",
+    "tests/agent-driven/integration/created-native-workspace.test.ts": "439d469032c9af2b83ceb826e0aead7cf5c2fe5c5693be7cbf18c8e67f0f615f",
+    "tests/agent-driven/integration/created-native-ack.test.ts": "5f50db85c7c07a2ecf4faefc20ec2ec6c7ad4910fafe549c2edc76bbad729c7c"
+  },
+  "findings": [
+    {
+      "id": "014-PREFLIGHT2-01",
+      "severity": "MAJOR",
+      "path": "src/adapters/openfilm/openfilm-upstream.ts",
+      "fact": "Factory brands raw owner but returns a different frozen spread object; actual returned producer fails identity predicate.",
+      "required": "Brand/return same immutable actual owner with same shared owner accounting identity."
+    },
+    {
+      "id": "014-PREFLIGHT2-02",
+      "severity": "MAJOR",
+      "path": "src/host/agent-driven/native-cache-witness.ts",
+      "fact": "film-poster depsPath/stampPath use family key instead of frameKey; fixed producer writes hashed frameKey triple.",
+      "required": "Pair poster with awaited normal hashed pageframe triple and verify both."
+    },
+    {
+      "id": "014-PREFLIGHT2-03",
+      "severity": "MAJOR",
+      "path": "src/host/agent-driven/native-cache-witness.ts",
+      "fact": "Before draw retains only request.rel then releases closure; other loaded dependencies captured only after. open enumerates membership without hashing regular files.",
+      "required": "Retain and hash genuine dependency PRE closure through render; verify identity/content POST, include CSS/image/JS/audio unchanged-size/restoredmtime negative case."
+    },
+    {
+      "id": "014-PREFLIGHT2-04",
+      "severity": "MAJOR",
+      "path": "src/host/agent-driven/native-cache-witness.ts",
+      "fact": "workspaces registry is structural; arbitrary object can report issuedRoot and accept issued witness from genuine factory producer.",
+      "required": "Bind witness issuance to actual service-issued opaque workspace authority/root/ref/generation, final live recheck."
+    },
+    {
+      "id": "014-PREFLIGHT2-05",
+      "severity": "MAJOR",
+      "path": "tests/agent-driven/integration/native-cache-witness.test.ts",
+      "fact": "Loopback ready promise not awaited at base use; server close precedes producer drain; no independent mute/no-egress demonstration; only poster positive.",
+      "required": "Explicit ready, drain producers before server and fixture, prove silent local-only execution, add normal pageframe positive and negative producer/registry cases before browser grant."
+    }
+  ],
+  "claim_limit": "125/126/127 interim conditional runtime authorized on frozen source, does not waive any findings or mark N1N2 accepted; fixes follow terminal+owncleanup/slotrelease."
+}

@@ -1,0 +1,57 @@
+{
+  "at": "2026-11-15T02:14:16.622961+00:00",
+  "status": "NOFORK_KERNEL_IDENTITY_AND_EXPECTED_FAILURE_CLEANUP_OBSERVED",
+  "cases": [
+    "PASS_EXACT_NOFORK_IDENTITY",
+    "PASS_EXACT_NOFORK_EXPECTED_ASSERTION_FAILURE"
+  ],
+  "runtime_roots": [
+    "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/var/native-cache-pilot/run-wyCcKv",
+    "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/var/native-cache-pilot/run-Ecefaa"
+  ],
+  "identities": [
+    {
+      "pid": 186046,
+      "state": "R",
+      "ppid": 186039,
+      "pgid": 186046,
+      "sid": 186046,
+      "start_ticks": "280962"
+    },
+    {
+      "pid": 187139,
+      "state": "R",
+      "ppid": 187132,
+      "pgid": 187139,
+      "sid": 187139,
+      "start_ticks": "289460"
+    }
+  ],
+  "all_input_bindings": 649,
+  "no_source_changes": true,
+  "no_observed_live_target_epochs": true,
+  "review_scope": "R4B exactstaticpass+twoactualnofork cases only; notfreezeacceptance",
+  "open": [
+    "production14",
+    "original17",
+    "ISO01..18 except these narrow supportingfacts",
+    "N-positive/fork/exec/reap/adoption",
+    "Q2/Chrome/sourceFD/wholeproduction",
+    "fullcheck/build",
+    "newfreezeindependentreview",
+    "nextwiringacceptedcommitanchor"
+  ],
+  "known_evidence_limits": [
+    "RawHELLO bytes were notpersisted; actualfixedtoolassertions and independentprocIDs are supporting evidence, not rawtranscript",
+    "Monitor final role after Node zombie corrected in derivative annotation using sameepoch earlier samples; rawrecord retained",
+    "No realstderrEPIPE fault or C+N process-domain tested"
+  ],
+  "artifacts": {
+    "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/pilot-060p2a-nofork/RELEASE.json": "6a5778d28d146df4e7cb2d6838edad27319cca1447a0c679fac265f480484f1f",
+    "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/pilot-060p2a-nofork/MAIN_IDENTITY_VERDICT.json": "27cbdbd01a0eb61263cd475b3dea363529458c2dfbf8e55e32ac369f0a7594f0",
+    "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/pilot-060p2a-nofork/MAIN_ASSERTION_VERDICT.json": "c131326b0f9b54e758233c390a31286be30cd790619372fe3c88b21bc801cd38",
+    "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/pilot-060p2a-nofork/IDENTITY_PROC_RECEIPT.json": "3ee435075f0a2e2d5c4cfc5367500855c0ad97638f26308b17ec164a127829e9",
+    "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/pilot-060p2a-nofork/ASSERTION_PROC_RECEIPT.json": "74a9ec28752c55b445c340d48b345d5b8704f27c9fa1d915743d2869669c5036"
+  },
+  "index": ""
+}

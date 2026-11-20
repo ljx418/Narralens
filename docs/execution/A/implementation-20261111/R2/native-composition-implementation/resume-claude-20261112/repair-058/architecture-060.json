@@ -1,0 +1,260 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "叙镜 N1/N2：绘制资源所有权目标设计（尚未实施）",
+    "locale": "zh-CN",
+    "quality_profile": "showcase",
+    "views": [
+      {
+        "id": "owned-execution",
+        "label": "绘制与资源归属",
+        "focus": [
+          "workspace",
+          "scope",
+          "supervisor",
+          "worker",
+          "producer",
+          "parent-ledger"
+        ],
+        "note": "工作副本持有输入，独占执行域和父级资源真实结束后才允许收尾。"
+      },
+      {
+        "id": "independent-proof",
+        "label": "源与见证",
+        "focus": [
+          "snapshot",
+          "reader",
+          "witness",
+          "scope"
+        ],
+        "note": "源事实独立于预览；清理未证不能签发新的已加载证明。"
+      }
+    ]
+  },
+  "layout": {
+    "mode": "grid",
+    "origin": [
+      34,
+      80
+    ],
+    "cols": 4,
+    "gapX": 120,
+    "gapY": 160,
+    "cellW": 240,
+    "cellH": 80
+  },
+  "components": [
+    {
+      "id": "snapshot",
+      "type": "database",
+      "label": "已提交源",
+      "sublabel": "SnapshotStore / Authority",
+      "tag": "现有",
+      "row": 0,
+      "col": 0,
+      "size": [
+        240,
+        80
+      ]
+    },
+    {
+      "id": "workspace",
+      "type": "backend",
+      "label": "工作副本与输入持有者",
+      "sublabel": "created-native-workspace.ts",
+      "tag": "现有·需接线",
+      "row": 0,
+      "col": 1,
+      "size": [
+        240,
+        80
+      ]
+    },
+    {
+      "id": "scope",
+      "type": "security",
+      "label": "完整生产锁与未证屏障",
+      "sublabel": "cache-production-scope.ts",
+      "tag": "待新增",
+      "row": 0,
+      "col": 2,
+      "size": [
+        240,
+        80
+      ]
+    },
+    {
+      "id": "supervisor",
+      "type": "backend",
+      "label": "独占进程监管",
+      "sublabel": "cache-process-supervisor.ts",
+      "tag": "待新增",
+      "row": 0,
+      "col": 3,
+      "size": [
+        240,
+        80
+      ]
+    },
+    {
+      "id": "worker",
+      "type": "backend",
+      "label": "单次绘制进程",
+      "sublabel": "openfilm-cache-worker.mjs",
+      "tag": "待新增",
+      "row": 1,
+      "col": 3,
+      "size": [
+        240,
+        80
+      ]
+    },
+    {
+      "id": "producer",
+      "type": "external",
+      "label": "固定绘制原始模块",
+      "sublabel": "pageframes.mjs · e70d9d9",
+      "tag": "现有·隔离加载待实现",
+      "row": 2,
+      "col": 3,
+      "size": [
+        240,
+        80
+      ]
+    },
+    {
+      "id": "parent-ledger",
+      "type": "backend",
+      "label": "父级请求、源流与探测",
+      "sublabel": "openfilm-upstream.ts",
+      "tag": "现有·需补账本",
+      "row": 1,
+      "col": 2,
+      "size": [
+        240,
+        80
+      ]
+    },
+    {
+      "id": "witness",
+      "type": "security",
+      "label": "产物身份与见证激活",
+      "sublabel": "NativeCacheWitnessLedger",
+      "tag": "现有·门槛需增强",
+      "row": 1,
+      "col": 1,
+      "size": [
+        240,
+        80
+      ]
+    },
+    {
+      "id": "reader",
+      "type": "backend",
+      "label": "独立源读取与最终守卫",
+      "sublabel": "created-native-source-reader.ts",
+      "tag": "现有·需接根状态",
+      "row": 1,
+      "col": 0,
+      "size": [
+        240,
+        80
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "snapshot-copy",
+      "from": "snapshot",
+      "to": "workspace",
+      "label": "复制提交源"
+    },
+    {
+      "id": "production-reserve",
+      "from": "workspace",
+      "to": "scope",
+      "label": "PRE前准入"
+    },
+    {
+      "id": "start-execution",
+      "from": "scope",
+      "to": "supervisor",
+      "label": "持锁执行"
+    },
+    {
+      "id": "worker-pipe",
+      "from": "supervisor",
+      "to": "worker",
+      "label": "私有管道",
+      "labelDy": 24
+    },
+    {
+      "id": "pinned-load",
+      "from": "worker",
+      "to": "producer",
+      "label": "校验后加载",
+      "labelDy": 24
+    },
+    {
+      "id": "media-read",
+      "from": "worker",
+      "to": "parent-ledger",
+      "label": "素材GET"
+    },
+    {
+      "id": "post-proof",
+      "from": "parent-ledger",
+      "to": "witness",
+      "label": "排空后复核"
+    },
+    {
+      "id": "witness-read",
+      "from": "witness",
+      "to": "reader",
+      "label": "见证依赖"
+    },
+    {
+      "id": "source-read",
+      "from": "snapshot",
+      "to": "reader",
+      "label": "独立读取",
+      "labelDy": 24
+    },
+    {
+      "id": "quiescence-query",
+      "from": "reader",
+      "to": "scope",
+      "label": "只读根状态",
+      "variant": "dashed",
+      "fromSide": "top",
+      "toSide": "bottom"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "amber",
+      "title": "目标状态，未实施",
+      "items": [
+        "ADR060 rev2已通过文档复验；060P1代码与业务验收尚未释放。",
+        "标签标实现状态；颜色只区分组件职责，不代表验收通过。"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "收尾的真实顺序",
+      "items": [
+        "完整生产锁覆盖PRE、绘制、整组退出、父流排空、POST与最终见证。",
+        "进程未知时原promise保持待定，输入、锁和配额不提前释放。"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "范围与事实边界",
+      "items": [
+        "固定上游原字节不改；每次绘制新进程，失去跨绘制内存页复用。",
+        "此图不代表NativeAck、Studio、中文成片或V1已验收。"
+      ]
+    }
+  ]
+}

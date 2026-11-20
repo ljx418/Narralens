@@ -1,0 +1,15 @@
+{
+  "grant": "R2-MEDIA-PROOF-001",
+  "status_report": "msg_7a8f81ebff1d",
+  "reported_exit": 1,
+  "reported_duration_seconds": "104.65",
+  "reported_results": {
+    "processor_passed": 11,
+    "new_proof_timeout": 8
+  },
+  "fix_commit": "6c22182aebefee14f4cceccd3e2583da8630cc2f",
+  "main_diff_review": "exact8 case timeout-only additions120000; aligns prior grant per-case120s, no assertion changes",
+  "retry": "same two files reported; not yet observed terminal or accepted",
+  "cleanup": "explicit evidence requested for old timed-out async/Host/ffmpeg/fixture teardown before retry, do not infer from Vitest exit",
+  "acceptance": "NOT_CLAIMED"
+}

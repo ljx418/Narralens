@@ -1,0 +1,14 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:55161) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/media/native-draft-real-render.test.ts (2 tests) 46498ms
+   ✓ registers real media and visibly burns native captions: 'Chinese full-stop normalization'  23727ms
+   ✓ registers real media and visibly burns native captions: 'fractional final audio frame'  22770ms
+
+ Test Files  1 passed (1)
+      Tests  2 passed (2)
+   Start at  09:04:12
+   Duration  53.64s (transform 2.57s, setup 0ms, collect 5.23s, tests 46.50s, environment 0ms, prepare 1.28s)
+

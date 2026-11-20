@@ -1,0 +1,68 @@
+{
+  "commands": [
+    {
+      "argv": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "vitest",
+        "run",
+        "--config",
+        "vitest.config.ts",
+        "tests/agent-driven/integration/controlled-recovery-families.test.ts",
+        "tests/agent-driven/integration/controlled-recovery-scheduler.test.ts"
+      ],
+      "cwd": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+      "start": 1794458131.765273,
+      "pid": 515981,
+      "pgid": 515981,
+      "exit": 0,
+      "end": 1794458157.1453247,
+      "stdout_sha256": "e40dcd54a6da1077f6b9a2ae2be216b4d01ae3dad7546f4dfe91758ef2c0375c",
+      "stderr_sha256": "6dff167d9ddb7aebb5f2cd84d98a118f1b82b0ccb9a49b29efb71f95de21d9be",
+      "remaining_process_group_pids": []
+    },
+    {
+      "argv": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "tsc",
+        "--noEmit"
+      ],
+      "cwd": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+      "start": 1794458157.1540976,
+      "pid": 516747,
+      "pgid": 516747,
+      "exit": 0,
+      "end": 1794458181.4647138,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "remaining_process_group_pids": []
+    },
+    {
+      "argv": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "vitest",
+        "run",
+        "--config",
+        "vitest.config.ts",
+        "tests/wave2/m4b/adoption-route.test.ts",
+        "-t",
+        "owned adoption marker|unparseable unknown request"
+      ],
+      "cwd": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+      "start": 1794458181.4720547,
+      "pid": 517579,
+      "pgid": 517579,
+      "exit": 0,
+      "end": 1794458206.5938494,
+      "stdout_sha256": "eac6826b5b25d852ba000ffd458d3cccace9096dc578b4389b241269cd21286e",
+      "stderr_sha256": "9385b4334ab5de2bfa84171caabe255d9a2e654366341bc9b054a5474b77f1da",
+      "remaining_process_group_pids": []
+    }
+  ],
+  "unchanged": true
+}

@@ -1,0 +1,27 @@
+{
+  "candidate": "e0aaa242c9d1b19211366a53ce8d6c989b07a912",
+  "scope": "early immutable source review, not final independent acceptance",
+  "status": "NOT_INTEGRATED",
+  "findings": [
+    {
+      "id": "EP-01",
+      "source": "src/host/m5/openfilm-native-expected.ts",
+      "issue": "readSource returns facts only; proof/assertCurrent retains no actual file identity or final source guard",
+      "required": "real retained source identity proof with final synchronous guard and byte/inode drift negatives"
+    },
+    {
+      "id": "EP-02",
+      "source": "src/host/m5/openfilm-native-expected.ts",
+      "issue": "assertCurrent lacks owning-instance membership check; exposed nested facts mutable",
+      "required": "issuing instance bound proof; immutable facts; reject cross-instance/released/fabricated/tampered proof"
+    },
+    {
+      "id": "EP-03",
+      "source": "src/host/m5/openfilm-native-expected.ts",
+      "issue": "runtime loader pins against colocated self-asserted manifest only; read-then-pathname import",
+      "required": "independent approved input/build linkage; source/module/manifest tamper refusals"
+    }
+  ],
+  "bridge_candidate": "8e410fe82557be8063e3087cd89fc3ac70376134 remains correction2 due arbitrary exported scope/publication mint authority; no integration",
+  "producer_transfer": "PRODUCT e0aaa242 sent to BRIDGE interface candidate only"
+}

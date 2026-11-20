@@ -1,0 +1,24 @@
+{
+  "at": "2026-11-14T13:23:49.087148+00:00",
+  "message": "msg_c38a72bac47b",
+  "dispatch": "ctx_15bdf408c243",
+  "status": "REQUEST_CHANGES",
+  "counts": {
+    "MAJOR": 8,
+    "MINOR": 1
+  },
+  "main_verified_inputs": 36,
+  "current_mismatches": [],
+  "review_sha256": "e26fae605b895c6137be473a137f224e10f910f1d530fb2a772be39399666f78",
+  "static_old_defects_fixed": [
+    "startup ctypes GET/seq/detached",
+    "exec writer ownership and selector status",
+    "custodian identity excluded",
+    "private HOME/XDG",
+    "candidate helper and cleanup array"
+  ],
+  "open_scope": "live wait-owner survival and recovery; overflow/receipt/finalize failure handling; async spawn/socket errors; authority after exit vs close; safe finally-owned pilot cleanup",
+  "runtime_release": false,
+  "source_write_release": false,
+  "next": "Consolidate with existing integration reviewer ctx_eaec2fc00d86 before one repair assignment; do not grant proposed P2a suite"
+}

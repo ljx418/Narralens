@@ -1,0 +1,13 @@
+# 05889独立审查返修映射（MAIN直接实施）
+
+M1：对象目录FD在预览全过程保持，所有leaf创建经该FD，命名路径/FD identity在发布前后与最终暴露复核；拒绝后只经原FD清理自身inode一致对象。at-open换目录到author的实际race必须拒绝，author全树哈希不变、原held域空。
+
+M2：初始hash结束以及每次read后检查held/named fingerprint和取消状态；EOFhash后及positionalread前的同inode等长改写各有实际FS屏障，必须拒绝且恰好关闭。
+
+m1：完整写循环处理positivepartial，zero进度拒绝；复制完成再通过目标FD回读核验长度/hash。测试只在这两项用renderer-inspection终止，不冒充编码成功；实际检查到拷贝film字节一致或未开始render。
+
+m2：第五个对象sync内取消/close，写后与receipt最终暴露再复核signal/closed/proof/author/rights和object-domain身份，拒绝且清空自己未发布对象。原先预先取消用例仍保留。
+
+真实结果：修复版完整11项全部通过，含原4项及新7项；same-inode两项先轻量通过。旧05889读race两项确切失败，旧05889其余5个新case确切失败（目录替换成功返回、partial拷贝hash错误、zero仍进入render、cancel/close仍返回receipt），两次负控testexit1原样保留，源均精确还原；第二次还提供磁盘source快照防中断丢失。未弱化renderer/合同/权限守卫。
+
+已有五part是3秒syntheticdiagnostic，仍不等于真实A人声/素材或R1/UI通过。修复新增源码独立增量复核仍PENDING，旧05889审查NOTPASS不覆盖。公共DTO另移src/contracts/prepared-preview.ts，wire字段不改，assembly重导出兼容，独立评估应注意该纯类型/常量抽取。

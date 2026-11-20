@@ -1,0 +1,15 @@
+{
+  "status": "LEGACY_CLAIM_LIMIT_OBSERVED_NOT_N1N2_CODE_REGRESSION",
+  "source_hashes": {
+    "src/host/projects/openfilm-migrator.ts": "c40caf1d121945fdab4aa3a7e01d9b2218b8e0225a788639f4240948d86f4c20",
+    "tests/m2.3/migration-real-export.test.ts": "3184f1b1a4164e04879a32226309cc156bca76730ae3ff9c72c1d6af0c802f9d"
+  },
+  "observations": [
+    "clipHtml builds a title page with source clip title and brightness animation. It accepts title/stage/duration, not the source visual asset.",
+    "migrateToOpenFilm writes that page for every source clip; referenced assets are copied in a separate loop.",
+    "Real render/decode can prove native clip renderability and output frame count; by itself it cannot prove original visual content preservation.",
+    "migration-real-export header says real chain with real media and nothing simulated, while its snapshot fixture includes opaque placeholder media and a constant frame probe as separately observed."
+  ],
+  "required_reporting": "Keep old Gate records unchanged. New report must separate actual renderer invocation, editable clip identity, source bytes preservation, real input media decode, original visual content preservation and fresh legacy export. Do not claim the latter merely from title-page MP4 or placeholder digest.",
+  "scope": "Read-only evidence limit. No legacy migrator rewrite authorized; any newly required semantic change needs explicit scoped design before release."
+}

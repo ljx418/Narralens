@@ -1,0 +1,101 @@
+{
+  "format": "narralens.next-wiring-plan@draft1",
+  "status": "DRAFT_PENDING_N1N2_ACCEPTANCE",
+  "created_at": "2026-11-12T13:51:25.160156+00:00",
+  "accepted_native_commit": null,
+  "historical_design_base": "e2eff61b464d75d36598103d718cd2a75db5dfda",
+  "implementation_release": false,
+  "business_acceptance": "NOT_RUN",
+  "source_inputs": {
+    "docs/execution/A/implementation-20261111/R2/shared-selection-authority-design/CONTRACT.md": "82dbf646710a807c7e38796e0e0216a5d2890134a00d6b6b306656715742855d",
+    "docs/execution/A/implementation-20261111/R2/shared-selection-authority-design/ACCEPTANCE_AND_RELEASE.json": "716b34b81f7b15d73522965b8f9721e0cd9a36c87601d98e4135bde49dbd8325",
+    "docs/execution/A/implementation-20261111/R2/native-source-composition-design/CONTRACTS_AND_OWNERSHIP.md": "6f0ab26b819dbd9b2be1a91f434b9b0b877b105662b7bbfd687e048806a13beb",
+    "docs/execution/A/implementation-20261111/R2/native-source-composition-design/DEVELOPMENT_AND_ACCEPTANCE.md": "3bf0925a2dc4b46ba21856a0156361994ee04c2eb8f428b6f4dfe417db9fc508",
+    "docs/execution/A/implementation-20261111/R2/host-recovery-composition-review/ACCEPTANCE_CASES.md": "8420bd50a0bd0beab85cca13c5abf3c4687e48117433e3c2a7615fe0932b2595",
+    "docs/execution/A/implementation-20261111/R2/host-recovery-composition-review/RELEASE_RECOMMENDATION.json": "d34dd7ac4b6a8587f25928b118d78c68211205fb5b07c712bcca334df96febde",
+    "docs/execution/A/implementation-20261111/R2/native-source-composition-design/DESIGN.md": "c13c2ea3006309e724fabd2ad22b4c8426127c25007b89f0b78dd63fd67a99ac",
+    "docs/execution/A/implementation-20261111/R2/native-composition-implementation/MAIN_DECISIONS.md": "1bf9e7c0f2ec68c399591d233a9a5c17f0815baea0c5b2fc324f77d1cd2d2143",
+    "docs/execution/A/implementation-20261111/R2/native-composition-implementation/S01_MAIN_REVIEW_CHECKPOINTS.md": "429a80a3c94c9116805b30c2f56003df0ac8df799517aa525f870027d2c8e2f3",
+    "docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/G01_G07_MAIN_DESIGN_CONSTRAINTS.md": "154c525418a345b0cf1651383bd98d6eb8ede9df1f476b74ca70a31dbb80339d",
+    "docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/G01_G07_CONSOLIDATED_014_RELEASE.md": "2c2b0225ea951bb3b5df33b4368da528aeae6156621305e6c02ef67cfb3a500a",
+    "docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/G01_G07_CONSOLIDATED_014_RELEASE.json": "38faf27bd3340ccdccfc8fc960ff17f4d649f39c99832214a75e5a199748b084"
+  },
+  "files": {
+    "00_READ_FIRST.md": "3982931ae5a436f9e34b35926dce5add66a90baca92299b32dab2d58e22c1c27",
+    "01_CONTRACT.md": "580f024a64afaa1e3939189c817038d13e705d128c53ab14bd6f48ab792fd813",
+    "02_DEVELOPMENT_AND_ACCEPTANCE.md": "8d094d8b45f13baad44faf2390f23ef96bebd0eea5c7edc1d3fde4e26672dfd2",
+    "03_CLAUDE_HANDOFF.md": "c8dedb0cf373ac3aa9c26f29bbdb66e6a8e822451eb9ad6c3e400f92bf513fc3",
+    "04_PATHS_PORTS_AND_PRODUCERS.md": "f7c3b784701c4feef729caba24eb18f1c28f7bead3a42408f1c3ad9053954110",
+    "05_LIFECYCLE_AND_NATIVE_CACHE_ROUTES.md": "dfc6762320ee4c85f9f98c646c181fa583a130c421e58c8f786c9cc794692bb6",
+    "06_REVIEW_PUBLICATION_SCHEMA_PROPOSAL.md": "d8e65585575866e0b5ec0afde3c125dda14d46710f9854dfe3c31b2f85331cd9",
+    "07_OBSERVED_CANDIDATE_API.md": "55e61e76f9f4d077e8fc18975ee64fe89f009a030c58ee3bf2e213204baaa5a2"
+  },
+  "s01_case_count": 28,
+  "unresolved_before_finalization": [
+    "014 alloriginalrequirements realproof+frozencommit independentreview",
+    "reconcile actual014 interfaces/resourceownership/cacheproducercontract",
+    "exactnext-stagepaths and protectedsurface comparison",
+    "independentplanreview and casecrossreference check",
+    "proposedreviewpublication privateDDL literalSQL+fingerprint independentreview",
+    "validateproposedprivateports againstaccepted014",
+    "reviewcontrolledGET/background route implementationbeforeunlock",
+    "Close independent frozen057 findings via Claude and re-freeze; then re-anchor07 to actual accepted commit, not just candidate",
+    "Review host-owned shared-pool composition and exact close/capability invalidation semantics against07",
+    "Finalize durable publication installation-history loss detection (whole namespace deletion) without reconstructing approvals or receipts",
+    "Choose actual supported rollback: compatible-build feature disable preferred; unmodified old binary must not be assumed to enforce new schema guard"
+  ],
+  "claim_limit": "planning draft only;notreadyforimplementation,nohumanpass",
+  "revision": 5,
+  "revised_at": "2026-11-14T03:09:59.509700+00:00",
+  "input_authority_classes": {
+    "S01_and_Native_HC_original_docs": "historical_design_contracts baselinee2;caseIDs preserved",
+    "MAIN_DECISIONS_and_S01_checkpoints": "current architectural rulings boundatmanifesttime",
+    "014release_and_constraints": "currentauthorizations/design;implementationunaccepted,actualsignatureslater"
+  },
+  "implementation_cwd": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+  "canonical_docs_root": "/mnt/c/workspace/videoworkline/Narralens/docs",
+  "planned_evidence_root": "docs/execution/A/implementation-20261111/integration/next-wiring/",
+  "review": "rev2 proposal-gap recheck completed; new receipt schema annex independently UNREVIEWED; not final release PASS",
+  "receipt_ddl_proposal_sha256": "be75d5683a25861ab2cbe14d0a12c4bbde050a342288e2f254f577a2a6623e56",
+  "receipt_schema_review": "PENDING; MAIN rev5 exact comparator/marker/rollback clarification; independent review still required",
+  "observed_candidate_commit": "1d348d419120f23f45d958112ea8c43df5a04675",
+  "candidate_acceptance": "INDEPENDENT_REVIEW_IN_PROGRESS_WITH_CANDIDATE_MAJOR",
+  "observed_candidate_source_files": [
+    {
+      "path": "src/host/agent-driven/created-native-workspace.ts",
+      "sha256": "3702917cf6efe09287030435c1883e1cdd57eb6e0da2fdd577bf3879ab965c1e",
+      "bytes": 65816
+    },
+    {
+      "path": "src/host/agent-driven/created-native-source-reader.ts",
+      "sha256": "cde88435d61dba1a881bef403e6a013f1d4f2bb93db8e1ffa2b3c15b4c74f82b",
+      "bytes": 77595
+    },
+    {
+      "path": "src/host/agent-driven/retained-native-closure.ts",
+      "sha256": "ab7ffead1c4b7b238f7e4f6097b1d17ad7792513e84591b623f67c95576ac6e7",
+      "bytes": 66515
+    },
+    {
+      "path": "src/host/agent-driven/native-cache-witness.ts",
+      "sha256": "97c1fe93037f3f31afdf67e97a5d4451d42ac7016d3cca642217fe1750c2573b",
+      "bytes": 13857
+    },
+    {
+      "path": "src/host/agent-driven/committed-snapshot-authority.ts",
+      "sha256": "1c53360e3c618c603cfcbe61d0c2d57004c5bd33dc26a92c2fdec72a1844bd6d",
+      "bytes": 44087
+    },
+    {
+      "path": "src/adapters/openfilm/openfilm-upstream.ts",
+      "sha256": "013f50ce87e04b3ff542e15f3c98d833ae43940fef9d85ccad79ff38e5bd200b",
+      "bytes": 55012
+    },
+    {
+      "path": "src/host/agent-driven/creation-application.ts",
+      "sha256": "774749bfab1f13f8a6ecad6ac5c85e157daa2f0a97f0385b2798229b16f50333",
+      "bytes": 26806
+    }
+  ],
+  "candidate_api_annex": "07_OBSERVED_CANDIDATE_API.md"
+}

@@ -1,0 +1,38 @@
+# R5G 完整结果契约独立文档审查
+
+**PLAN_READY_FOR_SINGLE_BATCH_IMPLEMENTATION。** 未发现需要阻塞这份完整契约的逻辑冲突；R5F-O01/O02均已有明确字段门与直接反例覆盖。此结论仅允许MAIN继续准备单批正式release，**不是源码修复通过或运行授权**；两项实现发现当前仍STILL_OPEN。
+
+审查绑定RESULT_CONTRACT_AND_CASE_MATRIX.md SHA256 `493f86e334b25a4d2fa240b2248f485c910f379747b9c7e1e91ec4b82f124319`、RELEASE_DRAFT.json `c4e98791cdaeee6e4908efd3696bb41fe3b36bd3ad1c06075d236284b0310301`、START_INPUT_BINDING.json `5f0c64fe8e7a5501d63d3812bbf68c54d64644c91e9b30cd261264106488d862`。20份实际读取/摘要输入开始、结束相等，具体完整SHA与scope见INPUTS.json。现有source8/protected7与绑定一致；没有声称逐行审查651或新commit冻结。历史HEAD仍是1d348d419120f23f45d958112ea8c43df5a04675。
+
+## 已覆盖的关键缺口
+
+F01–F04及F06将candidate/final/outcome的原失败、settlement、cleanup、image、kind/exit/fault组合纳入同一事实投影，mandatory自有字段、显式null、错类型和跨记录矛盾均有规范。C01–C06直接命中R5F已有反例，不再只测mode/link。实际对象同一性或直接cause关系由F03/C06核验，C07明确合法wrapper-cause正控；不以同文案、JSON code或非空对象代替真实关系。
+
+F05/F07/F08要求终局boolean、实际snapshot与既有proof observations、transport/latched/cleanup均一致并满足模式语义，覆盖normal分支过去只看cleanup计数的问题。F09绑定原取消的name/code/message及截断规则，覆盖fault只查accepted/superseded布尔值的问题。F10保留实际字节链、报告、读取和发布门，未重开R5E已闭环全行hash/唯一checker/digest或kernel算法。
+
+C01–C09及“每个适用mandatory字段删除/错类型/合法类型不一致”矩阵足以指导一次完整实施，而不是逐个发现局部补洞。真实FS write/publish边缘委托后由实际mapper自然计算坏字节的hash，再调用唯一checker/main，正好隔离协议语义验证，不需伪hash oracle、消费副本或真实C/N。C07保留正常及fault模式普通失败1；完整一致失败为可靠、不接受、1，缺字段/矛盾为不可靠3，两个分类没有混淆。详细F01..F10→case映射在FINDINGS.json。
+
+## 新diagnosticSnapshot面必要且范围合适
+
+现有PositivePilotOutcome未携带transport/latched/terminal明细，因此validator只有final里的自述，无法独立绑定它与当次实际原事实。新增必需内部readonly diagnosticSnapshot字段，是在原tool中补齐这个基线的最小可行选择。应返回当前runner在1489附近**已经一次取得**的同一冻结snapshot，并让candidate/final/outcome比较这一次观测；不能重新采样或建立第二时间点。
+
+该字段补充实际比较来源，不替代现有发布字段/hash链，也不产生第二持久权威、cleanup handle、公开DTO或MCP能力。它足以支撑本票在“可信同进程实际outcome”前提下的事实一致性检查；不应把导出的纯checker描述为任意JSON重建outcome的身份认证器。原Error对象与cause关系仍从同一次实际run的对象取得，不能由snapshot或序列化投影创造。
+
+## 实施时必须保留的现有语义
+
+这些是合同已要求的执行注意点，不是新增文档阻塞：
+
+- 无root、未发布或mandatory证据失败仍unreliable3，先走拒绝门，不要求创建不存在的final或把cwd当root；参数拒绝仍2。早期setup一致null snapshot合法，接受normal/fault才要求非null且真正proven。
+- 有完整证据的业务failed1无需成功snapshot shape。F02/F03约束的是序列化bounded error；实际unknown异常沿当前boundedError归一化。transport_failure仍用既有含stack/cause/phase的NativeErrorEnvelope，不能误套小型三字段Error形态。
+- F04比较现有保留的有界cleanup内容和顺序；不要求把所有历史cleanup重新扩成无限数组或让同一raw/diagnostic数组必须彼此相等。两者分别绑定原事实、接受时均无失败。
+- 当前pure StubSupervisor:479的成功模拟仍返回terminal_proof:null；F05将要求为其适配显式mock终局事实或使用实际supervisor+mock协议正控。不能为保留旧stub而放宽生产门，也不能把纯mock proven=true称内核证明。
+- F09按实际requestCancel:1882的原name/code/message截断绑定，不把latched的“cancelled by owner”前缀消息误当provenance原message；wrapper Error可与原Error文本不同，只要实际cause关系与各自序列化事实正确。
+- C10准确保留旧5s超时和20s当前harness预算，未把机器繁忙写成已证实原因，没有授权继续加预算或改变生产deadline。
+
+## 范围与停点
+
+RELEASE_DRAFT保持PLAN_REVIEW_ONLY_NOT_IMPLEMENTATION_RELEASE、source_write_release=false、runtime_release=false，原八existing路径、无新source、六种unchanged recorder轻量命令不扩展。增加tool内部outcome字段和fixture适配可在此范围内完成；不需要公共API或supervisor回收算法重写。保护七文件、历史失败、004/005及429立即停的规则均保留。
+
+建议MAIN据本合同发出一次完整、精确的Claude实现与自验证release，再冻结当前字节做受影响独立代码复核。文档接受不关闭R5F实现发现，不授予真实N票；最小N、R6/R7/R8、原17/ISO18、新冻结外审及NEXT仍按原顺序另验。
+
+本审查只读源码/合同/已有审查与metadata/hash，只新增本目录三个文件；tests、产品导入、真实CLI/C/N/fork/signal/wait/prctl/Host/HTTP/media/Chrome/network均NOT_RUN。没有源码/Git/运行根/旧报告修改，没有自签N1N2、NEXT或V1。

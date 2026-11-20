@@ -1,0 +1,5 @@
+MAIN已按你ADR060独立审查补齐rev2，请只读复验，不改实现、不运行任何业务/测试。仍只读git show原冻结1d348d4，不把059变动中源当基线。读取C/repair-058/ADR_060_ISOLATED_CACHE_DRAW.md/json最新rev2，旧rev1已归档ADR_060_REV1_BEFORE_REVIEW_FIX.md/json，原报告保留不覆盖。只允许写C/repair-058/ADR_060_REV2_RECHECK_A.md和.json。
+
+rev2选定：无PRE资源转移，CLEANUP_REQUIRED时完整draw promise保持pending、诊断单独可见、真实handle reconciliation只凭新鲜结束/drain证明才settle；父source-stream真实pipe/close ledger与freezeAdmission/drain；全production scope从PRE前到POST/释放/最终witness激活跨owner共享物理root锁；sourceReader根状态的窄read-quiescence面避免清理未证时出新proof（不使generic生产lease自我失效）；forced-finalize按单调记录的可观测真值表不声称唯一信号因果；唯一调度2active完整production/32queued/8perroot/queue30s，PRE前准入，直接factory也共享，无递归双占配额。
+
+请逐ADR060-A01..A05判定是否在可实施接口/owner/测试层闭环，特别检查新增scope/read-quiescence有无自锁或权限破坏，不以笼统风险阻塞也不代签实现。不需要假定任意恶意native的cgroup保证；保留数字signal的真实边界。若仍有真实阻塞，给精确最小修改；若可指导则DOCUMENT_PLAN_READY并列最终ReleaseAssignment还须锁定的路径/argv（这不等于实现通过）。绑定新md/json实际hash，全部runtime NOT_RUN，完成worker_done。C完整路径为 /mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112。

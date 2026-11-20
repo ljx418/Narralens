@@ -1,0 +1,118 @@
+{
+  "at": "2026-11-12T05:08:21.649565+00:00",
+  "head": "e2eff61b464d75d36598103d718cd2a75db5dfda",
+  "state": "STOPPED_429_PARTIAL_UNVALIDATED_NO_REPLACEMENT_WRITER",
+  "paths": {
+    "src/host/agent-driven/committed-snapshot-authority.ts": {
+      "sha256": "c11dc60c20e49d7a4a9293eb5b501508bed5eeffd6468d008715db2a50e3ef76",
+      "bytes": 28721,
+      "preserved": "src__host__agent-driven__committed-snapshot-authority.ts.preserved",
+      "baseline_sha256": "80088c1cac9c87817dee9f944c6a15e35f90800c4db4df84678483a4d4ce7740"
+    },
+    "src/host/agent-driven/created-native-workspace.ts": {
+      "sha256": "f4dcd1c4518e63c1835bd768ca941e2b764b588660332b4bc4a54c7b13124f73",
+      "bytes": 19903,
+      "preserved": "src__host__agent-driven__created-native-workspace.ts.preserved",
+      "baseline_sha256": "90fa46ca3bc677bd687060ed7f3fb89f653b7cea89688641b0a43cd63ab467f4"
+    },
+    "src/host/m5/openfilm-native-expected.ts": {
+      "sha256": "19110e45a83b6d5b611b4260620ce873f923f1e5a5b907bc6176c4b734fbeed3",
+      "bytes": 47279,
+      "preserved": "src__host__m5__openfilm-native-expected.ts.preserved",
+      "baseline_sha256": "0d59ee891c9a1d3bf491e479639c67d61e35271f5af6b0e4bd708c34eece0795"
+    },
+    "tests/agent-driven/integration/created-native-workspace.test.ts": {
+      "sha256": "439d469032c9af2b83ceb826e0aead7cf5c2fe5c5693be7cbf18c8e67f0f615f",
+      "bytes": 12700,
+      "preserved": "tests__agent-driven__integration__created-native-workspace.test.ts.preserved",
+      "baseline_sha256": "439d469032c9af2b83ceb826e0aead7cf5c2fe5c5693be7cbf18c8e67f0f615f"
+    },
+    "tests/agent-driven/integration/committed-snapshot-host.test.ts": {
+      "sha256": "bfd0c6373b254050d32a6a99e7b6f8b9827dc24b6b2587515ab4c5aad2cd9037",
+      "bytes": 12061,
+      "preserved": "tests__agent-driven__integration__committed-snapshot-host.test.ts.preserved",
+      "baseline_sha256": "bfd0c6373b254050d32a6a99e7b6f8b9827dc24b6b2587515ab4c5aad2cd9037"
+    },
+    "tests/agent-driven/integration/created-native-ack.test.ts": {
+      "sha256": "439677f921b14e70e4f3553747d8e683ef4490e0595854df4f8d8ccc71959e19",
+      "bytes": 132212,
+      "preserved": "tests__agent-driven__integration__created-native-ack.test.ts.preserved",
+      "baseline_sha256": "8f21cb81d38281364f0e654a128175de24dac96ffec89e77dbb44b21634dd510"
+    },
+    "src/host/agent-driven/retained-native-closure.ts": {
+      "sha256": "d3c9b58eaffd6b63240a86f743275c2157c93430e6c5bee61eb26090b57a3bf0",
+      "bytes": 25125,
+      "preserved": "src__host__agent-driven__retained-native-closure.ts.preserved",
+      "baseline_sha256": null
+    },
+    "src/host/agent-driven/created-native-source-reader.ts": {
+      "state": "ABSENT_NOT_IMPLEMENTED"
+    },
+    "tests/agent-driven/integration/created-native-source-reader.test.ts": {
+      "state": "ABSENT_NOT_IMPLEMENTED"
+    },
+    "tests/agent-driven/integration/helpers/native-source-fixture.ts": {
+      "state": "ABSENT_NOT_IMPLEMENTED"
+    }
+  },
+  "captures": [
+    {
+      "name": "n1n2-claude-001-tsc-closure",
+      "exit": 2,
+      "source_changed": [],
+      "source_added": [],
+      "log_sha256": "3c2de0aa2a9eaacec06ff5a2d38c2636ead52e69e76c9fba1d908dba85b1e4be",
+      "finished_at": "2026-11-12T04:57:26.021529+00:00"
+    },
+    {
+      "name": "n1n2-claude-002-tsc-closure",
+      "exit": 2,
+      "source_changed": [],
+      "source_added": [],
+      "log_sha256": "da1b0991ebe9caaf5d83716c37f0844de0a023c7a156fa10d4bf7a02778893cb",
+      "finished_at": "2026-11-12T04:58:01.514353+00:00"
+    },
+    {
+      "name": "n1n2-claude-003-tsc-closure",
+      "exit": 2,
+      "source_changed": [],
+      "source_added": [],
+      "log_sha256": "3908110ef93021b20a4500c9acd7e33830e5c80c495637f8e0e633047789dfeb",
+      "finished_at": "2026-11-12T04:58:28.209575+00:00"
+    },
+    {
+      "name": "n1n2-claude-004-tsc-closure",
+      "exit": 0,
+      "source_changed": [],
+      "source_added": [],
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "finished_at": "2026-11-12T04:59:11.202691+00:00"
+    },
+    {
+      "name": "n1n2-claude-005-approved-loader",
+      "exit": 0,
+      "source_changed": [],
+      "source_added": [],
+      "log_sha256": "8d3f318acb6eb030280ef58485552f352e95d1c9b50ab94090f6fdba605f16eb",
+      "finished_at": "2026-11-12T04:59:36.775132+00:00"
+    },
+    {
+      "name": "n1n2-claude-006-tsc",
+      "exit": 2,
+      "source_changed": [],
+      "source_added": [],
+      "log_sha256": "0a5ce2f6f7ab94b1229202a029f33dbd83a08e51af1f7051ae796fddb196be26",
+      "finished_at": "2026-11-12T05:02:37.958987+00:00"
+    }
+  ],
+  "last_capture_limit": "tsc006 actual exit2 with3 errors; later source/test edits exist and were NOT revalidated. Earlier004tsc0/005loader0 must not imply final candidate passes.",
+  "supervisor_handoff": "msg_507ddce660be outcome failed; own commands terminal, partial preserved under MAIN docs/parallel/lane-product/A-R2-20261112/N1N2-native-source/STOP_429",
+  "policy_source": "latest user instruction and current MAIN AGENTS: Claude429 stops affected implementation; explicit authorization required for this takeover occurrence",
+  "forbidden": [
+    "new source/test edits",
+    "new validation/compile/gates",
+    "new Claude request/restart/provider/credential switch",
+    "Codex/MAIN automatic implementation takeover",
+    "N1N2 PASS/completion claim"
+  ]
+}

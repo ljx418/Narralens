@@ -1,0 +1,61 @@
+{
+  "at": "2026-11-15T16:44:59.379776+00:00",
+  "terminal": {
+    "C": {
+      "original": {
+        "pid": 1381827,
+        "ppid": 1381613,
+        "pgid": 1381827,
+        "sid": 1381827,
+        "start_ticks": 5313002,
+        "state": "S"
+      },
+      "current": null,
+      "at": "2026-11-15T16:44:59.379737+00:00"
+    },
+    "N": {
+      "original": {
+        "pid": 1381828,
+        "ppid": 1381827,
+        "pgid": 1381828,
+        "sid": 1381828,
+        "start_ticks": 5313007,
+        "state": "S"
+      },
+      "current": null,
+      "at": "2026-11-15T16:44:59.379770+00:00"
+    }
+  },
+  "groups": {
+    "C": "ESRCH",
+    "N": "ESRCH"
+  },
+  "alive": {
+    "C": [
+      {
+        "pid": 1381827,
+        "ppid": 1381613,
+        "pgid": 1381827,
+        "sid": 1381827,
+        "start_ticks": 5313002,
+        "state": "D",
+        "role": "C",
+        "first_seen_at": "2026-11-15T16:44:56.025431+00:00",
+        "cmdline_sha256": "9affabcd4dcb649539dc3cbfd99c2a740c3160e84e3d0f962e9db7f26f2fb49a"
+      }
+    ],
+    "N": [
+      {
+        "pid": 1381828,
+        "ppid": 1381827,
+        "pgid": 1381828,
+        "sid": 1381828,
+        "start_ticks": 5313007,
+        "state": "R",
+        "role": "N",
+        "first_seen_at": "2026-11-15T16:44:56.063002+00:00",
+        "cmdline_sha256": "18bec717192247df132e2ee4baa35923789ce829aac41e0fb0adf33860d5ec33"
+      }
+    ]
+  }
+}

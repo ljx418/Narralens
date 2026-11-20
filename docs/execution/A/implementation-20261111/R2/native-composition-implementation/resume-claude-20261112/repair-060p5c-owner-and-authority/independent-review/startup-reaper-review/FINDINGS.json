@@ -1,0 +1,183 @@
+{
+  "verdict": "REQUEST_CHANGES",
+  "scope": "R5C targeted startup/reaper and exact minimal N pilot prerequisite review; static source inspection only",
+  "candidate": {
+    "historical_head": "1d348d419120f23f45d958112ea8c43df5a04675",
+    "custodian_sha256": "36387d5287ee6977ee1625e9a6ebbe61f2f8992fa4502c19310d11548d9503d7",
+    "supervisor_sha256": "1d069b382324a183dcb7fb0bee19fe464eb39fd4216613b80114fdcbda36caaa",
+    "tool_sha256": "2dad75da85ef30c37a600c98a5dc5b644f6e6ccf57907ff0cb89dcb6ee264af8",
+    "report_sha256": "8874241b614fe8816e987e4d874e1d379a3e351ad6e058a5c88551affa6aed03",
+    "git_freeze": false
+  },
+  "findings": [
+    {
+      "id": "R5C-N01",
+      "classification": "NEW",
+      "severity": "MAJOR",
+      "relatedPriorIDs": [
+        "R5B-S03",
+        "R5B-S06"
+      ],
+      "title": "Real asynchronous modes are cancelled/refused before startup can produce N or a normal result",
+      "locations": [
+        "tools/native-cache-normal-pilot.ts:679",
+        "tools/native-cache-normal-pilot.ts:771",
+        "tools/native-cache-normal-pilot.ts:930",
+        "tools/native-cache-normal-pilot.ts:935",
+        "tools/native-cache-normal-pilot.ts:950",
+        "src/adapters/openfilm/cache-process-supervisor.ts:1538",
+        "src/adapters/openfilm/cache-process-supervisor.ts:2303"
+      ],
+      "reachable_precondition": "Run either exact proposed CLI with the actual supervisor. start begins #run, spawns C then yields awaiting C_HELLO; it does not synchronously resolve the draw or accept N.",
+      "actual_call_path": "normal: start -> no normal-mode wait -> finally -> continueToTerminal observes unsettled -> requestCancel(DRAW_NOT_SETTLED). assertion-failure: immediately acceptedWorker(entry) before its first await -> null because N_HELLO has not happened -> WORKER_NOT_OBSERVED cancel. waitForLiveWorker is never reached on that initial null branch.",
+      "impact": "The normal command cannot exercise a successful positive exchange and the fault command cannot reach its intended same-epoch HELLO+GO injection on real startup. This is an actual deterministic source-order regression, not lack of kernel evidence or an unrelated R6 gate. The tool may still clean the cancelled C; no physical orphan is inferred from this finding.",
+      "contract": "R5C SPEC3/5 and release next gate require normal exact synthetic success, and deliberate fault only after actual accepted N HELLO+GO/live. Ownership finally must not turn ordinary pending progress into a cancellation failure.",
+      "minimal_fix": "Preserve one canonical terminal continuation, but distinguish pending normal progress from requested cancellation/error. Let normal await the original result/reconcile without injecting DRAW_NOT_SETTLED just because it is asynchronous. Let assertion mode boundedly wait for accepted N before checking bound GO/live, then retain the last synchronous epoch check. Finally cancels only when a genuine error/explicit cancellation needs it.",
+      "direct_counterexample": "Mock actual returned ChildProcess/proc edges so start remains pending until later C_HELLO/FORKED/N_HELLO/GO/result. Invoke actual runner/main with actual supervisor or a faithful asynchronous adapter. Assert zero owner cancel before normal result; normal yields the exact1024 payload. For fault mode initial worker=null must wait, then inject only after the later same-epoch GO/live. Existing StubSupervisor.start synchronously marks settled and diagnosticSnapshot advertises worker from construction, masking both branches.",
+      "runtime": "NOT_RUN; source-order counterexample, not a captured old-code run"
+    },
+    {
+      "id": "R5C-N02",
+      "classification": "STILL_OPEN",
+      "severity": "MAJOR",
+      "relatedPriorIDs": [
+        "R5B-S06"
+      ],
+      "title": "Repeated owner cancel overwrites accepted primary-cancel provenance and prevents valid asynchronous fault qualification",
+      "locations": [
+        "src/adapters/openfilm/cache-process-supervisor.ts:1740",
+        "src/adapters/openfilm/cache-process-supervisor.ts:1754",
+        "tools/native-cache-normal-pilot.ts:683",
+        "tools/native-cache-normal-pilot.ts:812",
+        "tools/native-cache-normal-pilot.ts:1004"
+      ],
+      "reachable_precondition": "After mode startup is allowed to progress, requestCancel accepts the deliberate Error as first failure. C/N cleanup is asynchronous, so finally's first inspection is still unsettled and continueToTerminal calls requestCancel again with the same original Error.",
+      "actual_call_path": "First requestCancel sets facts.error=originalError and cancel_provenance.accepted_as_primary=true. Second requestCancel sees latched.kind=failure and unconditionally overwrites provenance with accepted_as_primary=false/superseded_by_earlier_failure=true, even though the primary failure is that same accepted cancel. judge later requires accepted_as_primary=true.",
+      "impact": "A genuine intended fault with full cleanup and the correct original settlement Error is disqualified. Repeated cancellation is not idempotent in the diagnostic/proof fact used by this exact gate. The original object itself is now preserved, which is a real improvement; its provenance is what regresses.",
+      "contract": "R5C SPEC5 explicitly preserves issued/idempotent cancellation and requires the same cancel accepted as primary. It does not allow a repeated observation of that cancel to be recast as a foreign earlier failure.",
+      "minimal_fix": "Keep immutable primary-cancel provenance once accepted; distinguish an already accepted cancel from a prior unrelated failure. Additional calls may record bounded secondary requests but cannot overwrite first provenance. Avoid unnecessary duplicate cancel in continuation as appropriate, while retaining production method idempotence.",
+      "direct_counterexample": "Use actual supervisor requestCancel twice with same issued handle before terminal, then start/reconcile: error remains exactly first Error, accepted_as_primary remains true and the cancel is sent once. Also test a different later cancel preserves original accepted cause. Drive actual runner with delayed cleanup through finally. Current StubSupervisor lacks the production else-branch that overwrites provenance, and actual identity test only calls once.",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "id": "R5C-N03",
+      "classification": "STILL_OPEN",
+      "severity": "MAJOR",
+      "relatedPriorIDs": [
+        "R5B-S05",
+        "R5B-S02",
+        "R3-C04"
+      ],
+      "title": "Unbound initial C epoch permanently blocks even a genuinely fresh gone no-authorize startup",
+      "locations": [
+        "src/adapters/openfilm/cache-process-supervisor.ts:2060",
+        "src/adapters/openfilm/cache-process-supervisor.ts:2760",
+        "src/adapters/openfilm/cache-process-supervisor.ts:2764"
+      ],
+      "reachable_precondition": "Spawn returns a born C PID, but its immediate identity read is unknown. C then fails/exits before a verified C_HELLO, so both custodianEpoch and custodianHelloEpoch stay null. No AUTHORIZE was sent; actual exit+close arrive and later reading the issued child PID would return ENOENT/ESRCH.",
+      "actual_call_path": "#proveDomainGone returns false at epoch===null before making any fresh query. reconcile now correctly admits the no-authorize ledger, but always reuses this same unconditional null-epoch rejection, so the original handle/promise can never settle.",
+      "impact": "A legitimate failed-start cleanup stays held forever despite complete actual no-authorize termination. The same path can be encountered by a cancelled early-start C; it is not a request to relax authorize-sent/missing-proof cases or to guess replacement when fresh is known.",
+      "contract": "R5C SPEC2 permits actual child exit/close plus fresh gone, and specifically distinguishes unbound epoch with fresh known (must hold) from fresh gone. MAIN requires normal failed cleanup to converge when evidence genuinely becomes available.",
+      "minimal_fix": "After real C exit/close, query the PID of the issued born ChildProcess even if no epoch was bound. Fresh gone can prove that original child ended; fresh unknown or fresh known with no original epoch cannot prove replacement and remains held. Keep verified C_HELLO fallback when available, and preserve original failure/no-authorize binding.",
+      "direct_counterexample": "Actual supervisor start with mocked initial /proc EIO, no HELLO/AUTHORIZE, later exit+close and then ENOENT: reconcile must settle the same original failed promise once. A parallel fresh-known/unbound case must stay held. Current late no-authorize test seeds a readable initial epoch, so it misses this branch.",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "id": "R5C-N04",
+      "classification": "NEW",
+      "severity": "MAJOR",
+      "relatedPriorIDs": [
+        "R5B-S01",
+        "R3-C05"
+      ],
+      "title": "Permanent signal revocation can become permanent refusal to perform later terminal proof",
+      "locations": [
+        "src/adapters/openfilm/cache-process-custodian.py:847",
+        "src/adapters/openfilm/cache-process-custodian.py:905",
+        "src/adapters/openfilm/cache-process-custodian.py:1974",
+        "src/adapters/openfilm/cache-process-custodian.py:2070"
+      ],
+      "reachable_precondition": "TERM ends N and actual _reap_worker consumes it. Subsequent ECHILD/group probe is temporarily unknown so recovery resumes. Before those observations recover, census is still unknown and owed KILL reaches the now-reaped authority check, setting actions.authority_lost. Later children/group/known-epoch observations all become provably gone.",
+      "actual_call_path": "Kernel dispatch correctly refuses to signal the reaped N and no peer is killed. But every later TargetSettlement.run immediately returns _held at actions.authority_lost before any census/reaping/ECHILD/group proof. It can never discover the later complete terminal evidence.",
+      "impact": "The old unsafe signal reacquisition is stopped, but a transient post-reap proof uncertainty can now leave C and its original responsibility permanently held even after all targets really ended. Signal capability revocation is correctly irreversible; evidence collection is incorrectly revoked with it. _held also reports anchor_held=true even though this concrete path already reaped N.",
+      "contract": "R5C SPEC1 and ADR rev3 require irreversible signal authority and continuing honest settlement; they do not equate 'cannot ever signal this PID again' with 'cannot ever prove the original domain ended'. The report's claim that reap/replacement necessarily means permanently held overstates the contract.",
+      "minimal_fix": "Separate irreversible no-further-signals state from terminal-proof progress. After authority loss continue conservative original-domain census/ECHILD/group/known-epoch checks and use retained actual N wait facts; never reacquire or signal replacement PID/group. Do not skip the original group obligation just because signalling is revoked, and report actual anchor state.",
+      "direct_counterexample": "Drive actual _settle_domain -> KernelSettlementOperations with raw OS-edge mocks: real mock waitpid consumes N, ECHILD/group probe EIO causes recovery, attempted owed signal is refused, then all original targets and group become gone. Assert zero post-reap raw signal and eventual proven settlement from same responsibility. Current 'reused number' test sets anchor_reaped=True by hand and asserts held, never traversing the actual reap/probe-error/recovered-proof sequence.",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "id": "R5C-N05",
+      "classification": "NEW",
+      "severity": "MINOR",
+      "relatedPriorIDs": [
+        "R5B-S01"
+      ],
+      "title": "Persistent failed signal delivery accumulates an unbounded Custodian.signals history",
+      "locations": [
+        "src/adapters/openfilm/cache-process-custodian.py:858",
+        "src/adapters/openfilm/cache-process-custodian.py:896",
+        "src/adapters/openfilm/cache-process-custodian.py:2084"
+      ],
+      "reachable_precondition": "Authority remains valid but the real raw kill/killpg keeps returning failed (e.g. a persistent EPERM). Debt correctly remains unsent and C retries via local recovery.",
+      "actual_call_path": "Each settlement pass adds a signal answer, then self.signals.extend(result['signals']) retains it forever. Unlike bounded _events, this list has no cap/compaction. The lifetime intentionally has no expiry.",
+      "impact": "Long-lived unknown cleanup can grow retained signal facts and eventual receipt payload without bound. No claim is made that the fixed normal/silent helpers naturally cause EPERM; this is the explicitly assigned rejection path. It is not a reason to consume failed delivery debt or expire the resource owner.",
+      "contract": "R5C SPEC1 requires bounded refusal facts, no unbounded signal/log churn, truthful unsent debt and indefinite ownership.",
+      "minimal_fix": "Keep bounded first/recent dispatch/refusal facts plus bounded counters/current debt, with controlled retries driven by fresh authority/recovery; preserve original Error and do not invent successful delivery. Ensure proof/receipt overflow is explicitly conservative without unbounded resident logs.",
+      "direct_counterexample": "Actual KernelSettlementOperations with raw os.kill/killpg EPERM for many recovery passes: term/kill_sent stay false as appropriate, same owner remains active, retained signal/event facts stay within fixed bounds and later allowed delivery can still converge. Existing new adapter tests patch signal_group/signal_pid above raw errno handling and do not cover this.",
+      "runtime": "NOT_RUN"
+    }
+  ],
+  "prior_dispositions": [
+    {
+      "priorID": "R5B-S01",
+      "classification": "STILL_OPEN",
+      "assessment": "Old replacement-PID/group dispatch is CLOSED_STATIC as a subclaim: real KernelSettlementOperations now checks _authorise_signal, WNOWAIT/ECHILD/reaped and immutable original startticks; stale group fallback is removed. Full assigned signal/recovery item remains open for N04/N05. New test mostly seeds bound/reaped state and replaces signal wrappers; it does not prove the complete raw wait->reap->probe-error->replacement sequence."
+    },
+    {
+      "priorID": "R5B-S02",
+      "classification": "CLOSED_STATIC",
+      "assessment": "Old blanket worker=null/forkedPid=null rejection replaced by no-birth/no-authorize/forked/unknown ledger. Actual start/reconcile tests now exercise late no-PID error+close and bound-epoch late no-authorize close, preserving original failed promise; authorize-sent/no-fork proof remains held. Related unbound-epoch edge is separately N03/S05."
+    },
+    {
+      "priorID": "R5B-S03",
+      "classification": "CLOSED_STATIC",
+      "assessment": "Old exception-path early return is replaced with same original start promise and active terminal continuation in finally; partial owner/root registration and original result read improve. New mode-order regression N01 prevents actual positive pilots, so this subclosure is not tool acceptance."
+    },
+    {
+      "priorID": "R5B-S04",
+      "classification": "CLOSED_STATIC",
+      "assessment": "Actual protected R4B factory is dynamically loaded at a fixed local specifier and same callback/error-aware boundary is shared by main/runner before resource creation; direct stderr bypass removed. No nofork signal/cleanup capability reused."
+    },
+    {
+      "priorID": "R5B-S05",
+      "classification": "STILL_OPEN",
+      "assessment": "Fresh unknown with a bound C epoch now rejects correctly and verified HELLO epoch can be fallback. Completely unbound original startup never tests fresh gone (N03). Nonblocking same-Z qualification note below."
+    },
+    {
+      "priorID": "R5B-S06",
+      "classification": "STILL_OPEN",
+      "assessment": "Exact Error object/cause, same N PID/startticks/PPID/PGID/SID/live state and bound GO checks added; unrelated-error predicate improved. Immediate pre-wait N requirement and repeated-cancel provenance (N01/N02) prevent actual exact gate success."
+    }
+  ],
+  "notes": [
+    {
+      "id": "R5C-NOTE-01",
+      "severity": "NOTE",
+      "locations": [
+        "src/adapters/openfilm/cache-process-supervisor.ts:2774"
+      ],
+      "assessment": "New condition permits a known same C epoch if state Z after actual exit/close. The contract asks original epoch gone including Z. A genuine Node ChildProcess close normally follows actual reaping, so this review does not invent a reachable lingering-C orphan from impossible fake close events; nevertheless this extra acceptance is not fresh-gone evidence and should not be cited as kernel proof. Keep normative proof and mocks consistent."
+    },
+    {
+      "id": "R5C-NOTE-02",
+      "severity": "NOTE",
+      "locations": [
+        "tools/native-cache-normal-pilot.ts:714",
+        "tools/native-cache-normal-pilot.ts:1000"
+      ],
+      "assessment": "Original settlement cleanup is reduced to a timeline count; expected-fault judge does not inspect raw cleanup errors or snapshot.cleanup_failures. Do not overstate no-unrelated-cleanup qualification. Preserve actual settlement/cleanup evidence and require the intended predicate when repairing the exact gate; no R6 complete receipt audit is requested."
+    }
+  ],
+  "runtime": "Reviewer executed no test/import/CLI/production module/C/fork/wait/signal/prctl/Host/browser/media/network. All real new-C/N/kernel/CLI and R6/R7/17/ISO18/N1N2/NEXT remain NOT_RUN/OPEN.",
+  "source_reasoning": "Counterexamples are static source-path reasoning and future decisive mocks, not captured old-code or kernel failures."
+}

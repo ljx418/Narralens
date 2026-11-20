@@ -1,0 +1,442 @@
+{
+  "base": "abf34c9a04ae31639ce9ea2180fda32458413a17",
+  "source_root": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+  "status": "READ_ONLY_DESIGN_NOT_IMPLEMENTED",
+  "pending_delta": {
+    "message": "msg_4561af4efe91",
+    "from": "dd32f156",
+    "files": [
+      "src/host/m5/openfilm-native-expected.ts",
+      "tests/agent-driven/integration/created-native-ack.test.ts"
+    ],
+    "rule": "MAIN importing accepted lifecycle blobs; this map uses immutable abf34c9, rebase review before release"
+  },
+  "files": [
+    {
+      "path": "src/host/server.ts",
+      "blob": "d79f02cb178190a36b5aa107af4b0fd0ad33b041",
+      "sha256": "f1b9029158730bd24967361f4cd677b1d37c8c9474c1b0af7049e9ca5dd5025d",
+      "evidence": [
+        {
+          "start": 687,
+          "end": 735,
+          "meaning": "startup fixed passes"
+        },
+        {
+          "start": 750,
+          "end": 815,
+          "meaning": "reaper, ingress, close"
+        }
+      ]
+    },
+    {
+      "path": "src/host/projects/project-coordinator.ts",
+      "blob": "dc1e33a47e21a131a5721dceeba1f9e730ae0752",
+      "sha256": "36a996d700f7009bc08f9aaafe489081058033fe8adbf2ae20019c8568143e02",
+      "evidence": [
+        {
+          "start": 106,
+          "end": 123,
+          "meaning": "queue and recovery gate"
+        },
+        {
+          "start": 343,
+          "end": 370,
+          "meaning": "generic all incomplete and global lease reap"
+        }
+      ]
+    },
+    {
+      "path": "src/host/projects/controlled-recovery-scheduler.ts",
+      "blob": "0d6f44d07be52d85cc6eef9b4b2837075d1a0170",
+      "sha256": "58b720762a9c3405d5f48f8d546fb874bbd7e23498c1452a05d7ec9180140a82",
+      "evidence": [
+        {
+          "start": 15,
+          "end": 45,
+          "meaning": "classification and total order"
+        },
+        {
+          "start": 57,
+          "end": 132,
+          "meaning": "finite original set and DB progress"
+        }
+      ]
+    },
+    {
+      "path": "src/host/projects/controlled-write-formats.ts",
+      "blob": "d9ae79fa3001e62ff2fc1e7c4616618b01b540a8",
+      "sha256": "39ba9c8875c003b9ff594afdca3602e35e11d47e09f4ac99b1f0e50d0dab5f3d",
+      "evidence": [
+        {
+          "start": 24,
+          "end": 55,
+          "meaning": "unparseable not claimed"
+        }
+      ]
+    },
+    {
+      "path": "src/host/projects/revision-store.ts",
+      "blob": "3bc050143a271cd673409fe562a4ca6ed1e72156",
+      "sha256": "b558839b76f8cad595b79efa66734e12de1058452efe55eecf8f9f6d0b1dec8e",
+      "evidence": [
+        {
+          "start": 548,
+          "end": 556,
+          "meaning": "strict other prepared check"
+        },
+        {
+          "start": 793,
+          "end": 801,
+          "meaning": "project recovery gate"
+        },
+        {
+          "start": 1305,
+          "end": 1310,
+          "meaning": "incomplete omits recovering"
+        }
+      ]
+    },
+    {
+      "path": "src/host/agent-driven/creation-application.ts",
+      "blob": "3238590e8f7fe79e004b1d9d21c8e488a46d3943",
+      "sha256": "774749bfab1f13f8a6ecad6ac5c85e157daa2f0a97f0385b2798229b16f50333",
+      "evidence": [
+        {
+          "start": 96,
+          "end": 153,
+          "meaning": "single-store composition and missing native context"
+        },
+        {
+          "start": 214,
+          "end": 224,
+          "meaning": "native entry lacks observation binding"
+        },
+        {
+          "start": 326,
+          "end": 338,
+          "meaning": "recover and close"
+        }
+      ]
+    },
+    {
+      "path": "src/host/projects/project-creation-service.ts",
+      "blob": "663de6dfa440783707166f12eddf9c0f5a1f8a87",
+      "sha256": "7a4431a1aefeae635f252119f495d4571a8c1bdecc01711dd7b4eb4e6a679ed5",
+      "evidence": [
+        {
+          "start": 72,
+          "end": 89,
+          "meaning": "bootstrap recovery global throw and close"
+        }
+      ]
+    },
+    {
+      "path": "src/host/agent-driven/created-task-application.ts",
+      "blob": "09c05bd50856b6a75183761b7b772b2e8a1ed99d",
+      "sha256": "4203e55493c330ea537b11601cd48eb736a6bd29915565a9c4f5cae046288493",
+      "evidence": [
+        {
+          "start": 92,
+          "end": 120,
+          "meaning": "one tasks store factory"
+        },
+        {
+          "start": 163,
+          "end": 190,
+          "meaning": "dedicated recovery exclusion and close"
+        }
+      ]
+    },
+    {
+      "path": "src/host/agent-driven/created-source-recovery.ts",
+      "blob": "7d9265f6ad2f57080cff76dda39a97beb9961a84",
+      "sha256": "392ffe1dcb64bfd3478287524996fc774e001d3b3ea8f61cae296a3e12289f97",
+      "evidence": [
+        {
+          "start": 112,
+          "end": 127,
+          "meaning": "deps and roots"
+        },
+        {
+          "start": 340,
+          "end": 399,
+          "meaning": "whole scan admission"
+        },
+        {
+          "start": 1241,
+          "end": 1253,
+          "meaning": "close drain"
+        }
+      ]
+    },
+    {
+      "path": "src/host/agent-driven/created-source-adoption-service.ts",
+      "blob": "ebf8dd66375c2cac2d7af481d71e4a04ae1e7e65",
+      "sha256": "9e140f5887b6e8ad5f406517504043ade1eaaa9df8978fee8a2d99d82c46ddb7",
+      "evidence": [
+        {
+          "start": 36,
+          "end": 43,
+          "meaning": "normal adoption dependencies"
+        },
+        {
+          "start": 117,
+          "end": 118,
+          "meaning": "publisher shared selection"
+        },
+        {
+          "start": 146,
+          "end": 154,
+          "meaning": "close"
+        }
+      ]
+    },
+    {
+      "path": "src/host/agent-driven/created-source-publisher.ts",
+      "blob": "b84b2fed09c497ae9412dc9c5ece4b88620e097b",
+      "sha256": "72d0bb32143eebdf630c386795c95be0411bb5b43498307db0128c8a424600fd",
+      "evidence": [
+        {
+          "start": 379,
+          "end": 400,
+          "meaning": "identity journal and two renames"
+        }
+      ]
+    },
+    {
+      "path": "src/host/agent-driven/created-publication-recovery-files.ts",
+      "blob": "3411f2cf80376ba327d858ed86f83ed002a85ff0",
+      "sha256": "3fb41e83611f6e2e8557f4229e714786f584ca01c162cdb378ffb08b6cd4b330",
+      "evidence": [
+        {
+          "start": 33,
+          "end": 34,
+          "meaning": "existing fault seam"
+        },
+        {
+          "start": 268,
+          "end": 277,
+          "meaning": "rollback physical boundaries"
+        }
+      ]
+    },
+    {
+      "path": "src/host/history/history-service.ts",
+      "blob": "5d24d44530aaf91df727ea47a65b11d81b5b14b2",
+      "sha256": "706fdbcffe41221bde2b81efc649c9039fe6679ed61b641e4ae906e3373db86b",
+      "evidence": [
+        {
+          "start": 460,
+          "end": 490,
+          "meaning": "family recovery and guard"
+        }
+      ]
+    },
+    {
+      "path": "src/host/adoption/adoption-coordinator.ts",
+      "blob": "9660afce4e164c39a481dfa8d6becacfedd07a18",
+      "sha256": "41daa0c0559832255b4999a5e5a83cade7eacdcac160e1978a48b132076794de",
+      "evidence": [
+        {
+          "start": 484,
+          "end": 530,
+          "meaning": "unreadable row misownership"
+        }
+      ]
+    },
+    {
+      "path": "src/host/agent-driven/start-runtime.ts",
+      "blob": "a589bbb4b689ca6bc094f5a2d2050f0595657865",
+      "sha256": "d5bd8fb2507f61e1dc1c01c83def8a9d81406dc48a7e7120746c090dca9227a4",
+      "evidence": [
+        {
+          "start": 15,
+          "end": 38,
+          "meaning": "FD owned start and fixed roots"
+        },
+        {
+          "start": 52,
+          "end": 73,
+          "meaning": "shutdown and startup error swallowing"
+        }
+      ]
+    },
+    {
+      "path": "src/host/agent-driven/owned-runtime.ts",
+      "blob": "b1346164943a6abb648701305b34703dd64a7366",
+      "sha256": "9ff6bca28da8f9d9537eda9a013149ef5789616ce98d43066eb91d8872fda8e4",
+      "evidence": [
+        {
+          "start": 38,
+          "end": 51,
+          "meaning": "FD9 flock"
+        },
+        {
+          "start": 88,
+          "end": 104,
+          "meaning": "old process identity and generation"
+        }
+      ]
+    },
+    {
+      "path": "src/launcher/local-runtime-ports.ts",
+      "blob": "25d00f9adaa260484fda567da6b78439449acbfd",
+      "sha256": "bf885c40271d7a73a772cbdafffa798b5cc143dbaa383fd43c19ec4117885f0d",
+      "evidence": [
+        {
+          "start": 31,
+          "end": 67,
+          "meaning": "inherited descriptor and timeout not exit"
+        }
+      ]
+    },
+    {
+      "path": "src/host/m5/native-observation.ts",
+      "blob": "f48deec3e768d0ae2165abf9fc58261970f61d44",
+      "sha256": "7d246c7a518fcbaecf4f9e569c5d78c47ad5cd0860ef36af49112d22471074f4",
+      "evidence": [
+        {
+          "start": 202,
+          "end": 231,
+          "meaning": "mapping and dependencies"
+        },
+        {
+          "start": 559,
+          "end": 575,
+          "meaning": "real selection semantics"
+        },
+        {
+          "start": 653,
+          "end": 665,
+          "meaning": "sync close"
+        }
+      ]
+    },
+    {
+      "path": "src/host/m5/openfilm-native-expected.ts",
+      "blob": "9a1104fc16c5065c1737a208c5efcaa0a704f7c4",
+      "sha256": "9f9d2c820510beee15d926f3d7e6e11034843ff829d15b5526ac45028848ab14",
+      "evidence": [
+        {
+          "start": 538,
+          "end": 547,
+          "meaning": "reader loader approval required"
+        }
+      ]
+    },
+    {
+      "path": "src/host/m5/native-ack-store.ts",
+      "blob": "d9d11488228a31305e959f5d3a98b676236d5d0d",
+      "sha256": "d42a38f6b56d9912130f90559b94ff8ae0004e6937fd5e9862034790f0a32ee2",
+      "evidence": [
+        {
+          "start": 30,
+          "end": 53,
+          "meaning": "ack deps and same-store construction"
+        }
+      ]
+    },
+    {
+      "path": "src/host/m5/openfilm-studio-gateway.ts",
+      "blob": "11f42e548767562e54c849621024f334f442dfac",
+      "sha256": "a154ab81dcddfec00752337a4ff3858f099e860dd39bed93b65f616ff152d68e",
+      "evidence": [
+        {
+          "start": 709,
+          "end": 739,
+          "meaning": "closed native observation ingress"
+        }
+      ]
+    },
+    {
+      "path": "src/host/agent-driven/created-source-change-service.ts",
+      "blob": "bf6769dfe86038d6faaed150f4cbc391a7e7c9ab",
+      "sha256": "65d123e91866ea1a6e3096a062daabf73bcfad778eec280e5689d25f7dd564fe",
+      "evidence": [
+        {
+          "start": 28,
+          "end": 49,
+          "meaning": "prepare dependencies"
+        },
+        {
+          "start": 90,
+          "end": 123,
+          "meaning": "current authority checks"
+        }
+      ]
+    },
+    {
+      "path": "src/host/projects/project-write-actor.ts",
+      "blob": "eb090c61249c2f96c9536be967281188fe488d42",
+      "sha256": "9ca1741ed53a5ad88435adee584c3d37ca808073430ca3b7c92233ceeae746fe",
+      "evidence": [
+        {
+          "start": 237,
+          "end": 258,
+          "meaning": "separate legacy edit journal recovery"
+        }
+      ]
+    },
+    {
+      "path": "tests/agent-driven/integration/owned-runtime.test.ts",
+      "blob": "5e992d014d2f4c80a62c9e989caa606f1e8b3389",
+      "sha256": "5f1c0358dd0ffc89f5b6d447d4f414cd381c32e5d2b339af42a92a37cfeecf1e",
+      "evidence": [
+        {
+          "start": 19,
+          "end": 40,
+          "meaning": "actual launcher harness"
+        }
+      ]
+    },
+    {
+      "path": "tests/agent-driven/integration/created-source-recovery.test.ts",
+      "blob": "5e1ac674c5f951b33937bdfc296fcdb6865aab74",
+      "sha256": "f4750e9fb5201434bfeab07197d7ce8edeb63b89824c9f730850f8bc262d9466",
+      "evidence": [
+        {
+          "start": 32,
+          "end": 38,
+          "meaning": "component scope disclaimer"
+        }
+      ]
+    },
+    {
+      "path": "tests/agent-driven/integration/controlled-recovery-families.test.ts",
+      "blob": "ce7a010d2bc2dc0d9a0b1e569bf07ee3af4761c2",
+      "sha256": "1140cdf618f698bdc2b83dc06b5115389eb9112fa4ea8e941e7703ef443e5d23",
+      "evidence": [
+        {
+          "start": 1,
+          "end": 20,
+          "meaning": "branch tests scope"
+        }
+      ]
+    },
+    {
+      "path": "tests/agent-driven/integration/helpers/created-draft-fixture.ts",
+      "blob": "f800252345f0cfc35c939b112bba95a311d65bc3",
+      "sha256": "a584e60359237c3bb45a54640f8320aa9827bd2d474be2770f1ea410d9feb218",
+      "evidence": [
+        {
+          "start": 27,
+          "end": 53,
+          "meaning": "real media/Host diagnostic fixture"
+        }
+      ]
+    },
+    {
+      "path": "tools/agent-runtime.ts",
+      "blob": "bb16aee4bf88018c3e6823429a86c6c00048d75b",
+      "sha256": "abc9b71ee6e26632915ed0a32505c416dc66d547527d90b7a66d482adba1e25e",
+      "evidence": [
+        {
+          "start": 12,
+          "end": 45,
+          "meaning": "real launcher CLI"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,133 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:1004345) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/agent-driven/media/preview-prepared-source.test.ts (14 tests | 3 failed | 11 skipped) 43314ms
+   ↓ renders an isolated preview of a completed prepared source with five real parts and measured facts
+   ↓ refuses a preview whose proof is not a proof of this prepared source
+   ↓ refuses the boundaries a prepared preview must not cross
+   ↓ refuses a part whose content type or media facts do not belong to its slot
+   ↓ refuses a same-inode rewrite during read and closes its verified descriptor once
+   ↓ refuses a same-inode rewrite during hash-eof and closes its verified descriptor once
+   ↓ cannot redirect object publication into author source by replacing the object directory at open
+   ↓ handles a partial target write without rendering different copied bytes
+   ↓ handles a zero target write without rendering different copied bytes
+   ↓ does not expose a receipt after cancel at the fifth publication
+   ↓ does not expose a receipt after close at the fifth publication
+   × does not expose a receipt after cancel during awaited copy cleanup 15026ms
+     → promise resolved "{ …(16) }" instead of rejecting
+   × does not expose a receipt after close during awaited copy cleanup 14006ms
+     → promise resolved "{ …(16) }" instead of rejecting
+   × does not expose a receipt after revoke during awaited copy cleanup 14281ms
+     → promise resolved "{ …(16) }" instead of rejecting
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/media/preview-prepared-source.test.ts > does not expose a receipt after cancel during awaited copy cleanup
+ FAIL  tests/agent-driven/media/preview-prepared-source.test.ts > does not expose a receipt after close during awaited copy cleanup
+ FAIL  tests/agent-driven/media/preview-prepared-source.test.ts > does not expose a receipt after revoke during awaited copy cleanup
+AssertionError: promise resolved "{ …(16) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "execution_attempt": 1,
++   "format": "narralens.prepared-preview-receipt@1",
++   "fps": {
++     "den": 1,
++     "num": 30,
++   },
++   "frame_count": 90,
++   "parts": [
++     {
++       "bytes": 84175,
++       "content_type": "video/mp4",
++       "media_facts": {
++         "fps": {
++           "den": 1,
++           "num": 30,
++         },
++         "frame_count": 90,
++         "kind": "video",
++       },
++       "object_id": "obj_aefbc2fd9cce431c944e55522ef3d04f",
++       "sha256": "011bd960b4cc2d41b575af6e91a252ee6f96524e24a22f3a608603957378e1ec",
++       "slot": "preview",
++     },
++     {
++       "bytes": 288078,
++       "content_type": "audio/wav",
++       "media_facts": {
++         "channels": 1,
++         "kind": "audio",
++         "sample_count": 144000,
++         "sample_rate": 48000,
++       },
++       "object_id": "obj_e74b0ea1379147d7a76e22b73d2171cc",
++       "sha256": "42c9992dbd4dcfbeaf52790767beb0febee1279ce37e2e46d5cb474bdd8e1a1d",
++       "slot": "narration",
++     },
++     {
++       "bytes": 259,
++       "content_type": "text/vtt; charset=utf-8",
++       "media_facts": {
++         "kind": "text",
++       },
++       "object_id": "obj_e9e612b1616c4292a940653313a45419",
++       "sha256": "7589688eff6e9ca5ee39341deb23d149f5a6cccec1da8ac9299fbb07230b88d9",
++       "slot": "subtitles",
++     },
++     {
++       "bytes": 385,
++       "content_type": "application/json; charset=utf-8",
++       "media_facts": {
++         "kind": "json",
++       },
++       "object_id": "obj_92642057c65a4037b74b1a66eb65399c",
++       "sha256": "c353a78b5f8b494391403eef90d1abcb234721435558dc4b593ae9733bcaf834",
++       "slot": "shot_summary",
++     },
++     {
++       "bytes": 1663,
++       "content_type": "application/json; charset=utf-8",
++       "media_facts": {
++         "kind": "json",
++       },
++       "object_id": "obj_5bed407e47724496813647d78f4e7105",
++       "sha256": "11f6854716a4121f15a511b0c599e0de57abce330d9494a0eefdb329557af490",
++       "slot": "rights_quality",
++     },
++   ],
++   "plan_digest": "954130745fdee2e81e58571610b9044b98c90d968a499aacc5ddf9437102ffbe",
++   "plan_version": 1,
++   "prepared_job_id": "job_a7eceefa5cfc43278d16084ffbc513c4",
++   "prepared_source_id": "prepared_367356853c11b555e5e4f19f",
++   "producer_attempt": 1,
++   "project_id": "project_c0fe59aef8a24d11bae4430dfb43353d",
++   "receipt_digest": "8acab4cba49e5e8e901ab7c3b487504c9046896212dc48d40c1807d770b48791",
++   "rights_digest": "27422d0d5b9dca880769b7699e9cd78b412bcfddfc00b0d99d80cf502d1652ef",
++   "run_id": "run-a04a699a-1fb5-4114-80aa-08f2fcf0dfce",
++   "source_digest": "367356853c11b555e5e4f19feb3e888e2746bcb8d1d28def3fd2eb12ff83c7ff",
++   "step_id": "sample",
+  }
+
+ ❯ tests/agent-driven/media/preview-prepared-source.test.ts:325:157
+    323|   let hit=false;
+    324|   ioFault.onCleanupClose=()=>{hit=true;if(mode==='cancel')controller.a…
+    325|   try{await expect(f.service.preview({format:'narralens.prepared-previ…
+       |                                                                                                                                                             ^
+    326|   finally{f.verifier.release(proof);}
+    327|   await closing;
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  3 failed | 11 skipped (14)
+   Start at  00:02:38
+   Duration  51.92s (transform 3.31s, setup 0ms, collect 6.37s, tests 43.31s, environment 0ms, prepare 1.38s)
+

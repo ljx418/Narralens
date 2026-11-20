@@ -1,0 +1,58 @@
+{
+  "at": "2026-11-14T14:32:15.505649+00:00",
+  "rows": [
+    {
+      "capture": "n1n2-claude-060p1r3a-generate-001",
+      "exit": 0,
+      "inputs": 647,
+      "current_mismatches": [
+        "src/adapters/openfilm/cache-worker-integrity.json"
+      ],
+      "source_changed": [
+        "src/adapters/openfilm/cache-worker-integrity.json"
+      ],
+      "source_added": [],
+      "log_sha256": "935887d3b5e12302baa46695d2edd70b82320677eca3372b38eae4610f86bd11",
+      "log_matches": true
+    },
+    {
+      "capture": "n1n2-claude-060p1r3a-integrity-001",
+      "exit": 0,
+      "inputs": 647,
+      "current_mismatches": [],
+      "source_changed": [],
+      "source_added": [],
+      "log_sha256": "7480083d801311b007ec2f2a6c4717621f8aed33de5e17dd7ba35815b0d68e68",
+      "log_matches": true
+    },
+    {
+      "capture": "n1n2-claude-060p1r3a-unit-001",
+      "exit": 1,
+      "inputs": 647,
+      "current_mismatches": [
+        "src/adapters/openfilm/cache-worker-integrity.json",
+        "tests/agent-driven/integration/helpers/cache-custodian-unit.py"
+      ],
+      "source_changed": [],
+      "source_added": [],
+      "log_sha256": "5cd6100cf21b43e1134c7c241ff453df5a962823630958310f361a3e36d52fbc",
+      "log_matches": true
+    },
+    {
+      "capture": "n1n2-claude-060p1r3a-unit-002",
+      "exit": 0,
+      "inputs": 647,
+      "current_mismatches": [
+        "src/adapters/openfilm/cache-worker-integrity.json"
+      ],
+      "source_changed": [],
+      "source_added": [],
+      "log_sha256": "4d875fedc582561cde1f243eafa5d4e02956cf374028ab9ddd019828c4c590fd",
+      "log_matches": true
+    }
+  ],
+  "unexpected_non3_source_and_report_changes": [],
+  "protectedAGENTS": "37300463a72a612ae16e0a5fcfb496502c57c722b83781e0e2e8c9480594542b",
+  "index": "",
+  "claim_limit": "Puremockcounterfactual expected oldfailure is source reasoning, not captured actual oldbinary run. Real C/N/kernel/FD not validated."
+}

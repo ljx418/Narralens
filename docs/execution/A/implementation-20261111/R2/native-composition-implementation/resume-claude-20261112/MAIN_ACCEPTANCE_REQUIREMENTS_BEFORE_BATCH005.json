@@ -1,0 +1,140 @@
+{
+  "at": "2026-11-12T05:59:27.635794+00:00",
+  "authority_ticket_sha256": "e4b375f5049e803f7265720f3da35b864bab1703d9ea1259b5f9791528cf8662",
+  "purpose": "MAIN completion audit ledger; references original R groups, introduces no replacement gate numbering or source scope",
+  "current_candidate": "NOT_FROZEN",
+  "items": [
+    {
+      "group": "R01",
+      "requirement": "producer_chain",
+      "proof_required": "Actual bootstrap, SOURCE_ONLY draft and controlled adoption produce committed rich source; actual workspace/reader consumes it; preserve producer/rights/consumer identities.",
+      "verdict": "UNPROVEN",
+      "accepted_evidence": []
+    },
+    {
+      "group": "R01",
+      "requirement": "independent_trees",
+      "proof_required": "Committed source and workspace retain independent physical trees; equal relative paths never collapse resource ownership; nested and empty directories are separate evidence.",
+      "verdict": "UNPROVEN",
+      "accepted_evidence": []
+    },
+    {
+      "group": "R02",
+      "requirement": "tamper_and_authority",
+      "proof_required": "Same bytes/new inode, parent/root replacement, same-size/restored mtime, symlink, copied/foreign/released capability and stale base/control/owner/generation are refused before authoritative use.",
+      "verdict": "UNPROVEN",
+      "accepted_evidence": []
+    },
+    {
+      "group": "R03",
+      "requirement": "complete_dependencies",
+      "proof_required": "Positive/negative style/settings/markers/subtitle/translation dependencies, added empty directory and actual listing changes invalidate stale proofs.",
+      "verdict": "UNPROVEN",
+      "accepted_evidence": []
+    },
+    {
+      "group": "R04",
+      "requirement": "native_cache",
+      "proof_required": "Unknown/forged native metadata or cache refused; concrete approved producer derivation invalidates old round, then stable proven native derivation can be read; no broad cache whitelist.",
+      "verdict": "UNPROVEN",
+      "accepted_evidence": []
+    },
+    {
+      "group": "R05",
+      "requirement": "actual_probe",
+      "proof_required": "Fixed local ffprobe uses same held parent-PID FD; normalized duration/first-video/fps/rotation/audio/dimensions and provenance match pinned upstream; no injected facts.",
+      "verdict": "UNPROVEN",
+      "accepted_evidence": []
+    },
+    {
+      "group": "R05",
+      "requirement": "child_lifetime",
+      "proof_required": "Timeout/cancel/abrupt child: actual child exit and reap precede input release; limits refuse rather than truncate; diagnostic media never represents Chinese A films.",
+      "verdict": "UNPROVEN",
+      "accepted_evidence": []
+    },
+    {
+      "group": "R06",
+      "requirement": "native_bytes_and_order",
+      "proof_required": "Exact UTF8/BOM/CRLF/native_rev vectors; numeric localeCompare video ordering vs separate actual caption readdir order; Node/ICU/locale recorded.",
+      "verdict": "UNPROVEN",
+      "accepted_evidence": []
+    },
+    {
+      "group": "R07",
+      "requirement": "budgets",
+      "proof_required": "Size checks precede bounded text read; growth, total bytes, path/depth/FD/output/time bounds have explicit rejection; no unbounded media read.",
+      "verdict": "UNPROVEN",
+      "accepted_evidence": []
+    },
+    {
+      "group": "R07",
+      "requirement": "per_allocation_fd_lifetime",
+      "proof_required": "Descriptor allocation generations own closes; recycled integer after temporary directory walk still closes newly retained allocation exactly once; no raw numeric retry.",
+      "verdict": "UNPROVEN",
+      "accepted_evidence": []
+    },
+    {
+      "group": "R07",
+      "requirement": "cleanup_uncertainty",
+      "proof_required": "Nth open/stat/verify/close/reentry failures preserve primary and all cleanup errors; every outstanding resource attempted; sticky uncertainty prevents new proof.",
+      "verdict": "UNPROVEN",
+      "accepted_evidence": []
+    },
+    {
+      "group": "R07",
+      "requirement": "drain_and_delivery",
+      "proof_required": "Close drains accepted reads and probes; success transfers source/workspace plus directory/negative guards; reader close cannot destroy delivered resources.",
+      "verdict": "UNPROVEN",
+      "accepted_evidence": []
+    },
+    {
+      "group": "R01/R02",
+      "requirement": "lease_isolation",
+      "proof_required": "Releasing one acquired lease does not revoke ref or another lease; repeated proof works; issuing instance checked and replaced generation invalidates prior proof.",
+      "verdict": "UNPROVEN",
+      "accepted_evidence": []
+    },
+    {
+      "group": "REG",
+      "requirement": "existing_behavior",
+      "proof_required": "Original render SnapshotReadPort, legacy refusal and accepted Expected lifecycle/84 assertions preserved; loader only approved015 minimal exports, no artifact/pin change.",
+      "verdict": "UNPROVEN",
+      "accepted_evidence": []
+    },
+    {
+      "group": "EVIDENCE",
+      "requirement": "frozen_capture",
+      "proof_required": "Exact ten-file diff and protected hashes checked; unique captures retain all failures, source/index immutable during commands, actual exits and source/artifact SHA256 verified.",
+      "verdict": "UNPROVEN",
+      "accepted_evidence": []
+    },
+    {
+      "group": "REVIEW",
+      "requirement": "independent_acceptance",
+      "proof_required": "Freeze actual candidate and obtain independent review bound to it; fix then reverify affected gates. No self-signed external pass.",
+      "verdict": "UNPROVEN",
+      "accepted_evidence": []
+    },
+    {
+      "group": "NEXT",
+      "requirement": "next_integration_plan",
+      "proof_required": "After N1N2 acceptance freeze compatible next-stage contract and exact implementation/acceptance plan; no premature S01/NativeAck/Studio/film/A readiness claim.",
+      "verdict": "UNPROVEN",
+      "accepted_evidence": []
+    }
+  ],
+  "last_confirmed_compile": "resume-004 exit0, captured inputs stable; subsequent edits are not covered",
+  "heavy_slot": "UNGRANTED",
+  "business_acceptance": "NOT_CLAIMED",
+  "last_compile_log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "last_compile_observed_at": "2026-11-12T06:05:17.266521+00:00",
+  "engineering_smoke": {
+    "capture": "n1n2-claude-resume-011-smoke-corrected",
+    "result": "2PASS actual amended inputs, not full acceptance",
+    "deviation": "preserved after-freeze test edit",
+    "cleanup_sha256": "753fdf291c442263c535502a3f08b16500bb083596fbf356d09099fec5a48660",
+    "cleanup_receipt": "msg_969c640b10e2",
+    "preserved_prior_diagnosis_sha256": "2247df47b45f849969f3dc525bc695afc1e92663a3e1a99891a5fc383eeccedc"
+  }
+}

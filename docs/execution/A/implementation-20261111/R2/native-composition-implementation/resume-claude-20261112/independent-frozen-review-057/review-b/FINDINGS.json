@@ -1,0 +1,48 @@
+{
+  "candidate_commit": "1d348d419120f23f45d958112ea8c43df5a04675",
+  "conclusion": "REQUEST_CHANGES",
+  "findings": [
+    {
+      "id": "B01",
+      "severity": "MAJOR",
+      "path": "tests/m2.1/openfilm-upstream-lock.test.ts",
+      "line": 358,
+      "related_lines": [
+        338,
+        347,
+        359,
+        360,
+        713
+      ],
+      "title": "Vendor-path static gate never visits class-method or top-level arrow initializer call sites",
+      "call_reachability": "Actual production calls exist in NarralensHost server.ts:529, CommittedSnapshotAuthority:298/366/403, CreatedNativeWorkspaceService:532/551, and OpenFilmStudioSupervisor:342. buildScopes enumerates module FunctionDeclaration and ExpressionStatement only; ClassDeclaration and VariableStatement initializer bodies never enter calls. Thus productionSources() including their file is not equivalent to inspecting these calls.",
+      "contract_violated": "N1N2 existing_behavior / loader regression gate must reject request-derived vendor paths at actual Host call sites and cover helper/alias/namespace/local paths; assertion at line713 claims all Host sites.",
+      "trigger": "A request-derived call inside a class method, e.g. class Handler { run(incoming: IncomingMessage) { createPinnedOpenFilmUpstream(incoming.url as string); } }, or top-level const handler=(incoming: IncomingMessage)=>createPinnedOpenFilmUpstream(incoming.url as string), produces no collected call regardless of taint. This is a source-proven test blind spot, NOT a claim that the current runtime vendor path is user-controlled.",
+      "counterexample_execution": "NOT_RUN by authorization; deterministic AST branch analysis only. No test/build/import executed.",
+      "minimal_fix": "Extend lexical traversal and taint bindings to actual function-like nodes including methods, constructors, arrow/function expressions and their initializers; include local callable aliases where promised. Add synthetic refusal vectors shaped like real class methods and arrow callbacks and verify actual production loader sites are enumerated. Re-run affected lock test/full gates via MAIN authorized writer, then re-freeze for independent review.",
+      "acceptance_effect": "REQUEST_CHANGES for test validity; no claim of active secret leak or reachable runtime exploit."
+    },
+    {
+      "id": "B02",
+      "severity": "NOTE",
+      "path": "tests/agent-driven/integration/helpers/created-project-fixture.ts",
+      "line": 12,
+      "title": "Clean checkout verification has explicit external environment prerequisites",
+      "call_reachability": "Real component fixtures load fixed vendorRoot and approved expected module from var; pnpm build does not regenerate Approved015.",
+      "contract_violated": null,
+      "trigger": "Fresh machine without fixed upstream checkout/dependencies or the separately approved five files cannot execute full component gates.",
+      "minimal_fix": "Retain explicit prerequisite provisioning/version/hash instructions. This is an acknowledged deployment prerequisite, not an omitted N1N2 source file; do not promise environment-free clean checkout execution."
+    },
+    {
+      "id": "B03",
+      "severity": "NOTE",
+      "path": "tests/agent-driven/media/committed-render-phases.test.ts",
+      "line": 1350,
+      "title": "Default fullcheck retains one real-tools opt-in NOT_RUN",
+      "call_reachability": "REAL_TOOLS false skips actual committed phase render/inspect/publish integration; other module tests use fake tools as their own comments state.",
+      "contract_violated": null,
+      "trigger": "Default pnpm check without NARRALENS_PHASE_REAL_TOOLS=1.",
+      "minimal_fix": "Keep NOT_RUN. Separate pinned CLI diagnostic render and actual N1N2 pageframe/poster/probe evidence cover this component but do not close production committed render-phase integration, NativeAck, A-film or next-stage gates."
+    }
+  ]
+}

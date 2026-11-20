@@ -1,0 +1,162 @@
+{
+  "kind": "positive-pilot-candidate",
+  "authoritative": false,
+  "mode": "assertion-failure",
+  "root": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/var/native-cache-positive-pilot/run-wHALdm",
+  "custodian_sha256": "bd06d7d7f79d6d2ccf2204a4e27ed5aba5364cbcda71785a67ac3ab887306b79",
+  "fixture_sha256": "e3f4ccb1c4016a54356ce04be344b4ffff23f2f88698efe191570ad8407d03ab",
+  "copied_fixture_sha256": "e3f4ccb1c4016a54356ce04be344b4ffff23f2f88698efe191570ad8407d03ab",
+  "scenario": "silent",
+  "expected_image": {
+    "sha256": "d592c3cbaf5d17852d9cff7fd0002db9a336e3d41acee2456689b86b5521b238",
+    "bytes": 1024
+  },
+  "actual_image": null,
+  "original_failure": {
+    "name": "PositivePilotFailure",
+    "message": "the deliberate assertion failure of the positive pilot (EXPECTED_ASSERTION_FAILURE)",
+    "code": "EXPECTED_ASSERTION_FAILURE"
+  },
+  "settlement_failure": {
+    "name": "PositivePilotFailure",
+    "message": "the deliberate assertion failure of the positive pilot (EXPECTED_ASSERTION_FAILURE)",
+    "code": "EXPECTED_ASSERTION_FAILURE"
+  },
+  "cleanup_facts": [],
+  "terminal_proof": true,
+  "terminal_proof_observations": {
+    "at": 1794761096150,
+    "proven": true,
+    "truncated": false,
+    "observations": [
+      {
+        "at": 1794761096149,
+        "kind": "custodian-epoch",
+        "presence": "gone",
+        "pid": 1381827,
+        "start_ticks": "5313002",
+        "state": null,
+        "reason": "the original epoch of the custodian"
+      },
+      {
+        "at": 1794761096149,
+        "kind": "worker-epoch",
+        "presence": "gone",
+        "pid": 1381828,
+        "start_ticks": null,
+        "state": null,
+        "reason": "the original epoch of the worker"
+      },
+      {
+        "at": 1794761096150,
+        "kind": "group",
+        "presence": "gone",
+        "pid": 1381828,
+        "start_ticks": null,
+        "state": null,
+        "reason": "the group of the worker"
+      }
+    ]
+  },
+  "receipt_summary": {
+    "kind": "DOMAIN_REAPED",
+    "outcome": "reaped",
+    "seq": 4,
+    "segments": 1,
+    "events_count": 6,
+    "waits_count": 1,
+    "identities_count": 1,
+    "exec_ok": true,
+    "echild": true,
+    "group_esrch": true,
+    "known_ids_gone": true,
+    "anchor_retained": true,
+    "identity_overflow": false,
+    "events_truncated": false,
+    "diagnostics_lost": false,
+    "state": "receipt_flush",
+    "events_digest": "8c5aa7c54676c8b209839cf1fea2d4577a7029de353a54a6bdb339193d2b7a20",
+    "waits_digest": "faab92f65bbb1939f93ad0be73a8ed79633f5a195f37345eecb013645a71dd3b",
+    "identities_digest": "527ff7e6e8701ce558c770650a4c4760c84336e9b90bacec47d8c63d8147f4bd"
+  },
+  "accumulator_summary": {
+    "segments": 1,
+    "received": 1,
+    "events": 6,
+    "waits": 1,
+    "identities": 1,
+    "refused": false,
+    "events_digest": "8c5aa7c54676c8b209839cf1fea2d4577a7029de353a54a6bdb339193d2b7a20",
+    "waits_digest": "faab92f65bbb1939f93ad0be73a8ed79633f5a195f37345eecb013645a71dd3b",
+    "identities_digest": "527ff7e6e8701ce558c770650a4c4760c84336e9b90bacec47d8c63d8147f4bd"
+  },
+  "raw_segments_saved": false,
+  "timeline": [
+    {
+      "at": 1794761095995,
+      "what": "root-created",
+      "detail": {
+        "root": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/var/native-cache-positive-pilot/run-wHALdm"
+      }
+    },
+    {
+      "at": 1794761096003,
+      "what": "root-prepared",
+      "detail": null
+    },
+    {
+      "at": 1794761096006,
+      "what": "pins-checked",
+      "detail": {
+        "custodianDigest": "bd06d7d7f79d6d2ccf2204a4e27ed5aba5364cbcda71785a67ac3ab887306b79",
+        "fixtureDigest": "e3f4ccb1c4016a54356ce04be344b4ffff23f2f88698efe191570ad8407d03ab"
+      }
+    },
+    {
+      "at": 1794761096012,
+      "what": "helper-copied",
+      "detail": {
+        "copiedFixtureDigest": "e3f4ccb1c4016a54356ce04be344b4ffff23f2f88698efe191570ad8407d03ab"
+      }
+    },
+    {
+      "at": 1794761096015,
+      "what": "started",
+      "detail": null
+    },
+    {
+      "at": 1794761096119,
+      "what": "same-epoch-live",
+      "detail": {
+        "pid": 1381828,
+        "start_ticks": "5313007"
+      }
+    },
+    {
+      "at": 1794761096119,
+      "what": "injection",
+      "detail": {
+        "code": "EXPECTED_ASSERTION_FAILURE"
+      }
+    },
+    {
+      "at": 1794761096172,
+      "what": "settlement",
+      "detail": {
+        "has_picture": false,
+        "picture_bytes": null,
+        "error": {
+          "name": "PositivePilotFailure",
+          "message": "the deliberate assertion failure of the positive pilot (EXPECTED_ASSERTION_FAILURE)",
+          "code": "EXPECTED_ASSERTION_FAILURE"
+        },
+        "cleanup": 0
+      }
+    },
+    {
+      "at": 1794761096173,
+      "what": "terminal-proof",
+      "detail": null
+    }
+  ]
+}

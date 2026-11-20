@@ -1,0 +1,82 @@
+{
+  "format": "narralens.independent-document-recheck@1",
+  "revision_reviewed": 8,
+  "verdict": "DOCUMENT_FIXES_CLOSED",
+  "claim_limit": "Only NW7-A01 document-direction closure; not implementation-ready, N1N2/060 acceptance, business PASS or human acceptance",
+  "source_commit": "1d348d419120f23f45d958112ea8c43df5a04675",
+  "counts": {
+    "BLOCKER": 0,
+    "MAJOR": 0,
+    "MINOR": 0
+  },
+  "findings": [],
+  "prior_finding_recheck": [
+    {
+      "id": "NW7-A01",
+      "status": "DOCUMENT_FIX_CLOSED",
+      "sources": [
+        "04_PATHS_PORTS_AND_PRODUCERS.md:65",
+        "04_PATHS_PORTS_AND_PRODUCERS.md:72",
+        "04_PATHS_PORTS_AND_PRODUCERS.md:79",
+        "06_REVIEW_PUBLICATION_SCHEMA_PROPOSAL.md:145",
+        "02_DEVELOPMENT_AND_ACCEPTANCE.md:85"
+      ],
+      "evidence": "Selected prepareFinish/prepareTerminal keeps actual S01 guard dependencies, FD/budget and DB; READY requires real synchronous terminal capability; finishAndDeliver validates while held, checks synchronous terminal release and calls registered Host sink without await. OwnedReviewDelivery survives dispatcher await through agent-http-router final send. Fully released lease is never reused."
+    }
+  ],
+  "counterexamples_considered": [
+    {
+      "scenario": "Zero-change describe after media.close",
+      "resolution": "S01 dependencies remain held through prepareFinish/READY; final guard does not observe a self-released lease."
+    },
+    {
+      "scenario": "Revocation while dispatcher awaits after candidate/READY",
+      "resolution": "Private OwnedReviewDelivery carries same authority to actual final router send; sync guard is at that boundary, not business return."
+    },
+    {
+      "scenario": "Raw close or synchronous terminal release fails",
+      "resolution": "No ReadyDelivery or no sink call respectively; preserve primary/cleanup cause and owner/DB dependency when cleanup unproven."
+    },
+    {
+      "scenario": "Cancel/repeated prepare/finish/abort or sink throws",
+      "resolution": "Single terminal state/settlement; canceled ready cannot deliver, no retry or resurrection after sink failure, no duplicate close/write."
+    },
+    {
+      "scenario": "Actual accepted lease has async-only terminal dependency",
+      "resolution": "Cannot claim READY or release implementation; must add exact dedicated two-phase hook and independent review before final ReleaseAssignment. This is an explicit precondition, not a proven existing capability."
+    },
+    {
+      "scenario": "Concurrent external process modifies DB/files between guard and socket write",
+      "resolution": "No cross-process DB/socket atomicity is claimed; already-written/in-flight bytes cannot be recalled. Honest stated boundary retained."
+    }
+  ],
+  "release_prerequisites_not_findings": [
+    {
+      "item": "Reanchor to actually accepted N1N2 commit and actual 060 owner/lifetime semantics; accepted commit remains null."
+    },
+    {
+      "item": "Map every S01MediaGuardLease terminal dependency/held FD/budget to actual resources; prove prepareTerminal ownership/drain, synchronous checked terminal actions, no hidden Promise or callbacks, and stable normal success. If dependency is async-only, freeze minimal dedicated hook and independently review before release."
+    },
+    {
+      "item": "Freeze exact private interfaces and narrow paths including agent-http-router, trusted sink registration, output validation before final delivery; public DTO remains unchanged."
+    },
+    {
+      "item": "Final ReleaseAssignment must lock complete paths/argv/cwd/resources/captures/error mapping/supported rollback; runtime matrix and original 28/HC/A/H/J/film/human gates remain pending."
+    }
+  ],
+  "checks": {
+    "manifest_revision": 8,
+    "manifest_files": "8/8 exact raw-byte SHA256",
+    "archived_rev7": "8/8 match prior independent recorded bytes",
+    "referenced_authorities": "12/12 unchanged SHA256",
+    "historical_candidate": "7/7 fixed git show raw-byte SHA256/size; no dirty source used",
+    "original_s01_cases": "28/28 complete rows identical to reviewed rev7; unchanged authority preserves original comparison",
+    "ddl_sha256": "be75d5683a25861ab2cbe14d0a12c4bbde050a342288e2f254f577a2a6623e56",
+    "migration_detail_sha256": "b021a477274708f2695cd4676d1c806ddef0d5f2d25be6c5c8e9142bc01e4dce",
+    "ddl_and_detail_bytes": "unchanged from rev7",
+    "accepted_native_commit": null,
+    "implementation_release": false,
+    "business_acceptance": "NOT_RUN"
+  },
+  "runtime": "ALL_NOT_RUN"
+}

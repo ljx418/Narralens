@@ -1,0 +1,7 @@
+MAIN独立文档审查任务；这是准备性只读审计，不是代码或运行release。060P0 Claude仍独占源码writer及heavy slot，你不得编辑W源码/测试/合同/主文档，不启动Host/SQLite/Node导入/浏览器/任何测试构建/进程探针，无网络、付费、J盘、配置/凭据/.env/fullenv读取；不操作Git index/commit/reset/stash/push/merge。允许只读文件、静态SQL/契约逻辑推导和git show固定commit。
+
+C=/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112。请完整审查 C/next-wiring-draft 的8份Markdown及manifest revision6，先逐字节核对manifest.files，再读取引用的原S01合同、验收及MAIN决定。重点06_REVIEW_PUBLICATION_SCHEMA_PROPOSAL.md的双marker原子迁移、schema_migration既有6列、完整namespace含异名trigger/implicitindex、marker逐操作新鲜读取、旧binding缺receiptpreimage拒绝、支持回退，及其与01/02/03/04/05/07是否一致。原28case不能删；从体验全链路、authority/生命周期、代码接口可实现性与验收直接证据四角审查。已声明NOT_RUN/未接受commit本身是正确边界，不因为草案不能开工而伪造缺陷。
+
+W=/mnt/c/workspace/videoworkline/Narralens-agents/main-integration；只有 git show 1d348d419120f23f45d958112ea8c43df5a04675:<path> 可作为07的历史实现证据。该候选已REQUEST_CHANGES、060修复未完成，不能把当前dirty当冻结实现或要求它已符合目标；可读 C/repair-058/ADR_060_ISOLATED_CACHE_DRAW.md rev2解释待接线语义，绝不宣称实现通过。
+
+输出且仅可写 /mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/next-wiring-review-rev6/REVIEW.md、FINDINGS.json、INPUTS.json。每条BLOCKER/MAJOR要具体合同冲突/反例/建议修订及case映射，区分真正逻辑缺陷、发版前必须重锚的待办、可延后minor。明确结论是DRAFT_DIRECTION_CONSISTENT或REQUEST_CHANGES，仅文档准备审计，不能给implementation-ready/业务PASS。INPUTS记录实际读取文件sha256、被冻结sourcecommit和所有NOT_RUN；完成前重验输入未改。不得自行修订草案。按本task新dispatch worker_done报告并交还；无需反复check。遇新429/服务端限制保留并报告，不换provider。

@@ -1,0 +1,23 @@
+{
+  "source_control": "34118e71cf9582d20a715b441e3fe4ea8e98412f",
+  "argv": [
+    "corepack",
+    "pnpm",
+    "exec",
+    "vitest",
+    "run",
+    "tests/agent-driven/media/preview-prepared-source.test.ts",
+    "--maxWorkers=1",
+    "--minWorkers=1",
+    "-t",
+    "during awaited copy cleanup"
+  ],
+  "start": "2026-11-11T16:02:35.603571+00:00",
+  "expected": "3 FAIL: old producer returns receipt despite cleanup cancellation/close/proof revocation",
+  "pid": 1004187,
+  "test_exit": 1,
+  "restored_exactly": true,
+  "fixed_sha256": "630d9222c33bcd44e01bd2dad46328e59c4db95dc90069af9b310be0d51fced0",
+  "end": "2026-11-11T16:03:32.004525+00:00",
+  "log_sha256": "c150bdf773976bcf7f666ad761b8b58a1ed8d867e48db4fb84681d85e0af9bcd"
+}

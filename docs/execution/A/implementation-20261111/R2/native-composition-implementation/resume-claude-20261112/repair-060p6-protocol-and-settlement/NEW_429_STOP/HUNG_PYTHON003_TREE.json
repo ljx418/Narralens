@@ -1,0 +1,65 @@
+{
+  "at": "2026-11-15T19:00:22.861978+00:00",
+  "recorder_pid": 1596765,
+  "tree": [
+    {
+      "identity": {
+        "pid": 1596763,
+        "ppid": 1555879,
+        "pgid": 1596763,
+        "sid": 1596763,
+        "start_ticks": 5939722,
+        "state": "S"
+      },
+      "argv": [
+        "/bin/bash",
+        "-c",
+        "source /home/administrator/.claude/shell-snapshots/snapshot-bash-1794766600563-qlfoz1.sh 2>/dev/null || true && shopt -u extglob 2>/dev/null || true && { \\builtin unalias -- 'unsetenv'; \\builtin unset -f -- 'unsetenv'; } >/dev/null 2>&1 || true && eval 'python3 - <<'\"'\"'PY'\"'\"'\nfrom pathlib import Path\np = Path(\"tests/agent-driven/integration/helpers/cache-custodian-unit.py\")\nt = p.read_text()\n\nanchor = '\"'\"''\"'\"''\"'\"'if __name__ == \"__main__\":\n    unittest.main()'\"'\"''\"'\"''\"'\"'\nassert t.count(anchor) == 1\n\nblock = '\"'\"''\"'\"''\"'\"'class TheShapesOfTheReceipt(_RawEdgeGuardedCase):\n    \"\"\"The shapes that the C writes and the Host parses.\n\n    The identity of a process is its number AND its ticks, and the way an\n    epoch ended is a fact of its own: the same number that was given to\n    somebody else is not the same process, and a process that the ORIGINAL\n    parent reaped is not a wait of this program.\n    \"\"\"\n\n    def _instance(self) -> custodian.Custodian:\n        instance = custodian.Custodian()\n        self.addCleanup(instance._selector.close)\n        return instance\n\n    def test_the_identity_item_carries_the_full_epoch_and_its_completion(self) -> None:\n        instance = self._instance()\n        instance.identities[200] = {\n            \"pid\": 200, \"ppid\": 100, \"pgid\": 200, \"sid\": 200, \"start_ticks\": 20,\n        }\n        instance._completions[200] = \"waited-by-custodian\"\n        items = instance._receipt_items()\n        identity = [item for item in items if item.get(\"t\") == \"i\"]\n        self.assertEqual(len(identity), 1)\n        value = identity[0][\"v\"]\n        self.assertEqual(value[\"pid\"], 200)\n        self.assertEqual(value[\"ppid\"], 100)\n        self.assertEqual(value[\"pgid\"], 200)\n        self.assertEqual(value[\"sid\"], 200)\n        self.assertEqual(value[\"start_ticks\"], \"20\")\n        self.assertEqual(value[\"completion\"], \"waited-by-custodian\")\n\n    def test_a_target_that_the_parent_reaped_is_not_a_wait_of_this_program(self) -> None:\n        # The epoch is really gone and this program did NOT wait for it: the\n        # completion says so, and it is not a wait.\n        instance = self._instance()\n        instance.identities[300] = {\n            \"pid\": 300, \"ppid\": 100, \"pgid\": 300, \"sid\": 300, \"start_ticks\": 30,\n        }\n        original_identity = custodian.read_process_identity\n        custodian.read_process_identity = lambda pid: (\n            (None, \"gone\") if pid == 300 else original_identity(pid)\n        )\n        try:\n            self.assertTrue(instance._known_targets_gone())\n        finally:\n            custodian.read_process_identity = original_identity\n        self.assertEqual(instance._completions.get(300), \"parent-reaped-observed-gone\")\n        items = instance._receipt_items()\n        identity = [item for item in items if item.get(\"t\") == \"i\"]\n        self.assertEqual(identity[0][\"v\"][\"completion\"], \"parent-reaped-observed-gone\")\n\n    def test_the_wait_item_carries_its_order_and_its_category(self) -> None:\n        instance = self._instance()\n        instance.worker_pid = 200\n        instance.identities[200] = {\n            \"pid\": 200, \"ppid\": 100, \"pgid\": 200, \"sid\": 200, \"start_ticks\": 20,\n        }\n        instance._completions[200] = \"waited-by-custodian\"\n        instance._wait_ordinal = 3\n        instance._worker_wait = {\n            \"pid\": 200,\n            \"status\": {\"kind\": \"exited\", \"code\": 0},\n            \"ordinal\": 3,\n            \"category\": \"worker\",\n            \"epoch\": instance._epoch_of(200),\n        }\n        instance.waits.append(dict(instance._worker_wait))\n        items = instance._receipt_items()\n        wait = [item for item in items if item.get(\"t\") == \"w\"]\n        self.assertEqual(len(wait), 1)\n        value = wait[0][\"v\"]\n        self.assertEqual(value[\"order\"], 3)\n        self.assertEqual(value[\"category\"], \"worker\")\n        self.assertEqual(value[\"epoch\"][\"start_ticks\"], \"20\")\n        self.assertEqual(value[\"status\"][\"kind\"], \"exited\")\n\n    def test_a_fork_that_failed_closes_every_parent_side_once(self) -> None:\n        # The fork really failed: there is NO child, every parent side is\n        # closed, and the streams were never inherited.\n        instance = self._instance()\n        original_fork = os.fork\n\n        def failing_fork() -> int:\n            raise OSError(errno.EAGAIN, \"the fork could not be made\")\n\n        os.fork = failing_fork\n        try:\n            with self.assertRaises(OSError):\n                instance._spawn_worker(\"/usr/bin/node\", \"/tmp/worker.mjs\", {})\n        finally:\n            os.fork = original_fork\n        self.assertEqual(instance.stdout_ledger.disposition, custodian.STREAM_NEVER_INHERITED)\n        self.assertEqual(instance.stderr_ledger.disposition, custodian.STREAM_NEVER_INHERITED)\n        self.assertTrue(instance.stdout_ledger.closed)\n        self.assertFalse(instance.stdout_ledger.eof)\n\n    def test_the_transcript_and_the_resources_are_two_different_facts(self) -> None:\n        # A draw that really failed may have its resources really ended: the\n        # FAILED proof holds, and the qualification of a RESULT does not.\n        instance = self._instance()\n        instance._failure = custodian.CustodianFailure(\"DIAGNOSTIC_BUDGET\", \"the worker wrote too much\")\n        instance.diagnostics_lost = True\n        settlement = {\n            \"ok\": True,\n            \"echild\": True,\n            \"group_esrch\": True,\n            \"known_ids_gone\": True,\n        }\n        instance._worker_wait = {\n            \"pid\": 200,\n            \"status\": {\"kind\": \"exited\", \"code\": 0},\n            \"ordinal\": 1,\n            \"category\": \"worker\",\n            \"epoch\": None,\n        }\n        instance._echild_after_wait_ordinal = 1\n        instance._subreaper_before_fork = True\n        instance._session_established = True\n        instance.fork_attempt_state = \"born\"\n        instance.stdout_ledger.disposition = custodian.STREAM_EOF\n        instance.stderr_ledger.disposition = custodian.STREAM_EOF\n        # The RESOURCES really ended.\n        self.assertTrue(instance._resource_proof_complete(settlement))\n        # And the RESULT is not qualified: the transcript did not survive.\n        self.assertFalse(instance._transcript_complete(settlement))\n\n    def test_a_late_wait_after_the_worker_refuses_the_result_but_keeps_the_end(self) -> None:\n        # The worker was NOT the last process that was waited for: the result is\n        # refused, and the FAILED proof of the resources still holds.\n        instance = self._instance()\n        instance._worker_wait = {\n            \"pid\": 200,\n            \"status\": {\"kind\": \"exited\", \"code\": 0},\n            \"ordinal\": 1,\n            \"category\": \"worker\",\n            \"epoch\": None,\n        }\n        instance._post_worker_waits = 1\n        instance._echild_after_wait_ordinal = 2\n        instance._subreaper_before_fork = True\n        instance._session_established = True\n        instance.fork_attempt_state = \"born\"\n        instance.stdout_ledger.disposition = custodian.STREAM_EOF\n        instance.stderr_ledger.disposition = custodian.STREAM_EOF\n        settlement = {\n            \"ok\": True,\n            \"echild\": True,\n            \"group_esrch\": True,\n            \"known_ids_gone\": True,\n        }\n        self.assertTrue(instance._resource_proof_complete(settlement))\n        self.assertFalse(instance._transcript_complete(settlement))\n        facts = instance._raw_tree_terminal(settlement)\n        self.assertFalse(facts[\"worker_wait_was_last\"])\n        self.assertEqual(facts[\"post_worker_wait_count\"], 1)\n\n    def test_a_stream_that_wrote_too_much_keeps_its_budget_failure(self) -> None:\n        # The budget of a stream is a STICKY fact: the bytes are counted, and\n        # the failure is kept even when the domain really ended.\n        instance = self._instance()\n        read_fd, write_fd = os.pipe()\n        try:\n            os.set_blocking(read_fd, False)\n            instance._worker_stdout_read = read_fd\n            instance._worker_stderr_read = -1\n            os.write(write_fd, b\"x\" * (custodian.MAX_STREAM_BYTES + 1))\n            os.close(write_fd)\n            instance._drain_worker_streams()\n            # The bytes were really counted, and the budget failed.\n            self.assertEqual(instance.stdout_ledger.bytes, custodian.MAX_STREAM_BYTES + 1)\n            self.assertTrue(instance.diagnostics_lost)\n        finally:\n            instance._selector.close()\n            try:\n                os.close(read_fd)\n            except OSError:\n                pass\n\n\n'\"'\"''\"'\"''\"'\"'\nt = t.replace(anchor, block + anchor)\np.write_text(t)\nprint(\"ok\")\nPY\npython3 docs/execution/A/implementation-20261111/integration/e1-main-takeover/run-recorded.py n1n2-claude-060p6-complete-python-003 /usr/bin/python3.12 -I -S -B tests/agent-driven/integration/helpers/cache-custodian-unit.py 2>&1 | tail -1; tail -25 docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p6-complete-python-003.txt' && pwd -P >| /tmp/claude-225c-cwd"
+      ],
+      "cwd": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+      "wchan": "do_wait"
+    },
+    {
+      "identity": {
+        "pid": 1596765,
+        "ppid": 1596763,
+        "pgid": 1596765,
+        "sid": 1596763,
+        "start_ticks": 5939726,
+        "state": "S"
+      },
+      "argv": [
+        "python3",
+        "docs/execution/A/implementation-20261111/integration/e1-main-takeover/run-recorded.py",
+        "n1n2-claude-060p6-complete-python-003",
+        "/usr/bin/python3.12",
+        "-I",
+        "-S",
+        "-B",
+        "tests/agent-driven/integration/helpers/cache-custodian-unit.py"
+      ],
+      "cwd": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+      "wchan": "do_wait"
+    },
+    {
+      "identity": {
+        "pid": 1596768,
+        "ppid": 1596765,
+        "pgid": 1596765,
+        "sid": 1596763,
+        "start_ticks": 5939920,
+        "state": "S"
+      },
+      "argv": [
+        "/usr/bin/python3.12",
+        "-I",
+        "-S",
+        "-B",
+        "tests/agent-driven/integration/helpers/cache-custodian-unit.py"
+      ],
+      "cwd": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+      "wchan": "anon_pipe_write"
+    }
+  ],
+  "destructive_signals_sent": []
+}

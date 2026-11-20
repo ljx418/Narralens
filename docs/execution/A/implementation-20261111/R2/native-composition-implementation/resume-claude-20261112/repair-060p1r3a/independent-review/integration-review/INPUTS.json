@@ -1,0 +1,1660 @@
+{
+  "format": "narralens.R3R3A.integration.review-inputs@1",
+  "historical_head": "1d348d419120f23f45d958112ea8c43df5a04675",
+  "accepted_repair_commit": null,
+  "snapshot": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p1r3a/independent-review/INPUT_SNAPSHOT.json",
+  "snapshot_matches": 25,
+  "input_count": 136,
+  "all_inputs_end_equal": true,
+  "verified_at_utc": "2026-11-14T14:44:48.753810+00:00",
+  "R3A_delta_from_R3_snapshot": [
+    "src/adapters/openfilm/cache-worker-integrity.json",
+    "src/adapters/openfilm/cache-process-custodian.py",
+    "tests/agent-driven/integration/helpers/cache-custodian-unit.py"
+  ],
+  "R3_other_19_source_test_and_two_reports_equal": true,
+  "inspection_note": "25 bound source/test/report bytes verified at review entry and end; auxiliary contracts/closure/instruction/evidence measured when inspected then rehashed at end. Capture claim/input metadata includes hash-only provenance inventory; not a claim to inspect every source named in the 646+ capture inputs. No configuration contents or environment read.",
+  "inputs": [
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p1r3a/independent-review/INPUT_SNAPSHOT.json",
+      "start": {
+        "sha256": "5bd64deb4253e9b9452d2e0a077659b12019d287f73c0bfc2eddddcc683a7e41",
+        "bytes": 4759
+      },
+      "end": {
+        "sha256": "5bd64deb4253e9b9452d2e0a077659b12019d287f73c0bfc2eddddcc683a7e41",
+        "bytes": 4759
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/AGENTS.md",
+      "start": {
+        "sha256": "37300463a72a612ae16e0a5fcfb496502c57c722b83781e0e2e8c9480594542b",
+        "bytes": 12665
+      },
+      "end": {
+        "sha256": "37300463a72a612ae16e0a5fcfb496502c57c722b83781e0e2e8c9480594542b",
+        "bytes": 12665
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/src/host/agent-driven/retained-native-closure.ts",
+      "start": {
+        "sha256": "fd896104149d6cd2663b63a59d50beabbeee546f3e3f46a5d6bf07fbe662ede9",
+        "bytes": 75335
+      },
+      "end": {
+        "sha256": "fd896104149d6cd2663b63a59d50beabbeee546f3e3f46a5d6bf07fbe662ede9",
+        "bytes": 75335
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/src/adapters/openfilm/openfilm-upstream.ts",
+      "start": {
+        "sha256": "17fe1138e50bc30df5c26b74e1e0ff9393140c070e1233676d2811485890a2b6",
+        "bytes": 87571
+      },
+      "end": {
+        "sha256": "17fe1138e50bc30df5c26b74e1e0ff9393140c070e1233676d2811485890a2b6",
+        "bytes": 87571
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/src/host/agent-driven/created-native-workspace.ts",
+      "start": {
+        "sha256": "d83edbdac8cd6dd7db6b5d18f1d0f5d3beb028279297a822f59f97f6504d562c",
+        "bytes": 80984
+      },
+      "end": {
+        "sha256": "d83edbdac8cd6dd7db6b5d18f1d0f5d3beb028279297a822f59f97f6504d562c",
+        "bytes": 80984
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/src/host/agent-driven/created-native-source-reader.ts",
+      "start": {
+        "sha256": "0a52b8ff16652cf4bf439ef19812b05a4a417396a9139dd4ee4ce7df8505289e",
+        "bytes": 80202
+      },
+      "end": {
+        "sha256": "0a52b8ff16652cf4bf439ef19812b05a4a417396a9139dd4ee4ce7df8505289e",
+        "bytes": 80202
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/m2.1/openfilm-upstream-lock.test.ts",
+      "start": {
+        "sha256": "9b2cf8525c7e51da9a7c0d9eb579b65be56a679651fcbb5bfb5bd8e1424c175a",
+        "bytes": 58158
+      },
+      "end": {
+        "sha256": "9b2cf8525c7e51da9a7c0d9eb579b65be56a679651fcbb5bfb5bd8e1424c175a",
+        "bytes": 58158
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/native-cache-witness.test.ts",
+      "start": {
+        "sha256": "33ce515e5555eb79ea842ee95d832bcf4d310df0696a6d75016d3e6cac1ac218",
+        "bytes": 94490
+      },
+      "end": {
+        "sha256": "33ce515e5555eb79ea842ee95d832bcf4d310df0696a6d75016d3e6cac1ac218",
+        "bytes": 94490
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/created-native-source-reader.test.ts",
+      "start": {
+        "sha256": "6325eab3e4411e77a0b000a084793fb57545d961437c572d0a990625a50d9784",
+        "bytes": 173839
+      },
+      "end": {
+        "sha256": "6325eab3e4411e77a0b000a084793fb57545d961437c572d0a990625a50d9784",
+        "bytes": 173839
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/src/adapters/openfilm/cache-production-scope.ts",
+      "start": {
+        "sha256": "0072d30b8e465658d26942010c7cad800bdedef5d32dc743df44e644acbef8b3",
+        "bytes": 30182
+      },
+      "end": {
+        "sha256": "0072d30b8e465658d26942010c7cad800bdedef5d32dc743df44e644acbef8b3",
+        "bytes": 30182
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/src/adapters/openfilm/cache-process-supervisor.ts",
+      "start": {
+        "sha256": "b561eda7141590b98e00250a856688be80ddce1492955cf8a763b5fc1d47f07a",
+        "bytes": 101560
+      },
+      "end": {
+        "sha256": "b561eda7141590b98e00250a856688be80ddce1492955cf8a763b5fc1d47f07a",
+        "bytes": 101560
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/src/adapters/openfilm/openfilm-cache-worker.mjs",
+      "start": {
+        "sha256": "579a484bea740d768f7b183b46de85775446a3b0f8ea62ab7927d7e026d5b089",
+        "bytes": 21415
+      },
+      "end": {
+        "sha256": "579a484bea740d768f7b183b46de85775446a3b0f8ea62ab7927d7e026d5b089",
+        "bytes": 21415
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/src/adapters/openfilm/cache-worker-policy.mjs",
+      "start": {
+        "sha256": "0d2b2b38eea9922b0348ae2dbbbfbe1c2bc7715fc923879776696110015b1214",
+        "bytes": 5798
+      },
+      "end": {
+        "sha256": "0d2b2b38eea9922b0348ae2dbbbfbe1c2bc7715fc923879776696110015b1214",
+        "bytes": 5798
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/src/adapters/openfilm/cache-worker-integrity.json",
+      "start": {
+        "sha256": "9dac431b53d620c2ea8832a6dbab02e1c66e5583f5b634c399defe24250f4c65",
+        "bytes": 2135
+      },
+      "end": {
+        "sha256": "9dac431b53d620c2ea8832a6dbab02e1c66e5583f5b634c399defe24250f4c65",
+        "bytes": 2135
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tools/openfilm-cache-worker-integrity.mjs",
+      "start": {
+        "sha256": "8f59fb5951a1f83dc360413ac1b71e7914bc98f65c1efa71af909751b7d509d0",
+        "bytes": 11028
+      },
+      "end": {
+        "sha256": "8f59fb5951a1f83dc360413ac1b71e7914bc98f65c1efa71af909751b7d509d0",
+        "bytes": 11028
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/cache-production-scope.test.ts",
+      "start": {
+        "sha256": "3aa86112afc8b419b03e4d9176dd4872bc39321d88fa8f712cfb2ca2530f6088",
+        "bytes": 20536
+      },
+      "end": {
+        "sha256": "3aa86112afc8b419b03e4d9176dd4872bc39321d88fa8f712cfb2ca2530f6088",
+        "bytes": 20536
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/cache-process-settlement.test.ts",
+      "start": {
+        "sha256": "ddd557cf50e28d1f7893e4edc90d7714e688015b3ec99d223c4002426e07b115",
+        "bytes": 12031
+      },
+      "end": {
+        "sha256": "ddd557cf50e28d1f7893e4edc90d7714e688015b3ec99d223c4002426e07b115",
+        "bytes": 12031
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/src/adapters/openfilm/cache-process-custodian.py",
+      "start": {
+        "sha256": "6b8d6df32b1958b3cf53e05152e9b04abf6c010d58ae6e672fcd7fa4c9511618",
+        "bytes": 90894
+      },
+      "end": {
+        "sha256": "6b8d6df32b1958b3cf53e05152e9b04abf6c010d58ae6e672fcd7fa4c9511618",
+        "bytes": 90894
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/helpers/cache-worker-fixture.mjs",
+      "start": {
+        "sha256": "e3f4ccb1c4016a54356ce04be344b4ffff23f2f88698efe191570ad8407d03ab",
+        "bytes": 15045
+      },
+      "end": {
+        "sha256": "e3f4ccb1c4016a54356ce04be344b4ffff23f2f88698efe191570ad8407d03ab",
+        "bytes": 15045
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/helpers/cache-probe-fixture.mjs",
+      "start": {
+        "sha256": "80388baed7275482ea7c4b7273d43706aa143a532aa47b8e0922c53e3c2720ef",
+        "bytes": 4068
+      },
+      "end": {
+        "sha256": "80388baed7275482ea7c4b7273d43706aa143a532aa47b8e0922c53e3c2720ef",
+        "bytes": 4068
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/cache-custodian-lifecycle.test.ts",
+      "start": {
+        "sha256": "5491f60ef72a55486dd270fb97c680690cedfbb65d62f1d3a6f29902d77c35d0",
+        "bytes": 13276
+      },
+      "end": {
+        "sha256": "5491f60ef72a55486dd270fb97c680690cedfbb65d62f1d3a6f29902d77c35d0",
+        "bytes": 13276
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/cache-frame-duration-lifetime.test.ts",
+      "start": {
+        "sha256": "df45f9294d5b583367506ad4ce4fbc733a8c87e7997855fab8be2151e55864bc",
+        "bytes": 8405
+      },
+      "end": {
+        "sha256": "df45f9294d5b583367506ad4ce4fbc733a8c87e7997855fab8be2151e55864bc",
+        "bytes": 8405
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/cache-process-identity.test.ts",
+      "start": {
+        "sha256": "4d3e18f759496a2a4123fb2c89d737e682600073763b619908397899d9643585",
+        "bytes": 29951
+      },
+      "end": {
+        "sha256": "4d3e18f759496a2a4123fb2c89d737e682600073763b619908397899d9643585",
+        "bytes": 29951
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/cache-serving-drain.test.ts",
+      "start": {
+        "sha256": "d9734282dd8a67d4a7d0a0bb0531ed2a9db0ca5db6c6d92caa2c9b3895bf1c4d",
+        "bytes": 4671
+      },
+      "end": {
+        "sha256": "d9734282dd8a67d4a7d0a0bb0531ed2a9db0ca5db6c6d92caa2c9b3895bf1c4d",
+        "bytes": 4671
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/helpers/cache-custodian-unit.py",
+      "start": {
+        "sha256": "85b738d0fc8cf81337749d65eed4eda06cfaa77e9e4d36eefbf47193c9d12347",
+        "bytes": 45236
+      },
+      "end": {
+        "sha256": "85b738d0fc8cf81337749d65eed4eda06cfaa77e9e4d36eefbf47193c9d12347",
+        "bytes": 45236
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/parallel/lane-product/A-R2-20261112/N1N2-native-source/n1n2-claude-060p1r3-report.md",
+      "start": {
+        "sha256": "ba45163378fc2dd9d4f5dc6b5c7217700c27c752ca94840f3ec3d2fc7acccba8",
+        "bytes": 42887
+      },
+      "end": {
+        "sha256": "ba45163378fc2dd9d4f5dc6b5c7217700c27c752ca94840f3ec3d2fc7acccba8",
+        "bytes": 42887
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/parallel/lane-product/A-R2-20261112/N1N2-native-source/n1n2-claude-060p1r3-evidence-gap.md",
+      "start": {
+        "sha256": "699e2e978d61911092e10e2512919c9d5f6de3f462a4cabab6b92cf54cc4f874",
+        "bytes": 9738
+      },
+      "end": {
+        "sha256": "699e2e978d61911092e10e2512919c9d5f6de3f462a4cabab6b92cf54cc4f874",
+        "bytes": 9738
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/parallel/lane-product/A-R2-20261112/N1N2-native-source/n1n2-claude-060p1r3a-report.md",
+      "start": {
+        "sha256": "d9df4ee59c43bff9ad132488de341642abd060eabf5a9176914a87e0573e5069",
+        "bytes": 14996
+      },
+      "end": {
+        "sha256": "d9df4ee59c43bff9ad132488de341642abd060eabf5a9176914a87e0573e5069",
+        "bytes": 14996
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p1r3/RELEASE.json",
+      "start": {
+        "sha256": "83f06182849814986c6e8359b8be2b5c720b607d381e4641e6d1bbb723f36eba",
+        "bytes": 9622
+      },
+      "end": {
+        "sha256": "83f06182849814986c6e8359b8be2b5c720b607d381e4641e6d1bbb723f36eba",
+        "bytes": 9622
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p1r3/SPEC.md",
+      "start": {
+        "sha256": "48f8105333e32d5535c9e7b683dd9ff04f3e0623423e923193f497783c7ad2ce",
+        "bytes": 12233
+      },
+      "end": {
+        "sha256": "48f8105333e32d5535c9e7b683dd9ff04f3e0623423e923193f497783c7ad2ce",
+        "bytes": 12233
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p1r3/MAIN_COMBINED_DECISION.json",
+      "start": {
+        "sha256": "c43730f8ce29c454caa0d66ae0111d431c55fd4e3d85afb37ab61bb16abd1176",
+        "bytes": 1100
+      },
+      "end": {
+        "sha256": "c43730f8ce29c454caa0d66ae0111d431c55fd4e3d85afb37ab61bb16abd1176",
+        "bytes": 1100
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p1r3/MAIN_HANDOFF_REVIEW/MAIN_BLOCKER_DECISION.json",
+      "start": {
+        "sha256": "aa0805ec806ec64be0330072fe6bf545b75787ff5071588662300a8e9eaa495d",
+        "bytes": 1024
+      },
+      "end": {
+        "sha256": "aa0805ec806ec64be0330072fe6bf545b75787ff5071588662300a8e9eaa495d",
+        "bytes": 1024
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p1r3a/RELEASE.json",
+      "start": {
+        "sha256": "3526fa63bfa210a02666288264efd53c07c129d66e293125b168bb38cbdaa98f",
+        "bytes": 2147
+      },
+      "end": {
+        "sha256": "3526fa63bfa210a02666288264efd53c07c129d66e293125b168bb38cbdaa98f",
+        "bytes": 2147
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p1r3a/SPEC.md",
+      "start": {
+        "sha256": "76ace55bf79cf4469943fa71e4644153ba5e247d36c761f800a023f634d9e40d",
+        "bytes": 3377
+      },
+      "end": {
+        "sha256": "76ace55bf79cf4469943fa71e4644153ba5e247d36c761f800a023f634d9e40d",
+        "bytes": 3377
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p1-review/ADR_060_REV3_CUSTODIAN_AND_REPAIR.md",
+      "start": {
+        "sha256": "326bed74476956e363a1168460803f35b57e088259cf30e6a6c1315583d395ac",
+        "bytes": 12929
+      },
+      "end": {
+        "sha256": "326bed74476956e363a1168460803f35b57e088259cf30e6a6c1315583d395ac",
+        "bytes": 12929
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p1-review/060P1R_PRIVATE_CONTRACT.md",
+      "start": {
+        "sha256": "bead5edc8547b22521d835a468c75fc88024dce62bb8b3d39ba6fc9406fe3a2e",
+        "bytes": 8556
+      },
+      "end": {
+        "sha256": "bead5edc8547b22521d835a468c75fc88024dce62bb8b3d39ba6fc9406fe3a2e",
+        "bytes": 8556
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p1r2/independent-review/integration-review/REVIEW.md",
+      "start": {
+        "sha256": "919beb8b0c8ad45f22988677dbd5ea6c848d3b80cb07f0f15bbc05528e2e2fba",
+        "bytes": 7026
+      },
+      "end": {
+        "sha256": "919beb8b0c8ad45f22988677dbd5ea6c848d3b80cb07f0f15bbc05528e2e2fba",
+        "bytes": 7026
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p1r2/independent-review/integration-review/FINDINGS.json",
+      "start": {
+        "sha256": "1500a95951c9e3e8192c13c18a888a0d0a9a6c7a6a543e9a148d67daaca3a67d",
+        "bytes": 41807
+      },
+      "end": {
+        "sha256": "1500a95951c9e3e8192c13c18a888a0d0a9a6c7a6a543e9a148d67daaca3a67d",
+        "bytes": 41807
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r3-custodian-syntax-001.result.json",
+      "start": {
+        "sha256": "02618c084b9f2b4a20b88468033f2680a14885892548a8ea9f065e063d4b2ec5",
+        "bytes": 198
+      },
+      "end": {
+        "sha256": "02618c084b9f2b4a20b88468033f2680a14885892548a8ea9f065e063d4b2ec5",
+        "bytes": 198
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r3-custodian-unit-001.result.json",
+      "start": {
+        "sha256": "2442f63da8fe1680e95d10e148bd8bd65542f59eca919fe2e16f7ac3d944a1c2",
+        "bytes": 198
+      },
+      "end": {
+        "sha256": "2442f63da8fe1680e95d10e148bd8bd65542f59eca919fe2e16f7ac3d944a1c2",
+        "bytes": 198
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r3-generate-001.result.json",
+      "start": {
+        "sha256": "a9bc0dc892d7f028814f472507945e5bf0ac72bf1ee7ae053d017b9c3973b31b",
+        "bytes": 257
+      },
+      "end": {
+        "sha256": "a9bc0dc892d7f028814f472507945e5bf0ac72bf1ee7ae053d017b9c3973b31b",
+        "bytes": 257
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r3-identity-001.result.json",
+      "start": {
+        "sha256": "de91ec92e872ef161f547808b951b0686f06cb53e2f364fc4bbed6488f3056de",
+        "bytes": 198
+      },
+      "end": {
+        "sha256": "de91ec92e872ef161f547808b951b0686f06cb53e2f364fc4bbed6488f3056de",
+        "bytes": 198
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r3-integrity-check-001.result.json",
+      "start": {
+        "sha256": "924273f707586f15b8f20ec802e67597a39be23d99ff48462e22ff0bfaedd519",
+        "bytes": 198
+      },
+      "end": {
+        "sha256": "924273f707586f15b8f20ec802e67597a39be23d99ff48462e22ff0bfaedd519",
+        "bytes": 198
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r3-m21-lock-001.result.json",
+      "start": {
+        "sha256": "772c53197452836f7d0a6dc38548734f687e2916ff433d38a91f1e80eb98019a",
+        "bytes": 198
+      },
+      "end": {
+        "sha256": "772c53197452836f7d0a6dc38548734f687e2916ff433d38a91f1e80eb98019a",
+        "bytes": 198
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r3-scheduler-001.result.json",
+      "start": {
+        "sha256": "8930d55ceb9a067e980a7b626b5f32f5b9ec866fef35143eb5ccf4e299d87c44",
+        "bytes": 198
+      },
+      "end": {
+        "sha256": "8930d55ceb9a067e980a7b626b5f32f5b9ec866fef35143eb5ccf4e299d87c44",
+        "bytes": 198
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r3-syntax-policy-001.result.json",
+      "start": {
+        "sha256": "11d00b8eb34cc8be9ae60583e6482700957abd479e556cc969268114201e5b64",
+        "bytes": 198
+      },
+      "end": {
+        "sha256": "11d00b8eb34cc8be9ae60583e6482700957abd479e556cc969268114201e5b64",
+        "bytes": 198
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r3-syntax-probe-fixture-001.result.json",
+      "start": {
+        "sha256": "61a099078784873ac98dd95418eb50eaf714ff69f61c3b6b5ba543526a98cecc",
+        "bytes": 198
+      },
+      "end": {
+        "sha256": "61a099078784873ac98dd95418eb50eaf714ff69f61c3b6b5ba543526a98cecc",
+        "bytes": 198
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r3-syntax-worker-001.result.json",
+      "start": {
+        "sha256": "a9807ca58e343a01778b6e3f3c91629a28380b337fcc79be6af7a4feb7872376",
+        "bytes": 198
+      },
+      "end": {
+        "sha256": "a9807ca58e343a01778b6e3f3c91629a28380b337fcc79be6af7a4feb7872376",
+        "bytes": 198
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r3-syntax-worker-fixture-001.result.json",
+      "start": {
+        "sha256": "0a6b2a666693192bd651935c88803167c4a34fa667b7eda649900c9515b946d0",
+        "bytes": 198
+      },
+      "end": {
+        "sha256": "0a6b2a666693192bd651935c88803167c4a34fa667b7eda649900c9515b946d0",
+        "bytes": 198
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r3-typecheck-001.result.json",
+      "start": {
+        "sha256": "7d1d969a03b1bb7c6fc42ec5173e236f81caf186688c8787fc2ab9614962bcc6",
+        "bytes": 198
+      },
+      "end": {
+        "sha256": "7d1d969a03b1bb7c6fc42ec5173e236f81caf186688c8787fc2ab9614962bcc6",
+        "bytes": 198
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r3a-generate-001.claim.json",
+      "start": {
+        "sha256": "b18ce26c41f39171f7caf2fb453011deb9a7030471a9d1180b598fc2d3904e6f",
+        "bytes": 193
+      },
+      "end": {
+        "sha256": "b18ce26c41f39171f7caf2fb453011deb9a7030471a9d1180b598fc2d3904e6f",
+        "bytes": 193
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r3a-generate-001.cmd.json",
+      "start": {
+        "sha256": "d8f3ba35ce9834d008c14bba9a32e0c9ac6b95baaaf3aac244612c38d7c296cf",
+        "bytes": 459
+      },
+      "end": {
+        "sha256": "d8f3ba35ce9834d008c14bba9a32e0c9ac6b95baaaf3aac244612c38d7c296cf",
+        "bytes": 459
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r3a-generate-001.exit",
+      "start": {
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+        "bytes": 2
+      },
+      "end": {
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+        "bytes": 2
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r3a-generate-001.inputs.json",
+      "start": {
+        "sha256": "46866740c501599346937b24286deba755f1d1826f497f303ec25a3951438f79",
+        "bytes": 74526
+      },
+      "end": {
+        "sha256": "46866740c501599346937b24286deba755f1d1826f497f303ec25a3951438f79",
+        "bytes": 74526
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r3a-generate-001.result.json",
+      "start": {
+        "sha256": "0a804176d85cdea6156ad364a778eaf1cc3c3975b3a20d8f531f5405d8932ee4",
+        "bytes": 257
+      },
+      "end": {
+        "sha256": "0a804176d85cdea6156ad364a778eaf1cc3c3975b3a20d8f531f5405d8932ee4",
+        "bytes": 257
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r3a-generate-001.txt",
+      "start": {
+        "sha256": "935887d3b5e12302baa46695d2edd70b82320677eca3372b38eae4610f86bd11",
+        "bytes": 161
+      },
+      "end": {
+        "sha256": "935887d3b5e12302baa46695d2edd70b82320677eca3372b38eae4610f86bd11",
+        "bytes": 161
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r3a-integrity-001.claim.json",
+      "start": {
+        "sha256": "783c555fb51718d71ab106370b31220391981d9f0d816382afc9289675d872b7",
+        "bytes": 191
+      },
+      "end": {
+        "sha256": "783c555fb51718d71ab106370b31220391981d9f0d816382afc9289675d872b7",
+        "bytes": 191
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r3a-integrity-001.cmd.json",
+      "start": {
+        "sha256": "c01adee75feb770ea4168bc77e07f32b347a289925e4555d7838d530f07e98c8",
+        "bytes": 456
+      },
+      "end": {
+        "sha256": "c01adee75feb770ea4168bc77e07f32b347a289925e4555d7838d530f07e98c8",
+        "bytes": 456
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r3a-integrity-001.exit",
+      "start": {
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+        "bytes": 2
+      },
+      "end": {
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+        "bytes": 2
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r3a-integrity-001.inputs.json",
+      "start": {
+        "sha256": "2d3b9140eb058aaa65974b1ed0ae2957e868de14c4bf21a0fbd455c3fdf26e48",
+        "bytes": 74526
+      },
+      "end": {
+        "sha256": "2d3b9140eb058aaa65974b1ed0ae2957e868de14c4bf21a0fbd455c3fdf26e48",
+        "bytes": 74526
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r3a-integrity-001.result.json",
+      "start": {
+        "sha256": "85b63cf5c16fda52e9a60b0ad04e4bb12f3d8aa0817d657e84bd17bdc562ca04",
+        "bytes": 198
+      },
+      "end": {
+        "sha256": "85b63cf5c16fda52e9a60b0ad04e4bb12f3d8aa0817d657e84bd17bdc562ca04",
+        "bytes": 198
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r3a-integrity-001.txt",
+      "start": {
+        "sha256": "7480083d801311b007ec2f2a6c4717621f8aed33de5e17dd7ba35815b0d68e68",
+        "bytes": 24
+      },
+      "end": {
+        "sha256": "7480083d801311b007ec2f2a6c4717621f8aed33de5e17dd7ba35815b0d68e68",
+        "bytes": 24
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r3a-unit-001.claim.json",
+      "start": {
+        "sha256": "4689fd06d2b231401f25a931a7977dd181b4a7785932c3d60a148c5d7ba008c7",
+        "bytes": 229
+      },
+      "end": {
+        "sha256": "4689fd06d2b231401f25a931a7977dd181b4a7785932c3d60a148c5d7ba008c7",
+        "bytes": 229
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r3a-unit-001.cmd.json",
+      "start": {
+        "sha256": "d6c1e16c5e87ea6327398b76d467785bebc4a0c3803879e32e26f25720ea5a40",
+        "bytes": 507
+      },
+      "end": {
+        "sha256": "d6c1e16c5e87ea6327398b76d467785bebc4a0c3803879e32e26f25720ea5a40",
+        "bytes": 507
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r3a-unit-001.exit",
+      "start": {
+        "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+        "bytes": 2
+      },
+      "end": {
+        "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+        "bytes": 2
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r3a-unit-001.inputs.json",
+      "start": {
+        "sha256": "b146488a7736f893975af746206d7645eb43a25e8e1c65e026bf694fc1dc4866",
+        "bytes": 74526
+      },
+      "end": {
+        "sha256": "b146488a7736f893975af746206d7645eb43a25e8e1c65e026bf694fc1dc4866",
+        "bytes": 74526
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r3a-unit-001.result.json",
+      "start": {
+        "sha256": "d057aefe6cde4074f649c40ee2abb6e15924b0585f37dc59e604ce73ca859daf",
+        "bytes": 198
+      },
+      "end": {
+        "sha256": "d057aefe6cde4074f649c40ee2abb6e15924b0585f37dc59e604ce73ca859daf",
+        "bytes": 198
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r3a-unit-001.txt",
+      "start": {
+        "sha256": "5cd6100cf21b43e1134c7c241ff453df5a962823630958310f361a3e36d52fbc",
+        "bytes": 1360
+      },
+      "end": {
+        "sha256": "5cd6100cf21b43e1134c7c241ff453df5a962823630958310f361a3e36d52fbc",
+        "bytes": 1360
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r3a-unit-002.claim.json",
+      "start": {
+        "sha256": "9a3b90200d193333287c4bc3c552cb361ac13b7c3664609e6c53d58b80e94ed0",
+        "bytes": 229
+      },
+      "end": {
+        "sha256": "9a3b90200d193333287c4bc3c552cb361ac13b7c3664609e6c53d58b80e94ed0",
+        "bytes": 229
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r3a-unit-002.cmd.json",
+      "start": {
+        "sha256": "0c77445a7d306ac12b404907a6e8af2711bc44395f1e673d959814517d1a932c",
+        "bytes": 507
+      },
+      "end": {
+        "sha256": "0c77445a7d306ac12b404907a6e8af2711bc44395f1e673d959814517d1a932c",
+        "bytes": 507
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r3a-unit-002.exit",
+      "start": {
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+        "bytes": 2
+      },
+      "end": {
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+        "bytes": 2
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r3a-unit-002.inputs.json",
+      "start": {
+        "sha256": "46866740c501599346937b24286deba755f1d1826f497f303ec25a3951438f79",
+        "bytes": 74526
+      },
+      "end": {
+        "sha256": "46866740c501599346937b24286deba755f1d1826f497f303ec25a3951438f79",
+        "bytes": 74526
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r3a-unit-002.result.json",
+      "start": {
+        "sha256": "5af62b279ecbbb6f03cfac4c10300a39a52cbfc865d5ab73ae1e7cafa42b6b74",
+        "bytes": 198
+      },
+      "end": {
+        "sha256": "5af62b279ecbbb6f03cfac4c10300a39a52cbfc865d5ab73ae1e7cafa42b6b74",
+        "bytes": 198
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r3a-unit-002.txt",
+      "start": {
+        "sha256": "4d875fedc582561cde1f243eafa5d4e02956cf374028ab9ddd019828c4c590fd",
+        "bytes": 137
+      },
+      "end": {
+        "sha256": "4d875fedc582561cde1f243eafa5d4e02956cf374028ab9ddd019828c4c590fd",
+        "bytes": 137
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r3-custodian-syntax-001.claim.json",
+      "start": {
+        "sha256": "c805ffd39d34032656f13dd444d47af2d3373c407e92851e23cf71658f5c2696",
+        "bytes": 337
+      },
+      "end": {
+        "sha256": "c805ffd39d34032656f13dd444d47af2d3373c407e92851e23cf71658f5c2696",
+        "bytes": 337
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r3-custodian-syntax-001.cmd.json",
+      "start": {
+        "sha256": "d4efb60c54ade96825f4faeab0d35d5ea7617daee0cddfccd93dfda48e7f01c2",
+        "bytes": 608
+      },
+      "end": {
+        "sha256": "d4efb60c54ade96825f4faeab0d35d5ea7617daee0cddfccd93dfda48e7f01c2",
+        "bytes": 608
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r3-custodian-syntax-001.exit",
+      "start": {
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+        "bytes": 2
+      },
+      "end": {
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+        "bytes": 2
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r3-custodian-syntax-001.inputs.json",
+      "start": {
+        "sha256": "75bc7c41ef42d7c4cfa0ed6e646a65cfe9944fb81fd52c2b8e441d0883ffc855",
+        "bytes": 74526
+      },
+      "end": {
+        "sha256": "75bc7c41ef42d7c4cfa0ed6e646a65cfe9944fb81fd52c2b8e441d0883ffc855",
+        "bytes": 74526
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r3-custodian-syntax-001.txt",
+      "start": {
+        "sha256": "dd8ee964b960e83ee2ed8f892492ac84dc2c0ea3c9ddb84f9b29e3922f08b97c",
+        "bytes": 20
+      },
+      "end": {
+        "sha256": "dd8ee964b960e83ee2ed8f892492ac84dc2c0ea3c9ddb84f9b29e3922f08b97c",
+        "bytes": 20
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r3-custodian-unit-001.claim.json",
+      "start": {
+        "sha256": "73b3c9ace92fee9593999df3682034f03d9985ffdc9d841fd12b7772ca0d801d",
+        "bytes": 238
+      },
+      "end": {
+        "sha256": "73b3c9ace92fee9593999df3682034f03d9985ffdc9d841fd12b7772ca0d801d",
+        "bytes": 238
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r3-custodian-unit-001.cmd.json",
+      "start": {
+        "sha256": "46cdd969ccfd7b9980eb3bac71f126b66cd5afe10ab3efa3c68141a8d528d1f9",
+        "bytes": 507
+      },
+      "end": {
+        "sha256": "46cdd969ccfd7b9980eb3bac71f126b66cd5afe10ab3efa3c68141a8d528d1f9",
+        "bytes": 507
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r3-custodian-unit-001.exit",
+      "start": {
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+        "bytes": 2
+      },
+      "end": {
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+        "bytes": 2
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r3-custodian-unit-001.inputs.json",
+      "start": {
+        "sha256": "75bc7c41ef42d7c4cfa0ed6e646a65cfe9944fb81fd52c2b8e441d0883ffc855",
+        "bytes": 74526
+      },
+      "end": {
+        "sha256": "75bc7c41ef42d7c4cfa0ed6e646a65cfe9944fb81fd52c2b8e441d0883ffc855",
+        "bytes": 74526
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r3-custodian-unit-001.txt",
+      "start": {
+        "sha256": "ea57a1768c572b4d377004773000e3b70e0c490da94bd4dfc3ff6b13b006904b",
+        "bytes": 134
+      },
+      "end": {
+        "sha256": "ea57a1768c572b4d377004773000e3b70e0c490da94bd4dfc3ff6b13b006904b",
+        "bytes": 134
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r3-generate-001.claim.json",
+      "start": {
+        "sha256": "b1ae4bbf3e5e7a0625c3d9496a2f4cbd8188a242ce39be9c7a73ac4f99536d87",
+        "bytes": 192
+      },
+      "end": {
+        "sha256": "b1ae4bbf3e5e7a0625c3d9496a2f4cbd8188a242ce39be9c7a73ac4f99536d87",
+        "bytes": 192
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r3-generate-001.cmd.json",
+      "start": {
+        "sha256": "3f7210282b758fef227df72060f6aec0699a19856e1fd9a0633f390a45562c8f",
+        "bytes": 459
+      },
+      "end": {
+        "sha256": "3f7210282b758fef227df72060f6aec0699a19856e1fd9a0633f390a45562c8f",
+        "bytes": 459
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r3-generate-001.exit",
+      "start": {
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+        "bytes": 2
+      },
+      "end": {
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+        "bytes": 2
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r3-generate-001.inputs.json",
+      "start": {
+        "sha256": "f72d87f69ce666ddc70ae8d245d838eba7e1fe1e7cd0ebce3c56f0580b10680f",
+        "bytes": 74526
+      },
+      "end": {
+        "sha256": "f72d87f69ce666ddc70ae8d245d838eba7e1fe1e7cd0ebce3c56f0580b10680f",
+        "bytes": 74526
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r3-generate-001.txt",
+      "start": {
+        "sha256": "34c83f4222134df80a0dba3e7ee8649f7cbf70931192d12e816763e2e34150ef",
+        "bytes": 161
+      },
+      "end": {
+        "sha256": "34c83f4222134df80a0dba3e7ee8649f7cbf70931192d12e816763e2e34150ef",
+        "bytes": 161
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r3-identity-001.claim.json",
+      "start": {
+        "sha256": "de38670723c5e2c3a1e10850a36a7dc383d6463b0ca59907b7d2adccef3410c9",
+        "bytes": 267
+      },
+      "end": {
+        "sha256": "de38670723c5e2c3a1e10850a36a7dc383d6463b0ca59907b7d2adccef3410c9",
+        "bytes": 267
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r3-identity-001.cmd.json",
+      "start": {
+        "sha256": "4ff1328644b20172afdb9b41c36c09f40b000510c49ba2d8c3bd43c8027885a3",
+        "bytes": 554
+      },
+      "end": {
+        "sha256": "4ff1328644b20172afdb9b41c36c09f40b000510c49ba2d8c3bd43c8027885a3",
+        "bytes": 554
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r3-identity-001.exit",
+      "start": {
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+        "bytes": 2
+      },
+      "end": {
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+        "bytes": 2
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r3-identity-001.inputs.json",
+      "start": {
+        "sha256": "75bc7c41ef42d7c4cfa0ed6e646a65cfe9944fb81fd52c2b8e441d0883ffc855",
+        "bytes": 74526
+      },
+      "end": {
+        "sha256": "75bc7c41ef42d7c4cfa0ed6e646a65cfe9944fb81fd52c2b8e441d0883ffc855",
+        "bytes": 74526
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r3-identity-001.txt",
+      "start": {
+        "sha256": "9730576b05d243f8477207e9dacdf1e00ed1ef9352be199244db105738a59a89",
+        "bytes": 348
+      },
+      "end": {
+        "sha256": "9730576b05d243f8477207e9dacdf1e00ed1ef9352be199244db105738a59a89",
+        "bytes": 348
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r3-integrity-check-001.claim.json",
+      "start": {
+        "sha256": "1f90026f0ce2de55ffe0a9342e2530796b184aac276694b8b7f3760df02d204a",
+        "bytes": 196
+      },
+      "end": {
+        "sha256": "1f90026f0ce2de55ffe0a9342e2530796b184aac276694b8b7f3760df02d204a",
+        "bytes": 196
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r3-integrity-check-001.cmd.json",
+      "start": {
+        "sha256": "0063eea13f7fcad0a35b569d34a350052688ead4d3ae73169fbb7d479be22bee",
+        "bytes": 456
+      },
+      "end": {
+        "sha256": "0063eea13f7fcad0a35b569d34a350052688ead4d3ae73169fbb7d479be22bee",
+        "bytes": 456
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r3-integrity-check-001.exit",
+      "start": {
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+        "bytes": 2
+      },
+      "end": {
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+        "bytes": 2
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r3-integrity-check-001.inputs.json",
+      "start": {
+        "sha256": "75bc7c41ef42d7c4cfa0ed6e646a65cfe9944fb81fd52c2b8e441d0883ffc855",
+        "bytes": 74526
+      },
+      "end": {
+        "sha256": "75bc7c41ef42d7c4cfa0ed6e646a65cfe9944fb81fd52c2b8e441d0883ffc855",
+        "bytes": 74526
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r3-integrity-check-001.txt",
+      "start": {
+        "sha256": "7480083d801311b007ec2f2a6c4717621f8aed33de5e17dd7ba35815b0d68e68",
+        "bytes": 24
+      },
+      "end": {
+        "sha256": "7480083d801311b007ec2f2a6c4717621f8aed33de5e17dd7ba35815b0d68e68",
+        "bytes": 24
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r3-m21-lock-001.claim.json",
+      "start": {
+        "sha256": "415797bd15c24f1653bd3b711b7674fcfdbad348b3522d3c3be0a018212cc438",
+        "bytes": 247
+      },
+      "end": {
+        "sha256": "415797bd15c24f1653bd3b711b7674fcfdbad348b3522d3c3be0a018212cc438",
+        "bytes": 247
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r3-m21-lock-001.cmd.json",
+      "start": {
+        "sha256": "6c4237007feaea466b96c4f7455b5548bbbd3dee20641df28b85c099e97ab920",
+        "bytes": 534
+      },
+      "end": {
+        "sha256": "6c4237007feaea466b96c4f7455b5548bbbd3dee20641df28b85c099e97ab920",
+        "bytes": 534
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r3-m21-lock-001.exit",
+      "start": {
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+        "bytes": 2
+      },
+      "end": {
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+        "bytes": 2
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r3-m21-lock-001.inputs.json",
+      "start": {
+        "sha256": "75bc7c41ef42d7c4cfa0ed6e646a65cfe9944fb81fd52c2b8e441d0883ffc855",
+        "bytes": 74526
+      },
+      "end": {
+        "sha256": "75bc7c41ef42d7c4cfa0ed6e646a65cfe9944fb81fd52c2b8e441d0883ffc855",
+        "bytes": 74526
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r3-m21-lock-001.txt",
+      "start": {
+        "sha256": "5953e319f89241fef6b0a69f1c0570cb7b007e3ac1d2ff6174b646d321e06d9a",
+        "bytes": 569
+      },
+      "end": {
+        "sha256": "5953e319f89241fef6b0a69f1c0570cb7b007e3ac1d2ff6174b646d321e06d9a",
+        "bytes": 569
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r3-scheduler-001.claim.json",
+      "start": {
+        "sha256": "13605fa6e0c74bed210014a2a2288e92e22c3a69dfdf018c1d3862868467acd5",
+        "bytes": 268
+      },
+      "end": {
+        "sha256": "13605fa6e0c74bed210014a2a2288e92e22c3a69dfdf018c1d3862868467acd5",
+        "bytes": 268
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r3-scheduler-001.cmd.json",
+      "start": {
+        "sha256": "19a92772ca0268dce3f0611db229bc6c615d497ace94401905f8faf0d93ec082",
+        "bytes": 554
+      },
+      "end": {
+        "sha256": "19a92772ca0268dce3f0611db229bc6c615d497ace94401905f8faf0d93ec082",
+        "bytes": 554
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r3-scheduler-001.exit",
+      "start": {
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+        "bytes": 2
+      },
+      "end": {
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+        "bytes": 2
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r3-scheduler-001.inputs.json",
+      "start": {
+        "sha256": "75bc7c41ef42d7c4cfa0ed6e646a65cfe9944fb81fd52c2b8e441d0883ffc855",
+        "bytes": 74526
+      },
+      "end": {
+        "sha256": "75bc7c41ef42d7c4cfa0ed6e646a65cfe9944fb81fd52c2b8e441d0883ffc855",
+        "bytes": 74526
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r3-scheduler-001.txt",
+      "start": {
+        "sha256": "9b48619c827a4e60418b81d4138e093528cf210efc89bd139cf3c143f390a751",
+        "bytes": 631
+      },
+      "end": {
+        "sha256": "9b48619c827a4e60418b81d4138e093528cf210efc89bd139cf3c143f390a751",
+        "bytes": 631
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r3-syntax-policy-001.claim.json",
+      "start": {
+        "sha256": "5099c3c580cc5526b071358dd9a2ce7299e2ef3fa1a5589023ffd7dc72d392f9",
+        "bytes": 198
+      },
+      "end": {
+        "sha256": "5099c3c580cc5526b071358dd9a2ce7299e2ef3fa1a5589023ffd7dc72d392f9",
+        "bytes": 198
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r3-syntax-policy-001.cmd.json",
+      "start": {
+        "sha256": "12e1b0967c4fd9079468e6a100416bbd19eff95d25c3386f148d9f1b0667932f",
+        "bytes": 460
+      },
+      "end": {
+        "sha256": "12e1b0967c4fd9079468e6a100416bbd19eff95d25c3386f148d9f1b0667932f",
+        "bytes": 460
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r3-syntax-policy-001.exit",
+      "start": {
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+        "bytes": 2
+      },
+      "end": {
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+        "bytes": 2
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r3-syntax-policy-001.inputs.json",
+      "start": {
+        "sha256": "75bc7c41ef42d7c4cfa0ed6e646a65cfe9944fb81fd52c2b8e441d0883ffc855",
+        "bytes": 74526
+      },
+      "end": {
+        "sha256": "75bc7c41ef42d7c4cfa0ed6e646a65cfe9944fb81fd52c2b8e441d0883ffc855",
+        "bytes": 74526
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r3-syntax-policy-001.txt",
+      "start": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "end": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r3-syntax-probe-fixture-001.claim.json",
+      "start": {
+        "sha256": "9dd77bc62a9fcdfb5871567be61407a9e391d1c93ab2b92b38e0eddf14d73515",
+        "bytes": 222
+      },
+      "end": {
+        "sha256": "9dd77bc62a9fcdfb5871567be61407a9e391d1c93ab2b92b38e0eddf14d73515",
+        "bytes": 222
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r3-syntax-probe-fixture-001.cmd.json",
+      "start": {
+        "sha256": "f3f3a93d6ae3adf0e14938038cd320d9b0635e5dd4458c79065e7abe88cef029",
+        "bytes": 477
+      },
+      "end": {
+        "sha256": "f3f3a93d6ae3adf0e14938038cd320d9b0635e5dd4458c79065e7abe88cef029",
+        "bytes": 477
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r3-syntax-probe-fixture-001.exit",
+      "start": {
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+        "bytes": 2
+      },
+      "end": {
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+        "bytes": 2
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r3-syntax-probe-fixture-001.inputs.json",
+      "start": {
+        "sha256": "75bc7c41ef42d7c4cfa0ed6e646a65cfe9944fb81fd52c2b8e441d0883ffc855",
+        "bytes": 74526
+      },
+      "end": {
+        "sha256": "75bc7c41ef42d7c4cfa0ed6e646a65cfe9944fb81fd52c2b8e441d0883ffc855",
+        "bytes": 74526
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r3-syntax-probe-fixture-001.txt",
+      "start": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "end": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r3-syntax-worker-001.claim.json",
+      "start": {
+        "sha256": "33db4b35bb9f800a053d665406861ce2c13a517c502f8dae4c64b7180de0f3e3",
+        "bytes": 200
+      },
+      "end": {
+        "sha256": "33db4b35bb9f800a053d665406861ce2c13a517c502f8dae4c64b7180de0f3e3",
+        "bytes": 200
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r3-syntax-worker-001.cmd.json",
+      "start": {
+        "sha256": "3868262c737bb098d076436c1c1d1afe93bf120c6e52032f449fc2dfce55c92f",
+        "bytes": 462
+      },
+      "end": {
+        "sha256": "3868262c737bb098d076436c1c1d1afe93bf120c6e52032f449fc2dfce55c92f",
+        "bytes": 462
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r3-syntax-worker-001.exit",
+      "start": {
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+        "bytes": 2
+      },
+      "end": {
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+        "bytes": 2
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r3-syntax-worker-001.inputs.json",
+      "start": {
+        "sha256": "75bc7c41ef42d7c4cfa0ed6e646a65cfe9944fb81fd52c2b8e441d0883ffc855",
+        "bytes": 74526
+      },
+      "end": {
+        "sha256": "75bc7c41ef42d7c4cfa0ed6e646a65cfe9944fb81fd52c2b8e441d0883ffc855",
+        "bytes": 74526
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r3-syntax-worker-001.txt",
+      "start": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "end": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r3-syntax-worker-fixture-001.claim.json",
+      "start": {
+        "sha256": "b5e98a1d17acf12fc32e5feb9d3b783776c4a2eb2d37cb39b4c237055d6b6d2c",
+        "bytes": 224
+      },
+      "end": {
+        "sha256": "b5e98a1d17acf12fc32e5feb9d3b783776c4a2eb2d37cb39b4c237055d6b6d2c",
+        "bytes": 224
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r3-syntax-worker-fixture-001.cmd.json",
+      "start": {
+        "sha256": "88d629e13b717c748f3f467c271cb9b32601c7e7224450b7a67777978c2428a0",
+        "bytes": 478
+      },
+      "end": {
+        "sha256": "88d629e13b717c748f3f467c271cb9b32601c7e7224450b7a67777978c2428a0",
+        "bytes": 478
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r3-syntax-worker-fixture-001.exit",
+      "start": {
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+        "bytes": 2
+      },
+      "end": {
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+        "bytes": 2
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r3-syntax-worker-fixture-001.inputs.json",
+      "start": {
+        "sha256": "75bc7c41ef42d7c4cfa0ed6e646a65cfe9944fb81fd52c2b8e441d0883ffc855",
+        "bytes": 74526
+      },
+      "end": {
+        "sha256": "75bc7c41ef42d7c4cfa0ed6e646a65cfe9944fb81fd52c2b8e441d0883ffc855",
+        "bytes": 74526
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r3-syntax-worker-fixture-001.txt",
+      "start": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "end": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r3-typecheck-001.claim.json",
+      "start": {
+        "sha256": "337675698f24b62023cef3eeb611b5458f4b345eb061cdc519183e775ba3c110",
+        "bytes": 173
+      },
+      "end": {
+        "sha256": "337675698f24b62023cef3eeb611b5458f4b345eb061cdc519183e775ba3c110",
+        "bytes": 173
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r3-typecheck-001.cmd.json",
+      "start": {
+        "sha256": "e7b4e54d0889e6c4acec98ca017095520268324ea9c3158c3189d4e2d16a18e7",
+        "bytes": 447
+      },
+      "end": {
+        "sha256": "e7b4e54d0889e6c4acec98ca017095520268324ea9c3158c3189d4e2d16a18e7",
+        "bytes": 447
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r3-typecheck-001.exit",
+      "start": {
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+        "bytes": 2
+      },
+      "end": {
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+        "bytes": 2
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r3-typecheck-001.inputs.json",
+      "start": {
+        "sha256": "75bc7c41ef42d7c4cfa0ed6e646a65cfe9944fb81fd52c2b8e441d0883ffc855",
+        "bytes": 74526
+      },
+      "end": {
+        "sha256": "75bc7c41ef42d7c4cfa0ed6e646a65cfe9944fb81fd52c2b8e441d0883ffc855",
+        "bytes": 74526
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r3-typecheck-001.txt",
+      "start": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "end": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p1r3/MAIN_HANDOFF_REVIEW/INPUT_SNAPSHOT.json",
+      "start": {
+        "sha256": "309edeab0969ea02edec40dcc34b061440ce6410098f16a4e706063051fdc569",
+        "bytes": 4514
+      },
+      "end": {
+        "sha256": "309edeab0969ea02edec40dcc34b061440ce6410098f16a4e706063051fdc569",
+        "bytes": 4514
+      },
+      "equal": true
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p1r3/MAIN_HANDOFF_REVIEW/MAIN_CAPTURE_AUDIT.json",
+      "start": {
+        "sha256": "6ab26ea98ce6a5334cac961fc9fc3e65c84cc22e030b505abac95c7e048a524c",
+        "bytes": 3120
+      },
+      "end": {
+        "sha256": "6ab26ea98ce6a5334cac961fc9fc3e65c84cc22e030b505abac95c7e048a524c",
+        "bytes": 3120
+      },
+      "equal": true
+    }
+  ],
+  "runtime": {
+    "reviewer_business": "NOT_RUN",
+    "tests_build": "NOT_RUN",
+    "C_N_kernel_FD_reap_signal": "NOT_RUN",
+    "Host_HTTP_probe_media_Chrome": "NOT_RUN",
+    "original17_ISO18_full_gates": "NOT_RUN",
+    "P2a_authorized_by_review": false
+  },
+  "historical_evidence": "R3 approx10 developer failures unrecorded; R3A one recorded failure preserved; no old logs fabricated."
+}

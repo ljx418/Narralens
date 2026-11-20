@@ -1,0 +1,85 @@
+{
+  "runId": "run_20296ffbad2e",
+  "scope": "design and documentation; child Claude read-only readiness only",
+  "workspace": "90974dd7-625f-46bf-a442-37f7cbadac25::C:\\workSpace\\videoWorkLine",
+  "workers": [
+    {
+      "lane": "bridge",
+      "dispatch": "ctx_27f642d62f2d",
+      "task": "task_a915784941ed",
+      "terminal": "term_6b4f4382-d829-4065-b446-97808e041937",
+      "launch_state": "ready"
+    },
+    {
+      "lane": "product",
+      "dispatch": "ctx_88f025cb2616",
+      "task": "task_8c641136f2f9",
+      "terminal": "term_cbb662e5-3041-44b3-bb26-aac1213e1695",
+      "launch_state": "ready"
+    },
+    {
+      "lane": "media",
+      "dispatch": "ctx_35705e537e18",
+      "task": "task_cb34e517149a",
+      "terminal": "term_d6cb9559-1366-4b42-849a-3ee926ccc58b",
+      "launch_state": "ready"
+    }
+  ],
+  "implementation": "NOT_STARTED",
+  "claude_children": [
+    {
+      "lane": "bridge",
+      "initial_dispatch": "ctx_55ed85325974",
+      "initial_terminal": "term_f361b74a-b799-4f1a-8172-f3e44bd052e9",
+      "followup_dispatch": "ctx_aca9dc7af0f2",
+      "followup_terminal": "term_c7b45237e89f62cd4defe27cbb8c6f00",
+      "status_at_observation": "followup succeeded; section10 ACK six main findings; zero blockers; terminal retained by worker-keep-open"
+    },
+    {
+      "lane": "product",
+      "dispatch": "ctx_291a3c63fe4f",
+      "terminal": "term_15069fcf-7f1f-46cc-be33-225cf860c4f2",
+      "status_at_observation": "readiness reported; credential incident disclosed"
+    },
+    {
+      "lane": "media",
+      "dispatch": "ctx_14a7ed7e66e3",
+      "terminal": "term_37251bd1-b0d6-4846-9a8f-28fd5aafb376",
+      "status_at_observation": "readiness reported"
+    }
+  ],
+  "lead_followups": [
+    {
+      "lane": "bridge",
+      "dispatch": "ctx_79706e20ac81",
+      "status_at_observation": "succeeded; final D01-D15 ACK"
+    },
+    {
+      "lane": "product",
+      "dispatch": "ctx_41a1d75dec64",
+      "status_at_observation": "settled; final D13-D15 ACK"
+    },
+    {
+      "lane": "media",
+      "dispatch": "ctx_2f9a95868c44",
+      "status_at_observation": "settled; final D01-D15 ACK"
+    }
+  ],
+  "handle_policy": "Runtime scoped recorded handles; rediscover exact worker before sending. Do not infer current liveness from this file.",
+  "startup_notice": {
+    "dispatch": "ctx_aca9dc7af0f2",
+    "input": "bare Enter informational acknowledgement only",
+    "receipt": "15a0899c-0c04-4f68-a6a8-f9d0ccf5a12e",
+    "accepted": true,
+    "config_changed": false,
+    "new_task_prompt_sent": false,
+    "parent_notification": "msg_30990f7db1af"
+  },
+  "last_notification_followup": {
+    "dispatch": "ctx_86b8e22db755",
+    "task": "task_978d04b5abe4",
+    "cause": "notification raced with settled parent; Orca reopened same terminal automatically",
+    "scope": "acknowledge completed preparation only; no new review or implementation",
+    "status_at_observation": "succeeded; no additional review or implementation"
+  }
+}

@@ -1,0 +1,63 @@
+{
+  "format": "narralens.release-assignment@1",
+  "ticket": "A-R1-MEDIA",
+  "status": "RELEASED",
+  "base_sha": "84deba07927fa59b45a24039b4740a2f9d3fd430",
+  "directory": "/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-MEDIA",
+  "contract_sha": "ca5b67a8285b130c79055317c6202f73cfbb99c8",
+  "preparation_manifest_sha256": "2a847488f59259b196caeb22e0407327583fed6985516ed16fa9bf9a87aad0c0",
+  "owner": "media-Codex",
+  "implementation_writer": "media-Claude",
+  "scope": "R1 source-only prepared closure, adoption-specific read-only reproof API and safe isolated preview. No author publish, committed encoding or Delivery. Caller/consumer wires via reviewed ports.",
+  "allowed_product_files": [
+    "src/host/agent-driven/created-draft-processor.ts",
+    "src/host/agent-driven/prepared-draft-verifier.ts",
+    "src/host/engine/source-digest-v1.ts",
+    "src/host/render/assembly-ports.ts",
+    "src/host/render/native-draft-assembler.ts",
+    "src/host/render/native-draft-io.ts",
+    "src/host/render/native-draft-plan.ts",
+    "src/host/render/preview-prepared-source.ts",
+    "tests/agent-driven/integration/created-draft-processor.test.ts",
+    "tests/agent-driven/integration/source-digest-resource-boundary.test.ts",
+    "tests/agent-driven/media/native-draft.test.ts",
+    "tests/agent-driven/media/preview-prepared-source.test.ts"
+  ],
+  "allowed_documentation_prefix": "docs/parallel/lane-media/A-R1-20261111/",
+  "required_reading": [
+    "docs/execution/A/relaunch-20261111/02_MAIN_CONTRACT_AND_DECISIONS.md",
+    "docs/execution/A/relaunch-20261111/media/DESIGN.md",
+    "docs/execution/A/relaunch-20261111/media/ACCEPTANCE.md",
+    "docs/execution/A/relaunch-20261111/implementation-prompts/media.md"
+  ],
+  "preconditions": [
+    "actual isolated directory and base SHA verified",
+    "Codex update ticket with current release/interfaces before handing writer to Claude",
+    "heavy checks require MAIN resource reservation; no simultaneous writer/index mutation"
+  ],
+  "heavy_resources": "MAIN reservation only; no default parallel Host/media/build",
+  "stop": "report ticket evidence to lane Codex; no B or human acceptance signature",
+  "rework": "429 verify previous writer/process stopped before Codex takeover; >2 stage reworks MAIN root-cause ownership",
+  "orca_workspace_id": "2e732423-9bcc-494c-a0ed-e27a9488f313::\\\\wsl.localhost\\Ubuntu-24.04\\home\\administrator\\orca\\workspaces\\Narralens\\Narralens-A-R1-MEDIA",
+  "interface_contract": "CR-R1-001-INTERFACE-LOCK.md sections1-8; contracts/gateway-ui.registry.json",
+  "ownership_delta": "ownership-delta.json",
+  "interface_sha256": "7e9b61b339d9cf2bc80c7925e09139f6362eeee6ecc373a2bd142d4be0f895b8",
+  "gateway_registry_sha256": "8416e1abeec71b4e063df53c9e4974ea4ab1bab3b8f1f5ddfc280f5b5261e54f",
+  "authorization_interpretation": "current user goal explicitly authorizes existing ClaudeCode implementation; credential disposition remains UNKNOWN, no risk-acceptance fiction",
+  "r0_reviewed_source_sha": "9f583239714835a89332fcae9363aa39d887821d",
+  "source_equivalence": "git diff old/new -- src tests contracts tools package.json pnpm-lock.yaml empty",
+  "released_by": "MAIN under explicit user active A implementation goal",
+  "allowed_start": "lane Codex updates ticket then starts existing configured Claude in this exact checkout; no model/config edits",
+  "credential_disposition": "UNKNOWN; invocation independently authorized by explicit user goal, see AUTHORIZATION_INTERPRETATION.md",
+  "active_writer": "CLAUDE_AFTER_RECORDED_LAUNCH; Codex doc prep first",
+  "conditional_takeover": {
+    "trigger": "Claude429",
+    "authority": "MAIN preauthorizes Codex takeover under user goal",
+    "prerequisites": [
+      "verify old writer call and all child processes stopped",
+      "preserve exact HEAD/dirty/commands/logs",
+      "record exclusive writer transfer; Claude does not auto-resume"
+    ]
+  },
+  "rework_escalation": "same stage >2 reworks MAIN takes root-cause and necessary fixes, no mechanical rejection loop"
+}

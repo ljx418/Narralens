@@ -1,0 +1,160 @@
+import {join} from 'node:path';
+import type {ApplyChange,Applied} from '../../contracts/agent-driven-types.js';
+import {validateAgentDefinition} from '../../contracts/agent-driven-validator.js';
+import type {NarralensHost} from '../server.js';
+import {ProductError} from '../creative/trusted-context.js';
+import {canonicalDigest,canonicalJson,contentDigest,FIXED_PLAN} from '../creative/digest.js';
+import {creativeInputClosure} from '../creative/creative-closure.js';
+import {guardExecution,readGuardFacts,readNarrowEffectFacts} from '../creative/execution-guard.js';
+import type {ProductTransaction} from '../creative/product-repository.js';
+import {OperationIdempotencyStore} from '../projects/operation-idempotency-store.js';
+import {computeSourceDigest} from '../engine/source-digest-v1.js';
+import {OPENFILM_UPSTREAM_SHA} from '../engine/engine-binding-store.js';
+import {CreativeProjectAuthority} from './creative-project-authority.js';
+import {ProductSqliteRepository} from './product-sqlite-repository.js';
+import {CreatedSourceAdoptionStore} from './created-source-adoption-store.js';
+import {CreatedSourceImpactStore} from './created-source-impact-store.js';
+import {CreatedPreparedSourceStore} from './created-prepared-source-store.js';
+import {CreatedSourceFactsReader,type CreatedPreparedFactsProof} from './created-source-facts-reader.js';
+import {CreatedSourcePublisher,type CreatedSourceSelectionPort} from './created-source-publisher.js';
+import {assertPreparedAdoptionPlan,preparedAdoptionPlanDigest,type PreparedAdoptionPlanV1} from './created-source-ports.js';
+import {PublicationCleanupError} from './publication-cleanup.js';
+import type {CreatedTaskStore} from './created-task-store.js';
+import type {LocalAssetRegistry} from './local-asset-registry.js';
+import type {PreparedDraftVerifier} from './prepared-draft-verifier.js';
+
+const OPERATION='agent.v1:change.apply';
+const stale=(message:string):never=>{throw new ProductError('REVISION_CONFLICT',message);};
+/** Shared queue + publisher + existing closed commit. No route is opened until
+ * startup recovery is assembled: an uncommitted publication must never reach the
+ * legacy edit recovery path. No second transaction state, Approval or command ledger. */
+export class CreatedSourceAdoptionService {
+ readonly #repository:ProductSqliteRepository;readonly #commands:OperationIdempotencyStore;
+ readonly #adoptions:CreatedSourceAdoptionStore;readonly #publishers=new Set<CreatedSourcePublisher>();
+ readonly #pending=new Set<Promise<Applied>>();readonly #uncertain=new Map<string,PublicationCleanupError>();
+ #closed=false;#closing:Promise<void>|undefined;
+ constructor(private readonly options:{readonly host:NarralensHost;readonly authority:CreativeProjectAuthority;
+  readonly prepared:CreatedPreparedSourceStore;readonly impacts:CreatedSourceImpactStore;readonly facts:CreatedSourceFactsReader;
+  readonly tasks:CreatedTaskStore;readonly assets:LocalAssetRegistry;readonly verifier:PreparedDraftVerifier;
+  readonly selection:CreatedSourceSelectionPort;readonly stageDomainRoot:string;readonly privateRoot:string}){
+  this.#repository=new ProductSqliteRepository(options.host.revisions);
+  this.#commands=new OperationIdempotencyStore(options.host.revisions.compose(db=>db));
+  this.#adoptions=new CreatedSourceAdoptionStore(options.host.revisions);
+ }
+ #open(project:string):void{if(this.#closed)throw new ProductError('CAPABILITY_UNAVAILABLE','Adoption service is closed');const failure=this.#uncertain.get(project);if(failure)throw failure;}
+ #replay(input:ApplyChange,principal:string,digest:string):Applied|undefined{
+  const remembered=this.#commands.recall(input.project_id,OPERATION,input.meta.idempotency_key);if(!remembered)return;
+  this.#commands.assertSameRequest(remembered,digest,OPERATION,input.project_id,input.meta.correlation_id);
+  const envelope=JSON.parse(remembered.response_json) as {format?:unknown;receipt?:Record<string,unknown>;response?:unknown};
+  const receipt=envelope.receipt,transaction=this.options.host.revisions.projectTransaction(remembered.transaction_id);
+  if(envelope.format!=='agent.idempotency@1'||!receipt||receipt.principal_id!==principal||receipt.project_id!==input.project_id
+   ||receipt.operation!=='change.apply'||receipt.request_digest!==digest||receipt.idempotency_key!==input.meta.idempotency_key
+   ||!transaction||transaction.state!=='committed'||transaction.project_id!==input.project_id)stale('Stored adoption receipt differs');
+  const applied=validateAgentDefinition<Applied>('Applied',envelope.response),fact=this.#adoptions.adoptionFact(remembered.transaction_id);
+  if(!fact||fact.impact_id!==input.impact_id||fact.approval_id!==input.approval_id||canonicalDigest(fact.execution)!==canonicalDigest(input.execution)
+   ||applied.project_id!==input.project_id||applied.transaction_id!==remembered.transaction_id||applied.snapshot_id!==transaction!.snapshot_id
+   ||applied.source_digest!==transaction!.source_digest_after||applied.project_revision!==transaction!.base_revision+1)stale('Stored adoption has no matching committed facts');
+  return {...applied,replayed:true};
+ }
+ #preflight(tx:ProductTransaction,input:ApplyChange,principal:string,plan:PreparedAdoptionPlanV1,proof:CreatedPreparedFactsProof):void{
+  this.#open(input.project_id);this.options.authority.assertOwner(input.project_id,principal);
+  const digest=preparedAdoptionPlanDigest(plan),impact=this.options.impacts.requireActive(input.impact_id,new Date());
+  if(plan.project_id!==input.project_id||plan.base_revision!==input.base_revision||plan.base_source_digest!==input.source_digest
+   ||impact.native_plan_sha256!==digest||canonicalDigest(input.execution)!==canonicalDigest(plan.producer_execution))stale('Adoption request does not name the approved plan');
+  const approval=tx.get('approval',{project_id:input.project_id,run_id:input.execution.run_id,approval_id:input.approval_id});
+  if(!approval||approval.state!=='active'||approval.impact_id!==input.impact_id||approval.action_digest!==digest||approval.facts_digest!==digest
+   ||approval.change_id!==plan.materialization_id||approval.base_revision!==plan.base_revision||approval.control_revision!==plan.control_revision
+   ||approval.step_id!==input.execution.step_id||approval.attempt!==input.execution.attempt||approval.input_digest!==input.execution.input_digest
+   ||approval.run_scope_digest!==input.execution.run_scope_digest||approval.consumed_transaction_id!==null)throw new ProductError('APPROVAL_REQUIRED','No current approval for this adoption');
+  const confirmation=tx.get('trusted_confirmation',{project_id:input.project_id,run_id:input.execution.run_id,confirmation_id:approval.confirmation_id});
+  if(!confirmation||confirmation.authenticated_actor!==principal||confirmation.purpose!=='change.approve'||confirmation.channel!=='trusted_ui'
+   ||confirmation.action_digest!==digest||confirmation.input_digest!==input.execution.input_digest||!confirmation.review_id)throw new ProductError('APPROVAL_REQUIRED','The trusted confirmation differs');
+  const creation=this.options.authority.creation.forProject(input.project_id),head=creation&&tx.get('intake_head',{intake_id:creation.request.intake_id});
+  const fixed=tx.get('plan_version',{project_id:input.project_id,run_id:input.execution.run_id,plan_version:1});
+  if(!creation||!head||canonicalDigest(creativeInputClosure(tx,creation.request.intake_id,head.current_version))!==input.execution.input_digest
+   ||!fixed||canonicalDigest(fixed.plan_json)!==canonicalDigest(FIXED_PLAN)||fixed.input_digest!==input.execution.input_digest)stale('Current creative input or fixed plan differs');
+  const {rights_digest,...observed}=this.options.facts.assertCurrent({project_id:input.project_id,prepared_source_id:plan.materialization_id,execution:input.execution},principal,proof);
+  const {format:_format,version:_version,source_kind:_kind,expires_at:_expires,...expected}=plan;
+  if(canonicalDigest(observed)!==canonicalDigest(expected)||rights_digest!==impact.rights_digest)stale('Actual prepared facts differ');
+  const narrow=readNarrowEffectFacts(tx,{project_id:input.project_id,run_id:input.execution.run_id,package_id:confirmation.review_id,
+   approval_id:input.approval_id,impact_id:input.impact_id},id=>this.options.impacts.state(id)==='active'?'active':undefined);
+  const guard=readGuardFacts(tx,input.project_id,input.execution,principal,Math.floor(Date.now()/1000));
+  const now=Date.now();
+  if(approval.expires_at*1000<=now||confirmation.expires_at*1000<=now||Date.parse(plan.expires_at)<=now)throw new ProductError('APPROVAL_REQUIRED','Adoption approval has expired');
+  guardExecution(input.execution,{kind:'approved_prepared_adoption',package_id:confirmation.review_id,approval_id:input.approval_id,impact_id:input.impact_id},
+   {...guard,now_epoch_seconds:Math.floor(now/1000),narrow});
+ }
+ async apply(raw:ApplyChange,principal:string):Promise<Applied>{
+  const input=structuredClone(validateAgentDefinition<ApplyChange>('ApplyChange',raw));this.#open(input.project_id);
+  this.options.authority.assertOwner(input.project_id,principal);const digest=contentDigest(input);
+  const replay=this.#replay(input,principal,digest);if(replay)return Promise.resolve(replay);
+  const work=this.options.host.coordinator.controlledWrite(input.project_id,input.meta.correlation_id,async()=>{
+   this.#open(input.project_id);this.options.authority.assertOwner(input.project_id,principal);
+   const raced=this.#replay(input,principal,digest);if(raced)return raced;
+   const fact=this.options.impacts.planFact(input.impact_id);if(!fact)throw new ProductError('NOT_FOUND','No owned prepared impact');
+   const plan=assertPreparedAdoptionPlan(fact.plan as PreparedAdoptionPlanV1);
+   if(plan.project_id!==input.project_id)throw new ProductError('NOT_FOUND','No owned prepared impact');
+   const mapping=this.options.prepared.read(plan.materialization_id);
+   if(!mapping||mapping.project_id!==input.project_id||fact.prepared_source_id!==mapping.prepared_source_id)throw new ProductError('NOT_FOUND','No prepared source for this impact');
+   const read={project_id:input.project_id,prepared_source_id:mapping.prepared_source_id,execution:input.execution};
+   let proof:CreatedPreparedFactsProof;
+   try{proof=await this.options.facts.acquire(read,principal);}catch(error){
+    if(error instanceof PublicationCleanupError)this.#uncertain.set(input.project_id,error);throw error;
+   }
+   let publisher:CreatedSourcePublisher|undefined,transactionId:string|undefined,failed=false,primary:unknown;
+   try{
+    const view=await this.options.host.projectResolver.resolveCreated(input.project_id);
+    const original=await computeSourceDigest({root:view.source_root.value,roots:view.source_fact.roots,engine:'openfilm',engineUpstreamSha:OPENFILM_UPSTREAM_SHA});
+    if(original.source_digest!==plan.base_source_digest||original.external_reference_count!==0)stale('Original rollback closure differs from the committed base');
+    await this.#repository.transaction(tx=>this.#preflight(tx,input,principal,plan,proof));
+    transactionId=this.options.host.coordinator.beginTransaction({projectId:input.project_id,kind:'edit',requestJson:canonicalJson({operation:'agent.created_source.apply@1',input}),requestHash:digest,baseRevision:input.base_revision,correlationId:input.meta.correlation_id});
+    this.#adoptions.record({transaction_id:transactionId,project_id:input.project_id,prepared_source_id:mapping.prepared_source_id,impact_id:input.impact_id,
+     approval_id:input.approval_id,plan_sha256:fact.plan_sha256,facts_digest:fact.plan_sha256,original_source_digest:plan.base_source_digest,target_source_digest:plan.target_source_digest,
+     expected_snapshot_id:plan.target_snapshot_id,native_plan:plan.native_plan,original_closure:[...original.manifest.files,...original.manifest.assets].map(f=>({relative_path:f.path,bytes:f.size,sha256:f.sha256})),
+     target_closure:plan.files,stage_root:mapping.stage_root,backup_token:'backup_'+transactionId,execution:input.execution,now:new Date()});
+    await this.#repository.transaction(tx=>tx.put('prepared_authorization',{transaction_id:transactionId!},{transaction_id:transactionId!,project_id:input.project_id,run_id:input.execution.run_id,approval_id:input.approval_id,facts_digest:fact.plan_sha256}));
+    const coordinator=this.options.host.coordinator;coordinator.preconditionsChecked(transactionId,plan.base_source_digest);coordinator.stage(transactionId);coordinator.validate(transactionId);coordinator.prepare(transactionId);
+    publisher=new CreatedSourcePublisher({revisions:this.options.host.revisions,authorRoot:view.source_root.value,privateRoot:join(this.options.privateRoot,input.project_id),
+     snapshots:this.options.host.snapshots,selection:this.options.selection,assets:this.options.assets,tasks:this.options.tasks,verifier:this.options.verifier,stageDomainRoot:this.options.stageDomainRoot});
+    this.#publishers.add(publisher);
+    const publication=await publisher.publish({project_id:input.project_id,transaction_id:transactionId,prepared_source_id:mapping.prepared_source_id,stage_root:mapping.stage_root,
+     files:plan.files,original_source_digest:plan.base_source_digest,published_source_digest:plan.target_source_digest,target_snapshot_id:plan.target_snapshot_id});
+    return this.options.host.revisions.commitPreparedCreatedSource({project_id:input.project_id,transaction_id:transactionId,impact_id:input.impact_id,approval_id:input.approval_id,
+     prepared_source_id:mapping.prepared_source_id,execution:input.execution,idempotency_key:input.meta.idempotency_key,request_digest:digest,publication_proof:publication});
+   }catch(error){failed=true;primary=error;
+    if(transactionId){
+     // An interrupted publication is not a terminal attention. The prepared row stays
+     // with the dedicated recovery, and the original gate keeps blocking writes for this
+     // project until that recovery decides it. A failed operation never produces a
+     // terminal state that the dedicated recovery could not still converge.
+     const published=publisher?.journalOf(transactionId).some(row=>row.phase==='published');
+     // An abort is only legal after the complete original closure is proved at the
+     // author root. An empty publication journal is not a proof of anything.
+     if(!published&&await this.#authorHoldsBase(input.project_id,plan.base_source_digest))
+      this.options.host.coordinator.abort(transactionId,'CREATED_SOURCE_ADOPTION_FAILED');
+    }
+    throw error;
+   }finally{
+    const errors:unknown[]=[];
+    try{this.options.facts.release(proof);}catch(error){errors.push(error);}
+    if(publisher)try{await publisher.close();this.#publishers.delete(publisher);}catch(error){errors.push(error);}
+    if(errors.length){const uncertainty=new PublicationCleanupError([...(failed?[primary]:[]),...errors]);this.#uncertain.set(input.project_id,uncertainty);throw uncertainty;}
+   }
+  });this.#pending.add(work);void work.then(()=>this.#pending.delete(work),()=>this.#pending.delete(work));return work;
+ }
+ close():Promise<void>{this.#closed=true;return this.#closing??=(async()=>{
+  await Promise.allSettled([...this.#pending]);const errors:unknown[]=[...this.#uncertain.values()];
+  for(const publisher of [...this.#publishers])try{await publisher.close();this.#publishers.delete(publisher);}catch(error){errors.push(error);}
+  if(errors.length)throw new PublicationCleanupError(errors);
+ })();}
+ /** The author root still holds the complete original closure of the committed base.
+  * This is the proof an abort of an unpublished transaction needs; the absence of a
+  * publication journal is not that proof. */
+ async #authorHoldsBase(projectId:string,baseSourceDigest:string):Promise<boolean>{
+  try{
+   const view=await this.options.host.projectResolver.resolveCreated(projectId);
+   const now=await computeSourceDigest({root:view.source_root.value,roots:view.source_fact.roots,engine:'openfilm',engineUpstreamSha:OPENFILM_UPSTREAM_SHA});
+   return now.external_reference_count===0&&now.source_digest===baseSourceDigest;
+  }catch{return false;}
+ }
+}

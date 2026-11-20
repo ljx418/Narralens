@@ -1,0 +1,44 @@
+{
+  "at": "2026-11-12T10:09:10.479066+00:00",
+  "reason": "NEW_CLAUDE_429_TOKEN_PLAN_LIMIT",
+  "observed_terminal": "429 已达到 Token Plan 用量上限; Retrying in5s attempt6/10",
+  "dispatch": "ctx_e5e736e1846b",
+  "task": "task_5dcbe8192764",
+  "terminal": "term_b4006907-19df-46dd-ae99-34909d8de5e6",
+  "guarded_stop": {
+    "state": "stopped",
+    "processAction": "closed_agent_terminal",
+    "ptyKilled": true,
+    "requestId": "921e1c2f-cb98-4cb3-99f0-94a8a52fd3a3"
+  },
+  "head": "e2eff61b464d75d36598103d718cd2a75db5dfda",
+  "index_changed": "",
+  "source_hashes": {
+    "src/host/agent-driven/committed-snapshot-authority.ts": "f8470afddb8e8732edb112379902c3e28f51892a0104d6182f13207d473906c9",
+    "src/host/agent-driven/created-native-workspace.ts": "b57bed5df0ea600a2aa1a5b2dc3df2873f794389ee5274f32efb52a6f3d653ad",
+    "src/host/m5/openfilm-native-expected.ts": "19110e45a83b6d5b611b4260620ce873f923f1e5a5b907bc6176c4b734fbeed3",
+    "src/host/agent-driven/retained-native-closure.ts": "b5d85e9fd6e3bfd80d1663715fa0393a0490d42871c78c14422d625a8c3375a4",
+    "src/host/agent-driven/created-native-source-reader.ts": "b386615cb4036f0ce3d2bc65a5d9aa99ee8bc9c191f3468eb15baf65b2a33aa1",
+    "tests/agent-driven/integration/created-native-workspace.test.ts": "439d469032c9af2b83ceb826e0aead7cf5c2fe5c5693be7cbf18c8e67f0f615f",
+    "tests/agent-driven/integration/committed-snapshot-host.test.ts": "bfd0c6373b254050d32a6a99e7b6f8b9827dc24b6b2587515ab4c5aad2cd9037",
+    "tests/agent-driven/integration/created-native-ack.test.ts": "5f50db85c7c07a2ecf4faefc20ec2ec6c7ad4910fafe549c2edc76bbad729c7c",
+    "tests/agent-driven/integration/created-native-source-reader.test.ts": "b4c2c3758ca902e26f8b911617bd90480bcb110ea29a5dc80ecf44bda82be7d1",
+    "tests/agent-driven/integration/helpers/native-source-fixture.ts": "19cb73cb9d69394e550699d3363128a4ea60e96a3f28f22e1ea4fce01c6dda0a"
+  },
+  "matches094frozen": true,
+  "AGENTS_sha256": "37300463a72a612ae16e0a5fcfb496502c57c722b83781e0e2e8c9480594542b",
+  "094_test_pid1464549_exists": false,
+  "094_result": "exit1/32PASS2FAIL17filtered;noinputdrift",
+  "093_result": "exit0/17PASS34filtered",
+  "remaining": [
+    "094 ownedcleanupreceipt pending",
+    "R02 exacterror-interface test correction",
+    "F05 deterministic provenance-mutation test correction",
+    "R07 primary+allcleanupcauses proof",
+    "legacy regressions on finalbytes",
+    "realcandidatefreeze+independentreview",
+    "nextwiringcontractrebind"
+  ],
+  "action": "STOP_IMPLEMENTATION_AND_RETRIES;NO_CODEX_TAKEOVER;PRESERVE_ALL_WORK;NO_TESTS",
+  "claim_limit": "guardedstop confirms exactClaude agentterminal stopped; no blanketclaim about unrelatedprocesses"
+}

@@ -1,0 +1,19 @@
+{
+  "at": "2026-11-12T15:03:59.587019+00:00",
+  "status": "G04_AUTHORITY_BYPASS_STATIC_FINDING_UNRESOLVED",
+  "frozen_files": {
+    "src/host/agent-driven/native-cache-witness.ts": "c54a12a36d66516b107b6cbbf4a1ee9e920f05c0582d224a86dc33a49f69e742",
+    "src/host/agent-driven/created-native-workspace.ts": "a23ed94b5625593c2a6f10af656b69070e58502ad1753e5917aab6755e23c10c",
+    "tests/agent-driven/integration/native-cache-witness.test.ts": "232963f6a7d80a107857009eacae2fdec6c5ad06cc5eca45ab13338dadbc42dd"
+  },
+  "notification": "msg_8c2fb9c2ffed",
+  "call_chain": [
+    "service.witnessRegistry returns service.#witnesses directly",
+    "produceNativeCacheEntry(request.workspaces).record(witness) invokes raw ledger, not service.record",
+    "raw Ledger.record verifies module witness brand and string/numeric shape only",
+    "service.record ref/generation/root checks therefore not on production insertion path",
+    "public NativeCacheWitnessLedger resolver can still report arbitraryroot; module witness issuance no realserviceissuedleaseauth"
+  ],
+  "required": "One service-issued opaque capability tied to actualservice/ref/root/generation and final validation in insertion path; forbid exported rawwritableledger bypass; test publicconstructorfake resolver and attemptedactualserviceconsumption",
+  "not_claimed": "No browser/exploit run; actual runtime behavior pending. Not an additional feature or newpersistent authority. Focused140 excludes browser and does not close this requirement."
+}

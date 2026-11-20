@@ -1,0 +1,104 @@
+{
+  "head": "eba0d42fc41d0c9c99e1ddf90364149d3a8d5880",
+  "index_sha256": "7f4cadd3fbf4b5b5cbb2a0fe434d76aa08709bf1c47282de4cb887ae033b0766",
+  "original_files_count": 8236,
+  "original_changed_or_missing": [],
+  "status": "M AGENTS.md",
+  "historical_logs": {
+    "d10-business-adoption-010": {
+      "sha_matches": true,
+      "actual_capture_exit": 0,
+      "recorded_exit": 0
+    },
+    "d10-business-oldsel-001": {
+      "sha_matches": true,
+      "actual_capture_exit": 1,
+      "recorded_exit": 1
+    },
+    "d10-business-oldsel-002": {
+      "sha_matches": true,
+      "actual_capture_exit": 1,
+      "recorded_exit": 1
+    },
+    "d10-business-oldsel-006": {
+      "sha_matches": true,
+      "actual_capture_exit": 1,
+      "recorded_exit": 1
+    },
+    "d10-business-oldsel-007": {
+      "sha_matches": true,
+      "actual_capture_exit": 1,
+      "recorded_exit": 1
+    },
+    "d10-business-repairedfull-004": {
+      "sha_matches": true,
+      "actual_capture_exit": 1,
+      "recorded_exit": 1
+    },
+    "d10-business-repairedfull-005": {
+      "sha_matches": true,
+      "actual_capture_exit": 0,
+      "recorded_exit": 0
+    },
+    "d10-business-repairedfull-009": {
+      "sha_matches": true,
+      "actual_capture_exit": 0,
+      "recorded_exit": 0
+    },
+    "d10-business-repairedsel-003": {
+      "sha_matches": true,
+      "actual_capture_exit": 0,
+      "recorded_exit": 0
+    },
+    "d10-business-repairedsel-007": {
+      "sha_matches": true,
+      "actual_capture_exit": 0,
+      "recorded_exit": 0
+    },
+    "d10-business-repairedsel-008": {
+      "sha_matches": true,
+      "actual_capture_exit": 0,
+      "recorded_exit": 0
+    },
+    "d10-business-tsc-011": {
+      "sha_matches": true,
+      "actual_capture_exit": 0,
+      "recorded_exit": 0
+    }
+  },
+  "final_inputs": {
+    "d10-business-repairedfull-009": {
+      "count": 538,
+      "mismatches": []
+    },
+    "d10-business-adoption-010": {
+      "count": 538,
+      "mismatches": []
+    },
+    "d10-business-tsc-011": {
+      "count": 538,
+      "mismatches": []
+    }
+  },
+  "evidence_verification_note": "First verification attempt exited 1 for incorrect .log suffix; corrected to actual .txt and rerun.",
+  "index_unchanged": true,
+  "head_unchanged": true,
+  "frozen_files": {
+    "src/host/agent-driven/created-source-recovery.ts": {
+      "sha256": "eb980288feb888a743475d185c1e34df3a67313d69dc2bb772e1eb9d13bfd1b5",
+      "equals_frozen_blob": true
+    },
+    "src/host/agent-driven/created-source-adoption-service.ts": {
+      "sha256": "9e140f5887b6e8ad5f406517504043ade1eaaa9df8978fee8a2d99d82c46ddb7",
+      "equals_frozen_blob": true
+    },
+    "tests/agent-driven/integration/created-source-adoption.test.ts": {
+      "sha256": "04eb25fa45efede7d101878d0c603d96b8947f377c49896dc3422a74ed644548",
+      "equals_frozen_blob": true
+    },
+    "tests/agent-driven/integration/created-source-recovery.test.ts": {
+      "sha256": "38bf3a469dfd8437c819f90751a0e004f817d724813a7a8e615ee7a0ed088445",
+      "equals_frozen_blob": true
+    }
+  }
+}

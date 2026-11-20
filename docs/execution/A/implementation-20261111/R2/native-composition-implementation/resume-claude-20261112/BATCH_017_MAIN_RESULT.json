@@ -1,0 +1,19 @@
+{
+  "at": "2026-11-12T06:39:38.007184+00:00",
+  "result": {
+    "exit": 1,
+    "source_changed": [],
+    "source_added": [],
+    "log_sha256": "a94348421d081a401176f81d92ddfb4629c6a009a1bc89144979250f79ea3921",
+    "finished_at": "2026-11-12T06:37:54.819831+00:00"
+  },
+  "counts": {
+    "exit": 1,
+    "passed": 2,
+    "failed": 5,
+    "filtered": 15,
+    "no_input_drift": true
+  },
+  "verdict": "FAIL; implementation vs test-oracle triage required, no scope narrowed",
+  "remaining_commands": "018/019 authorized serial if own cleanup certain, no midbatch edits"
+}

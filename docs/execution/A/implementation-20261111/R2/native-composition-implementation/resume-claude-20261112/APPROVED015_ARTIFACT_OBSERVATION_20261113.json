@@ -1,0 +1,57 @@
+{
+  "at": "2026-11-13T03:04:52.498663+00:00",
+  "status": "READ_ONLY_PIN_AND_BYTES_OBSERVATION",
+  "pin_sha256": "ebb3072522aee6220b4cf2ea6fd69913aa1ea71cb338b0524d5c6e51801b8bb5",
+  "approval": "APPROVED",
+  "upstream_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+  "inputs": {
+    "build-expected.mjs": "60027ead5a509522f2d35fda33749675923dee523bb8cc12f2b7de3dca8f840d",
+    "expected-projection.d.ts": "0f5f565a3d8b70de995aeb0dfdfb6052acad53cbf452c8d70168f555a8937f80",
+    "expected-projection.mjs": "3500b1d6485791b13ec9364c6eb80740531142c16754877e21923ad73e9d494e",
+    "native-pure.entry.ts": "1ca8590535d412f0d91a522fbf942cbacabba7d95c64f3e849ca9f0fbf416354",
+    "request013.patch": "f699889206e129dfe4fd913618b34baa8d7e04363f1940d3659664a1e7b9d435",
+    "vite.expected.config.mjs": "ffac37faeb5e9fcc53460f19d235cc9c38251b3bf969a9183e8cffe5e0657f29"
+  },
+  "inputs_sha256": "c5b53099b2f94fc12b5f9d184c0c8c2b12c51349051eddf67794fb0866e8dfd1",
+  "approved_inputs_sha256": "c5b53099b2f94fc12b5f9d184c0c8c2b12c51349051eddf67794fb0866e8dfd1",
+  "inputs_match": true,
+  "modules": [
+    {
+      "name": "NATIVE_LICENSE.txt",
+      "exists": true,
+      "sha256": "4f39fecc5d074a4795bb7c55c5aaad1a4505b5e022ae6c2c3b55b4f26e7c43fc",
+      "approved_sha256": "4f39fecc5d074a4795bb7c55c5aaad1a4505b5e022ae6c2c3b55b4f26e7c43fc",
+      "matches": true
+    },
+    {
+      "name": "build-manifest.json",
+      "exists": true,
+      "sha256": "13c803b00dc4d0dc40d62209dc03b7f0d2707404a7cce6fcd4c3739a8daf8c95",
+      "approved_sha256": "13c803b00dc4d0dc40d62209dc03b7f0d2707404a7cce6fcd4c3739a8daf8c95",
+      "matches": true
+    },
+    {
+      "name": "expected-projection.d.ts",
+      "exists": true,
+      "sha256": "0f5f565a3d8b70de995aeb0dfdfb6052acad53cbf452c8d70168f555a8937f80",
+      "approved_sha256": "0f5f565a3d8b70de995aeb0dfdfb6052acad53cbf452c8d70168f555a8937f80",
+      "matches": true
+    },
+    {
+      "name": "expected-projection.mjs",
+      "exists": true,
+      "sha256": "3500b1d6485791b13ec9364c6eb80740531142c16754877e21923ad73e9d494e",
+      "approved_sha256": "3500b1d6485791b13ec9364c6eb80740531142c16754877e21923ad73e9d494e",
+      "matches": true
+    },
+    {
+      "name": "native-pure-library.mjs",
+      "exists": true,
+      "sha256": "9cb18aebe9a5daf08a2c92259b6314493fe98e40fe8a1b410bad444671a9904c",
+      "approved_sha256": "9cb18aebe9a5daf08a2c92259b6314493fe98e40fe8a1b410bad444671a9904c",
+      "matches": true
+    }
+  ],
+  "all_modules_match": true,
+  "meaning": "Actual approved015 bytes verified without loading/rebuilding; not business runtime or final independent review. Recheck at freeze."
+}

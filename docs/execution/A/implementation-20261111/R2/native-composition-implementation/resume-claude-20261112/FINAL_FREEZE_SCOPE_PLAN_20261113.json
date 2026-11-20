@@ -1,0 +1,60 @@
+{
+  "at": "2026-11-13T02:29:40.018629+00:00",
+  "status": "FREEZE_PLAN_ONLY_NOT_COMMIT_AUTHORIZATION",
+  "implementation_cwd": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+  "baseline": "e2eff61b464d75d36598103d718cd2a75db5dfda",
+  "business_changed_paths": [
+    "src/adapters/openfilm/openfilm-upstream.ts",
+    "src/host/agent-driven/committed-snapshot-authority.ts",
+    "src/host/agent-driven/created-native-workspace.ts",
+    "src/host/m5/openfilm-native-expected.ts",
+    "tests/agent-driven/integration/created-draft-processor.test.ts",
+    "tests/agent-driven/integration/created-native-ack.test.ts",
+    "tests/agent-driven/integration/helpers/created-draft-fixture.ts",
+    "src/host/agent-driven/created-native-source-reader.ts",
+    "src/host/agent-driven/native-cache-witness.ts",
+    "src/host/agent-driven/retained-native-closure.ts",
+    "tests/agent-driven/integration/created-native-source-reader.test.ts",
+    "tests/agent-driven/integration/helpers/native-source-fixture.ts",
+    "tests/agent-driven/integration/native-cache-witness.test.ts"
+  ],
+  "candidate_input_sha256": {
+    "src/host/agent-driven/native-cache-witness.ts": "85b1e804b3956165a6f8e171aa1fb8800cd8337290ad2d16ac05d3906ba2501a",
+    "src/host/agent-driven/created-native-workspace.ts": "32d5adae9d737b6799f20531e50956413a619e048a8f2f225fccb064205afbd2",
+    "src/host/agent-driven/committed-snapshot-authority.ts": "1c53360e3c618c603cfcbe61d0c2d57004c5bd33dc26a92c2fdec72a1844bd6d",
+    "src/host/m5/openfilm-native-expected.ts": "19110e45a83b6d5b611b4260620ce873f923f1e5a5b907bc6176c4b734fbeed3",
+    "src/adapters/openfilm/openfilm-upstream.ts": "29a0827a6130c2f382de93d1738b1be003c5ef15ded253d256585e6214d2aa69",
+    "tests/agent-driven/integration/created-native-source-reader.test.ts": "8d740f83883fd42c13f8e0e2ea63bee406f8d9edf19ea02a1005c72e26616e60",
+    "tests/agent-driven/integration/helpers/native-source-fixture.ts": "7160a285930e61b7927d90bb517e7d9575f5f0888394d228b192baff80daf622",
+    "tests/agent-driven/integration/helpers/created-draft-fixture.ts": "59788a8f9c08415a808b2418e86b4dac6bb7de65297ad5d1cb19b5f26eb22d27",
+    "tests/agent-driven/integration/created-native-workspace.test.ts": "439d469032c9af2b83ceb826e0aead7cf5c2fe5c5693be7cbf18c8e67f0f615f",
+    "tests/agent-driven/integration/committed-snapshot-host.test.ts": "bfd0c6373b254050d32a6a99e7b6f8b9827dc24b6b2587515ab4c5aad2cd9037",
+    "tests/agent-driven/integration/created-native-ack.test.ts": "5f50db85c7c07a2ecf4faefc20ec2ec6c7ad4910fafe549c2edc76bbad729c7c",
+    "src/host/agent-driven/retained-native-closure.ts": "776331d6397191ee7fc97a4859f8d3ff95031efaf2d4fe7a7ee875451d85eb30",
+    "src/host/agent-driven/created-native-source-reader.ts": "f00e02781c8531a74a1034a6a1c992c463f49ff1cbf9c49b203e8449d8360d7d",
+    "tests/agent-driven/integration/native-cache-witness.test.ts": "eb5c71c99b749509b304bc925ec47469099f1049746e63f145ae851c6281bcb1",
+    "tests/agent-driven/integration/created-draft-processor.test.ts": "684df1c287890a13ecd8b08a4cd32d5053c2868e80494eca2fcc6412cdc4e0b6"
+  },
+  "user_exclusions": {
+    "AGENTS.md": "User-owned modification, must remain byte-identical37300463a72a612ae16e0a5fcfb496502c57c722b83781e0e2e8c9480594542b and never added incidentally"
+  },
+  "configuration": "package/lockfile/vitest config unmodified; no timeout or concurrency change authorized",
+  "remaining_before_candidate": [
+    "D3/D4/D5 actual terminal success and owncleanup; no new429",
+    "Original17 requirement evidence matrix code/assertion review; full counts not substitute",
+    "Exact source-bound full gate corepack pnpm check and corepack pnpm build with complete exits/logs/input hashes after resource grant; failures retained",
+    "Evidence inventory/hash all earlierfailed captures and correctedtest candidates; history protected; explicit path list only",
+    "Explicit MAIN-reviewed staging and candidate commit; independent read-only reviewer bound to actual candidate; findings fixed by sameClaude with freshgrant and affectedregates"
+  ],
+  "remaining_after_candidate": [
+    "Final independent acceptance of original17; do not self-sign external review",
+    "Reanchor next-wiring draft contracts/privateports/ownership/lifecycle and exact acceptance/development phases to acceptedcandidatecommit",
+    "Final plan review and stop at next-stage implementation threshold, no newstagecode"
+  ],
+  "git_constraints": [
+    "No broad gitadd; noreset/stash/historyrewrite/forcepush/merge/push",
+    "Evidence-only review commits distinguished from source capture commit; ensure source dependencies match reviewedtree",
+    "Keep userdirty/indexsafe; candidate need not falselyclaim entireworkspaceclean if userAGENTS remainsmodified"
+  ],
+  "business_readiness": "NOT_ACCEPTED; no NativeAck/Studio/Afilm/V1 claim"
+}

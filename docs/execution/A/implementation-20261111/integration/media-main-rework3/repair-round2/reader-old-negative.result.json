@@ -1,0 +1,19 @@
+{
+  "purpose": "old05889 reader race negative control,2 expected test failures; no Host/renderer/ffmpeg invoked",
+  "argv": [
+    "corepack",
+    "pnpm",
+    "test",
+    "tests/agent-driven/media/preview-prepared-source.test.ts",
+    "--maxWorkers=1",
+    "--minWorkers=1",
+    "-t",
+    "same-inode"
+  ],
+  "start": "2026-11-11T15:18:49.826428+00:00",
+  "pid": 928673,
+  "test_exit": 1,
+  "restored_exactly": true,
+  "end": "2026-11-11T15:19:00.308895+00:00",
+  "log_sha256": "c97a3e63fda5b214ae7598e3725d7bf261fa5bb0257b68c3c9da3506e0f44817"
+}

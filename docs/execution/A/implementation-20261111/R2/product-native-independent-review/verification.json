@@ -1,0 +1,59 @@
+{
+  "head": "0ddacd46feb0643296d375c3df3a6ac9ae72b401",
+  "tracked_and_untracked_files_checked": 7320,
+  "changed": [],
+  "index_unchanged": true,
+  "protected_count": 42,
+  "protected_changed": [],
+  "target_hashes": {
+    "src/host/m5/openfilm-native-expected.ts": "1fbd20efb1a5d3a00a9d2a54c718e913aee0cf2e93420dbb590d800e4e98280c",
+    "tests/agent-driven/integration/created-native-ack.test.ts": "dab9087cba99ecd53c2242834da4ac73858f52a197ed50967d69ee217815e930"
+  },
+  "captures": {
+    "root001-old": {
+      "log_matches": true,
+      "result": {
+        "exit": 1,
+        "source_changed": [],
+        "source_added": [],
+        "log_sha256": "60a4b3a8f7bf599ee42a84c09194d0f1a36e2990734b07ed4351c9e4f5ba379f",
+        "finished_at": "2026-11-12T02:01:12.101211+00:00"
+      }
+    },
+    "root002-fixed": {
+      "log_matches": true,
+      "result": {
+        "exit": 0,
+        "source_changed": [],
+        "source_added": [],
+        "log_sha256": "222aca6446fe04e05643aa42cb71ee81495a269eb640965ee3891bf7e4290784",
+        "finished_at": "2026-11-12T02:02:04.389533+00:00"
+      }
+    },
+    "root003-probe": {
+      "log_matches": true,
+      "result": {
+        "exit": 0,
+        "source_changed": [],
+        "source_added": [],
+        "log_sha256": "34f3f42f5406fa03300d898bde73a65b2f4bf4cb4431843004a89744dcf8828a",
+        "finished_at": "2026-11-12T02:05:37.500187+00:00"
+      }
+    },
+    "root004-tsc": {
+      "log_matches": true,
+      "result": {
+        "exit": 0,
+        "source_changed": [],
+        "source_added": [],
+        "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "finished_at": "2026-11-12T02:05:54.708965+00:00"
+      }
+    }
+  },
+  "non_file_git_entries_excluded": [
+    "vendor/OpenMontage",
+    "vendor/hypit"
+  ],
+  "new_files": []
+}

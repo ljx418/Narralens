@@ -1,0 +1,37 @@
+{
+  "source_commit": "25b417556a617267a79b276acb7d39ab516edd00",
+  "evidence_commit": "d9daff39c9fe3f2e41c3bb33b51b88d5d7036277",
+  "source_checks": {
+    "src/host/m5/native-effective-sidecars.ts": "c59ae0d2fa197f4439bb5da883a5674740894981424f37e0fea7e6df1ede15ce",
+    "tests/agent-driven/product/native-effective-sidecars.test.ts": "7b34cde1d13e4c8698b0a7a2808faafb9f82f5710e722a503d6bb6e18d8db3c7",
+    "tests/agent-driven/product/native-effective-sidecars-oracle.mts": "5d631db523183244705d45ca30fd339c7040739792b2f21302ccc52209bb46d8",
+    "tests/agent-driven/product/fixtures/native-effective-sidecars.vectors.json": "442dcee677cc84ee1dacdb7fdde9d6b941b79387e328ff6b852977d483bd9ba3"
+  },
+  "logs": [
+    {
+      "path": "docs/parallel/lane-product/A-R2-20261112/logs/sidecars-final-oracle.txt",
+      "sha256": "27d885493e42f285c170ae3305c56c761c0277bddac83bbed3ed3b93eed1dbb9",
+      "reported_exit": 0,
+      "bytes": 886
+    },
+    {
+      "path": "docs/parallel/lane-product/A-R2-20261112/logs/sidecars-final-unit.txt",
+      "sha256": "15483f7f3d17b22cbf831ed6dcb0ba73782a0df2b1f43e9f75a0922778207853",
+      "reported_exit": 0,
+      "bytes": 573
+    },
+    {
+      "path": "docs/parallel/lane-product/A-R2-20261112/logs/sidecars-final-typecheck.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "reported_exit": 0,
+      "bytes": 0
+    },
+    {
+      "path": "docs/parallel/lane-product/A-R2-20261112/logs/sidecars-final-oracle-typecheck.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "reported_exit": 0,
+      "bytes": 0
+    }
+  ],
+  "scope": "MAIN read-only blob/hash verification; not executing algorithm, proving provenance authority, or approving integration"
+}

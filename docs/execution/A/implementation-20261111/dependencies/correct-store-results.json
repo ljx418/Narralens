@@ -1,0 +1,95 @@
+{
+  "scope": "fixed offline cache; no lifecycle scripts/provider/network downloads",
+  "results": [
+    {
+      "lane": "bridge",
+      "cwd": "/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE",
+      "argv": [
+        "corepack",
+        "pnpm",
+        "install",
+        "--offline",
+        "--store-dir",
+        "/mnt/c/.pnpm-store/v10",
+        "--frozen-lockfile",
+        "--ignore-scripts",
+        "--ignore-pnpmfile",
+        "--package-import-method=copy"
+      ],
+      "started_at": "2026-11-11T13:20:11.313641+00:00",
+      "retained_failed_modules": "/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE/node_modules.failed-offline-20261111",
+      "store_evidence": "main node_modules metadata storeDir, read metadata only not user credentials",
+      "before": {
+        "package.json": "edace26fdfa5a9808f2706fe15ab3935d0512d08f765d4cffec268eb7e783263",
+        "pnpm-lock.yaml": "66d38478d0b035777472a8cdb53954559a6c1a5f8803f7247caaffce1ac3584d"
+      },
+      "exit": 0,
+      "ended_at": "2026-11-11T13:20:37.765023+00:00",
+      "after": {
+        "package.json": "edace26fdfa5a9808f2706fe15ab3935d0512d08f765d4cffec268eb7e783263",
+        "pnpm-lock.yaml": "66d38478d0b035777472a8cdb53954559a6c1a5f8803f7247caaffce1ac3584d"
+      },
+      "log_sha256": "51e6044467b28eb19a80be5053130f94056d84670ddca52c48fa1bea57e0a4f9"
+    },
+    {
+      "lane": "product",
+      "cwd": "/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-PRODUCT",
+      "argv": [
+        "corepack",
+        "pnpm",
+        "install",
+        "--offline",
+        "--store-dir",
+        "/mnt/c/.pnpm-store/v10",
+        "--frozen-lockfile",
+        "--ignore-scripts",
+        "--ignore-pnpmfile",
+        "--package-import-method=copy"
+      ],
+      "started_at": "2026-11-11T13:20:37.772338+00:00",
+      "retained_failed_modules": null,
+      "store_evidence": "main node_modules metadata storeDir, read metadata only not user credentials",
+      "before": {
+        "package.json": "edace26fdfa5a9808f2706fe15ab3935d0512d08f765d4cffec268eb7e783263",
+        "pnpm-lock.yaml": "66d38478d0b035777472a8cdb53954559a6c1a5f8803f7247caaffce1ac3584d"
+      },
+      "exit": 0,
+      "ended_at": "2026-11-11T13:21:01.301612+00:00",
+      "after": {
+        "package.json": "edace26fdfa5a9808f2706fe15ab3935d0512d08f765d4cffec268eb7e783263",
+        "pnpm-lock.yaml": "66d38478d0b035777472a8cdb53954559a6c1a5f8803f7247caaffce1ac3584d"
+      },
+      "log_sha256": "c7ee63e201c2a1a889b9ef370cb3baa4e4862d1dbc9666cc2efe3c9c8330a93a"
+    },
+    {
+      "lane": "media",
+      "cwd": "/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-MEDIA",
+      "argv": [
+        "corepack",
+        "pnpm",
+        "install",
+        "--offline",
+        "--store-dir",
+        "/mnt/c/.pnpm-store/v10",
+        "--frozen-lockfile",
+        "--ignore-scripts",
+        "--ignore-pnpmfile",
+        "--package-import-method=copy"
+      ],
+      "started_at": "2026-11-11T13:21:01.307449+00:00",
+      "retained_failed_modules": null,
+      "store_evidence": "main node_modules metadata storeDir, read metadata only not user credentials",
+      "before": {
+        "package.json": "edace26fdfa5a9808f2706fe15ab3935d0512d08f765d4cffec268eb7e783263",
+        "pnpm-lock.yaml": "66d38478d0b035777472a8cdb53954559a6c1a5f8803f7247caaffce1ac3584d"
+      },
+      "exit": 0,
+      "ended_at": "2026-11-11T13:21:25.804735+00:00",
+      "after": {
+        "package.json": "edace26fdfa5a9808f2706fe15ab3935d0512d08f765d4cffec268eb7e783263",
+        "pnpm-lock.yaml": "66d38478d0b035777472a8cdb53954559a6c1a5f8803f7247caaffce1ac3584d"
+      },
+      "log_sha256": "d3f5e99fbbc1d7db6f10c5b37cf92fe68b983791dea4d769c65c53e2b3fdeb44"
+    }
+  ]
+}

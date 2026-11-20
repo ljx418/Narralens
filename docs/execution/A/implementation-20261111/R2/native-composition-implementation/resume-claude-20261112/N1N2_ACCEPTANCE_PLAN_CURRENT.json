@@ -1,0 +1,968 @@
+{
+  "format": "narralens.n1n2.acceptance-plan@1",
+  "created_at": "2026-11-15T07:15:37.760875+00:00",
+  "status": "PLAN_ONLY_NOT_RUNTIME_RELEASE_NOT_ACCEPTANCE",
+  "original17_source": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/evidence/N1N2/freeze-057/ORIGINAL_REQUIREMENTS.json",
+  "ISO18_source": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-058/RELEASE_060P1_PREPARATION_DRAFT.md",
+  "sources": [
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/evidence/N1N2/freeze-057/ORIGINAL_REQUIREMENTS.json",
+      "sha256": "7270eb4d3f9bdcb0aabaf500e8e3055ee39ab82a2fe2e69f91afbd0326bae756"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-058/RELEASE_060P1_PREPARATION_DRAFT.md",
+      "sha256": "e7bce8f0353c97c26572acdc9067154ea68ef0e92f56bf0fdf2042afe2c2b41a"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p1-review/060P1R_PRIVATE_CONTRACT.md",
+      "sha256": "bead5edc8547b22521d835a468c75fc88024dce62bb8b3d39ba6fc9406fe3a2e"
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p1-review/ADR_060_REV3_CUSTODIAN_AND_REPAIR.md",
+      "sha256": "326bed74476956e363a1168460803f35b57e088259cf30e6a6c1315583d395ac"
+    }
+  ],
+  "precedence": [
+    "最新用户指令/当前精确release",
+    "已批准rev3 ADR/私有合同与后续明确修订",
+    "原17需求与ISO场景：保留目标及编号；历史拓扑/路径数按后续明确release解释"
+  ],
+  "historical_interpretation_limits": [
+    "ORIGINAL_REQUIREMENTS frozen_capture十文件为历史scope，后续明确范围已扩展；不得据此删掉新生产实体或强行恢复旧十文件。新冻结必须核完整实际授权scope和保护路径。",
+    "ISO清单来自旧P1准备草案，仅抽取保留的18个实证要求，不激活草案源码/运行权限。rev3已改为Host→组外Python custodian→Node→Chrome；C为唯一target wait owner，Host reap C，不能重启旧worker内部subreaper路线。",
+    "组ESRCH不是唯一终局证明，必须结合原epoch、实际wait/N-last、known descendants、C exit/close等当前合同。无权限/未知不能盲杀，普通TERM-ignore必须主动收敛而非永久held。",
+    "nofork2历史通过只覆盖当时固定字节的辅助事实，不关闭需要N/Chrome的ISO条目。",
+    "R5C当前源码仍在写；此表无candidate/source freeze或test PASS。"
+  ],
+  "evidence_required_per_item": [
+    "exact original ID and intended boundary",
+    "frozen source/contract/upstream/tool SHA256 and actual scope",
+    "actual production producer/consumer or explicit component-only limitation",
+    "command argv/cwd/owner/resource/exit and immutable input binding",
+    "raw logs/artifact hashes plus negative controls/cleanup facts",
+    "independent disposition and known limits"
+  ],
+  "items": [
+    {
+      "id": "producer_chain",
+      "original_group": "R01",
+      "original_proof_required": "Actual bootstrap, SOURCE_ONLY draft and controlled adoption produce committed rich source; actual workspace/reader consumes it; preserve producer/rights/consumer identities.",
+      "planning_phase": "R8",
+      "root_cause_groups": [
+        "R5C-OWNER",
+        "R7-WORKSPACE-PROOF"
+      ],
+      "status": "NOT_REVERIFIED_ON_NEW_CANDIDATE",
+      "evidence": [],
+      "owner": "MAIN验收/独立复核；Claude按精确票实施/自验证",
+      "candidate_test_files": [
+        "tests/agent-driven/integration/created-source-adoption.test.ts",
+        "tests/agent-driven/integration/created-native-workspace.test.ts",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts"
+      ],
+      "candidate_mapping_status": "EXISTING_PATHS_VERIFIED_ONLY_NOT_ASSERTIONS_OR_COVERAGE",
+      "remaining_acceptance_design": [
+        "交还后核当前测试具体assertion与实际生产触发边界",
+        "区分pure/childmock/kernel/Chrome/Host/media；需要真实的项单独固定运行票",
+        "绑定当前输入和产物SHA，补缺并做适用变异或对照，不能凭文件存在认定覆盖"
+      ]
+    },
+    {
+      "id": "independent_trees",
+      "original_group": "R01",
+      "original_proof_required": "Committed source and workspace retain independent physical trees; equal relative paths never collapse resource ownership; nested and empty directories are separate evidence.",
+      "planning_phase": "R7/R8",
+      "root_cause_groups": [
+        "R7-WORKSPACE-PROOF"
+      ],
+      "status": "NOT_REVERIFIED_ON_NEW_CANDIDATE",
+      "evidence": [],
+      "owner": "MAIN验收/独立复核；Claude按精确票实施/自验证",
+      "candidate_test_files": [
+        "tests/agent-driven/integration/retained-source-tree.test.ts",
+        "tests/agent-driven/integration/created-native-workspace.test.ts"
+      ],
+      "candidate_mapping_status": "EXISTING_PATHS_VERIFIED_ONLY_NOT_ASSERTIONS_OR_COVERAGE",
+      "remaining_acceptance_design": [
+        "交还后核当前测试具体assertion与实际生产触发边界",
+        "区分pure/childmock/kernel/Chrome/Host/media；需要真实的项单独固定运行票",
+        "绑定当前输入和产物SHA，补缺并做适用变异或对照，不能凭文件存在认定覆盖"
+      ]
+    },
+    {
+      "id": "tamper_and_authority",
+      "original_group": "R02",
+      "original_proof_required": "Same bytes/new inode, parent/root replacement, same-size/restored mtime, symlink, copied/foreign/released capability and stale base/control/owner/generation are refused before authoritative use.",
+      "planning_phase": "R7/R8",
+      "root_cause_groups": [
+        "R7-WORKSPACE-PROOF",
+        "R5C-AUTHORITY"
+      ],
+      "status": "NOT_REVERIFIED_ON_NEW_CANDIDATE",
+      "evidence": [],
+      "owner": "MAIN验收/独立复核；Claude按精确票实施/自验证",
+      "candidate_test_files": [
+        "tests/agent-driven/integration/created-native-source-reader.test.ts",
+        "tests/agent-driven/integration/native-cache-witness.test.ts",
+        "tests/agent-driven/integration/source-digest-resource-boundary.test.ts"
+      ],
+      "candidate_mapping_status": "EXISTING_PATHS_VERIFIED_ONLY_NOT_ASSERTIONS_OR_COVERAGE",
+      "remaining_acceptance_design": [
+        "交还后核当前测试具体assertion与实际生产触发边界",
+        "区分pure/childmock/kernel/Chrome/Host/media；需要真实的项单独固定运行票",
+        "绑定当前输入和产物SHA，补缺并做适用变异或对照，不能凭文件存在认定覆盖"
+      ]
+    },
+    {
+      "id": "complete_dependencies",
+      "original_group": "R03",
+      "original_proof_required": "Positive/negative style/settings/markers/subtitle/translation dependencies, added empty directory and actual listing changes invalidate stale proofs.",
+      "planning_phase": "R7/R8",
+      "root_cause_groups": [
+        "R7-WORKSPACE-PROOF"
+      ],
+      "status": "NOT_REVERIFIED_ON_NEW_CANDIDATE",
+      "evidence": [],
+      "owner": "MAIN验收/独立复核；Claude按精确票实施/自验证",
+      "candidate_test_files": [
+        "tests/agent-driven/integration/created-native-source-reader.test.ts",
+        "tests/agent-driven/integration/retained-source-tree.test.ts"
+      ],
+      "candidate_mapping_status": "EXISTING_PATHS_VERIFIED_ONLY_NOT_ASSERTIONS_OR_COVERAGE",
+      "remaining_acceptance_design": [
+        "交还后核当前测试具体assertion与实际生产触发边界",
+        "区分pure/childmock/kernel/Chrome/Host/media；需要真实的项单独固定运行票",
+        "绑定当前输入和产物SHA，补缺并做适用变异或对照，不能凭文件存在认定覆盖"
+      ]
+    },
+    {
+      "id": "native_cache",
+      "original_group": "R04",
+      "original_proof_required": "Unknown/forged native metadata or cache refused; concrete approved producer derivation invalidates old round, then stable proven native derivation can be read; no broad cache whitelist.",
+      "planning_phase": "R6/R8",
+      "root_cause_groups": [
+        "R6-RECEIPT-SEMANTICS",
+        "R5C-CANCEL-ELIGIBILITY"
+      ],
+      "status": "NOT_REVERIFIED_ON_NEW_CANDIDATE",
+      "evidence": [],
+      "owner": "MAIN验收/独立复核；Claude按精确票实施/自验证",
+      "candidate_test_files": [
+        "tests/agent-driven/integration/native-cache-witness.test.ts",
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts"
+      ],
+      "candidate_mapping_status": "EXISTING_PATHS_VERIFIED_ONLY_NOT_ASSERTIONS_OR_COVERAGE",
+      "remaining_acceptance_design": [
+        "交还后核当前测试具体assertion与实际生产触发边界",
+        "区分pure/childmock/kernel/Chrome/Host/media；需要真实的项单独固定运行票",
+        "绑定当前输入和产物SHA，补缺并做适用变异或对照，不能凭文件存在认定覆盖"
+      ]
+    },
+    {
+      "id": "actual_probe",
+      "original_group": "R05",
+      "original_proof_required": "Fixed local ffprobe uses same held parent-PID FD; normalized duration/first-video/fps/rotation/audio/dimensions and provenance match pinned upstream; no injected facts.",
+      "planning_phase": "R6/R7/R8",
+      "root_cause_groups": [
+        "R7-WORKSPACE-PROOF"
+      ],
+      "status": "NOT_REVERIFIED_ON_NEW_CANDIDATE",
+      "evidence": [],
+      "owner": "MAIN验收/独立复核；Claude按精确票实施/自验证",
+      "candidate_test_files": [
+        "tests/agent-driven/integration/cache-frame-duration-lifetime.test.ts",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts"
+      ],
+      "candidate_mapping_status": "EXISTING_PATHS_VERIFIED_ONLY_NOT_ASSERTIONS_OR_COVERAGE",
+      "remaining_acceptance_design": [
+        "交还后核当前测试具体assertion与实际生产触发边界",
+        "区分pure/childmock/kernel/Chrome/Host/media；需要真实的项单独固定运行票",
+        "绑定当前输入和产物SHA，补缺并做适用变异或对照，不能凭文件存在认定覆盖"
+      ]
+    },
+    {
+      "id": "child_lifetime",
+      "original_group": "R05",
+      "original_proof_required": "Timeout/cancel/abrupt child: actual child exit and reap precede input release; limits refuse rather than truncate; diagnostic media never represents Chinese A films.",
+      "planning_phase": "R5C/R6/R7",
+      "root_cause_groups": [
+        "R5C-AUTHORITY",
+        "R5C-OWNER",
+        "R7-WORKSPACE-PROOF"
+      ],
+      "status": "NOT_REVERIFIED_ON_NEW_CANDIDATE",
+      "evidence": [],
+      "owner": "MAIN验收/独立复核；Claude按精确票实施/自验证",
+      "candidate_test_files": [
+        "tests/agent-driven/integration/cache-process-settlement.test.ts",
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts",
+        "tests/agent-driven/integration/cache-frame-duration-lifetime.test.ts"
+      ],
+      "candidate_mapping_status": "EXISTING_PATHS_VERIFIED_ONLY_NOT_ASSERTIONS_OR_COVERAGE",
+      "remaining_acceptance_design": [
+        "交还后核当前测试具体assertion与实际生产触发边界",
+        "区分pure/childmock/kernel/Chrome/Host/media；需要真实的项单独固定运行票",
+        "绑定当前输入和产物SHA，补缺并做适用变异或对照，不能凭文件存在认定覆盖"
+      ]
+    },
+    {
+      "id": "native_bytes_and_order",
+      "original_group": "R06",
+      "original_proof_required": "Exact UTF8/BOM/CRLF/native_rev vectors; numeric localeCompare video ordering vs separate actual caption readdir order; Node/ICU/locale recorded.",
+      "planning_phase": "R8",
+      "root_cause_groups": [],
+      "status": "NOT_REVERIFIED_ON_NEW_CANDIDATE",
+      "evidence": [],
+      "owner": "MAIN验收/独立复核；Claude按精确票实施/自验证",
+      "candidate_test_files": [
+        "tests/agent-driven/integration/created-native-source-reader.test.ts"
+      ],
+      "candidate_mapping_status": "EXISTING_PATHS_VERIFIED_ONLY_NOT_ASSERTIONS_OR_COVERAGE",
+      "remaining_acceptance_design": [
+        "交还后核当前测试具体assertion与实际生产触发边界",
+        "区分pure/childmock/kernel/Chrome/Host/media；需要真实的项单独固定运行票",
+        "绑定当前输入和产物SHA，补缺并做适用变异或对照，不能凭文件存在认定覆盖"
+      ]
+    },
+    {
+      "id": "budgets",
+      "original_group": "R07",
+      "original_proof_required": "Size checks precede bounded text read; growth, total bytes, path/depth/FD/output/time bounds have explicit rejection; no unbounded media read.",
+      "planning_phase": "R6/R8",
+      "root_cause_groups": [
+        "R6-DIAGNOSTICS",
+        "R6-OVERFLOW"
+      ],
+      "status": "NOT_REVERIFIED_ON_NEW_CANDIDATE",
+      "evidence": [],
+      "owner": "MAIN验收/独立复核；Claude按精确票实施/自验证",
+      "candidate_test_files": [
+        "tests/agent-driven/integration/retained-native-budget.test.ts",
+        "tests/agent-driven/integration/cache-process-settlement.test.ts"
+      ],
+      "candidate_mapping_status": "EXISTING_PATHS_VERIFIED_ONLY_NOT_ASSERTIONS_OR_COVERAGE",
+      "remaining_acceptance_design": [
+        "交还后核当前测试具体assertion与实际生产触发边界",
+        "区分pure/childmock/kernel/Chrome/Host/media；需要真实的项单独固定运行票",
+        "绑定当前输入和产物SHA，补缺并做适用变异或对照，不能凭文件存在认定覆盖"
+      ]
+    },
+    {
+      "id": "per_allocation_fd_lifetime",
+      "original_group": "R07",
+      "original_proof_required": "Descriptor allocation generations own closes; recycled integer after temporary directory walk still closes newly retained allocation exactly once; no raw numeric retry.",
+      "planning_phase": "R7",
+      "root_cause_groups": [
+        "R7-WORKSPACE-PROOF"
+      ],
+      "status": "NOT_REVERIFIED_ON_NEW_CANDIDATE",
+      "evidence": [],
+      "owner": "MAIN验收/独立复核；Claude按精确票实施/自验证",
+      "candidate_test_files": [
+        "tests/agent-driven/integration/retained-source-tree.test.ts",
+        "tests/agent-driven/integration/retained-native-budget.test.ts"
+      ],
+      "candidate_mapping_status": "EXISTING_PATHS_VERIFIED_ONLY_NOT_ASSERTIONS_OR_COVERAGE",
+      "remaining_acceptance_design": [
+        "交还后核当前测试具体assertion与实际生产触发边界",
+        "区分pure/childmock/kernel/Chrome/Host/media；需要真实的项单独固定运行票",
+        "绑定当前输入和产物SHA，补缺并做适用变异或对照，不能凭文件存在认定覆盖"
+      ]
+    },
+    {
+      "id": "cleanup_uncertainty",
+      "original_group": "R07",
+      "original_proof_required": "Nth open/stat/verify/close/reentry failures preserve primary and all cleanup errors; every outstanding resource attempted; sticky uncertainty prevents new proof.",
+      "planning_phase": "R5C/R7",
+      "root_cause_groups": [
+        "R5C-STARTUP",
+        "R5C-OWNER",
+        "R7-WORKSPACE-PROOF"
+      ],
+      "status": "NOT_REVERIFIED_ON_NEW_CANDIDATE",
+      "evidence": [],
+      "owner": "MAIN验收/独立复核；Claude按精确票实施/自验证",
+      "candidate_test_files": [
+        "tests/agent-driven/integration/cache-process-identity.test.ts",
+        "tests/agent-driven/integration/created-native-workspace.test.ts",
+        "tests/agent-driven/integration/retained-source-tree.test.ts"
+      ],
+      "candidate_mapping_status": "EXISTING_PATHS_VERIFIED_ONLY_NOT_ASSERTIONS_OR_COVERAGE",
+      "remaining_acceptance_design": [
+        "交还后核当前测试具体assertion与实际生产触发边界",
+        "区分pure/childmock/kernel/Chrome/Host/media；需要真实的项单独固定运行票",
+        "绑定当前输入和产物SHA，补缺并做适用变异或对照，不能凭文件存在认定覆盖"
+      ]
+    },
+    {
+      "id": "drain_and_delivery",
+      "original_group": "R07",
+      "original_proof_required": "Close drains accepted reads and probes; success transfers source/workspace plus directory/negative guards; reader close cannot destroy delivered resources.",
+      "planning_phase": "R7",
+      "root_cause_groups": [
+        "R7-WORKSPACE-PROOF"
+      ],
+      "status": "NOT_REVERIFIED_ON_NEW_CANDIDATE",
+      "evidence": [],
+      "owner": "MAIN验收/独立复核；Claude按精确票实施/自验证",
+      "candidate_test_files": [
+        "tests/agent-driven/integration/cache-serving-drain.test.ts",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts"
+      ],
+      "candidate_mapping_status": "EXISTING_PATHS_VERIFIED_ONLY_NOT_ASSERTIONS_OR_COVERAGE",
+      "remaining_acceptance_design": [
+        "交还后核当前测试具体assertion与实际生产触发边界",
+        "区分pure/childmock/kernel/Chrome/Host/media；需要真实的项单独固定运行票",
+        "绑定当前输入和产物SHA，补缺并做适用变异或对照，不能凭文件存在认定覆盖"
+      ]
+    },
+    {
+      "id": "lease_isolation",
+      "original_group": "R01/R02",
+      "original_proof_required": "Releasing one acquired lease does not revoke ref or another lease; repeated proof works; issuing instance checked and replaced generation invalidates prior proof.",
+      "planning_phase": "R7/R8",
+      "root_cause_groups": [
+        "R7-WORKSPACE-PROOF"
+      ],
+      "status": "NOT_REVERIFIED_ON_NEW_CANDIDATE",
+      "evidence": [],
+      "owner": "MAIN验收/独立复核；Claude按精确票实施/自验证",
+      "candidate_test_files": [
+        "tests/agent-driven/integration/native-cache-witness.test.ts",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts"
+      ],
+      "candidate_mapping_status": "EXISTING_PATHS_VERIFIED_ONLY_NOT_ASSERTIONS_OR_COVERAGE",
+      "remaining_acceptance_design": [
+        "交还后核当前测试具体assertion与实际生产触发边界",
+        "区分pure/childmock/kernel/Chrome/Host/media；需要真实的项单独固定运行票",
+        "绑定当前输入和产物SHA，补缺并做适用变异或对照，不能凭文件存在认定覆盖"
+      ]
+    },
+    {
+      "id": "existing_behavior",
+      "original_group": "REG",
+      "original_proof_required": "Original render SnapshotReadPort, legacy refusal and accepted Expected lifecycle/84 assertions preserved; loader only approved015 minimal exports, no artifact/pin change.",
+      "planning_phase": "R8",
+      "root_cause_groups": [
+        "R5C-LEGACY"
+      ],
+      "status": "NOT_REVERIFIED_ON_NEW_CANDIDATE",
+      "evidence": [],
+      "owner": "MAIN验收/独立复核；Claude按精确票实施/自验证",
+      "candidate_test_files": [
+        "tests/agent-driven/integration/created-native-ack.test.ts",
+        "tests/agent-driven/integration/created-native-workspace.test.ts"
+      ],
+      "candidate_mapping_status": "EXISTING_PATHS_VERIFIED_ONLY_NOT_ASSERTIONS_OR_COVERAGE",
+      "remaining_acceptance_design": [
+        "交还后核当前测试具体assertion与实际生产触发边界",
+        "区分pure/childmock/kernel/Chrome/Host/media；需要真实的项单独固定运行票",
+        "绑定当前输入和产物SHA，补缺并做适用变异或对照，不能凭文件存在认定覆盖"
+      ]
+    },
+    {
+      "id": "frozen_capture",
+      "original_group": "EVIDENCE",
+      "original_proof_required": "Exact ten-file diff and protected hashes checked; unique captures retain all failures, source/index immutable during commands, actual exits and source/artifact SHA256 verified.",
+      "planning_phase": "R8",
+      "root_cause_groups": [],
+      "status": "NOT_REVERIFIED_ON_NEW_CANDIDATE",
+      "evidence": [],
+      "owner": "MAIN验收/独立复核；Claude按精确票实施/自验证",
+      "candidate_test_files": [],
+      "candidate_mapping_status": "EXISTING_PATHS_VERIFIED_ONLY_NOT_ASSERTIONS_OR_COVERAGE",
+      "remaining_acceptance_design": [
+        "交还后核当前测试具体assertion与实际生产触发边界",
+        "区分pure/childmock/kernel/Chrome/Host/media；需要真实的项单独固定运行票",
+        "绑定当前输入和产物SHA，补缺并做适用变异或对照，不能凭文件存在认定覆盖"
+      ]
+    },
+    {
+      "id": "independent_acceptance",
+      "original_group": "REVIEW",
+      "original_proof_required": "Freeze actual candidate and obtain independent review bound to it; fix then reverify affected gates. No self-signed external pass.",
+      "planning_phase": "R8",
+      "root_cause_groups": [],
+      "status": "NOT_REVERIFIED_ON_NEW_CANDIDATE",
+      "evidence": [],
+      "owner": "MAIN验收/独立复核；Claude按精确票实施/自验证",
+      "candidate_test_files": [],
+      "candidate_mapping_status": "EXISTING_PATHS_VERIFIED_ONLY_NOT_ASSERTIONS_OR_COVERAGE",
+      "remaining_acceptance_design": [
+        "交还后核当前测试具体assertion与实际生产触发边界",
+        "区分pure/childmock/kernel/Chrome/Host/media；需要真实的项单独固定运行票",
+        "绑定当前输入和产物SHA，补缺并做适用变异或对照，不能凭文件存在认定覆盖"
+      ]
+    },
+    {
+      "id": "next_integration_plan",
+      "original_group": "NEXT",
+      "original_proof_required": "After N1N2 acceptance freeze compatible next-stage contract and exact implementation/acceptance plan; no premature S01/NativeAck/Studio/film/A readiness claim.",
+      "planning_phase": "AFTER_N1N2_ACCEPTANCE",
+      "root_cause_groups": [],
+      "status": "PENDING_AFTER_N1N2_ACCEPTANCE",
+      "evidence": [],
+      "owner": "MAIN验收/独立复核；Claude按精确票实施/自验证",
+      "candidate_test_files": [],
+      "candidate_mapping_status": "EXISTING_PATHS_VERIFIED_ONLY_NOT_ASSERTIONS_OR_COVERAGE",
+      "remaining_acceptance_design": [
+        "交还后核当前测试具体assertion与实际生产触发边界",
+        "区分pure/childmock/kernel/Chrome/Host/media；需要真实的项单独固定运行票",
+        "绑定当前输入和产物SHA，补缺并做适用变异或对照，不能凭文件存在认定覆盖"
+      ]
+    },
+    {
+      "id": "ISO-01",
+      "original_proof_required": "真实连续两帧与poster可生成；缓存key/算法不变；跨draw进程隔离不破坏成功体验",
+      "planning_phase": "R6/R7/R8",
+      "root_cause_groups": [
+        "R5C-OWNER",
+        "R6-RECEIPT-SEMANTICS"
+      ],
+      "status": "NOT_REVERIFIED_ON_NEW_CANDIDATE",
+      "evidence": [],
+      "owner": "MAIN真实验收；独立复核绑定新冻结SHA",
+      "candidate_test_files": [
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts",
+        "tests/agent-driven/integration/native-cache-witness.test.ts"
+      ],
+      "candidate_mapping_status": "EXISTING_PATHS_VERIFIED_ONLY_NOT_ASSERTIONS_OR_COVERAGE",
+      "remaining_acceptance_design": [
+        "交还后核当前测试具体assertion与实际生产触发边界",
+        "区分pure/childmock/kernel/Chrome/Host/media；需要真实的项单独固定运行票",
+        "绑定当前输入和产物SHA，补缺并做适用变异或对照，不能凭文件存在认定覆盖"
+      ]
+    },
+    {
+      "id": "ISO-02",
+      "original_proof_required": "真实seek15秒与JOB45秒原始错误可达，外层60秒不遮盖JOB；每项真正结束原生执行域",
+      "planning_phase": "R6/R7/R8",
+      "root_cause_groups": [
+        "R5C-CANCEL-ELIGIBILITY",
+        "R5C-AUTHORITY"
+      ],
+      "status": "NOT_REVERIFIED_ON_NEW_CANDIDATE",
+      "evidence": [],
+      "owner": "MAIN真实验收；独立复核绑定新冻结SHA",
+      "candidate_test_files": [
+        "tests/agent-driven/integration/cache-process-settlement.test.ts",
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts"
+      ],
+      "candidate_mapping_status": "EXISTING_PATHS_VERIFIED_ONLY_NOT_ASSERTIONS_OR_COVERAGE",
+      "remaining_acceptance_design": [
+        "交还后核当前测试具体assertion与实际生产触发边界",
+        "区分pure/childmock/kernel/Chrome/Host/media；需要真实的项单独固定运行票",
+        "绑定当前输入和产物SHA，补缺并做适用变异或对照，不能凭文件存在认定覆盖"
+      ]
+    },
+    {
+      "id": "ISO-03",
+      "original_proof_required": "capture30秒通过真实资源与明确标注transport barrier命中；不得声称自然卡顿",
+      "planning_phase": "R6/R7/R8",
+      "root_cause_groups": [
+        "R5C-OWNER"
+      ],
+      "status": "NOT_REVERIFIED_ON_NEW_CANDIDATE",
+      "evidence": [],
+      "owner": "MAIN真实验收；独立复核绑定新冻结SHA",
+      "candidate_test_files": [
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts"
+      ],
+      "candidate_mapping_status": "EXISTING_PATHS_VERIFIED_ONLY_NOT_ASSERTIONS_OR_COVERAGE",
+      "remaining_acceptance_design": [
+        "交还后核当前测试具体assertion与实际生产触发边界",
+        "区分pure/childmock/kernel/Chrome/Host/media；需要真实的项单独固定运行票",
+        "绑定当前输入和产物SHA，补缺并做适用变异或对照，不能凭文件存在认定覆盖"
+      ]
+    },
+    {
+      "id": "ISO-04",
+      "original_proof_required": "late launch/newPage continuation在错误后也不能越过执行域清理；无旧work继续读PRE",
+      "planning_phase": "R6/R7/R8",
+      "root_cause_groups": [
+        "R5C-OWNER",
+        "R7-WORKSPACE-PROOF"
+      ],
+      "status": "NOT_REVERIFIED_ON_NEW_CANDIDATE",
+      "evidence": [],
+      "owner": "MAIN真实验收；独立复核绑定新冻结SHA",
+      "candidate_test_files": [
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts",
+        "tests/agent-driven/integration/created-native-workspace.test.ts"
+      ],
+      "candidate_mapping_status": "EXISTING_PATHS_VERIFIED_ONLY_NOT_ASSERTIONS_OR_COVERAGE",
+      "remaining_acceptance_design": [
+        "交还后核当前测试具体assertion与实际生产触发边界",
+        "区分pure/childmock/kernel/Chrome/Host/media；需要真实的项单独固定运行票",
+        "绑定当前输入和产物SHA，补缺并做适用变异或对照，不能凭文件存在认定覆盖"
+      ]
+    },
+    {
+      "id": "ISO-05",
+      "original_proof_required": "不同物理根两个真实worker并行，清理A时B存活并成功；同根别名仍共享锁",
+      "planning_phase": "R6/R7/R8",
+      "root_cause_groups": [
+        "R5C-AUTHORITY",
+        "R7-WORKSPACE-PROOF"
+      ],
+      "status": "NOT_REVERIFIED_ON_NEW_CANDIDATE",
+      "evidence": [],
+      "owner": "MAIN真实验收；独立复核绑定新冻结SHA",
+      "candidate_test_files": [
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts",
+        "tests/agent-driven/integration/cache-production-scope.test.ts"
+      ],
+      "candidate_mapping_status": "EXISTING_PATHS_VERIFIED_ONLY_NOT_ASSERTIONS_OR_COVERAGE",
+      "remaining_acceptance_design": [
+        "交还后核当前测试具体assertion与实际生产触发边界",
+        "区分pure/childmock/kernel/Chrome/Host/media；需要真实的项单独固定运行票",
+        "绑定当前输入和产物SHA，补缺并做适用变异或对照，不能凭文件存在认定覆盖"
+      ]
+    },
+    {
+      "id": "ISO-06",
+      "original_proof_required": "完整同根锁覆盖preexisting-output/PRE/worker/drain/POST/两个tree释放/最终门/witness激活",
+      "planning_phase": "R6/R7/R8",
+      "root_cause_groups": [
+        "R7-WORKSPACE-PROOF"
+      ],
+      "status": "NOT_REVERIFIED_ON_NEW_CANDIDATE",
+      "evidence": [],
+      "owner": "MAIN真实验收；独立复核绑定新冻结SHA",
+      "candidate_test_files": [
+        "tests/agent-driven/integration/cache-production-scope.test.ts",
+        "tests/agent-driven/integration/created-native-workspace.test.ts"
+      ],
+      "candidate_mapping_status": "EXISTING_PATHS_VERIFIED_ONLY_NOT_ASSERTIONS_OR_COVERAGE",
+      "remaining_acceptance_design": [
+        "交还后核当前测试具体assertion与实际生产触发边界",
+        "区分pure/childmock/kernel/Chrome/Host/media；需要真实的项单独固定运行票",
+        "绑定当前输入和产物SHA，补缺并做适用变异或对照，不能凭文件存在认定覆盖"
+      ]
+    },
+    {
+      "id": "ISO-07",
+      "original_proof_required": "close/cancel/私有断管含GO前、GO后；重复close只结算释放一次；不交付晚到结果",
+      "planning_phase": "R6/R7/R8",
+      "root_cause_groups": [
+        "R5C-STARTUP",
+        "R5C-CANCEL-ELIGIBILITY",
+        "R5C-OWNER"
+      ],
+      "status": "NOT_REVERIFIED_ON_NEW_CANDIDATE",
+      "evidence": [],
+      "owner": "MAIN真实验收；独立复核绑定新冻结SHA",
+      "candidate_test_files": [
+        "tests/agent-driven/integration/cache-process-identity.test.ts",
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts"
+      ],
+      "candidate_mapping_status": "EXISTING_PATHS_VERIFIED_ONLY_NOT_ASSERTIONS_OR_COVERAGE",
+      "remaining_acceptance_design": [
+        "交还后核当前测试具体assertion与实际生产触发边界",
+        "区分pure/childmock/kernel/Chrome/Host/media；需要真实的项单独固定运行票",
+        "绑定当前输入和产物SHA，补缺并做适用变异或对照，不能凭文件存在认定覆盖"
+      ]
+    },
+    {
+      "id": "ISO-08",
+      "original_proof_required": "真实协议、JPEG、stdout/stderr洪水有界拒绝并真正清理；无先反序列化巨对象",
+      "planning_phase": "R6/R7/R8",
+      "root_cause_groups": [
+        "R6-DIAGNOSTICS",
+        "R6-OVERFLOW"
+      ],
+      "status": "NOT_REVERIFIED_ON_NEW_CANDIDATE",
+      "evidence": [],
+      "owner": "MAIN真实验收；独立复核绑定新冻结SHA",
+      "candidate_test_files": [
+        "tests/agent-driven/integration/cache-process-settlement.test.ts",
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts"
+      ],
+      "candidate_mapping_status": "EXISTING_PATHS_VERIFIED_ONLY_NOT_ASSERTIONS_OR_COVERAGE",
+      "remaining_acceptance_design": [
+        "交还后核当前测试具体assertion与实际生产触发边界",
+        "区分pure/childmock/kernel/Chrome/Host/media；需要真实的项单独固定运行票",
+        "绑定当前输入和产物SHA，补缺并做适用变异或对照，不能凭文件存在认定覆盖"
+      ]
+    },
+    {
+      "id": "ISO-09",
+      "original_proof_required": "TERM-ignore转KILL实际回收；child close+组ESRCH+已知后代消失含Z，信号成功不是结束",
+      "planning_phase": "R6/R7/R8",
+      "root_cause_groups": [
+        "R5C-AUTHORITY",
+        "R6-ADOPTED-READINESS"
+      ],
+      "status": "NOT_REVERIFIED_ON_NEW_CANDIDATE",
+      "evidence": [],
+      "owner": "MAIN真实验收；独立复核绑定新冻结SHA",
+      "candidate_test_files": [
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts"
+      ],
+      "candidate_mapping_status": "EXISTING_PATHS_VERIFIED_ONLY_NOT_ASSERTIONS_OR_COVERAGE",
+      "remaining_acceptance_design": [
+        "交还后核当前测试具体assertion与实际生产触发边界",
+        "区分pure/childmock/kernel/Chrome/Host/media；需要真实的项单独固定运行票",
+        "绑定当前输入和产物SHA，补缺并做适用变异或对照，不能凭文件存在认定覆盖"
+      ]
+    },
+    {
+      "id": "ISO-10",
+      "original_proof_required": "leader意外退出、EPERM、未知归属不盲杀/伪settled；PRE、FD、scope、容量均不释放",
+      "planning_phase": "R6/R7/R8",
+      "root_cause_groups": [
+        "R5C-AUTHORITY",
+        "R5C-OWNER",
+        "R7-WORKSPACE-PROOF"
+      ],
+      "status": "NOT_REVERIFIED_ON_NEW_CANDIDATE",
+      "evidence": [],
+      "owner": "MAIN真实验收；独立复核绑定新冻结SHA",
+      "candidate_test_files": [
+        "tests/agent-driven/integration/cache-process-identity.test.ts",
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts"
+      ],
+      "candidate_mapping_status": "EXISTING_PATHS_VERIFIED_ONLY_NOT_ASSERTIONS_OR_COVERAGE",
+      "remaining_acceptance_design": [
+        "交还后核当前测试具体assertion与实际生产触发边界",
+        "区分pure/childmock/kernel/Chrome/Host/media；需要真实的项单独固定运行票",
+        "绑定当前输入和产物SHA，补缺并做适用变异或对照，不能凭文件存在认定覆盖"
+      ]
+    },
+    {
+      "id": "ISO-11",
+      "original_proof_required": "真实私有handle reconcile以新鲜证明结算恰好一次；伪handle、旧JSON/PID不能签发成功",
+      "planning_phase": "R6/R7/R8",
+      "root_cause_groups": [
+        "R5C-STARTUP",
+        "R7-WORKSPACE-PROOF"
+      ],
+      "status": "NOT_REVERIFIED_ON_NEW_CANDIDATE",
+      "evidence": [],
+      "owner": "MAIN真实验收；独立复核绑定新冻结SHA",
+      "candidate_test_files": [
+        "tests/agent-driven/integration/cache-process-identity.test.ts",
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts"
+      ],
+      "candidate_mapping_status": "EXISTING_PATHS_VERIFIED_ONLY_NOT_ASSERTIONS_OR_COVERAGE",
+      "remaining_acceptance_design": [
+        "交还后核当前测试具体assertion与实际生产触发边界",
+        "区分pure/childmock/kernel/Chrome/Host/media；需要真实的项单独固定运行票",
+        "绑定当前输入和产物SHA，补缺并做适用变异或对照，不能凭文件存在认定覆盖"
+      ]
+    },
+    {
+      "id": "ISO-12",
+      "original_proof_required": "真实range源流在响应中止后曾存活且最终close；响应close不能替代源FD close",
+      "planning_phase": "R6/R7/R8",
+      "root_cause_groups": [
+        "R7-WORKSPACE-PROOF"
+      ],
+      "status": "NOT_REVERIFIED_ON_NEW_CANDIDATE",
+      "evidence": [],
+      "owner": "MAIN真实验收；独立复核绑定新冻结SHA",
+      "candidate_test_files": [
+        "tests/agent-driven/integration/cache-serving-drain.test.ts"
+      ],
+      "candidate_mapping_status": "EXISTING_PATHS_VERIFIED_ONLY_NOT_ASSERTIONS_OR_COVERAGE",
+      "remaining_acceptance_design": [
+        "交还后核当前测试具体assertion与实际生产触发边界",
+        "区分pure/childmock/kernel/Chrome/Host/media；需要真实的项单独固定运行票",
+        "绑定当前输入和产物SHA，补缺并做适用变异或对照，不能凭文件存在认定覆盖"
+      ]
+    },
+    {
+      "id": "ISO-13",
+      "original_proof_required": "真实父frameDuration probe跨worker结束仍被等待并reap；需明确原回调是否覆盖真实child close",
+      "planning_phase": "R6/R7/R8",
+      "root_cause_groups": [
+        "R7-WORKSPACE-PROOF"
+      ],
+      "status": "NOT_REVERIFIED_ON_NEW_CANDIDATE",
+      "evidence": [],
+      "owner": "MAIN真实验收；独立复核绑定新冻结SHA",
+      "candidate_test_files": [
+        "tests/agent-driven/integration/cache-frame-duration-lifetime.test.ts"
+      ],
+      "candidate_mapping_status": "EXISTING_PATHS_VERIFIED_ONLY_NOT_ASSERTIONS_OR_COVERAGE",
+      "remaining_acceptance_design": [
+        "交还后核当前测试具体assertion与实际生产触发边界",
+        "区分pure/childmock/kernel/Chrome/Host/media；需要真实的项单独固定运行票",
+        "绑定当前输入和产物SHA，补缺并做适用变异或对照，不能凭文件存在认定覆盖"
+      ]
+    },
+    {
+      "id": "ISO-14",
+      "original_proof_required": "执行域消失后同步封资源准入；冻结边界的新请求不访问源/创建probe；下一draw显式重开",
+      "planning_phase": "R6/R7/R8",
+      "root_cause_groups": [
+        "R7-WORKSPACE-PROOF"
+      ],
+      "status": "NOT_REVERIFIED_ON_NEW_CANDIDATE",
+      "evidence": [],
+      "owner": "MAIN真实验收；独立复核绑定新冻结SHA",
+      "candidate_test_files": [
+        "tests/agent-driven/integration/cache-serving-drain.test.ts",
+        "tests/agent-driven/integration/created-native-workspace.test.ts"
+      ],
+      "candidate_mapping_status": "EXISTING_PATHS_VERIFIED_ONLY_NOT_ASSERTIONS_OR_COVERAGE",
+      "remaining_acceptance_design": [
+        "交还后核当前测试具体assertion与实际生产触发边界",
+        "区分pure/childmock/kernel/Chrome/Host/media；需要真实的项单独固定运行票",
+        "绑定当前输入和产物SHA，补缺并做适用变异或对照，不能凭文件存在认定覆盖"
+      ]
+    },
+    {
+      "id": "ISO-15",
+      "original_proof_required": "完整候选→单调FINALIZE_AFTER_OK→授权终止→真实结算→最终源/witness门；不得倒填或由SIGKILL推成功",
+      "planning_phase": "R6/R7/R8",
+      "root_cause_groups": [
+        "R6-RECEIPT-SEMANTICS",
+        "R7-WORKSPACE-PROOF"
+      ],
+      "status": "NOT_REVERIFIED_ON_NEW_CANDIDATE",
+      "evidence": [],
+      "owner": "MAIN真实验收；独立复核绑定新冻结SHA",
+      "candidate_test_files": [
+        "tests/agent-driven/integration/native-cache-witness.test.ts",
+        "tests/agent-driven/integration/created-native-workspace.test.ts",
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts"
+      ],
+      "candidate_mapping_status": "EXISTING_PATHS_VERIFIED_ONLY_NOT_ASSERTIONS_OR_COVERAGE",
+      "remaining_acceptance_design": [
+        "交还后核当前测试具体assertion与实际生产触发边界",
+        "区分pure/childmock/kernel/Chrome/Host/media；需要真实的项单独固定运行票",
+        "绑定当前输入和产物SHA，补缺并做适用变异或对照，不能凭文件存在认定覆盖"
+      ]
+    },
+    {
+      "id": "ISO-16",
+      "original_proof_required": "两活跃scope、32全局/8同根排队、30秒队列截止；超额/取消在PRE前拒绝且不生child/泄漏FD",
+      "planning_phase": "R6/R7/R8",
+      "root_cause_groups": [
+        "R7-WORKSPACE-PROOF"
+      ],
+      "status": "NOT_REVERIFIED_ON_NEW_CANDIDATE",
+      "evidence": [],
+      "owner": "MAIN真实验收；独立复核绑定新冻结SHA",
+      "candidate_test_files": [
+        "tests/agent-driven/integration/cache-production-scope.test.ts"
+      ],
+      "candidate_mapping_status": "EXISTING_PATHS_VERIFIED_ONLY_NOT_ASSERTIONS_OR_COVERAGE",
+      "remaining_acceptance_design": [
+        "交还后核当前测试具体assertion与实际生产触发边界",
+        "区分pure/childmock/kernel/Chrome/Host/media；需要真实的项单独固定运行票",
+        "绑定当前输入和产物SHA，补缺并做适用变异或对照，不能凭文件存在认定覆盖"
+      ]
+    },
+    {
+      "id": "ISO-17",
+      "original_proof_required": "reader准入及最终交付同时查对应物理根；generic production lease不因自己的活跃scope自我失效",
+      "planning_phase": "R6/R7/R8",
+      "root_cause_groups": [
+        "R7-WORKSPACE-PROOF"
+      ],
+      "status": "NOT_REVERIFIED_ON_NEW_CANDIDATE",
+      "evidence": [],
+      "owner": "MAIN真实验收；独立复核绑定新冻结SHA",
+      "candidate_test_files": [
+        "tests/agent-driven/integration/created-native-source-reader.test.ts",
+        "tests/agent-driven/integration/native-cache-witness.test.ts"
+      ],
+      "candidate_mapping_status": "EXISTING_PATHS_VERIFIED_ONLY_NOT_ASSERTIONS_OR_COVERAGE",
+      "remaining_acceptance_design": [
+        "交还后核当前测试具体assertion与实际生产触发边界",
+        "区分pure/childmock/kernel/Chrome/Host/media；需要真实的项单独固定运行票",
+        "绑定当前输入和产物SHA，补缺并做适用变异或对照，不能凭文件存在认定覆盖"
+      ]
+    },
+    {
+      "id": "ISO-18",
+      "original_proof_required": "当前worker/policy原字节下真实Chrome/zygote/renderer/utility继承与整组退出；旧policy证据不复用",
+      "planning_phase": "R6/R7/R8",
+      "root_cause_groups": [
+        "R5C-AUTHORITY",
+        "R6-ADOPTED-READINESS"
+      ],
+      "status": "NOT_REVERIFIED_ON_NEW_CANDIDATE",
+      "evidence": [],
+      "owner": "MAIN真实验收；独立复核绑定新冻结SHA",
+      "candidate_test_files": [
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts"
+      ],
+      "candidate_mapping_status": "EXISTING_PATHS_VERIFIED_ONLY_NOT_ASSERTIONS_OR_COVERAGE",
+      "remaining_acceptance_design": [
+        "交还后核当前测试具体assertion与实际生产触发边界",
+        "区分pure/childmock/kernel/Chrome/Host/media；需要真实的项单独固定运行票",
+        "绑定当前输入和产物SHA，补缺并做适用变异或对照，不能凭文件存在认定覆盖"
+      ]
+    }
+  ],
+  "release_sequence": [
+    "R5C交还并核最终源码/证据/保护范围",
+    "两独立安全前置复核，合并意见并闭环",
+    "新精确票：正常N与故意异常两场景（合成协议，不替代视频）",
+    "按18场景生产实体和共同根因分组：回收/receipt/流预算→workspace/sourceFD/parent/scope→Chrome/Q2/真实媒体",
+    "R8适用全部旧门/fullcheck/build/security/完整性与新冻结SHA独立复核",
+    "NEXT重锚实际接受commit与接口，独立文档复核后停在开工门"
+  ],
+  "runtime_permission": false,
+  "acceptance": false,
+  "future_execution_batches": [
+    {
+      "name": "R5I当前真实正常门修复",
+      "depends_on": [
+        "actual normal001 failure preserved, C/N independentgone"
+      ],
+      "scope": "原8轻量诊断EOF/FINALIZE/CANCEL顺序与测试minor，不掩盖真实reset",
+      "exit": "精确反例/最小修复+同源6捕获+受影响独立安全；再新pinnormal002；不是直接进入R6"
+    },
+    {
+      "name": "真实N最小基线",
+      "depends_on": [
+        "targeted independent safety safe",
+        "fresh exact source/tool/CLI runtime release"
+      ],
+      "scope": "normal synthetic 1024 + exact intentional failure fullcleanup，各自唯一root和recorded命令",
+      "exit": "normal0精确图片；fault1仅最终资格明确通过且无额外失败、完整新鲜终局。不是视频/Chrome或A影片"
+    },
+    {
+      "name": "R6协议/回收联合批",
+      "depends_on": [
+        "actual N baseline accepted",
+        "current code-map and exact release"
+      ],
+      "scope": "R3-C06..09、ISO关联：真实wait/N-last/receipt/流预算/溢出/收养/权限/断管/peer，先纯反例再真实受控进程",
+      "exit": "每条原编号直接证据；不能用NOFORK替代N，保所有失败"
+    },
+    {
+      "name": "R7项目资源联合批",
+      "depends_on": [
+        "R6所需终局语义明确并验证",
+        "exact production resource scope release"
+      ],
+      "scope": "R3-I01..04、原17资源项、rangeFD/parentprobe/drain/同根锁/最终guard/closure allocation",
+      "exit": "真实生产接缝和fresh证明、普通失败能收敛；unknown不释放；源/项目不损坏"
+    },
+    {
+      "name": "R8真实生产与冻结",
+      "depends_on": [
+        "all applicable per-case evidence and affected regressions"
+      ],
+      "scope": "固定当前Chrome两帧poster/Q2/源资源回归、原17/ISO18全项、适用全量/build/security、原规定媒体双片及PRD检查",
+      "exit": "明确新冻结commit；独立绑定SHA复核，未执行或风险不得绿"
+    },
+    {
+      "name": "NEXT开工包",
+      "depends_on": [
+        "N1N2 actual frozen candidate accepted"
+      ],
+      "scope": "重锚next-wiring真实commit/接口、合同、逐case计划与回退；独立文档复核",
+      "exit": "停在下一接线实施门，不实现S01/NativeAck/Studio或代签A人验"
+    }
+  ],
+  "actual_script_inventory": {
+    "check": "tsc --noEmit && vitest run --config vitest.config.ts && python3 -I tests/wave2/m4a/impact-hash.golden.py tests/wave2/m4a/impact-hash.vectors.json && vite build && vite build --config vite.m5.config.ts",
+    "build": "tsx tools/build-native-workbench-validators.ts --check && vite build && vite build --config vite.m5.config.ts",
+    "meaning": "从当前package.json只读核对；仅供后续计划，当前R5D不授权执行。R8前重新核对脚本与适用额外门，不能把这两条当全部验收。"
+  },
+  "next_runtime_protocol": {
+    "status": "MINIMAL_BASELINE_ACCEPTED_R6_RUNTIME_NOT_RELEASED",
+    "tool": "tools/native-cache-normal-pilot.ts",
+    "source_binding": "R5I current651 exactpin; normal002 and fault001 accepted with independent observed epochs and bytechain",
+    "entry_argv_form": [
+      "corepack",
+      "pnpm",
+      "exec",
+      "tsx",
+      "tools/native-cache-normal-pilot.ts",
+      "--mode",
+      "normal|assertion-failure",
+      "--expected-custodian-sha256",
+      "REVIEWED_FULL_SHA",
+      "--expected-fixture-sha256",
+      "REVIEWED_FULL_SHA"
+    ],
+    "recording": "FIRSTvia unchangedrun-recorded.py, unique MAINcapture, immutable651inputs; oneownedroot/heavyslot at a time",
+    "artifact_authority": {
+      "candidate.json": "authoritative=false; original result/error/cleanup and source terminal observations; no PASS authority",
+      "manifest.json": "actual existing artifact hashes, listing_error=null; excludes itself/final explicitly; no circularselfhash",
+      "final.json": "authoritative=true and kind positive-pilot-final; all required links/digests verify exactactualbytes; MAIN separately hashes final",
+      "stderr": "candidate line only; cannot by itself certify finalcase",
+      "exit": "must match final; assertion-failure exit1 alone is never accepted"
+    },
+    "common_required": [
+      "final/candidate/manifest parse, correct runroot/mode/current pins/copiedfixturehash",
+      "candidate/manifest references nonnull fullSHA and match actualbytes; every mandatory artifactpresent/notempty/missinghasherrorexplicit",
+      "terminal_proof=true and real proof path observations fresh+timestamped, originalC/N/known epochs gone inclZ/groupgone/actualwait+Cexitclose corroborated by independentobserver",
+      "cleanup_facts empty, final diagnostics cleanup_failures=0, transport_failure=null, evidence_errors empty, manifest_error=null, reporting_failure=null, nounexpectedfailure",
+      "rawsegments_saved=false if notpersisted; receipt summaries/digests do not become full raw transcript",
+      "normal and fault use different ownedroots; no productauthor/projectDB edits, no network/browser/media/GPU"
+    ],
+    "normal_required": [
+      "outerexit0 and final.exit_code0",
+      "kind_of_run=ok; exact1024bytes0x4a actualimage/sha, no original/settlementfailure",
+      "candidate vs actualimagefacts consistent; no ownercancel causedby ordinarypending"
+    ],
+    "assertion_failure_required": [
+      "outerexit1 and final.exit_code1",
+      "kind_of_run=fault-observed and fault_case_passed=true",
+      "original_failure.code=EXPECTED_ASSERTION_FAILURE; settlement matches accepted originalcause; cancel_provenance.accepted_as_primary=true",
+      "same acceptedliveN fulltuple and same root/drawGO digest immediatelybeforecancel",
+      "picture absent/null, picture_is_the_exact_one=false; no late success adopted"
+    ],
+    "unknown_or_failure": [
+      "retain actualowner/rawpromise and runroot; no Ckill fallback or globalkill",
+      "no timeout wrapper over recorder to fabricate ending; incomplete remains incomplete with actual process evidence",
+      "anyunexpectederror does not become expectedfault success; preservelogs/artifacts and repair currentgate"
+    ],
+    "exclusions": "This syntheticN protocol is not actualvideo/Chrome/Q2/Afilm/N1N2/V1acceptance; original35matrix stayspending",
+    "pending_design_reference": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p5e-proof-and-publication/SPEC.md",
+    "pending_design_limit": "R5I private publication-v2 implemented and minimal normal/fault accepted; no automatic R6 or full lifecycle release"
+  },
+  "batch_revision_history": [
+    {
+      "at": "2026-11-15T08:51:04.545370+00:00",
+      "prior_first_batch": {
+        "name": "R5D交还与复核",
+        "depends_on": [
+          "task_e1899cd17d6a accepted worker_done"
+        ],
+        "scope": "原8路径，验证两审合并根因；代码不安全则修本门",
+        "exit": "实际最终输入固定、独立安全结论；不替代新冻结外审"
+      }
+    }
+  ],
+  "minimal_real_attempts": [
+    {
+      "case": "normal001",
+      "capture": "n1n2-main-060p5h-real-normal-001",
+      "verdict": "FAIL_CHANNEL_RESET_NO_IMAGE",
+      "actual_exit": 1,
+      "evidence": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/pilot-060p5h-real-n/normal-001/FAILED_ACCEPTANCE.json",
+      "terminal": "independent originalC/N absent; group0ESRCH; no destructive MAIN signals"
+    },
+    {
+      "at": "2026-11-15T16:46:57.416376+00:00",
+      "state": "MINIMAL_NORMAL_AND_EXPECTED_FAULT_ACCEPTED",
+      "normal": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/pilot-060p5i-real-n/normal-002/MAIN_ACCEPTANCE.json",
+      "fault": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/pilot-060p5i-real-n/fault-001/MAIN_ACCEPTANCE.json",
+      "normal001_remains": "FAILED_PRESERVED",
+      "observer_normal002_defect": "Original NameError preserved; separate readonly supplement verified same execution, no product rerun",
+      "source_write_release": false,
+      "runtime_release": false,
+      "heavy_slot_reserved": false,
+      "next": "R6 current source gap audit and exact consolidated plan, no current code/runtime grant",
+      "not_accepted": [
+        "N1N2",
+        "R6",
+        "R7",
+        "R8",
+        "original17+ISO18",
+        "new frozen commit",
+        "NEXT wiring",
+        "video/Chrome/V1"
+      ]
+    }
+  ]
+}

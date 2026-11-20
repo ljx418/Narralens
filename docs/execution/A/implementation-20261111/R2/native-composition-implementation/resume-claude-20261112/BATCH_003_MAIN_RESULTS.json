@@ -1,0 +1,54 @@
+{
+  "at": "2026-11-12T07:22:22.415862+00:00",
+  "rows": [
+    {
+      "capture": "n1n2-claude-resume-034-batch-pure",
+      "result": {
+        "exit": 0,
+        "source_changed": [],
+        "source_added": [],
+        "log_sha256": "2df7f22afccda8cba9a772720c125d27c34be3bee265459420a8d7e11bd37eea",
+        "finished_at": "2026-11-12T07:13:57.324892+00:00"
+      },
+      "passed": 8,
+      "failed": 0,
+      "started_at": "2026-11-12T07:13:30.208702+00:00",
+      "input_count": 624
+    },
+    {
+      "capture": "n1n2-claude-resume-035-batch-component",
+      "result": {
+        "exit": 0,
+        "source_changed": [],
+        "source_added": [],
+        "log_sha256": "82d64e914fab5b2371dd77d22e1e5ee82f784d118cd526bab4a354a43aac7da5",
+        "finished_at": "2026-11-12T07:18:12.246962+00:00"
+      },
+      "passed": 18,
+      "failed": 0,
+      "started_at": "2026-11-12T07:14:11.919445+00:00",
+      "input_count": 624
+    },
+    {
+      "capture": "n1n2-claude-resume-036-batch-regressions",
+      "result": {
+        "exit": 0,
+        "source_changed": [],
+        "source_added": [],
+        "log_sha256": "4c84e9e75dea48f0f68a07380b57bfd2003d24790b0b1c6b895429a30c50f04f",
+        "finished_at": "2026-11-12T07:21:12.264716+00:00"
+      },
+      "passed": 107,
+      "failed": 0,
+      "started_at": "2026-11-12T07:18:40.370849+00:00",
+      "input_count": 624
+    }
+  ],
+  "counts": {
+    "passed": 133,
+    "failed": 0
+  },
+  "serial_order_verified": true,
+  "all3_input_manifests_equal": true,
+  "verdict": "SELECTED_BATCH_PASS; full original scope coverage, frozen candidate external audit and handoff remain pending"
+}

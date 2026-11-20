@@ -1,0 +1,30 @@
+{
+  "status": "INTERIM_FAILURE_051_NOT_YET_DONE",
+  "results": [
+    {
+      "capture": "n1n2-claude-resume-049-corrective-pure",
+      "result": {
+        "exit": 0,
+        "source_changed": [],
+        "source_added": [],
+        "log_sha256": "1f994bfd27da29c3d9a21c29d1615fd684fa5c776f5c303e1de8efc8b1df2c99",
+        "finished_at": "2026-11-12T08:09:42.924636+00:00"
+      },
+      "passed": 11,
+      "failed": 0
+    },
+    {
+      "capture": "n1n2-claude-resume-050-corrective-component",
+      "result": {
+        "exit": 1,
+        "source_changed": [],
+        "source_added": [],
+        "log_sha256": "5dd8781441e319209fdc593c7eac152f7986538cb5155fe7b8e8598749fb65f8",
+        "finished_at": "2026-11-12T08:18:48.479397+00:00"
+      },
+      "passed": 26,
+      "failed": 4
+    }
+  ],
+  "not_final_acceptance": true
+}

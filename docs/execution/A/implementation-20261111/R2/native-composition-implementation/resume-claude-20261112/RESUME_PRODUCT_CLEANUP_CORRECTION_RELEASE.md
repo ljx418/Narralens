@@ -1,0 +1,9 @@
+# 恢复后最小产品修正释放：原R07主错误与全部清理错误
+
+原问题范围不变。MAIN只读核对新Claude问题 msg_293f4f1e8cf3：retained-native-closure.ts #enumerate递归catch在cleanup失败时fail新包装错误，替换原错误；#directoryRecord与retainFile catch直接defineProperty(cleanup_errors=failures)也仍可覆盖旧cause，与attachCauses合并规则不一致。
+
+唯一writer ctx_b4086093cd96。精确新增释放 src/host/agent-driven/retained-native-closure.ts：仅在上述三个cleanup catch统一使用既有attachCauses合并并rethrow原错误；当原错误不可附加时才保留原错误及全部cause的安全fallback。不得改预算、媒体、公开接口、Expected或其他生产实体。
+
+测试仍仅reader.test.ts，覆盖真实嵌套enumeration失败+child自身close失败+outer/root/ancestor清理失败，断言原production错误的code/message/identity语义保留、具名原syscall及>=2清理cause各自保留且顺序可核对，实际close先执行再注入失败、每allocation只尝试一次、uncertain阻断。不得刻意让child close成功回避报告缺陷。测试标题中不得含R0子串（会被component filter误选）；pure与component过滤必须互斥且覆盖全集。分别报告证据类别，不自签业务或外审。
+
+其余恢复说明不变。仅精确recorded serial tsc站立授权；新pure/component/legacy仍需改后十路径哈希、编译证据和独立freshgrant。所有旧capture保留，新429立即停。

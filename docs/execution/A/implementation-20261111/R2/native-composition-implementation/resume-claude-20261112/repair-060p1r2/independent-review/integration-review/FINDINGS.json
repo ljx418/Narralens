@@ -1,0 +1,935 @@
+{
+  "format": "narralens.P1R2.integration-rereview@1",
+  "verdict": "REQUEST_CHANGES",
+  "binding": "24 current dirty source/test/report bytes; historical 1d348d4 not accepted implementation freeze",
+  "counts": {
+    "BLOCKER": 0,
+    "MAJOR": 6,
+    "MINOR": 1,
+    "NOTE": 1
+  },
+  "prior_findings": [
+    {
+      "prior_id": "IR-01",
+      "status": "STILL_OPEN",
+      "actual_basis": "R2-I01",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "prior_id": "IR-02",
+      "status": "CLOSED_STATIC",
+      "actual_basis": "Owner-bound per-phase lease registry replaces raw boolean receipts; spent consumption wired. Real business/error phase settlement still separately fails R2-I01.",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "prior_id": "IR-03",
+      "status": "CLOSED_STATIC",
+      "actual_basis": "run/reconcile both call #proveExecution, bound receipt capture/validator and C exit/close gates are actual call sites; no kernel acceptance.",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "prior_id": "IR-04",
+      "status": "STILL_OPEN",
+      "actual_basis": "R2-I05; pure candidate->failure function is fixed, actual EOF path bypass remains.",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "prior_id": "IR-05",
+      "status": "STILL_OPEN",
+      "actual_basis": "R2-I02",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "prior_id": "IR-06",
+      "status": "STILL_OPEN",
+      "actual_basis": "R2-I03; JPEG summaries/max settled retention improved.",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "prior_id": "IR-07",
+      "status": "CLOSED_STATIC",
+      "actual_basis": "Direct scope now includes parent_drain, bridge settles parent then releases; producer settled promise waits bridge. Actual shared inspect defect remains R2-I02.",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "prior_id": "IR-08",
+      "status": "CLOSED_STATIC",
+      "actual_basis": "CacheFrameQueue used by real pumps, one CacheDeadline shared startup, EOF notifies C. Runtime flood not proved.",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "prior_id": "IR-09",
+      "status": "STILL_OPEN",
+      "actual_basis": "R2-I04; protocol scenario/ticket/ref timer improved but failed cleanup unsafe.",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "prior_id": "IR-10",
+      "status": "CLOSED_STATIC",
+      "actual_basis": "identity uses hoisted vi.mock(node:child_process), no real spawn; prior unrecorded child remains historical fact.",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "prior_id": "IR-11",
+      "status": "CLOSED_STATIC",
+      "actual_basis": "Workspace passes existing #abort.signal to acquire; later lease guards remain.",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "prior_id": "P1R-C01",
+      "status": "CLOSED_STATIC",
+      "actual_basis": "Actual detached spawn, initialized sequence, ctypes GET pointer helper used by production.",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "prior_id": "P1R-C02",
+      "status": "CLOSED_STATIC",
+      "actual_basis": "Actual fork parent closes status writer/draw duplicate; exec writer preserved CLOEXEC in N; selector exec-status branch consumes real status.",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "prior_id": "P1R-C03",
+      "status": "CLOSED_STATIC",
+      "actual_basis": "C identity separated from target table in production.",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "prior_id": "P1R-C04",
+      "status": "STILL_OPEN",
+      "actual_basis": "R2-I06",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "prior_id": "P1R-C05",
+      "status": "STILL_OPEN",
+      "actual_basis": "R2-I06; known pre-setsid case now uses pid, unknown target census still drops ownership.",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "prior_id": "P1R-C06",
+      "status": "STILL_OPEN",
+      "actual_basis": "Host strict proof wired, but real C UNKNOWN branch still R2-I06; not source-complete lifecycle closure.",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "prior_id": "P1R-C07",
+      "status": "CLOSED_STATIC",
+      "actual_basis": "Bounded decoded queues and per-round reads used by actual pumps; kernel unknown census issue separate R2-I06.",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "prior_id": "P1R-C08",
+      "status": "CLOSED_STATIC",
+      "actual_basis": "ControlWriter offset/reserved terminal slot and writable-interest adapter used by production; no actual backpressure proof.",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "prior_id": "P1R-C09",
+      "status": "STILL_OPEN",
+      "actual_basis": "Candidate latch/cleanup-copy helpers actually wired; EOF event remains R2-I05.",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "prior_id": "P1R-C10",
+      "status": "STILL_OPEN",
+      "actual_basis": "Per-draw HOME/XDG run namespace now present; completed held cleanup leak R2-I07.",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "prior_id": "P1R-C11",
+      "status": "STILL_OPEN",
+      "actual_basis": "R2-I04",
+      "runtime": "NOT_RUN"
+    }
+  ],
+  "findings": [
+    {
+      "id": "R2-I01",
+      "classification": "NEW",
+      "severity": "MAJOR",
+      "title": "whole-production仍无法区分正常未启动失败与未知清理，原promise也没有保持barrier",
+      "locations": [
+        {
+          "path": "src/host/agent-driven/created-native-workspace.ts",
+          "line": 733
+        },
+        {
+          "path": "src/host/agent-driven/created-native-workspace.ts",
+          "line": 747
+        },
+        {
+          "path": "src/host/agent-driven/created-native-workspace.ts",
+          "line": 757
+        },
+        {
+          "path": "src/host/agent-driven/created-native-workspace.ts",
+          "line": 764
+        },
+        {
+          "path": "src/host/agent-driven/created-native-workspace.ts",
+          "line": 840
+        },
+        {
+          "path": "src/host/agent-driven/created-native-workspace.ts",
+          "line": 973
+        },
+        {
+          "path": "src/host/agent-driven/created-native-workspace.ts",
+          "line": 1157
+        }
+      ],
+      "trigger": "正常preexisting-output或排队后stale lease等在bridge执行前拒绝：parent/tree lease未settle，outer finally只settle execution；另一分支PRE/POST release实际失败后内层throw，outer标held但原operation已reject。",
+      "impact": "第一类无活资源的普通业务失败永久占root/额度且无bridge handle可恢复；第二类仅留scheduler计数，原workspace operation已经结束，close/dispose可越过它关闭/删除原根，未持有可恢复的PRE/tree责任。锁住一个计数不等于完整settlement barrier。",
+      "minimal_correction": "按实际取得资源建立NOT_STARTED/NOT_OWNED与真实settled收据，正常业务失败清理完应释放；真实tree/parent未知须由owner持有原closure和wholeProduction promise至fresh reconciliation结束，不能先reject掉原操作。dispose也要等待该责任。",
+      "decisive_test": "无需child的preexisting/stale拒绝后root回idle且下个合法生产可准入；真实tree close故障时原promise/close/dispose不结束，恢复后原错误返回、root释放一次。",
+      "prior_ids": [
+        "IR-01"
+      ],
+      "runtime": "NOT_RUN",
+      "authority_limit": "Static Host-private/owned test lifecycle analysis, not a claimed public HTTP capability exploit"
+    },
+    {
+      "id": "R2-I02",
+      "classification": "NEW",
+      "severity": "MAJOR",
+      "title": "bridge单一current指针仍让同bridge排队B遮住held A",
+      "locations": [
+        {
+          "path": "src/adapters/openfilm/openfilm-upstream.ts",
+          "line": 1605
+        },
+        {
+          "path": "src/adapters/openfilm/openfilm-upstream.ts",
+          "line": 1608
+        },
+        {
+          "path": "src/adapters/openfilm/openfilm-upstream.ts",
+          "line": 1629
+        },
+        {
+          "path": "src/adapters/openfilm/openfilm-upstream.ts",
+          "line": 1657
+        }
+      ],
+      "trigger": "A通过同一issued bridge.draw进入held；B调用同一bridge.draw并排队，闭包responsibility改为B（B尚未取得scope时handle可能null）。",
+      "impact": "局部current已修好每个draw的父drain归属，但inspect/reconcile读共享最新指针；A真实handle或workspace之前签发的A cleanup handle被拒，原A无法经生产接口reconcile。",
+      "minimal_correction": "bridge按issued opaque handle保存所有未结责任；inspect列出active/held责任或可稳定索引，reconcile直接查原handle，不经一个可覆盖的current。保留每draw局部current供parent continuation。",
+      "decisive_test": "同bridge A held、B排队，B不替换A的inspection/reconcile权限；A恢复后原continuation完成，B随后获准；cross bridge/service handle拒绝。",
+      "prior_ids": [
+        "IR-05"
+      ],
+      "runtime": "NOT_RUN",
+      "authority_limit": "Static Host-private/owned test lifecycle analysis, not a claimed public HTTP capability exploit"
+    },
+    {
+      "id": "R2-I03",
+      "classification": "NEW",
+      "severity": "MAJOR",
+      "title": "未获准/失败的裸factory责任未标settled，历史剪枝仍无界",
+      "locations": [
+        {
+          "path": "src/adapters/openfilm/openfilm-upstream.ts",
+          "line": 469
+        },
+        {
+          "path": "src/adapters/openfilm/openfilm-upstream.ts",
+          "line": 518
+        },
+        {
+          "path": "src/adapters/openfilm/openfilm-upstream.ts",
+          "line": 595
+        },
+        {
+          "path": "src/adapters/openfilm/openfilm-upstream.ts",
+          "line": 683
+        },
+        {
+          "path": "src/adapters/openfilm/openfilm-upstream.ts",
+          "line": 700
+        }
+      ],
+      "trigger": "长寿producer直接pageFrame持续遭遇queue full、queue timeout或获准前关闭等拒绝。",
+      "impact": "finally resolve settled promise却未把phase=queued/executing改为settled；prune只清phase=settled，多次拒绝无限积累controller/root/责任。成功JPEG改有界summary已修，但失败准入历史仍无限。",
+      "minimal_correction": "完整结算且无未知资源的拒绝也进入terminal phase并剪枝；未知责任仍保留并有明确owner。计数cacheProducerCalls只对实际加过的调用递减。",
+      "decisive_test": "反复制造超过历史限额的无资源准入拒绝，责任表保持有界、无负计数；真实held记录不被剪枝。",
+      "prior_ids": [
+        "IR-06"
+      ],
+      "runtime": "NOT_RUN",
+      "authority_limit": "Static Host-private/owned test lifecycle analysis, not a claimed public HTTP capability exploit"
+    },
+    {
+      "id": "R2-I04",
+      "classification": "NEW",
+      "severity": "MAJOR",
+      "title": "首次P2a失败清理仍把deadline当close，测试会删未结根/证据",
+      "locations": [
+        {
+          "path": "tests/agent-driven/integration/cache-frame-duration-lifetime.test.ts",
+          "line": 105
+        },
+        {
+          "path": "tests/agent-driven/integration/cache-frame-duration-lifetime.test.ts",
+          "line": 115
+        },
+        {
+          "path": "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts",
+          "line": 64
+        },
+        {
+          "path": "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts",
+          "line": 116
+        }
+      ],
+      "trigger": "helper kill失败或5秒内close未到；或custodian positive test超时/held，原supervisor.draw仍pending。",
+      "impact": "reapHelper吞kill异常后Promise.race到期正常返回，afterEach无条件rm目录；custodian workingRoot在启动前就加入removable，kept从未push，且没有reserved handle/无条件终端owner账本。正常对照若失败，尚不能安全保全/收割。",
+      "minimal_correction": "启动即保存真实child/C/N handle、identity与close promise；finally必须真实close/reap才标removable，UNKNOWN保留目录/场景/事件并报告，deadline仅触发UNKNOWN。正向pilot单case也不能靠测试框架timeout跳出后删除根。",
+      "decisive_test": "故意让中途expect失败、kill抛错、close延迟超过5秒：不会报告清理成功或rm，已有owner继续等待/精确处置；真正close后清理一次。",
+      "prior_ids": [
+        "IR-09",
+        "P1R-C11"
+      ],
+      "runtime": "NOT_RUN",
+      "authority_limit": "Static Host-private/owned test lifecycle analysis, not a claimed public HTTP capability exploit"
+    },
+    {
+      "id": "R2-I05",
+      "classification": "NEW",
+      "severity": "MAJOR",
+      "title": "实际draw EOF取消未进入失败锁存，纯latch测试没有覆盖该接线",
+      "locations": [
+        {
+          "path": "src/adapters/openfilm/cache-process-supervisor.ts",
+          "line": 1338
+        },
+        {
+          "path": "src/adapters/openfilm/cache-process-supervisor.ts",
+          "line": 1589
+        },
+        {
+          "path": "src/adapters/openfilm/cache-process-supervisor.ts",
+          "line": 1613
+        },
+        {
+          "path": "src/adapters/openfilm/cache-process-supervisor.ts",
+          "line": 1677
+        }
+      ],
+      "trigger": "合法result/picture已缓冲，N在parent记录FINALIZE前提前关draw socket；Host先观察EOF并发送CANCEL，随后消费候选。",
+      "impact": "onDrawEnd只调用requestCustodianCancel，不latchFailure；cancelSent也不进入成功资格门。C可按较早CANCEL结束，Host稍后补记FINALIZE并仍交付合法receipt对应的picture，违背取消/协议失败先于候选采纳的真值表。",
+      "minimal_correction": "在FINALIZE之前观察EOF时锁存具体原失败/取消并拒绝候选；区分已授权finalization后的正常EOF。不要只修latchCacheOutcome函数而让事件入口绕过它。",
+      "decisive_test": "真实/局部socket mock：先完整picture再pre-finalize EOF，与finalize后EOF作对照；前者保原失败零witness，后者在完整证明后正常成功。",
+      "prior_ids": [
+        "IR-04",
+        "P1R-C09"
+      ],
+      "runtime": "NOT_RUN",
+      "authority_limit": "Static Host-private/owned test lifecycle analysis, not a claimed public HTTP capability exploit"
+    },
+    {
+      "id": "R2-I06",
+      "classification": "NEW",
+      "severity": "MAJOR",
+      "title": "真实KernelSettlementOperations仍把无法枚举的目标藏成空，提前reap锚并退出owner",
+      "locations": [
+        {
+          "path": "src/adapters/openfilm/cache-process-custodian.py",
+          "line": 1284
+        },
+        {
+          "path": "src/adapters/openfilm/cache-process-custodian.py",
+          "line": 1312
+        },
+        {
+          "path": "src/adapters/openfilm/cache-process-custodian.py",
+          "line": 1347
+        },
+        {
+          "path": "src/adapters/openfilm/cache-process-custodian.py",
+          "line": 657
+        },
+        {
+          "path": "src/adapters/openfilm/cache-process-custodian.py",
+          "line": 1458
+        },
+        {
+          "path": "src/adapters/openfilm/cache-process-custodian.py",
+          "line": 1568
+        }
+      ],
+      "trigger": "N已Z，仍有孙进程；group_members/direct_children返回None(EIO等)。_collect_targets忽略None，cached表可能只有N；_live_targets跳过Z后返回[]，_reap_adopted也将None归[]。",
+      "impact": "TargetSettlement因此认为无存活目标，reap N释放锚；随后ECHILD/group unknown才失败，Custodian.run发unknown并exit4，主动丢掉本应活着处理UNKNOWN的wait owner。单独三态syscall函数和fake Operations测试都不能证明实际kernel adapter未吞unknown。",
+      "minimal_correction": "目标观察/收养枚举把unknown显式传到状态机，禁止据此进入reap-worker；保持C与N锚及控制/重试责任。需在完整真实adapter层验证未知分支，不只给抽取状态机一个人工live列表。",
+      "decisive_test": "mock实际Custodian._settle_domain→KernelSettlementOperations和proc函数，使N为Z、子枚举EIO、孙进程存在：不得reap N/退出C；读数恢复后按孙先N后完成。再授权真实最小pilot验证。",
+      "prior_ids": [
+        "P1R-C04",
+        "P1R-C05",
+        "P1R-C06"
+      ],
+      "runtime": "NOT_RUN",
+      "authority_limit": "Static Host-private/owned test lifecycle analysis, not a claimed public HTTP capability exploit"
+    },
+    {
+      "id": "R2-I07",
+      "classification": "NEW",
+      "severity": "MINOR",
+      "title": "已证明held reconciliation后私有run目录仍无法释放",
+      "locations": [
+        {
+          "path": "src/adapters/openfilm/cache-process-supervisor.ts",
+          "line": 1024
+        },
+        {
+          "path": "src/adapters/openfilm/cache-process-supervisor.ts",
+          "line": 1055
+        },
+        {
+          "path": "src/adapters/openfilm/cache-process-supervisor.ts",
+          "line": 1159
+        }
+      ],
+      "trigger": "held execution后来取得完整fresh证明，经reconcileCleanup完成原settlement。",
+      "impact": "reconcile没有清cleanupRequired或调用releaseRunDirectory，后者还要求cleanupRequired=false；原#run早已finally结束，已确认结束的run目录继续永久保留。UNKNOWN保留合理，结束后不清理不应伪称完整资源终端。",
+      "minimal_correction": "在同一owner核实fresh execution与依赖结束后更新终端清理状态并执行一次目录释放，失败保留原对象/可检视原因；不能把reconcile成功当无需cleanup。",
+      "decisive_test": "先held再有效reconcile，证明原run目录只在结束后删一次；rm失败保留诊断而不是静默成功。",
+      "prior_ids": [
+        "P1R-C10"
+      ],
+      "runtime": "NOT_RUN",
+      "authority_limit": "Static Host-private/owned test lifecycle analysis, not a claimed public HTTP capability exploit"
+    },
+    {
+      "id": "R2-N01",
+      "classification": "NEW",
+      "severity": "NOTE",
+      "title": "证据边界保持，不能以最终成功覆盖失败",
+      "facts": "实际找到24份R2 result capture，其中3份失败：typecheck-001 exit2、custodian-unit-001 exit1、scheduler-001 exit1，原日志/argv/inputs/exit/hash均保留核验。本波另有未记录node --check tests/agent-driven/integration/helpers/cache-worker-fixture.mjs，报告声称exit0；无原capture不能独立确认时刻/exit，不叫第四份已记录失败。旧P1与P1R共四次开发失败仍UNRECORDED/UNKNOWN。R2 generate-001记录source_changed仅integrity JSON；P1R旧generate是同字节重复，区别保留。"
+    }
+  ],
+  "extracted_test_wiring_assessment": {
+    "TargetSettlement": "Actually invoked by Custodian._settle_domain via KernelSettlementOperations; not a dead copied oracle. However FakeOperations tests do not exercise real _collect_targets/_reap_adopted None->empty adapter behavior, so R2-I06 remains.",
+    "latchCacheOutcome": "Actually called by #latchFailure; pure transition fixed. onDrawEnd calls cancel sender without invoking failure latch (R2-I05), so pure tests cannot close event wiring.",
+    "phase_leases": "Actual workspace/direct factory code opens owner-bound leases and consumes one-shot completion; no longer raw boolean caller mint. Tests manually settling phase leases do not prove normal early refusal NOT_OWNED accounting nor original promise lifetime (R2-I01).",
+    "identity": "Current local vi.mock spawn genuinely intercepts module import; closes IR10 static only, not P1R historical evidence."
+  },
+  "captures": [
+    {
+      "capture": "n1n2-claude-060p1r2-custodian-syntax-001",
+      "argv": [
+        "/usr/bin/python3.12",
+        "-I",
+        "-S",
+        "-B",
+        "-c",
+        "import ast,pathlib; ast.parse(pathlib.Path('src/adapters/openfilm/cache-process-custodian.py').read_text(encoding='utf-8')); print('CUSTODIAN_SYNTAX_OK')"
+      ],
+      "exit": 0,
+      "log_sha256": "dd8ee964b960e83ee2ed8f892492ac84dc2c0ea3c9ddb84f9b29e3922f08b97c",
+      "source_changed": [],
+      "inputs_count": 646,
+      "mismatch_to_final_bound_subset": [
+        "src/adapters/openfilm/openfilm-upstream.ts",
+        "src/host/agent-driven/created-native-workspace.ts",
+        "src/adapters/openfilm/cache-production-scope.ts",
+        "src/adapters/openfilm/cache-process-supervisor.ts",
+        "src/adapters/openfilm/openfilm-cache-worker.mjs",
+        "src/adapters/openfilm/cache-worker-integrity.json",
+        "tests/agent-driven/integration/cache-production-scope.test.ts",
+        "tests/agent-driven/integration/cache-process-settlement.test.ts",
+        "src/adapters/openfilm/cache-process-custodian.py",
+        "tests/agent-driven/integration/helpers/cache-worker-fixture.mjs",
+        "tests/agent-driven/integration/helpers/cache-probe-fixture.mjs",
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts",
+        "tests/agent-driven/integration/cache-frame-duration-lifetime.test.ts",
+        "tests/agent-driven/integration/cache-process-identity.test.ts"
+      ],
+      "limit": "Early repair/failure captures intentionally bind earlier bytes; final captures distinguished; no test rerun"
+    },
+    {
+      "capture": "n1n2-claude-060p1r2-custodian-unit-001",
+      "argv": [
+        "/usr/bin/python3.12",
+        "-I",
+        "-S",
+        "-B",
+        "tests/agent-driven/integration/helpers/cache-custodian-unit.py"
+      ],
+      "exit": 1,
+      "log_sha256": "82f2d376b362ccc8599477ef49df35e771a387c7484ac9bb7d5c7effd67c379b",
+      "source_changed": [],
+      "inputs_count": 647,
+      "mismatch_to_final_bound_subset": [
+        "src/adapters/openfilm/openfilm-upstream.ts",
+        "src/adapters/openfilm/openfilm-cache-worker.mjs",
+        "src/adapters/openfilm/cache-worker-integrity.json",
+        "tests/agent-driven/integration/cache-production-scope.test.ts",
+        "tests/agent-driven/integration/cache-process-settlement.test.ts",
+        "tests/agent-driven/integration/helpers/cache-worker-fixture.mjs",
+        "tests/agent-driven/integration/helpers/cache-probe-fixture.mjs",
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts",
+        "tests/agent-driven/integration/cache-frame-duration-lifetime.test.ts",
+        "tests/agent-driven/integration/cache-process-identity.test.ts",
+        "tests/agent-driven/integration/helpers/cache-custodian-unit.py"
+      ],
+      "limit": "Early repair/failure captures intentionally bind earlier bytes; final captures distinguished; no test rerun"
+    },
+    {
+      "capture": "n1n2-claude-060p1r2-custodian-unit-002",
+      "argv": [
+        "/usr/bin/python3.12",
+        "-I",
+        "-S",
+        "-B",
+        "tests/agent-driven/integration/helpers/cache-custodian-unit.py"
+      ],
+      "exit": 0,
+      "log_sha256": "40c333e8dd3758e33ff7e10e08c136217d357fe3f4db4c24fb6f6ab278306999",
+      "source_changed": [],
+      "inputs_count": 647,
+      "mismatch_to_final_bound_subset": [
+        "src/adapters/openfilm/openfilm-upstream.ts",
+        "src/adapters/openfilm/openfilm-cache-worker.mjs",
+        "src/adapters/openfilm/cache-worker-integrity.json",
+        "tests/agent-driven/integration/cache-production-scope.test.ts",
+        "tests/agent-driven/integration/cache-process-settlement.test.ts",
+        "tests/agent-driven/integration/helpers/cache-worker-fixture.mjs",
+        "tests/agent-driven/integration/helpers/cache-probe-fixture.mjs",
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts",
+        "tests/agent-driven/integration/cache-frame-duration-lifetime.test.ts",
+        "tests/agent-driven/integration/cache-process-identity.test.ts"
+      ],
+      "limit": "Early repair/failure captures intentionally bind earlier bytes; final captures distinguished; no test rerun"
+    },
+    {
+      "capture": "n1n2-claude-060p1r2-final-custodian-syntax-001",
+      "argv": [
+        "/usr/bin/python3.12",
+        "-I",
+        "-S",
+        "-B",
+        "-c",
+        "import ast,pathlib; ast.parse(pathlib.Path('src/adapters/openfilm/cache-process-custodian.py').read_text(encoding='utf-8')); print('CUSTODIAN_SYNTAX_OK')"
+      ],
+      "exit": 0,
+      "log_sha256": "dd8ee964b960e83ee2ed8f892492ac84dc2c0ea3c9ddb84f9b29e3922f08b97c",
+      "source_changed": [],
+      "inputs_count": 647,
+      "mismatch_to_final_bound_subset": [],
+      "limit": "Early repair/failure captures intentionally bind earlier bytes; final captures distinguished; no test rerun"
+    },
+    {
+      "capture": "n1n2-claude-060p1r2-final-custodian-unit-001",
+      "argv": [
+        "/usr/bin/python3.12",
+        "-I",
+        "-S",
+        "-B",
+        "tests/agent-driven/integration/helpers/cache-custodian-unit.py"
+      ],
+      "exit": 0,
+      "log_sha256": "9436669d041fd992a7c7eaf244080a988eb9dea765843dfb3c4af0fa94f0cb70",
+      "source_changed": [],
+      "inputs_count": 647,
+      "mismatch_to_final_bound_subset": [],
+      "limit": "Early repair/failure captures intentionally bind earlier bytes; final captures distinguished; no test rerun"
+    },
+    {
+      "capture": "n1n2-claude-060p1r2-final-identity-001",
+      "argv": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "vitest",
+        "run",
+        "--config",
+        "vitest.config.ts",
+        "tests/agent-driven/integration/cache-process-identity.test.ts"
+      ],
+      "exit": 0,
+      "log_sha256": "08318c3fd42284d178c88f6ee7fe1262fb66d5b844a0f3c75c8c97f356b099c0",
+      "source_changed": [],
+      "inputs_count": 647,
+      "mismatch_to_final_bound_subset": [],
+      "limit": "Early repair/failure captures intentionally bind earlier bytes; final captures distinguished; no test rerun"
+    },
+    {
+      "capture": "n1n2-claude-060p1r2-final-integrity-check-001",
+      "argv": [
+        "node",
+        "tools/openfilm-cache-worker-integrity.mjs",
+        "--check"
+      ],
+      "exit": 0,
+      "log_sha256": "7480083d801311b007ec2f2a6c4717621f8aed33de5e17dd7ba35815b0d68e68",
+      "source_changed": [],
+      "inputs_count": 647,
+      "mismatch_to_final_bound_subset": [],
+      "limit": "Early repair/failure captures intentionally bind earlier bytes; final captures distinguished; no test rerun"
+    },
+    {
+      "capture": "n1n2-claude-060p1r2-final-m21-lock-001",
+      "argv": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "vitest",
+        "run",
+        "--config",
+        "vitest.config.ts",
+        "tests/m2.1/openfilm-upstream-lock.test.ts"
+      ],
+      "exit": 0,
+      "log_sha256": "4936318ad49ff10c4926ccd981b6feae36992c8df7457a5b0c07aebfbc9554fc",
+      "source_changed": [],
+      "inputs_count": 647,
+      "mismatch_to_final_bound_subset": [],
+      "limit": "Early repair/failure captures intentionally bind earlier bytes; final captures distinguished; no test rerun"
+    },
+    {
+      "capture": "n1n2-claude-060p1r2-final-scheduler-001",
+      "argv": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "vitest",
+        "run",
+        "--config",
+        "vitest.config.ts",
+        "tests/agent-driven/integration/cache-production-scope.test.ts"
+      ],
+      "exit": 0,
+      "log_sha256": "d9a34a04b0bb070ed79cf586f66b0add37e5859b619f70c1e97da71ddd1dd65a",
+      "source_changed": [],
+      "inputs_count": 647,
+      "mismatch_to_final_bound_subset": [],
+      "limit": "Early repair/failure captures intentionally bind earlier bytes; final captures distinguished; no test rerun"
+    },
+    {
+      "capture": "n1n2-claude-060p1r2-final-syntax-policy-001",
+      "argv": [
+        "node",
+        "--check",
+        "src/adapters/openfilm/cache-worker-policy.mjs"
+      ],
+      "exit": 0,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source_changed": [],
+      "inputs_count": 647,
+      "mismatch_to_final_bound_subset": [],
+      "limit": "Early repair/failure captures intentionally bind earlier bytes; final captures distinguished; no test rerun"
+    },
+    {
+      "capture": "n1n2-claude-060p1r2-final-syntax-probe-fixture-001",
+      "argv": [
+        "node",
+        "--check",
+        "tests/agent-driven/integration/helpers/cache-probe-fixture.mjs"
+      ],
+      "exit": 0,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source_changed": [],
+      "inputs_count": 647,
+      "mismatch_to_final_bound_subset": [],
+      "limit": "Early repair/failure captures intentionally bind earlier bytes; final captures distinguished; no test rerun"
+    },
+    {
+      "capture": "n1n2-claude-060p1r2-final-syntax-worker-001",
+      "argv": [
+        "node",
+        "--check",
+        "src/adapters/openfilm/openfilm-cache-worker.mjs"
+      ],
+      "exit": 0,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source_changed": [],
+      "inputs_count": 647,
+      "mismatch_to_final_bound_subset": [],
+      "limit": "Early repair/failure captures intentionally bind earlier bytes; final captures distinguished; no test rerun"
+    },
+    {
+      "capture": "n1n2-claude-060p1r2-final-syntax-worker-fixture-001",
+      "argv": [
+        "node",
+        "--check",
+        "tests/agent-driven/integration/helpers/cache-worker-fixture.mjs"
+      ],
+      "exit": 0,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source_changed": [],
+      "inputs_count": 647,
+      "mismatch_to_final_bound_subset": [],
+      "limit": "Early repair/failure captures intentionally bind earlier bytes; final captures distinguished; no test rerun"
+    },
+    {
+      "capture": "n1n2-claude-060p1r2-final-tsc-001",
+      "argv": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "tsc",
+        "--noEmit"
+      ],
+      "exit": 0,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source_changed": [],
+      "inputs_count": 647,
+      "mismatch_to_final_bound_subset": [],
+      "limit": "Early repair/failure captures intentionally bind earlier bytes; final captures distinguished; no test rerun"
+    },
+    {
+      "capture": "n1n2-claude-060p1r2-generate-001",
+      "argv": [
+        "node",
+        "tools/openfilm-cache-worker-integrity.mjs",
+        "--generate"
+      ],
+      "exit": 0,
+      "log_sha256": "958825c41d7e482d785280512535c13558d60012ca26f10d20cad19472bbbcf6",
+      "source_changed": [
+        "src/adapters/openfilm/cache-worker-integrity.json"
+      ],
+      "inputs_count": 647,
+      "mismatch_to_final_bound_subset": [
+        "src/adapters/openfilm/cache-worker-integrity.json"
+      ],
+      "limit": "Early repair/failure captures intentionally bind earlier bytes; final captures distinguished; no test rerun"
+    },
+    {
+      "capture": "n1n2-claude-060p1r2-handback-integrity-001",
+      "argv": [
+        "node",
+        "tools/openfilm-cache-worker-integrity.mjs",
+        "--check"
+      ],
+      "exit": 0,
+      "log_sha256": "7480083d801311b007ec2f2a6c4717621f8aed33de5e17dd7ba35815b0d68e68",
+      "source_changed": [],
+      "inputs_count": 647,
+      "mismatch_to_final_bound_subset": [],
+      "limit": "Early repair/failure captures intentionally bind earlier bytes; final captures distinguished; no test rerun"
+    },
+    {
+      "capture": "n1n2-claude-060p1r2-identity-001",
+      "argv": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "vitest",
+        "run",
+        "--config",
+        "vitest.config.ts",
+        "tests/agent-driven/integration/cache-process-identity.test.ts"
+      ],
+      "exit": 0,
+      "log_sha256": "ca1fc90018166360b7f1323158daa99c6a3151a8d2aef627f5d411086e9691f4",
+      "source_changed": [],
+      "inputs_count": 647,
+      "mismatch_to_final_bound_subset": [
+        "src/adapters/openfilm/openfilm-upstream.ts",
+        "src/adapters/openfilm/openfilm-cache-worker.mjs",
+        "src/adapters/openfilm/cache-worker-integrity.json",
+        "tests/agent-driven/integration/cache-production-scope.test.ts",
+        "tests/agent-driven/integration/cache-process-settlement.test.ts",
+        "tests/agent-driven/integration/helpers/cache-worker-fixture.mjs",
+        "tests/agent-driven/integration/helpers/cache-probe-fixture.mjs",
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts",
+        "tests/agent-driven/integration/cache-frame-duration-lifetime.test.ts"
+      ],
+      "limit": "Early repair/failure captures intentionally bind earlier bytes; final captures distinguished; no test rerun"
+    },
+    {
+      "capture": "n1n2-claude-060p1r2-m21-lock-001",
+      "argv": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "vitest",
+        "run",
+        "--config",
+        "vitest.config.ts",
+        "tests/m2.1/openfilm-upstream-lock.test.ts"
+      ],
+      "exit": 0,
+      "log_sha256": "52a1a28f3d499624cdb45fb93e6245f10db3e884d5e3afaa8c1e3f017067739a",
+      "source_changed": [],
+      "inputs_count": 647,
+      "mismatch_to_final_bound_subset": [
+        "src/adapters/openfilm/openfilm-upstream.ts",
+        "src/adapters/openfilm/openfilm-cache-worker.mjs",
+        "src/adapters/openfilm/cache-worker-integrity.json",
+        "tests/agent-driven/integration/cache-process-settlement.test.ts",
+        "tests/agent-driven/integration/helpers/cache-worker-fixture.mjs",
+        "tests/agent-driven/integration/helpers/cache-probe-fixture.mjs",
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts",
+        "tests/agent-driven/integration/cache-frame-duration-lifetime.test.ts"
+      ],
+      "limit": "Early repair/failure captures intentionally bind earlier bytes; final captures distinguished; no test rerun"
+    },
+    {
+      "capture": "n1n2-claude-060p1r2-scheduler-001",
+      "argv": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "vitest",
+        "run",
+        "--config",
+        "vitest.config.ts",
+        "tests/agent-driven/integration/cache-production-scope.test.ts"
+      ],
+      "exit": 1,
+      "log_sha256": "5330d02aa843fa483afd72bf4d8c5a950790b01b9eab15a4791adf5db2e830bf",
+      "source_changed": [],
+      "inputs_count": 647,
+      "mismatch_to_final_bound_subset": [
+        "src/adapters/openfilm/openfilm-upstream.ts",
+        "src/adapters/openfilm/openfilm-cache-worker.mjs",
+        "src/adapters/openfilm/cache-worker-integrity.json",
+        "tests/agent-driven/integration/cache-production-scope.test.ts",
+        "tests/agent-driven/integration/cache-process-settlement.test.ts",
+        "tests/agent-driven/integration/helpers/cache-worker-fixture.mjs",
+        "tests/agent-driven/integration/helpers/cache-probe-fixture.mjs",
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts",
+        "tests/agent-driven/integration/cache-frame-duration-lifetime.test.ts"
+      ],
+      "limit": "Early repair/failure captures intentionally bind earlier bytes; final captures distinguished; no test rerun"
+    },
+    {
+      "capture": "n1n2-claude-060p1r2-scheduler-002",
+      "argv": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "vitest",
+        "run",
+        "--config",
+        "vitest.config.ts",
+        "tests/agent-driven/integration/cache-production-scope.test.ts"
+      ],
+      "exit": 0,
+      "log_sha256": "938621b374e3ad9fdcbc9417935d1edc423791cdd6e6d13cc56bd864078fb75d",
+      "source_changed": [],
+      "inputs_count": 647,
+      "mismatch_to_final_bound_subset": [
+        "src/adapters/openfilm/openfilm-upstream.ts",
+        "src/adapters/openfilm/openfilm-cache-worker.mjs",
+        "src/adapters/openfilm/cache-worker-integrity.json",
+        "tests/agent-driven/integration/cache-process-settlement.test.ts",
+        "tests/agent-driven/integration/helpers/cache-worker-fixture.mjs",
+        "tests/agent-driven/integration/helpers/cache-probe-fixture.mjs",
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts",
+        "tests/agent-driven/integration/cache-frame-duration-lifetime.test.ts"
+      ],
+      "limit": "Early repair/failure captures intentionally bind earlier bytes; final captures distinguished; no test rerun"
+    },
+    {
+      "capture": "n1n2-claude-060p1r2-syntax-worker-fixture-001",
+      "argv": [
+        "node",
+        "--check",
+        "tests/agent-driven/integration/helpers/cache-worker-fixture.mjs"
+      ],
+      "exit": 0,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source_changed": [],
+      "inputs_count": 647,
+      "mismatch_to_final_bound_subset": [
+        "src/adapters/openfilm/openfilm-upstream.ts",
+        "src/adapters/openfilm/openfilm-cache-worker.mjs",
+        "src/adapters/openfilm/cache-worker-integrity.json",
+        "tests/agent-driven/integration/cache-process-settlement.test.ts",
+        "tests/agent-driven/integration/helpers/cache-probe-fixture.mjs",
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts",
+        "tests/agent-driven/integration/cache-frame-duration-lifetime.test.ts"
+      ],
+      "limit": "Early repair/failure captures intentionally bind earlier bytes; final captures distinguished; no test rerun"
+    },
+    {
+      "capture": "n1n2-claude-060p1r2-typecheck-001",
+      "argv": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "tsc",
+        "--noEmit"
+      ],
+      "exit": 2,
+      "log_sha256": "3b7e9f13487559a674439174844e98fb203cfd0ce60e7b1ccd126f2608bc034a",
+      "source_changed": [],
+      "inputs_count": 646,
+      "mismatch_to_final_bound_subset": [
+        "src/adapters/openfilm/openfilm-upstream.ts",
+        "src/adapters/openfilm/cache-production-scope.ts",
+        "src/adapters/openfilm/openfilm-cache-worker.mjs",
+        "src/adapters/openfilm/cache-worker-integrity.json",
+        "tests/agent-driven/integration/cache-production-scope.test.ts",
+        "tests/agent-driven/integration/cache-process-settlement.test.ts",
+        "src/adapters/openfilm/cache-process-custodian.py",
+        "tests/agent-driven/integration/helpers/cache-worker-fixture.mjs",
+        "tests/agent-driven/integration/helpers/cache-probe-fixture.mjs",
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts",
+        "tests/agent-driven/integration/cache-frame-duration-lifetime.test.ts",
+        "tests/agent-driven/integration/cache-process-identity.test.ts"
+      ],
+      "limit": "Early repair/failure captures intentionally bind earlier bytes; final captures distinguished; no test rerun"
+    },
+    {
+      "capture": "n1n2-claude-060p1r2-typecheck-002",
+      "argv": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "tsc",
+        "--noEmit"
+      ],
+      "exit": 0,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source_changed": [],
+      "inputs_count": 646,
+      "mismatch_to_final_bound_subset": [
+        "src/adapters/openfilm/openfilm-upstream.ts",
+        "src/adapters/openfilm/openfilm-cache-worker.mjs",
+        "src/adapters/openfilm/cache-worker-integrity.json",
+        "tests/agent-driven/integration/cache-production-scope.test.ts",
+        "tests/agent-driven/integration/cache-process-settlement.test.ts",
+        "src/adapters/openfilm/cache-process-custodian.py",
+        "tests/agent-driven/integration/helpers/cache-worker-fixture.mjs",
+        "tests/agent-driven/integration/helpers/cache-probe-fixture.mjs",
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts",
+        "tests/agent-driven/integration/cache-frame-duration-lifetime.test.ts",
+        "tests/agent-driven/integration/cache-process-identity.test.ts"
+      ],
+      "limit": "Early repair/failure captures intentionally bind earlier bytes; final captures distinguished; no test rerun"
+    },
+    {
+      "capture": "n1n2-claude-060p1r2-typecheck-003",
+      "argv": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "tsc",
+        "--noEmit"
+      ],
+      "exit": 0,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source_changed": [],
+      "inputs_count": 647,
+      "mismatch_to_final_bound_subset": [
+        "src/adapters/openfilm/openfilm-upstream.ts",
+        "src/adapters/openfilm/openfilm-cache-worker.mjs",
+        "src/adapters/openfilm/cache-worker-integrity.json"
+      ],
+      "limit": "Early repair/failure captures intentionally bind earlier bytes; final captures distinguished; no test rerun"
+    }
+  ],
+  "P2a_prerequisites": [
+    "当前REQUEST_CHANGES不签STATIC_NO_BLOCKER_FOR_MINIMAL_P2A；先修最小pilot的真实child owner/无条件finally、close超时UNKNOWN与根保全。",
+    "若MAIN后续单独批准仅C identity或一次正向receipt，必须独立唯一运行根、单case/单slot、明确reserved handle/C child责任、失败/timeout后仍能保留并收割；不能直接跑现有整个lifecycle整文件。",
+    "场景文件仅单slot测试scaffold；将scenario/events复制或映射到该次专属runtime root并注册清理，明确使用fixture读位置；不得借此批准生产共享永久状态。",
+    "先C能力/身份再正向N helper/receipt，暂不TERM-ignore/adoption/flood；不过任何正向异常也要走安全owner清理。修R2-I06后再批准这些负例。",
+    "对实际Custodian kernel adapter与真实workspace phase流程做mock边界测试，不能仅抽取TargetSettlement/latch/lease函数手工settle证明全链。",
+    "固定原17/ISO18与所有真实内核/FD/Chrome/fullgates为NOT_RUN，Q2默认上游probe不替换，分阶段pilot不代签验收。"
+  ],
+  "original17_ISO18": "All whole-requirement acceptance, actual kernel/FD/reaping/Chrome and full gates NOT_RUN; NEXT pending after N1N2 acceptance",
+  "runtime": "ALL_REVIEWER_BUSINESS_RUNTIME_NOT_RUN"
+}

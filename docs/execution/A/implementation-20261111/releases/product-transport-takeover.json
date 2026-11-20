@@ -1,0 +1,17 @@
+{
+  "status": "MAIN_CORRECTION_EXCLUSIVE",
+  "base": "69a26e57fb73a09286baca01627ece4c469ab545",
+  "handoff_commit": "df32311ce86193aa91db4535776d833358680013",
+  "source_handoff_messages": [
+    "msg_afacdfa47e86",
+    "msg_0b4e02499cd2"
+  ],
+  "paths": [
+    "src/host/m5/controlled-studio-access.ts",
+    "src/host/m5/openfilm-studio-gateway.ts",
+    "tests/agent-driven/integration/created-native-ui-transport.test.ts"
+  ],
+  "writer": "MAIN integration only",
+  "lane_hold": "PRODUCT until corrected commit consumed at safe boundary",
+  "reason": ">2 transport substage reworks"
+}

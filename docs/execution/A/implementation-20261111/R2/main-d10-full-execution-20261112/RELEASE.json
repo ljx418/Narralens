@@ -1,0 +1,12 @@
+{
+  "base": "13496366d9c0a2ff3aec5efa4798ce6b5f1c9818",
+  "writer": "MAIN",
+  "paths": [
+    "src/host/agent-driven/created-source-recovery.ts",
+    "tests/agent-driven/integration/created-source-recovery.test.ts"
+  ],
+  "handoff": "msg_61f17aad8677; all reviewer commands terminal, sole slot released",
+  "reason": "MAJOR-R2-01 full immutable producer execution; repeated common-root MAIN repair; no429 takeover",
+  "protected_agents_sha256": "37300463a72a612ae16e0a5fcfb496502c57c722b83781e0e2e8c9480594542b",
+  "at": "2026-11-12T04:09:35.448395+00:00"
+}

@@ -1,0 +1,34 @@
+{
+  "at": "2026-11-12T14:39:37.581392+00:00",
+  "status": "CAUSAL_CLARIFICATION_NOT_FIX_ACCEPTANCE",
+  "sources": {
+    "src/host/agent-driven/created-native-workspace.ts": "3decdc3d826e323a943589b372ccca23560802170b2cebf34904fc2355fbca56",
+    "src/host/agent-driven/committed-snapshot-authority.ts": "53321dfe1560b8403d9b78ca643eb24ff4ce6360a619cee30adbff0fc7b8bca5",
+    "tests/agent-driven/integration/created-native-source-reader.test.ts": "83d13030b19a6e3bc79eaa2104a53ab31cfc8214b9fbce8047a24cc34bb0d21a"
+  },
+  "message": "msg_06bde941f854",
+  "decisions": [
+    {
+      "case": "G02 working copy replacement",
+      "observation": "prepare() cached&&same returns cached view after verify; calling prepare same binding is not replacement.",
+      "required": "Actual invalidation/rebuild synchronized before final read fence; preserve legitimate cache reuse."
+    },
+    {
+      "case": "G06 isolated parent identity",
+      "observation": "Swap occurs before fresh acquisition; no old held inode exists for that acquisition.",
+      "required": "Hold original lease or swap after original open then remove sibling; assert oldlease/finalguard invalidation. No permanent inode authority or new source revision semantics."
+    },
+    {
+      "case": "G07 empty directory",
+      "observation": "Unknown workspace directory correctly refused before reader exposes facts.",
+      "required": "Use legitimate owned native directory or precisely scoped RetainedClosure component test with independent allocations; preserve unknown-write refusal."
+    },
+    {
+      "case": "F03/F04 errors",
+      "observation": "Raw RetainedNativeError now leaks across old stable boundary.",
+      "required": "Preserve old documented boundary codes and genuine cleanup cause ledger; distinguish budget refusal from content conflict, no broad catch masking failures."
+    }
+  ],
+  "cleanup_status": "AWAIT_CHILD_RECEIPT; PID1808480 absent verified, no global FD absence claim",
+  "runtime": "No127/browser or ungranted rerun"
+}

@@ -1,0 +1,46 @@
+{
+  "grant_id": "N1N2-RESUME-FOCUSED-006",
+  "at": "2026-11-12T08:56:08.135495+00:00",
+  "request": "msg_474d66368e6e",
+  "holder": "ctx_e5e736e1846b",
+  "cwd": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+  "frozen_sha256": {
+    "src/host/agent-driven/committed-snapshot-authority.ts": "f8470afddb8e8732edb112379902c3e28f51892a0104d6182f13207d473906c9",
+    "src/host/agent-driven/created-native-workspace.ts": "b57bed5df0ea600a2aa1a5b2dc3df2873f794389ee5274f32efb52a6f3d653ad",
+    "src/host/m5/openfilm-native-expected.ts": "19110e45a83b6d5b611b4260620ce873f923f1e5a5b907bc6176c4b734fbeed3",
+    "src/host/agent-driven/retained-native-closure.ts": "d3b7392a16385d78a13dd546e6868c23a423867e61c20348eaef1b6e52c9193f",
+    "src/host/agent-driven/created-native-source-reader.ts": "82cd502970800d5d53be4833b693612ec4ad7bdaa04490cd1be0ad86df7520da",
+    "tests/agent-driven/integration/created-native-workspace.test.ts": "439d469032c9af2b83ceb826e0aead7cf5c2fe5c5693be7cbf18c8e67f0f615f",
+    "tests/agent-driven/integration/committed-snapshot-host.test.ts": "bfd0c6373b254050d32a6a99e7b6f8b9827dc24b6b2587515ab4c5aad2cd9037",
+    "tests/agent-driven/integration/created-native-ack.test.ts": "5f50db85c7c07a2ecf4faefc20ec2ec6c7ad4910fafe549c2edc76bbad729c7c",
+    "tests/agent-driven/integration/created-native-source-reader.test.ts": "d652296bac57d8f53e77123ceba0c229e81dd9d0b5a1b50bd4875abdbf364d73",
+    "tests/agent-driven/integration/helpers/native-source-fixture.ts": "19cb73cb9d69394e550699d3363128a4ea60e96a3f28f22e1ea4fce01c6dda0a"
+  },
+  "commands": [
+    {
+      "capture": "n1n2-claude-resume-064-focused-three",
+      "argv": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "vitest",
+        "run",
+        "--config",
+        "vitest.config.ts",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts",
+        "-t",
+        "R07 refuses a later read after a delivered release failed|F06 refuses a referenced text above the budget in the authority path|F09 refuses every injected probe failure through the production runner"
+      ],
+      "expected_cases": 3,
+      "filtered": 38
+    }
+  ],
+  "selected_assertions": [
+    "R07 refuses a later read after a delivered release failed",
+    "F06 refuses a referenced text above the budget in the authority path",
+    "F09 refuses every injected probe failure through the production runner"
+  ],
+  "effects": "same loopback Host/privateDB/diagnostic media/fixed upstream015; labelled transport failure simulations; real version probe; no browser/network/J/provider/paid/build/config/index/pin",
+  "scope": "focused defect proof ONLY; original outstanding requirements and final fullgate/independent frozencommit review remain",
+  "execution": "unchanged recorder once; all source/tests/tools/config/index frozen until command terminal+cleanup; new429STOP"
+}

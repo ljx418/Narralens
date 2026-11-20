@@ -1,0 +1,491 @@
+{
+  "reservation": "A05-CREATED-NATIVE-WORKBENCH",
+  "status": "MAIN_FINAL_SCAN_ONLY",
+  "holder": "MAIN",
+  "execSession": null,
+  "resources": [
+    "scan only; source and media checks completed"
+  ],
+  "lanePolicy": "Reserve before next heavy checks; peer agents readonly",
+  "amendedAt": "2026-11-10T02:45:44.723400+00:00",
+  "admissions": [
+    {
+      "holder": "MAIN",
+      "allowed": [
+        "actual pinned Studio with private OPENFILM_HOME/library",
+        "singleworker read probe/test"
+      ],
+      "forbidden": [
+        "headed browser",
+        "paid providers",
+        "Jdrive",
+        "external network",
+        "global Studio state writes"
+      ]
+    }
+  ],
+  "baselineExit": 0,
+  "baseline": {
+    "execSession": 62928,
+    "exit": 0,
+    "files": 97,
+    "tests": 1099
+  },
+  "lastCompleted": {
+    "created_foundation": {
+      "session": 48077,
+      "typecheck": 0,
+      "tests": 90
+    },
+    "created_durability": {
+      "session": 16327,
+      "typecheck": 0,
+      "tests": 34
+    },
+    "real_diagnostic_render": {
+      "session": 82162,
+      "exit": 0,
+      "production_ready": false
+    },
+    "created_worker": {
+      "commit": "76607c191db5505bcedc88113330fc4ce7e14537",
+      "session": 56286,
+      "typecheck": 0,
+      "files": 5,
+      "tests": 71,
+      "exit": 0
+    },
+    "created_worker_independent": {
+      "commit": "76607c191db5505bcedc88113330fc4ce7e14537",
+      "session": 5314,
+      "exit": 0,
+      "files": 2,
+      "tests": 15,
+      "scope": "creation chain only"
+    },
+    "owned_runtime_r2": {
+      "session": 93799,
+      "typecheck": 0,
+      "exit": 0,
+      "tests": 1,
+      "scope": "real flock/instance/MCP lifecycle integration"
+    },
+    "owned_runtime_r3": {
+      "session": 17525,
+      "typecheck": 0,
+      "exit": 0,
+      "tests": 7,
+      "scope": "token rotation/snapshot binding/pidfd refusal + auth regression"
+    },
+    "owned_runtime_final": {
+      "session": 77657,
+      "typecheck": 0,
+      "files": 3,
+      "tests": 29,
+      "exit": 0,
+      "scan_findings": 0
+    },
+    "owned_runtime_independent": {
+      "session": 15585,
+      "exit": 0,
+      "files": 1,
+      "tests": 7,
+      "commit": "4eaa169d235e5f607feec8dd1e93701bc67815e3",
+      "scope": "local runtime/MCP foundation only"
+    },
+    "creative_context_r7": {
+      "session": 71954,
+      "typecheck": 0,
+      "files": 14,
+      "tests": 217,
+      "exit": 0
+    },
+    "creative_context_r8": {
+      "session": 64719,
+      "commit": "791fd1dfb8958889c101715a68cc628898ed650c",
+      "typecheck": 0,
+      "files": 15,
+      "tests": 232,
+      "exit": 0,
+      "golden_vectors": 10,
+      "scan_findings": 0
+    },
+    "creative_context_independent": {
+      "commit": "791fd1dfb8958889c101715a68cc628898ed650c",
+      "tests_session": 79293,
+      "checks_session": 17953,
+      "tests": 18,
+      "exit": 0,
+      "typecheck_exit": 0,
+      "golden_vectors": 10,
+      "hashes": 61,
+      "scope": "Creative/Context chain only"
+    },
+    "committed_snapshot_r1": {
+      "session": 82688,
+      "typecheck": 0,
+      "tests": 25,
+      "exit": 0
+    },
+    "committed_snapshot_r2": {
+      "session": 49426,
+      "typecheck": 0,
+      "files": 4,
+      "tests": 40,
+      "exit": 0
+    },
+    "committed_snapshot_r3": {
+      "session": 40206,
+      "typecheck": 0,
+      "tests_passed": 113,
+      "tests_failed": 1,
+      "exit": 1,
+      "cause": "old mock parser text did not match actual source; original test expectation kept, fixture corrected"
+    },
+    "committed_snapshot_r4": {
+      "session": 48006,
+      "typecheck": 0,
+      "files": 11,
+      "tests": 134,
+      "exit": 0
+    },
+    "committed_snapshot_final": {
+      "session": 92550,
+      "typecheck": 0,
+      "tests": 29,
+      "tests_exit": 0,
+      "historical_m21_probe_exit": 1,
+      "historical_m21_probe_reason": "incompatible old no-completeness-issue rule; originalM1Boverride preserved; laterchecksNOT_RUN"
+    },
+    "current_native_probe": {
+      "session": 63363,
+      "typecheck": 0,
+      "tests": 1,
+      "exit": 0,
+      "golden_vectors": 10,
+      "scan_findings": 0,
+      "commit": "d15e44d1d9739febdc0f47e260b06b4a3881ab1c"
+    },
+    "committed_snapshot_independent": {
+      "commit": "d15e44d1d9739febdc0f47e260b06b4a3881ab1c",
+      "session": 70222,
+      "files": 4,
+      "tests": 30,
+      "exit": 0,
+      "hashes": 51,
+      "scope": "committed snapshot read chain only"
+    },
+    "local_assets_r2": {
+      "session": 84370,
+      "typecheck": 0,
+      "tests_passed": 8,
+      "tests_failed": 3,
+      "exit": 1,
+      "cause": "row exact-key validator omitted source; corrected without weakening assertions"
+    },
+    "local_assets_r4": {
+      "session": 98071,
+      "typecheck": 0,
+      "tests": 16,
+      "exit": 0
+    },
+    "local_assets_r5": {
+      "session": 65209,
+      "typecheck": 0,
+      "files": 2,
+      "tests": 31,
+      "exit": 0
+    },
+    "local_assets_r6": {
+      "session": 43781,
+      "typecheck": 0,
+      "passed": 38,
+      "failed": 1,
+      "exit": 1,
+      "cause": "legitimate winner staging hardlink cleanup changed shared blob ctime; fixed conditional full digest recheck"
+    },
+    "local_assets_r7": {
+      "session": 93801,
+      "typecheck": 0,
+      "tests": 21,
+      "exit": 0
+    },
+    "local_assets_r8": {
+      "session": 92226,
+      "typecheck": 0,
+      "files": 3,
+      "tests": 31,
+      "exit": 0
+    },
+    "local_assets_r10": {
+      "session": 47518,
+      "typecheck": 0,
+      "tests": 23,
+      "exit": 0
+    },
+    "local_assets_final_combined": {
+      "session": 65232,
+      "typecheck": 0,
+      "files": 4,
+      "tests": 44,
+      "exit": 0,
+      "scope": "before leaf cleanup microfix"
+    },
+    "local_assets_freeze": {
+      "session": 3915,
+      "typecheck": 0,
+      "tests": 23,
+      "exit": 0,
+      "scan_files": 511,
+      "scan_findings": 0,
+      "source_commit": "a8e020452d2ee49e65d977b79d8cfe3f2d24aa97",
+      "candidate": "cb444229e37d7503daf13c5fd886ea2bfb7d5fd2"
+    },
+    "local_assets_independent": {
+      "session": 14888,
+      "exit": 0,
+      "files": 3,
+      "tests": 33,
+      "hashes": 57,
+      "commit": "cb444229e37d7503daf13c5fd886ea2bfb7d5fd2",
+      "scope": "local input only"
+    },
+    "workbench_r4": {
+      "session": 94198,
+      "exit": 0,
+      "files": 5,
+      "tests": 19,
+      "scope": "before readproof/capacity fixes"
+    },
+    "workbench_r7": {
+      "session": 25945,
+      "exit": 0,
+      "files": 5,
+      "tests": 25,
+      "scope": "origin proof/auth regressions before capacity fix"
+    },
+    "workbench_headless_r8": {
+      "session": 92929,
+      "exit": 0,
+      "files": 1,
+      "tests": 1,
+      "scope": "built browser session proof only; no native workbench"
+    },
+    "workbench_final": {
+      "session": 97235,
+      "exit": 0,
+      "files": 8,
+      "tests": 38,
+      "typecheck": 0,
+      "build": 0,
+      "secret_scan_findings": 0,
+      "scope": "UI session only, no A completion"
+    },
+    "workbench_independent": {
+      "typecheck_session": 57042,
+      "test_session": 41675,
+      "exit": 0,
+      "tests": 38,
+      "hashes": 81,
+      "builds": 6,
+      "commit": "bb5a29bde02fdc77db6332384ffa3ada80e1259a",
+      "scope": "UI transport only"
+    },
+    "owned_studio_r8": {
+      "session": 91887,
+      "exit": 0,
+      "tests": 6,
+      "scope": "before nonempty frame/quiet process-title fixes"
+    },
+    "native_workspace_r4": {
+      "session": 5320,
+      "typecheck": 0,
+      "tests": 11,
+      "exit": 0,
+      "scope": "actual committed native working copy and startup/close/version windows; not full A"
+    },
+    "native_workspace_r5": {
+      "session": 54250,
+      "exit": 0,
+      "files": 8,
+      "tests": 85,
+      "commit": "8638ee182fd53251b6461904016ddce62b9bc4eb"
+    },
+    "native_workspace_independent": {
+      "session": 55515,
+      "commit": "8638ee182fd53251b6461904016ddce62b9bc4eb",
+      "typecheck_exit": 0,
+      "build_exit": 0,
+      "files": 2,
+      "tests": 12,
+      "exit": 0,
+      "scope": "derived native workspace/internal startup and close only"
+    },
+    "created_read_final": {
+      "session": 17719,
+      "commit": "fe38b9d0fdadb43e2af542b7b52bf429bdc4de08",
+      "typecheck_exit": 0,
+      "build_exit": 0,
+      "files": 3,
+      "tests": 17,
+      "exit": 0,
+      "scan_findings": 0,
+      "external": "REVIEW_PENDING"
+    },
+    "controlled_native_r8": {
+      "session": 30537,
+      "files": 10,
+      "tests": 56,
+      "exit": 0,
+      "typecheck_exit": 0,
+      "build_exit": 0,
+      "scope": "before CNE-R1 capacity repair, includes legacy/current native regression"
+    },
+    "controlled_native_r10": {
+      "session": 34103,
+      "typecheck_exit": 0,
+      "files": 4,
+      "tests": 9,
+      "tests_exit": 0,
+      "overall_exit": 1,
+      "reason": "mutation tool did not match issue-stage 503; failed tool capture retained; source restored"
+    },
+    "controlled_native_r11": {
+      "session": 18549,
+      "commit": "2a196ed943acc4dab8d868f95f5d0a535332f957",
+      "typecheck_exit": 0,
+      "files": 1,
+      "tests": 2,
+      "tests_exit": 0,
+      "mutation_gates": 2,
+      "mutations_exit": 0,
+      "source_restored": true,
+      "build_exit": 0,
+      "overall_exit": 0,
+      "scan_findings": 0
+    },
+    "native_subtitle_render": {
+      "commit": "aa99092",
+      "baseline_session": 87333,
+      "baseline_exit": 0,
+      "media_files": 18,
+      "media_tests": 168,
+      "old_worker_expected_exit": 1,
+      "source_restored": true,
+      "build_exit": 0,
+      "scan_findings": 0,
+      "scope": "synthetic prepared diagnostic only"
+    },
+    "created_task_join": {
+      "commit": "8bd3df0d80931687c3a129f50a36c5d97c85bb9d",
+      "join_session": 35369,
+      "typecheck_exit": 0,
+      "tests": 66,
+      "exit": 0,
+      "gate_session": 73415,
+      "gate_tests": 4,
+      "gate_exit": 0,
+      "independent_static": "SCOPED_PASS",
+      "scope": "reservation only, not production worker or film"
+    },
+    "task_worker_initial": {
+      "session": 25925,
+      "tests": 8,
+      "exit": 0,
+      "scope": "scheduler with explicit fixture processors"
+    },
+    "task_progression_pre_cancel_fix": {
+      "session": 91855,
+      "typecheck_exit": 0,
+      "files": 5,
+      "tests": 79,
+      "exit": 0
+    },
+    "task_worker_progression_final": {
+      "commit": "838ba5f2c8500f0103f56dbe51264ea9f70086fc",
+      "session": 98166,
+      "typecheck_exit": 0,
+      "files": 5,
+      "tests": 82,
+      "exit": 0,
+      "independent_static": "SCOPED_PASS",
+      "scope": "scheduler and real Host workflow progress seam, no actual film producer"
+    },
+    "task_settlement": {
+      "session": 21727,
+      "typecheck_exit": 0,
+      "files": 2,
+      "tests": 35,
+      "exit": 0
+    },
+    "dedicated_task_recovery": {
+      "session": 40519,
+      "typecheck_exit": 0,
+      "files": 2,
+      "tests": 46,
+      "exit": 0
+    },
+    "dedicated_recovery_real_cp_reopen": {
+      "session": 27039,
+      "tests_executed": 2,
+      "skipped_unselected": 5,
+      "exit": 0
+    },
+    "real_draft_processor": {
+      "session": 30961,
+      "typecheck_exit": 0,
+      "tests": 5,
+      "exit": 0,
+      "scope": "real local diagnostic source preparation, not human/committed film"
+    },
+    "draft_chain_combined": {
+      "session": 71456,
+      "typecheck_exit": 0,
+      "files": 7,
+      "tests": 98,
+      "exit": 0
+    },
+    "draft_chain_final": {
+      "session": 32373,
+      "typecheck_exit": 0,
+      "store_tests": 39,
+      "store_exit": 0,
+      "build_exit": 0,
+      "scan_exit": 1,
+      "scan_reason": "evidence parent absent; scan output save ENOENT; raw failure retained; rerun scan only"
+    }
+  },
+  "peerPreparation": {
+    "BRIDGE": "actual followup triggered; exact frozen archive independent validation authorized, await reported process handle",
+    "PRODUCT": "e96ca4c P2 candidate actual native tsc/build0 complete, no runtime producer",
+    "MEDIA": "P2 source fixed audit complete; no runtime NativeAck verdict"
+  },
+  "latestActualCompletion": {
+    "MAIN_managed_native": {
+      "session": 86349,
+      "exit": 0,
+      "typecheck": 0,
+      "files": 4,
+      "tests": 19,
+      "build": 0
+    },
+    "MAIN_secret_scan": {
+      "session": 76385,
+      "exit": 0,
+      "findings": 0
+    },
+    "BRIDGE_owned_frozen": {
+      "session": 50158,
+      "exit": 0,
+      "files": 4,
+      "tests": 10
+    },
+    "MEDIA_native_draft_light": {
+      "session": 98912,
+      "exit": 0,
+      "files": 1,
+      "tests": 14
+    }
+  },
+  "peer_prep": "PRODUCT source/docs expected helper only; MEDIA/BRIDGE read-only/no checks"
+}

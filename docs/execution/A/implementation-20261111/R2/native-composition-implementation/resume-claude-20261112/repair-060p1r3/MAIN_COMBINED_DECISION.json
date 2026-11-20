@@ -1,0 +1,37 @@
+{
+  "at": "2026-11-14T13:30:24.790184+00:00",
+  "status": "REQUEST_CHANGES_TARGETED_REPAIR_RELEASED",
+  "reviews": [
+    "msg_c38a72bac47b",
+    "msg_aa8991b8c5d9"
+  ],
+  "verified_inputs": {
+    "custodian": 36,
+    "integration": 154
+  },
+  "current_mismatches": [],
+  "counts_not_deduplicated": {
+    "custodian": {
+      "MAJOR": 8,
+      "MINOR": 1
+    },
+    "integration": {
+      "MAJOR": 6,
+      "MINOR": 1
+    }
+  },
+  "runtime_release": "Eleven exact lightweight unit/static only, NOT real P2",
+  "source_writer": {
+    "delivery": "reopened",
+    "followUpOf": "ctx_c79af5ef24d4",
+    "dispatchId": "ctx_b76df1e29d74",
+    "taskId": "task_8b6607f1acb4",
+    "runId": "run_399f9dd3ce5a",
+    "state": "ready",
+    "agent": "claude",
+    "terminal": "term_aaf4921b71923bf1b6415c7bc5fde7ac",
+    "workspace": "2e732423-9bcc-494c-a0ed-e27a9488f313::C:\\workspace\\videoworkline\\Narralens-agents\\main-integration",
+    "next": "Orca wakes you when workers report; end your turn when you're done."
+  },
+  "normative_plan": "SPEC ninegroups include all R2 findings and actual-branch tests"
+}

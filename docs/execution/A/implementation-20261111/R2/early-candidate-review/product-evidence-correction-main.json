@@ -1,0 +1,37 @@
+{
+  "format": "narralens.main-recomputed-evidence-index@1",
+  "source_commit": "e6bdb3d6204f4161a1e29ed56f5df8302aace927",
+  "computed_at": "2026-11-11T17:55:29.407984+00:00",
+  "files": [
+    {
+      "path": "docs/parallel/lane-product/A-R2-20261112/logs/r2-08-expected-build-first-failure.txt",
+      "bytes": 3666,
+      "sha256": "b54c2e879309efa3d1333445e5b197f6d36dac5ba7a2a7a2beb2d7046a01addb"
+    },
+    {
+      "path": "docs/parallel/lane-product/A-R2-20261112/logs/r2-10-build001-process-evidence.txt",
+      "bytes": 5804,
+      "sha256": "d4905cbdf5739522863c11bd9cf7428eb7a7c0429c47f124883e9db907f83b24"
+    },
+    {
+      "path": "docs/parallel/lane-product/A-R2-20261112/logs/r2-13-pid-reconciliation.txt",
+      "bytes": 2400,
+      "sha256": "dd640e5f0ff3227861610d74ab583df36027b9e3d18d97f06601dc75d07e447a"
+    },
+    {
+      "path": "docs/parallel/lane-product/A-R2-20261112/logs/r2-14-command-idle-boundary.txt",
+      "bytes": 2433,
+      "sha256": "709e13cc78c27593ddf76c9ccb0f70af7fa1550a587719f10c8af6f03eb9f1e9"
+    }
+  ],
+  "corrections": [
+    "Prior hand-written hashes are not authoritative; use this mechanically computed immutable-tree index.",
+    "Historical PID ownership was not proven. Later absence observations do not establish historical isolation.",
+    "Placeholder times are not observations.",
+    "The unauthorized studio-gateway Host test did run and failed; any claim that no Host ran at any point is false."
+  ],
+  "limits": [
+    "These hashes prove file bytes only, not the factual correctness of log narratives.",
+    "No PRODUCT implementation/build/Host/browser gate is certified here."
+  ]
+}

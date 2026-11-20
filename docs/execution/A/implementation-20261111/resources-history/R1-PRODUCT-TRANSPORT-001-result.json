@@ -1,0 +1,25 @@
+{
+  "grant": {
+    "format": "narralens.dev-resource-ledger@1",
+    "status": "HELD",
+    "holder": "PRODUCT Claude ctx_cb5959acbeb8 via PRODUCT Codex",
+    "queue": [],
+    "policy": "MAIN grants single heavy slot for Host/media/ffmpeg/Chromium/build/full gate; pure typecheck/unit permitted isolated",
+    "last_main_heavy": "R0 affected checks exit0, no owned heavy check running",
+    "evidence_limit": "operational coordination ledger, not proof of unrelated OS process absence",
+    "no_budget_ceiling": true,
+    "grant_id": "R1-PRODUCT-TRANSPORT-001",
+    "granted_at": "2026-11-11T14:09:13.721341+00:00",
+    "exact_command": "corepack pnpm test tests/agent-driven/integration/created-native-ui-transport.test.ts --maxWorkers=1 --minWorkers=1",
+    "cwd": "/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-PRODUCT",
+    "scope": "one ephemeral loopback Gateway with stub Studio; no real Studio/browser/ffmpeg/DB/build",
+    "request_message": "msg_d6d12e8db109",
+    "source_fence": "do not edit tested source/test/contract inputs while command runs; MAIN will not change PRODUCT worktree"
+  },
+  "outcome": "21/21 component tests, final run exit0; three earlier failing runs retained",
+  "raw_log_sha256": "805d5ba727e94cedfd52897c110b8bc1d1fa94c98f4a1854ba2724ae034bd837",
+  "recorded_shell_pid": 768624,
+  "pid_observed_absent": true,
+  "cleanup_limit": "finally gateway.close and child process checks; per-case port numbers NOT_CAPTURED",
+  "escalation": "MAIN root-cause review; no business acceptance"
+}

@@ -1,0 +1,154 @@
+{
+  "format": "narralens.R5F.positive-owner.static-review@1",
+  "verdict": "REQUEST_CHANGES",
+  "counts": {
+    "BLOCKER": 0,
+    "MAJOR": 2,
+    "MINOR": 0
+  },
+  "binding": {
+    "review_task": "task_88b5c70d41e9",
+    "review_dispatch": "ctx_ef8ad1d1486d",
+    "implementation_handback": "msg_96f275dfcd73",
+    "historical_head": "1d348d419120f23f45d958112ea8c43df5a04675",
+    "accepted_new_commit": null
+  },
+  "prior_findings": [
+    {
+      "prior_id": "R5E-O01",
+      "status": "CLOSED_STATIC",
+      "basis": "evidenceProblemsOf:241 now checks every row via artifactRowProblems, name uniqueness/reservation, full lowercase hash/safe byte count and candidate links; real mapper:619 and actual fs read-boundary scenario EIO test:1880 cover the original third-file error bypass, without replacing artifactFacts. Runtime not rerun."
+    },
+    {
+      "prior_id": "R5E-O02",
+      "status": "STILL_OPEN",
+      "basis": "Single actual-byte checker and call-site sharing, real artifact hash/length reads and I/O refusal are fixed. Result/schema consistency remains R5F-O01/O02; these are existing SPEC group2 obligations, not additional kernel work."
+    },
+    {
+      "prior_id": "R5E-O03",
+      "status": "CLOSED_STATIC",
+      "basis": "supervisor boundedDigestString:682, receipt summary:1971 and accumulator summary:2007 copy actual existing values; frozen/repeated snapshot and protocol fixture assertions read. OWN §2 now quotes concrete computed strings and raw_segments_saved=false. Captured mock result only, no actual C receipt asserted."
+    }
+  ],
+  "findings": [
+    {
+      "id": "R5F-O01",
+      "severity": "MAJOR",
+      "status": "STILL_OPEN",
+      "prior_ids": [
+        "R5E-O02"
+      ],
+      "title": "Hash-consistent normal evidence with missing, mistyped or contradictory result facts is accepted as success",
+      "locations": [
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 1979
+        },
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 1983
+        },
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 2052
+        },
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 2062
+        },
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 2070
+        },
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 2088
+        },
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 2230
+        },
+        {
+          "path": "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts",
+          "line": 273
+        }
+      ],
+      "reachable_precondition": "A record is readable and its publication/hash/length links are valid, but its result fields are missing/mistyped or disagree with the candidate/outcome. This is precisely the approved valid-hash/invalid-JSON-contract fault model. No arbitrary public JSON/HTTP authority or physical cleanup bypass is alleged.",
+      "actual_call_path": "actual main -> runPositivePilot -> default artifact mapper/link hashes -> verifyPublishedRun; actual legacy uses the same checker and uses accepted in root deletion. Candidate is checked only for kind/root/mode/authoritative/raw_segments_saved, not its original_failure/settlement_failure/cleanup/terminal/image. final original_failure and settlement_failure are coerced to null whenever isRecord fails, including missing/string/array. normal noExtraFailure checks only final cleanup_facts.length and snapshot.cleanup_failures===0; it does not reject snapshot.transport_failure or latched_outcome.kind=failure and does not compare candidate or outcome.cleanupFacts. Thus final missing error fields or diagnostic carrying an extra transport/latched failure can still yield reliable=true/accepted=true/exit0.",
+      "contract": "R5F SPEC group2 explicitly requires missing/wrong-type JSON fields and protocol inconsistencies to be unreliable3, and original result/candidate/final/outcome, terminal/settlement/diagnostic cleanup and mode-specific success to agree. Normal acceptance requires no extra failure, not only empty cleanup.",
+      "minimal_fix": "Validate presence and bounded types for the actual v2 result fields (explicit null versus a properly typed error), including diagnostic, image/terminal and published artifact row error fields. Do not normalize malformed/missing errors to null. Compare candidate/final normalized facts against each other and the real outcome, including raw cleanup; apply the producer's normal transport/latched failure predicate to the final diagnostic. Missing/malformed/contradictory protocol evidence must return reliable=false/accepted=false/exit3. Keep coherent ordinary failed evidence at reliable=true/accepted=false/exit1.",
+      "direct_counterexamples": [
+        "Guarded normal supervisor + real temporary FS; override only writeEvidence(candidate): serialize a copy with original_failure={name:'Error',message:'candidate EIO',code:'EIO'} or cleanup_facts=[error], or delete settlement_failure/terminal_proof. Delegate the real writer. The actual producer mapper and final links naturally hash those bytes; outcome/final remain clean. Current checker accepts normal0 because it ignores those candidate result fields. Run through actual main as the decisive future test.",
+        "Guarded normal fixture; at publishEvidence serialize the actual final with diagnostic_snapshot.transport_failure=EPIPE and/or latched_outcome={kind:'failure',code:'DRAW_PROTOCOL',message:'extra failure'}, keeping cleanup_failures=0; delegate REAL publishEvidence so final digest and size are real. Current normal branch accepts0 even though the stored terminal diagnostic explicitly says failure.",
+        "Delete final.original_failure/settlement_failure or replace each with a string before real publication; all hashes agree and isRecord converts each malformed value to null. Require3, not accepted0. Separately test coherent ordinary failure1 remains1, while contradictory final.kind/exit versus outcome is protocol3 rather than ordinary1."
+      ],
+      "test_gap": "Actual shared checker is now tested directly, which is an improvement. Existing valid-hash mutations1770-1850 cover mode/protocol/link/length only. Existing extra-error test1660 uses a producer fixture that already judged the run failed, not a hash-consistent record with omitted or contradictory normal fields.",
+      "impact": "The only byte/protocol authority can green-light contradictory or incomplete mandatory evidence; main can answer0 and the actual legacy consumer can authorize root deletion. This is evidence acceptance integrity, not proof that production kernel cleanup was bypassed.",
+      "runtime": "NOT_RUN; pure counterexample designs/static branch evaluation only, not captured old-code failures"
+    },
+    {
+      "id": "R5F-O02",
+      "severity": "MAJOR",
+      "status": "STILL_OPEN",
+      "prior_ids": [
+        "R5E-O02"
+      ],
+      "title": "Expected-fault verification accepts an unrelated settlement error and does not bind cancel provenance to the original Error",
+      "locations": [
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 2106
+        },
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 2111
+        },
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 2113
+        },
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 2120
+        },
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 2130
+        }
+      ],
+      "reachable_precondition": "A hash-consistent fault publication is submitted to the actual checker. All success-looking flags, original EXPECTED_ASSERTION_FAILURE, terminal proof, null picture and zero cleanup stay present, but settlement/cancel facts differ from the actual outcome or candidate. The same approved serialized-record fault injection can reach this through actual run/main without a live C/N.",
+      "actual_call_path": "verifyPublishedRun accepts any record at final.settlement_failure (2130 only !==null). It checks only originalFailure.code; cancel provenance checks accepted_as_primary/superseded flags but not error_code/error_name/message matching the original. Fault agrees never inspects outcome.originalFailure, outcome.settlementFailure or their object/cause relationship, outcome.pictureBytes or cleanupFacts. Candidate's corresponding errors are never compared. Therefore final settlement_failure={name:'Error',message:'unrelated failure',code:'EPIPE'} or even {} still accepted:true/exit1 while outcome/candidate preserve the original expected error.",
+      "contract": "R5F SPEC group2 requires the exact EXPECTED_ASSERTION_FAILURE and same original cancellation/settlement with no extra error. The producer judge:1514 actually verifies settlementFailure===originalFailure or settlementFailure.cause===originalFailure; replacing it with non-null serialized evidence is explicitly weaker. In-memory original Error identity must not be reconstructed from a JSON code alone.",
+      "minimal_fix": "For fault, verify the actual outcome's original deliberate Error and settlement object/cause relationship, compare the normalized bounded originals/settlement in candidate/final to the real outcome, and bind all cancel provenance error fields to that original. Validate null actual image/byte fields and raw cleanup consistently. If the protocol needs a private producer-issued relation fact to preserve wrapper cause information, add a narrowly bound fact rather than inferring identity from strings; original outcome already carries the real objects. Reject record/outcome contradictions with unreliable3; a well-formed ordinary failure remains not accepted/exit1.",
+      "direct_counterexamples": [
+        "Use the existing guarded silent fault fixture and real temp FS. Override only publishEvidence for final: copy final and replace settlement_failure with an unrelated EPIPE error record (or {}). Delegate real atomic publisher; returned final hash/size match actual bytes, candidate/outcome still have the deliberate original Error. Call actual verifyPublishedRun and main. Current logic yields accepted=true/exit1; require protocol3/no acceptance.",
+        "Keep final.original_failure.code=EXPECTED_ASSERTION_FAILURE but set cancel_provenance.error_code='OTHER', error_name/message to a different error, leaving the two accepted/superseded booleans and latched DRAW_CANCELLED intact. Current checker accepts; require mismatch refusal.",
+        "On a legitimate published fault, pass an otherwise identical internal outcome carrying a different originalFailure/settlementFailure, or non-null pictureBytes/extra cleanupFacts. Existing fault agrees ignores those fields. Add wrong-cause and valid-wrapper-cause controls so a fix does not reject the producer's legitimate exact-cause case."
+      ],
+      "test_gap": "The accepted-fault test:1622 exercises only the happy path. Extra-failure test:1657 injects transport failure before producer judgement and therefore receives kind=failed; it cannot prove independently that the checker validates same settlement/cancel facts in a valid-hash fault-observed record.",
+      "impact": "A hash-consistent record explicitly describing an unrelated settlement/cancel can be certified as the deliberate fault. Matching outer exit1 alone cannot fix that semantic false acceptance. No claim of a new raw-signal/resource-owner defect.",
+      "runtime": "NOT_RUN"
+    }
+  ],
+  "preserved_boundaries": {
+    "kernel": "Original group-proof algorithm and Python guard/test bytes unchanged; not reopened. Bounded digest addition does not grant authority.",
+    "owner": "Original same startPromise/finally, no normal self-cancel, late accepted N/full-tuple no-await injection guard, original cancel cause and replacement PID protections, null-root no cwd writes, actual reporting factory, atomic publisher retained.",
+    "incident": "Historical real os.kill event remains out of scope/unknown impact;004 MAIN exact stop and005 INCOMPLETE retained; no PID/exit fabricated.",
+    "timeout": "Final-pilot exit1/5000ms timeout retained. Current only the two mock-supervisor test case budgets become20000ms, not product deadlines; captured green does not establish machine-busy cause or kernel liveness. No runtime replay performed."
+  },
+  "acceptance_limits": {
+    "all_reviewer_runtime": "NOT_RUN",
+    "no_runtime_grant": true,
+    "not_accepted": [
+      "C/N/kernel",
+      "N1N2",
+      "R6",
+      "R7",
+      "R8/frozen commit",
+      "original17",
+      "ISO18",
+      "NEXT",
+      "V1"
+    ]
+  }
+}

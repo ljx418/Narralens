@@ -1,0 +1,12 @@
+{
+  "at": "2026-11-12T03:43:09.706152+00:00",
+  "frozen": "eba0d42fc41d0c9c99e1ddf90364149d3a8d5880",
+  "probe_sha256": "b72fc890dc4c078b2c40847313c20c71cbe443c1817c0111d0f62763274f350f",
+  "observed": [
+    "early guard cleanup failed: result deferred while actual row aborted, next transaction aborted and close succeeded: lost sticky cleanup fact",
+    "close during accepted recoverOnStart: sweep rejects CLOSED and stops before next row because full sweep not tracked as admitted operation"
+  ],
+  "state": "Await reviewer final code findings and explicit readonly handoff before any source/index mutation",
+  "planned_writer": "MAIN under user >2 defect rework consolidation; no429 in prior Claude batch, no429 substitution",
+  "scope": "same frozen4source/test paths and own new evidence; preserve all old captures/candidates; no core gate relaxation"
+}

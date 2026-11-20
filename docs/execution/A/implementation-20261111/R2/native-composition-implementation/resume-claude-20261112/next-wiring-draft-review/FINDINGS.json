@@ -1,0 +1,141 @@
+{
+  "status": "DRAFT_GAP_REVIEW_NOT_FINAL_RELEASE_PASS",
+  "reviewed_at": "2026-11-12T13:57:14.981148+00:00",
+  "scope": "Read-only document gap review; no implementation or runtime authority",
+  "canonical_root": "/mnt/c/workspace/videoworkline/Narralens",
+  "actual_source_root_read_only": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+  "draft_hashes": {
+    "00_READ_FIRST.md": "b312a8932fcfceaaa83b06f5abe30d9723059bc96b8a12228394427e91ab1acd",
+    "01_CONTRACT.md": "044d4b8389d38ff0438a1529bf01b19148329156d2831bdb1ebf542d56c60fc4",
+    "02_DEVELOPMENT_AND_ACCEPTANCE.md": "df1aab8dfa94bf88d3e974f309382cea102e39259dce7f25ad2d991482fe6707",
+    "03_CLAUDE_HANDOFF.md": "ba4ad729c2bc8429c514ff921675583c7027db01c8f9bcc8fa88ce5c59ee852c",
+    "manifest.json": "7da0657198c0948c99ae843ca0273ac2e84ee3a3ebd42e948170272eed2d6f04"
+  },
+  "checks": {
+    "all_declared_source_hashes_match": true,
+    "all_declared_draft_hashes_match": true,
+    "s01_original_count": 28,
+    "s01_copied_count": 28,
+    "all28_fields_exact": true,
+    "duplicate_s01_ids": false
+  },
+  "findings": [
+    {
+      "id": "NW-D01",
+      "severity": "MAJOR",
+      "kind": "CONTRADICTORY_EVENT_ORDER",
+      "references": [
+        "next-wiring-draft/01_CONTRACT.md:34",
+        "shared-selection-authority-design/CONTRACT.md:132"
+      ],
+      "finding": "The draft orders real selection mapper before S01 pending/finish. The authoritative S01 contract requires accepted pending_token and fresh CAS to COMMIT before invoking the asynchronous mapper. A literal implementation permits a crash or business currentSelectionVersion read to miss accepted work.",
+      "minimum_change": "Replace the arrow with authenticated ingress/sequence/profile check -> same-DB acceptMapping pending COMMIT and live-loaded revocation -> async mapper -> finishMapping final CAS -> fresh Expected/permit. State that document/hydration Expected proof may start from the epoch face without prior mapping, and add explicit pending-commit-before-mapper and crash barriers using original S01-E02/E05/R01/D01 IDs.",
+      "acceptance": "No new case numbering: reuse S01-E02/E05/R01/D01 and original native A02."
+    },
+    {
+      "id": "NW-D02",
+      "severity": "MAJOR",
+      "kind": "PUBLIC_PRODUCER_PREREQUISITE_AND_DEPENDENCY",
+      "references": [
+        "next-wiring-draft/02_DEVELOPMENT_AND_ACCEPTANCE.md:10",
+        "next-wiring-draft/02_DEVELOPMENT_AND_ACCEPTANCE.md:11",
+        "next-wiring-draft/01_CONTRACT.md:14",
+        "MAIN:src/host/agent-driven/creation-application.ts:63",
+        "MAIN:src/host/agent-driven/creation-application.ts:113",
+        "MAIN:src/host/agent-driven/creation-application.ts:159",
+        "host-recovery-composition-review/RELEASE_RECOMMENDATION.json:public_producer_followup"
+      ],
+      "finding": "W3 says wiring existing Change/Adoption/Publisher plus trusted review, but no concrete owner/path/output chain produces the prepared preview receipt, immutable ReviewPackage, registered media binding, trusted review/confirmation/approval and prepared-source package association. Observed CreationApplication explicitly supplies no media binding producer and has no change.prepare/apply handlers. W2 is assigned all event/lifecycle cases before W3, although S01-P01 and real S/A/H acceptance require that public chain. Component W2 can precede W3; full production acceptance cannot.",
+      "minimum_change": "Add a proposed public-producer subpackage and exact intended existing/new paths before release, naming PreparedPreviewService, FixedWorkflowService.publishReviewPackageInScope, prepared.bindPackage/media binding authority, trusted UI decision/approval producer, real Change/Adoption handlers and recovery admission gate. Separate W2 component evidence from W2+W3 real acceptance to avoid a dependency cycle. Reuse original public contracts and do not seed accepted policy/rows as end-to-end evidence.",
+      "acceptance": "Bind S01-P01, original H01/H03, HC06/HC07/HC11/HC13 and J04 to this prerequisite; absent producer remains NOT_RUN rather than a pass."
+    },
+    {
+      "id": "NW-D03",
+      "severity": "MAJOR",
+      "kind": "EXACT_HANDOFF_PATHS_AND_PRIVATE_PORT_BINDING",
+      "references": [
+        "next-wiring-draft/01_CONTRACT.md:12",
+        "next-wiring-draft/01_CONTRACT.md:36",
+        "next-wiring-draft/03_CLAUDE_HANDOFF.md:5",
+        "MAIN:src/host/m5/native-observation.ts:202",
+        "MAIN:src/host/m5/native-ack-store.ts:83",
+        "MAIN:src/host/agent-driven/project-context-service.ts:19",
+        "shared-selection-authority-design/ACCEPTANCE_AND_RELEASE.json:release_recommendation",
+        "host-recovery-composition-review/RELEASE_RECOMMENDATION.json:release_groups"
+      ],
+      "finding": "The draft names entities and promises a later exact ReleaseAssignment, but offers no proposed path inventory or private method binding table. It lists native-selection-mapper as an existing entity, while the inspected source has NativeSelectionMappingPort only, with no implementation file of that name. Ack record currently accepts only data and Context port has read only; a phrase about a permit/final fence does not define constructor-only validator ownership, transaction scope, single-use consumption, replay or read-lease release. Old HC recommendations also contain superseded reader filenames and broad DDL protection that cannot serve as the new exact allowlist.",
+      "minimum_change": "Prepare an explicitly PROPOSED path/owner/protected/test inventory and existing-versus-new port table now, to be re-anchored after accepted014 commit. Include mapper implementation path, S01 bootstrap constructor binding, same-DB Ack permit issue/validate/consume and Context read-lease/final-assert/release APIs, plus HC13 child/constructor-only barrier paths. Keep public DTOs/cp_a0/nine-field commit unchanged; no raw DB/callback provided by callers. This requests a draft proposal, not the currently pending accepted commit.",
+      "acceptance": "Final release must bind each W package, original cases and protected files to exact paths and one writer, with private signatures independently reviewed."
+    },
+    {
+      "id": "NW-D04",
+      "severity": "MAJOR",
+      "kind": "LIFECYCLE_PARTIAL_ORDER_AND_RECONCILIATION",
+      "references": [
+        "next-wiring-draft/01_CONTRACT.md:42",
+        "next-wiring-draft/02_DEVELOPMENT_AND_ACCEPTANCE.md:12",
+        "shared-selection-authority-design/CONTRACT.md:43",
+        "shared-selection-authority-design/CONTRACT.md:140",
+        "shared-selection-authority-design/CONTRACT.md:159",
+        "shared-selection-authority-design/CONTRACT.md:161",
+        "host-recovery-composition-review/ACCEPTANCE_CASES.md:Common real harness and evidence"
+      ],
+      "finding": "One owner and DB-last are correct but insufficient as an executable lifecycle. The draft does not schedule S01 settleInterruptedObservations/reconcileBaseline relative to dedicated recovery, generic recovery/reaper, worker/listener admission and normal prepare/apply/native/context calls. Nor does it define how public revoke/stopAdmission differs from keeping business-read authority alive for accepted recovery, or when failed drain prevents closing DB/native roots. Those are critical original invariants, not optional final implementation details.",
+      "minimum_change": "Add one explicit startup and shutdown dependency table with operation owners: owned FD9/original DB -> S01 migration/validation -> pending settlement/baseline reconciliation -> dedicated and generic recovery/reaper gates -> public/task/native admission; reconcile before each new prepare/apply/native/context round and after real baseline/control changes, pure comparison inside final guards. On shutdown revoke ingress/live-loaded, drain raw acquisitions/scans/adoptions/mappers/probes/cache calls while their dependencies remain readable, stop native before workspace disposal, then close selection/dependencies/DB under exact ownership. Preserve primary plus cleanup and fail honestly on unresolved processes.",
+      "acceptance": "Bind existing S01-C02/R01-R03/L01-L02, J01-J05 and HC01/03/09/10/13; actual IPC/pid/start/FD9/descendant exit evidence remains required."
+    },
+    {
+      "id": "NW-D05",
+      "severity": "MAJOR",
+      "kind": "ROLLBACK_OLD_ZERO_MODE",
+      "references": [
+        "next-wiring-draft/02_DEVELOPMENT_AND_ACCEPTANCE.md:41",
+        "shared-selection-authority-design/ACCEPTANCE_AND_RELEASE.json:rollback_preservation",
+        "MAIN:src/host/agent-driven/project-context-service.ts:35",
+        "MAIN:src/host/m5/native-observation.ts:559"
+      ],
+      "finding": "Rollback is described as closing only new mounted entries/capabilities while retaining data. On a binary without S01, original created paths can still use session-local/default selection0. Merely removing the new wiring can therefore re-enable the very old-mode write/Context behavior prohibited by the authoritative rollback contract.",
+      "minimum_change": "State that rollback to an incompatible binary puts affected created writes/native loaded claims into explicit read-only/unavailable mode; bootstrap, prepare/apply, recovery authorization and Context must not silently use legacy0. Preserve ledger/schema/receipts and resume only a compatible audited binary. Separate untouched Hypit/migrated legacy mode and already-true committed receipts.",
+      "acceptance": "Use original S01-X01/B04 and rollback provenance checks; do not add down migration, erase history or turn missing authority into0."
+    },
+    {
+      "id": "NW-D06",
+      "severity": "MAJOR",
+      "kind": "014_CACHE_AND_POOL_ROUTE_OWNERSHIP_BINDING",
+      "references": [
+        "next-wiring-draft/01_CONTRACT.md:11",
+        "next-wiring-draft/01_CONTRACT.md:16",
+        "next-wiring-draft/01_CONTRACT.md:42",
+        "G01_G07_CONSOLIDATED_014_RELEASE.md:3-7",
+        "G01_G07_MAIN_DESIGN_CONSTRAINTS.md:G04/G07"
+      ],
+      "finding": "The draft correctly defers to accepted014 and rejects browser witnesses/global singleton pools, but does not map controlled native GET/background cache producer paths to the trusted wrapper, issued workspace/ref/generation registry, shared explicit pool and shared-browser owner. Without this binding the new stage can leave a normal native cache path bypassing witnessed production, or create per-proof budgets/close a peer producer. This is a missing next-stage wiring contract, not a finding about the ongoing014 implementation.",
+      "minimum_change": "Add a proposed call/ownership table for each native cache-producing route/background action and reader/mapper/proof acquisition. Specify trusted source of producer parameters, where issued witnesses are registered/revoked, behavior for unknown pre-existing cache/cache-hit and new workspace/restart, and explicit pool injection shared across both trees and parallel proofs. Name last-browser-owner close/drain and workspace disposal order. Rebind actual signatures only after014 acceptance; do not invent new persistent witness authority.",
+      "acceptance": "Plan existing R04/J03/J04/H02 and014 G04/G07 interface-consumption regressions including stale/foreign witness, cache-hit without witness, budget accounting and peer-owner drain; never count a test-only registry as production wiring."
+    },
+    {
+      "id": "NW-D07",
+      "severity": "MINOR",
+      "kind": "REFERENCE_CLOSURE_AND_ENVIRONMENT",
+      "references": [
+        "next-wiring-draft/manifest.json:source_inputs",
+        "next-wiring-draft/00_READ_FIRST.md:7",
+        "next-wiring-draft/03_CLAUDE_HANDOFF.md:5"
+      ],
+      "finding": "All six declared input hashes and four draft hashes match. However the handoff asks for Native design semantics while manifest omits native-source-composition-design/DESIGN.md; the three shared MAIN decisions and current014 architectural constraints are also not bound. Source root is only indirectly discoverable through referenced historical files, and the provisional handoff does not list planned evidence roots/command partitions. This leaves an avoidable stale-document/file-name ambiguity before final re-anchor.",
+      "minimum_change": "Extend the draft input manifest with actual referenced DESIGN and applicable MAIN decisions/014 constraints, record explicit canonical-doc root versus actual MAIN implementation cwd, and mark their live or historical authority. Add planned evidence root and test-category/IPC seam inventory; final exact hashes/argv/accepted commit remain the known future release gate, not something requested now.",
+      "acceptance": "Recompute manifest after draft correction; preserve original IDs and all source-doc hashes as immutable references."
+    }
+  ],
+  "known_pending_not_a_finding": [
+    "accepted_native_commit is intentionally null until014 accepted",
+    "actual014 signatures/resources are live, not a frozen accepted API",
+    "original H01-H04/human/Chinese-film/export/T20 gates remain independent NOT_RUN"
+  ],
+  "no_runtime_executed": true,
+  "no_source_or_draft_mutation": true,
+  "write_allowlist": [
+    "REVIEW.md",
+    "FINDINGS.json"
+  ]
+}

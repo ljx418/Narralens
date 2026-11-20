@@ -1,0 +1,5 @@
+PASS failed pending round: zero reads, zero hashes, zero hydrated deliveries
+PASS new normal round: four reads/hashes and hydrated delivery
+PASS final failure ends its round; a subsequent normal round succeeds
+PASS actual helper canonical/hash matches eight literal contract vectors
+{"scope":"actual-helper VM unit only; no React render/DOM/browser/Host","calls":7,"reads":12,"hashes":20,"delivered":2}

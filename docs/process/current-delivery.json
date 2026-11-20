@@ -1,0 +1,185 @@
+{
+  "format": "narralens.delivery-packet@1",
+  "status": "PARTIAL",
+  "contract": {
+    "path": "docs/process/01_DELIVERY_SPEC.md",
+    "sha256": "0d81c568da5ada4633a2e463552b6ff3f554c0a5e85daee71aa1e50799c65345"
+  },
+  "source": [
+    {
+      "path": "tools/check-delivery-spec.py",
+      "sha256": "fe467996d6509cc299088c9beaf63b730c9dfaf38a42e63f1adac5364d027a85"
+    }
+  ],
+  "required_cases": [
+    "C06-BIND",
+    "C06-ONESHOT",
+    "C06-ORDER",
+    "C06-WAIT",
+    "C06-EPOCH",
+    "C06-PARENT",
+    "C06-BOUND",
+    "C06-EXEC",
+    "C07-LATE",
+    "C07-EOF",
+    "C07-EIO",
+    "C07-CHANNEL",
+    "C08-OVERFLOW",
+    "C08-END",
+    "C08-HOLD",
+    "C08-LATEWAIT",
+    "C08-FORGE",
+    "R5-REG"
+  ],
+  "cases": [
+    {
+      "id": "C06-BIND",
+      "implementation": "NEEDS_REVALIDATION",
+      "production_entry": "R6 reviewed contract / original source worktree",
+      "test_name": null,
+      "level": "D1",
+      "command_capture": null
+    },
+    {
+      "id": "C06-ONESHOT",
+      "implementation": "NEEDS_REVALIDATION",
+      "production_entry": "R6 reviewed contract / original source worktree",
+      "test_name": null,
+      "level": "D1",
+      "command_capture": null
+    },
+    {
+      "id": "C06-ORDER",
+      "implementation": "NEEDS_REVALIDATION",
+      "production_entry": "R6 reviewed contract / original source worktree",
+      "test_name": null,
+      "level": "D1",
+      "command_capture": null
+    },
+    {
+      "id": "C06-WAIT",
+      "implementation": "NEEDS_REVALIDATION",
+      "production_entry": "R6 reviewed contract / original source worktree",
+      "test_name": null,
+      "level": "D1",
+      "command_capture": null
+    },
+    {
+      "id": "C06-EPOCH",
+      "implementation": "NEEDS_REVALIDATION",
+      "production_entry": "R6 reviewed contract / original source worktree",
+      "test_name": null,
+      "level": "D1",
+      "command_capture": null
+    },
+    {
+      "id": "C06-PARENT",
+      "implementation": "NEEDS_REVALIDATION",
+      "production_entry": "R6 reviewed contract / original source worktree",
+      "test_name": null,
+      "level": "D1",
+      "command_capture": null
+    },
+    {
+      "id": "C06-BOUND",
+      "implementation": "NEEDS_REVALIDATION",
+      "production_entry": "R6 reviewed contract / original source worktree",
+      "test_name": null,
+      "level": "D1",
+      "command_capture": null
+    },
+    {
+      "id": "C06-EXEC",
+      "implementation": "NEEDS_REVALIDATION",
+      "production_entry": "R6 reviewed contract / original source worktree",
+      "test_name": null,
+      "level": "D1",
+      "command_capture": null
+    },
+    {
+      "id": "C07-LATE",
+      "implementation": "NEEDS_REVALIDATION",
+      "production_entry": "R6 reviewed contract / original source worktree",
+      "test_name": null,
+      "level": "D1",
+      "command_capture": null
+    },
+    {
+      "id": "C07-EOF",
+      "implementation": "NEEDS_REVALIDATION",
+      "production_entry": "R6 reviewed contract / original source worktree",
+      "test_name": null,
+      "level": "D1",
+      "command_capture": null
+    },
+    {
+      "id": "C07-EIO",
+      "implementation": "NEEDS_REVALIDATION",
+      "production_entry": "R6 reviewed contract / original source worktree",
+      "test_name": null,
+      "level": "D1",
+      "command_capture": null
+    },
+    {
+      "id": "C07-CHANNEL",
+      "implementation": "NEEDS_REVALIDATION",
+      "production_entry": "R6 reviewed contract / original source worktree",
+      "test_name": null,
+      "level": "D1",
+      "command_capture": null
+    },
+    {
+      "id": "C08-OVERFLOW",
+      "implementation": "NEEDS_REVALIDATION",
+      "production_entry": "R6 reviewed contract / original source worktree",
+      "test_name": null,
+      "level": "D1",
+      "command_capture": null
+    },
+    {
+      "id": "C08-END",
+      "implementation": "NEEDS_REVALIDATION",
+      "production_entry": "R6 reviewed contract / original source worktree",
+      "test_name": null,
+      "level": "D1",
+      "command_capture": null
+    },
+    {
+      "id": "C08-HOLD",
+      "implementation": "NEEDS_REVALIDATION",
+      "production_entry": "R6 reviewed contract / original source worktree",
+      "test_name": null,
+      "level": "D1",
+      "command_capture": null
+    },
+    {
+      "id": "C08-LATEWAIT",
+      "implementation": "NEEDS_REVALIDATION",
+      "production_entry": "R6 reviewed contract / original source worktree",
+      "test_name": null,
+      "level": "D1",
+      "command_capture": null
+    },
+    {
+      "id": "C08-FORGE",
+      "implementation": "NEEDS_REVALIDATION",
+      "production_entry": "R6 reviewed contract / original source worktree",
+      "test_name": null,
+      "level": "D1",
+      "command_capture": null
+    },
+    {
+      "id": "R5-REG",
+      "implementation": "NEEDS_REVALIDATION",
+      "production_entry": "R6 reviewed contract / original source worktree",
+      "test_name": null,
+      "level": "D1",
+      "command_capture": null
+    }
+  ],
+  "note": "Current R6 is blocked, not a source acceptance packet. Rebind real source/captures in implementation worktree before any ready claim.",
+  "release": {
+    "path": "docs/process/current-release.json",
+    "sha256": "d089f8cba886e2d2e1517ca8bd30dd335370dbaaf1d9c81ba99463425b096b33"
+  }
+}

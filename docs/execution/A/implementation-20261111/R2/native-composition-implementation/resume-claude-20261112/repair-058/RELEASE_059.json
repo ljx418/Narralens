@@ -1,0 +1,77 @@
+{
+  "release_id": "MAIN_RELEASE_059_CLEAR_REPAIRS",
+  "at": "2026-11-14T03:02:48.342464+00:00",
+  "base_commit": "1d348d419120f23f45d958112ea8c43df5a04675",
+  "status": "RELEASED_SCOPED_IMPLEMENTATION_AND_EXACT_LIGHT_RUNTIME",
+  "allow_existing": [
+    "src/adapters/openfilm/openfilm-upstream.ts",
+    "src/host/agent-driven/retained-native-closure.ts",
+    "src/host/agent-driven/committed-snapshot-authority.ts",
+    "src/host/agent-driven/created-native-source-reader.ts",
+    "tests/m2.1/openfilm-upstream-lock.test.ts",
+    "tests/agent-driven/integration/created-native-source-reader.test.ts",
+    "tests/agent-driven/integration/native-cache-witness.test.ts"
+  ],
+  "allow_new": [
+    "tests/agent-driven/integration/openfilm-serving-url.test.ts",
+    "tests/fixtures/openfilm-serving-url-child.mjs",
+    "tests/agent-driven/integration/retained-native-budget.test.ts",
+    "tests/agent-driven/integration/helpers/native-read-growth-child.mjs",
+    "tests/agent-driven/integration/helpers/native-read-byte-observer.mjs"
+  ],
+  "existing_raw_sha256": {
+    "src/adapters/openfilm/openfilm-upstream.ts": "013f50ce87e04b3ff542e15f3c98d833ae43940fef9d85ccad79ff38e5bd200b",
+    "src/host/agent-driven/retained-native-closure.ts": "ab7ffead1c4b7b238f7e4f6097b1d17ad7792513e84591b623f67c95576ac6e7",
+    "src/host/agent-driven/committed-snapshot-authority.ts": "1c53360e3c618c603cfcbe61d0c2d57004c5bd33dc26a92c2fdec72a1844bd6d",
+    "src/host/agent-driven/created-native-source-reader.ts": "cde88435d61dba1a881bef403e6a013f1d4f2bb93db8e1ffa2b3c15b4c74f82b",
+    "tests/m2.1/openfilm-upstream-lock.test.ts": "a4f1d676e8a246cc79cf5de6547e7df23a0298941132c6ded34bea7155b400b2",
+    "tests/agent-driven/integration/created-native-source-reader.test.ts": "09ef2019ad95cbd3b3bb377e8f146b994c9462f48f4662db5e072b629383ea77",
+    "tests/agent-driven/integration/native-cache-witness.test.ts": "6ba76059a41c1820d580ea0a7ae684f62b7afcd445bdc431a1524b8c7647ccd4"
+  },
+  "allowed_commands": [
+    [
+      "corepack",
+      "pnpm",
+      "exec",
+      "tsc",
+      "--noEmit"
+    ],
+    [
+      "corepack",
+      "pnpm",
+      "exec",
+      "vitest",
+      "run",
+      "--config",
+      "vitest.config.ts",
+      "tests/m2.1/openfilm-upstream-lock.test.ts"
+    ],
+    [
+      "corepack",
+      "pnpm",
+      "exec",
+      "vitest",
+      "run",
+      "--config",
+      "vitest.config.ts",
+      "tests/agent-driven/integration/retained-native-budget.test.ts"
+    ],
+    [
+      "corepack",
+      "pnpm",
+      "exec",
+      "vitest",
+      "run",
+      "--config",
+      "vitest.config.ts",
+      "tests/agent-driven/integration/openfilm-serving-url.test.ts"
+    ]
+  ],
+  "recorder": "docs/execution/A/implementation-20261111/integration/e1-main-takeover/run-recorded.py",
+  "capture_prefix": "n1n2-claude-059-",
+  "one_writer": "next actual Claude dispatch only; previous058 task settled",
+  "heavy_runtime": false,
+  "excluded_finding": "A057-04 remainsOPEN; no producer/bridge/workspace architecture implementation",
+  "protected_AGENTS_sha256": "37300463a72a612ae16e0a5fcfb496502c57c722b83781e0e2e8c9480594542b",
+  "spec_sha256": "26e95e9f4bbffb8c60ef0ae0932ac35d2d250e298592d49d29c01b16f0147d55"
+}

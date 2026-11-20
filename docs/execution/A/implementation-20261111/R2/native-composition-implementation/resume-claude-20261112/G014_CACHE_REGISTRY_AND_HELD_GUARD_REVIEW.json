@@ -1,0 +1,25 @@
+{
+  "at": "2026-11-12T14:55:25.451728+00:00",
+  "status": "ACTIVE014_STATIC_GAPS_NOT_RUNTIME_CONCLUSIONS",
+  "source_sha256": {
+    "src/host/agent-driven/native-cache-witness.ts": "1f5a752fb01d9c0ecf5db1c7935bf01700b98c76534d9711c696eee82bd76426",
+    "src/host/agent-driven/created-native-workspace.ts": "a23ed94b5625593c2a6f10af656b69070e58502ad1753e5917aab6755e23c10c",
+    "src/host/agent-driven/retained-native-closure.ts": "bd83a07eb2e9d7ca4acbd30e131a19b225b7f82b50a574b64f178b86ec297c29"
+  },
+  "message": "msg_51b65b813b8c",
+  "findings": [
+    {
+      "id": "G04-REGISTRY-CONSTRUCTOR",
+      "fact": "Exported NativeCacheWitnessLedger constructor accepts arbitrary roots callback and brands every constructed instance.",
+      "required": "Witness issuance requires real service-issued workspace lease/ref/root identity; reject arbitrary public constructor fake roots, not only plainobject clone. Do not assert foreign-witness production is a completed runtime exploit: actual service may additionally refuse recording, which must be tested."
+    },
+    {
+      "id": "G04-DEPENDENCY-RESTORE",
+      "fact": "PREPOST FileFacts comparesdev/ino/hash/bytes/mtime_ms but omits ctime/held guard across draw.",
+      "required": "Use held PREfile finalguard or equivalent ctimeNs fence for declared dependencies; sameinode temporarychange thenrestorebytes+mtime negativecontrol. Preserve legitimate cache creation; no blanket fulltree mismatch."
+    }
+  ],
+  "business_acceptance": "NOT_RUN",
+  "browser": "NOT_GRANTED",
+  "scope": "Original014 root/request identity and PREPOST source stability, not newpersistent authority"
+}

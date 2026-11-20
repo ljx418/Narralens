@@ -1,0 +1,97 @@
+{
+  "at": "2026-11-12T14:37:19.412719+00:00",
+  "status": "BATCH016_FAILED_126_AWAIT_OWN_CLEANUP",
+  "results": [
+    {
+      "capture": "n1n2-claude-resume-125-gate-pure",
+      "result": {
+        "exit": 0,
+        "source_changed": [],
+        "source_added": [],
+        "log_sha256": "228472d899df115868c9135b1e114d1a4d7e2d715f10de46faa796788a99e9ad",
+        "finished_at": "2026-11-12T14:26:21.677994+00:00"
+      },
+      "failures": [],
+      "counts": {
+        "passed": 18,
+        "failed": 0,
+        "filtered": 59
+      }
+    },
+    {
+      "capture": "n1n2-claude-resume-126-gate-component",
+      "result": {
+        "exit": 1,
+        "source_changed": [],
+        "source_added": [],
+        "log_sha256": "d7a97529a2bf35afcbab507f294726e9f970c04ff030196d78a6842eb7d71e79",
+        "finished_at": "2026-11-12T14:35:37.716103+00:00"
+      },
+      "failures": [
+        {
+          "case": "tests/agent-driven/integration/created-native-source-reader.test.ts > F03 refuses a source leaf and a source parent replaced during the acquisition",
+          "diagnostic_excerpt": "AssertionError: expected RetainedNativeError: The retained file is\u2026 { code: '\u2026' } to match object { code: 'REVISION_CONFLICT' }\n(1 matching property omitted from actual)\n\n- Expected\n+ Received\n\n- {\n-   \"code\": \"REVISION_CONFLICT\",\n+ RetainedNativeError {\n+   \"code\": \"NATIVE_CLOSURE_MEMBERSHIP_MOVED\",\n  }\n"
+        },
+        {
+          "case": "tests/agent-driven/integration/created-native-source-reader.test.ts > F04 refuses a hardlink alias and an unknown directory in the working copy",
+          "diagnostic_excerpt": "AssertionError: expected RetainedNativeError: The retained file is\u2026 { code: '\u2026' } to match object { code: 'NATIVE_SOURCE_COPY_ALIASED' }\n(1 matching property omitted from actual)\n\n- Expected\n+ Received\n\n- {\n-   \"code\": \"NATIVE_SOURCE_COPY_ALIASED\",\n+ RetainedNativeError {\n+   \"code\": \"NATIVE_CLOSURE_ALIASED\",\n  }\n"
+        },
+        {
+          "case": "tests/agent-driven/integration/created-native-source-reader.test.ts > G01 adopts the genuine cleanup uncertainty of a rejected source acquisition",
+          "diagnostic_excerpt": "AssertionError: expected RetainedNativeError: The retained tree co\u2026 { \u2026(2) } to match object { code: 'REVISION_CONFLICT' }\n(1 matching property omitted from actual)\n\n- Expected\n+ Received\n\n- {\n-   \"code\": \"REVISION_CONFLICT\",\n+ RetainedNativeError {\n+   \"code\": \"NATIVE_CLOSURE_CLEANUP_FAILED\",\n  }\n"
+        },
+        {
+          "case": "tests/agent-driven/integration/created-native-source-reader.test.ts > G01 keeps the reader usable after an ordinary failure of the acquisition",
+          "diagnostic_excerpt": "AssertionError: expected RetainedNativeError: The retained path is\u2026 { code: '\u2026' } to match object { code: 'REVISION_CONFLICT' }\n(1 matching property omitted from actual)\n\n- Expected\n+ Received\n\n- {\n-   \"code\": \"REVISION_CONFLICT\",\n+ RetainedNativeError {\n+   \"code\": \"NATIVE_CLOSURE_NOT_FOUND\",\n  }\n"
+        },
+        {
+          "case": "tests/agent-driven/integration/created-native-source-reader.test.ts > G01 adopts the genuine uncertainty of a raw rejection that arrives after the caller was cancelled",
+          "diagnostic_excerpt": "AssertionError: expected null not to be null\n \u276f tests/agent-driven/integration/created-native-source-reader.test.ts:1882:23\n    1880|  // The reader's own close reports the real cleanup state.\n    1881|  const reported=await closing.then(()=>null,error=>error);\n    1882|  expect(reported).not.toBeNull();\n       |                       ^\n    1883|  expect((reported as {cleanup_errors?:unknown[]}).cleanup_errors?.leng\u2026\n    1884| },60000);\n\n\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af[5/13]\u23af"
+        },
+        {
+          "case": "tests/agent-driven/integration/created-native-source-reader.test.ts > G02 refuses the round when the working copy view is replaced during the read",
+          "diagnostic_excerpt": "AssertionError: promise resolved \"{ entries: [ { \u2026(2) }, \u2026(10) ], \u2026(6) }\" instead of rejecting\n\n- Expected\n+ Received\n\n- Error {\n-   \"message\": \"rejected promise\",\n+ {\n+   \"captions\": {\n+     \"state\": \"present\",\n+     \"value\": {\n+       \"cues\": ["
+        },
+        {
+          "case": "tests/agent-driven/integration/created-native-source-reader.test.ts > G02 refuses the round when another delivered proof fails to release",
+          "diagnostic_excerpt": "Error: The case could not release everything\n \u276f tests/agent-driven/integration/created-native-source-reader.test.ts:2033:17\n    2031|  if(primary!==undefined)withCleanup(primary,failures);\n    2032|  if(failures.length>0){\n    2033|   const failure=new Error('The case could not release everything');\n       |                 ^\n    2034|   Object.defineProperty(failure,'cleanup_errors',{value:failures,enume\u2026\n    2035|   throw failure;\n\n\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af[7/13]\u23af"
+        },
+        {
+          "case": "tests/agent-driven/integration/created-native-source-reader.test.ts > G03 refuses a film that is replaced between the bounded digest and the parse",
+          "diagnostic_excerpt": "AssertionError: expected RetainedNativeError: The retained file ch\u2026 { code: '\u2026' } to match object { code: 'REVISION_CONFLICT' }\n(1 matching property omitted from actual)\n\n- Expected\n+ Received\n\n- {\n-   \"code\": \"REVISION_CONFLICT\",\n+ RetainedNativeError {\n+   \"code\": \"NATIVE_CLOSURE_MEMBERSHIP_MOVED\",\n  }\n"
+        },
+        {
+          "case": "tests/agent-driven/integration/created-native-source-reader.test.ts > G05 proves a real child that dies by a signal and a real child that is cancelled",
+          "diagnostic_excerpt": "AssertionError: expected [ 'read-rejected' ] to include 'child-exited'\n \u276f tests/agent-driven/integration/created-native-source-reader.test.ts:2219:17\n    2217|   await closing;\n    2218|   // The child's own exit came before the read was rejected.\n    2219|   expect(order).toContain('child-exited');\n       |                 ^\n    2220|   expect(order.indexOf('child-exited')).toBeLessThan(order.indexOf('re\u2026\n    2221|  });\n \u276f withFixture tests/agent-driven/integration/created-native-source-reader.test.ts:55:6\n \u276f tests/agent-driven/integration/created-native-source-reader.test.ts:2202:2\n\n\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af[9/13]\u23af"
+        },
+        {
+          "case": "tests/agent-driven/integration/created-native-source-reader.test.ts > G06 hands a non-lexical caption order to the actual consumer without changing it",
+          "diagnostic_excerpt": "AssertionError: expected 'unsupported' to be 'computed' // Object.is equality\n\nExpected: \"computed\"\nReceived: \"unsupported\"\n\n \u276f tests/agent-driven/integration/created-native-source-reader.test.ts:2261:24\n    2259|  const result=await computeNativeEffectiveSidecars(input);\n    2260|  // The consumer took the listing it was given: the directory it looke\u2026\n    2261|  expect(result.status).toBe('computed');\n       |                        ^\n    2262|  expect(result.directory_lookups).toContain('assets/vo');\n    2263|  // And a listing that is not the one it was given is refused, so the \u2026"
+        },
+        {
+          "case": "tests/agent-driven/integration/created-native-source-reader.test.ts > G06 accepts an absent heard transcript and refuses its later birth",
+          "diagnostic_excerpt": "AssertionError: expected undefined to be defined\n \u276f tests/agent-driven/integration/created-native-source-reader.test.ts:2280:19\n    2278|   const missing=readdirSync(vo).filter(name=>name.endsWith('.wav')).ma\u2026\n    2279|    .find(name=>!existsSync(join(vo,name)));\n    2280|   expect(missing).toBeDefined();\n       |                   ^\n    2281|   expect(facts.verifyClosure()).toBe(true);\n    2282|   // The file is born while the proof is held: the proof does not veri\u2026\n \u276f tests/agent-driven/integration/created-native-source-reader.test.ts:77:37\n \u276f withFixture tests/agent-driven/integration/created-native-source-reader.test.ts:55:6\n \u276f withFacts tests/agent-driven/integration/created-native-source-reader.test.ts:74:2\n \u276f tests/agent-driven/integration/created-native-source-reader.test.ts:2276:2"
+        },
+        {
+          "case": "tests/agent-driven/integration/created-native-source-reader.test.ts > G06 refuses an isolated parent swap that leaves no extra file behind",
+          "diagnostic_excerpt": "AssertionError: promise resolved \"{ facts: { \u2026(16) }, \u2026(4) }\" instead of rejecting\n\n- Expected\n+ Received\n\n- Error {\n-   \"message\": \"rejected promise\",\n+ {\n+   \"assertCurrent\": [Function assertCurrent],\n+   \"closure\": RetainedNativeClosure {},\n+   \"facts\": {\n+     \"assets\": ["
+        },
+        {
+          "case": "tests/agent-driven/integration/created-native-source-reader.test.ts > G07 holds every nested and empty directory of both trees independently",
+          "diagnostic_excerpt": "NativeSourceReaderError: The working copy holds a directory the native does not produce\n \u276f refuse src/host/agent-driven/created-native-source-reader.ts:41:73\n     39|  constructor(readonly code:string,message:string){super(message);this.\u2026\n     40| }\n     41| const refuse:(code:string,message:string)=>never=(code,message)=>{thro\u2026\n       |                                                                         ^\n     42| \n     43| /** The normalised fact of one probed media file.\n \u276f CreatedNativeSourceReader.#readFacts src/host/agent-driven/created-native-source-reader.ts:730:4\n \u276f CreatedNativeSourceReader.#read src/host/agent-driven/created-native-source-reader.ts:623:15\n\n\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af\u23af[13/13]\u23af"
+        }
+      ],
+      "counts": {
+        "passed": 46,
+        "failed": 13,
+        "filtered": 18
+      }
+    }
+  ],
+  "127": "NOT_GRANTED_AFTER126FAIL",
+  "128_browser": "NOT_GRANTED",
+  "new_capture_failure_preserved": true,
+  "notification": "msg_3523c9f737a4",
+  "actual_pid1808480": "ABSENT_CURRENT_OBSERVATION",
+  "remaining": "Owncleanupthenreleaseexisting014correction;final17requirementsunproven;noimplementationtakeover"
+}

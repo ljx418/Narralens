@@ -1,0 +1,479 @@
+{
+  "status": "DESIGN_DELIVERED_NOT_IMPLEMENTATION_RELEASE",
+  "baseline": "e2eff61b464d75d36598103d718cd2a75db5dfda",
+  "source_root": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+  "authority": "MAIN S-01 plus msg_1105a6251955; one MAIN release owner, no source grant held by reviewer",
+  "ddl_version": 1,
+  "ddl_sha256": "6c9804ca36e226cb28674eff742c1eb433f6c650fe7148bacb603a902f8ab896",
+  "ddl_executed": false,
+  "contract_sha256": "82dbf646710a807c7e38796e0e0216a5d2890134a00d6b6b306656715742855d",
+  "source_evidence": {
+    "src/host/m5/native-observation.ts": {
+      "blob": "f48deec3e768d0ae2165abf9fc58261970f61d44",
+      "sha256": "7d246c7a518fcbaecf4f9e569c5d78c47ad5cd0860ef36af49112d22471074f4",
+      "evidence": "170-172 existing session port;559-575 current version;576-613 session-local reset;738-777 async mapper and local counter; document/hydration admission precedes proof"
+    },
+    "src/host/m5/native-ack-store.ts": {
+      "blob": "d9d11488228a31305e959f5d3a98b676236d5d0d",
+      "sha256": "d42a38f6b56d9912130f90559b94ff8ae0004e6937fd5e9862034790f0a32ee2",
+      "evidence": "83-105 existing same-db append transaction needs private final permit fence"
+    },
+    "src/host/agent-driven/project-context-service.ts": {
+      "blob": "48d77a089d289239ed9c719bdb001734e0c518c9",
+      "sha256": "27a9e09f7647148443ad549f386e3aa6175f7a3de0f362886ef981769b440b7e",
+      "evidence": "35 default version0;66-70 Ack/context final assembly"
+    },
+    "src/host/agent-driven/created-source-facts-reader.ts": {
+      "blob": "96bbac775e4ae6bc6577879b0a440be7ed3d05bf",
+      "sha256": "f45226012a260cff8c9938942f2324cde00bb89c2077ddbf310944ec12667af5",
+      "evidence": "91 final version check;122 current version capture"
+    },
+    "src/host/agent-driven/created-source-change-service.ts": {
+      "blob": "bf6769dfe86038d6faaed150f4cbc391a7e7c9ab",
+      "sha256": "65d123e91866ea1a6e3096a062daabf73bcfad778eec280e5689d25f7dd564fe",
+      "evidence": "96 current selection equality;112 re-read current authority"
+    },
+    "src/host/agent-driven/created-source-adoption-service.ts": {
+      "blob": "ebf8dd66375c2cac2d7af481d71e4a04ae1e7e65",
+      "sha256": "9e140f5887b6e8ad5f406517504043ade1eaaa9df8978fee8a2d99d82c46ddb7",
+      "evidence": "118 selection shared with publisher;122 original commit"
+    },
+    "src/host/agent-driven/created-source-publisher.ts": {
+      "blob": "b84b2fed09c497ae9412dc9c5ece4b88620e097b",
+      "sha256": "72d0bb32143eebdf630c386795c95be0411bb5b43498307db0128c8a424600fd",
+      "evidence": "244 reopen current selection;469-489 synchronous final proof selection check"
+    },
+    "src/host/agent-driven/created-source-recovery.ts": {
+      "blob": "7d9265f6ad2f57080cff76dda39a97beb9961a84",
+      "sha256": "392ffe1dcb64bfd3478287524996fc774e001d3b3ea8f61cae296a3e12289f97",
+      "evidence": "1102 actual selection read, pending must propagate as unavailable/deferred"
+    },
+    "src/host/projects/revision-store.ts": {
+      "blob": "3bc050143a271cd673409fe562a4ca6ed1e72156",
+      "sha256": "b558839b76f8cad595b79efa66734e12de1058452efe55eecf8f9f6d0b1dec8e",
+      "evidence": "432 compose on original db;488-501 exact9 inputs and closed scope;793 recoveryGate"
+    },
+    "src/host/projects/project-creation-store.ts": {
+      "blob": "76b3cbd96d49c4ddceb8ad285b8f574998d6d79a",
+      "sha256": "ee87d38d6f2ac79e5ec0ed3ee5ea074d035c388de43ff1a5365eb0732d43f682",
+      "evidence": "57-61 immutable source facts;64 original bootstrap commit boundaries;88 original bootstrap store;238-309 original commit transaction;254-257 committed replay;285-286 origin/init position;302-307 final proof/lease/confirmation"
+    },
+    "src/host/agent-driven/product-sqlite-repository.ts": {
+      "blob": "2a82766a97b7792d2568363bcb631bfb10a079b0",
+      "sha256": "d2233cae1669f42f3236cb793c7f4a2864bb9d2fc467be2bb56531cef09f9226",
+      "evidence": "58-65 original schema/atomic same-connection transaction"
+    },
+    "src/host/agent-driven/agent-schema-definition.ts": {
+      "blob": "d83c736bf01620c802e13546a3392384fda73860",
+      "sha256": "581974592352a9fd6da2affa47afe722274581933d1cbbf569f6c94b18e6a46d",
+      "evidence": "55 frozen cp_a0;62-66 separate exact namespace comparator"
+    },
+    "src/host/agent-driven/created-publication-identity-store.ts": {
+      "blob": "687b01e580e0092cebc391373c33caa87d2a5973",
+      "sha256": "9bfaa65813117a25189c5b5f6156146ed75ed7f3b53c3023bcf10c117b713601",
+      "evidence": "76-81 existing private schema practice;90-100 same transaction fact insertion"
+    },
+    "src/host/agent-driven/creation-application.ts": {
+      "blob": "3238590e8f7fe79e004b1d9d21c8e488a46d3943",
+      "sha256": "774749bfab1f13f8a6ecad6ac5c85e157daa2f0a97f0385b2798229b16f50333",
+      "evidence": "composition shared instances and existing Context undefined port"
+    },
+    "src/host/server.ts": {
+      "blob": "d79f02cb178190a36b5aa107af4b0fd0ad33b041",
+      "sha256": "f1b9029158730bd24967361f4cd677b1d37c8c9474c1b0af7049e9ca5dd5025d",
+      "evidence": "Host startup and shutdown owner; original DB last-close requirement"
+    },
+    "src/host/agent-driven/owned-runtime.ts": {
+      "blob": "b1346164943a6abb648701305b34703dd64a7366",
+      "sha256": "9ff6bca28da8f9d9537eda9a013149ef5789616ce98d43066eb91d8872fda8e4",
+      "evidence": "FD9 and predecessor ownership prerequisite"
+    },
+    "src/contracts/agent-driven-types.ts": {
+      "blob": "315500d852ca4e6e2d64e2292074d92fe1e3fb88",
+      "sha256": "54356697802c0bf048e5cbcde1f54eb33713d4fe58943b346406804011cb3644",
+      "evidence": "public Selection/Context/NativeAck unchanged"
+    },
+    "src/host/m5/controlled-studio-access.ts": {
+      "blob": "c8726a8658840effc40027a6242655a17c8e74fe",
+      "sha256": "cf4ceedcf212fd0313a4706823047c818f2b283dfb815a9ab2402148fd752403",
+      "evidence": "existing native session binding/observation port"
+    },
+    "src/host/m5/openfilm-native-expected.ts": {
+      "blob": "37ae6ad83c9b0c07fb1b8d22cd22302c848c90b8",
+      "sha256": "0d59ee891c9a1d3bf491e479639c67d61e35271f5af6b0e4bd708c34eece0795",
+      "evidence": "existing Expected binding proof lifecycle, consume stable epoch face"
+    },
+    "src/host/projects/job-kind-migration.ts": {
+      "blob": "5c3ec71f1f83f379525ef37b10ec1094cd7e8cd9",
+      "sha256": "e0f5e6c8aeaf13ddd3dafbbedbf777db3e81c60524754b68cde11e0dde0f66f0",
+      "evidence": "96-99 migrateJobKind ensures table;121-126 original six-column schema_migration; only read by this task"
+    }
+  },
+  "document_evidence_sha256": {
+    "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/host-recovery-composition-review/ACCEPTANCE_CASES.md": "8420bd50a0bd0beab85cca13c5abf3c4687e48117433e3c2a7615fe0932b2595",
+    "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/host-recovery-composition-review/CODE_MAP.json": "bce88630644ae077d3664d3e78595b3a38f3d809dabd7bda0c3d1fb33fd2bfb4",
+    "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/host-recovery-composition-review/RELEASE_RECOMMENDATION.json": "d34dd7ac4b6a8587f25928b118d78c68211205fb5b07c712bcca334df96febde",
+    "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/host-recovery-composition-review/REVIEW.md": "f14bd204ec5b3c0a9ca20c8c437af0b75cf31d8f1deab8b4874c1eb8cdc1a64c",
+    "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-source-composition-design/CONTRACTS_AND_OWNERSHIP.md": "6f0ab26b819dbd9b2be1a91f434b9b0b877b105662b7bbfd687e048806a13beb",
+    "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-source-composition-design/DESIGN.md": "c13c2ea3006309e724fabd2ad22b4c8426127c25007b89f0b78dd63fd67a99ac",
+    "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-source-composition-design/DEVELOPMENT_AND_ACCEPTANCE.md": "3bf0925a2dc4b46ba21856a0156361994ee04c2eb8f428b6f4dfe417db9fc508",
+    "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-source-composition-design/RELEASE_RECOMMENDATION.json": "66cff4f1c8aaa6a0e6efe29c8664e78171e8a67893fecf3cc2256b607dc22855",
+    "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/MAIN_DECISIONS.md": "80093b9858cce4b08fbf4903f806ee6a33849ea9953f0001cb938734864f0f9a",
+    "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/S01_DESIGN_TASK.md": "613334370f6b1304e4dbd26c4a5b1fb436dced3d672fc2ab879b611a18219ab0",
+    "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/S01_MAIN_REVIEW_CHECKPOINTS.md": "429a80a3c94c9116805b30c2f56003df0ac8df799517aa525f870027d2c8e2f3",
+    "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/S01_MAIN_REVIEW_ROUND1.md": "23d412b74818f21e246aaf782876838b95451fd0ba4a85501cf4759ca758d20d"
+  },
+  "release_recommendation": {
+    "new": [
+      "src/host/agent-driven/created-native-selection-state.ts"
+    ],
+    "existing": [
+      "src/host/projects/project-creation-store.ts",
+      "src/host/m5/native-observation.ts",
+      "src/host/m5/native-ack-store.ts",
+      "src/host/agent-driven/project-context-service.ts",
+      "src/host/agent-driven/creation-application.ts",
+      "src/host/server.ts"
+    ],
+    "consumer_wiring_only": [
+      "src/host/agent-driven/created-source-facts-reader.ts",
+      "src/host/agent-driven/created-source-adoption-service.ts",
+      "src/host/agent-driven/created-source-publisher.ts",
+      "src/host/agent-driven/created-source-recovery.ts"
+    ],
+    "new_tests": [
+      "tests/agent-driven/integration/created-native-selection-state.test.ts",
+      "tests/agent-driven/integration/created-native-selection-restart.test.ts",
+      "tests/agent-driven/integration/created-native-selection-composition.test.ts"
+    ],
+    "existing_tests": [
+      "tests/agent-driven/integration/created-native-ack.test.ts",
+      "tests/agent-driven/integration/created-source-recovery.test.ts",
+      "tests/agent-driven/integration/created-source-adoption.test.ts",
+      "tests/agent-driven/integration/creative-context-host.test.ts"
+    ]
+  },
+  "release_notes": [
+    "N1N2 owned files are NOT released to S01 concurrently; wait PRODUCT handback and freeze actual new baseline, then rebase this e2 design",
+    "One same-DB owner/factory distributes separate epoch-read and business-currentSelectionVersion faces; consumer wiring does not alter public port method shape",
+    "Original business faces block accepted in-flight mapping, Expected readable epoch does not; pending no longer conflated with mapping null",
+    "Bootstrap atomic hook belongs to ProjectCreationStore; no RevisionStore core/DDL edits needed for proposed authority beyond private module using existing atomic/compose",
+    "NativeAck final permit private API is implemented in original record transaction; cp_a0 table stays unchanged",
+    "Native observation mode selected by verified created origin, never client mode flag; retain all legacy expectations",
+    "Do not edit N1N2 mapper/reader/retained/native-workspace modules; consume released actual ports",
+    "Any implementation finding needing another file or core scope first requires precise MAIN addendum",
+    "Migration module writes only its exact schema_migration INSERT; job-kind-migration.ts/schema_migration DDL and all other receipt rows are protected, read-only",
+    "ProjectCreationStore constructor-only bootstrap init binding after origin286, before final checks302-307; committed replay254-257 never initializes missing ledger",
+    "New private fault boundary labels selection_before_initialize/selection_after_initialize only; no public commit input hook"
+  ],
+  "protected": [
+    "contracts/**",
+    "cp_a0_* tables and namespace comparator",
+    "src/host/projects/revision-store.ts nine-field closedcommit and pending gate",
+    "DDL of original transaction/approval/Ack",
+    "N1N2 active ten-path release",
+    "AGENTS.md",
+    "dependencies/config/index/HEAD outside MAIN controlled freeze",
+    "plan.selection_version never used as initializer",
+    "src/host/projects/job-kind-migration.ts and schema_migration table DDL",
+    "all schema_migration rows except exact new created_native_selection_v1 INSERT"
+  ],
+  "acceptance": [
+    {
+      "id": "S01-M01",
+      "level": "real SQLite",
+      "input_steps": "Empty independent migration marker and private namespace under valid owned original DB; migrate twice; interrupt joint DDL/private+external receipt transaction then reopen",
+      "expected": "Exactly complete schema+two validated receipts or all absent; definitions/detail fingerprint validated; repeat no changes to applied_at or other rows",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "S01-M02",
+      "level": "real SQLite",
+      "input_steps": "Seed extra namespace trigger, wrong receipt, partial schema, float/text epoch, wrong bootstrap binding, deleted row after schema installed",
+      "expected": "Explicit unavailable/corrupt; no DROP/repair/INSERT0, no source/approval/Ack changes; healthy project row corruption remains project-local",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "S01-B01",
+      "level": "actual bootstrap plus SQLite",
+      "input_steps": "Real verified new bootstrap commits and initializes0 in same transaction; fail each original commit boundary",
+      "expected": "Both original commit and selection row present or both rollback; exact bootstrap permit retries do not reset; unrelated pending blocks initializer",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "S01-B02",
+      "level": "negative migration fixture",
+      "input_steps": "Old created pending has no ledger, both unpublished and published layouts; also force EIO vs confirmed absent",
+      "expected": "No plan/session/Ack-derived epoch; only original independently proved early safe abort may run; published unknown preserved and explicit reconciliation diagnostic; neither counts RD05 success",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "S01-E01",
+      "level": "real SQLite + trusted observation",
+      "input_steps": "Initialize0, sessionA open, mappingA, session close, sessionB open, same mappingA, reopen again",
+      "expected": "Epoch strictly advances at session/invalidation and first mapping; no reset0, no old lastMapping dedup; duplicate active session delivery no-op",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "S01-E02",
+      "level": "real SQLite + mapper barrier",
+      "input_steps": "Accept same-session duplicate mapping event; suspend mapper before completion; attempt business read and Expected epoch read",
+      "expected": "Expected reads valid epoch and can begin proof; all original business consumers refuse pending; completion same effective mapping leaves epoch unchanged and CAS token advances; no decrement",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "S01-E03",
+      "level": "real SQLite + async mapper",
+      "input_steps": "Accept A then B while A suspended, complete B then A; independently repeat on project2",
+      "expected": "Only latest issued sequence/profile/token may CAS; lateA changes0 rows and no Ack; other project epoch unchanged",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "S01-E04",
+      "level": "real SQLite",
+      "input_steps": "A-to-B-to-A effective mapping with valid same-session callbacks; repeat A without change",
+      "expected": "Two increments for two semantic transitions; duplicate increment0; old prepare version cannot ABA",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "S01-E05",
+      "level": "real SQLite + original consumers",
+      "input_steps": "Hold accepted selection pending while FactsReader/change prepare, normal apply, Publisher final closedcommit and Recovery try old numeric version",
+      "expected": "Each existing business face refuses pending even if epoch equal; no permission consumption/commit/compensation from pending503; only after completion and fresh checks may proceed",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "S01-D01",
+      "level": "actual observation/Expected",
+      "input_steps": "Open session (mapping null,no pending event), deliver real document/hydration before selection; then map and finalize proof",
+      "expected": "Readable epoch allows Expected to start; no loaded/selection claim before map/proof; new-session bootstrap never requires prior Ack; all DTOs unchanged",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "S01-D02",
+      "level": "actual observation",
+      "input_steps": "Invalidate document/view/workspace; replay duplicate invalidation; supersede pending map via newer hydration/doc",
+      "expected": "One increment per real invalidation identity, repeat no-op; old mapper/Ack cannot resurrect; new proof round can start; ordinary hydration alone no bump",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "S01-C01",
+      "level": "real SQLite scope",
+      "input_steps": "Take read permit then accept mapping pending or change baseline before NativeAck record/context final return",
+      "expected": "Same-db final permit compare refuses stale CAS/binding inside append transaction; no new cp_a0 row or loaded; no epoch-column addition",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "S01-C02",
+      "level": "real original commit",
+      "input_steps": "Successful adoption changes baseline, then next Context/prepare; separately fail reconciliation afterward",
+      "expected": "Reconcile exact actual commit/control once before new admission; old live mapping invalidated; original committed receipt remains true; never mutate epoch within publication final proof",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "S01-R01",
+      "level": "real subprocess + SQLite",
+      "input_steps": "SIGKILL owned child immediately after pending acceptance COMMIT before mapper result; reopen same DB under original ownership; reopen a second time",
+      "expected": "First reopen atomically epoch+1 clears pending/session/map with restart_unfinished; second no increment; no fabricated mapping; old plan stale and ordinary recovery can progress without opening Studio",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "S01-R02",
+      "level": "real subprocess + SQLite",
+      "input_steps": "Kill before CAS COMMIT and after CAS COMMIT, both same-mapping and changed-mapping finishes; reopen",
+      "expected": "SQLite yields old pending or committed finish; no partial token/epoch; pending branch invalidates once; clean finish does not blanket bump on reopen",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "S01-R03",
+      "level": "real subprocess + SQLite",
+      "input_steps": "Kill idle Host with nonzero epoch and no pending; reopen with no native session",
+      "expected": "Validated nonzero epoch retained, live map/Ack null; new actual session increments; cannot use retained mapping_digest as live selection",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "S01-L01",
+      "level": "real Host lifecycle",
+      "input_steps": "Admit recovery + mapper/proof, start graceful shutdown, send new events and sessionClosed(host_shutdown)",
+      "expected": "New admission denied; accepted readers keep dependency until drained; admitted mapping may invalidate accepted write via true final check; no blanket epoch bump/false Ack; authority closes before DB only after quiescence",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "S01-L02",
+      "level": "real SQLite + failure injection",
+      "input_steps": "Mapper EIO then fail cleanup/pending settlement; close with drain still active",
+      "expected": "No old mapping restored; pending durable or honest single invalidation; unresolved cause retained, DB not closed under work, no claim finally on SIGKILL",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "S01-N01",
+      "level": "real SQLite numeric edges",
+      "input_steps": "Validated epoch MAX_SAFE_INTEGER-1 then required bump; next new event; corrupt numeric forms",
+      "expected": "Max remains precisely readable; further necessary transition refused without wrap/saturation; no new event admitted if completion cannot increment",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "S01-X01",
+      "level": "legacy regression",
+      "input_steps": "Run existing legacy/migrated observation flow without created authority and created flow with absent authority",
+      "expected": "Legacy semantics unchanged; created missing authority fails explicitly rather than taking legacy default0",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "S01-I01",
+      "level": "real SQLite + scoped transaction",
+      "input_steps": "Race two CAS with same token, rollback winner transaction, issue forged owner/event/scope token",
+      "expected": "One actual winner per committed token; rollback reverts; forged opaque objects rejected; no arbitrary cross-DB scope or HTTP epoch accepted",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "S01-P01",
+      "level": "actual ownership + public workflow",
+      "input_steps": "Real runtime/bootstrap/prepare/approval/apply/recovery/native round with shared instance identity instrumentation",
+      "expected": "One DB and one epoch owner; actual public approvals remain separate; process barriers and trusted facts, no SQL fake success; blocked until N3/N4/public producer release",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "S01-M03",
+      "level": "real SQLite and scoped bootstrap / child crash where named",
+      "input_steps": "Four independent DB fixtures: external marker absent/present x namespace absent/complete; repeat with partial namespace",
+      "expected": "Only absent+absent installs; exact present+complete opens without mutation; present+absent/partial and absent+present reject without repair; no project row created",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "S01-M04",
+      "level": "real SQLite and scoped bootstrap / child crash where named",
+      "input_steps": "Drop whole private namespace keeping external marker; delete only marker keeping private schema; alter marker from/to/detail/digest; insert unknown higher selection migration id",
+      "expected": "Distinct mismatch/unsupported errors, no regeneration or marker backfill; unchanged unrelated receipts and all project business facts",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "S01-M05",
+      "level": "real SQLite and scoped bootstrap / child crash where named",
+      "input_steps": "Inject failure after DDL, after private receipt, after external receipt, after verification before COMMIT; actual child kill before and after COMMIT then sameDB reopen",
+      "expected": "Atomic both receipts+namespace or all absent; precommit rollback preserves other receipts; postcommit reopen validates all; SIGKILL not physical power loss",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "S01-M06",
+      "level": "real SQLite and scoped bootstrap / child crash where named",
+      "input_steps": "Corrupt/miss schema_migration after original store-open prerequisite; EIO/BUSY on reads; change marker DML without schema_version change",
+      "expected": "S01 does not create/rebuild table or treat error as absent; marker freshly checked each operation; no cached-valid bypass",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "S01-B03",
+      "level": "real SQLite and scoped bootstrap / child crash where named",
+      "input_steps": "Real bootstrap: mint at after-origin scope, forge crossDB/crossproject token, call after scope return, reuse permit, fail before/after init and final proof/expiry",
+      "expected": "Only original active scope can initialize; faults roll back epoch0+original DB facts; published files preserved per original bootstrap policy, no fake delete",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "S01-B04",
+      "level": "real SQLite and scoped bootstrap / child crash where named",
+      "input_steps": "Commit bootstrap with ledger then replay original request; repeat after adversarial ledger removal/corruption",
+      "expected": "Original committed receipt path stays read-only, no remint/INSERT0; selection authority unavailable on corruption, no rewrite of true committed result; new admitted bootstrap after rollback obtains new permit",
+      "status": "NOT_RUN"
+    }
+  ],
+  "commands_proposed_not_run": [
+    [
+      "corepack",
+      "pnpm",
+      "exec",
+      "vitest",
+      "run",
+      "--config",
+      "vitest.config.ts",
+      "tests/agent-driven/integration/created-native-selection-state.test.ts"
+    ],
+    [
+      "corepack",
+      "pnpm",
+      "exec",
+      "vitest",
+      "run",
+      "--config",
+      "vitest.config.ts",
+      "tests/agent-driven/integration/created-native-selection-restart.test.ts"
+    ],
+    [
+      "corepack",
+      "pnpm",
+      "exec",
+      "vitest",
+      "run",
+      "--config",
+      "vitest.config.ts",
+      "tests/agent-driven/integration/created-native-selection-composition.test.ts"
+    ],
+    [
+      "corepack",
+      "pnpm",
+      "exec",
+      "vitest",
+      "run",
+      "--config",
+      "vitest.config.ts",
+      "tests/agent-driven/integration/created-native-ack.test.ts",
+      "tests/agent-driven/integration/created-source-recovery.test.ts",
+      "tests/agent-driven/integration/created-source-adoption.test.ts",
+      "tests/agent-driven/integration/creative-context-host.test.ts"
+    ],
+    [
+      "corepack",
+      "pnpm",
+      "exec",
+      "tsc",
+      "--noEmit"
+    ]
+  ],
+  "resources": "No grant used now; future commands require frozen source, unique raw captures and original default single worker; restart/Host/media/ffprobe/browser require exact MAIN single heavy slot, no concurrent heavy work",
+  "crash_evidence": "Boundary IPC ACK only after actual SQLite COMMIT; parent records PID/start/boot and waits exact child/descendants exit, same DB/root reopened via original FD9 owner; SQL rollback/crash test is not physical power-loss proof; real power loss NOT_RUN",
+  "evidence_required": [
+    "full argv/cwd/time/exit and raw stdout/stderr hashes",
+    "source/index/DDL/DB input manifests before and after",
+    "row epoch/cas/pending/binding state at each boundary",
+    "approval/impact/receipt/source/Ack unchanged on refusal",
+    "exact original DB/connection and authority instance identity",
+    "raw failure and pending uncertainty history preserved",
+    "process-group/pidfd exit evidence and same runtime roots"
+  ],
+  "migration_risks": [
+    "Four-quadrant independent schema_migration marker detects private-namespace loss; simultaneous removal/whole older DB rollback remains outside local provenance guarantee",
+    "Historical published pending without ledger cannot be safely auto-committed or auto-rolled-back from missing selection; concrete audited resolution required",
+    "Irrecoverable historical lineage with prior native use has no in-place epoch rebaseline in v1; read-only preserved old project/new authorized bootstrap lineage or separately reviewed future migration",
+    "Original synchronous commit scope must never run lazy ledger writes from proof read; explicit Host reconcile plus pure final fences required",
+    "Observation async mapping acceptance durable pending must occur before await; otherwise crash resurrects old plan"
+  ],
+  "rollback_preservation": "No down migration or DELETE ledger; preserve runtime and DB/WAL/source/log backups before release, never reset/stash user work; rollback code may enter read-only/unavailable for created writes because older binary lacks authority, not silently resume old0 semantics; resume only audited compatible binary with original ledger",
+  "not_run": [
+    "all DDL migrations and acceptance cases",
+    "tests/typecheck",
+    "Host/media/browser/network/provider",
+    "SIGKILL and physical power loss",
+    "N3 implementation",
+    "full native/film/export/A acceptance"
+  ],
+  "design_revision": "round1-revised-independent-migration-marker-and-exact-bootstrap-hook",
+  "superseded_contract_sha256": "ec722ecd4e5d009ce71ef3dbfb32313257540a72323637f658943595aef6d074",
+  "migration_marker": {
+    "table": "schema_migration (existing original job-kind migration)",
+    "id": "created_native_selection_v1",
+    "from_version": 0,
+    "to_version": 1,
+    "backup_path": "",
+    "applied_at": "Host actual Date.toISOString at first transaction, never refresh",
+    "detail_canonical_utf8": "{\"ddl_sha256\":\"6c9804ca36e226cb28674eff742c1eb433f6c650fe7148bacb603a902f8ab896\",\"format\":\"narralens.created-native-selection-migration@1\",\"namespace\":\"created_native_selection_\",\"version\":1}",
+    "detail_sha256": "ee34688afab9e316c24fc3a93e3d66e7aa43db5dd167257ab777ed1edf81f483",
+    "ddl_unchanged": true,
+    "atomicity": "exact namespace + private receipt + independent marker in one original atomic transaction",
+    "quadrants": {
+      "absent_absent": "first namespace install only with valid original migration table, owned DB and no unknown family migration id; NO project backfill",
+      "present_complete": "validate both receipts and exact definitions",
+      "present_absent_or_partial": "SCHEMA_MISMATCH preserve, never recreate",
+      "absent_any_namespace": "UNVERIFIED_SELECTION_SCHEMA preserve, never backfill"
+    },
+    "trust_limit": "simultaneous removal of independent marker AND namespace or full old DB rollback not cryptographically detected"
+  }
+}

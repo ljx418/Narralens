@@ -1,0 +1,23 @@
+{
+  "at": "2026-11-12T06:20:39.910988+00:00",
+  "grant_id": "N1N2-RESUME-SMOKE-002",
+  "request_message": "msg_01525ac84037",
+  "argv": [
+    "corepack",
+    "pnpm",
+    "exec",
+    "vitest",
+    "run",
+    "--config",
+    "vitest.config.ts",
+    "tests/agent-driven/integration/created-native-source-reader.test.ts",
+    "-t",
+    "R00 smoke"
+  ],
+  "capture": "n1n2-claude-resume-011-smoke-corrected",
+  "diagnosis_actual_sha256": "2247df47b45f849969f3dc525bc695afc1e92663a3e1a99891a5fc383eeccedc",
+  "ten_request_hashes_match": true,
+  "old_cleanup_evidence_limit": "MAIN observed recorder930430/test930809 absent, no live ffprobe/ffmpeg with old heldFD argument; child reports cleanup. No global absence guarantee or full FD leak acceptance.",
+  "status": "GRANTED_NOT_STARTED",
+  "acceptance": "NOT_CLAIMED"
+}

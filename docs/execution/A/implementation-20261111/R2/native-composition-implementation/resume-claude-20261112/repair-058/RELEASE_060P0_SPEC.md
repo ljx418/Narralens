@@ -1,0 +1,13 @@
+MAIN_RELEASE_060P0_BASELINE_REAL_REGRESSION。059已交还writer，MAIN已实核四条最新绿capture共631输入均与当前字节相同，loghash一致；用户AGENTS不变、index空、未提交。现在继续唯一Claude实施，先完成060P0基线真实回归，不进入A04架构代码。A04 ADR rev2独立DOCUMENT_PLAN_READY已取得，后续060P1另票。本票不是N1N2/阶段PASS。
+
+W=/mnt/c/workspace/videoworkline/Narralens-agents/main-integration，HEAD保持1d348d419120f23f45d958112ea8c43df5a04675，保留059全部dirty与用户工作。C=/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112。先读C/repair-058/RELEASE_060P0.json。唯一可写源/测试仍按059同一allow_existing/allow_new，加本票据准确限制；禁止producer工厂/bridge/workspace/新process模块的A04实现与配置/pin/Approved015/contract/Git改动。若真实回归暴露超范围缺陷，具体报告请求MAIN，不自行越界。
+
+先修已知K04-c测试错误：triple=join(..., witness.frame_key)是文件名前缀，join(triple,'.jpg')实际找key/.jpg，不是key.jpg。存在检查与三件删除必须用真实<key>.jpg/.json/.stamp，且证明只删这三件。另before.mtime是Date会丢mtimeMs小数；直接utimesSync(Date)后再expect精确mtimeMs相等可能假失败，也可能只撞到mtime:size陈旧而非witness历史依赖。建议在真实draw之前把film时间设为可精确表示的固定整秒，draw后记录bigint mtimeNs/ctimeNs；改复bytes再恢复同一mtimeNs，逐字证明bytes与mtimeNs不变、ctimeNs确变、duration output identity未变、旧duration.film stamp仍匹配，然后期望NATIVE_SOURCE_CACHE_STALE，确保命中依赖历史身份。需要真实不同ctime时可用已拥有的一次性变异子进程，不用固定sleep当正确时序。不要放宽原判定或换成任意reject。若现有fixture其他约束要求不同办法，给真实直接证据，不猜。
+
+执行顺序：修复上面测试并完成tsc；按JSON的两个整文件命令依次真实跑reader与native-cache，不并行。允许在原范围内自行修复普通真实失败、每次唯一capture保留，不放宽默认并发/超时/预算或原断言掩盖。两整文件含真实fixture的SOURCE_ONLY/controlled commit、实际ffprobe/ffmpeg及fixed headless Chrome，因此MAIN把本票据占用唯一重型slot释放给你；除此两条和tsc没有fullcheck/build/其他业务命令权限。无跨文件并行，不启动用户可见浏览器/声音/焦点，不联网/下载/付费/J盘/读改用户config或credentials/.env/fullenv。固定V与Approved015全部只读且确认已批准hash，不重建015、不改HOME或供应商。
+
+每条通过python3 docs/execution/A/implementation-20261111/integration/e1-main-takeover/run-recorded.py <唯一n1n2-claude-060p0-name> <exact argv>，cwd=W。运行前后source必须不变，所有失败保留；同一命令允许按真实修复重验，不人为设次数上限。重活结束先证明自己创建的raw child/probe/browser/listener/临时树真实结束再交还；不按进程名全杀、不凭unverifiable当退出。复用现有producer清理，A04已知缺陷仍OPEN，不能用旧成功路径证明它已修。
+
+A057-05/06的059新case应实际运行；原91/31等历史数仅参考，以真实新case数与断言为准。重点保留所有原K/P/F/G/Q用例，不因读后identity更严格而直接改期望绕过原规格；若确需分类调整先拿真实前提说明。预算零读的实际authority/workspace面与纯closure面区别也要诚实记录；未测仍NOT_RUN。
+
+输出OWN下n1n2-claude-060p0-*自审/实际命令与loghash/当前源码hash/逐case通过失败NOT_RUN/旧坏artifact保留/精确owner清理，交还writer。059原报告不覆盖；其history列表lock004 exit字面与raw实际0有差，MAIN的MAIN_059_RAW_CAPTURE_INDEX.json优先；以后自动从recorder生成，不手填。所有时间取实际工具，不填午夜。禁止Git add/commit/reset/stash/push/merge、外审自签或进入下一接线/S01/NativeAck/A/V1。新429立即停止保全，不重试/重启/换provider/Codex接手。

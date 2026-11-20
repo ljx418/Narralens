@@ -1,0 +1,196 @@
+{
+  "release_id": "MAIN_R5E_ORIGINAL_GROUP_AND_JOINT_PUBLICATION_V2",
+  "at": "2026-11-15T08:44:58.214555+00:00",
+  "cwd": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+  "base_head": "1d348d419120f23f45d958112ea8c43df5a04675",
+  "allow_existing": [
+    "src/adapters/openfilm/cache-process-supervisor.ts",
+    "src/adapters/openfilm/cache-process-custodian.py",
+    "src/adapters/openfilm/cache-worker-integrity.json",
+    "tests/agent-driven/integration/cache-process-identity.test.ts",
+    "tests/agent-driven/integration/helpers/cache-custodian-unit.py",
+    "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts",
+    "tools/native-cache-normal-pilot.ts",
+    "tests/agent-driven/integration/native-cache-normal-pilot.test.ts"
+  ],
+  "allow_new": [],
+  "start_sha256": {
+    "src/adapters/openfilm/cache-process-supervisor.ts": "049489317e8f4f37be77556a90698c82027c8d8d4bf0ee51d15c15862b26d553",
+    "src/adapters/openfilm/cache-process-custodian.py": "30583caab4024b3e4131183e19d60635b1711735892640c5dc7d7e0db34c34f2",
+    "src/adapters/openfilm/cache-worker-integrity.json": "e916cc632b80794793342aff6b84a02eb6ab1a15a4b637d29d7137bb6180cda1",
+    "tests/agent-driven/integration/cache-process-identity.test.ts": "fcebae33a8eca72365a5a121042d7e107924de43ce7254c4b7abbf55e9a47d5a",
+    "tests/agent-driven/integration/helpers/cache-custodian-unit.py": "3be0b3c533ea22c0ff9f882e4a2cc4683750101f2808536f8ed6238ca66dba31",
+    "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts": "7293aed94e7ecdefa87208b8611672a6ca429e94efda7aa14cd83dad3243bea5",
+    "tools/native-cache-normal-pilot.ts": "a9e343cc257ddb1dad678be7de8bcb7a5bfdb9c8e99a0cd662b01b54067be3b3",
+    "tests/agent-driven/integration/native-cache-normal-pilot.test.ts": "7dadcb126ba6c370bb1dd4ccd10ea31ad7ab9920641594ae508ba37976b57352"
+  },
+  "protected_exact_sha256": {
+    "tools/native-cache-nofork-pilot.mjs": "73fed24c66ec310ccd811fdd7e4dfb51be6d22875ce81a50e1a86a47072fe00d",
+    "tests/agent-driven/integration/helpers/native-cache-nofork-pilot.test.mjs": "feb9786b4f38044382ab6ac2ca8435f3bdf89ae83c0882b47177573136deb5ce",
+    "tests/agent-driven/integration/helpers/cache-worker-fixture.mjs": "e3f4ccb1c4016a54356ce04be344b4ffff23f2f88698efe191570ad8407d03ab",
+    "src/host/agent-driven/retained-native-closure.ts": "fd896104149d6cd2663b63a59d50beabbeee546f3e3f46a5d6bf07fbe662ede9",
+    "src/host/agent-driven/created-native-workspace.ts": "d83edbdac8cd6dd7db6b5d18f1d0f5d3beb028279297a822f59f97f6504d562c",
+    "src/adapters/openfilm/openfilm-upstream.ts": "17fe1138e50bc30df5c26b74e1e0ff9393140c070e1233676d2811485890a2b6",
+    "AGENTS.md": "37300463a72a612ae16e0a5fcfb496502c57c722b83781e0e2e8c9480594542b"
+  },
+  "recorder": "docs/execution/A/implementation-20261111/integration/e1-main-takeover/run-recorded.py",
+  "recorder_sha256": "88cd47ec732a340f54cdd4bb05b05878887697eebb0ddc94b1ccd7d0e434fd10",
+  "capture_prefix": "n1n2-claude-060p5e-",
+  "allowed_runtime": [
+    [
+      "corepack",
+      "pnpm",
+      "exec",
+      "tsc",
+      "--noEmit"
+    ],
+    [
+      "corepack",
+      "pnpm",
+      "exec",
+      "vitest",
+      "run",
+      "--config",
+      "vitest.config.ts",
+      "tests/agent-driven/integration/cache-process-identity.test.ts"
+    ],
+    [
+      "/usr/bin/python3.12",
+      "-I",
+      "-S",
+      "-B",
+      "tests/agent-driven/integration/helpers/cache-custodian-unit.py"
+    ],
+    [
+      "corepack",
+      "pnpm",
+      "exec",
+      "vitest",
+      "run",
+      "--config",
+      "vitest.config.ts",
+      "tests/agent-driven/integration/native-cache-normal-pilot.test.ts"
+    ],
+    [
+      "node",
+      "tools/openfilm-cache-worker-integrity.mjs",
+      "--generate"
+    ],
+    [
+      "node",
+      "tools/openfilm-cache-worker-integrity.mjs",
+      "--check"
+    ]
+  ],
+  "generation_writable_only": "src/adapters/openfilm/cache-worker-integrity.json",
+  "scope_findings": [
+    "R5D-N04",
+    "R5D-O03",
+    "R5D-NOTE-01",
+    "R5D-N01",
+    "R5D-O04",
+    "R5D-N02",
+    "R5D-O01",
+    "R5D-N03",
+    "R5D-O02"
+  ],
+  "explicit_internal_surface_additions": [
+    "Bounded read-only receipt digest copies from actual accumulator/receipt",
+    "Private joint-publication validator for tool/legacy, no newsourcefile/public API",
+    "Same-owned-root temp+rename final publishing dependency; explicit failure outcomes, no cwd fallback"
+  ],
+  "runtime_limit": "Six recordedtype/pure/generation only; no actualC/N/fork/exec/signal/prctl/media/Host/browser/pilot or mixedlifecycle file execution",
+  "source_writer": "existingClaude only",
+  "new429": "STOP_NO_RETRY_TAKEOVER",
+  "next": "GUARD_READ_GATE first -> same task full repair/selfvalidation -> independent affected review -> only then separate exactN ticket",
+  "prior_safety_reviews": [
+    "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p5d-lifecycle-and-final-qualification/independent-review/startup-reaper-review/FINDINGS.json",
+    "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p5d-lifecycle-and-final-qualification/independent-review/positive-owner-review/FINDINGS.json"
+  ],
+  "report": "docs/parallel/lane-product/A-R2-20261112/N1N2-native-source/n1n2-claude-060p5e-report.md",
+  "stage_a": {
+    "allow_write": [
+      "tests/agent-driven/integration/cache-process-identity.test.ts",
+      "tests/agent-driven/integration/native-cache-normal-pilot.test.ts",
+      "tests/agent-driven/integration/helpers/cache-custodian-unit.py"
+    ],
+    "allow_runtime": [
+      [
+        "corepack",
+        "pnpm",
+        "exec",
+        "tsc",
+        "--noEmit"
+      ]
+    ],
+    "no_pure_tests_until_MAIN_guard_reply": true
+  },
+  "stage_b": {
+    "requires": "MAIN exact reply approving current guard file SHA",
+    "allow_write": [
+      "src/adapters/openfilm/cache-process-supervisor.ts",
+      "src/adapters/openfilm/cache-process-custodian.py",
+      "src/adapters/openfilm/cache-worker-integrity.json",
+      "tests/agent-driven/integration/cache-process-identity.test.ts",
+      "tests/agent-driven/integration/helpers/cache-custodian-unit.py",
+      "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts",
+      "tools/native-cache-normal-pilot.ts",
+      "tests/agent-driven/integration/native-cache-normal-pilot.test.ts"
+    ],
+    "allow_runtime": [
+      [
+        "corepack",
+        "pnpm",
+        "exec",
+        "tsc",
+        "--noEmit"
+      ],
+      [
+        "corepack",
+        "pnpm",
+        "exec",
+        "vitest",
+        "run",
+        "--config",
+        "vitest.config.ts",
+        "tests/agent-driven/integration/cache-process-identity.test.ts"
+      ],
+      [
+        "/usr/bin/python3.12",
+        "-I",
+        "-S",
+        "-B",
+        "tests/agent-driven/integration/helpers/cache-custodian-unit.py"
+      ],
+      [
+        "corepack",
+        "pnpm",
+        "exec",
+        "vitest",
+        "run",
+        "--config",
+        "vitest.config.ts",
+        "tests/agent-driven/integration/native-cache-normal-pilot.test.ts"
+      ],
+      [
+        "node",
+        "tools/openfilm-cache-worker-integrity.mjs",
+        "--generate"
+      ],
+      [
+        "node",
+        "tools/openfilm-cache-worker-integrity.mjs",
+        "--check"
+      ]
+    ]
+  },
+  "private_protocol_decision": {
+    "version": "positive-pilot-publication-v2",
+    "exit0": "normal accepted jointpublication",
+    "exit1": "expectedfault accepted only if valid final-chain; ordinaryfailedmustnotgreen",
+    "exit2": "argument/entryrefused",
+    "exit3": "mandatoryevidence/report/publicationunreliable; never expectedfaultaccepted",
+    "scope": "internal CLI only, no Host API/public DTO/EnginePort changes"
+  },
+  "spec_sha256": "9723fa7be4c37908a5f97f4290ac3662584e8c19851ff1235d7a1501f77b0fee"
+}

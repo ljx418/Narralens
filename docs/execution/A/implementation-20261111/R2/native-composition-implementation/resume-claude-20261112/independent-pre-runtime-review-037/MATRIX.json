@@ -1,0 +1,735 @@
+{
+  "status": "PRE_RUNTIME_READONLY_IMPLEMENTATION_REVIEW_NOT_EXTERNAL_PASS",
+  "candidate_commit": null,
+  "verdict": "REQUEST_CHANGES",
+  "grant": "COMPILE_037_002_GRANT.json",
+  "baseline": "e2eff61b464d75d36598103d718cd2a75db5dfda",
+  "worktree": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+  "end_observed_at": "2026-11-13T07:54:13.284390+00:00",
+  "exact35_hashes": {
+    "src/host/agent-driven/native-cache-witness.ts": {
+      "expected": "97c1fe93037f3f31afdf67e97a5d4451d42ac7016d3cca642217fe1750c2573b",
+      "start": "97c1fe93037f3f31afdf67e97a5d4451d42ac7016d3cca642217fe1750c2573b",
+      "end": "97c1fe93037f3f31afdf67e97a5d4451d42ac7016d3cca642217fe1750c2573b",
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/97c1fe93037f3f31afdf67e97a5d4451d42ac7016d3cca642217fe1750c2573b.txt",
+      "backup_sha256": "97c1fe93037f3f31afdf67e97a5d4451d42ac7016d3cca642217fe1750c2573b",
+      "match": true
+    },
+    "src/host/agent-driven/created-native-workspace.ts": {
+      "expected": "b29d0bf0d2345555a6ade5f21125ae1b640bde2b5bae65f1463f91618207de57",
+      "start": "b29d0bf0d2345555a6ade5f21125ae1b640bde2b5bae65f1463f91618207de57",
+      "end": "b29d0bf0d2345555a6ade5f21125ae1b640bde2b5bae65f1463f91618207de57",
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/b29d0bf0d2345555a6ade5f21125ae1b640bde2b5bae65f1463f91618207de57.txt",
+      "backup_sha256": "b29d0bf0d2345555a6ade5f21125ae1b640bde2b5bae65f1463f91618207de57",
+      "match": true
+    },
+    "src/host/agent-driven/committed-snapshot-authority.ts": {
+      "expected": "1c53360e3c618c603cfcbe61d0c2d57004c5bd33dc26a92c2fdec72a1844bd6d",
+      "start": "1c53360e3c618c603cfcbe61d0c2d57004c5bd33dc26a92c2fdec72a1844bd6d",
+      "end": "1c53360e3c618c603cfcbe61d0c2d57004c5bd33dc26a92c2fdec72a1844bd6d",
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/1c53360e3c618c603cfcbe61d0c2d57004c5bd33dc26a92c2fdec72a1844bd6d.txt",
+      "backup_sha256": "1c53360e3c618c603cfcbe61d0c2d57004c5bd33dc26a92c2fdec72a1844bd6d",
+      "match": true
+    },
+    "src/host/m5/openfilm-native-expected.ts": {
+      "expected": "19110e45a83b6d5b611b4260620ce873f923f1e5a5b907bc6176c4b734fbeed3",
+      "start": "19110e45a83b6d5b611b4260620ce873f923f1e5a5b907bc6176c4b734fbeed3",
+      "end": "19110e45a83b6d5b611b4260620ce873f923f1e5a5b907bc6176c4b734fbeed3",
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/19110e45a83b6d5b611b4260620ce873f923f1e5a5b907bc6176c4b734fbeed3.txt",
+      "backup_sha256": "19110e45a83b6d5b611b4260620ce873f923f1e5a5b907bc6176c4b734fbeed3",
+      "match": true
+    },
+    "src/adapters/openfilm/openfilm-upstream.ts": {
+      "expected": "b4c6ca242d46096b7cf60afef73d599cba0393053d931c295bf6db79724b16e6",
+      "start": "b4c6ca242d46096b7cf60afef73d599cba0393053d931c295bf6db79724b16e6",
+      "end": "b4c6ca242d46096b7cf60afef73d599cba0393053d931c295bf6db79724b16e6",
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/b4c6ca242d46096b7cf60afef73d599cba0393053d931c295bf6db79724b16e6.txt",
+      "backup_sha256": "b4c6ca242d46096b7cf60afef73d599cba0393053d931c295bf6db79724b16e6",
+      "match": true
+    },
+    "tests/agent-driven/integration/helpers/native-source-fixture.ts": {
+      "expected": "7160a285930e61b7927d90bb517e7d9575f5f0888394d228b192baff80daf622",
+      "start": "7160a285930e61b7927d90bb517e7d9575f5f0888394d228b192baff80daf622",
+      "end": "7160a285930e61b7927d90bb517e7d9575f5f0888394d228b192baff80daf622",
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/7160a285930e61b7927d90bb517e7d9575f5f0888394d228b192baff80daf622.txt",
+      "backup_sha256": "7160a285930e61b7927d90bb517e7d9575f5f0888394d228b192baff80daf622",
+      "match": true
+    },
+    "tests/agent-driven/integration/helpers/created-draft-fixture.ts": {
+      "expected": "59788a8f9c08415a808b2418e86b4dac6bb7de65297ad5d1cb19b5f26eb22d27",
+      "start": "59788a8f9c08415a808b2418e86b4dac6bb7de65297ad5d1cb19b5f26eb22d27",
+      "end": "59788a8f9c08415a808b2418e86b4dac6bb7de65297ad5d1cb19b5f26eb22d27",
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/59788a8f9c08415a808b2418e86b4dac6bb7de65297ad5d1cb19b5f26eb22d27.txt",
+      "backup_sha256": "59788a8f9c08415a808b2418e86b4dac6bb7de65297ad5d1cb19b5f26eb22d27",
+      "match": true
+    },
+    "tests/agent-driven/integration/created-native-workspace.test.ts": {
+      "expected": "439d469032c9af2b83ceb826e0aead7cf5c2fe5c5693be7cbf18c8e67f0f615f",
+      "start": "439d469032c9af2b83ceb826e0aead7cf5c2fe5c5693be7cbf18c8e67f0f615f",
+      "end": "439d469032c9af2b83ceb826e0aead7cf5c2fe5c5693be7cbf18c8e67f0f615f",
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/439d469032c9af2b83ceb826e0aead7cf5c2fe5c5693be7cbf18c8e67f0f615f.txt",
+      "backup_sha256": "439d469032c9af2b83ceb826e0aead7cf5c2fe5c5693be7cbf18c8e67f0f615f",
+      "match": true
+    },
+    "tests/agent-driven/integration/committed-snapshot-host.test.ts": {
+      "expected": "bfd0c6373b254050d32a6a99e7b6f8b9827dc24b6b2587515ab4c5aad2cd9037",
+      "start": "bfd0c6373b254050d32a6a99e7b6f8b9827dc24b6b2587515ab4c5aad2cd9037",
+      "end": "bfd0c6373b254050d32a6a99e7b6f8b9827dc24b6b2587515ab4c5aad2cd9037",
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/bfd0c6373b254050d32a6a99e7b6f8b9827dc24b6b2587515ab4c5aad2cd9037.txt",
+      "backup_sha256": "bfd0c6373b254050d32a6a99e7b6f8b9827dc24b6b2587515ab4c5aad2cd9037",
+      "match": true
+    },
+    "tests/agent-driven/integration/created-native-ack.test.ts": {
+      "expected": "5f50db85c7c07a2ecf4faefc20ec2ec6c7ad4910fafe549c2edc76bbad729c7c",
+      "start": "5f50db85c7c07a2ecf4faefc20ec2ec6c7ad4910fafe549c2edc76bbad729c7c",
+      "end": "5f50db85c7c07a2ecf4faefc20ec2ec6c7ad4910fafe549c2edc76bbad729c7c",
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/5f50db85c7c07a2ecf4faefc20ec2ec6c7ad4910fafe549c2edc76bbad729c7c.txt",
+      "backup_sha256": "5f50db85c7c07a2ecf4faefc20ec2ec6c7ad4910fafe549c2edc76bbad729c7c",
+      "match": true
+    },
+    "src/host/agent-driven/retained-native-closure.ts": {
+      "expected": "ab7ffead1c4b7b238f7e4f6097b1d17ad7792513e84591b623f67c95576ac6e7",
+      "start": "ab7ffead1c4b7b238f7e4f6097b1d17ad7792513e84591b623f67c95576ac6e7",
+      "end": "ab7ffead1c4b7b238f7e4f6097b1d17ad7792513e84591b623f67c95576ac6e7",
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/ab7ffead1c4b7b238f7e4f6097b1d17ad7792513e84591b623f67c95576ac6e7.txt",
+      "backup_sha256": "ab7ffead1c4b7b238f7e4f6097b1d17ad7792513e84591b623f67c95576ac6e7",
+      "match": true
+    },
+    "src/host/agent-driven/created-native-source-reader.ts": {
+      "expected": "cde88435d61dba1a881bef403e6a013f1d4f2bb93db8e1ffa2b3c15b4c74f82b",
+      "start": "cde88435d61dba1a881bef403e6a013f1d4f2bb93db8e1ffa2b3c15b4c74f82b",
+      "end": "cde88435d61dba1a881bef403e6a013f1d4f2bb93db8e1ffa2b3c15b4c74f82b",
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/cde88435d61dba1a881bef403e6a013f1d4f2bb93db8e1ffa2b3c15b4c74f82b.txt",
+      "backup_sha256": "cde88435d61dba1a881bef403e6a013f1d4f2bb93db8e1ffa2b3c15b4c74f82b",
+      "match": true
+    },
+    "tests/agent-driven/integration/native-cache-witness.test.ts": {
+      "expected": "cf4e86733b7937e985a5adce0a07e0fba64b7d7bd6fd88914bdeecbe3b963414",
+      "start": "cf4e86733b7937e985a5adce0a07e0fba64b7d7bd6fd88914bdeecbe3b963414",
+      "end": "cf4e86733b7937e985a5adce0a07e0fba64b7d7bd6fd88914bdeecbe3b963414",
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/cf4e86733b7937e985a5adce0a07e0fba64b7d7bd6fd88914bdeecbe3b963414.txt",
+      "backup_sha256": "cf4e86733b7937e985a5adce0a07e0fba64b7d7bd6fd88914bdeecbe3b963414",
+      "match": true
+    },
+    "tests/agent-driven/integration/created-draft-processor.test.ts": {
+      "expected": "684df1c287890a13ecd8b08a4cd32d5053c2868e80494eca2fcc6412cdc4e0b6",
+      "start": "684df1c287890a13ecd8b08a4cd32d5053c2868e80494eca2fcc6412cdc4e0b6",
+      "end": "684df1c287890a13ecd8b08a4cd32d5053c2868e80494eca2fcc6412cdc4e0b6",
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/684df1c287890a13ecd8b08a4cd32d5053c2868e80494eca2fcc6412cdc4e0b6.txt",
+      "backup_sha256": "684df1c287890a13ecd8b08a4cd32d5053c2868e80494eca2fcc6412cdc4e0b6",
+      "match": true
+    },
+    "tests/agent-driven/integration/created-native-source-reader.test.ts": {
+      "expected": "09ef2019ad95cbd3b3bb377e8f146b994c9462f48f4662db5e072b629383ea77",
+      "start": "09ef2019ad95cbd3b3bb377e8f146b994c9462f48f4662db5e072b629383ea77",
+      "end": "09ef2019ad95cbd3b3bb377e8f146b994c9462f48f4662db5e072b629383ea77",
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/09ef2019ad95cbd3b3bb377e8f146b994c9462f48f4662db5e072b629383ea77.txt",
+      "backup_sha256": "09ef2019ad95cbd3b3bb377e8f146b994c9462f48f4662db5e072b629383ea77",
+      "match": true
+    },
+    "package.json": {
+      "expected": "edace26fdfa5a9808f2706fe15ab3935d0512d08f765d4cffec268eb7e783263",
+      "start": "edace26fdfa5a9808f2706fe15ab3935d0512d08f765d4cffec268eb7e783263",
+      "end": "edace26fdfa5a9808f2706fe15ab3935d0512d08f765d4cffec268eb7e783263",
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/edace26fdfa5a9808f2706fe15ab3935d0512d08f765d4cffec268eb7e783263.txt",
+      "backup_sha256": "edace26fdfa5a9808f2706fe15ab3935d0512d08f765d4cffec268eb7e783263",
+      "match": true
+    },
+    "pnpm-lock.yaml": {
+      "expected": "66d38478d0b035777472a8cdb53954559a6c1a5f8803f7247caaffce1ac3584d",
+      "start": "66d38478d0b035777472a8cdb53954559a6c1a5f8803f7247caaffce1ac3584d",
+      "end": "66d38478d0b035777472a8cdb53954559a6c1a5f8803f7247caaffce1ac3584d",
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/66d38478d0b035777472a8cdb53954559a6c1a5f8803f7247caaffce1ac3584d.txt",
+      "backup_sha256": "66d38478d0b035777472a8cdb53954559a6c1a5f8803f7247caaffce1ac3584d",
+      "match": true
+    },
+    "tsconfig.json": {
+      "expected": "83fbe518b8002a19afcf522215bdd431b9addca24f88771732e123f689acb475",
+      "start": "83fbe518b8002a19afcf522215bdd431b9addca24f88771732e123f689acb475",
+      "end": "83fbe518b8002a19afcf522215bdd431b9addca24f88771732e123f689acb475",
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/83fbe518b8002a19afcf522215bdd431b9addca24f88771732e123f689acb475.txt",
+      "backup_sha256": "83fbe518b8002a19afcf522215bdd431b9addca24f88771732e123f689acb475",
+      "match": true
+    },
+    "vitest.config.ts": {
+      "expected": "b8cc675ba57ac95cc74b007db787a33b830fe628f7648f902a4dcf8235d787d4",
+      "start": "b8cc675ba57ac95cc74b007db787a33b830fe628f7648f902a4dcf8235d787d4",
+      "end": "b8cc675ba57ac95cc74b007db787a33b830fe628f7648f902a4dcf8235d787d4",
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/b8cc675ba57ac95cc74b007db787a33b830fe628f7648f902a4dcf8235d787d4.txt",
+      "backup_sha256": "b8cc675ba57ac95cc74b007db787a33b830fe628f7648f902a4dcf8235d787d4",
+      "match": true
+    },
+    "vite.config.ts": {
+      "expected": "6dc4858d37a5ddfac9779371b63b4d3d129641dc485c642de05c17f29a746f2c",
+      "start": "6dc4858d37a5ddfac9779371b63b4d3d129641dc485c642de05c17f29a746f2c",
+      "end": "6dc4858d37a5ddfac9779371b63b4d3d129641dc485c642de05c17f29a746f2c",
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/6dc4858d37a5ddfac9779371b63b4d3d129641dc485c642de05c17f29a746f2c.txt",
+      "backup_sha256": "6dc4858d37a5ddfac9779371b63b4d3d129641dc485c642de05c17f29a746f2c",
+      "match": true
+    },
+    "vite.m5.config.ts": {
+      "expected": "777295eb5278d162ce549a5fa695618fd68cfb35769b30a9b8c52344a3220ff7",
+      "start": "777295eb5278d162ce549a5fa695618fd68cfb35769b30a9b8c52344a3220ff7",
+      "end": "777295eb5278d162ce549a5fa695618fd68cfb35769b30a9b8c52344a3220ff7",
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/777295eb5278d162ce549a5fa695618fd68cfb35769b30a9b8c52344a3220ff7.txt",
+      "backup_sha256": "777295eb5278d162ce549a5fa695618fd68cfb35769b30a9b8c52344a3220ff7",
+      "match": true
+    },
+    "contracts/openfilm-upstream-lock.json": {
+      "expected": "69c4da1decfb27fd6002a030228a2ccadd1a9fb4392e42320cf249ae311b301b",
+      "start": "69c4da1decfb27fd6002a030228a2ccadd1a9fb4392e42320cf249ae311b301b",
+      "end": "69c4da1decfb27fd6002a030228a2ccadd1a9fb4392e42320cf249ae311b301b",
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/69c4da1decfb27fd6002a030228a2ccadd1a9fb4392e42320cf249ae311b301b.txt",
+      "backup_sha256": "69c4da1decfb27fd6002a030228a2ccadd1a9fb4392e42320cf249ae311b301b",
+      "match": true
+    },
+    "src/host/agent-driven/local-asset-registry.ts": {
+      "expected": "0f99ed585bc8152926b555a3139a240c80025c023db4dc690b26769e1635bb25",
+      "start": "0f99ed585bc8152926b555a3139a240c80025c023db4dc690b26769e1635bb25",
+      "end": "0f99ed585bc8152926b555a3139a240c80025c023db4dc690b26769e1635bb25",
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/0f99ed585bc8152926b555a3139a240c80025c023db4dc690b26769e1635bb25.txt",
+      "backup_sha256": "0f99ed585bc8152926b555a3139a240c80025c023db4dc690b26769e1635bb25",
+      "match": true
+    },
+    "src/host/agent-driven/created-source-impact-store.ts": {
+      "expected": "f1cb2d87b21dd5177c2ea29e214a0d89c46868eaa5a255cd6debe4cf4f72a3b1",
+      "start": "f1cb2d87b21dd5177c2ea29e214a0d89c46868eaa5a255cd6debe4cf4f72a3b1",
+      "end": "f1cb2d87b21dd5177c2ea29e214a0d89c46868eaa5a255cd6debe4cf4f72a3b1",
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/f1cb2d87b21dd5177c2ea29e214a0d89c46868eaa5a255cd6debe4cf4f72a3b1.txt",
+      "backup_sha256": "f1cb2d87b21dd5177c2ea29e214a0d89c46868eaa5a255cd6debe4cf4f72a3b1",
+      "match": true
+    },
+    "src/host/agent-driven/created-source-change-service.ts": {
+      "expected": "249df97d95939beeebcc1f9f51d3daed21100fc6aaebfb9b5d000d3a32c0f259",
+      "start": "249df97d95939beeebcc1f9f51d3daed21100fc6aaebfb9b5d000d3a32c0f259",
+      "end": "249df97d95939beeebcc1f9f51d3daed21100fc6aaebfb9b5d000d3a32c0f259",
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/249df97d95939beeebcc1f9f51d3daed21100fc6aaebfb9b5d000d3a32c0f259.txt",
+      "backup_sha256": "249df97d95939beeebcc1f9f51d3daed21100fc6aaebfb9b5d000d3a32c0f259",
+      "match": true
+    },
+    "tests/agent-driven/integration/local-assets-host.test.ts": {
+      "expected": "2cf891aab59bcd8db64750abf31cb73173be39b03ac35fde68962ce3951d2112",
+      "start": "2cf891aab59bcd8db64750abf31cb73173be39b03ac35fde68962ce3951d2112",
+      "end": "2cf891aab59bcd8db64750abf31cb73173be39b03ac35fde68962ce3951d2112",
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/2cf891aab59bcd8db64750abf31cb73173be39b03ac35fde68962ce3951d2112.txt",
+      "backup_sha256": "2cf891aab59bcd8db64750abf31cb73173be39b03ac35fde68962ce3951d2112",
+      "match": true
+    },
+    "tests/agent-driven/integration/created-source-change.test.ts": {
+      "expected": "9d82c3c47b23a44ee27cf129ea51aa61c7e29259e94d6d14a27ed43fc6817860",
+      "start": "9d82c3c47b23a44ee27cf129ea51aa61c7e29259e94d6d14a27ed43fc6817860",
+      "end": "9d82c3c47b23a44ee27cf129ea51aa61c7e29259e94d6d14a27ed43fc6817860",
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/9d82c3c47b23a44ee27cf129ea51aa61c7e29259e94d6d14a27ed43fc6817860.txt",
+      "backup_sha256": "9d82c3c47b23a44ee27cf129ea51aa61c7e29259e94d6d14a27ed43fc6817860",
+      "match": true
+    },
+    "tests/agent-driven/integration/created-source-adoption.test.ts": {
+      "expected": "cad88f2767a77c8afb14ef95886a7bf3131280666c6a3ce61dfb0ff448816792",
+      "start": "cad88f2767a77c8afb14ef95886a7bf3131280666c6a3ce61dfb0ff448816792",
+      "end": "cad88f2767a77c8afb14ef95886a7bf3131280666c6a3ce61dfb0ff448816792",
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/cad88f2767a77c8afb14ef95886a7bf3131280666c6a3ce61dfb0ff448816792.txt",
+      "backup_sha256": "cad88f2767a77c8afb14ef95886a7bf3131280666c6a3ce61dfb0ff448816792",
+      "match": true
+    },
+    "tests/agent-driven/integration/created-impact-atomic.test.ts": {
+      "expected": "e6f1ddb662deea7c506ec28d390aa1f548c818016a0bc829e8cebd3294e0f5d8",
+      "start": "e6f1ddb662deea7c506ec28d390aa1f548c818016a0bc829e8cebd3294e0f5d8",
+      "end": "e6f1ddb662deea7c506ec28d390aa1f548c818016a0bc829e8cebd3294e0f5d8",
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/e6f1ddb662deea7c506ec28d390aa1f548c818016a0bc829e8cebd3294e0f5d8.txt",
+      "backup_sha256": "e6f1ddb662deea7c506ec28d390aa1f548c818016a0bc829e8cebd3294e0f5d8",
+      "match": true
+    },
+    "tests/architecture/m2.2-fitness.test.ts": {
+      "expected": "e806d88c7a5452539e629a4da0f4c4e0a4346e0364c233f07e0f16675931cb63",
+      "start": "e806d88c7a5452539e629a4da0f4c4e0a4346e0364c233f07e0f16675931cb63",
+      "end": "e806d88c7a5452539e629a4da0f4c4e0a4346e0364c233f07e0f16675931cb63",
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/e806d88c7a5452539e629a4da0f4c4e0a4346e0364c233f07e0f16675931cb63.txt",
+      "backup_sha256": "e806d88c7a5452539e629a4da0f4c4e0a4346e0364c233f07e0f16675931cb63",
+      "match": true
+    },
+    "tests/m2.1/openfilm-upstream-lock.test.ts": {
+      "expected": "754f88c990bfe3405d973315ba67c9b9753c10e6d9355d785e36aab38c7ed813",
+      "start": "754f88c990bfe3405d973315ba67c9b9753c10e6d9355d785e36aab38c7ed813",
+      "end": "754f88c990bfe3405d973315ba67c9b9753c10e6d9355d785e36aab38c7ed813",
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/754f88c990bfe3405d973315ba67c9b9753c10e6d9355d785e36aab38c7ed813.txt",
+      "backup_sha256": "754f88c990bfe3405d973315ba67c9b9753c10e6d9355d785e36aab38c7ed813",
+      "match": true
+    },
+    "tests/m2.3/migration-real-export.test.ts": {
+      "expected": "a965bbe3c9add3db50479ea250829e8ccdead9d91361267bff4125685192334f",
+      "start": "a965bbe3c9add3db50479ea250829e8ccdead9d91361267bff4125685192334f",
+      "end": "a965bbe3c9add3db50479ea250829e8ccdead9d91361267bff4125685192334f",
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/a965bbe3c9add3db50479ea250829e8ccdead9d91361267bff4125685192334f.txt",
+      "backup_sha256": "a965bbe3c9add3db50479ea250829e8ccdead9d91361267bff4125685192334f",
+      "match": true
+    },
+    "tests/fixtures/m2.1/snapshot-project/assets/generated/visual-10s.mp4": {
+      "expected": "0427d617584264ac2875243d6cf711dd985577566f71db6b9d5faf051575989c",
+      "start": "0427d617584264ac2875243d6cf711dd985577566f71db6b9d5faf051575989c",
+      "end": "0427d617584264ac2875243d6cf711dd985577566f71db6b9d5faf051575989c",
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/0427d617584264ac2875243d6cf711dd985577566f71db6b9d5faf051575989c.txt",
+      "backup_sha256": "0427d617584264ac2875243d6cf711dd985577566f71db6b9d5faf051575989c",
+      "match": true
+    },
+    "tests/fixtures/m2.1/snapshot-project/assets/generated/visual-alt-10s.mp4": {
+      "expected": "40d825e66ee7e69ae53dfdc8d5195fbb9ffc3af7eb07452a5081c51e24115cff",
+      "start": "40d825e66ee7e69ae53dfdc8d5195fbb9ffc3af7eb07452a5081c51e24115cff",
+      "end": "40d825e66ee7e69ae53dfdc8d5195fbb9ffc3af7eb07452a5081c51e24115cff",
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/40d825e66ee7e69ae53dfdc8d5195fbb9ffc3af7eb07452a5081c51e24115cff.txt",
+      "backup_sha256": "40d825e66ee7e69ae53dfdc8d5195fbb9ffc3af7eb07452a5081c51e24115cff",
+      "match": true
+    },
+    "tests/fixtures/m2.1/snapshot-project/assets/generated/narration-30s.wav": {
+      "expected": "e4276d5ec9199f11df067a98061508eaa11dbaf11ffac107775714b95962173d",
+      "start": "e4276d5ec9199f11df067a98061508eaa11dbaf11ffac107775714b95962173d",
+      "end": "e4276d5ec9199f11df067a98061508eaa11dbaf11ffac107775714b95962173d",
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/e4276d5ec9199f11df067a98061508eaa11dbaf11ffac107775714b95962173d.txt",
+      "backup_sha256": "e4276d5ec9199f11df067a98061508eaa11dbaf11ffac107775714b95962173d",
+      "match": true
+    }
+  },
+  "changed_scope": [],
+  "compile_actual": {
+    "exit": 0,
+    "source_changed": [],
+    "source_added": [],
+    "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "finished_at": "2026-11-13T07:45:33.060734+00:00"
+  },
+  "compile_log_independently_verified": true,
+  "business037": "NOT_RUN",
+  "findings": [
+    {
+      "id": "Q01",
+      "severity": "MAJOR",
+      "scope": "PF01/R07",
+      "kind": "CODE_LIFECYCLE",
+      "title": "Serving construction escapes close/drain and can leak after rejection",
+      "locations": [
+        "src/host/agent-driven/created-native-workspace.ts:444",
+        "src/host/agent-driven/created-native-workspace.ts:455",
+        "src/host/agent-driven/created-native-workspace.ts:461",
+        "src/host/agent-driven/created-native-workspace.ts:874",
+        "src/host/agent-driven/created-native-workspace.ts:882",
+        "src/adapters/openfilm/openfilm-upstream.ts:825",
+        "src/adapters/openfilm/openfilm-upstream.ts:836"
+      ],
+      "reachable_counterexample": "servingFor accepts a current view, then awaits factory verification/listen. Concurrent close/dispose snapshots only #operations, which does not contain this construction, and can close root resources before the continuation. After a listener starts, factory realpath/stat can throw, or service fstat/root validation can throw; neither path closes the new listener. A simple service.close during construction without dispose also permits owner registration/return after closing because #closing/current lease is never rechecked. Parallel servingFor calls both miss #servings and create distinct owners; last registration makes the earlier legitimate returned owner unusable.",
+      "test_gap": "PF01:924 creates owners sequentially and closes a fully created owner before invoking production; no creation-await close, registration failure or concurrent same-view creation case.",
+      "minimum_correction": "Admit and track the entire construction before its first await, single-flight by exact held view, recheck closing/lease/record after awaits before registration, and own cleanup of all partially-created listener/folder resources on every failed construction or registration. Add precise creation/close/parallel/failure cases; no extra public module needed.",
+      "execution": "STATIC_INFERENCE_NOT_RUN"
+    },
+    {
+      "id": "Q02",
+      "severity": "MAJOR",
+      "scope": "PF01/R07",
+      "kind": "CODE_LIFECYCLE",
+      "title": "Serving owner closes listener before accepted draw dependencies finish",
+      "locations": [
+        "src/adapters/openfilm/openfilm-upstream.ts:844",
+        "src/adapters/openfilm/openfilm-upstream.ts:851",
+        "src/adapters/openfilm/openfilm-upstream.ts:853",
+        "src/host/agent-driven/created-native-workspace.ts:608",
+        "src/host/agent-driven/created-native-workspace.ts:754",
+        "tests/agent-driven/integration/native-cache-witness.test.ts:924"
+      ],
+      "reachable_counterexample": "An already accepted real pageFrame may still need its initial navigation or later asset/iframe requests. Caller can invoke returned serving.close while the draw is awaiting: close immediately stops listener/new connections and drains only currently registered folder HTTP/probe promises, not the producer draw. It can resolve in a gap with no active request while the draw later issues more HTTP. The draw fails or times out because its required origin was torn down. Concurrent repeated close also returns immediately on closed=true instead of sharing original settlement promise.",
+      "test_gap": "Old B0-2 covers producer browser peer ownership; PF01 only exercises closed-before-draw refusal. Neither covers serving.close during draw with future HTTP dependencies. Service dispose waits its admitted productions, but the public Host-private serving.close path bypasses that wait.",
+      "minimum_correction": "Stop admitting new productions separately from servicing dependencies of already admitted draws, give serving an actual draw lease/drain ownership, and share a close promise through true settlement before closing listener/root. Assert a delayed future dependency during owner close and repeated-close settlement.",
+      "execution": "STATIC_INFERENCE_NOT_RUN"
+    },
+    {
+      "id": "Q03",
+      "severity": "MAJOR",
+      "scope": "PF02/R04",
+      "kind": "CODE_PROVENANCE",
+      "title": "A child-page draw can brand an unrelated preexisting film duration",
+      "locations": [
+        "src/host/agent-driven/created-native-workspace.ts:583",
+        "src/host/agent-driven/created-native-workspace.ts:665",
+        "src/host/agent-driven/created-native-workspace.ts:686",
+        "src/host/agent-driven/native-cache-witness.ts:185",
+        "src/host/agent-driven/created-native-source-reader.ts:1239",
+        "tests/agent-driven/integration/native-cache-witness.test.ts:1001"
+      ],
+      "reachable_counterexample": "Place a forged finite duration JSON with the real film mtime:size in the issued root, then draw an existing non-film page such as a committed scenes page through the real registered serving. Fixed upstream pageframes.mjs writes film-duration only inside rel===FILM_PAGE and finite duration (pinned file:103), so this draw leaves the forged JSON untouched. The wrapper unconditionally captures any existing duration at665 as an output and activation makes it current by output path; the reader then accepts its full matching identity as witnessed. Likewise a nonfinite film draw can leave a previous duration and have it falsely reissued.",
+      "test_gap": "PF02:1001 does only one film-poster draw and an equal-bytes/new-inode negative. There is no non-film/preexisting duration negative, change-and-restore duration negative, or actual two-different-frame consecutive draw N8 followed by consumption of both frame triples and latest duration. By-output mapping and per-frame restricted consumption are present statically, but no N8 execution/body proves the requested success.",
+      "minimum_correction": "Issue authority only for outputs that this exact fixed-producer branch actually wrote; do not adopt prior duration merely because present at POST. Preserve latest per-output authority and old frame triples. Add actual non-film forged duration refusal plus the required two-draw/latest-output positive and tamper negatives.",
+      "execution": "STATIC_INFERENCE_NOT_RUN"
+    },
+    {
+      "id": "Q04",
+      "severity": "MAJOR",
+      "scope": "LF05/REG",
+      "kind": "STATIC_GATE_FALSE_NEGATIVE",
+      "title": "Vendor taint gate misses renamed imports and loader-local calls",
+      "locations": [
+        "tests/m2.1/openfilm-upstream-lock.test.ts:124",
+        "tests/m2.1/openfilm-upstream-lock.test.ts:196",
+        "tests/m2.1/openfilm-upstream-lock.test.ts:204",
+        "tests/m2.1/openfilm-upstream-lock.test.ts:212",
+        "tests/m2.1/openfilm-upstream-lock.test.ts:388"
+      ],
+      "reachable_counterexample": "Synthetic valid caller: import {createPinnedOpenFilmUpstream as load} from \"../../adapters/openfilm/openfilm-upstream.js\"; function call(req:IncomingMessage){load(req.url as string)}. imported contains local name load, but known maps exported names, so known.get(load) is undefined and no violation is reported. Namespace import OF.createPinnedOpenFilmUpstream(req.url) is also skipped because only identifier callees are visited. The loader module self-check has no import from itself, so imported is empty and its local openFilmAvailability(requestDerivedRoot) calls are not checked at all. A helper taking root:string and invoking the sink can receive req.url without parameter taint propagation; current helper test only tests pick(req) at a direct sink.",
+      "test_gap": "Current synthetic request alias and renamed parameter cases do not rename loader import or call through helper into sink. Comment admits cross-file limit, but these bypasses are same-file and beyond that stated limitation. No current production request-controlled vendor path exploit is claimed.",
+      "minimum_correction": "Resolve local imported aliases/namespaces to original exports, include loader-local entry calls, and follow actual argument-to-helper-parameter data flow or explicitly enforce a smaller audited composition capability boundary. Add these exact counterexamples before relying on the gate; keep fixed argv/pin/shell refusals.",
+      "execution": "STATIC_ORACLE_COUNTEREXAMPLES_NOT_EXECUTED"
+    },
+    {
+      "id": "Q05",
+      "severity": "MAJOR",
+      "scope": "LF02/REG",
+      "kind": "TEST_PREREQUISITE_DEFECT",
+      "title": "Real-media setup cannot overwrite copied opaque fixtures with current ffmpeg argv",
+      "locations": [
+        "tests/m2.3/migration-real-export.test.ts:97",
+        "tests/m2.3/migration-real-export.test.ts:101",
+        "tests/m2.3/migration-real-export.test.ts:105",
+        "tests/m2.3/migration-real-export.test.ts:107",
+        "tests/m2.3/migration-real-export.test.ts:133",
+        "tests/m2.3/migration-real-export.test.ts:137",
+        "tests/m2.3/migration-real-export.test.ts:228"
+      ],
+      "reachable_counterexample": "Both real-export cases cp SOURCE_FIXTURE recursively, including now-restored17/17/18-byte files, then prepareDiagnosticMedia writes exactly the same output paths. ffmpeg argv has -nostdin and no -y, nor does setup remove only these owned copied files first. Existing output is refused, so the first visual preparation exits before manifest probing, migration, target renders or second edited export. This is a source/CLI control-flow inference, not a claimed run.",
+      "test_gap": "New actual frames/real AssetRegistry and preserved target900/edit/hash assertions are promising but unreachable from the restored fixture under this setup. Counts/titles or tsc cannot establish LF02.",
+      "minimum_correction": "Explicitly overwrite or remove only the three owned files in the private copied fixture before fixed bounded generation; preserve canonical opaque bytes and all real render/decode/two-export assertions. Verify audio as well as visual decode; diagnostic remains non-A media.",
+      "execution": "STATIC_INFERENCE_NOT_RUN"
+    },
+    {
+      "id": "Q06",
+      "severity": "MAJOR",
+      "scope": "LF04/REG",
+      "kind": "AUTHORITY_NEGATIVE_COVERAGE_GAP",
+      "title": "Foreign impact/transaction test uses absent IDs or mismatched request fields",
+      "locations": [
+        "tests/agent-driven/integration/created-source-adoption.test.ts:567",
+        "tests/agent-driven/integration/created-source-adoption.test.ts:570",
+        "tests/agent-driven/integration/created-source-adoption.test.ts:586"
+      ],
+      "reachable_counterexample": "The branch described as an impact of another project never creates such an impact in the same authority; it substitutes imp_of_another_project, an absent ID, and accepts any throw. The transaction branch only substitutes project_id on the original input without creating/selecting an actual transaction belonging to another project. Early missing-row or publication-binding refusal can satisfy both without exercising cross-project CAS/transaction ownership. A defect allowing valid foreign rows could survive these assertions.",
+      "test_gap": "Tampered stored impact_hash branch is a real DB mutation; expiry delegation and file-scoped fitness registration are present. Those do not establish the two separate actual foreign-authority negatives required by037 LF04.",
+      "minimum_correction": "Arrange real second-project impact/transaction rows in the same database/authority, prove their existence and foreign ownership before invocation, then assert the intended ownership/CAS refusal and unchanged complete authorities; retain the real hash/rollback and scanner negatives.",
+      "execution": "STATIC_TEST_REACHABILITY_NOT_RUN"
+    }
+  ],
+  "severity_counts": {
+    "BLOCKER": 0,
+    "MAJOR": 6,
+    "MINOR": 0
+  },
+  "corrective_coverage": [
+    {
+      "area": "PF01",
+      "status": "REQUEST_CHANGES_STATIC;BUSINESS_NOT_RUN",
+      "proof": "Private owner WeakMap + read-only binding, registered held-view identity, root dev/ino, preproduction and preactivation liveness checks are present.",
+      "tests": "tests/agent-driven/integration/native-cache-witness.test.ts:924 foreign root, same-root second allocation, clones/shape/handler string, closed owner zero-request negatives",
+      "gap": "Q01/Q02; positive and new negatives not executed."
+    },
+    {
+      "area": "PF02",
+      "status": "REQUEST_CHANGES_STATIC;BUSINESS_NOT_RUN",
+      "proof": "By-output current authority and full duration identity consumption replace bare stamp acceptance; frame reader only checks its actual triple rather than all witness outputs.",
+      "tests": "tests/agent-driven/integration/native-cache-witness.test.ts:1001 one draw/current-output lookup/newinode",
+      "gap": "Q03; actual N8 consecutive two draws body absent; no revoked-newest/no-fallback or duration change-restore assertion."
+    },
+    {
+      "area": "PF03",
+      "status": "PARTIAL_ASSERTIONS;BUSINESS_AND_MUTATION_NOT_RUN",
+      "proof": "Production overrides PRE/POST phase, descriptor metadata namespace/monotonic allocationid/path. K05-c changes existing film at POST root-open; this does not change root entry identity, so PRE/POST comparison SOURCE_RACED appears reachable. Both real closes fail separately and genuine messages checked.",
+      "tests": "tests/agent-driven/integration/native-cache-witness.test.ts:1056 K05-c; retained-native-closure.ts:429 rootallocation id1",
+      "gap": "K05-c records messages, not exact Error object references; no inventory/assertion for all allocated IDs/all-attempt count, only two root faults. No actual mutation/old-red claim authorized or obtained. Proposed precise reachability still NOT_RUN."
+    },
+    {
+      "area": "LF01",
+      "status": "LOCAL_BYTES_SUPPORTED;FREEZE_TRACKING_PENDING",
+      "proof": "Three opaque fixtures independently hash-match exact17/17/18 bytes and backups.",
+      "tests": "Existing component contract remains opaque, not video/audio.",
+      "gap": "Clean-checkout tracking is MAIN freeze follow-up; no git index change or durable staging claimed."
+    },
+    {
+      "area": "LF02",
+      "status": "REQUEST_CHANGES_STATIC;BUSINESS_NOT_RUN",
+      "proof": "Private diagnostic generator/real measured asset frame counts, real AssetRegistry, source digest-only rollback explicitly distinguished from fresh Hypit export, two target export900/edit/hash checks retained.",
+      "tests": "tests/m2.3/migration-real-export.test.ts:95 generator;143 real registry;180 and200 target export assertions",
+      "gap": "Q05; no ffmpeg run/actual decode evidence. frameCount count_frames is actual video decode, audio full-decode setup assertion not supplied. Do not weaken target assertions or edit old migrator."
+    },
+    {
+      "area": "LF03",
+      "status": "STATIC_IMPLEMENTATION_SUPPORTED;BUSINESS_AND_COUNTERFACTUAL_NOT_RUN",
+      "proof": "Private staging strict fingerprint; published-only ctime path rehashes sameFD using explicit offset0, bounded MAX_BYTES and full second fingerprint plus original dev/ino/size/mtime; final SQL #assertBlob reproof remains.",
+      "tests": "local-assets-host.test.ts:310 two-different-key concurrent success/capacity2/cancel;343 real link/unlink exact after_published_stat;188 tamper rollback",
+      "gap": "No execution establishes N9/N10 or strict-comparison counterfactual. N10 positive alone does not run every tamper variant; samekey event assertion is at202, different-key event count not separately asserted. Async realpath/sync after second pass is followed by synchronous #assertBlob; no high-confidence new LF03 production defect found."
+    },
+    {
+      "area": "LF04",
+      "status": "IMPLEMENTATION_PARTIAL_PROOF;BUSINESS_NOT_RUN",
+      "proof": "expire delegates existing ImpactStore.markExpired, service rereads state. Fitness is exact file+method pair, negatives otherfile/samename and samefile/unregistered; hash mutation and postconsume rollback bodies retained.",
+      "tests": "created-impact-atomic.test.ts:60; m2.2-fitness.test.ts:122; created-source-adoption.test.ts:567,603",
+      "gap": "Q06; no fake async race invented for sync SQL."
+    },
+    {
+      "area": "LF05",
+      "status": "REQUEST_CHANGES_STATIC",
+      "proof": "AST uses typed request sources, properties, aliases, selected expressions; pin/fixedargv/shell/forgedverdict tests retained.",
+      "tests": "tests/m2.1/openfilm-upstream-lock.test.ts:388 synthetic direct/property/body/requestalias/renamedparameter/pick(req)",
+      "gap": "Q04; staticfitness execution, if MAIN separately authorizes/runs it, cannot close omitted counterexamples."
+    }
+  ],
+  "original17": [
+    {
+      "group": "R01",
+      "requirement": "producer_chain",
+      "proof_required": "Actual bootstrap, SOURCE_ONLY draft and controlled adoption produce committed rich source; actual workspace/reader consumes it; preserve producer/rights/consumer identities.",
+      "status": "HISTORICAL_COMPONENT_EVIDENCE_CURRENT037_NOT_RUN",
+      "prior_evidence_locations": [
+        "src/host/agent-driven/committed-snapshot-authority.ts:362",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:109",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:171",
+        "tests/agent-driven/integration/helpers/native-source-fixture.ts:105"
+      ],
+      "current_limit": "Prior036 concrete evidence retained as history; not claimed as runtime proof of037 changes."
+    },
+    {
+      "group": "R01",
+      "requirement": "independent_trees",
+      "proof_required": "Committed source and workspace retain independent physical trees; equal relative paths never collapse resource ownership; nested and empty directories are separate evidence.",
+      "status": "HISTORICAL_COMPONENT_EVIDENCE_CURRENT037_NOT_RUN",
+      "prior_evidence_locations": [
+        "src/host/agent-driven/created-native-source-reader.ts:740",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:801",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:823",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:2702",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:2723"
+      ],
+      "current_limit": "Prior036 concrete evidence retained as history; not claimed as runtime proof of037 changes."
+    },
+    {
+      "group": "R02",
+      "requirement": "tamper_and_authority",
+      "proof_required": "Same bytes/new inode, parent/root replacement, same-size/restored mtime, symlink, copied/foreign/released capability and stale base/control/owner/generation are refused before authoritative use.",
+      "status": "HISTORICAL_COMPONENT_EVIDENCE_CURRENT037_NOT_RUN",
+      "prior_evidence_locations": [
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:737",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:1774",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:2567",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:3183",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:3206",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:3230",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:3260",
+        "tests/agent-driven/integration/native-cache-witness.test.ts:853",
+        "tests/agent-driven/integration/native-cache-witness.test.ts:906"
+      ],
+      "current_limit": "Prior036 concrete evidence retained as history; not claimed as runtime proof of037 changes."
+    },
+    {
+      "group": "R03",
+      "requirement": "complete_dependencies",
+      "proof_required": "Positive/negative style/settings/markers/subtitle/translation dependencies, added empty directory and actual listing changes invalidate stale proofs.",
+      "status": "HISTORICAL_COMPONENT_EVIDENCE_CURRENT037_NOT_RUN",
+      "prior_evidence_locations": [
+        "src/host/agent-driven/created-native-source-reader.ts:779",
+        "src/host/agent-driven/created-native-source-reader.ts:911",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:285",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:946",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:1633",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:2420",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:2511",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:3152"
+      ],
+      "current_limit": "Prior036 concrete evidence retained as history; not claimed as runtime proof of037 changes."
+    },
+    {
+      "group": "R04",
+      "requirement": "native_cache",
+      "proof_required": "Unknown/forged native metadata or cache refused; concrete approved producer derivation invalidates old round, then stable proven native derivation can be read; no broad cache whitelist.",
+      "status": "UNPROVEN_REQUEST_CHANGES",
+      "prior_evidence_locations": [
+        "src/host/agent-driven/created-native-workspace.ts:462",
+        "src/host/agent-driven/created-native-source-reader.ts:1173",
+        "tests/agent-driven/integration/native-cache-witness.test.ts:136",
+        "tests/agent-driven/integration/native-cache-witness.test.ts:302",
+        "tests/agent-driven/integration/native-cache-witness.test.ts:471",
+        "tests/agent-driven/integration/native-cache-witness.test.ts:853",
+        "tests/agent-driven/integration/native-cache-witness.test.ts:906"
+      ],
+      "current_limit": "Q01/Q02/Q03 and missingN8; original R04 actual lifecycle/provenance not closed."
+    },
+    {
+      "group": "R05",
+      "requirement": "actual_probe",
+      "proof_required": "Fixed local ffprobe uses same held parent-PID FD; normalized duration/first-video/fps/rotation/audio/dimensions and provenance match pinned upstream; no injected facts.",
+      "status": "HISTORICAL_COMPONENT_EVIDENCE_CURRENT037_NOT_RUN",
+      "prior_evidence_locations": [
+        "src/host/agent-driven/created-native-source-reader.ts:499",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:361",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:568",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:1020",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:1537"
+      ],
+      "current_limit": "Prior036 concrete evidence retained as history; not claimed as runtime proof of037 changes."
+    },
+    {
+      "group": "R05",
+      "requirement": "child_lifetime",
+      "proof_required": "Timeout/cancel/abrupt child: actual child exit and reap precede input release; limits refuse rather than truncate; diagnostic media never represents Chinese A films.",
+      "status": "HISTORICAL_COMPONENT_EVIDENCE_CURRENT037_NOT_RUN",
+      "prior_evidence_locations": [
+        "src/host/agent-driven/created-native-source-reader.ts:428",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:568",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:2280",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:2307",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:2334",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:2361"
+      ],
+      "current_limit": "Prior036 concrete evidence retained as history; not claimed as runtime proof of037 changes."
+    },
+    {
+      "group": "R06",
+      "requirement": "native_bytes_and_order",
+      "proof_required": "Exact UTF8/BOM/CRLF/native_rev vectors; numeric localeCompare video ordering vs separate actual caption readdir order; Node/ICU/locale recorded.",
+      "status": "HISTORICAL_COMPONENT_EVIDENCE_CURRENT037_NOT_RUN",
+      "prior_evidence_locations": [
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:1064",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:1093",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:1663",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:1686",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:2941",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:2975"
+      ],
+      "current_limit": "Prior036 concrete evidence retained as history; not claimed as runtime proof of037 changes."
+    },
+    {
+      "group": "R07",
+      "requirement": "budgets",
+      "proof_required": "Size checks precede bounded text read; growth, total bytes, path/depth/FD/output/time bounds have explicit rejection; no unbounded media read.",
+      "status": "HISTORICAL_COMPONENT_EVIDENCE_CURRENT037_NOT_RUN",
+      "prior_evidence_locations": [
+        "src/host/agent-driven/retained-native-closure.ts:20",
+        "src/host/agent-driven/retained-native-closure.ts:702",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:1181",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:1294",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:1743",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:1820",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:2280",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:2307"
+      ],
+      "current_limit": "Prior036 concrete evidence retained as history; not claimed as runtime proof of037 changes."
+    },
+    {
+      "group": "R07",
+      "requirement": "per_allocation_fd_lifetime",
+      "proof_required": "Descriptor allocation generations own closes; recycled integer after temporary directory walk still closes newly retained allocation exactly once; no raw numeric retry.",
+      "status": "HISTORICAL_COMPONENT_EVIDENCE_CURRENT037_NOT_RUN",
+      "prior_evidence_locations": [
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:1851",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:1181",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:2814"
+      ],
+      "current_limit": "Prior036 concrete evidence retained as history; not claimed as runtime proof of037 changes."
+    },
+    {
+      "group": "R07",
+      "requirement": "cleanup_uncertainty",
+      "proof_required": "Nth open/stat/verify/close/reentry failures preserve primary and all cleanup errors; every outstanding resource attempted; sticky uncertainty prevents new proof.",
+      "status": "UNPROVEN_AFFECTED_LIFECYCLE",
+      "prior_evidence_locations": [
+        "src/host/agent-driven/created-native-source-reader.ts:385",
+        "src/host/agent-driven/committed-snapshot-authority.ts:391",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:1230",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:1957",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:2007",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:2030",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:2638",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:2814",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:3028",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:3051",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:3085"
+      ],
+      "current_limit": "Q01/Q02 and PF03 exact-allocation/causes evidence pending."
+    },
+    {
+      "group": "R07",
+      "requirement": "drain_and_delivery",
+      "proof_required": "Close drains accepted reads and probes; success transfers source/workspace plus directory/negative guards; reader close cannot destroy delivered resources.",
+      "status": "UNPROVEN_AFFECTED_LIFECYCLE",
+      "prior_evidence_locations": [
+        "src/host/agent-driven/created-native-source-reader.ts:645",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:513",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:628",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:1616",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:2099",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:2173",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:3004"
+      ],
+      "current_limit": "Q01/Q02 and PF03 exact-allocation/causes evidence pending."
+    },
+    {
+      "group": "R01/R02",
+      "requirement": "lease_isolation",
+      "proof_required": "Releasing one acquired lease does not revoke ref or another lease; repeated proof works; issuing instance checked and replaced generation invalidates prior proof.",
+      "status": "HISTORICAL_COMPONENT_EVIDENCE_CURRENT037_NOT_RUN",
+      "prior_evidence_locations": [
+        "src/host/agent-driven/created-native-workspace.ts:337",
+        "src/host/agent-driven/created-native-workspace.ts:698",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:401",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:447",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:2538",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:3260",
+        "tests/agent-driven/integration/native-cache-witness.test.ts:385",
+        "tests/agent-driven/integration/native-cache-witness.test.ts:425",
+        "tests/agent-driven/integration/native-cache-witness.test.ts:471",
+        "tests/agent-driven/integration/native-cache-witness.test.ts:526"
+      ],
+      "current_limit": "Prior036 concrete evidence retained as history; not claimed as runtime proof of037 changes."
+    },
+    {
+      "group": "REG",
+      "requirement": "existing_behavior",
+      "proof_required": "Original render SnapshotReadPort, legacy refusal and accepted Expected lifecycle/84 assertions preserved; loader only approved015 minimal exports, no artifact/pin change.",
+      "status": "UNPROVEN_REGRESSIONS037_NOT_RUN",
+      "prior_evidence_locations": [
+        "src/host/m5/openfilm-native-expected.ts:625",
+        "tests/agent-driven/integration/created-native-ack.test.ts:667",
+        "tests/agent-driven/integration/created-draft-processor.test.ts:72",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:193"
+      ],
+      "current_limit": "Q04/Q05/Q06 plus LF03 actual concurrency, real-media and state regression pending."
+    },
+    {
+      "group": "EVIDENCE",
+      "requirement": "frozen_capture",
+      "proof_required": "Exact ten-file diff and protected hashes checked; unique captures retain all failures, source/index immutable during commands, actual exits and source/artifact SHA256 verified.",
+      "status": "EXPECTED_PENDING",
+      "prior_evidence_locations": [
+        "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/BATCH_036_GRANT.json"
+      ],
+      "current_limit": "All35 exact bytes captured; no candidate commit; final frozen acceptance and later contract reanchor not issued."
+    },
+    {
+      "group": "REVIEW",
+      "requirement": "independent_acceptance",
+      "proof_required": "Freeze actual candidate and obtain independent review bound to it; fix then reverify affected gates. No self-signed external pass.",
+      "status": "EXPECTED_PENDING",
+      "prior_evidence_locations": [
+        "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/independent-pre-freeze-review-021/TASK.md"
+      ],
+      "current_limit": "All35 exact bytes captured; no candidate commit; final frozen acceptance and later contract reanchor not issued."
+    },
+    {
+      "group": "NEXT",
+      "requirement": "next_integration_plan",
+      "proof_required": "After N1N2 acceptance freeze compatible next-stage contract and exact implementation/acceptance plan; no premature S01/NativeAck/Studio/film/A readiness claim.",
+      "status": "EXPECTED_PENDING",
+      "prior_evidence_locations": [
+        "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/MAIN_ACCEPTANCE_REQUIREMENTS.json"
+      ],
+      "current_limit": "All35 exact bytes captured; no candidate commit; final frozen acceptance and later contract reanchor not issued."
+    }
+  ],
+  "limits": [
+    "No tests/tsc/Host/browser/media/build/network/installation/provider/process probes performed.",
+    "No source/config/index/fixture edits; only these two new reports.",
+    "No counterexample/mutation execution inferred from static control flow.",
+    "Prior reports and all failure evidence preserved; writer stays frozen; MAIN owns grants and next action."
+  ]
+}

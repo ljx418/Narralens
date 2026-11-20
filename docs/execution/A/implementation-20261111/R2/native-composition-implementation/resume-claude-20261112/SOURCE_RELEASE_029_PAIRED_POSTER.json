@@ -1,0 +1,33 @@
+{
+  "id": "N1N2_021_PAIRED_POSTER_SOURCE_RELEASE_029",
+  "at": "2026-11-13T01:48:18.351742+00:00",
+  "status": "SOURCE_ONLY_NO_BUSINESS_RUNTIME",
+  "dispatch": "ctx_297f7b8da2e1",
+  "request": "msg_4f0452fbdb50",
+  "write_paths": {
+    "src/host/agent-driven/created-native-source-reader.ts": "919648425c0a9a461efa56007e31d4a247d4ef198d2fef21f0122711af81f781",
+    "tests/agent-driven/integration/native-cache-witness.test.ts": "71119fc394d8dbbae6b5843d1dd7c73dec3ecd29aeb027dd11a7007c03c25155"
+  },
+  "protected_other12": {
+    "src/host/agent-driven/native-cache-witness.ts": "85b1e804b3956165a6f8e171aa1fb8800cd8337290ad2d16ac05d3906ba2501a",
+    "src/host/agent-driven/created-native-workspace.ts": "32d5adae9d737b6799f20531e50956413a619e048a8f2f225fccb064205afbd2",
+    "src/host/agent-driven/committed-snapshot-authority.ts": "1c53360e3c618c603cfcbe61d0c2d57004c5bd33dc26a92c2fdec72a1844bd6d",
+    "src/host/m5/openfilm-native-expected.ts": "19110e45a83b6d5b611b4260620ce873f923f1e5a5b907bc6176c4b734fbeed3",
+    "src/adapters/openfilm/openfilm-upstream.ts": "29a0827a6130c2f382de93d1738b1be003c5ef15ded253d256585e6214d2aa69",
+    "tests/agent-driven/integration/created-native-source-reader.test.ts": "8d740f83883fd42c13f8e0e2ea63bee406f8d9edf19ea02a1005c72e26616e60",
+    "tests/agent-driven/integration/helpers/native-source-fixture.ts": "7160a285930e61b7927d90bb517e7d9575f5f0888394d228b192baff80daf622",
+    "tests/agent-driven/integration/helpers/created-draft-fixture.ts": "59788a8f9c08415a808b2418e86b4dac6bb7de65297ad5d1cb19b5f26eb22d27",
+    "tests/agent-driven/integration/created-native-workspace.test.ts": "439d469032c9af2b83ceb826e0aead7cf5c2fe5c5693be7cbf18c8e67f0f615f",
+    "tests/agent-driven/integration/committed-snapshot-host.test.ts": "bfd0c6373b254050d32a6a99e7b6f8b9827dc24b6b2587515ab4c5aad2cd9037",
+    "tests/agent-driven/integration/created-native-ack.test.ts": "5f50db85c7c07a2ecf4faefc20ec2ec6c7ad4910fafe549c2edc76bbad729c7c",
+    "src/host/agent-driven/retained-native-closure.ts": "776331d6397191ee7fc97a4859f8d3ff95031efaf2d4fe7a7ee875451d85eb30"
+  },
+  "requirements": [
+    "Only pageframe lookup missing direct witness may inspect actual same workspace/generation active poster witness; must kind film-poster and exact frame_key equality; do not override existing incompatible direct witness",
+    "Retain every full identity/output/dependency/stamp check; exact picture chosen for requested kind; no forged witness, new alias authority, relaxed errors or fake media",
+    "Strengthen B0-1 existing real draw: assert direct frame-key lookup absent while poster witness covers paired triple and reader accepts; after success copy actual triple under different valid-looking frame key and prove reader rejects UNWITNESSED rather than accepts unrelated poster. Preserve original assertions and cleanup. No extra browser draw needed",
+    "Record unique next tsc --noEmit; save all14 actual byte blobs/hashes; request fresh A3c runtime. No business test before fresh grant"
+  ],
+  "stop": "New429 immediateSTOP no retry/takeover",
+  "review_limit": "Actual A3b5PASS1FAIL; N1N2 original17 notaccepted; historicalfailedcapturessaved"
+}

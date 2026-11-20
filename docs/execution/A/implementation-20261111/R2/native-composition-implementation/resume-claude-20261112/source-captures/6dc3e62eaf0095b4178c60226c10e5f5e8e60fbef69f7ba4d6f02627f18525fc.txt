@@ -1,0 +1,1309 @@
+import { createHash } from "node:crypto";
+import { execFile, execFileSync, spawn, spawnSync } from "node:child_process";
+import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
+import { cp, mkdir, mkdtemp, readFile, rm, stat, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join, resolve, sep } from "node:path";
+import { promisify } from "node:util";
+import { afterEach, describe, expect, it } from "vitest";
+import { MigrationService } from "../../src/host/projects/migration-service.js";
+import { AssetRegistry } from "../../src/host/projects/asset-registry.js";
+import { MigratedAssetLedger } from "../../src/host/projects/migrated-asset-ledger.js";
+import { ProjectCatalog } from "../../src/host/projects/project-catalog.js";
+import { RevisionStore } from "../../src/host/projects/revision-store.js";
+import { SnapshotStore } from "../../src/host/projects/snapshot-store.js";
+import { EngineBindingStore } from "../../src/host/engine/engine-binding-store.js";
+import { createPinnedOpenFilmUpstream } from "../../src/adapters/openfilm/openfilm-upstream.js";
+import { treeDigest } from "../../src/host/projects/openfilm-migrator.js";
+import type { EngineKind } from "../../src/contracts/engine-types.js";
+
+/**
+ * MIG-03 and EN-05 (M2.3 plan §6): the real chain, with real media.
+ *
+ * Migrate, close and reopen, export, edit the middle clip, export again. Nothing here is
+ * simulated: the exports are produced by the pinned OpenFilm renderer and the two MP4s are
+ * compared by digest, frame count and duration. A test that only inspected JSON would not
+ * be evidence for this case, so none of it does.
+ *
+ * THE HARNESS OWNS EVERYTHING IT STARTS (053):
+ *
+ *  - The pinned CLI is an INTERACTIVE tool: `openfilm.mjs` shows a project Studio has never
+ *    shown, and a missing `project/.film/opened` makes `render` open the project first,
+ *    which starts the Studio as a DETACHED process that this case would then leave behind.
+ *    This case renders OFFLINE, so it writes the marker the upstream itself uses, in its
+ *    OWN private project copy. The marker says ONE thing - "do not open this project
+ *    interactively" - and it is NOT a claim that a person opened the project, NOT a claim
+ *    that Studio ever showed it and NOT a UX pass.
+ *  - Every CLI child runs with its OWN `OPENFILM_HOME` and `OPENFILM_LIBRARY` under this
+ *    case's private temp root and with `OPENFILM_NO_UPDATE_CHECK=1`. `HOME` is never set
+ *    or changed, the real `~/.openfilm` is never read or written, and no user credential
+ *    or configuration is touched.
+ *  - Every child is owned: its pid, its argv, its cwd and its exit are recorded, and the
+ *    Studio this case may have started is settled BY ITS OWN IDENTITY (the `run.json` in
+ *    this case's OWN private home), never by a broad name match and never by cleaning a
+ *    shared port. A Studio that appears at all is a FAILURE of this harness, and it is
+ *    still settled before the case ends.
+ *  - The real MP4s are KEPT: every export is copied into `docs/evidence/N1N2/real-export-054/`
+ *    with its real sha256 and byte count, and a manifest records the real commands, their
+ *    real exits and the real media facts. The evidence is evidence, never authority.
+ *    The 053 evidence stays exactly as it is: it is read, never written.
+ *
+ * THE CHILD BOUNDARIES ARE BOUNDED AGAIN (054):
+ *
+ *  - Every CLI child runs under the budget the render always had: 600000 ms and 8 MiB of
+ *    output. The output buffers are bounded WHILE the child runs - the bytes are counted,
+ *    never accumulated without limit and sliced afterwards.
+ *  - The child's identity is registered the moment it is spawned, BEFORE the first await,
+ *    so a child that hangs can still be found, killed and reaped in the `finally`.
+ *  - A timeout, an output overflow, a spawn error and a cancellation all END the same way:
+ *    the child is signalled, it is really waited for, it is reaped, the primary reason and
+ *    the cleanup reason are both kept, and only then does the call fail.
+ *  - The Studio this case may have started is settled BY PROVEN OWNERSHIP: a pid that
+ *    cannot be proven to belong to this case's own private home is NEVER signalled, and
+ *    such a state is a FAILURE, never a quiet "there was nothing to kill".
+ */
+
+const VENDOR = "/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm";
+const SOURCE_FIXTURE = resolve("tests/fixtures/m2.1/snapshot-project");
+const OPENFILM_SHA = "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3";
+const PROJECT = "d1-30s";
+/** The 053 evidence: READ ONLY from here on. Its history is kept, never rewritten. */
+const EVIDENCE_DIR_053 = resolve("docs/evidence/N1N2/real-export-053");
+/** Where THIS wave keeps its own media, manifests and the validity index of the 053 evidence. */
+const EVIDENCE_DIR = resolve("docs/evidence/N1N2/real-export-054");
+/** The budget the render always had. It is restored, never widened. */
+const RENDER_TIMEOUT_MS = 600_000;
+const RENDER_MAX_OUTPUT_BYTES = 8 * 1024 * 1024;
+/** The capture this run belongs to, when the runner is told which one it is. */
+const CAPTURE_ID = process.env.N1N2_CAPTURE_ID ?? null;
+const run = promisify(execFile);
+
+const dirs: string[] = [];
+const stores: RevisionStore[] = [];
+afterEach(async () => {
+  while (stores.length > 0) stores.pop()!.close();
+  await Promise.all(dirs.splice(0).map((path) => rm(path, { recursive: true, force: true })));
+});
+
+/** The pinned renderer must actually be there; its absence is reported, never assumed. */
+function pinnedUpstreamPresent(): boolean {
+  return existsSync(resolve(VENDOR, "packages/openfilm/bin/openfilm.mjs"));
+}
+
+/** One command this case ran, with the facts it produced. */
+interface CommandRecord {
+  readonly argv: readonly string[];
+  readonly exit: number | null;
+  readonly cwd: string;
+  readonly note: string;
+}
+
+/** The Studio this case may have started, identified by its OWN private home. */
+interface StudioOwnership {
+  readonly present: boolean;
+  readonly pid: number | null;
+  readonly supervisor: number | null;
+  readonly origin: string | null;
+  readonly run_file: string | null;
+}
+
+/** Everything this case owns while it runs. */
+interface RenderContext {
+  /** The private temp root of this case. Everything it owns lives under it. */
+  readonly base: string;
+  /** The private `OPENFILM_HOME` of this case: the upstream's own isolation variable. */
+  readonly private_home: string;
+  /** The private `OPENFILM_LIBRARY` of this case. */
+  readonly private_library: string;
+  /** Every CLI child this case started, in order. */
+  readonly children: CliChildRecord[];
+  /** Every real export this case made, with the artifact each one kept. */
+  readonly exports: Array<{ readonly stage: string; readonly facts: ExportFacts }>;
+  /** The Studio this case's private home advertises, if any. */
+  studio: StudioOwnership;
+  /** What the settlement of that Studio was. */
+  cleanup: { settled: boolean; actions: string[]; reasons: string[] } | null;
+}
+
+/** The private roots of one case. The upstream reads them; the real `~/.openfilm` is never used. */
+function createRenderContext(base: string): RenderContext {
+  const private_home = join(base, "openfilm-home");
+  const private_library = join(base, "openfilm-library");
+  mkdirSync(private_home, { recursive: true });
+  mkdirSync(private_library, { recursive: true });
+  return {
+    base, private_home, private_library,
+    children: [], exports: [],
+    studio: { present: false, pid: null, supervisor: null, origin: null, run_file: null },
+    cleanup: null,
+  };
+}
+
+/**
+ * The environment of ONE CLI child.
+ *
+ * `HOME` is neither set nor changed, and no user configuration or credential is touched:
+ * the upstream's own `OPENFILM_HOME` / `OPENFILM_LIBRARY` variables are what isolate this
+ * case, and `OPENFILM_NO_UPDATE_CHECK=1` keeps it off the network.
+ */
+function cliEnv(context: RenderContext): NodeJS.ProcessEnv {
+  return {
+    ...process.env,
+    OPENFILM_HOME: context.private_home,
+    OPENFILM_LIBRARY: context.private_library,
+    OPENFILM_NO_UPDATE_CHECK: "1",
+    OPENFILM_NO_BROWSER: "1",
+  };
+}
+
+/**
+ * The HEADLESS marker of THIS harness, in THIS case's OWN project copy.
+ *
+ * The pinned CLI opens a project Studio has never shown before it renders it, and that
+ * open starts a DETACHED Studio. This case renders offline and owns every process it
+ * starts, so it writes the marker the upstream itself reads (`project/.film/opened`).
+ *
+ * The marker says ONE thing and nothing else: this project must not be opened
+ * interactively. It is NOT evidence that a person opened the project, NOT evidence that
+ * Studio ever showed it and NOT a UX pass. It is written ONLY inside this case's own
+ * private temp project - never into the fixed fixture, never into a user project.
+ */
+async function markHeadlessProject(root: string, context: RenderContext): Promise<void> {
+  if (!root.startsWith(context.base + sep)) throw new Error("the rendered project is not inside this case's own private root");
+  const film = join(root, ".film");
+  await mkdir(film, { recursive: true });
+  await writeFile(join(film, "opened"), "");
+}
+
+/** One CLI child this case owns. The record is live: it is registered before the first await. */
+interface CliChildRecord {
+  pid: number;
+  argv: string[];
+  cwd: string;
+  /** How the child ended: on its own, by the budget, by the output limit, by a cancellation or by a spawn error. */
+  outcome: "exited" | "timeout" | "output_limit" | "aborted" | "error";
+  exit: number | null;
+  signal: string | null;
+  stdout_bytes: number;
+  stderr_bytes: number;
+  stdout_tail: string;
+  stderr_tail: string;
+  /** Whether this case had to signal the child. */
+  killed: boolean;
+  /** Whether the child really exited and was reaped. */
+  settled: boolean;
+  note: string;
+}
+
+/** A child that did not end well. It carries the record and BOTH reasons. */
+class ChildFailure extends Error {
+  constructor(message: string, readonly record: CliChildRecord, readonly cleanup: string) {
+    super(message);
+    this.name = "ChildFailure";
+  }
+}
+
+/** The budget of one child: a time limit and an output limit, both enforced while it runs. */
+interface ChildBudget {
+  readonly timeout_ms: number;
+  readonly max_output_bytes: number;
+}
+
+/**
+ * Run ONE CLI child under a BOUNDED budget and own it completely.
+ *
+ * The identity of the child is registered BEFORE the first await, so a child that hangs
+ * is still known to the case and can be killed and reaped in its `finally`.
+ *
+ * The output buffers are bounded WHILE the child runs: the bytes are counted and only the
+ * tail is kept, so a child that floods stdout cannot exhaust this process.
+ *
+ * A timeout, an output overflow, a spawn error and a cancellation all end the same way:
+ * the child is signalled, it is REALLY waited for (the promise settles on the child's own
+ * `close`, which is after it exited and was reaped), and the primary reason and the
+ * cleanup reason are both kept.
+ */
+function runCli(argv: readonly string[], options: {
+  cwd: string; env: NodeJS.ProcessEnv; budget: ChildBudget;
+  register: (record: CliChildRecord) => void;
+  abort?: AbortSignal;
+}): Promise<CliChildRecord> {
+  return new Promise((resolveChild, rejectChild) => {
+    const record: CliChildRecord = {
+      pid: -1, argv: [...argv], cwd: options.cwd, outcome: "exited", exit: null, signal: null,
+      stdout_bytes: 0, stderr_bytes: 0, stdout_tail: "", stderr_tail: "", killed: false, settled: false,
+      note: "CLI child",
+    };
+    let stdout = "";
+    let stderr = "";
+    let settled = false;
+    let timer: NodeJS.Timeout | undefined;
+    let grace: NodeJS.Timeout | undefined;
+    let child: ReturnType<typeof spawn>;
+    try {
+      child = spawn(argv[0]!, argv.slice(1), { cwd: options.cwd, env: options.env, windowsHide: true, stdio: ["ignore", "pipe", "pipe"] });
+    } catch (error) {
+      record.outcome = "error";
+      record.settled = true;
+      rejectChild(new ChildFailure(`the child could not be started: ${String(error)}`, record, "no child existed"));
+      return;
+    }
+    // The identity is known NOW, before anything is awaited.
+    record.pid = child.pid ?? -1;
+    options.register(record);
+    // The pipes are asked for explicitly, so they are there; if they are not, the child is
+    // failed loudly instead of being watched without a bound.
+    const stdoutStream = child.stdout;
+    const stderrStream = child.stderr;
+    if (stdoutStream === null || stderrStream === null) {
+      record.outcome = "error";
+      record.note = "the child was started without pipes, so its output could not be bounded";
+      try { child.kill("SIGKILL"); } catch { /* it is already gone */ }
+      record.settled = true;
+      rejectChild(new ChildFailure(record.note, record, "the child was killed and waited for"));
+      return;
+    }
+
+    const finish = (): void => {
+      if (settled) return;
+      settled = true;
+      if (timer !== undefined) clearTimeout(timer);
+      if (grace !== undefined) clearTimeout(grace);
+      record.settled = true;
+      const primary = record.outcome === "exited"
+        ? `the child exited with code ${String(record.exit)}`
+        : `the child ended by ${record.outcome}`;
+      const cleanup = record.killed
+        ? `the child was signalled and really waited for (exit ${String(record.exit)}, signal ${String(record.signal)})`
+        : "the child exited on its own and was reaped";
+      if (record.outcome === "exited" && record.exit === 0) resolveChild(record);
+      else rejectChild(new ChildFailure(primary, record, cleanup));
+    };
+
+    const stop = (): void => {
+      if (record.killed) return;
+      record.killed = true;
+      try { child.kill("SIGTERM"); } catch { /* it is already gone */ }
+      // If it does not go, it is forced - and it is still waited for below.
+      if (grace === undefined) {
+        grace = setTimeout(() => {
+          try { child.kill("SIGKILL"); } catch { /* it is already gone */ }
+        }, 2_000);
+        grace.unref();
+      }
+    };
+
+    stdoutStream.on("data", (chunk: Buffer) => {
+      record.stdout_bytes += chunk.length;
+      if (record.stdout_bytes > options.budget.max_output_bytes) {
+        record.outcome = "output_limit";
+        record.note = `stdout exceeded the ${options.budget.max_output_bytes} byte budget`;
+        stop();
+        return;
+      }
+      stdout = (stdout + chunk.toString("utf8")).slice(-8_192);
+      record.stdout_tail = stdout;
+    });
+    stderrStream.on("data", (chunk: Buffer) => {
+      record.stderr_bytes += chunk.length;
+      if (record.stderr_bytes > options.budget.max_output_bytes) {
+        record.outcome = "output_limit";
+        record.note = `stderr exceeded the ${options.budget.max_output_bytes} byte budget`;
+        stop();
+        return;
+      }
+      stderr = (stderr + chunk.toString("utf8")).slice(-8_192);
+      record.stderr_tail = stderr;
+    });
+    child.once("error", (error) => {
+      record.outcome = "error";
+      record.note = `the child failed: ${String(error)}`;
+      finish();
+    });
+    // 'close' comes after the child really exited and its streams closed: it is reaped.
+    child.once("close", (code, signal) => {
+      record.exit = code;
+      record.signal = signal === null ? null : String(signal);
+      finish();
+    });
+    timer = setTimeout(() => {
+      record.outcome = "timeout";
+      record.note = `the child exceeded its ${options.budget.timeout_ms} ms budget`;
+      stop();
+    }, options.budget.timeout_ms);
+    timer.unref();
+    if (options.abort !== undefined) {
+      if (options.abort.aborted) {
+        record.outcome = "aborted";
+        record.note = "the child was cancelled before it ended";
+        stop();
+      } else {
+        options.abort.addEventListener("abort", () => {
+          record.outcome = "aborted";
+          record.note = "the child was cancelled";
+          stop();
+        }, { once: true });
+      }
+    }
+  });
+}
+
+/**
+ * What THIS case's own private home advertises.
+ *
+ * The Studio writes its own `run.json` into the studio home it was started with. With a
+ * private `OPENFILM_HOME`, that file belongs to THIS case and to nothing else - so the
+ * pids in it are THIS case's own processes, and no other process is ever touched.
+ */
+function studioOwnership(context: RenderContext): StudioOwnership {
+  const file = join(context.private_home, "run.json");
+  if (!existsSync(file)) return { present: false, pid: null, supervisor: null, origin: null, run_file: null };
+  try {
+    const raw = JSON.parse(readFileSync(file, "utf8")) as { pid?: number; supervisor?: number; origin?: string };
+    return { present: true, pid: raw.pid ?? null, supervisor: raw.supervisor ?? null, origin: raw.origin ?? null, run_file: file };
+  } catch {
+    return { present: true, pid: null, supervisor: null, origin: null, run_file: file };
+  }
+}
+
+/**
+ * The start time of a process, in the platform's own clock ticks since boot.
+ *
+ * It is read from the kernel, so it is a fact about the process and not a claim about it.
+ */
+function processStartTicks(pid: number): number | null {
+  try {
+    const stat = readFileSync(`/proc/${pid}/stat`, "utf8");
+    const fields = stat.slice(stat.lastIndexOf(")") + 2).split(" ");
+    const ticks = Number(fields[19]);
+    return Number.isFinite(ticks) ? ticks : null;
+  } catch { return null; }
+}
+
+/**
+ * Whether a process really belongs to THIS case's private home.
+ *
+ * A pid in a file is a CLAIM, not an identity. The proof is the kernel's own view of that
+ * process: its environment must name this case's private `OPENFILM_HOME`, and it must have
+ * started no earlier than this case did. A pid that cannot be proven is NEVER signalled.
+ */
+function processBelongsToHome(pid: number, privateHome: string, ownStartTicks: number | null): { owned: boolean; reason: string } {
+  const alive = ((): boolean => { try { process.kill(pid, 0); return true; } catch { return false; } })();
+  if (!alive) return { owned: false, reason: `pid ${pid} is not alive` };
+  let environ: string;
+  try { environ = readFileSync(`/proc/${pid}/environ`, "utf8"); }
+  catch { return { owned: false, reason: `pid ${pid} has no readable environment, so its ownership cannot be proven` }; }
+  if (!environ.split("\0").includes(`OPENFILM_HOME=${privateHome}`))
+    return { owned: false, reason: `pid ${pid} does not carry this case's private OPENFILM_HOME` };
+  const ticks = processStartTicks(pid);
+  if (ticks === null) return { owned: false, reason: `pid ${pid} has no readable start time, so its creation window cannot be proven` };
+  if (ownStartTicks !== null && ticks < ownStartTicks)
+    return { owned: false, reason: `pid ${pid} started before this case did, so it is not this case's child` };
+  return { owned: true, reason: `pid ${pid} carries this case's private OPENFILM_HOME and started inside this case's window` };
+}
+
+/**
+ * Settle the Studio THIS case started, by PROVEN ownership.
+ *
+ * Only a pid that the kernel proves to be this case's own process is signalled, and each
+ * of them is asked to stop before it is forced. Nothing is matched by name and no shared
+ * port is cleaned: a process this case did not start is never touched.
+ *
+ * A private home that advertises a Studio WITHOUT a provable pid is NOT "nothing to do":
+ * it is an unsettled state, and it is reported as such so the case fails.
+ */
+async function settleOwnedStudio(context: RenderContext): Promise<{ settled: boolean; actions: string[]; reasons: string[] }> {
+  const actions: string[] = [];
+  const reasons: string[] = [];
+  const owned = context.studio;
+  if (!owned.present) return { settled: true, actions, reasons };
+  const ownStartTicks = processStartTicks(process.pid);
+  const candidates = [owned.pid, owned.supervisor].filter((pid): pid is number => pid !== null && pid > 0);
+  if (candidates.length === 0) {
+    reasons.push("the private home advertised a Studio without any verifiable pid: nothing was signalled and the state is NOT settled");
+    return { settled: false, actions, reasons };
+  }
+  const ownedPids: number[] = [];
+  for (const pid of candidates) {
+    const proof = processBelongsToHome(pid, context.private_home, ownStartTicks);
+    if (proof.owned) { ownedPids.push(pid); actions.push(`proven own: ${proof.reason}`); }
+    else reasons.push(`not signalled: ${proof.reason}`);
+  }
+  if (ownedPids.length === 0) {
+    reasons.push("no pid of the advertised Studio could be proven to belong to this case: nothing was signalled and the state is NOT settled");
+    return { settled: false, actions, reasons };
+  }
+  const alive = (pid: number): boolean => { try { process.kill(pid, 0); return true; } catch { return false; } };
+  for (const pid of ownedPids) {
+    try { process.kill(pid, "SIGTERM"); actions.push(`SIGTERM ${pid}`); }
+    catch { actions.push(`SIGTERM ${pid} (already gone)`); }
+  }
+  for (let attempt = 0; attempt < 50; attempt += 1) {
+    if (!ownedPids.some(alive)) return { settled: true, actions, reasons };
+    await new Promise((done) => setTimeout(done, 100));
+  }
+  for (const pid of ownedPids) {
+    if (!alive(pid)) continue;
+    try { process.kill(pid, "SIGKILL"); actions.push(`SIGKILL ${pid}`); }
+    catch { actions.push(`SIGKILL ${pid} (already gone)`); }
+  }
+  await new Promise((done) => setTimeout(done, 500));
+  return { settled: !ownedPids.some(alive), actions, reasons };
+}
+
+/** The real facts of one exported MP4, measured by the fixed local tools. */
+interface ExportFacts {
+  readonly path: string;
+  readonly bytes: number;
+  readonly sha256: string;
+  readonly frames: number;
+  readonly width: number;
+  readonly height: number;
+  readonly duration_seconds: number;
+  readonly audio: { readonly codec: string; readonly sample_rate: string; readonly channels: number; readonly duration_seconds: number } | null;
+  readonly commands: readonly CommandRecord[];
+  readonly render: CliChildRecord;
+  /** The KEPT artifact of THIS export: its name and the sha its bytes really have. */
+  readonly artifact: { readonly name: string; readonly path: string; readonly sha256: string; readonly bytes: number };
+}
+
+/**
+ * Probe and FULLY DECODE one exported MP4.
+ *
+ * The frame count comes from the real container, the audio facts from the real stream and
+ * the whole file goes through the decoder: a decode failure is a non-zero exit of a real
+ * command, and every command with its argv and its exit is kept.
+ */
+function probeExport(path: string, render: CliChildRecord, context: RenderContext): Omit<ExportFacts, "artifact"> {
+  const commands: CommandRecord[] = [];
+  const bytes = readFileSync(path);
+  const sha256 = createHash("sha256").update(bytes).digest("hex");
+
+  const videoArgv = ["-v", "error", "-select_streams", "v:0", "-count_frames",
+    "-show_entries", "stream=nb_read_frames,width,height,r_frame_rate", "-of", "json", path];
+  const video = spawnSync("ffprobe", videoArgv, { encoding: "utf8", windowsHide: true, timeout: 120_000 });
+  commands.push({ argv: ["ffprobe", ...videoArgv], exit: video.status, cwd: context.base, note: "real container probe of the video stream" });
+  if (video.status !== 0) throw new Error(`the ffprobe of the exported video failed with exit ${video.status}: ${video.stderr}`);
+  const videoStream = (JSON.parse(video.stdout) as { streams: Array<{ nb_read_frames: string; width: string; height: string }> }).streams[0];
+  if (videoStream === undefined) throw new Error("the exported MP4 has no video stream");
+
+  const audioArgv = ["-v", "error", "-select_streams", "a:0",
+    "-show_entries", "stream=codec_type,codec_name,sample_rate,channels,duration:format=duration", "-of", "json", path];
+  const audio = spawnSync("ffprobe", audioArgv, { encoding: "utf8", windowsHide: true, timeout: 120_000 });
+  commands.push({ argv: ["ffprobe", ...audioArgv], exit: audio.status, cwd: context.base, note: "real probe of the audio stream and the container duration" });
+  if (audio.status !== 0) throw new Error(`the ffprobe of the exported audio failed with exit ${audio.status}: ${audio.stderr}`);
+  const audioFacts = JSON.parse(audio.stdout) as {
+    format?: { duration?: string };
+    streams?: Array<{ codec_type?: string; codec_name?: string; sample_rate?: string; channels?: number; duration?: string }>;
+  };
+  const sound = audioFacts.streams?.find((stream) => stream.codec_type === "audio");
+  // The probe must actually say whether there IS an audio stream: the entries asked for
+  // include the codec type, so the answer is measured and never inferred from silence.
+  if (audioFacts.streams === undefined) throw new Error("the audio probe of the exported MP4 returned no streams at all");
+  const duration = Number(audioFacts.format?.duration ?? "0");
+
+  const decodeArgv = ["-nostdin", "-hide_banner", "-v", "error", "-i", path, "-f", "null", "-"];
+  const decode = spawnSync("ffmpeg", decodeArgv, { stdio: "pipe", windowsHide: true, timeout: 300_000 });
+  commands.push({ argv: ["ffmpeg", ...decodeArgv], exit: decode.status, cwd: context.base, note: "the FULL decode of the exported media" });
+  if (decode.status !== 0) throw new Error(`the full decode of the exported MP4 failed with exit ${decode.status}: ${decode.stderr}`);
+
+  return {
+    path, bytes: bytes.length, sha256,
+    frames: Number.parseInt(videoStream.nb_read_frames, 10),
+    width: Number.parseInt(videoStream.width, 10),
+    height: Number.parseInt(videoStream.height, 10),
+    duration_seconds: duration,
+    audio: sound === undefined ? null : {
+      codec: sound.codec_name ?? "",
+      sample_rate: sound.sample_rate ?? "",
+      channels: sound.channels ?? 0,
+      duration_seconds: Number(sound.duration ?? duration),
+    },
+    commands, render,
+  };
+}
+
+/**
+ * KEEP one real export, RIGHT NOW.
+ *
+ * The renderer writes its MP4 to ONE path in the project, so the NEXT export overwrites
+ * it: an artifact copied at the end of the case would carry the bytes of the LAST
+ * export under the name of an earlier one. The bytes are therefore copied AT THE MOMENT
+ * of that export, and the copy is read back and compared with the digest the probe
+ * measured - a mismatch is a failure, never a silent mislabel.
+ *
+ * The name carries the capture, so an artifact of an earlier capture is never
+ * overwritten by a later one.
+ */
+async function keepArtifact(stage: string, facts: Omit<ExportFacts, "artifact">, context: RenderContext): Promise<ExportFacts["artifact"]> {
+  await mkdir(EVIDENCE_DIR, { recursive: true });
+  const tag = (CAPTURE_ID ?? `run-${process.pid}`).replace(/[^A-Za-z0-9._-]/gu, "-");
+  const name = `${stage}-${facts.sha256.slice(0, 12)}-${tag}.mp4`;
+  const path = join(EVIDENCE_DIR, name);
+  const bytes = readFileSync(facts.path);
+  if (createHash("sha256").update(bytes).digest("hex") !== facts.sha256)
+    throw new Error("the bytes of this export are not the bytes this export was measured from");
+  if (existsSync(path)) {
+    const kept = createHash("sha256").update(readFileSync(path)).digest("hex");
+    if (kept !== facts.sha256) throw new Error(`the evidence artifact ${name} exists with other bytes and is never overwritten`);
+  } else {
+    writeFileSync(path, bytes);
+  }
+  // The kept bytes are read back and compared: the artifact IS what it says it is.
+  const written = readFileSync(path);
+  const writtenSha = createHash("sha256").update(written).digest("hex");
+  if (writtenSha !== facts.sha256) throw new Error(`the kept artifact ${name} does not hold the bytes of this export`);
+  return { name, path, sha256: writtenSha, bytes: written.length };
+}
+
+/** Render a project with the pinned CLI. Fixed argv, no shell, nothing caller-controlled. */
+async function renderProject(root: string, context: RenderContext, stage: string): Promise<ExportFacts> {
+  // The harness marker goes in before the CLI runs, in this case's OWN project copy.
+  await markHeadlessProject(root, context);
+  const cli = resolve(VENDOR, "packages/openfilm/bin/openfilm.mjs");
+  // Node under this runtime lives wherever `node` resolves; a hard-coded path is brittle.
+  const nodeBin = process.execPath || "node";
+  // The child is REGISTERED the moment it is spawned, and it runs under the budget the
+  // render always had: 600000 ms and 8 MiB of output.
+  const child = await runCli([nodeBin, cli, "render"], {
+    cwd: root, env: cliEnv(context),
+    budget: { timeout_ms: RENDER_TIMEOUT_MS, max_output_bytes: RENDER_MAX_OUTPUT_BYTES },
+    register: (record) => { context.children.push(record); },
+  });
+  if (child.exit !== 0) throw new Error(`the pinned render failed with exit ${child.exit}: ${child.stderr_tail}`);
+  const name = root.slice(root.lastIndexOf("/") + 1);
+  const output = join(root, `${name}.mp4`);
+  const facts = await probeExport(output, child, context);
+  // The bytes of THIS export are kept at once, before anything can overwrite them.
+  const artifact = await keepArtifact(stage, facts, context);
+  const kept = { ...facts, artifact };
+  context.exports.push({ stage, facts: kept });
+  return kept;
+}
+
+/** Real container frame count, read with ffprobe rather than assumed. */
+async function frameCount(path: string): Promise<number> {
+  const probe = spawnSync("ffprobe", ["-v", "error", "-select_streams", "v:0",
+    "-count_frames", "-show_entries", "stream=nb_read_frames", "-of", "json", path], { encoding: "utf8", timeout: 120_000 });
+  if (probe.status !== 0) throw new Error(`the ffprobe of ${path} failed with exit ${probe.status}: ${probe.stderr}`);
+  return Number.parseInt((JSON.parse(probe.stdout) as { streams: Array<{ nb_read_frames: string }> }).streams[0]!.nb_read_frames, 10);
+}
+
+/**
+ * The DIAGNOSTIC media of this case, prepared in its OWN private copy.
+ *
+ * The fixed fixture carries OPAQUE bytes: 17 bytes that stand for a video and 18 bytes
+ * that stand for a sound. They are the component contract of the migration - they are
+ * NOT a video and NOT a sound, and no renderer can decode them.
+ *
+ * This case therefore PREPARES ITS OWN media, in the PRIVATE copy of the fixture:
+ * real, bounded diagnostic files with a real frame count, made by the fixed local
+ * ffmpeg with a fixed argv, and measured by the fixed local ffprobe. The manifest of
+ * the PRIVATE copy carries the REAL digests and the REAL frame count of those bytes.
+ *
+ * The fixed fixture is NOT touched, and this media is a DIAGNOSTIC: it is not a
+ * creation film and it is not an A film.
+ */
+async function prepareDiagnosticMedia(sourceRoot: string): Promise<void> {
+  const generated = join(sourceRoot, "assets", "generated");
+  await mkdir(generated, { recursive: true });
+  // The three files the fixed fixture copied are OPAQUE bytes - 17, 17 and 18 bytes
+  // that stand for a video, a video and a sound. They are removed HERE, in THIS
+  // case's OWN private copy, and only there: the fixed fixture and the user's media
+  // are never touched, and no prefix is swept.
+  if (!generated.startsWith(sourceRoot + sep)) throw new Error("the private media root is not inside the private fixture");
+  for (const name of ["visual-10s.mp4", "visual-alt-10s.mp4", "narration-30s.wav"])
+    await rm(join(generated, name), { force: true });
+  // 900 frames at 30 fps: thirty seconds. The frame count of the case is MEASURED
+  // below, never declared: the manifest carries what ffprobe really counted.
+  const visual = async (color: string, name: string): Promise<void> => {
+    await run("ffmpeg", ["-nostdin", "-hide_banner", "-v", "error", "-filter_threads", "1",
+      "-f", "lavfi", "-i", `color=c=${color}:s=160x90:r=30:d=30`, "-threads", "1",
+      "-c:v", "libx264", "-pix_fmt", "yuv420p", "-frames:v", "900", join(generated, name)],
+    { timeout: 120_000, maxBuffer: 8 * 1024 * 1024, windowsHide: true });
+    // The video is really DECODED, not only counted: the whole file goes through the
+    // decoder, and a decode failure is a non-zero exit of this command.
+    execFileSync("ffmpeg", ["-nostdin", "-hide_banner", "-v", "error", "-i", join(generated, name),
+      "-f", "null", "-"], { stdio: "pipe", windowsHide: true, timeout: 120_000 });
+  };
+  await visual("blue", "visual-10s.mp4");
+  await visual("green", "visual-alt-10s.mp4");
+  await run("ffmpeg", ["-nostdin", "-hide_banner", "-v", "error", "-f", "lavfi",
+    "-i", "sine=frequency=400:sample_rate=48000:duration=30", "-threads", "1",
+    "-c:a", "pcm_s16le", join(generated, "narration-30s.wav")],
+  { timeout: 120_000, maxBuffer: 8 * 1024 * 1024, windowsHide: true });
+  // The sound is really probed AND really decoded as well.
+  const narration = join(generated, "narration-30s.wav");
+  const audio = JSON.parse(execFileSync("ffprobe", ["-v", "error",
+    "-show_entries", "format=duration:stream=codec_type,sample_rate,duration", "-of", "json", narration],
+  { encoding: "utf8", windowsHide: true, timeout: 60_000 })) as {
+    format?: { duration?: string };
+    streams?: Array<{ codec_type?: string; sample_rate?: string; duration?: string }>;
+  };
+  const sound = audio.streams?.find(stream => stream.codec_type === "audio");
+  if (sound === undefined) throw new Error("the prepared narration has no audio stream");
+  if (Number(sound.sample_rate) !== 48000) throw new Error("the prepared narration is not the 48 kHz it claims");
+  if (Math.abs(Number(audio.format?.duration ?? "0") - 30) > 0.5) throw new Error("the prepared narration is not thirty seconds");
+  execFileSync("ffmpeg", ["-nostdin", "-hide_banner", "-v", "error", "-i", narration, "-f", "null", "-"],
+    { stdio: "pipe", windowsHide: true, timeout: 120_000 });
+  // The manifest of the PRIVATE copy carries the real digests and the real frame
+  // count of the bytes that are really there.
+  const manifestPath = join(sourceRoot, "narralens.assets.json");
+  const manifest = JSON.parse(await readFile(manifestPath, "utf8")) as {
+    assets: Array<{ asset_id: string; project_path: string; sha256: string; duration_frames: number }>;
+  };
+  for (const asset of manifest.assets) {
+    if (!asset.project_path.endsWith(".mp4")) continue;
+    const path = join(sourceRoot, asset.project_path);
+    asset.sha256 = createHash("sha256").update(await readFile(path)).digest("hex");
+    asset.duration_frames = await frameCount(path);
+  }
+  await writeFile(manifestPath, JSON.stringify(manifest, null, 2));
+}
+
+/**
+ * THE VALIDITY INDEX of the 053 evidence.
+ *
+ * The 053 directory holds the artifacts of three captures, and two of them are the record
+ * of harness defects. This index adjudicates EVERY entry one by one: the digest of the
+ * file as it is on disk, the digest its manifest claims, whether the two agree, whether the
+ * audio field of that manifest is real, and why an entry is refused.
+ *
+ * It is NOT a glob of the directory: the acceptance entry is ONE explicitly active group
+ * (the capture whose artifacts are all admissible), and every other entry is listed with
+ * its own verdict. The 053 directory is only READ here.
+ */
+async function writeValidityIndex(): Promise<{ path: string; sha256: string; active: string[]; refused: string[] }> {
+  await mkdir(EVIDENCE_DIR, { recursive: true });
+  const manifests = existsSync(EVIDENCE_DIR_053)
+    ? readdirSync(EVIDENCE_DIR_053).filter((name) => /^manifest-.*\.json$/u.test(name)).sort()
+    : [];
+  const entries: Array<Record<string, unknown>> = [];
+  const active = new Set<string>();
+  const refused: string[] = [];
+  for (const manifestName of manifests) {
+    const manifestPath = join(EVIDENCE_DIR_053, manifestName);
+    const manifest = JSON.parse(readFileSync(manifestPath, "utf8")) as {
+      capture_id?: string; stage?: string;
+      artifact?: { name?: string; sha256?: string; bytes?: number };
+      media?: { frames?: number; audio?: { codec?: string } | null };
+    };
+    const artifactName = manifest.artifact?.name ?? "";
+    const artifactPath = artifactName ? join(EVIDENCE_DIR_053, artifactName) : "";
+    const exists = artifactPath !== "" && existsSync(artifactPath);
+    const actualSha = exists ? createHash("sha256").update(readFileSync(artifactPath)).digest("hex") : null;
+    const actualBytes = exists ? readFileSync(artifactPath).length : null;
+    const claimedSha = manifest.artifact?.sha256 ?? null;
+    const namePrefix = artifactName.replace(/\.mp4$/u, "").split("-").slice(-3).join("-").slice(0, 12);
+    const nameClaimsSha = artifactName.startsWith(`${manifest.stage ?? ""}-`);
+    // The audio field of a manifest is only real when the artifact really carries audio.
+    let audioReal: boolean | null = null;
+    if (exists) {
+      const probe = spawnSync("ffprobe", ["-v", "error", "-select_streams", "a:0",
+        "-show_entries", "stream=codec_type,codec_name,sample_rate,channels", "-of", "json", artifactPath],
+      { encoding: "utf8", timeout: 60_000 });
+      const streams = probe.status === 0
+        ? (JSON.parse(probe.stdout) as { streams?: Array<{ codec_type?: string }> }).streams ?? []
+        : [];
+      const reallyHasAudio = streams.some((stream) => stream.codec_type === "audio");
+      const claimedAudio = manifest.media?.audio;
+      audioReal = claimedAudio === null || claimedAudio === undefined ? !reallyHasAudio : reallyHasAudio;
+    }
+    const admissible = exists && actualSha === claimedSha && nameClaimsSha && audioReal === true;
+    if (admissible) active.add(manifest.capture_id ?? "unknown");
+    else refused.push(`${manifestName}: ${artifactName === "" ? "no artifact named" : `digest ${String(actualSha)} vs claimed ${String(claimedSha)}`}, audio_field_real=${String(audioReal)}`);
+    entries.push({
+      manifest: manifestName, manifest_sha256: createHash("sha256").update(readFileSync(manifestPath)).digest("hex"),
+      capture_id: manifest.capture_id ?? null, stage: manifest.stage ?? null,
+      artifact: artifactName, artifact_exists: exists,
+      artifact_sha256_actual: actualSha, artifact_sha256_claimed: claimedSha,
+      artifact_bytes_actual: actualBytes, artifact_bytes_claimed: manifest.artifact?.bytes ?? null,
+      media_frames_claimed: manifest.media?.frames ?? null,
+      media_audio_claimed: manifest.media?.audio ?? null,
+      media_audio_field_is_real: audioReal,
+      verdict: admissible ? "ADMISSIBLE" : "REFUSED",
+      refusal_reason: admissible ? null : refused[refused.length - 1],
+    });
+  }
+  const body = {
+    format: "narralens.real-export-validity-index@1",
+    capture_id: CAPTURE_ID,
+    source_directory: EVIDENCE_DIR_053,
+    source_directory_state: "read only; nothing in it was changed, deleted or overwritten",
+    rule: "the acceptance entry is the ONE explicitly active capture group; every other entry is listed with its own verdict and is NOT a pass",
+    active_captures: [...active].sort(),
+    active_artifact_count: entries.filter((entry) => entry.verdict === "ADMISSIBLE").length,
+    refused_count: refused.length,
+    known_defects: [
+      { defect: "capture 001 mig03-export-first: the artifact was copied after a later render had overwritten the file, so its name claims the first export while its bytes are the after-edit export", state: "kept as defect evidence, REFUSED as evidence" },
+      { defect: "capture 001 and 002 manifests: the audio probe did not ask for codec_type, so media.audio was written as null although the export really carries AAC audio", state: "the media.audio field of those manifests is INVALID; the artifacts themselves are byte-correct" },
+    ],
+    entries,
+  };
+  const tag = (CAPTURE_ID ?? `run-${process.pid}`).replace(/[^A-Za-z0-9._-]/gu, "-");
+  const path = join(EVIDENCE_DIR, `validity-index-053-${tag}.json`);
+  writeFileSync(path, JSON.stringify(body, null, 2));
+  const sha256 = createHash("sha256").update(readFileSync(path)).digest("hex");
+  console.log(`[real-export-054] validity index sha256=${sha256} active=${[...active].sort().join(",")} ` +
+    `admissible=${body.active_artifact_count} refused=${refused.length} file=${path.split("/").pop()}`);
+  return { path, sha256, active: [...active].sort(), refused };
+}
+
+/**
+ * WRITE the manifest of one real export.
+ *
+ * The artifact itself was already kept, byte for byte, at the moment of its export; the
+ * manifest names it and states the facts that were really measured. The manifest is
+ * written under a free name, so no earlier manifest is ever replaced.
+ */
+async function writeManifest(stage: string, facts: ExportFacts, extra: Record<string, unknown>): Promise<string> {
+  await mkdir(EVIDENCE_DIR, { recursive: true });
+  let index = 1;
+  while (existsSync(join(EVIDENCE_DIR, `manifest-${stage}-${index}.json`))) index += 1;
+  const manifest = join(EVIDENCE_DIR, `manifest-${stage}-${index}.json`);
+  const body = {
+    format: "narralens.real-export-evidence@1",
+    capture_id: CAPTURE_ID,
+    capture_id_source: CAPTURE_ID === null ? "the runner was not told which capture this is" : "the N1N2_CAPTURE_ID of this run",
+    stage,
+    artifact: {
+      name: facts.artifact.name, sha256: facts.artifact.sha256, bytes: facts.artifact.bytes,
+      kept_at: "at the moment of this export, before any later export could overwrite it",
+      verified: "the kept bytes were read back and their digest compared with the digest this export was measured from",
+    },
+    media: {
+      frames: facts.frames, width: facts.width, height: facts.height,
+      duration_seconds: facts.duration_seconds, audio: facts.audio,
+    },
+    render_child: {
+      pid: facts.render.pid, argv: facts.render.argv, cwd: facts.render.cwd,
+      outcome: facts.render.outcome, exit: facts.render.exit, signal: facts.render.signal,
+      stdout_bytes: facts.render.stdout_bytes, stderr_bytes: facts.render.stderr_bytes,
+      killed: facts.render.killed, settled: facts.render.settled,
+      budget: { timeout_ms: RENDER_TIMEOUT_MS, max_output_bytes: RENDER_MAX_OUTPUT_BYTES },
+    },
+    commands: facts.commands,
+    upstream: {
+      openfilm_sha: OPENFILM_SHA,
+      pinned_cli: resolve(VENDOR, "packages/openfilm/bin/openfilm.mjs"),
+      pinned_cli_sha256: createHash("sha256").update(readFileSync(resolve(VENDOR, "packages/openfilm/bin/openfilm.mjs"))).digest("hex"),
+    },
+    candidate: {
+      test_file: "tests/m2.3/migration-real-export.test.ts",
+      test_sha256: createHash("sha256").update(readFileSync(resolve("tests/m2.3/migration-real-export.test.ts"))).digest("hex"),
+      migration_service_sha256: createHash("sha256").update(readFileSync(resolve("src/host/projects/migration-service.ts"))).digest("hex"),
+      openfilm_adapter_sha256: createHash("sha256").update(readFileSync(resolve("src/adapters/openfilm/openfilm-upstream.ts"))).digest("hex"),
+    },
+    ...extra,
+  };
+  await writeFile(manifest, JSON.stringify(body, null, 2));
+  // The real digest is printed, so the log itself carries the artifact's identity.
+  console.log(`[real-export-054] stage=${stage} sha256=${facts.sha256} bytes=${facts.bytes} frames=${facts.frames} ` +
+    `audio=${facts.audio === null ? "none" : `${facts.audio.codec} ${facts.audio.sample_rate}Hz ${facts.audio.duration_seconds}s`} ` +
+    `artifact=${facts.artifact.name} artifact_sha256=${facts.artifact.sha256} manifest=${manifest.split("/").pop()}`);
+  return manifest;
+}
+
+describe("the child boundaries of this harness, with REAL node children", () => {
+  /** A real node child that never ends on its own. */
+  const HANGING = "setInterval(() => {}, 1000)";
+  /** A real node child that floods stdout with more than the small budget allows. */
+  const FLOOD_STDOUT = "process.stdout.write(Buffer.alloc(1024 * 1024))";
+  /** A real node child that floods stderr with more than the small budget allows. */
+  const FLOOD_STDERR = "process.stderr.write(Buffer.alloc(1024 * 1024))";
+  /** The small budgets these cases use: they prove the SAME runner logic, quickly. */
+  const SMALL = { timeout_ms: 1_500, max_output_bytes: 64 * 1024 };
+  /** Whether a pid is still alive. */
+  const alive = (pid: number): boolean => { try { process.kill(pid, 0); return true; } catch { return false; } };
+
+  it("kills and reaps a child that hangs past its budget, and keeps both reasons", async () => {
+    const base = await mkdtemp(join(tmpdir(), "narralens-m23-hang-"));
+    dirs.push(base);
+    const context = createRenderContext(base);
+    const registered: CliChildRecord[] = [];
+    let failure: ChildFailure | undefined;
+    try {
+      await runCli([process.execPath, "-e", HANGING], {
+        cwd: base, env: cliEnv(context), budget: SMALL,
+        register: (record) => { registered.push(record); context.children.push(record); },
+      });
+    } catch (error) {
+      if (error instanceof ChildFailure) failure = error;
+      else throw error;
+    }
+    expect(failure).toBeDefined();
+    const record = failure!.record;
+    // The child was known BEFORE it ended: its identity is registered, not collected later.
+    expect(registered.length).toBe(1);
+    expect(record.pid).toBeGreaterThan(0);
+    // It ended by the budget, it was signalled, and it was REALLY waited for.
+    expect(record.outcome).toBe("timeout");
+    expect(record.killed).toBe(true);
+    expect(record.settled).toBe(true);
+    expect(record.note).toMatch(/budget/u);
+    expect(failure!.cleanup).toMatch(/waited for/u);
+    // The primary reason and the cleanup reason are both kept.
+    expect(failure!.message).toMatch(/timeout/u);
+    expect(failure!.cleanup).not.toBe("");
+    // The child is really gone: this case leaves no descendant behind.
+    expect(alive(record.pid)).toBe(false);
+  }, 60_000);
+
+  it("stops a child that floods stdout at the output limit, and reaps it", async () => {
+    const base = await mkdtemp(join(tmpdir(), "narralens-m23-stdout-"));
+    dirs.push(base);
+    const context = createRenderContext(base);
+    const registered: CliChildRecord[] = [];
+    let failure: ChildFailure | undefined;
+    try {
+      await runCli([process.execPath, "-e", FLOOD_STDOUT], {
+        cwd: base, env: cliEnv(context), budget: SMALL,
+        register: (record) => { registered.push(record); context.children.push(record); },
+      });
+    } catch (error) {
+      if (error instanceof ChildFailure) failure = error;
+      else throw error;
+    }
+    expect(failure).toBeDefined();
+    const record = failure!.record;
+    expect(registered.length).toBe(1);
+    expect(record.outcome).toBe("output_limit");
+    expect(record.killed).toBe(true);
+    expect(record.settled).toBe(true);
+    expect(record.note).toMatch(/stdout/u);
+    // The buffer stayed BOUNDED: the bytes are counted, never accumulated without limit.
+    expect(record.stdout_bytes).toBeLessThanOrEqual(SMALL.max_output_bytes + 1024 * 1024);
+    expect(record.stdout_tail.length).toBeLessThanOrEqual(8_192);
+    expect(alive(record.pid)).toBe(false);
+  }, 60_000);
+
+  it("stops a child that floods stderr at the output limit, and reaps it", async () => {
+    const base = await mkdtemp(join(tmpdir(), "narralens-m23-stderr-"));
+    dirs.push(base);
+    const context = createRenderContext(base);
+    let failure: ChildFailure | undefined;
+    try {
+      await runCli([process.execPath, "-e", FLOOD_STDERR], {
+        cwd: base, env: cliEnv(context), budget: SMALL,
+        register: (record) => { context.children.push(record); },
+      });
+    } catch (error) {
+      if (error instanceof ChildFailure) failure = error;
+      else throw error;
+    }
+    expect(failure).toBeDefined();
+    const record = failure!.record;
+    expect(record.outcome).toBe("output_limit");
+    expect(record.killed).toBe(true);
+    expect(record.settled).toBe(true);
+    expect(record.note).toMatch(/stderr/u);
+    expect(record.stderr_tail.length).toBeLessThanOrEqual(8_192);
+    expect(alive(record.pid)).toBe(false);
+  }, 60_000);
+
+  it("stops a child that was cancelled, and reaps it", async () => {
+    const base = await mkdtemp(join(tmpdir(), "narralens-m23-cancel-"));
+    dirs.push(base);
+    const context = createRenderContext(base);
+    const abort = new AbortController();
+    let failure: ChildFailure | undefined;
+    const started = Date.now();
+    // The cancellation happens WHILE the child runs, not after it: the abort is what ends
+    // the child, and the call only settles once the child really exited.
+    const cancel = setTimeout(() => abort.abort(), 250);
+    try {
+      await runCli([process.execPath, "-e", HANGING], {
+        cwd: base, env: cliEnv(context), budget: { timeout_ms: 60_000, max_output_bytes: SMALL.max_output_bytes },
+        register: (record) => { context.children.push(record); },
+        abort: abort.signal,
+      });
+    } catch (error) {
+      if (error instanceof ChildFailure) failure = error;
+      else throw error;
+    } finally {
+      clearTimeout(cancel);
+    }
+    expect(failure).toBeDefined();
+    const record = failure!.record;
+    expect(record.outcome).toBe("aborted");
+    expect(record.killed).toBe(true);
+    expect(record.settled).toBe(true);
+    // The cancellation really ended the child, and it did not wait for the whole budget.
+    expect(Date.now() - started).toBeLessThan(30_000);
+    expect(alive(record.pid)).toBe(false);
+  }, 60_000);
+
+  it("fails closed when a private home advertises a Studio without a verifiable pid", async () => {
+    const base = await mkdtemp(join(tmpdir(), "narralens-m23-nopid-"));
+    dirs.push(base);
+    const context = createRenderContext(base);
+    // A private home that claims a Studio, without any pid to check: nothing is killed,
+    // and the state is NOT settled - it is a failure, not a quiet "there was nothing to do".
+    writeFileSync(join(context.private_home, "run.json"), JSON.stringify({ pid: null, supervisor: null }));
+    context.studio = studioOwnership(context);
+    expect(context.studio.present).toBe(true);
+    const settlement = await settleOwnedStudio(context);
+    expect(settlement.settled).toBe(false);
+    expect(settlement.actions).toEqual([]);
+    expect(settlement.reasons.join(" ")).toMatch(/without any verifiable pid/u);
+    expect(settlement.reasons.join(" ")).toMatch(/NOT settled/u);
+  }, 60_000);
+
+  it("writes the machine-readable validity index of the 053 evidence and adjudicates every entry", async () => {
+    const index = await writeValidityIndex();
+    const body = JSON.parse(readFileSync(index.path, "utf8")) as {
+      entries: Array<{
+        manifest: string; capture_id: string | null; verdict: string; refusal_reason: string | null;
+        artifact_sha256_actual: string | null; artifact_sha256_claimed: string | null;
+        media_audio_field_is_real: boolean | null;
+      }>;
+      active_captures: string[];
+    };
+    // Every 053 manifest is listed one by one: nothing is hidden by a glob.
+    expect(body.entries.length).toBe(11);
+    // The acceptance entry is ONE explicitly active capture group.
+    expect(body.active_captures).toEqual(["n1n2-claude-053-real-export-003"]);
+    // The 001 artifact whose name claims the first export is REFUSED, and its real digest
+    // is not the one its manifest claims.
+    const mislabelled = body.entries.find((entry) => entry.manifest === "manifest-mig03-export-first-1.json");
+    expect(mislabelled).toBeDefined();
+    expect(mislabelled!.verdict).toBe("REFUSED");
+    expect(mislabelled!.artifact_sha256_actual).not.toBe(mislabelled!.artifact_sha256_claimed);
+    expect(mislabelled!.refusal_reason).not.toBeNull();
+    // The audio field of the 001 and 002 manifests is marked invalid, and those entries are
+    // refused rather than quietly accepted.
+    for (const name of ["manifest-mig03-export-first-1.json", "manifest-mig03-export-first-2.json",
+      "manifest-mig03-export-after-middle-edit-1.json", "manifest-mig03-export-after-middle-edit-2.json",
+      "manifest-en05-export-copy-after-rollback-1.json", "manifest-en05-export-copy-after-rollback-2.json"]) {
+      const entry = body.entries.find((candidate) => candidate.manifest === name);
+      expect(entry, name).toBeDefined();
+      expect(entry!.media_audio_field_is_real, name).toBe(false);
+      expect(entry!.verdict, name).toBe("REFUSED");
+    }
+    // The five artifacts of the active capture are admissible, and nothing else is.
+    expect(body.entries.filter((entry) => entry.verdict === "ADMISSIBLE").length).toBe(5);
+    // The index itself is a real file with a real digest.
+    expect(index.sha256).toMatch(/^[a-f0-9]{64}$/u);
+    expect(createHash("sha256").update(readFileSync(index.path)).digest("hex")).toBe(index.sha256);
+  }, 120_000);
+
+  it("never signals a pid it cannot prove belongs to this case", async () => {
+    const base = await mkdtemp(join(tmpdir(), "narralens-m23-foreign-"));
+    dirs.push(base);
+    const context = createRenderContext(base);
+    // A REAL child of this case, in ANOTHER private home: it is alive and it is a pid,
+    // but it does NOT carry this case's private OPENFILM_HOME, so it is not this case's.
+    const foreign = spawn(process.execPath, ["-e", HANGING], {
+      cwd: base, env: { ...process.env, OPENFILM_HOME: join(base, "other-home") }, stdio: "ignore",
+    });
+    try {
+      const foreignPid = foreign.pid ?? -1;
+      expect(foreignPid).toBeGreaterThan(0);
+      // The private home of THIS case names that pid: the ownership must be proven, not read.
+      writeFileSync(join(context.private_home, "run.json"), JSON.stringify({ pid: foreignPid }));
+      context.studio = studioOwnership(context);
+      const settlement = await settleOwnedStudio(context);
+      expect(settlement.settled).toBe(false);
+      expect(settlement.actions.filter((action) => action.includes("SIGTERM") || action.includes("SIGKILL"))).toEqual([]);
+      expect(settlement.reasons.join(" ")).toMatch(/private OPENFILM_HOME/u);
+      // The foreign process is untouched: it is still alive.
+      expect(alive(foreignPid)).toBe(true);
+    } finally {
+      foreign.kill("SIGKILL");
+    }
+  }, 60_000);
+});
+
+describe("MIG-03 the real chain: migrate, reopen, export, edit the middle clip, export again", () => {
+  it("produces two real, different exports of the same 900-frame three-clip film", async () => {
+    // Absence of the pinned runtime is reported, never replaced by a weaker assertion.
+    if (!pinnedUpstreamPresent()) throw new Error("PINNED_OPENFILM_ABSENT: the real export cannot run here");
+
+    const base = await mkdtemp(join(tmpdir(), "narralens-m23-real-"));
+    dirs.push(base);
+    const context = createRenderContext(base);
+    const sourceRoot = join(base, "source");
+    await cp(SOURCE_FIXTURE, sourceRoot, { recursive: true });
+    // The PRIVATE copy gets real, decodable diagnostic media and a manifest that
+    // describes those real bytes.
+    await prepareDiagnosticMedia(sourceRoot);
+
+    const revisions = new RevisionStore(); stores.push(revisions);
+    const bindings = new EngineBindingStore(revisions);
+    bindings.bind(PROJECT, "hypit", { createdAt: new Date(0) });
+    const catalog = new ProjectCatalog(new Map([[PROJECT, join(sourceRoot, "narralens.project.json")]]));
+    const roots = new Map<string, string>([[PROJECT, sourceRoot]]);
+
+    const upstream = await createPinnedOpenFilmUpstream(VENDOR);
+    const service = new MigrationService({
+      catalog, revisions, bindings,
+      // ASSET-03: activation seeds the target's asset ledger, so a real migration carries it.
+      ledger: MigratedAssetLedger.create({
+        // The REAL probe: the frame count of every asset is measured with ffprobe and
+        // compared with the manifest, never assumed.
+        revisions, registry: new AssetRegistry(catalog),
+        catalog, migrationRoot: join(base, "migrations"),
+      }),
+      snapshots: new SnapshotStore({ snapshotsRoot: join(base, "snapshots") }),
+      migrationRoot: join(base, "migrations"), projectRoot: join(base, "projects"),
+      openfilmUpstreamSha: OPENFILM_SHA,
+      registerProject: (projectId, root) => { roots.set(projectId, root); },
+      verifyStagedProject: async (root) => {
+        const film = await upstream.readProjectFilm(root);
+        if (film.problems.length > 0) throw new Error("staged film does not read");
+        const clips = (film.doc as { tracks: Array<{ clips: Array<{ id: string; src: string }> }> }).tracks[0]!.clips;
+        if (clips.some((clip) => /\.(mp4|mov|webm|mkv)$/iu.test(clip.src))) {
+          throw new Error("flattened video clip is not native");
+        }
+        return clips.map((clip, index) => ({
+          source_id: clip.id, target_id: clip.id,
+          start_frame: index * 300, end_frame_exclusive: (index + 1) * 300,
+        }));
+      },
+      // The SOURCE is a Hypit project: it is exported by its OWN engine, and a fresh
+      // Hypit export submits a Build to external providers. Only the migrated copy is
+      // rendered here, by the pinned OpenFilm CLI, in this case's own private home.
+      exportProject: async (root, _label, engine) => {
+        if (engine === "openfilm") {
+          const facts = await renderProject(root, context, "mig03-migration-export");
+          return { sha256: facts.sha256, durationFrames: facts.frames };
+        }
+        const recorded = join(sourceRoot, "assets/generated/visual-10s.mp4");
+        return {
+          sha256: createHash("sha256").update(await readFile(recorded)).digest("hex"),
+          durationFrames: await frameCount(recorded),
+        };
+      },
+    });
+
+    let firstFacts: ExportFacts | null = null;
+    let secondFacts: ExportFacts | null = null;
+    let editFacts: Record<string, unknown> = {};
+    let completed = false;
+    try {
+      const sourceBefore = await treeDigest(sourceRoot);
+      const plan = await service.plan({ projectId: PROJECT, idempotencyKey: "mig-real-0001" });
+      const report = await service.execute(plan.migration_id);
+      expect(report.complete).toBe(true);
+      const targetRoot = roots.get(plan.target_project_id)!;
+
+      // The first export is a real MP4 of the whole film.
+      const first = await renderProject(targetRoot, context, "mig03-export-first");
+      firstFacts = first;
+      expect(first.frames).toBe(900);
+      expect(first.sha256).toMatch(/^[a-f0-9]{64}$/u);
+      expect(first.bytes).toBeGreaterThan(0);
+      expect(first.duration_seconds).toBeGreaterThan(0);
+      // The sound of the film really travelled into the export: the probe says there is
+      // an audio stream, at what rate, and for how long.
+      expect(first.audio).not.toBeNull();
+      expect(Number(first.audio!.sample_rate)).toBe(48000);
+      expect(first.audio!.duration_seconds).toBeGreaterThan(29);
+      expect(report.export_artifacts).toHaveLength(1);
+      expect(report.export_artifacts[0]!.sha256).toBe(first.sha256);
+      expect(report.export_artifacts[0]!.duration_frames).toBe(900);
+
+      // Close and reopen: a fresh process-level read sees the same three clips.
+      const reopened = await createPinnedOpenFilmUpstream(VENDOR);
+      const film = await reopened.readProjectFilm(targetRoot);
+      expect(film.problems).toEqual([]);
+      const clips = (film.doc as { tracks: Array<{ clips: Array<{ id: string }> }> }).tracks[0]!.clips;
+      expect(clips.map((clip) => clip.id)).toEqual(["shot-001", "shot-002", "shot-003"]);
+
+      // Edit the middle clip natively; the revision advances by exactly one.
+      const beforeEdit = film.rev;
+      const captionBefore = await readFile(join(targetRoot, "assets/narration.vtt"), "utf8");
+      const edited = await reopened.editProjectFilm(targetRoot, beforeEdit,
+        [{ op: "set", clip: "shot-002", field: "overrides", value: [{ at: ".t", text: "改过的第二镜" }] }]);
+      expect(edited.rebased).toBe(false);
+      expect(edited.rev).not.toBe(beforeEdit);
+      const captionAfter = await readFile(join(targetRoot, "assets/narration.vtt"), "utf8");
+      editFacts = {
+        clip_ids: clips.map((clip) => clip.id),
+        rev_before: beforeEdit, rev_after: edited.rev,
+        middle_clip: "shot-002", middle_clip_edited: true,
+        caption_sha256_before: createHash("sha256").update(captionBefore).digest("hex"),
+        caption_sha256_after: createHash("sha256").update(captionAfter).digest("hex"),
+        caption_bytes_before: Buffer.byteLength(captionBefore),
+        caption_bytes_after: Buffer.byteLength(captionAfter),
+        caption_contains_edited_text: captionAfter.includes("第二镜"),
+      };
+
+      // The second export differs from the first, and is the same length and clip count.
+      const second = await renderProject(targetRoot, context, "mig03-export-after-middle-edit");
+      secondFacts = second;
+      expect(second.sha256).not.toBe(first.sha256);
+      expect(second.frames).toBe(900);
+      expect(second.duration_seconds).toBeGreaterThan(0);
+      expect(second.audio).not.toBeNull();
+      expect(Number(second.audio!.sample_rate)).toBe(48000);
+
+      // Subtitles and narration travelled with the film. The names are read from the film
+      // itself rather than assumed, so the assertion is about the copy, not about our naming.
+      const filmText = await readFile(join(targetRoot, "film.html"), "utf8");
+      // The src carries an OpenFilm time fragment; the file on disk is what we stat.
+      const narrationRef = (/<audio[^>]*src="([^"#]+)/u.exec(filmText)?.[1] ?? "").trim();
+      const subtitlePath = join(targetRoot, "assets/narration.vtt");
+      expect(narrationRef).not.toBe("");
+      expect((await stat(join(targetRoot, narrationRef))).size).toBeGreaterThan(0);
+      expect(await readFile(subtitlePath, "utf8")).toContain("第二镜");
+      const afterReopen = await reopened.readProjectFilm(targetRoot);
+      expect((afterReopen.doc as { tracks: Array<{ clips: Array<{ id: string }> }> }).tracks[0]!.clips)
+        .toHaveLength(3);
+
+      // And the source project is still exactly as it was.
+      expect(await treeDigest(sourceRoot)).toBe(sourceBefore);
+      expect(bindings.read(PROJECT)).toMatchObject({ engine: "hypit" });
+      expect(bindings.read(plan.target_project_id)).toMatchObject({ engine: "openfilm" as EngineKind });
+
+      // The HEADLESS claim of this harness is a fact, not a hope: no Studio was started
+      // against this case's own private home, and no child of ours opened anything.
+      context.studio = studioOwnership(context);
+      expect(context.studio.present).toBe(false);
+      for (const child of context.children) expect(child.stderr_tail).not.toMatch(/OpenFilm Studio/i);
+      completed = true;
+    } finally {
+      // Every process this case owns is settled, even when the case failed.
+      context.studio = studioOwnership(context);
+      context.cleanup = await settleOwnedStudio(context);
+      const manifestFacts = context.exports;
+      for (const entry of manifestFacts) {
+        await writeManifest(entry.stage, entry.facts, {
+          case: "MIG-03 the real chain: migrate, reopen, export, edit the middle clip, export again",
+          project_id: PROJECT, target_project_id: "the migrated copy of this case",
+          ...editFacts,
+        });
+      }
+      console.log(`[real-export-054] children=${context.children.length} pids=${context.children.map((child) => child.pid).join(",")} ` +
+        `studio_started=${context.studio.present} cleanup=${JSON.stringify(context.cleanup)}`);
+      if (completed) {
+        // Every child this case started really exited and was reaped.
+        for (const child of context.children) {
+          if (!child.settled) throw new Error(`the child ${child.pid} did not settle: ${child.note}`);
+        }
+        // An advertised Studio that could not be proven and settled is a FAILURE.
+        if (context.studio.present && context.cleanup?.settled !== true)
+          throw new Error(`the Studio this case advertised could not be settled: ${(context.cleanup?.reasons ?? []).join("; ")}`);
+      }
+    }
+  }, 300_000);
+});
+
+describe("EN-05 the source project is still intact and openable after rollback", () => {
+  it("keeps the source bytes, binding and recorded output, and retains the copy", async () => {
+    if (!pinnedUpstreamPresent()) throw new Error("PINNED_OPENFILM_ABSENT: the real export cannot run here");
+
+    const base = await mkdtemp(join(tmpdir(), "narralens-m23-rollback-"));
+    dirs.push(base);
+    const context = createRenderContext(base);
+    const sourceRoot = join(base, "source");
+    await cp(SOURCE_FIXTURE, sourceRoot, { recursive: true });
+    await prepareDiagnosticMedia(sourceRoot);
+
+    const revisions = new RevisionStore(); stores.push(revisions);
+    const bindings = new EngineBindingStore(revisions);
+    bindings.bind(PROJECT, "hypit", { createdAt: new Date(0) });
+    const catalog = new ProjectCatalog(new Map([[PROJECT, join(sourceRoot, "narralens.project.json")]]));
+    const roots = new Map<string, string>([[PROJECT, sourceRoot]]);
+    const upstream = await createPinnedOpenFilmUpstream(VENDOR);
+
+    const service = new MigrationService({
+      catalog, revisions, bindings,
+      // ASSET-03: activation seeds the target's asset ledger, so a real migration carries it.
+      ledger: MigratedAssetLedger.create({
+        // The REAL probe again: the frame count of every asset is measured.
+        revisions, registry: new AssetRegistry(catalog),
+        catalog, migrationRoot: join(base, "migrations"),
+      }),
+      snapshots: new SnapshotStore({ snapshotsRoot: join(base, "snapshots") }),
+      migrationRoot: join(base, "migrations"), projectRoot: join(base, "projects"),
+      openfilmUpstreamSha: OPENFILM_SHA,
+      registerProject: (projectId, root) => { roots.set(projectId, root); },
+      verifyStagedProject: async (root) => {
+        const film = await upstream.readProjectFilm(root);
+        const clips = (film.doc as { tracks: Array<{ clips: Array<{ id: string; src: string }> }> }).tracks[0]!.clips;
+        if (clips.some((clip) => /\.(mp4|mov|webm|mkv)$/iu.test(clip.src))) throw new Error("flattened clip");
+        return clips.map((clip, index) => ({
+          source_id: clip.id, target_id: clip.id, start_frame: index * 300, end_frame_exclusive: (index + 1) * 300,
+        }));
+      },
+      // The copy is a real OpenFilm render. The Hypit SOURCE has no offline headless
+      // render: a fresh export of it would submit a Build to external providers, which
+      // costs money and egresses data, and this wave is authorised for neither.
+      //
+      // What the source side reports here is therefore the RECORDED artifact of the
+      // prepared diagnostic media - its digest and its MEASURED frame count. It is not
+      // a fresh export of the source project, and its frame count is measured rather
+      // than declared.
+      exportProject: async (root, _label, engine) => {
+        if (engine === "openfilm") {
+          const facts = await renderProject(root, context, "en05-migration-export");
+          return { sha256: facts.sha256, durationFrames: facts.frames };
+        }
+        const recorded = join(sourceRoot, "assets/generated/visual-10s.mp4");
+        return {
+          sha256: createHash("sha256").update(await readFile(recorded)).digest("hex"),
+          durationFrames: await frameCount(recorded),
+        };
+      },
+    });
+
+    let copyFacts: ExportFacts | null = null;
+    let completed = false;
+    try {
+      const sourceBefore = await treeDigest(sourceRoot);
+      const plan = await service.plan({ projectId: PROJECT, idempotencyKey: "mig-rollback-01" });
+      await service.execute(plan.migration_id);
+      const targetRoot = roots.get(plan.target_project_id)!;
+      const copyExport = await renderProject(targetRoot, context, "en05-export-copy-after-rollback");
+      copyFacts = copyExport;
+      expect(copyExport.frames).toBe(900);
+      expect(copyExport.audio).not.toBeNull();
+      expect(Number(copyExport.audio!.sample_rate)).toBe(48000);
+
+      const record = await service.rollback(plan.migration_id);
+      expect(record.phase).toBe("verified");
+
+      // The source is byte-identical, still bound to hypit, and the copy is kept for audit.
+      expect(await treeDigest(sourceRoot)).toBe(sourceBefore);
+      expect(bindings.read(PROJECT)).toMatchObject({ engine: "hypit" });
+      expect(record.source_sha256_after).toBe(sourceBefore);
+      expect(record.target_retained).toBe(true);
+      expect(copyExport.frames).toBe(900);
+      expect(await readFile(join(targetRoot, "film.html"), "utf8")).toContain("shot-002");
+
+      // The HEADLESS claim of this harness is a fact, not a hope.
+      context.studio = studioOwnership(context);
+      expect(context.studio.present).toBe(false);
+      for (const child of context.children) expect(child.stderr_tail).not.toMatch(/OpenFilm Studio/i);
+
+      // A fresh render of the Hypit SOURCE is deliberately NOT claimed here: it submits a Build
+      // to external providers, which costs money and egresses data, and this wave is not
+      // authorised for either. The source side is proved by byte identity, by its binding and
+      // by its recorded D1 output; the real render is of the migrated copy.
+      completed = true;
+    } finally {
+      // Every process this case owns is settled, even when the case failed.
+      context.studio = studioOwnership(context);
+      context.cleanup = await settleOwnedStudio(context);
+      if (copyFacts !== null) {
+        for (const entry of context.exports) {
+          await writeManifest(entry.stage, entry.facts, {
+            case: "EN-05 the source project is still intact and openable after rollback",
+            project_id: PROJECT,
+            claim_limit: "the migrated copy is a real render; the Hypit SOURCE is NOT freshly rendered and NOT a paid Hypit render",
+          });
+        }
+      }
+      console.log(`[real-export-054] children=${context.children.length} pids=${context.children.map((child) => child.pid).join(",")} ` +
+        `studio_started=${context.studio.present} cleanup=${JSON.stringify(context.cleanup)}`);
+      if (completed) {
+        for (const child of context.children) {
+          if (!child.settled) throw new Error(`the child ${child.pid} did not settle: ${child.note}`);
+        }
+        if (context.studio.present && context.cleanup?.settled !== true)
+          throw new Error(`the Studio this case advertised could not be settled: ${(context.cleanup?.reasons ?? []).join("; ")}`);
+      }
+    }
+  }, 300_000);
+});

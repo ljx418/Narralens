@@ -1,0 +1,85 @@
+{
+  "at": "2026-11-15T16:44:58.026872+00:00",
+  "recorder_pid": 1381524,
+  "samples": 500,
+  "roles": [
+    {
+      "pid": 1381524,
+      "ppid": 1381344,
+      "pgid": 1381344,
+      "sid": 1381344,
+      "start_ticks": 5312556,
+      "state": "R",
+      "role": "pipeline",
+      "first_seen_at": "2026-11-15T16:44:51.562731+00:00",
+      "cmdline_sha256": "0e9009aacc08767cb156ddadf361bbde54fd3fcf67d1f881c7ac7f3b36f1b056"
+    },
+    {
+      "pid": 1381584,
+      "ppid": 1381524,
+      "pgid": 1381344,
+      "sid": 1381344,
+      "start_ticks": 5312868,
+      "state": "D",
+      "role": "pipeline",
+      "first_seen_at": "2026-11-15T16:44:54.675640+00:00",
+      "cmdline_sha256": "d74c8fb8359ca5fa45da7dc9d7beff92f2e55a1ac5b8a85fe648a268245657a0"
+    },
+    {
+      "pid": 1381585,
+      "ppid": 1381524,
+      "pgid": 1381344,
+      "sid": 1381344,
+      "start_ticks": 5312873,
+      "state": "R",
+      "role": "pipeline",
+      "first_seen_at": "2026-11-15T16:44:54.736766+00:00",
+      "cmdline_sha256": "1af7d78cf75ef08e53b7cb3e916e5139d9099a0918ae10d0951b7e049fc76aee"
+    },
+    {
+      "pid": 1381597,
+      "ppid": 1381585,
+      "pgid": 1381344,
+      "sid": 1381344,
+      "start_ticks": 5312890,
+      "state": "D",
+      "role": "pipeline",
+      "first_seen_at": "2026-11-15T16:44:54.908305+00:00",
+      "cmdline_sha256": "56065b4230f33d6c5bff085824628b7e88eac8dacb7ffb66344b7070816f8a90"
+    },
+    {
+      "pid": 1381613,
+      "ppid": 1381597,
+      "pgid": 1381344,
+      "sid": 1381344,
+      "start_ticks": 5312910,
+      "state": "R",
+      "role": "pipeline",
+      "first_seen_at": "2026-11-15T16:44:55.095808+00:00",
+      "cmdline_sha256": "ce9f2017da4fc238404c8179ee36818da7492370e38531456321a6b999002979"
+    },
+    {
+      "pid": 1381827,
+      "ppid": 1381613,
+      "pgid": 1381827,
+      "sid": 1381827,
+      "start_ticks": 5313002,
+      "state": "D",
+      "role": "C",
+      "first_seen_at": "2026-11-15T16:44:56.025431+00:00",
+      "cmdline_sha256": "9affabcd4dcb649539dc3cbfd99c2a740c3160e84e3d0f962e9db7f26f2fb49a"
+    },
+    {
+      "pid": 1381828,
+      "ppid": 1381827,
+      "pgid": 1381828,
+      "sid": 1381828,
+      "start_ticks": 5313007,
+      "state": "R",
+      "role": "N",
+      "first_seen_at": "2026-11-15T16:44:56.063002+00:00",
+      "cmdline_sha256": "18bec717192247df132e2ee4baa35923789ce829aac41e0fb0adf33860d5ec33"
+    }
+  ],
+  "events_truncated": false
+}

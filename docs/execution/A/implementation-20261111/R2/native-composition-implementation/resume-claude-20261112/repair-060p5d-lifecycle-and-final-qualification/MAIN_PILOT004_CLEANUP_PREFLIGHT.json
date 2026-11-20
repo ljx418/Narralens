@@ -1,0 +1,68 @@
+{
+  "at": "2026-11-15T08:09:49.568120+00:00",
+  "capture": "n1n2-claude-060p5d-fix-pilot-004",
+  "intent": "Exact owned stuck pure-test cleanup only; no source changes/agent stop/global kill",
+  "recorder": {
+    "pid": 875574,
+    "ppid": 875572,
+    "start_ticks": "2304493",
+    "state": "S",
+    "comm": "python3.12",
+    "cmd_sha256": "03369ff44c283de229c16a0c6ea60c580c553271f789f9bef920117585f6e4a6",
+    "is_pilot_command": true,
+    "is_recorder004": true
+  },
+  "subtree": [
+    {
+      "pid": 875574,
+      "ppid": 875572,
+      "start_ticks": "2304493",
+      "state": "S",
+      "comm": "python3.12",
+      "cmd_sha256": "03369ff44c283de229c16a0c6ea60c580c553271f789f9bef920117585f6e4a6",
+      "is_pilot_command": true,
+      "is_recorder004": true
+    },
+    {
+      "pid": 875578,
+      "ppid": 875574,
+      "start_ticks": "2304653",
+      "state": "S",
+      "comm": "node",
+      "cmd_sha256": "1f83b094f49d4bc4df26c55bf4f9e6966304e1ae9e35d9f0acafc55297075fe1",
+      "is_pilot_command": true,
+      "is_recorder004": false
+    },
+    {
+      "pid": 875597,
+      "ppid": 875578,
+      "start_ticks": "2304671",
+      "state": "S",
+      "comm": "node (vitest)",
+      "cmd_sha256": "37e83f0144555ceee26ea28e725e16bb01c8c0714b48d63f9cb6dedaf04067b2",
+      "is_pilot_command": false,
+      "is_recorder004": false
+    },
+    {
+      "pid": 875650,
+      "ppid": 875597,
+      "start_ticks": "2304915",
+      "state": "S",
+      "comm": "esbuild",
+      "cmd_sha256": "d53d3b606da5c02a8bcdc1552e47bdec80c8ab695995fc14f9e2b93b9c182a55",
+      "is_pilot_command": false,
+      "is_recorder004": false
+    },
+    {
+      "pid": 875664,
+      "ppid": 875597,
+      "start_ticks": "2304928",
+      "state": "R",
+      "comm": "node (vitest 1)",
+      "cmd_sha256": "f6a4a9b81c98e97d978bdecbdd013f5b45daf7543568001f311d4ae015cf97e5",
+      "is_pilot_command": false,
+      "is_recorder004": false
+    }
+  ],
+  "signal_sent": false
+}

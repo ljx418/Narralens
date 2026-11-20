@@ -1,0 +1,23 @@
+{
+  "at": "2026-11-14T04:13:13.382653+00:00",
+  "historical_reference": "n1n2-claude-056-final-check-001.txt",
+  "historical_reader": {
+    "tests": 91,
+    "elapsed_ms": 666253
+  },
+  "historical_cache": {
+    "tests": 31,
+    "elapsed_ms": 295836
+  },
+  "current_reader": {
+    "capture": "n1n2-claude-060p0-reader-001",
+    "pid": 271766,
+    "start_ticks": "645887",
+    "live": true,
+    "cpu_ticks": 12246,
+    "exit": "NOT_YET_PRESENT",
+    "verdict": "INCOMPLETE; no timeout/failure inference from elapsed time"
+  },
+  "worker_observation": "same visible terminal running original sleep570; bounded-wait correction already delivered in msg_2ce53e6d8604",
+  "restart_authorized": false
+}

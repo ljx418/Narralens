@@ -1,0 +1,34 @@
+{
+  "at": "2026-11-12T06:25:13.357265+00:00",
+  "capture": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-resume-011-smoke-corrected",
+  "result": {
+    "exit": 0,
+    "source_changed": [],
+    "source_added": [],
+    "log_sha256": "8343533b27b7eb0d11a985ca841fab2a6ea24012e06c0594c3ef5bd0f46b9e83",
+    "finished_at": "2026-11-12T06:23:36.171586+00:00"
+  },
+  "counts": {
+    "passed": 2,
+    "failed": 0
+  },
+  "actual_test_sha256": "a0e7eafc0186fc0d220ce5deba82f6e6d8efadb8737802012c2c8d763f92ad1c",
+  "input_count": 624,
+  "procedural_deviation": "after-freeze test edit/start retained; MAIN reviewed and explicitly amended actual cleanup-only input; not original exact input acceptance",
+  "verdict": "ENGINEERING_SMOKE_PASS_ACTUAL_INPUT; not full N1N2 acceptance",
+  "process_observations": [
+    {
+      "pid": 958096,
+      "state": "ABSENT"
+    },
+    {
+      "pid": 958249,
+      "state": "ABSENT"
+    },
+    {
+      "pid": 958338,
+      "state": "ABSENT"
+    }
+  ],
+  "cleanup": "await final own-resource receipt"
+}

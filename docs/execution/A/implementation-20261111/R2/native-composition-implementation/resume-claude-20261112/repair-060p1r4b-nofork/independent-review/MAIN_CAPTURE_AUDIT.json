@@ -1,0 +1,48 @@
+{
+  "at": "2026-11-15T02:00:35.124894+00:00",
+  "rows": [
+    {
+      "capture": "n1n2-claude-060p1r4b-check-test-001",
+      "exit": 0,
+      "inputs": 649,
+      "current_mismatches": [],
+      "source_changed": [],
+      "source_added": [],
+      "log_matches": true,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "capture": "n1n2-claude-060p1r4b-check-tool-001",
+      "exit": 0,
+      "inputs": 649,
+      "current_mismatches": [],
+      "source_changed": [],
+      "source_added": [],
+      "log_matches": true,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "capture": "n1n2-claude-060p1r4b-test-001",
+      "exit": 0,
+      "inputs": 649,
+      "current_mismatches": [
+        "tests/agent-driven/integration/helpers/native-cache-nofork-pilot.test.mjs"
+      ],
+      "source_changed": [],
+      "source_added": [],
+      "log_matches": true,
+      "log_sha256": "4ece57a842a5b241ed98377ab05d4edd5f933fa6b5ef41837133ae97c13aebd8"
+    },
+    {
+      "capture": "n1n2-claude-060p1r4b-test-002",
+      "exit": 0,
+      "inputs": 649,
+      "current_mismatches": [],
+      "source_changed": [],
+      "source_added": [],
+      "log_matches": true,
+      "log_sha256": "fb2a53bce330e0b41abcb0cf7b6ba9c509ae293427c6f084ca265554ac9e2ed9"
+    }
+  ],
+  "limit": "53mock only, notactualkernel or stderrEPIPE; nofork CLI not authorizedyet"
+}

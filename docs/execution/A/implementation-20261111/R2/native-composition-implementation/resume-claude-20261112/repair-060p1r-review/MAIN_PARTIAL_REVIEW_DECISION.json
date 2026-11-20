@@ -1,0 +1,23 @@
+{
+  "at": "2026-11-14T09:42:05.544600+00:00",
+  "status": "REQUEST_CHANGES_CUSTODIAN_INTEGRATION_REVIEW_PENDING",
+  "worker_done": "msg_db5e84ac3379",
+  "custodian_findings": {
+    "BLOCKER": 2,
+    "MAJOR": 9
+  },
+  "main_verified_inputs": 32,
+  "main_current_mismatches": [],
+  "main_source_confirmed": [
+    "P1R-C01: c_ulong argument signature with byref GET, missing sequence initialization",
+    "P1R-C02: parent exec-write retained and blocking os.read; child closes error fd before exec",
+    "P1R-C03: C identity included in own target-gone predicate",
+    "P1R-C04: KILL driven only by leader exit; anchor reaped before proven descendant closure",
+    "P1R-C08: short-write suffix discarded",
+    "P1R-C05: signal target derived from unvalidated current group"
+  ],
+  "claim_limit": "Static code defects confirmed; no custodian/prctl/fork/kill/test/browser execution",
+  "source_write_release": false,
+  "runtime_release": false,
+  "next": "Wait existing integration reviewer ctx_81c34a00b2b8. Consolidate both reviews, de-duplicate findings and grant one exact Claude repair ticket before static recheck and nonbrowser P2a."
+}

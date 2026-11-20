@@ -1,0 +1,7 @@
+MAIN已接收msg_3066f3a5dac1，65份输入自核一致、接受F01..F11，不重写你原报告。现在请求独立审查MAIN新架构/修订合同，不是代码修复验收。C=/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112，目标repair-060p1-review/ADR_060_REV3_CUSTODIAN_AND_REPAIR.md及ADR_060_REV3_BINDING.json，里面以精确sha规范性引用你的FINDINGS与独立lifecycle-design完整报告/PROPOSAL，先核绑定再全文读。
+
+MAIN选择每draw目标N组外Python标准库custodian C，不采纳worker内subreaper/普通TERM-ignore永久CLEANUP_REQUIRED；两通道singlewriter、两级握手、C唯一wait owner、WNOWAIT保N锚/最后reap、C自身close/Host再父drain与workspacefinally，P1 F01..F11/原错误envelope/真实生产可达reconcile一并修。明确默认保留上游probe，先做事件pilot再条件批准窄owner。新增Host-only bridge/workspace inspect/reconcile面，public owner pageFrame/close和EnginePort7不改。新.py原recorder已覆盖，不改旧recorder。
+
+请从可实施架构、资源真实归属/恢复、协议/FD/背压、正常对照与故障场景/体验回归、P1 findings覆盖和验收可证性审查，重点找可复现合同矛盾/漏选决策，不把尚未有实际P2本身当新缺陷。文档身份/释放/receipt顺序要具体，不能靠术语过关；若需进一步明确F04私有completion及scope解除held先后，请列最小确切修订。当前只到文档门，真实Python环境/子进程/Chrome尚NOT_RUN。
+
+严格只读，不改W/ADR/原报告，不执行任何生产Node/Python代码、tests/build/Host/子进程/信号/浏览器或network，不碰config/credentials/.env/J盘/Git。仅可写/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p1-review/rev3-document-review/REVIEW.md,FINDINGS.json,INPUTS.json，记录实际sha并结束复核。结论DOCUMENT_PLAN_READY或REQUEST_CHANGES，仅文档，不授予源码/真实runtime/N1N2 PASS。完成worker_done，唯一Claude待MAIN精确新release，切勿自行发实现命令。

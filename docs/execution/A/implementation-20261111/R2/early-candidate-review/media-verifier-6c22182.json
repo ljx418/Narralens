@@ -1,0 +1,22 @@
+{
+  "candidate": "6c22182aebefee14f4cceccd3e2583da8630cc2f",
+  "file": "src/host/agent-driven/prepared-draft-verifier.ts",
+  "sha256": "f69770afba85137d0dfd7a33be6115093538a411c2a4308295b523a018bbe93f",
+  "review_kind": "MAIN static immutable-source pass only, not independent final module acceptance",
+  "inspected": [
+    "purpose-separated read/adoption/lease proofs with instance WeakMap",
+    "complete binding digest and producer attempt/root checks",
+    "same-FD hashing plus path and ancestor identity guards",
+    "full prepared tree membership recheck",
+    "explicit close/release and pending-proof lifecycle",
+    "final synchronous rights and source rechecks"
+  ],
+  "observations": [
+    "read proof not accepted for adoption; closed/foreign/unissued proof rejected",
+    "file fingerprints/bytes checked and source tree rewalked at final boundary",
+    "rights revalidator is Host-injected and must be actual authoritative implementation in BRIDGE, not constant/no-op",
+    "fixed vendor read/import seam is inherited; this review does not prove hostile concurrent vendor mutation safety"
+  ],
+  "runtime_proof": "PENDING MEDIA exact two-file retry logs/terminal/cleanup; no new test execution by MAIN",
+  "status": "NO_NEW_SOURCE_FINDING_IN_INSPECTED_SCOPE; NOT_RUNTIME_PASS"
+}

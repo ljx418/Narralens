@@ -1,0 +1,180 @@
+{
+  "verdict": "REQUEST_CHANGES",
+  "scope": "R5B failed-start proof, real C termination/recovery authority, private cancellation/diagnostics, minimal positive owner context only",
+  "runtime": "All reviewer product/kernel/child/test/import/signal/fork/Host/media/network runtime NOT_RUN",
+  "findings": [
+    {
+      "id": "R5B-S01",
+      "priorIDs": [
+        "R3-C05"
+      ],
+      "classification": "STILL_OPEN",
+      "severity": "MAJOR",
+      "title": "Real signal adapter can reacquire a reaped N number or use stale group identity during recovery",
+      "locations": [
+        "src/adapters/openfilm/cache-process-custodian.py:786",
+        "src/adapters/openfilm/cache-process-custodian.py:924",
+        "src/adapters/openfilm/cache-process-custodian.py:1517",
+        "src/adapters/openfilm/cache-process-custodian.py:1605",
+        "src/adapters/openfilm/cache-process-custodian.py:1659",
+        "src/adapters/openfilm/cache-process-custodian.py:1738"
+      ],
+      "trigger": "TERM ends N, census is free of live targets and _reap_worker consumes N. An ECHILD/group probe then returns unknown/error, so _settle_domain enters recovery with anchor_reaped=True, term_sent=True and kill_sent=False. Before a later census, the numerical PID is reused by an unrelated live session leader. _settle_domain/_target_census replace worker_identity from that PID without binding original epoch/parent or rejecting anchor_reaped. The expired action then sends owed KILL through the new/stale group or bare PID.",
+      "impact": "The real KernelSettlementOperations forwards signals directly to killpg/kill. worker_group_id only reads cached fields and _signal falls back to its old group even if current authority is unavailable. Nothing consults anchor_reaped or verifies retained direct-child authority at dispatch. Recovery can signal a peer instead of merely remaining unknown. This requires the stated post-reap probe uncertainty and PID reuse; it does not occur on every happy draw and is not a malicious sandbox claim.",
+      "contract": "R5B SPEC B explicitly requires exact unreaped-child authority before group establishment and fresh group SID/PGID/epoch for each signal; no lost wait authority may become guessed numerical authority.",
+      "minimal_fix": "Keep immutable original fork/epoch authority and explicit unreaped-child/retained-anchor state. At each real signal verify original live child or WNOWAIT-retained anchor and fresh full identity/group binding; unknown/ECHILD/reaped must refuse signal without adopting a replacement. Remove stale-group fallback when current authority fails. Keep genuine unsent escalation owed without resetting the action grace or adding responsibility expiry.",
+      "actual_branch_mock": "Drive actual Custodian._settle_domain -> KernelSettlementOperations with TERM-only completion, real adapter waitpid consuming N, subsequent ECHILD/group error and a replacement epoch at same PID. Assert no kill/killpg of replacement and continued honest unknown as needed. Also assert fresh unknown does not dispatch a cached group. Current new adapter test recovers readability before first KILL, while original N is still owned; its second-pass test already has kill_sent=True and misses this branch.",
+      "future_decisive_runtime": "Only after safe adapter review, separately authorized identity-error/recovery/peer protection diagnostics; no PID-reuse experiment or signal executed here.",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "id": "R5B-S02",
+      "priorIDs": [
+        "R3-C04"
+      ],
+      "classification": "STILL_OPEN",
+      "severity": "MAJOR",
+      "title": "Held no-N/no-birth startup still cannot reconcile a late genuine C close",
+      "locations": [
+        "src/adapters/openfilm/cache-process-supervisor.ts:1585",
+        "src/adapters/openfilm/cache-process-supervisor.ts:1831",
+        "src/adapters/openfilm/cache-process-supervisor.ts:2600"
+      ],
+      "trigger": "C has not been authorized (or async no-PID spawn error is awaiting close), #fail's bounded cleanup/proof window expires, and the responsibility is handed over as cleanup_required. C later really exits/closes and its original epoch is fresh-gone. worker and forkedPid are both null, so reconcileCleanup throws DRAW_NO_IDENTITY before invoking the shared proof.",
+      "impact": "A legitimate late startup cleanup can never settle the original failed issued handle even after resources have really ended. The new pilot's polling loops forever on this guard. This is an exact startup/finally path, not a demand to finish all R6 fault coverage.",
+      "contract": "R5B SPEC A: born but never AUTHORIZE requires true exit/close/fresh original epoch gone and may complete failed cleanup; genuine no-birth requires error+close, not a permanently pending obligation.",
+      "minimal_fix": "Allow the issued no-authorize/no-birth held branch through its appropriate shared terminal proof and settle the original failure once; do not require an N that was never authorized. Preserve UNKNOWN for AUTHORIZE sent but fork/receipt missing or contradictory.",
+      "actual_branch_mock": "Use actual supervisor start and returned child: no-PID error then close after first proof window, and born C before AUTHORIZE then late exit/close/freshgone. Assert initial held, later reconcile settles original failure exactly once, no spawn/signal to a new process. Existing added reconcile test proves only removal of worker-null guard when forkedPid already exists.",
+      "future_decisive_runtime": "Separately authorized delayed startup/late-close pilot after static repair; NOT_RUN."
+    },
+    {
+      "id": "R5B-S03",
+      "priorIDs": [
+        "R3-C02",
+        "R3-I05"
+      ],
+      "classification": "STILL_OPEN",
+      "severity": "MAJOR",
+      "title": "Positive pilot exception path returns while cleanup is unknown instead of owning a terminal finally",
+      "locations": [
+        "tools/native-cache-normal-pilot.ts:537",
+        "tools/native-cache-normal-pilot.ts:592",
+        "tools/native-cache-normal-pilot.ts:651",
+        "tools/native-cache-normal-pilot.ts:663",
+        "tools/native-cache-normal-pilot.ts:758"
+      ],
+      "trigger": "After start, assertion-failure reads a partially appended helper-event JSON line or encounters EIO while C/N are live. catch requests cancel, takes one inspection and falls into a finally that only writes evidence; it never waits original settlement or polls terminal proof. Registry is also only created after supervisor.start and pre-start construction/reserve/copy steps lie outside this try.",
+      "impact": "runPositivePilot/main can finish with terminalProof=false and no continuing owner poll. A Map reference is not active reconciliation; C may still be working or become held, and later child-handle closure can let the runner exit without the required proof. Do not infer an immediate physical orphan when surviving C is still reaping, but the promised complete ownership protocol is absent. Earlier originalFailure is overwritten by catch as well.",
+      "contract": "R5B SPEC D: every postbirth exception enters same owned cancel/raw-settlement/fresh-proof finally; unknown retains an active owner/root/start promise indefinitely, and all created objects are registered immediately.",
+      "minimal_fix": "Register incremental root/supervisor/issued handle before start; wrap all subsequent setup in one owner-aware try/finally. Finally must cancel if necessary, retain earliest failure and wait/reconcile the same original responsibility to full terminal proof without expiry. Do not publish a finished CLI result while unknown. No C/group kill fallback.",
+      "actual_branch_mock": "Make actual runner's helper-event reader throw after start; fake cancel must leave settlement pending and inspection unknown. Assert actual runPositivePilot/main remains pending with same registry/root/handle until later full proof, then returns original failed outcome. Add constructor/reserve/start failure ownership cases. Current StubSupervisor.requestCancel immediately sets settled=true and resolves, masking asynchronous real cleanup.",
+      "future_decisive_runtime": "Future exact intentional failure only after finally ownership is statically safe; actual C/N NOT_RUN."
+    },
+    {
+      "id": "R5B-S04",
+      "priorIDs": [
+        "R3-C02",
+        "R3-I05"
+      ],
+      "classification": "STILL_OPEN",
+      "severity": "MAJOR",
+      "title": "Typed reporting boundary exists but actual CLI/default stderr bypasses it",
+      "locations": [
+        "tools/native-cache-normal-pilot.ts:234",
+        "tools/native-cache-normal-pilot.ts:282",
+        "tools/native-cache-normal-pilot.ts:537",
+        "tools/native-cache-normal-pilot.ts:773",
+        "tools/native-cache-normal-pilot.ts:787"
+      ],
+      "trigger": "runPositivePilot creates createReportingBoundary(null, one-argument wrapper), never calls reporting.report, and main writes via deps.writeStderr directly. Real default is process.stderr.write(text) with no event listener or callback. On the live-unknown exception route S03, delayed EPIPE can therefore terminate the owner; on terminal normal/fault routes a late reporting error is also outside final eligibility.",
+      "impact": "The R4B asynchronous stderr ownership fix is not actually reused/equivalently wired. The claimed reportingFailure remains null for real main writes; synchronous final-write failure can reject top-level main, asynchronous error is unhandled. A completed resource-domain result is distinct from this reporting failure, but neither may be called accepted while reporting failed.",
+      "contract": "R5B SPEC D requires real pre-spawn Writable error listener and per-write callback on actual main/default paths, retained owner on reporting failure and no green qualification after known failure.",
+      "minimal_fix": "Construct one real reporting boundary as first main action with actual default stream and callback-aware writer, pass/share it through runner and all main REFUSED/final writes, and await pending writes before final qualification. Keep listener until owner terminal; broken reporting must not end live cleanup or recursively retry.",
+      "actual_branch_mock": "Drive actual main/default-shaped Writable with delayed callback+error while owner is unknown, then late terminal proof. Assert owner remains pending, same root/handle, error retained once and final case disqualified. Current tests use only synchronous string-array writeStderr; declaring a helper alone does not cover this route.",
+      "future_decisive_runtime": "Real stderr EPIPE NOT_RUN; requires separate authority after static fixes."
+    },
+    {
+      "id": "R5B-S05",
+      "priorIDs": [
+        "R3-C04"
+      ],
+      "classification": "STILL_OPEN",
+      "severity": "MINOR",
+      "title": "Unknown original C epoch observation is treated as gone in shared proof",
+      "locations": [
+        "src/adapters/openfilm/cache-process-supervisor.ts:2623"
+      ],
+      "trigger": "C really emits exit/close, but fresh observeCacheProcessIdentity returns presence unknown (for example EIO/EACCES). The proof rejects only known same epoch; unknown falls through and returns true if other checks pass. A missing initial custodianEpoch also skips this check.",
+      "impact": "The recorded fresh epoch-gone proof is not established although the code may settle and release its private run directory. Actual Node close/exit still provides independent process-ending evidence; this is a contract/proof qualification defect, not a claim that a real closed ChildProcess necessarily remains physically live.",
+      "contract": "R5B SPEC A requires fresh original C epoch gone, and UNKNOWN must remain explicit; cannot call unknown a replacement/gone.",
+      "minimal_fix": "Accept only fresh gone or a known different original epoch; explicitly hold on unknown. Define a conservative original identity source when immediate spawn observation was unknown (accepted C_HELLO epoch if available), rather than silently skipping it.",
+      "actual_branch_mock": "Actual start/fail/reconcile with close+exit and proc unknown must stay held; later freshgone permits original failure cleanup. Cover null initial epoch separately without manufacturing no-birth.",
+      "future_decisive_runtime": "Fresh proc read/error ordering NOT_RUN."
+    },
+    {
+      "id": "R5B-S06",
+      "priorIDs": [
+        "R3-C02",
+        "R3-I05"
+      ],
+      "classification": "STILL_OPEN",
+      "severity": "MAJOR",
+      "title": "Expected-fault gate accepts unrelated settlement failure and does not bind live observation to the same N epoch",
+      "locations": [
+        "tools/native-cache-normal-pilot.ts:443",
+        "tools/native-cache-normal-pilot.ts:687",
+        "src/adapters/openfilm/cache-process-supervisor.ts:1648"
+      ],
+      "trigger": "Tool has stored its own EXPECTED_ASSERTION_FAILURE, then the supervisor settles with any non-null unrelated error (e.g. a failure already latched before owner cancel). judge only checks settlementFailure!==null plus terminalProof; it does not verify the cancel error/bound cause or inspect unexpected cleanup/transport/latch facts. waitForLiveWorker likewise accepts any known process at snapshot.worker.pid without comparing observed start_ticks, while GO check accepts any go event.",
+      "impact": "The second exact pilot can be labelled fault-observed for the wrong failure or for an unbound observed generation. This violates the explicit no-any-reject/expected-error gate even when cleanup is physically complete. requestCancel itself wraps the supplied original error as generic DRAW_CANCELLED/message and does not retain an exact cause, while current stub resolves the original object; tests do not expose that difference.",
+      "contract": "R5B SPEC C/D and task's exact-next-gate require same accepted N epoch HELLO+GO/live, exact injected fault plus original owned cancel error, complete cleanup and no other unexpected failure.",
+      "minimal_fix": "Bind live observation's PID/startticks (and live state) and GO event to the issued snapshot epoch. Retain bounded exact original cancel cause/code in private facts and require matching cancel provenance plus no unrelated unexpected/transport/evidence/reporting failure for fault_case_passed; do not weaken normal result or public API.",
+      "actual_branch_mock": "Drive real runner with exact deliberate injection but a different settled WORKER_FAILED/CUSTODIAN_ERROR and full terminal proof; must fail fault qualification. Also return known different startticks at same PID and ensure no expected fault injection. Exercise actual supervisor cancel error representation, not StubSupervisor's originalError echo.",
+      "future_decisive_runtime": "Exact real assertion-failure N pilot remains NOT_RUN and unreleased."
+    }
+  ],
+  "prior_dispositions": [
+    {
+      "priorID": "R3-C04",
+      "classification": "STILL_OPEN",
+      "assessment": "Actual sync spawn catch and async no-PID error+close are improved, domain-vs-execution exec split added with bounded terminal wait PID facts, and forked/noHELLO reconcile guard improved. Late no-N close reconciliation and fresh-unknown C epoch proof remain open. Failed-exec successful reconcile is not tested end-to-end: validator-only positives plus actual rejected-domain reconcile do not establish it."
+    },
+    {
+      "priorID": "R3-C05",
+      "classification": "STILL_OPEN",
+      "assessment": "Census now accounts for forked worker_pid before identity and persisted actions remove old resignal shortcut. Real adapter tests cover transient unreadability before first KILL, but dispatch still lacks immutable/unreaped/fresh epoch authority and post-reap recovery safety."
+    },
+    {
+      "priorID": "R3-C02 positive-owner part",
+      "classification": "STILL_OPEN",
+      "assessment": "New distinct tool and registry exist, exact synthetic picture checked and HELD main waiting branch exists. Exception finally and actual stderr path remain unsafe/incomplete; nofork historical slice not reopened."
+    },
+    {
+      "priorID": "R3-I05 positive-owner part",
+      "classification": "STILL_OPEN",
+      "assessment": "Same owner/qualification findings; parallel owner review should reconcile overlapping IDs, not infer this reviewer owns implementation."
+    },
+    {
+      "priorID": "R5A R3-C01/C03",
+      "classification": "CLOSED_STATIC_UNCHANGED",
+      "assessment": "Non-consuming hash-copy accumulator and actual queue/writable baseline remain in source; no runtime closure is asserted."
+    }
+  ],
+  "notes": [
+    {
+      "severity": "NOTE",
+      "id": "R5B-N01",
+      "locations": [
+        "src/adapters/openfilm/cache-process-supervisor.ts:2247",
+        "src/adapters/openfilm/cache-process-supervisor.ts:1695"
+      ],
+      "assessment": "Failed exec's native errno is in C FORKED/receipt but the actual Host error becomes generic WORKER_EXEC_FAILED and diagnostic summary exposes only exec_ok. Native spawn errno does survive transportFailure envelope/message. Preserve the failed-exec errno/cause as well; do not claim exact original native failure preservation from the validator-only test."
+    },
+    {
+      "severity": "NOTE",
+      "id": "R5B-N02",
+      "assessment": "python-001 remains INCOMPLETE_NO_EXIT_OR_RESULT: claim/cmd/inputs/32-byte log plus author TaskStop receipt only. No PID recorded; missing files do not prove termination or historical status. MAIN's later bounded scan/no-current-match is a different observation. Accepted lifecycle receipt is msg_2ff3b08e2fb6/current task_af87a2249ff8/ctx_f6b0485fe1f0; two stale-ID worker_done messages are not accepted handback."
+    }
+  ],
+  "not_closed": "All unrelated R6/R7/full17/ISO18/N1N2/NEXT gates remain OPEN/NOT_RUN; no cross-platform or native sandbox guarantee."
+}

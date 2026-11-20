@@ -1,3 +1,5 @@
+> 2026-11-20当前流程：以`../process/README.md`及`../process/01_DELIVERY_SPEC.md`为执行权威，剩余计划见`../process/02_REMAINING_PLAN.md`。下文原规格/编号/历史保留；旧“当前”快照不授予新运行。
+
 # Agent 驱动路线审查入口
 
 > 最新体验讨论已完成关键选择，新增详细规格见`implementation-design/07_EXPERIENCE_SPEC.md`和`08_WORKFLOW_MCP_CONTRACT.md`：阶段展示/任务弹窗、分阶段Agent与工作台协作、样片/首章验证与稳定授权、章节审阅、MCP模板固化/在途计划调整、自动服务准备。V1不做工作台流程编辑器；核心方向已确认，产品与精确CP仍未实现/冻结。

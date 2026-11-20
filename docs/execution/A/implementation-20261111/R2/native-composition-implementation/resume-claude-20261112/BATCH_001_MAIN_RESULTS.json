@@ -1,0 +1,51 @@
+{
+  "at": "2026-11-12T06:45:47.633622+00:00",
+  "rows": [
+    {
+      "capture": "n1n2-claude-resume-017-batch-pure",
+      "result": {
+        "exit": 1,
+        "source_changed": [],
+        "source_added": [],
+        "log_sha256": "a94348421d081a401176f81d92ddfb4629c6a009a1bc89144979250f79ea3921",
+        "finished_at": "2026-11-12T06:37:54.819831+00:00"
+      },
+      "passed": 2,
+      "failed": 5,
+      "started_at": "2026-11-12T06:37:24.154950+00:00"
+    },
+    {
+      "capture": "n1n2-claude-resume-018-batch-component",
+      "result": {
+        "exit": 1,
+        "source_changed": [],
+        "source_added": [],
+        "log_sha256": "360ade92e1cc02e404123e4d545ac819bb33ed7a2cd8f1ceb195ff1533d3711e",
+        "finished_at": "2026-11-12T06:42:23.958598+00:00"
+      },
+      "passed": 14,
+      "failed": 1,
+      "started_at": "2026-11-12T06:38:31.920266+00:00"
+    },
+    {
+      "capture": "n1n2-claude-resume-019-batch-regressions",
+      "result": {
+        "exit": 1,
+        "source_changed": [],
+        "source_added": [],
+        "log_sha256": "d8f638c0b85fe8bf7b825bb9fb7b993e0fa44aa7358bbc33842b8861abdd42bc",
+        "finished_at": "2026-11-12T06:44:42.981292+00:00"
+      },
+      "passed": 82,
+      "failed": 24,
+      "started_at": "2026-11-12T06:42:53.157713+00:00"
+    }
+  ],
+  "counts": {
+    "passed": 98,
+    "failed": 30
+  },
+  "serial_order_verified": true,
+  "verdict": "FAIL, not fullN1N2 acceptance",
+  "next": "fix actualreentrancy and incorrect testsetup/loaderfixture oracles, then freeze/rerun; ownedcleanup pending"
+}

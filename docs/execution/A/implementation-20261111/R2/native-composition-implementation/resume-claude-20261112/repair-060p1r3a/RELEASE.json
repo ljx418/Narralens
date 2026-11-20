@@ -1,0 +1,44 @@
+{
+  "release_id": "MAIN_RELEASE_060P1R3A_REMOVE_RESPONSIBILITY_EXPIRY",
+  "at": "2026-11-14T14:22:47.810497+00:00",
+  "cwd": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+  "base_head": "1d348d419120f23f45d958112ea8c43df5a04675",
+  "allow_existing": [
+    "src/adapters/openfilm/cache-process-custodian.py",
+    "tests/agent-driven/integration/helpers/cache-custodian-unit.py",
+    "src/adapters/openfilm/cache-worker-integrity.json"
+  ],
+  "allow_new": [],
+  "start_sha256": {
+    "src/adapters/openfilm/cache-process-custodian.py": "78093fe81b31a55db1ffb500cdde19d5e67bf30d5ba884747c0ada643bfec221",
+    "tests/agent-driven/integration/helpers/cache-custodian-unit.py": "713af110affccd7b613ed5df56fe9da5320a9eedb22ded834c1b3a75e9601e7d",
+    "src/adapters/openfilm/cache-worker-integrity.json": "55eadbd6a8f9ec72d1eb245eaddce83560bcd4bcb46edf0bffe92c3a54eec08c"
+  },
+  "protected_AGENTS_sha256": "37300463a72a612ae16e0a5fcfb496502c57c722b83781e0e2e8c9480594542b",
+  "recorder": "docs/execution/A/implementation-20261111/integration/e1-main-takeover/run-recorded.py",
+  "recorder_sha256": "88cd47ec732a340f54cdd4bb05b05878887697eebb0ddc94b1ccd7d0e434fd10",
+  "capture_prefix": "n1n2-claude-060p1r3a-",
+  "allowed_runtime": [
+    [
+      "/usr/bin/python3.12",
+      "-I",
+      "-S",
+      "-B",
+      "tests/agent-driven/integration/helpers/cache-custodian-unit.py"
+    ],
+    [
+      "node",
+      "tools/openfilm-cache-worker-integrity.mjs",
+      "--generate"
+    ],
+    [
+      "node",
+      "tools/openfilm-cache-worker-integrity.mjs",
+      "--check"
+    ]
+  ],
+  "generation_writable_only": "src/adapters/openfilm/cache-worker-integrity.json",
+  "runtime_limit": "Only three exact commands via recorder, no other trial commands; pure unit actualsyscall boundaries mocked; no targetchild/kernel/browser/Host/media/full gates",
+  "new_429": "STOP, no retry/provider change/Codex takeover",
+  "prior_decision": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p1r3/MAIN_HANDOFF_REVIEW/MAIN_BLOCKER_DECISION.json"
+}

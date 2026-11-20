@@ -1,0 +1,40 @@
+# R6 合并开发与验收计划（MAIN，待契约独立审）
+
+## 本批交付结果
+创作者暂不新增UI；Agent调用同一底层cache服务时，完整结果只有在有界、逐epoch/wait语义和全寿命输出事实可靠时交付；预算/流失败在确切资源结束后以原失败返回，未知资源继续持责。不是把物理清理绿灯当创作成功。外层服务/工作区API不变。
+
+## 分工与顺序
+MAIN锁私有合同和case映射、发唯一writer release，独立Codex审契约及实现；原ClaudeCode一个批次完成producer/consumer/直接反例/自验证，汇报后停止。新429立即停，不重启/不换供应商/不由MAIN自动接实现。所有原失败保存。
+A：先同一stream ledger与有界原生semantic ledger；B：两端receipt版本、complete/failed-terminal、strict绑定/终局/eligibility接线；C：唯一snapshot/publication mapper与实际callback/纯测试；D：同源轻量门记录与冻结交还；E：独立源码审查；F：MAIN独立新pin正常/指定失败与小规模流/背压后，才依次准入C09/overflow真实运行。任何runtime票独立exactargv/sourcepins/ownedobserver，不执行mixed lifecycle整个套件。
+
+## 允许的实施路径草案
+仍仅原8：cache-process-supervisor.ts、cache-process-custodian.py、cache-worker-integrity.json；cache-process-identity.test.ts、helpers/cache-custodian-unit.py、cache-custodian-lifecycle.test.ts、tools/native-cache-normal-pilot.ts、native-cache-normal-pilot.test.ts。未用到的不改。只能另写自身报告，不改protected7/recorder/Host/upstream/closure/公共合同/依赖/配置/AGENTS。额外文件需求先报MAIN具名重新release，不能顺手扩散。当前仍不释放helper。
+
+## 直接case（保持原ID；后缀是本批证据键，不替代原编号）
+|证据键|触发与操作|必须断言|对应原范围|
+|C06-BIND|真实pump/accumulator foreign protocol/version/draw/ticket，重算digest|拒绝、不污染owner/候选；合法对照|R04/R05 ISO07/15|
+|C06-ORDER|重复/跳段/超count/终局后段/重复summary/非严格类型|明确失败，不覆盖已settled事实|R04 ISO15|
+|C06-WAIT|错N/missingN/重复N/非terminal/status不合法/N前于adopted|完整成功皆拒绝；原cleanup继续|R05 ISO09/10|
+|C06-EPOCH|错误ticks/错误初始父/伪造adoption/重复PID不同epoch|按实际epoch归属验证，不以PID复用建立权限|R05 ISO07/11|
+|C06-PARENT|parent-reaped observedgone正/unknown/Z反|不伪造C wait；未知不完整成功|R05 ISO10|
+|C06-BOUND|超过256个合法adopted completion后N-last，<=512总身份|N专用事实不被截断；map有界，真实原wait语义|R05/R07 ISO08/09|
+|C06-EXEC|原no-birth/failed setsid/failedexec与normal/adopted对照|保原失败，确切cleanup可结算，绝无图|R04/R05 ISO07|
+|C07-LATE|实际C lifecycle进入settle/recover后输出，分路65536及65537|累计准确，预算失败sticky，先清理再失败|R07 ISO08/10|
+|C07-EOF|短读/EAGAIN/read0/repeatedreadyEOF|EOF一次注销，公平处理control/reap，不忙循环|R05/R07 ISO07/15|
+|C07-EIO|running/settle/recover/final读错及活writer/全终局对照|读错不冒EOF，活资源仍held，已终局走failed证书|R05/R07 ISO07/10|
+|C07-CHANNEL|实际supervisor candidate后draw/control/child error回调|真实错误不能被FINALIZE或receipt洗成成功|R04/R05 ISO07/15|
+|C08-OVERFLOW|event256/257、identity512/513真实方法入口|首预算原错误、启动cleanup、内存有界，flag不清|R07 ISO08/11|
+|C08-END|真实settle/recover→failed证书→实际Host domain/eligibility|完整根所有权链+fresh终局时失败结算一次，无图|R05/R07 ISO10/15|
+|C08-HOLD|unknown/live/Z/groupEPERM/失root/subreaper未确认/N未wait|不能failed证书放行、权限不扩、原owner pending|R05 ISO07/10/11|
+|C08-LATEWAIT|N后意外wait但最后真实ECHILD全gone|不假写N-last，完整成功拒绝，失败证书如实收敛|R05 ISO09/10|
+|C08-FORGE|缺required对象/falsebool/错绑定/错digest/falsecreative/无原failure|fail closed，不把普通1冒充指定fault|R04/R05 ISO15|
+|R5-REG|原cause/未知升级/禁止复用PID/无root/publication全部mandatory keys|旧已通过语义保持；所有输入同源|原R5C组|
+|C09-PLAN|旧helper时序/拟定ready+adoption+TERM-live链|明确NOT_RUN，旧helper SHA未变、不宣称收养已证|ISO09/10/18|
+
+每条记录source pins、实际入口/测试名、命令/exit/loghash、before/after义务、old-code或精确mutant反例能否打红；没有实际红灯就写NOT_RUN/static，不猜造。不得用总测试数替代逐条。
+
+## 轻量自验证与停止
+沿用六条FIRST recorder命令：tsc --noEmit；identity单文件Vitest；guarded python helper；pilot pure单文件Vitest；integrity --generate；integrity --check。记录器不变、每次unique名；每次执行期间输入不可改。generate可改变manifest但须明确记录并再次捕获同源验证。禁止执行产品CLI、真实C/N/kernel测试、mixed lifecycle、全量check或任何未具名命令；实际OS kill/wait/fork/prctl始终deny，pure guard不得变弱。红灯保留，不自动扩预算；取得固定最终输入的六份全部结果后交还，源码冻结，独立review后真实票。
+
+## 出门条件与下一步
+本实现最多 `R6_SOURCE_C06_C08_INTERNAL_EVIDENCED`；C09未释放/真实R6全矩阵NOT_RUN。独立审查通过后MAIN新pin最小normal/fault，再递进真实stream/backpressure/overflow/收养。完成全部适用原case、原17+ISO18及R7/R8前不能签N1N2/V1。之后NEXT只重锚开工包并停止，不实施下一接线。

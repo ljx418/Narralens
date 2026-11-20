@@ -1,0 +1,27 @@
+{
+  "at": "2026-11-12T15:52:06.158890+00:00",
+  "message": "msg_6158e7eace67",
+  "dispatch": "ctx_3410a32b611a",
+  "task": "task_f07e7d1521af",
+  "status": "REQUEST_CHANGES_NOT_EXTERNAL_PASS",
+  "reports": {
+    "REVIEW.md": "c0d228e09394d142731dbe798edaafb1681cd128ff72cbed393667b9c29cd7de",
+    "MATRIX.json": "baa321eece3c2bcca154b9463e6fcdc94dd86ddabf13a396e0d88a3db5f667e6"
+  },
+  "bound019sourceblobs": 13,
+  "findings": {
+    "BLOCKER": 1,
+    "MAJOR": 5
+  },
+  "ids": [
+    "K01",
+    "K02",
+    "K03",
+    "K04",
+    "K05",
+    "K06"
+  ],
+  "currentproductionrelation": "020source sameas019; onlytestoraclechanged, so production findings stillapplicable",
+  "runtime_relation": "1563PASS/15719PASS do notcloseK01-K06;158currentlyallowed/inprogress andsourcefrozen; donotwriteuntilterminalcleanup",
+  "scope": "original014only, no UI/Afilm/publicDTO/newstage; no429takeover"
+}

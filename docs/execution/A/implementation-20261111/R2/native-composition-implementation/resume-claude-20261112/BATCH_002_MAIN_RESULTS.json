@@ -1,0 +1,55 @@
+{
+  "at": "2026-11-12T07:09:43.603211+00:00",
+  "rows": [
+    {
+      "capture": "n1n2-claude-resume-021-batch-pure",
+      "result": {
+        "exit": 1,
+        "source_changed": [],
+        "source_added": [],
+        "log_sha256": "ccc6ac29b697f69bdf52931de560c9eaa88c0032dd1cec3ea4676f82bef3362c",
+        "finished_at": "2026-11-12T07:02:18.378202+00:00"
+      },
+      "passed": 6,
+      "failed": 2,
+      "unhandled_errors": 0,
+      "started_at": "2026-11-12T07:01:55.747456+00:00"
+    },
+    {
+      "capture": "n1n2-claude-resume-022-batch-component",
+      "result": {
+        "exit": 1,
+        "source_changed": [],
+        "source_added": [],
+        "log_sha256": "58f3114a15ce4c69cc60a4e718b879b983e88a13989a1a54a816b4837d727a13",
+        "finished_at": "2026-11-12T07:06:11.414305+00:00"
+      },
+      "passed": 17,
+      "failed": 1,
+      "unhandled_errors": 1,
+      "started_at": "2026-11-12T07:02:48.943472+00:00"
+    },
+    {
+      "capture": "n1n2-claude-resume-023-batch-regressions",
+      "result": {
+        "exit": 0,
+        "source_changed": [],
+        "source_added": [],
+        "log_sha256": "53bfd698cc978698fabf41ffac3de14d5d5b7d84a4631814d84b2e905cfa0a50",
+        "finished_at": "2026-11-12T07:08:43.408310+00:00"
+      },
+      "passed": 107,
+      "failed": 0,
+      "unhandled_errors": 0,
+      "started_at": "2026-11-12T07:06:58.057916+00:00"
+    }
+  ],
+  "counts": {
+    "passed": 130,
+    "failed": 3,
+    "unhandled_errors": 1
+  },
+  "serial_order_verified": true,
+  "verdict": "NOT_PASS; strict legacy regressions107PASS preserved, remaining resource lifecycle defects/oracle correction required",
+  "next": "owncleanup then in-scope fixes/refreeze, no unauthorizedretry"
+}

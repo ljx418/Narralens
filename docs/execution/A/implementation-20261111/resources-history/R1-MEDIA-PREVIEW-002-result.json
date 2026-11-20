@@ -1,0 +1,27 @@
+{
+  "grant": {
+    "format": "narralens.dev-resource-ledger@1",
+    "status": "HELD",
+    "holder": "MEDIA Claude ctx_0c5994b7463b via MEDIA Codex",
+    "queue": [],
+    "policy": "MAIN grants single heavy slot for Host/media/ffmpeg/Chromium/build/full gate; pure typecheck/unit permitted isolated",
+    "last_main_heavy": "REGRESSION003 terminal exit0 34/34; exact PIDs absent; source restored and frozen cca95020",
+    "evidence_limit": "operational coordination ledger, not proof of unrelated OS process absence",
+    "no_budget_ceiling": true,
+    "grant_id": "R1-MEDIA-PREVIEW-002",
+    "granted_at": "2026-11-11T14:42:33.075380+00:00",
+    "exact_command": "corepack pnpm test tests/agent-driven/integration/created-draft-processor.test.ts tests/agent-driven/media/preview-prepared-source.test.ts --maxWorkers=1 --minWorkers=1",
+    "cwd": "/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-MEDIA",
+    "scope": "corrected frozen c8a06729c2a58d0e79c40042f3155c558ca6fd11 real Host/SQLite/ffmpeg and pinned headless preview",
+    "request_message": "msg_5b65357c031e amended msg_7964a8d2f419",
+    "source_fence": "freeze corrected tested input before command; no source/index mutation during command"
+  },
+  "command_exit": 1,
+  "processor": "7/7",
+  "preview": "4/4 fail at fixture prove before preview; NOT_RUN preview runtime",
+  "log_sha256": "77e755754ad34b9db017ed6219043137224bea98a7e140c8679d5a51cd7580b2",
+  "cleanup_record_sha256": "d9468acbf9474148d46754382fa294143be8dacb1307fcbeb24871865b7c8b76",
+  "recorded_pids_absent": true,
+  "cleanup_limit": "child ps exit code mislabeled in record; raw observations preserved",
+  "takeover": "MAIN rework3 after explicit writer stopped"
+}

@@ -1,0 +1,214 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "A阶段剩余集成：真实任务到受控视频交付",
+    "locale": "zh-CN",
+    "quality_profile": "showcase"
+  },
+  "components": [
+    {
+      "id": "driver",
+      "type": "external",
+      "label": "外部驱动 Agent",
+      "sublabel": "入口 Skill / MCP",
+      "pos": [
+        40,
+        360
+      ],
+      "size": [
+        210,
+        84
+      ]
+    },
+    {
+      "id": "app",
+      "type": "backend",
+      "label": "应用装配 · 待补齐",
+      "sublabel": "CreationApplication",
+      "pos": [
+        300,
+        360
+      ],
+      "size": [
+        210,
+        84
+      ]
+    },
+    {
+      "id": "prepare",
+      "type": "backend",
+      "label": "准备源 · 未提交候选",
+      "sublabel": "CreatedDraftTaskProcessor",
+      "pos": [
+        560,
+        360
+      ],
+      "size": [
+        210,
+        84
+      ]
+    },
+    {
+      "id": "commit",
+      "type": "security",
+      "label": "唯一受控提交 · 待接线",
+      "sublabel": "ProjectCoordinator",
+      "pos": [
+        820,
+        360
+      ],
+      "size": [
+        210,
+        84
+      ]
+    },
+    {
+      "id": "render",
+      "type": "backend",
+      "label": "正式导出链 · 待接线",
+      "sublabel": "SnapshotRenderService",
+      "pos": [
+        1080,
+        360
+      ],
+      "size": [
+        210,
+        84
+      ]
+    },
+    {
+      "id": "ui",
+      "type": "frontend",
+      "label": "现有工作台 · 增量集成",
+      "sublabel": "Studio / M5 / R4",
+      "pos": [
+        300,
+        110
+      ],
+      "size": [
+        210,
+        84
+      ]
+    },
+    {
+      "id": "db",
+      "type": "database",
+      "label": "单库持久事实 · 已有基础",
+      "sublabel": "RevisionStore / Job / outbox",
+      "pos": [
+        560,
+        110
+      ],
+      "size": [
+        210,
+        84
+      ]
+    },
+    {
+      "id": "native",
+      "type": "frontend",
+      "label": "原生加载确认 · 待接线",
+      "sublabel": "Host expected / NativeAck",
+      "pos": [
+        820,
+        110
+      ],
+      "size": [
+        210,
+        84
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "driver-app",
+      "from": "driver",
+      "to": "app",
+      "label": "鉴权调用",
+      "variant": "emphasis"
+    },
+    {
+      "id": "app-prepare",
+      "from": "app",
+      "to": "prepare",
+      "label": "Run 与租约",
+      "variant": "dashed",
+      "labelAt": [
+        535,
+        458
+      ]
+    },
+    {
+      "id": "prepare-commit",
+      "from": "prepare",
+      "to": "commit",
+      "label": "审阅与批准",
+      "variant": "dashed",
+      "labelAt": [
+        795,
+        458
+      ]
+    },
+    {
+      "id": "commit-render",
+      "from": "commit",
+      "to": "render",
+      "label": "committed snapshot",
+      "variant": "dashed",
+      "labelAt": [
+        1055,
+        458
+      ]
+    },
+    {
+      "id": "ui-app",
+      "from": "ui",
+      "to": "app",
+      "label": "可信操作",
+      "labelAt": [
+        405,
+        260
+      ]
+    },
+    {
+      "id": "prepare-db",
+      "from": "prepare",
+      "to": "db",
+      "label": "原子回执"
+    },
+    {
+      "id": "commit-native",
+      "from": "commit",
+      "to": "native",
+      "label": "独立事实核对",
+      "variant": "dashed"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "amber",
+      "title": "源码状态",
+      "items": [
+        "未提交候选已归档；组件验证不等于生产闭环",
+        "虚线为本轮规划接线，未宣称实现"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "同一产品事实",
+      "items": [
+        "单 Host、单库、单引擎与唯一 Coordinator",
+        "工作台保留原编辑器、时钟和选区"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "A阶段出门",
+      "items": [
+        "真实中文短片、改镜、重开与双导出",
+        "独立审查后停在人验入口，不进入B"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "at": "2026-11-13T02:16:27.791471+00:00",
+  "grant": "N1N2_021_CONDITIONAL_RUNTIME_030",
+  "actual": {
+    "exit": 1,
+    "source_changed": [],
+    "source_added": [],
+    "log_sha256": "7e212802821a7fe665de341b6fb03ba01682b7ecbca304262e03e38f5acff593",
+    "finished_at": "2026-11-13T02:15:10.258594+00:00"
+  },
+  "passed": 6,
+  "failed": 1,
+  "current14_match": true,
+  "failure": "metadata clip_ids has concept-s1 beyond expected list",
+  "diagnosis": "Baseline HEAD helper already contains concept_text; root classification pending comparison, do not remove feature to satisfy stale expectation",
+  "process_deviation": "D2 started despite D1 failure; not authorized by conditional030. MAIN ordered no new commands, existing D2 settle and owncleanup",
+  "remaining": "D3..D5 WITHDRAWN; no source edits or retries",
+  "messages": [
+    "msg_4c22b830c98d"
+  ]
+}

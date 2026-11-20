@@ -1,0 +1,65 @@
+{
+  "at": "2026-11-12T07:01:35.994467+00:00",
+  "grant_id": "N1N2-RESUME-BATCH-002",
+  "request": "msg_c0cca0f5a823",
+  "request_doc_sha256": "44f7013352c55b4fe95895170b711fdb3cdd901966b2fe398b5bd0c11232ea84",
+  "commands": [
+    {
+      "capture": "n1n2-claude-resume-021-batch-pure",
+      "argv": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "vitest",
+        "run",
+        "--config",
+        "vitest.config.ts",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts",
+        "-t",
+        "P0"
+      ],
+      "class": "pure FS",
+      "selected": 8
+    },
+    {
+      "capture": "n1n2-claude-resume-022-batch-component",
+      "argv": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "vitest",
+        "run",
+        "--config",
+        "vitest.config.ts",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts",
+        "-t",
+        "R0"
+      ],
+      "class": "heavy local component",
+      "selected": 18
+    },
+    {
+      "capture": "n1n2-claude-resume-023-batch-regressions",
+      "argv": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "vitest",
+        "run",
+        "--config",
+        "vitest.config.ts",
+        "tests/agent-driven/integration/created-native-ack.test.ts",
+        "tests/agent-driven/integration/committed-snapshot-host.test.ts",
+        "tests/agent-driven/integration/created-native-workspace.test.ts"
+      ],
+      "class": "mixed pure/heavy",
+      "selected": "all exact3files including missing-parser negative"
+    }
+  ],
+  "compiled": {
+    "capture": "032-tsc-oracles",
+    "exit": 0
+  },
+  "source_fence": "All src/tests/tools/config/index frozen until all3commands actually terminal. No edits/tsc/parallel heavy.",
+  "claims_ceiling": "internal component evidence only, not final acceptance"
+}

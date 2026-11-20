@@ -1,0 +1,24 @@
+{
+  "at": "2026-11-14T04:51:37.831625+00:00",
+  "reason": "NEW_CLAUDE_429_TOKEN_PLAN_LIMIT",
+  "observed_terminal": "term_499fde1b-4bc4-40d0-a884-225e555d7b70",
+  "observed_text": "429 已达到 Token Plan 用量上限：请升级 Token Plan … · Retrying in 12s · attempt 6/10",
+  "action": "Exact guarded worker-stop; no restart/retry/takeover/provider change",
+  "dispatch": "ctx_d18c60329d26",
+  "task": "task_82ff141a33a3",
+  "stop_receipt": {
+    "ok": true,
+    "state": "stopped",
+    "alreadySettled": false,
+    "processAction": "closed_agent_terminal",
+    "ptyKilled": true,
+    "requestId": "889bc588-a22f-4e80-bbab-cc8fd6e37259"
+  },
+  "existing_source_changes_since_grant": [],
+  "new_authorized_paths_present": [],
+  "p1_capture_claims": [],
+  "protected_AGENTS_sha256": "37300463a72a612ae16e0a5fcfb496502c57c722b83781e0e2e8c9480594542b",
+  "auto_recovery_authorized": false,
+  "next": "Wait for fresh explicit user instruction; only preserve/necessary cleanup/read-only diagnosis permitted. No development.",
+  "goal": "Incomplete; N1N2/A04 and final freeze/next-wiring release pending"
+}

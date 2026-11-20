@@ -1,0 +1,17 @@
+{
+  "base": "eba0d42fc41d0c9c99e1ddf90364149d3a8d5880",
+  "writer": "MAIN",
+  "scope": [
+    "src/host/agent-driven/created-source-recovery.ts",
+    "tests/agent-driven/integration/created-source-recovery.test.ts"
+  ],
+  "reason": "repeated rework common-root repair; no new Claude429; completed reviewer handback msg_b043f581e19c",
+  "findings": [
+    "MAJOR-01 all retained cleanup sticky and truthful outcome",
+    "MAJOR-02 authorization checked independently of adoption presence",
+    "MINOR-01 entire accepted startup sweep pending"
+  ],
+  "protected_agents_sha256": "37300463a72a612ae16e0a5fcfb496502c57c722b83781e0e2e8c9480594542b",
+  "heavy_tests": "not yet granted; only pure SQLite/FS lifecycle tests initially",
+  "created_at": "2026-11-12T03:53:05.998630+00:00"
+}

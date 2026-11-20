@@ -1,0 +1,112 @@
+{
+  "format": "narralens.release-scope-proposal@1",
+  "created_at": "2026-11-14T04:36:34.077027+00:00",
+  "status": "DRAFT_NOT_RELEASED",
+  "implementation_release": false,
+  "requires": [
+    "060P0 real cache full file outcome and exact owned cleanup",
+    "060P0 writer handback",
+    "MAIN verify post-P0 hashes and protected files/index",
+    "Exact ReleaseAssignment binding before any write"
+  ],
+  "adr": {
+    "file": "ADR_060_ISOLATED_CACHE_DRAW.md",
+    "sha256": "27c6bcbc46ab5473716cc04a92ac3f50a1ee027d68045db72048af488168d6f2",
+    "revision": 2
+  },
+  "allow_existing_proposed": [
+    "src/adapters/openfilm/openfilm-upstream.ts",
+    "src/host/agent-driven/created-native-workspace.ts",
+    "src/host/agent-driven/created-native-source-reader.ts",
+    "tests/m2.1/openfilm-upstream-lock.test.ts",
+    "tests/agent-driven/integration/native-cache-witness.test.ts",
+    "tests/agent-driven/integration/created-native-source-reader.test.ts"
+  ],
+  "allow_new_proposed": [
+    "src/adapters/openfilm/cache-production-scope.ts",
+    "src/adapters/openfilm/cache-process-supervisor.ts",
+    "src/adapters/openfilm/openfilm-cache-worker.mjs",
+    "src/adapters/openfilm/cache-worker-policy.mjs",
+    "src/adapters/openfilm/cache-worker-integrity.json",
+    "tools/openfilm-cache-worker-integrity.mjs",
+    "tests/agent-driven/integration/cache-production-scope.test.ts",
+    "tests/agent-driven/integration/cache-process-settlement.test.ts"
+  ],
+  "new_tool_contract": {
+    "path": "tools/openfilm-cache-worker-integrity.mjs",
+    "default": "check-only; mismatch exits nonzero; no implicit write",
+    "generate": "explicit --generate argument only in a future exact released command outside runtime capture; source changes are then reviewed and frozen",
+    "scope": "deterministically hash actual worker/policy/guard/pinned module closure raw bytes; exclude self-reference; existing upstream pins are independent authority, never regenerated to changed bytes",
+    "forbidden": "update vendor/pin/Approved015/formal-render helpers or silently generate during build/tests"
+  },
+  "static_fitness_change_limit": "Explicitly add only actual new reviewed owned process call sites and their rules; original class/arrow/this/computed/unknown-call detection and real counterfactual failures retained. Never widen blanket allowlist or turn off assertions.",
+  "additional_helpers": "No wildcard permission: worker must propose exact helper/protocol/guard/launcher names and why before write if needed; MAIN must inspect and amend release. Python/native subreaper/reaper or alternate execution domain is an explicit architecture addition, not silently included.",
+  "P1_initial_runtime_proposal": [
+    {
+      "argv": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "tsc",
+        "--noEmit"
+      ],
+      "kind": "typecheck"
+    },
+    {
+      "argv": [
+        "node",
+        "--check",
+        "src/adapters/openfilm/openfilm-cache-worker.mjs"
+      ],
+      "kind": "syntax only; does not execute worker"
+    },
+    {
+      "argv": [
+        "node",
+        "--check",
+        "src/adapters/openfilm/cache-worker-policy.mjs"
+      ],
+      "kind": "syntax only"
+    },
+    {
+      "argv": [
+        "node",
+        "tools/openfilm-cache-worker-integrity.mjs",
+        "--check"
+      ],
+      "kind": "raw byte validation only; no producer import/child birth"
+    },
+    {
+      "argv": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "vitest",
+        "run",
+        "--config",
+        "vitest.config.ts",
+        "tests/agent-driven/integration/cache-production-scope.test.ts"
+      ],
+      "kind": "scheduler only; no Host/media/browser/child; actual same-root directories permitted"
+    }
+  ],
+  "P1_runtime_not_implicitly_granted": [
+    "settlement tests that spawn real children",
+    "real Chrome/group containment pilot",
+    "seek/JOB/capture/peer/stream/probe/EPERM tests",
+    "full reader/cache regressions",
+    "build/fullcheck/security/fixture mutations"
+  ],
+  "future_real_runtime_rule": "All ISO-01..18 remain mandatory under approved ADR; release exact commands with unique capture and one heavy slot once implementation and resource ownership reviewed. Splitting runtime authorization does not waive real cases or constitute external acceptance.",
+  "protected": [
+    "user AGENTS.md",
+    "vendor and lockfiles",
+    "public contracts/DTO and EnginePort7",
+    "Approved015 five artifacts",
+    "formal render source/guards/policy",
+    "old evidence and unrelated media-lane drafts",
+    "git index/history/remotes"
+  ],
+  "goal_boundary": "All N1N2 repairs, actual affected and full gates, new frozen commit independent acceptance, then next-wiring final contract/plan; stop before next-wiring implementation",
+  "new_429": "STOP; no auto retry/restart/provider swap/Codex implementation takeover"
+}

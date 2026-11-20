@@ -1,0 +1,49 @@
+{
+  "at": "2026-11-15T19:01:08.059257+00:00",
+  "purpose": "429 safety cleanup only: exact owned hung pure-test child; no implementation, retry or product C/N signal",
+  "pidfd_signal": null,
+  "target_identity": {
+    "pid": 1596768,
+    "ppid": 1596765,
+    "pgid": 1596765,
+    "sid": 1596763,
+    "start_ticks": 5939920,
+    "state": "S"
+  },
+  "parent_identity": {
+    "pid": 1596765,
+    "ppid": 1596763,
+    "pgid": 1596765,
+    "sid": 1596763,
+    "start_ticks": 5939726,
+    "state": "S"
+  },
+  "target_argv": [
+    "/usr/bin/python3.12",
+    "-I",
+    "-S",
+    "-B",
+    "tests/agent-driven/integration/helpers/cache-custodian-unit.py"
+  ],
+  "parent_argv": [
+    "python3",
+    "docs/execution/A/implementation-20261111/integration/e1-main-takeover/run-recorded.py",
+    "n1n2-claude-060p6-complete-python-003",
+    "/usr/bin/python3.12",
+    "-I",
+    "-S",
+    "-B",
+    "tests/agent-driven/integration/helpers/cache-custodian-unit.py"
+  ],
+  "wchan": "anon_pipe_write",
+  "syscall_numbers_only": "UNREADABLE:1",
+  "children": "",
+  "currently_changed_since_capture_start": [
+    "src/adapters/openfilm/cache-process-custodian.py",
+    "src/adapters/openfilm/cache-process-supervisor.ts",
+    "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts",
+    "tests/agent-driven/integration/cache-process-identity.test.ts",
+    "tests/agent-driven/integration/helpers/cache-custodian-unit.py",
+    "tests/agent-driven/integration/native-cache-normal-pilot.test.ts"
+  ]
+}

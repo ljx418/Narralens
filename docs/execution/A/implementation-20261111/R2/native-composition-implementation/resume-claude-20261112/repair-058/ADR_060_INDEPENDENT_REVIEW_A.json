@@ -1,0 +1,252 @@
+{
+  "format": "narralens.adr060.independent-document-review-a@1",
+  "verdict": "REQUEST_CHANGES",
+  "architecture_direction": "SUPPORTED: per-draw isolated Node/session/group is a feasible scoped solution to A057-04; amendments close specified ownership/serialization/drain gaps",
+  "source_baseline": "1d348d419120f23f45d958112ea8c43df5a04675",
+  "upstream_baseline": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+  "implementation_review": false,
+  "implementation_or_runtime_authorized": false,
+  "runtime": "ALL_NOT_RUN",
+  "source_files_written": [],
+  "document_files_written": [
+    "repair-058/ADR_060_INDEPENDENT_REVIEW_A.md",
+    "repair-058/ADR_060_INDEPENDENT_REVIEW_A.json"
+  ],
+  "input_sha256": [
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-058/ADR_060_ISOLATED_CACHE_DRAW.md",
+      "kind": "document",
+      "sha256": "3dafa8c381fdc1a763c5075b073ae678f05a91e458997137604368e86fee949a",
+      "bytes": 8524
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-058/ADR_060_ISOLATED_CACHE_DRAW.json",
+      "kind": "document",
+      "sha256": "9ed99a504be09410025157187b31ece358ab6dafb8beea00a2e18afdc70f9786",
+      "bytes": 1022
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-058/isolated-process-feasibility.md",
+      "kind": "document",
+      "sha256": "dade7b14358b3107ab8733868801320830d7b57bb3c74f2ca39741523034ef16",
+      "bytes": 19761
+    },
+    {
+      "path": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/independent-frozen-review-057/review-a/FINDINGS.json",
+      "kind": "document",
+      "sha256": "7449495e62dcfb4de4e01506bf9accf146203052ed48462c7c78a27ec380ae3a",
+      "bytes": 14446
+    },
+    {
+      "repository": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+      "path": "docs/evidence/N1N2/freeze-057/ORIGINAL_REQUIREMENTS.json",
+      "kind": "frozen_git_blob",
+      "commit": "1d348d419120f23f45d958112ea8c43df5a04675",
+      "sha256": "7270eb4d3f9bdcb0aabaf500e8e3055ee39ab82a2fe2e69f91afbd0326bae756",
+      "bytes": 9530
+    },
+    {
+      "repository": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+      "path": "src/host/render/native-renderer.ts",
+      "kind": "frozen_git_blob",
+      "commit": "1d348d419120f23f45d958112ea8c43df5a04675",
+      "sha256": "591c30235a12df42a0234ad9bdf3bf09975864db818ca2b4ed2484a4ca8c829f",
+      "bytes": 18640
+    },
+    {
+      "repository": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+      "path": "src/host/render/media-process-policy.mjs",
+      "kind": "frozen_git_blob",
+      "commit": "1d348d419120f23f45d958112ea8c43df5a04675",
+      "sha256": "3d448ff79c497ee5e123f6931c554a716bc033088e05e701e1de42e48ae995bc",
+      "bytes": 2505
+    },
+    {
+      "repository": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+      "path": "src/host/render/openfilm-render-worker.mjs",
+      "kind": "frozen_git_blob",
+      "commit": "1d348d419120f23f45d958112ea8c43df5a04675",
+      "sha256": "a074a3e7aefeef1ea85a9a058447151cf42aef6351a1c0528323ae76bcd94f39",
+      "bytes": 20102
+    },
+    {
+      "repository": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+      "path": "src/host/render/openfilm-offline-wrapper.mjs",
+      "kind": "frozen_git_blob",
+      "commit": "1d348d419120f23f45d958112ea8c43df5a04675",
+      "sha256": "3da8a0b3a817d80bc9fad8be3d92f022b638c6919e4c959b9a5d895b62a08d30",
+      "bytes": 3661
+    },
+    {
+      "repository": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+      "path": "src/host/render/openfilm-offline-hooks.mjs",
+      "kind": "frozen_git_blob",
+      "commit": "1d348d419120f23f45d958112ea8c43df5a04675",
+      "sha256": "1f73d6b61741062d8b2419323174743ea42ffc93ae282a08cab6f97fe1a7f1ee",
+      "bytes": 1747
+    },
+    {
+      "repository": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+      "path": "src/host/render/openfilm-guard-rules.mjs",
+      "kind": "frozen_git_blob",
+      "commit": "1d348d419120f23f45d958112ea8c43df5a04675",
+      "sha256": "8ff1f73170dc0fd8414fb8fc8015416ac9e8522d0d7d092b903782f657c90c0a",
+      "bytes": 4068
+    },
+    {
+      "repository": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+      "path": "src/adapters/openfilm/openfilm-upstream.ts",
+      "kind": "frozen_git_blob",
+      "commit": "1d348d419120f23f45d958112ea8c43df5a04675",
+      "sha256": "013f50ce87e04b3ff542e15f3c98d833ae43940fef9d85ccad79ff38e5bd200b",
+      "bytes": 55012
+    },
+    {
+      "repository": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+      "path": "src/host/agent-driven/created-native-workspace.ts",
+      "kind": "frozen_git_blob",
+      "commit": "1d348d419120f23f45d958112ea8c43df5a04675",
+      "sha256": "3702917cf6efe09287030435c1883e1cdd57eb6e0da2fdd577bf3879ab965c1e",
+      "bytes": 65816
+    },
+    {
+      "repository": "/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm",
+      "path": "packages/openfilm/studio/server/pageframes.mjs",
+      "kind": "frozen_git_blob",
+      "commit": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+      "sha256": "87d82f73add17d699aab963a99e45b4406cf68ecf547389b61a24083658f2828",
+      "bytes": 17816
+    },
+    {
+      "repository": "/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm",
+      "path": "packages/openfilm/src/host.mjs",
+      "kind": "frozen_git_blob",
+      "commit": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+      "sha256": "dfed0fd5b068823d06b5091fbc01821791f0f470bbf061741bf21a25dc0bb170",
+      "bytes": 29805
+    }
+  ],
+  "receipt_checks": {
+    "adr_markdown_matches_companion_json": true,
+    "feasibility_markdown_matches_adr_evidence_inputs": true
+  },
+  "findings": [
+    {
+      "id": "ADR060-A01",
+      "severity": "MAJOR",
+      "title": "CLEANUP_REQUIRED still lacks a selected owner/return contract for the already-live PRE and serving",
+      "sources": [
+        "ADR_060_ISOLATED_CACHE_DRAW.md:20",
+        "ADR_060_ISOLATED_CACHE_DRAW.md:26",
+        "ADR_060_ISOLATED_CACHE_DRAW.md:42",
+        "isolated-process-feasibility.md:39",
+        "isolated-process-feasibility.md:53",
+        "isolated-process-feasibility.md:63",
+        "W@057/src/host/agent-driven/created-native-workspace.ts:727",
+        "W@057/src/host/agent-driven/created-native-workspace.ts:815-831",
+        "W@057/src/adapters/openfilm/openfilm-upstream.ts:1101-1112"
+      ],
+      "trigger": "Worker crashes after Chrome is spawned and the leader anchor disappears, or KILL/EPERM/proc uncertainty prevents a group-gone receipt. A naive supervisor rejects at its confirmation deadline. The frozen bridge finally calls endDraw, then workspace releases PRE even while the escaped/residual browser might still use that root. Merely returning an error with cleanup_required=true does not transfer ownership.",
+      "assessment": "The ADR correctly forbids this but defers the actual owner/return semantics to a later design. This exceptional branch is mandatory to implement; it cannot be left for an implementer to guess while claiming the minimal adapter-only plan is complete. R05 child_lifetime and R07 cleanup_uncertainty/drain_and_delivery require real ownership on every branch.",
+      "minimum_amendment": "Choose the no-transfer design for this release: register an owned DrawRecord before spawn and keep the bridge pageFrame promise pending on an explicit settlement barrier while CLEANUP_REQUIRED is separately observable. Deadline failure never rejects that operation before safe settlement. Keep beginDraw, workspace lexical PRE ownership, the root lock and unresolved process reservation alive; workspace close/dispose must continue waiting for that operation. A bounded diagnostic receipt exposes cleanup_required without calling the operation complete. Only a reconciliation method holding the exact internal draw capability may accept new kernel/group and parent-drain proof and resolve the barrier; then the operation rejects its original primary once, and normal finally releases PRE. If prompt caller return is required instead, specify an atomic quarantine transfer including PRE, serving, workspace disposal exclusion, mutex, quota and receipt owner before any rejection; that is a different explicit interface, not a flag on Error. Preserve abnormal records across a supervised restart if restart cleanup is in scope; stale receipts never authorize numeric kill.",
+      "required_tests": [
+        "Abrupt worker exit with a real residual group: neither endDraw, PRE release, root disposal nor unknown process-slot release occurs on the deadline.",
+        "After independently established disappearance and real parent drain, reconciliation settles FAILED_SETTLED once, releases once and permits the affected scope to recover.",
+        "Ordinary seek/JOB/TERM-ignore paths actively TERM/KILL and reach FAILED_SETTLED; do not pass them by entering permanent cleanup_required."
+      ],
+      "runtime": "NOT_RUN"
+    },
+    {
+      "id": "ADR060-A02",
+      "severity": "MAJOR",
+      "title": "Existing folder.drain does not implement the promised parent stream settlement boundary",
+      "sources": [
+        "ADR_060_ISOLATED_CACHE_DRAW.md:19",
+        "ADR_060_ISOLATED_CACHE_DRAW.md:42",
+        "isolated-process-feasibility.md:59",
+        "W@057/src/adapters/openfilm/openfilm-upstream.ts:598-629",
+        "W@057/src/adapters/openfilm/openfilm-upstream.ts:681-689",
+        "V@e70d9d9/packages/openfilm/src/host.mjs:128-133",
+        "V@e70d9d9/packages/openfilm/src/host.mjs:157-164"
+      ],
+      "trigger": "A real media response is aborted when the worker/browser is terminated. The adapter removes its request on ServerResponse close, while pinned folderFiles owns an independent fs.ReadStream. Node pipe does not make destination close proof of source FD close. Also an idle persistent listener can admit another local request after a zero-size ledger observation unless admission is explicitly frozen.",
+      "assessment": "The document promises HTTP/stream/ffprobe drain but only identifies a read-only folder.drain seam whose frozen implementation tracks responses and frameDuration promises, not the underlying source stream close. Killing the worker group cannot reap resources started in the parent. Reusing that promise alone would reproduce A057-04 at the parent resource layer.",
+      "minimum_amendment": "Specify a parent-owned resource ledger and a private drainAfterExecutionEnds(drawCapability) operation. Before invoking the pinned handler, attach ServerResponse pipe listeners to register the actual upstream source streams, watch each source close/error and response completion, and on aborted destination destroy only its owned sources while awaiting their real close. Retain all actual close errors. Reuse the exact upstream frameDuration promise only with a documented proof that its fixed execFile callback represents child close/reap; if that premise cannot be verified, introduce an explicit narrowly owned probe seam instead of assuming response close proves child exit. Once the worker execution domain is gone, freeze new request admission for this serialized serving, keep its listener up for accepted work, then drain existing HTTP, source streams and probes; reopen only for the next admitted draw. Do not call serving.close from inside an accepted draw. Add these ledger/admission changes explicitly to the openfilm-upstream.ts release scope; no vendor edit or shared fs prototype patch is needed.",
+      "required_tests": [
+        "Abort a real media range stream during termination and observe the source stream close/FD release before folder-drained/endDraw/PRE release.",
+        "Keep a real parent frame-duration probe outstanding across worker-group exit and prove its child is reaped before delivery.",
+        "Inject a request exactly at drain admission freeze; it cannot create a new owned stream/probe after the final empty-ledger decision, while already accepted responses still settle."
+      ],
+      "runtime": "NOT_RUN"
+    },
+    {
+      "id": "ADR060-A03",
+      "severity": "MAJOR",
+      "title": "Workspace serialization must cover producer authorization through POST and witness activation, not just worker.draw",
+      "sources": [
+        "ADR_060_ISOLATED_CACHE_DRAW.md:28",
+        "ADR_060_ISOLATED_CACHE_DRAW.md:42",
+        "isolated-process-feasibility.md:61",
+        "W@057/src/host/agent-driven/created-native-workspace.ts:700-727",
+        "W@057/src/host/agent-driven/created-native-workspace.ts:730-814",
+        "W@057/src/host/agent-driven/created-native-workspace.ts:775-793",
+        "W@057/src/host/agent-driven/created-native-workspace.ts:843-897",
+        "V@e70d9d9/packages/openfilm/studio/server/pageframes.mjs:101-109"
+      ],
+      "trigger": "Two valid different-frame productions target the same actual workspace. A supervisor mutex released after A group/drain but before A POST allows B to overwrite the shared film-duration output while A is retaining POST files. A can observe B's changed duration as an output of A, since the frozen duration capture only compares PRE/POST change and film branch. Distinct frame keys do not eliminate the shared duration path.",
+      "assessment": "The direction says same-root serial but leaves its start/end and its relationship to the workspace-owned witness gate unspecified, while proposing workspace changes only if uncertainty needs them. A mutex solely in the pageFrame supervisor cannot enforce full authorization serialization after returning the JPEG. This is a concrete producer-output attribution gap rather than a demand to change the native algorithm.",
+      "minimum_amendment": "Define one internal production lease keyed by verified canonical workspace root plus physical dev/ino, shared across every service/owner using that root. Acquire it before preexisting-output checks and PRE capture, retain it through worker-group cleanup, parent drain, POST capture, both tree releases, final identity/currentness checks and witness activation/refusal; release only after the production fully settles or is explicitly transferred to the cleanup owner. The process execution semaphore remains separate. Add the small CreatedNativeWorkspaceService.#produce acquisition/final-release change to 060 scope and pass an opaque already-held token to the supervisor if needed, avoiding recursive acquisition of the same lock. Distinct roots may still run concurrently, up to the two-process cap.",
+      "required_tests": [
+        "Two legal different-frame calls on the same root cannot interleave B writes between A draw completion and A witness activation.",
+        "Different service/producer instances referring to the same physical root share the mutex, while two independent roots really overlap in separate groups and B succeeds during A timeout.",
+        "Cancel/throw/cleanup_required at each boundary does not prematurely release or duplicate the root lease."
+      ],
+      "runtime": "NOT_RUN"
+    },
+    {
+      "id": "ADR060-A04",
+      "severity": "MINOR",
+      "title": "Forced-finalize success needs an observable truth table rather than causal SIGKILL attribution",
+      "sources": [
+        "ADR_060_ISOLATED_CACHE_DRAW.md:26",
+        "ADR_060_ISOLATED_CACHE_DRAW.md:36",
+        "isolated-process-feasibility.md:43",
+        "isolated-process-feasibility.md:51-55",
+        "W@057/src/host/render/native-renderer.ts:311-317"
+      ],
+      "trigger": "A complete candidate has arrived, and an unexpected signal/exit races the parent's decision or actual TERM/KILL. The child close event carries a signal name, not the identity or cause of the sender.",
+      "assessment": "Allowing deliberate cleanup after successful work is reasonable and need not be rejected for lacking graceful exit0. However neither Node close(signal) nor a successful numeric kill can prove which of two simultaneous signal sources caused exit. The feasibility report honestly acknowledges the check-to-signal race; the final ADR must not imply a stronger classifier exists.",
+      "minimum_amendment": "Record an irreversible parent FINALIZE_AFTER_OK decision only after the complete bounded candidate is validated and before requesting termination, with monotonically ordered control events, checked worker identity and result/sequence digest. Permit DELIVERED only after that authorized finalization, no observed prior unexpected exit, no known native/protocol/cancel/output/cleanup failure, and a real group/child/folder settlement receipt plus final workspace gates. Any exit or malformed/partial result before that decision is FAILED, never promoted from exit0/SIGKILL. Signal errors/identity uncertainty enter A01. Describe accepted late process disappearance as authorized finalization with observed signal, not proof the parent uniquely caused the signal; if exclusive causal attribution is required, reject such ambiguous successes instead of inventing it. Include races in tests.",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "id": "ADR060-A05",
+      "severity": "MINOR",
+      "title": "Two active workers does not bound queued reservations or retained PRE resources",
+      "sources": [
+        "ADR_060_ISOLATED_CACHE_DRAW.md:28",
+        "ADR_060_ISOLATED_CACHE_DRAW.md:34",
+        "isolated-process-feasibility.md:26",
+        "isolated-process-feasibility.md:61",
+        "isolated-process-feasibility.md:67"
+      ],
+      "trigger": "An owner admits many calls while two workers are running or one root is cleanup_required. Each queued request/DrawRecord and possibly its PRE closure remains owned, despite per-message byte caps.",
+      "assessment": "The new finite pipe budgets are explicit and platform-qualified, but the queue has no finite count/wait/admission boundary. This is a small scheduling contract omission, not a reason to reject process isolation.",
+      "minimum_amendment": "Name the one shared supervisor/scheduler instance that enforces the cap across producer owners, add a fixed finite queued-reservation cap (for example32 total, with a separately stated per-root cap), specify rejection and cancellation-before-GO semantics, and give queue wait its own bounded budget which does not masquerade as the native JOB timer. Acquire capacity before opening new PRE resources where practicable; otherwise account their retained descriptors under the existing pool and new root ownership record. An uncertain live group continues consuming process capacity until its disappearance is proved. Tune proposed values with the actual approved fixture rather than claiming all legacy arbitrary requests fit.",
+      "runtime": "NOT_RUN"
+    }
+  ],
+  "severity_counts": {
+    "BLOCKER": 0,
+    "MAJOR": 3,
+    "MINOR": 2
+  },
+  "read_only_constraints": "All W architectural sources read from git show at the frozen SHA; fixed V also read by git show; no moving W source bytes, env/config/secret reads, tests, imports, compile, HTTP, Chrome/probes, network or worker dispatch.",
+  "release_dependencies": [
+    "059 writer handback",
+    "MAIN resolves document amendments and freezes their input hashes",
+    "exact060 file/interface/case/resource ReleaseAssignment",
+    "authorized real runtime checks and new implementation SHA independent review"
+  ],
+  "requirements_retained": "All17 original requirements remain unchanged; this document does not close any implementation requirement or NEXT/A/NativeAck/Studio/V1 gate"
+}

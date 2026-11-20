@@ -1,0 +1,2823 @@
+import {it,expect} from 'vitest';
+import {execFileSync,spawn} from 'node:child_process';
+import type {ChildProcess} from 'node:child_process';
+import {closeSync,existsSync,fstatSync,linkSync,mkdirSync,mkdtempSync,openSync,readdirSync,readFileSync,readlinkSync,readSync,renameSync,rmSync,statSync,unlinkSync,utimesSync,writeFileSync} from 'node:fs';
+import {tmpdir} from 'node:os';
+import {dirname,join,resolve,sep} from 'node:path';
+import {createHash} from 'node:crypto';
+import {nativeSourceFixture} from './helpers/native-source-fixture.js';
+import {vendorRoot} from './helpers/created-project-fixture.js';
+import {OpenFilmNativeExpected,nativeExpectedApprovalFromPin,nativeExpectedLibraryLoader} from '../../../src/host/m5/openfilm-native-expected.js';
+import type {NativeExpectedBinding,NativeExpectedSourceFacts,NativeExpectedLibrary} from '../../../src/host/m5/openfilm-native-expected.js';
+import {RetainedNativeClosure,markRetainedCleanupFailures,retainedCleanupFailures} from '../../../src/host/agent-driven/retained-native-closure.js';
+import {computeNativeEffectiveSidecars,NATIVE_SIDECARS_UPSTREAM} from '../../../src/host/m5/native-effective-sidecars.js';
+import {observeNativeFacts} from '../../../src/host/agent-driven/committed-snapshot-authority.js';
+import {nativeClipPlacement,normalizeNativeProbe} from '../../../src/host/agent-driven/created-native-source-reader.js';
+import {CreatedNativeSourceReader,nativeVideoListingOrder} from '../../../src/host/agent-driven/created-native-source-reader.js';
+import {nativeCacheKey} from '../../../src/host/agent-driven/native-cache-witness.js';
+import {CreatedNativeWorkspaceService} from '../../../src/host/agent-driven/created-native-workspace.js';
+import {CommittedSnapshotAuthority} from '../../../src/host/agent-driven/committed-snapshot-authority.js';
+
+/**
+ * The N1N2 component cases.
+ *
+ * The real chain end to end: the real HTTP bootstrap, the real registered local
+ * assets, the real SOURCE_ONLY producer, the real controlled adoption that commits
+ * the rich source, the real working copy, the real approved 015 module and the real
+ * reader.
+ *
+ * These are *component* cases: the review policy of the fixture is fixture data, the
+ * session liveness callback is the fixture's own truth, and no human acceptance, no
+ * native UI load and no NativeAck is claimed here.
+ */
+type Fixture=Awaited<ReturnType<typeof nativeSourceFixture>>;
+
+/** The first read of one fixture. */
+const readOnce=(f:Fixture):Promise<NativeExpectedSourceFacts>=>f.reader.readSource({binding:f.binding});
+
+/** Attach the cleanup failures to a failure without hiding it. */
+function withCleanup(error:unknown,failures:readonly unknown[]):never{
+ if(failures.length>0&&typeof error==='object'&&error!==null){
+  try{Object.defineProperty(error,'cleanup_errors',{value:failures,enumerable:false,configurable:true});}catch{/* the error carries what it can */}
+ }
+ throw error;
+}
+
+/**
+ * Run a case over one fixture.
+ *
+ * Every owner is attempted even when an earlier one failed, and the primary failure
+ * keeps its place with the cleanup failures attached to it.
+ */
+async function withFixture(body:(f:Fixture)=>Promise<void>):Promise<void>{
+ const f=await nativeSourceFixture();
+ let primary:unknown;
+ try{await body(f);}
+ catch(error){primary=error;}
+ const failures:unknown[]=[];
+ try{await f.close();}catch(error){failures.push(error);}
+ if(primary!==undefined)withCleanup(primary,failures);
+ if(failures.length>0){
+  const failure=new Error('The case could not release everything');
+  Object.defineProperty(failure,'cleanup_errors',{value:failures,enumerable:false,configurable:true});
+  throw failure;
+ }
+}
+
+/**
+ * Run a case over one fixture and over the facts of one read.
+ *
+ * The delivered handles belong to the facts: they are released here, all of them, and
+ * a failure of one is kept instead of being swallowed.
+ */
+async function withFacts(body:(facts:NativeExpectedSourceFacts,f:Fixture)=>Promise<void>):Promise<void>{
+ await withFixture(async f=>{
+  let facts:NativeExpectedSourceFacts|undefined;
+  let primary:unknown;
+  try{facts=await readOnce(f);await body(facts,f);}
+  catch(error){primary=error;}
+  const failures:unknown[]=[];
+  if(facts)for(const handle of facts.retained){try{handle.close();}catch(error){failures.push(error);}}
+  if(primary!==undefined)withCleanup(primary,failures);
+  if(failures.length>0){
+   const failure=new Error('The case could not release the delivered handles');
+   Object.defineProperty(failure,'cleanup_errors',{value:failures,enumerable:false,configurable:true});
+   throw failure;
+  }
+ });
+}
+
+it('R00 smoke reaches the reader from the real committed created source',async()=>{
+ await withFixture(async f=>{
+  // The setup really reached the reader: the committed source, the registered
+  // workspace and the binding are all in place before anything is asserted.
+  expect(f.binding.workspace.workspace_ref).toBe(f.workspaceRef);
+  expect(f.binding.instance_generation).toBe(f.generation);
+  expect(f.generation).toBeGreaterThan(0);
+  const lease=f.workspace.acquireExpectedLease(f.workspaceRef,{project_id:f.projectId,snapshot_id:f.binding.snapshot_id,
+   source_digest:f.binding.source_digest,revision:f.binding.revision,native_project_id:f.binding.native_project_id});
+  expect(lease.generation).toBe(f.generation);
+  expect(lease.assertCurrent()).toBe(true);
+  lease.release();
+
+  // One read: the facts are taken once and handed to the expected service, so the
+  // diagnostic below shows the very input the projection refused.
+  const facts=await readOnce(f);
+  const diagnostic=JSON.stringify({
+   clips:(facts.expected_input.film.value.tracks??[]).flatMap(track=>track.clips??[])
+    .map(clip=>({id:clip.id,src:clip.src,at:clip.at,time:clip.time})),
+   media_facts:facts.expected_input.media_facts.map(fact=>({src:fact.source_ref,origin:fact.origin,
+    duration_ms:fact.duration_ms,fps:fact.fps,audio:fact.has_audio})),
+   listing:facts.expected_input.video_files_in_native_order,
+   clip_refs:facts.expected_input.clip_refs.map(ref=>({id:ref.clip_id,src:ref.source_ref,kind:ref.provenance.kind})),
+   settings:facts.expected_input.settings,
+  });
+  let handedOver=false;
+  const expected=new OpenFilmNativeExpected({source:{readSource:async()=>{handedOver=true;return facts;}},
+   loader:nativeExpectedLibraryLoader(),approved:nativeExpectedApprovalFromPin()});
+  const failures:unknown[]=[];
+  try{
+   const proof=await expected.prove(f.binding);
+   const projection=expected.assertCurrent(f.binding,proof);
+   const reason=String(projection.parts.settings.reason);
+   expect(projection.project_id).toBe(f.projectId);
+   expect(projection.revision).toBe(f.revision);
+   expect(projection.snapshot_id).toBe(f.snapshotId);
+   expect(projection.source_digest).toBe(f.sourceDigest);
+   expect(projection.film_sha256).toMatch(/^[0-9a-f]{64}$/);
+   expect(projection.native_rev).toMatch(/^[0-9a-f]{16}$/);
+   // The four parts of the hydration contract are computed from proved facts. The
+   // message carries the exact refusal reason and the input that produced it.
+   expect(projection.parts.settings.state,`settings reason=${reason} input=${diagnostic}`).toBe('hydrated');
+   expect(projection.parts.markers.state,`markers reason=${reason} input=${diagnostic}`).toBe('hydrated');
+   expect(projection.parts.captions.state,`captions reason=${reason} input=${diagnostic}`).toBe('hydrated');
+   expect(projection.parts.subtitle_style.state,`subtitle_style reason=${reason} input=${diagnostic}`).toBe('hydrated');
+   for(const part of Object.values(projection.parts))expect(part.effective_sha256).toMatch(/^[0-9a-f]{64}$/);
+   expected.release(proof);
+  }catch(error){
+   failures.push(error);
+  }finally{
+   try{expected.close();}catch(error){failures.push(error);}
+   if(!handedOver)for(const handle of facts.retained){try{handle.close();}catch(error){failures.push(error);}}
+  }
+  if(failures.length>0){
+   const failure=new Error('The smoke could not finish cleanly');
+   Object.defineProperty(failure,'cleanup_errors',{value:failures,enumerable:false,configurable:true});
+   throw failure;
+  }
+ });
+},300000);
+
+/** The committed source of the fixture really holds the native files. */
+it('R00 smoke commits a rich source with the native files and the media',async()=>{
+ await withFixture(async f=>{
+  const closure=await f.authority.readerForTransaction(f.projectId,f.transactionId,'owner')
+   .readSnapshot({project_id:f.projectId,snapshot_id:f.snapshotId,source_digest:f.sourceDigest});
+  const paths=closure.entries.map(entry=>entry.relative_path);
+  expect(paths).toContain('film.html');
+  expect(paths).toContain('.film/settings.json');
+  expect(paths).toContain('.film/subtitles.json');
+  expect(paths).toContain('rights.json');
+  expect(paths).toContain('draft-plan.json');
+  expect(paths.some(path=>path.startsWith('scenes/'))).toBe(true);
+  expect(paths.some(path=>path.startsWith('assets/video/')&&path.endsWith('.mp4'))).toBe(true);
+  expect(paths.some(path=>path.startsWith('assets/vo/')&&path.endsWith('.wav'))).toBe(true);
+ });
+},300000);
+
+/**
+ * R01 — the legacy project is still refused.
+ *
+ * The bootstrap commit has no created producer, so there is no created lineage to
+ * prove: the reader must refuse it rather than fall back to something weaker.
+ */
+it('R01 refuses the legacy project that has no created producer',async()=>{
+ await withFixture(async f=>{
+  await expect(f.authority.acquireNativeFacts(f.projectId,f.bootstrapTransactionId,'owner'))
+   .rejects.toMatchObject({code:'CAPABILITY_UNAVAILABLE'});
+ });
+},300000);
+
+/**
+ * R02 — the closure of a proof does not survive a change of the working copy.
+ *
+ * The change is made after the read: the proof must not verify any more, and a
+ * second read must refuse the copy that no longer is the committed source.
+ */
+it('R02 invalidates the old proof when the working copy changes under it',async()=>{
+ await withFixture(async f=>{
+  const facts=await readOnce(f);
+  let handedOver=false;
+  const expected=new OpenFilmNativeExpected({source:{readSource:async()=>{handedOver=true;return facts;}},
+   loader:nativeExpectedLibraryLoader(),approved:nativeExpectedApprovalFromPin()});
+  const failures:unknown[]=[];
+  try{
+   const proof=await expected.prove(f.binding);
+   expect(expected.assertCurrent(f.binding,proof)).toBeDefined();
+   // The same bytes, a different file: the content is equal and the identity is not.
+   const film=join(f.workspaceRoot,'film.html');
+   const bytes=readFileSync(film);
+   const copy=join(f.workspaceRoot,'film-copy.html');
+   writeFileSync(copy,bytes);
+   renameSync(copy,film);
+   // The old proof does not verify any more: the working copy is not the one it was
+   // made against.
+   expect(facts.verifyClosure()).toBe(false);
+   // The expected service refuses the stale proof with its own reason. The old
+   // interface states that reason in the MESSAGE of the refusal and not in a `code`
+   // field, so the reason is asserted exactly - never as "some error".
+   const stale=await Promise.resolve().then(()=>expected.assertCurrent(f.binding,proof)).then(()=>null,error=>error);
+   expect(stale).toBeInstanceOf(Error);
+   expect((stale as Error).message).toBe('NATIVE_EXPECTED_CLOSURE_MOVED');
+   // A fresh round independently revalidates the committed bytes and may succeed.
+   const next=await readOnce(f);
+   expect(next.verifyClosure()).toBe(true);
+   for(const handle of next.retained)handle.close();
+   // Changed bytes are refused by the reader itself.
+   writeFileSync(film,'not the committed movie');
+   await expect(readOnce(f)).rejects.toMatchObject({code:'NATIVE_SOURCE_COPY_DRIFTED'});
+  }finally{
+   try{expected.close();}catch(error){failures.push(error);}
+   if(!handedOver)for(const handle of facts.retained){try{handle.close();}catch(error){failures.push(error);}}
+   if(failures.length>0)throw new Error('The case could not release everything: '+failures.map(String).join('; '));
+  }
+ });
+},300000);
+
+/**
+ * R02 — a change while the read is in flight refuses the pending round.
+ *
+ * The barrier is the real media probe: the tool is reading a retained descriptor of
+ * the parent process, so the change lands in the middle of a real read.
+ */
+it('R02 refuses a pending round when the working copy changes during the read',async()=>{
+ let probing:((argument:string)=>void)|undefined;
+ const began=new Promise<string>(resolve=>{probing=resolve;});
+ const f=await nativeSourceFixture({childEvents:event=>{
+  if(event.kind==='started'&&/^\/proc\/\d+\/fd\/\d+$/.test(event.argument))probing?.(event.argument);
+ }});
+ let primary:unknown;
+ try{
+  const reading=readOnce(f);
+  const argument=await began;
+  expect(argument).toMatch(/^\/proc\/\d+\/fd\/\d+$/);
+  // The working copy changes while the read is in flight.
+  const film=join(f.workspaceRoot,'film.html');
+  const bytes=readFileSync(film);
+  const copy=join(f.workspaceRoot,'film-copy.html');
+  writeFileSync(copy,bytes);
+  renameSync(copy,film);
+  // The pending round must refuse: it would otherwise mix two epochs.
+  await expect(reading).rejects.toMatchObject({code:'NATIVE_SOURCE_CLOSURE_MOVED'});
+ }catch(error){primary=error;}
+ const failures:unknown[]=[];
+ try{await f.close();}catch(error){failures.push(error);}
+ if(primary!==undefined)withCleanup(primary,failures);
+ if(failures.length>0){
+  const failure=new Error('The case could not release everything');
+  Object.defineProperty(failure,'cleanup_errors',{value:failures,enumerable:false,configurable:true});
+  throw failure;
+ }
+},300000);
+
+/**
+ * R03 — a sidecar, an unknown item and a missing committed file are all refused.
+ */
+it('R03 refuses a sidecar, an unknown item and a missing committed file',async()=>{
+ await withFixture(async f=>{
+  // A markers file the committed source does not have: a native edit, not a cache.
+  writeFileSync(join(f.workspaceRoot,'.film','markers.json'),'[]');
+  await expect(readOnce(f)).rejects.toMatchObject({code:'NATIVE_SOURCE_SIDECAR_UNPROVEN'});
+  rmSync(join(f.workspaceRoot,'.film','markers.json'));
+  // An item the native does not produce.
+  writeFileSync(join(f.workspaceRoot,'.film','unknown.json'),'{}');
+  await expect(readOnce(f)).rejects.toMatchObject({code:'NATIVE_SOURCE_UNKNOWN_ITEM'});
+  rmSync(join(f.workspaceRoot,'.film','unknown.json'));
+  // A committed file that is no longer there.
+  const captions=readdirSync(join(f.workspaceRoot,'assets','vo')).find(name=>name.endsWith('.vtt'));
+  expect(captions).toBeDefined();
+  unlinkSync(join(f.workspaceRoot,'assets','vo',captions!));
+  await expect(readOnce(f)).rejects.toMatchObject({code:'NATIVE_SOURCE_COPY_INCOMPLETE'});
+ });
+},300000);
+
+/**
+ * R04 — the native project id, a forged probe cache and a file in flight.
+ *
+ * A *legitimate* cache is a different case: it must invalidate the proof that was
+ * made before it appeared and be accepted by the next stable round.
+ */
+it('R04 refuses a foreign native id, a forged probe cache and a file in flight',async()=>{
+ await withFixture(async f=>{
+  const media=readdirSync(join(f.workspaceRoot,'assets','video')).find(name=>name.endsWith('.mp4'));
+  expect(media).toBeDefined();
+  const mediaPath=`assets/video/${media!}`;
+  const info=statSync(join(f.workspaceRoot,mediaPath));
+  const key=upstreamMediaKey(mediaPath,info.size,info.mtimeMs);
+  // The native project id the Host did not issue.
+  mkdirSync(join(f.workspaceRoot,'.film'),{recursive:true});
+  writeFileSync(join(f.workspaceRoot,'.film','id'),'someone-elses-project\n');
+  await expect(readOnce(f)).rejects.toMatchObject({code:'NATIVE_SOURCE_NATIVE_ID_MISMATCH'});
+  rmSync(join(f.workspaceRoot,'.film','id'));
+  // A probe cache that says something else about the same bytes.
+  mkdirSync(join(f.workspaceRoot,'.film','cache','probe'),{recursive:true});
+  writeFileSync(join(f.workspaceRoot,'.film','cache','probe',`${key}.3.json`),JSON.stringify({duration:99,width:1,height:1,fps:1,audio:false}));
+  await expect(readOnce(f)).rejects.toMatchObject({code:'NATIVE_SOURCE_CACHE_FORGED'});
+  rmSync(join(f.workspaceRoot,'.film','cache','probe',`${key}.3.json`));
+  // A file that is still being written.
+  writeFileSync(join(f.workspaceRoot,'.film','cache','probe',`${key}.3.json.0123456789ab.tmp`),'{}');
+  await expect(readOnce(f)).rejects.toMatchObject({code:'NATIVE_SOURCE_CHANGING'});
+  rmSync(join(f.workspaceRoot,'.film','cache','probe',`${key}.3.json.0123456789ab.tmp`));
+ });
+},300000);
+
+/**
+ * R04 — a legitimate cache invalidates the old proof and the next round accepts it.
+ */
+it('R04 accepts a legitimate cache in the next stable round',async()=>{
+ await withFacts(async (facts,f)=>{
+  expect(facts.verifyClosure()).toBe(true);
+  const media=readdirSync(join(f.workspaceRoot,'assets','video')).find(name=>name.endsWith('.mp4'));
+  expect(media).toBeDefined();
+  const mediaPath=`assets/video/${media!}`;
+  const absolute=join(f.workspaceRoot,mediaPath);
+  const info=statSync(absolute);
+  const key=upstreamMediaKey(mediaPath,info.size,info.mtimeMs);
+  // The native's own cache of the same bytes, as the upstream's probe writes it.
+  const cached=upstreamProbeCache(absolute);
+  mkdirSync(join(f.workspaceRoot,'.film','cache','probe'),{recursive:true});
+  writeFileSync(join(f.workspaceRoot,'.film','cache','probe',`${key}.3.json`),JSON.stringify(cached));
+  // The proof that was made before the cache appeared does not verify any more.
+  expect(facts.verifyClosure()).toBe(false);
+  // The next stable round accepts it: the cache is proved against an independent probe.
+  const next=await readOnce(f);
+  expect(next.verifyClosure()).toBe(true);
+  for(const handle of next.retained)handle.close();
+ });
+},300000);
+
+/**
+ * R05 — the media facts are the facts of the same bytes, read by the fixed tool.
+ */
+it('R05 proves the media facts of the retained bytes',async()=>{
+ await withFacts(async (facts,f)=>{
+  const videos=facts.expected_input.media_facts.filter(fact=>fact.source_ref.startsWith('assets/video/'));
+  expect(videos.length).toBeGreaterThan(0);
+  for(const fact of videos){
+   // The same bytes, probed again by the fixed tool with the upstream's own argv.
+   const direct=upstreamProbeCache(join(f.workspaceRoot,fact.source_ref));
+   expect(fact.duration_ms).toBe(direct.duration===undefined?null:Math.round(direct.duration*1000));
+   expect(fact.has_audio).toBe(direct.audio);
+   expect(fact.fps).toBe(direct.fps===undefined?null:direct.fps);
+   expect(fact.origin).toBe('host_actual_probe');
+   expect(fact.proof_digest).toMatch(/^[0-9a-f]{64}$/);
+  }
+ });
+},300000);
+
+/**
+ * R06 — the listing of the media is the native's own numeric order.
+ */
+it('R06 lists the media in the native numeric order',async()=>{
+ await withFacts(async facts=>{
+  const listing=facts.expected_input.video_files_in_native_order;
+  expect(listing.length).toBeGreaterThan(0);
+  for(const path of listing)expect(path.startsWith('assets/')).toBe(true);
+  // The listing is the host's numeric collation of the whole path.
+  const sorted=[...listing].sort((left,right)=>left.localeCompare(right,undefined,{numeric:true}));
+  expect(listing).toEqual(sorted);
+  // The environment the order depends on is recorded.
+  expect(process.versions.icu).toBeDefined();
+  expect(Intl.DateTimeFormat().resolvedOptions().locale).toBeTruthy();
+ });
+},300000);
+
+/**
+ * R02 — the leases: parallel, repeated, foreign, copied and released.
+ *
+ * A lease is one acquisition. Releasing it releases that acquisition and nothing
+ * else: the ref and every other lease of it stay usable, so a later stable round can
+ * prove again on the same view.
+ */
+it('R02 keeps parallel leases independent and refuses foreign and copied tokens',async()=>{
+ await withFixture(async f=>{
+  const expectation={project_id:f.projectId,snapshot_id:f.binding.snapshot_id,
+   source_digest:f.binding.source_digest,revision:f.binding.revision,native_project_id:f.binding.native_project_id};
+  const first=f.workspace.acquireExpectedLease(f.workspaceRef,expectation);
+  const second=f.workspace.acquireExpectedLease(f.workspaceRef,expectation);
+  expect(second).not.toBe(first);
+  expect(first.assertCurrent()).toBe(true);
+  expect(second.assertCurrent()).toBe(true);
+  // Releasing one lease does not revoke the ref or the other lease.
+  first.release();
+  expect(first.assertCurrent()).toBe(false);
+  expect(second.assertCurrent()).toBe(true);
+  // A repeated acquisition after a release still works: the view is unchanged.
+  const third=f.workspace.acquireExpectedLease(f.workspaceRef,expectation);
+  expect(third.assertCurrent()).toBe(true);
+  third.release();
+  // A copy of a lease is not a lease of this service.
+  expect(f.workspace.isLease({...second})).toBe(false);
+  expect(f.workspace.isLease(second)).toBe(true);
+  // A lease of another service is not a lease of this one.
+  const other=new CreatedNativeWorkspaceService(f.host.revisions,f.app.creation,f.app.committedSnapshots,
+   {root:join(f.root,'other-workspaces'),protectedRoots:[join(f.root,'projects'),join(f.root,'snapshots'),vendorRoot]});
+  try{
+   const view=await other.prepare(f.projectId,f.owner);
+   const ref='foreign-ws';
+   const registration=other.registerWorkspaceRef(view,ref,{project_id:f.projectId,principal_id:'owner',
+    transaction_id:f.transactionId,snapshot_id:view.snapshot_id,source_digest:view.source_digest,
+    revision:view.revision,native_project_id:f.binding.native_project_id});
+   expect(registration.generation).toBeGreaterThan(0);
+   const foreign=other.acquireExpectedLease(ref,{project_id:f.projectId,snapshot_id:view.snapshot_id,
+    source_digest:view.source_digest,revision:view.revision,native_project_id:f.binding.native_project_id});
+   // The foreign lease really exists and really is current: the refusal below is
+   // about who issued it, not about a lease that was never made.
+   expect(foreign.assertCurrent()).toBe(true);
+   expect(other.isLease(foreign)).toBe(true);
+   expect(f.workspace.isLease(foreign)).toBe(false);
+  }finally{
+   await other.disposeAfterNative();
+  }
+ });
+},300000);
+
+/**
+ * R02 — the facts lease of another authority is not a lease of this one.
+ */
+it('R02 refuses a facts lease of another authority',async()=>{
+ await withFixture(async f=>{
+  const own=await f.authority.acquireNativeFacts(f.projectId,f.transactionId,'owner');
+  const other=new CommittedSnapshotAuthority(f.host.revisions,f.host.snapshots,f.app.creation,vendorRoot);
+  const foreign=await other.acquireNativeFacts(f.projectId,f.transactionId,'owner');
+  try{
+   expect(f.authority.isNativeFactsLease(own)).toBe(true);
+   // A copy of a lease is not a lease.
+   expect(f.authority.isNativeFactsLease({...own})).toBe(false);
+   // A lease of another authority over the same store is not a lease of this one.
+   expect(f.authority.isNativeFactsLease(foreign)).toBe(false);
+   expect(other.isNativeFactsLease(foreign)).toBe(true);
+  }finally{
+   // Both leases are released here: the fixture does not own them.
+   const failures:unknown[]=[];
+   try{own.release();}catch(error){failures.push(error);}
+   try{foreign.release();}catch(error){failures.push(error);}
+   if(failures.length>0)throw new Error('The leases could not be released: '+failures.map(String).join('; '));
+  }
+ });
+},300000);
+
+/**
+ * R02 — the whole closure travels with the handles and is released with the last one.
+ */
+it('R02 releases the whole closure only after the last retained leaf',async()=>{
+ await withFacts(async facts=>{
+  expect(facts.retained.length).toBeGreaterThan(1);
+  expect(facts.verifyClosure()).toBe(true);
+  const handles=[...facts.retained];
+  // Every leaf but the last: the closure is still whole, so the proof still verifies.
+  for(const handle of handles.slice(0,-1))handle.close();
+  expect(facts.verifyClosure()).toBe(true);
+  // The last leaf: the closure goes with it.
+  handles[handles.length-1]!.close();
+  expect(facts.verifyClosure()).toBe(false);
+ });
+},300000);
+
+/**
+ * R06 — the placement of every clip is the film's own, and the plan agrees with it.
+ *
+ * The film's own placement is read again, independently, from the committed bytes.
+ */
+it('R06 places every clip where the committed film places it',async()=>{
+ await withFacts(async (facts,f)=>{
+  const film=readFileSync(join(f.sourceRoot,'film.html'),'utf8');
+  const own=new Map<string,number>();
+  for(const match of film.matchAll(/<(?:video|iframe|audio)\s+id="([^"]+)"[^>]*\bat="([0-9.]+)"/g))own.set(match[1]!,Number(match[2]));
+  const clips=(facts.expected_input.film.value.tracks??[]).flatMap(track=>track.clips??[]);
+  expect(clips.length).toBeGreaterThan(0);
+  for(const clip of clips){
+   const placed=own.get(clip.id);
+   expect(placed,`the committed film has no place for ${clip.id}`).toBeDefined();
+   expect(Math.abs((clip.at??-1)-placed!)).toBeLessThan(0.001);
+  }
+ });
+},300000);
+
+/**
+ * R07 — the reader's own lifecycle: a close during a read, a late result, and no
+ * child of the reader after it closed.
+ *
+ * The authority and the workspace are stand-ins here on purpose: the case is about
+ * the reader's own admission, drain and ownership, not about the committed facts.
+ */
+it('R07 ends a read at a close and releases a late result exactly once',async()=>{
+ let workspaceReleases=0;
+ let sourceReleases=0;
+ let releaseLate!:()=>void;
+ const released=new Promise<void>(resolve=>{releaseLate=resolve;});
+ let resolveLease:((lease:unknown)=>void)|undefined;
+ const pending=new Promise<unknown>(resolve=>{resolveLease=resolve;});
+ const authority={acquireNativeFacts:()=>pending} as unknown as CommittedSnapshotAuthority;
+ const lease={workspace_ref:'ws',project_id:'p',principal_id:'owner',transaction_id:'txn',snapshot_id:'snap',
+  source_digest:'digest',revision:1,native_project_id:'native',generation:1,root:'/tmp',
+  assertCurrent:()=>true,release:()=>{workspaceReleases++;}};
+ const workspaces={acquireExpectedLease:()=>lease} as unknown as CreatedNativeWorkspaceService;
+ const reader=new CreatedNativeSourceReader({authority,workspaces,library:{} as NativeExpectedLibrary});
+ const binding={project_id:'p',native_project_id:'native',revision:1,snapshot_id:'snap',source_digest:'digest',
+  instance_generation:1,selection_version:0,workspace:{workspace_ref:'ws',snapshot_id:'snap',source_digest:'digest',revision:1},
+  isCurrent:()=>true} as unknown as NativeExpectedBinding;
+ const reading=reader.readSource({binding});
+ // The caller's rejection is handled, so it is never an unhandled rejection.
+ let callerCancelled=false;
+ const cancelled=reading.then(()=>{callerCancelled=true;},()=>{callerCancelled=true;});
+ // The close begins while the authority has not answered, and it stays pending: the
+ // dependency is still in flight.
+ let closeResolved=false;
+ const closing=reader.close().then(()=>{closeResolved=true;});
+ // The caller is cancelled promptly.
+ await cancelled;
+ expect(callerCancelled).toBe(true);
+ // But the owner is not quiescent: the acquisition it started has not settled, so the
+ // close has not returned.
+ expect(closeResolved).toBe(false);
+ // The authority answers after the close began: a late result, which the reader
+ // released because it asked for it.
+ resolveLease?.({release:()=>{sourceReleases++;releaseLate();}});
+ await released;
+ expect(sourceReleases).toBe(1);
+ // The caller's promise is cancelled: a cancelled read is not a quiet success.
+ await expect(reading).rejects.toMatchObject({code:'NATIVE_SOURCE_ABORTED'});
+ // The workspace lease the reader took is released exactly once.
+ expect(workspaceReleases).toBe(1);
+ // The owner's close returns only when the underlying dependency really settled.
+ await closing;
+ expect(closeResolved).toBe(true);
+ // After a completed close no further work is admitted and no child is started.
+ const reader2=new CreatedNativeSourceReader({authority,workspaces,library:{} as NativeExpectedLibrary});
+ await reader2.close();
+ await expect(reader2.readSource({binding})).rejects.toMatchObject({code:'NATIVE_SOURCE_READER_CLOSED'});
+},60000);
+
+/**
+ * R07 — the real child: it starts, it exits, and the reader's close waits for it.
+ *
+ * The order is proven by the reader's own child events: the tool's real process is
+ * observed, its real exit is observed, and the exit comes before the read is
+ * rejected and before the close returns. No elapsed time is used as evidence.
+ */
+it('R07 lets the real media child exit before the reader closes',async()=>{
+ const order:string[]=[];
+ let probing:((event:{readonly pid:number;readonly argument:string})=>void)|undefined;
+ const began=new Promise<{readonly pid:number;readonly argument:string}>(resolve=>{probing=resolve;});
+ let held:string|undefined;
+ let openAtExit:boolean|undefined;
+ const f=await nativeSourceFixture({childEvents:event=>{
+  order.push(`${event.kind}:${event.pid}:${event.argument}`);
+  // The media probe is the child whose argument is a descriptor of this process; the
+  // version query is not, and it must not be mistaken for it.
+  if(event.kind==='started'&&/^\/proc\/\d+\/fd\/\d+$/.test(event.argument)){
+   held=event.argument;probing?.({pid:event.pid,argument:event.argument});
+  }
+  // At the child's own exit, the input it was reading is still held.
+  if(event.kind==='exited'&&held!==undefined)openAtExit=existsSync(held);
+ }});
+ let primary:unknown;
+ try{
+  const reading=readOnce(f);
+  // The barrier is the real media probe: no sleep, no guess. The child's own process
+  // and the descriptor it reads are two different identities and are kept apart.
+  const {pid,argument}=await began;
+  expect(pid).toBeGreaterThan(0);
+  expect(argument).toMatch(/^\/proc\/\d+\/fd\/\d+$/);
+  // The descriptor belongs to this process, the parent of the tool.
+  expect(argument.split('/')[2]).toBe(String(process.pid));
+  // The descriptor is live while the child runs, and it is the media file itself.
+  expect(existsSync(argument)).toBe(true);
+  expect(readlinkSync(argument)).toContain('assets/video/');
+  await f.reader.close();
+  order.push('close-returned');
+  // The read ends; the error is the reader's own refusal, never a silent success.
+  await expect(reading).rejects.toMatchObject({code:expect.stringMatching(/^NATIVE_/)});
+  order.push('read-rejected');
+  // The child really exited, and it exited before the reader returned and before the
+  // read was rejected.
+  expect(order).toContain(`exited:${pid}:${argument}`);
+  expect(order.indexOf(`exited:${pid}:${argument}`)).toBeLessThan(order.indexOf('close-returned'));
+  expect(order.indexOf(`exited:${pid}:${argument}`)).toBeLessThan(order.indexOf('read-rejected'));
+  // The descriptor the child was reading was still held when the child exited, and it
+  // is released only afterwards.
+  expect(openAtExit).toBe(true);
+  expect(existsSync(argument)).toBe(false);
+ }catch(error){primary=error;}
+ const failures:unknown[]=[];
+ try{await f.close();}catch(error){failures.push(error);}
+ if(primary!==undefined)withCleanup(primary,failures);
+ if(failures.length>0){
+  const failure=new Error('The case could not release everything');
+  Object.defineProperty(failure,'cleanup_errors',{value:failures,enumerable:false,configurable:true});
+  throw failure;
+ }
+},300000);
+
+/**
+ * R07 — the admission is registered before the binding's own callbacks run.
+ *
+ * A callback may close the reader. The close must then find the read admitted, and it
+ * must not return while that read is still running.
+ */
+it('R07 registers the read before a binding callback can close the reader',async()=>{
+ const authority={acquireNativeFacts:()=>Promise.reject(new Error('the read must not reach the authority'))} as unknown as CommittedSnapshotAuthority;
+ const lease={workspace_ref:'ws',project_id:'p',principal_id:'owner',transaction_id:'txn',snapshot_id:'snap',
+  source_digest:'digest',revision:1,native_project_id:'native',generation:1,root:'/tmp',
+  assertCurrent:()=>true,release:()=>{}};
+ const workspaces={acquireExpectedLease:()=>lease} as unknown as CreatedNativeWorkspaceService;
+ const reader=new CreatedNativeSourceReader({authority,workspaces,library:{} as NativeExpectedLibrary});
+ const order:string[]=[];
+ let closing:Promise<void>|undefined;
+ const binding={project_id:'p',native_project_id:'native',revision:1,snapshot_id:'snap',source_digest:'digest',
+  instance_generation:1,selection_version:0,workspace:{workspace_ref:'ws',snapshot_id:'snap',source_digest:'digest',revision:1},
+  isCurrent:()=>{
+   // The callback closes the reader while the read is being admitted.
+   closing??=reader.close().then(()=>{order.push('close-returned');},()=>{order.push('close-returned');});
+   return true;
+  }} as unknown as NativeExpectedBinding;
+ const reading=reader.readSource({binding});
+ // The settlement is observed on the returned promise itself, not on a marker that
+ // runs after an assertion: the ordering must be the real one.
+ const settled=reading.then(()=>{order.push('read-settled');},()=>{order.push('read-settled');});
+ await expect(reading).rejects.toMatchObject({code:expect.stringMatching(/^NATIVE_/)});
+ await settled;
+ await closing;
+ // The close returned only after the read settled: the admission was registered
+ // before the callback ran, so the close could not leave the read behind.
+ expect(order.indexOf('read-settled')).toBeLessThan(order.indexOf('close-returned'));
+},60000);
+
+/**
+ * R07 — a delivered release that failed latches the reader.
+ *
+ * The reader can then no longer say what it holds, so it must not admit another read.
+ */
+it('R07 refuses a later read after a delivered release failed',async()=>{
+ let armed=false;
+ const f=await nativeSourceFixture({closureOps:{close:(fd:number)=>{
+  // The descriptor is closed FIRST and the failure is reported afterwards: the
+  // injection must not leave a real descriptor open, and no descriptor number is
+  // ever closed twice.
+  closeSync(fd);
+  if(armed)throw new Error('injected release failure');
+ }}});
+ let facts:NativeExpectedSourceFacts|undefined;
+ let primary:unknown;
+ try{
+  facts=await readOnce(f);
+  // The next release of a descriptor of the working copy fails.
+  armed=true;
+  const failures:unknown[]=[];
+  for(const handle of facts.retained){try{handle.close();}catch(error){failures.push(error);}}
+  expect(failures.length).toBeGreaterThan(0);
+  // The reader can no longer say what it holds: a later read is refused.
+  await expect(readOnce(f)).rejects.toMatchObject({code:'NATIVE_SOURCE_READER_UNCERTAIN'});
+ }catch(error){primary=error;}
+ // The reader's close REPORTS the delivered release failure: that is the behaviour
+ // under test, so it is asserted here instead of being swallowed as a cleanup
+ // accident of the case.
+ const reported=await f.close().then(()=>null,error=>error);
+ const reportedCauses=(reported as {cleanup_errors?:unknown[]}|null)?.cleanup_errors??[];
+ if(primary!==undefined)withCleanup(primary,reportedCauses);
+ expect(reported).not.toBeNull();
+ expect(reportedCauses.length).toBeGreaterThan(0);
+},300000);
+
+/**
+ * F01 — a temporary release failure is kept, latches the uncertainty and reaches the
+ * final release exactly once.
+ *
+ * The injected release closes the descriptor and *then* fails: the descriptor is really
+ * released, so the operating system may hand its number out again and no number is
+ * ever accused twice.
+ */
+it('F01 keeps a temporary release failure and reports it once at the final release',async()=>{
+ const root=closureTree();
+ let closure:RetainedNativeClosure|undefined;
+ let armed=false;
+ try{
+  closure=await RetainedNativeClosure.open(root,{},{close:(fd:number)=>{
+   closeSync(fd);
+   if(armed){armed=false;throw new Error('injected temporary release failure');}
+  }});
+  const file=await closure.retainFile('film.html');
+  expect(closure.verify()).toBe(true);
+  // The verification walk opens the directories again and releases them: a failure of
+  // one of those temporary releases must not stay hidden.
+  armed=true;
+  expect(closure.verify()).toBe(false);
+  expect(closure.uncertain).toBe(true);
+  expect(closure.cleanupFailures.length).toBe(1);
+  // The final release reports the ledger once, and a repeated release does not retry
+  // the descriptor and does not add the failure a second time.
+  let failure:unknown;
+  try{closure.close();}catch(error){failure=error;}
+  expect(failure).toBeDefined();
+  expect((failure as {cleanup_errors?:unknown[]}).cleanup_errors?.length).toBe(1);
+  expect(closure.cleanupFailures.length).toBe(1);
+  expect(()=>closure!.close()).not.toThrow();
+  expect(closure.cleanupFailures.length).toBe(1);
+ }finally{
+  try{closure?.close();}catch{/* the closure reports its own failures */}
+  rmSync(root,{recursive:true,force:true});
+ }
+},60000);
+
+/**
+ * F03 — a source leaf replaced *while the acquisition is running* is refused, and so
+ * is a replaced parent. The replacement happens at the moment the source is read: the
+ * bytes the acquisition used are the ones the closure retained.
+ */
+it('F03 refuses a source leaf and a source parent replaced during the acquisition',async()=>{
+ await withFixture(async f=>{
+  const authority=f.authority as {acquireNativeFacts:(p:string,t:string,o:string)=>Promise<unknown>};
+  let swapped=false;
+  observeNativeFacts({onSourceRead:()=>{
+   if(swapped)return;
+   swapped=true;
+   const source=join(f.sourceRoot,'film.html');
+   const copy=join(f.sourceRoot,'film-copy.html');
+   writeFileSync(copy,readFileSync(source));
+   renameSync(copy,source);
+  }});
+  try{
+   await expect(authority.acquireNativeFacts(f.projectId,f.transactionId,'owner')).rejects.toMatchObject({code:'REVISION_CONFLICT'});
+  }finally{observeNativeFacts(undefined);}
+ });
+ await withFixture(async f=>{
+  const authority=f.authority as {acquireNativeFacts:(p:string,t:string,o:string)=>Promise<unknown>};
+  let swapped=false;
+  observeNativeFacts({onSourceRead:()=>{
+   if(swapped)return;
+   swapped=true;
+   // The parent of the media is moved away and replaced by an equal one.
+   const parent=join(f.sourceRoot,'assets','video');
+   const moved=join(f.sourceRoot,'assets','video-moved');
+   renameSync(parent,moved);
+   mkdirSync(parent,{recursive:true});
+   for(const name of readdirSync(moved))writeFileSync(join(parent,name),readFileSync(join(moved,name)));
+  }});
+  try{
+   await expect(authority.acquireNativeFacts(f.projectId,f.transactionId,'owner')).rejects.toMatchObject({code:'REVISION_CONFLICT'});
+  }finally{observeNativeFacts(undefined);}
+ });
+},300000);
+
+/**
+ * F03 — an equal-byte replacement of a source leaf after the issue makes the lease
+ * stale; the next round proves the new identity.
+ */
+it('F03 refuses a stale source identity and proves the next one',async()=>{
+ await withFixture(async f=>{
+  const authority=f.authority as {acquireNativeFacts:(p:string,t:string,o:string)=>Promise<{assertCurrent:()=>boolean;release:()=>void}>};
+  const lease=await authority.acquireNativeFacts(f.projectId,f.transactionId,'owner');
+  try{
+   expect(lease.assertCurrent()).toBe(true);
+   // The same bytes, a different file: the identity moved, the content did not.
+   const source=join(f.sourceRoot,'film.html');
+   const bytes=readFileSync(source);
+   const copy=join(f.sourceRoot,'film-copy.html');
+   writeFileSync(copy,bytes);
+   renameSync(copy,source);
+   expect(lease.assertCurrent()).toBe(false);
+   // A new round proves the identity that is there now.
+   const next=await authority.acquireNativeFacts(f.projectId,f.transactionId,'owner');
+   expect(next.assertCurrent()).toBe(true);
+   next.release();
+  }finally{lease.release();}
+ });
+},300000);
+
+/**
+ * F04 — the working copy must be a copy: a hardlink to the committed source is an
+ * alias, and an unknown directory is an item the native does not produce.
+ */
+it('F04 refuses a hardlink alias and an unknown directory in the working copy',async()=>{
+ await withFixture(async f=>{
+  const source=join(f.sourceRoot,'film.html');
+  const target=join(f.workspaceRoot,'film.html');
+  rmSync(target);
+  linkSync(source,target);
+  // The hard link gives the COMMITTED file a second name, so the committed source
+  // is refused first - the tree of the source is not the tree that was committed.
+  await expect(readOnce(f)).rejects.toMatchObject({code:'REVISION_CONFLICT'});
+ });
+ await withFixture(async f=>{
+  mkdirSync(join(f.workspaceRoot,'.film','history'),{recursive:true});
+  await expect(readOnce(f)).rejects.toMatchObject({code:'NATIVE_SOURCE_UNKNOWN_DIRECTORY'});
+ });
+},300000);
+
+/**
+ * F04 — a leaf of the working copy that is linked to a file outside it.
+ *
+ * The link is not to the committed source: it is to an external file, so the
+ * committed source is untouched and the refusal is the reader's own.
+ */
+it('F04 refuses a working copy leaf that is hardlinked to an external file',async()=>{
+ await withFixture(async f=>{
+  const external=join(f.root,'external-film.html');
+  const target=join(f.workspaceRoot,'film.html');
+  writeFileSync(external,readFileSync(target));
+  rmSync(target);
+  linkSync(external,target);
+  // The working copy holds a file that is also a name of another file: it is an
+  // alias, and the reader refuses it with its own reason.
+  await expect(readOnce(f)).rejects.toMatchObject({code:'NATIVE_SOURCE_COPY_ALIASED'});
+ });
+},300000);
+
+/**
+ * F05 — the native cache entries whose producer cannot be proven are refused
+ * explicitly, and nothing is deleted.
+ */
+it('F05 refuses a page frame cache entry and an orphan film poster',async()=>{
+ await withFixture(async f=>{
+  const cache=join(f.workspaceRoot,'.film','cache','pageframes');
+  mkdirSync(cache,{recursive:true});
+  const key='a'.repeat(24);
+  writeFileSync(join(cache,`${key}.jpg`),'not a jpeg');
+  writeFileSync(join(cache,`${key}.json`),JSON.stringify({files:[]}));
+  writeFileSync(join(cache,`${key}.stamp`),'x');
+  // The refusal keeps its own reason: the entry was not produced by the fixed
+  // producer, so it is not a witness of anything.
+  await expect(readOnce(f)).rejects.toMatchObject({code:'NATIVE_SOURCE_CACHE_UNWITNESSED'});
+  // Nothing was deleted: the pollution is still there for the native to own.
+  expect(readdirSync(cache).length).toBe(3);
+ });
+ await withFixture(async f=>{
+  mkdirSync(join(f.workspaceRoot,'.film','cache'),{recursive:true});
+  writeFileSync(join(f.workspaceRoot,'.film','cache','film-poster.jpg'),'not a jpeg');
+  await expect(readOnce(f)).rejects.toMatchObject({code:'NATIVE_SOURCE_CACHE_UNWITNESSED'});
+ });
+},300000);
+
+/**
+ * F07 — the reader's close reports the failure of a delivered release.
+ */
+it('F07 reports a delivered release failure when the reader closes',async()=>{
+ let armed=false;
+ const f=await nativeSourceFixture({closureOps:{close:(fd:number)=>{
+  if(armed)throw new Error('injected delivered release failure');
+  closeSync(fd);
+ }}});
+ let facts:NativeExpectedSourceFacts|undefined;
+ try{
+  facts=await readOnce(f);
+  armed=true;
+  const failures:unknown[]=[];
+  for(const handle of facts.retained){try{handle.close();}catch(error){failures.push(error);}}
+  expect(failures.length).toBeGreaterThan(0);
+  // The reader knows: its close reports the real cleanup state.
+  let failure:unknown;
+  try{await f.reader.close();}catch(error){failure=error;}
+  expect(failure).toBeDefined();
+  expect((failure as {cleanup_errors?:unknown[]}).cleanup_errors?.length).toBeGreaterThan(0);
+ }finally{
+  armed=false;
+  // The fixture's own close reports the same delivered failure: that is the behaviour
+  // under test, and the case has already asserted it above. It is not swallowed as a
+  // cleanup accident.
+  const reported=await f.close().then(()=>null,error=>error);
+  if(reported!==null)expect((reported as {cleanup_errors?:unknown[]}).cleanup_errors?.length).toBeGreaterThan(0);
+ }
+},300000);
+
+/**
+ * F08 — a change of the producer's own lineage after the issue makes the lease stale.
+ */
+it('F08 refuses a lease whose producer lineage changed after the issue',async()=>{
+ await withFixture(async f=>{
+  const authority=f.authority as {acquireNativeFacts:(p:string,t:string,o:string)=>Promise<{assertCurrent:()=>boolean;release:()=>void}>};
+  const lease=await authority.acquireNativeFacts(f.projectId,f.transactionId,'owner');
+  try{
+   expect(lease.assertCurrent()).toBe(true);
+   // The committed lineage is changed behind the lease: the immutable fact is altered
+   // with its guard removed, exactly as a database fault would be.
+   f.host.revisions.compose(db=>{
+    const sql=String(db.prepare("SELECT sql FROM sqlite_master WHERE name='created_impact_fact_no_update'").get()?.sql);
+    db.exec('DROP TRIGGER created_impact_fact_no_update');
+    try{
+     db.prepare("UPDATE created_impact_fact SET plan_sha256=? WHERE impact_id=(SELECT impact_id FROM created_adopted_source_fact WHERE snapshot_id=?)")
+      .run('0'.repeat(64),f.snapshotId);
+    }finally{if(sql)db.exec(sql);}
+   });
+   expect(lease.assertCurrent()).toBe(false);
+  }finally{lease.release();}
+ });
+},300000);
+
+/**
+ * F08 — a change of the producer's lineage *while the acquisition is running* is
+ * refused: the fence was sampled before the first await.
+ */
+it('F08 refuses a lineage changed during the acquisition',async()=>{
+ await withFixture(async f=>{
+  const authority=f.authority as {acquireNativeFacts:(p:string,t:string,o:string)=>Promise<unknown>};
+  let changed=false;
+  observeNativeFacts({onSourceRead:()=>{
+   if(changed)return;
+   changed=true;
+   f.host.revisions.compose(db=>{
+    const sql=String(db.prepare("SELECT sql FROM sqlite_master WHERE name='created_impact_fact_no_update'").get()?.sql);
+    db.exec('DROP TRIGGER created_impact_fact_no_update');
+    try{
+     db.prepare("UPDATE created_impact_fact SET plan_sha256=? WHERE impact_id=(SELECT impact_id FROM created_adopted_source_fact WHERE snapshot_id=?)")
+      .run('0'.repeat(64),f.snapshotId);
+    }finally{if(sql)db.exec(sql);}
+   });
+  }});
+  try{
+   await expect(authority.acquireNativeFacts(f.projectId,f.transactionId,'owner')).rejects.toMatchObject({code:'REVISION_CONFLICT'});
+  }finally{observeNativeFacts(undefined);}
+ });
+},300000);
+
+/**
+ * F02 — a proved absence is a legitimate dependency, and its later birth invalidates
+ * the proof that was made while it was absent.
+ */
+it('F02 accepts a proved absence and refuses its later birth',async()=>{
+ await withFixture(async f=>{
+  // The committed source has no markers file: the absence is proved and the read is
+  // allowed to succeed on it.
+  expect(existsSync(join(f.sourceRoot,'.film','markers.json'))).toBe(false);
+  const facts=await readOnce(f);
+  expect(facts.expected_input.markers.file.state).toBe('absent');
+  expect(facts.expected_input.markers.file.sha256).toBeNull();
+  expect(facts.verifyClosure()).toBe(true);
+  // The file is born while the proof is held: the proof does not verify any more.
+  writeFileSync(join(f.workspaceRoot,'.film','markers.json'),'[]');
+  expect(facts.verifyClosure()).toBe(false);
+  for(const handle of facts.retained){try{handle.close();}catch{/* the fixture closes the rest */}}
+ });
+},300000);
+
+/**
+ * F06 — the authority's own preflight is bounded: a referenced text above the
+ * budget is refused before its bytes are read.
+ */
+it('F06 refuses a referenced text above the budget in the authority path',async()=>{
+ await withFixture(async f=>{
+  // The database facts stay entirely unchanged: the committed source is proven as it
+  // is. The referenced film is overwritten on the disk: this is post-commit
+  // filesystem corruption and a resource defence, not a new producer.
+  writeFileSync(join(f.sourceRoot,'film.html'),'x'.repeat(9*1024*1024));
+  const moved=new Map<string,number>();
+  observeNativeFacts({closureOps:{onReadChunk:(relativePath:string,bytes:number)=>{
+   moved.set(relativePath,(moved.get(relativePath)??0)+bytes);
+  }}});
+  try{
+   const authority=f.authority as {acquireNativeFacts:(p:string,t:string,o:string)=>Promise<unknown>};
+   // The budget refuses the text before its bytes are read.
+   await expect(authority.acquireNativeFacts(f.projectId,f.transactionId,'owner'))
+    .rejects.toMatchObject({code:'NATIVE_CLOSURE_BUDGET'});
+   // The oversized text was never read: not one of its bytes was moved.
+   expect(moved.get('film.html')??0).toBe(0);
+  }finally{observeNativeFacts(undefined);}
+ });
+},300000);
+
+/**
+ * F09 — the probe's failure branches, reached deterministically. The injection can only
+ * make the probe fail; it never produces an answer.
+ */
+it('F09 refuses every injected probe failure through the production runner',async()=>{
+ const scenarios=[
+  {fault:'spawn',code:'NATIVE_PROBE_UNAVAILABLE'},
+  {fault:'nonzero',code:'NATIVE_PROBE_FAILED'},
+  {fault:'malformed',code:'NATIVE_PROBE_MALFORMED'},
+  {fault:'output',code:'NATIVE_PROBE_OUTPUT'},
+  {fault:'hang',code:'NATIVE_PROBE_TIMEOUT'},
+ ] as const;
+ for(const scenario of scenarios){
+  await withFixture(async f=>{
+   const library=await nativeExpectedLibraryLoader().load(nativeExpectedApprovalFromPin());
+   const reader=new CreatedNativeSourceReader({authority:f.authority as never,workspaces:f.workspace as never,library,
+    // The injection replaces the transport; the runner, the parser and the child
+    // bookkeeping are the production ones. It never carries an answer.
+    toolTransport:{spawn:(command:string,args:readonly string[],options:{readonly stdio:readonly ['ignore','pipe','pipe'];readonly windowsHide:boolean})=>
+     // The version query is the REAL tool: the injection belongs to the probe.
+     args[0]==='-version'
+      ? spawn(command,[...args],{stdio:['ignore','pipe','pipe'],windowsHide:options.windowsHide})
+      : injectedToolChild(scenario.fault) as unknown as ChildProcess,deadlineMs:250}});
+   await expect(reader.readSource({binding:f.binding})).rejects.toMatchObject({code:scenario.code});
+   await reader.close();
+  });
+ }
+},600000);
+
+/**
+ * F09 — the normalisation against a **real** tool answer: a rotated video and a file
+ * with two video streams.
+ */
+it('F09 normalises a rotated video and the first of two video streams',async()=>{
+ const root=mkdtempSync(join(tmpdir(),'n1n2-probe-'));
+ try{
+  const plain=join(root,'plain.mp4');
+  execFileSync('ffmpeg',['-nostdin','-hide_banner','-v','error','-f','lavfi','-i','color=c=0x185a88:s=320x180:r=30:d=1',
+   '-threads','1','-c:v','libx264','-pix_fmt','yuv420p',plain],{windowsHide:true,timeout:30000});
+  // The rotation is a display matrix: the coded size stays 320x180 and the shown size
+  // is the other way round, which is what the upstream swaps for.
+  const rotated=join(root,'rotated.mp4');
+  execFileSync('ffmpeg',['-nostdin','-hide_banner','-v','error','-display_rotation','90','-i',plain,'-c','copy',rotated],{windowsHide:true,timeout:30000});
+  const other=join(root,'other.mp4');
+  execFileSync('ffmpeg',['-nostdin','-hide_banner','-v','error','-f','lavfi','-i','color=c=0x00ff00:s=64x48:r=15:d=1',
+   '-threads','1','-c:v','libx264','-pix_fmt','yuv420p',other],{windowsHide:true,timeout:30000});
+  const two=join(root,'two.mp4');
+  execFileSync('ffmpeg',['-nostdin','-hide_banner','-v','error','-i',plain,'-i',other,'-map','0:v','-map','1:v','-c','copy',two],{windowsHide:true,timeout:30000});
+  const answerOf=(path:string)=>JSON.parse(execFileSync('ffprobe',
+   ['-v','error','-print_format','json','-show_format','-show_streams',path],{encoding:'utf8',windowsHide:true,maxBuffer:16*1024*1024})) as unknown;
+  const plainFacts=normalizeNativeProbe(answerOf(plain));
+  expect(plainFacts.width).toBe(320);
+  expect(plainFacts.height).toBe(180);
+  const rotatedAnswer=answerOf(rotated) as {streams?:{codec_type?:string;width?:number;height?:number;side_data_list?:{rotation?:number}[]}[]};
+  const rotatedStream=rotatedAnswer.streams?.find(stream=>stream.codec_type==='video');
+  // The coded size is unchanged; the display matrix carries the turn.
+  expect(rotatedStream?.width).toBe(320);
+  expect(rotatedStream?.height).toBe(180);
+  expect(rotatedStream?.side_data_list?.[0]?.rotation).toBe(90);
+  const rotatedFacts=normalizeNativeProbe(rotatedAnswer);
+  // The upstream shows a turned video with its sides swapped.
+  expect(rotatedFacts.width).toBe(180);
+  expect(rotatedFacts.height).toBe(320);
+  expect(rotatedFacts.fps).toBe(30);
+  // With two video streams the first one is the one that counts.
+  const twoAnswer=answerOf(two) as {streams?:{codec_type?:string;width?:number;height?:number}[]};
+  expect(twoAnswer.streams?.filter(stream=>stream.codec_type==='video').length).toBe(2);
+  const twoFacts=normalizeNativeProbe(twoAnswer);
+  expect(twoFacts.width).toBe(320);
+  expect(twoFacts.height).toBe(180);
+  expect(twoFacts.fps).toBe(30);
+ }finally{rmSync(root,{recursive:true,force:true});}
+},120000);
+
+/**
+ * F10 — the listing is compared with the **pinned** consumer, on a real tree.
+ */
+it('F10 lists the media as the pinned consumer lists it',async()=>{
+ const root=mkdtempSync(join(tmpdir(),'n1n2-listing-'));
+ try{
+  const assets=join(root,'assets','video');
+  mkdirSync(assets,{recursive:true});
+  for(const name of ['video2.mp4','video10.mp4','video1.mp4','非ASCII.mp4'])writeFileSync(join(assets,name),'x');
+  // The pinned consumer itself, loaded from the read-only upstream checkout.
+  const pinnedModule='/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm/packages/openfilm/studio/server/files.mjs';
+  const pinned=await import(pinnedModule) as {listFiles:(root:string)=>Promise<{files:{path:string;kind:string}[]}>};
+  const listed=await pinned.listFiles(root);
+  const expected=listed.files.filter(file=>file.kind==='video').map(file=>file.path);
+  expect(expected.length).toBe(4);
+  // The reader's own listing is fed the paths in a SCRAMBLED order and must return
+  // the pinned order: a listing that merely echoed its input could not pass this.
+  const scrambled=[...expected].reverse();
+  expect(nativeVideoListingOrder(scrambled)).toEqual(expected);
+  expect(nativeVideoListingOrder(scrambled)).not.toEqual(scrambled);
+  // The environment the order depends on is RECORDED, not merely checked for existing.
+  const fingerprint={node:process.version,icu:process.versions.icu??'',locale:Intl.DateTimeFormat().resolvedOptions().locale};
+  console.log('N1N2_ENVIRONMENT_FINGERPRINT '+JSON.stringify(fingerprint));
+  expect(fingerprint.node).toMatch(/^v\d+\./);
+  expect(fingerprint.icu.length).toBeGreaterThan(0);
+  expect(fingerprint.locale.length).toBeGreaterThan(0);
+ }finally{rmSync(root,{recursive:true,force:true});}
+},60000);
+
+/**
+ * F10 — the caption directory keeps the platform's own order, apart from the listing.
+ */
+it('F10 keeps the caption directory in the platform order',async()=>{
+ const root=mkdtempSync(join(tmpdir(),'n1n2-caption-'));
+ try{
+  const captions=join(root,'assets','vo');
+  mkdirSync(captions,{recursive:true});
+  const names=['002-caption.vtt','001-caption.vtt','010-caption.vtt'];
+  for(const name of names)writeFileSync(join(captions,name),'WEBVTT');
+  const platform=readdirSync(captions);
+  const closure=await RetainedNativeClosure.open(root);
+  try{
+   const listing=await closure.retainDirectory('assets/vo');
+   // The retained listing is the platform's order, not a sorted one.
+   expect([...listing.names]).toEqual(platform);
+  }finally{closure.close();}
+ }finally{rmSync(root,{recursive:true,force:true});}
+},60000);
+
+/**
+ * F10 — the pinned consumer does not place a clip itself: it refuses a clip that
+ * states no number. The reader's placement therefore has to be a proved one.
+ */
+it('F10 shows that the pinned consumer refuses a clip without a number',async()=>{
+ await withFacts(async facts=>{
+  const library=await nativeExpectedLibraryLoader().load(nativeExpectedApprovalFromPin());
+  const value=facts.expected_input.film.value;
+  const tracks=(value.tracks??[]).map(track=>({...track,clips:(track.clips??[]).map(clip=>{const copy={...clip} as Record<string,unknown>;delete copy.at;return copy;})}));
+  const withoutPlacement={...facts.expected_input,film:{...facts.expected_input.film,value:{...value,tracks}}};
+  const computed=library.computeExpectedProjection(withoutPlacement);
+  // The pinned consumer places nothing: a clip without a number is refused.
+  expect(computed.status).toBe('unsupported');
+  expect(computed.status==='unsupported'?computed.reason:'').toBe('NON_NUMERIC_CLIP_UNSUPPORTED');
+  // And the input the reader actually builds is accepted.
+  expect(library.computeExpectedProjection(facts.expected_input).status).toBe('computed');
+ });
+},300000);
+
+
+/**
+ * A stand-in for the media tool's child.
+ *
+ * It is an INJECTION: it never carries a tool answer, and it exists so that the
+ * production runner takes its real failure branch. The runner, the parser and the
+ * child bookkeeping are the production ones.
+ */
+function injectedToolChild(fault:'spawn'|'nonzero'|'malformed'|'output'|'hang'):unknown{
+ const handlers:{close?:(code:number|null,signal:NodeJS.Signals|null)=>void}={};
+ const later=(fn:()=>void)=>{setTimeout(fn,0);};
+ const stdout={on(_event:'data',listener:(chunk:Buffer)=>void){
+  if(fault==='malformed')later(()=>listener(Buffer.from('this is not json')));
+  if(fault==='output')later(()=>listener(Buffer.alloc(5*1024*1024)));
+ }};
+ const stderr={on(_event:'data',listener:(chunk:Buffer)=>void){void listener;}};
+ const child={
+  pid:4242,exitCode:null,signalCode:null,stdout,stderr,
+  on(event:string,listener:(...args:never[])=>void){
+   if(event==='spawn')later(()=>(listener as ()=>void)());
+   if(event==='error'&&fault==='spawn')later(()=>(listener as (error:unknown)=>void)(new Error('injected spawn failure')));
+   return child;
+  },
+  once(event:string,listener:(...args:never[])=>void){
+   if(event==='close'){
+    handlers.close=listener as (code:number|null,signal:NodeJS.Signals|null)=>void;
+    if(fault==='nonzero')later(()=>handlers.close?.(1,null));
+    else if(fault==='spawn')later(()=>handlers.close?.(null,null));
+    else if(fault==='malformed'||fault==='output')later(()=>handlers.close?.(0,null));
+    // The hang ends only when the runner kills the child.
+   }
+   return child;
+  },
+  kill(){
+   if(fault==='hang')later(()=>handlers.close?.(null,'SIGKILL'));
+   return true;
+  },
+ };
+ return child;
+}
+
+
+/**
+ * P07 — the retained limits are refusals, each with its own reason: a file that grows
+ * under the read, the cumulative text, the path and depth bounds and the descriptor
+ * budget.
+ */
+it('P07 refuses a grown file, the cumulative text, the deep tree and the descriptor budget',async()=>{
+ // A file that grows between the retention and the read.
+ const grown=closureTree();
+ let closure:RetainedNativeClosure|undefined;
+ try{
+  const path=join(grown,'film.html');
+  closure=await RetainedNativeClosure.open(grown,{},{onRead:()=>{
+   writeFileSync(path,readFileSync(path,'utf8')+'<!-- grown -->');
+  }});
+  const file=await closure.retainFile('film.html');
+  await expect(closure.readText(file)).rejects.toMatchObject({code:'NATIVE_CLOSURE_MEMBERSHIP_MOVED'});
+ }finally{
+  try{closure?.close();}catch{/* the closure reports its own failures */}
+  rmSync(grown,{recursive:true,force:true});
+ }
+ // The cumulative text of the closure is bounded: two texts of KNOWN length, each under
+ // the limit on its own, the first is read, reading it again is not counted twice, and
+ // only the second crosses the sum.
+ const total=closureTree();
+ try{
+  const firstText='<!doctype html><html><body><section></section></body></html>';
+  const secondText='{"fps":30}';
+  writeFileSync(join(total,'film.html'),firstText);
+  writeFileSync(join(total,'.film','settings.json'),secondText);
+  const firstBytes=Buffer.byteLength(firstText,'utf8');
+  const secondBytes=Buffer.byteLength(secondText,'utf8');
+  // The limit is above the longer text and below the two together.
+  const limit=Math.max(firstBytes,secondBytes)+2;
+  expect(limit).toBeGreaterThan(Math.max(firstBytes,secondBytes));
+  expect(limit).toBeLessThan(firstBytes+secondBytes);
+  closure=await RetainedNativeClosure.open(total,{maxTotalTextBytes:limit});
+  const first=await closure.retainFile('film.html');
+  const second=await closure.retainFile('.film/settings.json');
+  // The first text is under the limit on its own and is read.
+  expect(await closure.readText(first)).toBe(firstText);
+  // Reading it again is still under the sum: it is not counted twice.
+  expect(await closure.readText(first)).toBe(firstText);
+  // The second text is under the limit on its own, but the two together are not.
+  await expect(closure.readText(second)).rejects.toMatchObject({code:'NATIVE_CLOSURE_BUDGET'});
+ }finally{
+  try{closure?.close();}catch{/* the closure reports its own failures */}
+  rmSync(total,{recursive:true,force:true});
+ }
+ // The depth of the tree is bounded.
+ const deep=closureTree();
+ try{
+  let path=deep;
+  for(let index=0;index<6;index+=1){path=join(path,'d');mkdirSync(path);writeFileSync(join(path,'f.txt'),'x');}
+  // The depth is refused at the admission: the open itself fails.
+  await expect(RetainedNativeClosure.open(deep,{maxDepth:2})).rejects.toMatchObject({code:'NATIVE_CLOSURE_BUDGET'});
+ }finally{
+  try{closure?.close();}catch{/* the closure reports its own failures */}
+  rmSync(deep,{recursive:true,force:true});
+ }
+ // The descriptors of the closure are bounded: the budget is a refusal, not an EMFILE.
+ // The ADMISSION itself is refused when the budget cannot hold the tree.
+ const few=closureTree();
+ try{
+  await expect(RetainedNativeClosure.open(few,{maxDescriptors:2})).rejects.toMatchObject({code:'NATIVE_CLOSURE_BUDGET'});
+ }finally{rmSync(few,{recursive:true,force:true});}
+ // A measured baseline: the peak of live allocations is measured, the opener never
+ // exceeds the cap, and a named later retained allocation crosses it.
+ const many=closureTree();
+ let opens=0;
+ let closes=0;
+ let live=0;
+ let peak=0;
+ const counted={
+  open:(path:string,flags:number)=>{opens+=1;live+=1;if(live>peak)peak=live;return openSync(path,flags);},
+  close:(fd:number)=>{closes+=1;live-=1;closeSync(fd);},
+ };
+ try{
+  closure=await RetainedNativeClosure.open(many,{maxDescriptors:4096},counted);
+  const cap=peak+1;
+  expect(cap).toBeGreaterThan(0);
+  closure.close();
+  opens=0;closes=0;live=0;peak=0;
+  closure=await RetainedNativeClosure.open(many,{maxDescriptors:cap},{open:(path:string,flags:number)=>{
+   opens+=1;live+=1;if(live>peak)peak=live;
+   // The closure never opens more descriptors than its budget allows.
+   expect(live).toBeLessThanOrEqual(cap);
+   return openSync(path,flags);
+  },close:(fd:number)=>{closes+=1;live-=1;closeSync(fd);}});
+  // The named later retained allocations cross the cap, one at a time.
+  let refused=false;
+  for(const path of ['film.html','.film/settings.json','assets/vo/001.wav']){
+   try{await closure.retainFile(path);}
+   catch(error){refused=(error as {code?:string}).code==='NATIVE_CLOSURE_BUDGET';break;}
+  }
+  expect(refused).toBe(true);
+ }finally{
+  try{closure?.close();}catch{/* the closure reports its own failures */}
+  rmSync(many,{recursive:true,force:true});
+ }
+},120000);
+
+/**
+ * P07 — the N-th open fails: the primary error is kept, every cleanup cause is kept,
+ * and no new proof is issued.
+ */
+it('P07 keeps the primary error when an open fails and releases everything else',async()=>{
+ const root=closureTree();
+ let closure:RetainedNativeClosure|undefined;
+ let fired=0;
+ let armed=0;
+ let injectedClose=0;
+ try{
+  // The closure opens with a real opener; the injection is ARMED afterwards and names
+  // ONE allocation - the leaf - so it really fires.
+  closure=await RetainedNativeClosure.open(root,{},{
+   open:(path:string,flags:number)=>{
+    if(armed>0&&path.endsWith('film.html')){
+     fired+=1;
+     throw Object.assign(new Error('injected open failure'),{code:'EIO'});
+    }
+    return openSync(path,flags);
+   },
+   close:(fd:number)=>{
+    // The descriptor is closed FIRST and the failure is injected afterwards, so no
+    // descriptor number is left open and none is closed twice.
+    closeSync(fd);
+    if(injectedClose>0&&injectedClose===1){injectedClose=2;throw new Error('injected close failure');}
+   },
+  });
+  // Both injections are armed only after the closure opened: the open itself must
+  // succeed, and the failure must come from the allocation that is named.
+  armed=1;
+  injectedClose=1;
+  // The leaf's open fails: the primary cause is the injected one.
+  const failure=await closure.retainFile('film.html').then(()=>null,error=>error);
+  expect(fired).toBe(1);
+  expect(failure).not.toBeNull();
+  expect((failure as {code?:string}).code).toBe('EIO');
+ }finally{
+  try{closure?.close();}catch{/* the closure reports its own failures */}
+  rmSync(root,{recursive:true,force:true});
+ }
+},60000);
+
+/**
+ * P07 — the syscall failures of the platform, each injected at its own layer.
+ *
+ * The injection is labelled: it is not a real platform failure, it is a
+ * deterministic stand-in for one, and the primary cause is kept.
+ */
+it('P07 keeps the primary cause of an EMFILE, an ENOMEM and an EACCES',async()=>{
+ for(const code of ['EMFILE','ENOMEM','EACCES'] as const){
+  const root=closureTree();
+  let closure:RetainedNativeClosure|undefined;
+  let armed=false;
+  let fired=0;
+  try{
+   closure=await RetainedNativeClosure.open(root,{},{
+    open:(path:string,flags:number)=>{
+     if(armed&&path.endsWith('film.html')){
+      fired+=1;
+      throw Object.assign(new Error(`injected ${code}`),{code});
+     }
+     return openSync(path,flags);
+    },
+   });
+   // The injection is armed for the leaf and must ACTUALLY fire.
+   armed=true;
+   const failure=await closure.retainFile('film.html').then(()=>null,error=>error);
+   expect(fired).toBe(1);
+   // The primary cause is the injected one, and it is not swallowed.
+   const causes=(failure as {cleanup_errors?:unknown[]}).cleanup_errors??[];
+   expect(causes.some(cause=>(cause as {code?:string}).code===code)||(failure as {code?:string}).code===code).toBe(true);
+  }finally{
+   try{closure?.close();}catch{/* the closure reports its own failures */}
+   rmSync(root,{recursive:true,force:true});
+  }
+ }
+},60000);
+
+/**
+ * P06 — the normalisation without a usable duration.
+ *
+ * The upstream's rule: a format duration that is not a positive number, or a picture
+ * format, has no duration at all.
+ */
+it('P06 normalises a missing and a picture duration as no duration',async()=>{
+ const absent=normalizeNativeProbe({format:{format_name:'mov'},streams:[{codec_type:'video',width:320,height:180,avg_frame_rate:'30/1'}]});
+ // A duration that is not there at all.
+ expect(absent.duration).toBeNull();
+ expect(absent.width).toBe(320);
+ const invalid=normalizeNativeProbe({format:{duration:'not a number',format_name:'mov'},streams:[{codec_type:'video',width:320,height:180,avg_frame_rate:'30/1'}]});
+ // A duration that is there but is not a number.
+ expect(invalid.duration).toBeNull();
+ const zero=normalizeNativeProbe({format:{duration:'0',format_name:'mov'},streams:[{codec_type:'video',width:320,height:180,avg_frame_rate:'30/1'}]});
+ expect(zero.duration).toBeNull();
+ expect(absent.width).toBe(320);
+ expect(absent.height).toBe(180);
+ expect(absent.fps).toBe(30);
+ const picture=normalizeNativeProbe({format:{duration:'1.000000',format_name:'png_pipe'},streams:[{codec_type:'video',width:64,height:48,avg_frame_rate:'1/1'}]});
+ // A picture format carries no duration at all, whatever the container says.
+ expect(picture.duration).toBeNull();
+ const noStream=normalizeNativeProbe({format:{duration:'2.5',format_name:'mov'},streams:[{codec_type:'audio'}]});
+ expect(noStream.audio).toBe(true);
+ expect(noStream.width).toBeNull();
+ expect(noStream.height).toBeNull();
+ expect(noStream.fps).toBeNull();
+},60000);
+
+
+/** The canonical JSON the reader digests with: sorted keys, no whitespace. */
+const canonicalJsonOf=(value:unknown):string=>{
+ if(value===null||typeof value!=='object')return JSON.stringify(value)??'null';
+ if(Array.isArray(value))return '['+value.map(canonicalJsonOf).join(',')+']';
+ const record=value as Record<string,unknown>;
+ return '{'+Object.keys(record).sort().map(key=>JSON.stringify(key)+':'+canonicalJsonOf(record[key])).join(',')+'}';
+};
+
+/**
+ * The upstream's own normalisation, written here from the upstream's rules, so that the
+ * expected probe evidence is derived independently of the reader's own function.
+ */
+const upstreamNormalized=(answer:unknown):Record<string,unknown>=>{
+ const raw=answer as {format?:{duration?:unknown;format_name?:unknown};streams?:{codec_type?:string;width?:number;height?:number;avg_frame_rate?:string;codec_name?:string;pix_fmt?:string;side_data_list?:{rotation?:number}[];tags?:{rotate?:number}}[]};
+ const streams=raw.streams??[];
+ const video=streams.find(stream=>stream.codec_type==='video');
+ const audio=streams.some(stream=>stream.codec_type==='audio');
+ const duration=Number(raw.format?.duration);
+ const kept=Number.isFinite(duration)&&duration>0&&!/image|png|mjpeg/.test(String(raw.format?.format_name??''))?duration:undefined;
+ const [numerator,denominator]=String(video?.avg_frame_rate??'0/1').split('/').map(Number);
+ const fps=numerator&&denominator?Math.round((numerator/denominator)*100)/100:undefined;
+ const turn=Number(video?.side_data_list?.find(entry=>entry.rotation!=null)?.rotation??video?.tags?.rotate??0);
+ const quarter=Math.abs(Math.round(turn/90))%2===1;
+ const width=video?.width;
+ const height=video?.height;
+ return {
+  ...(kept===undefined?{}:{duration:kept}),
+  ...(video===undefined?{}:quarter?{width:height,height:width}:{width,height}),
+  ...(fps===undefined?{}:{fps}),
+  ...(video?.codec_name?{codec:String(video.codec_name),pixfmt:String(video.pix_fmt??'')}:{}),
+  audio,
+ };
+};
+
+/**
+ * F05 — the probe evidence binds the concrete tool version, the argv, the input digest
+ * and bytes, the file identity and the normalised result.
+ */
+it('F05 binds the probe evidence to the concrete tool, argv, input and result',async()=>{
+ await withFacts(async (facts,f)=>{
+  const media=facts.expected_input.media_facts.find(fact=>fact.source_ref.startsWith('assets/video/'));
+  expect(media).toBeDefined();
+  const absolute=join(f.workspaceRoot,media!.source_ref);
+  // The bytes of the media, hashed HERE and independently of the reader: a stream of
+  // 64 KiB, never the whole file in memory. This is the only statement this file
+  // makes about what the bytes of the media are.
+  const actual=streamingSha256(absolute);
+  // The fact must name those very bytes: the returned fact and the committed fact
+  // both state the digest of the media that was probed.
+  expect(actual).toBe(media!.source_sha256);
+  expect(facts.entries.find(entry=>entry.relative_path===media!.source_ref)?.sha256).toBe(actual);
+  // The tool's own answer, read again by the fixed tool.
+  const version=execFileSync('ffprobe',['-version'],{encoding:'utf8',windowsHide:true}).split('\n')[0]!.trim();
+  const answer=JSON.parse(execFileSync('ffprobe',['-v','error','-print_format','json','-show_format','-show_streams',absolute],
+   {encoding:'utf8',windowsHide:true,maxBuffer:8*1024*1024})) as unknown;
+  const normalized=upstreamNormalized(answer);
+  const info=statSync(absolute);
+  // The preimage of the evidence: the concrete tool, the concrete argv, the concrete
+  // input, the concrete identity of the file and the concrete normalised result.
+  const preimage={
+   tool_version:version,
+   argv_profile:['-v','error','-print_format','json','-show_format','-show_streams','<parent-pid-fd-path>'],
+   input_sha256:media!.source_sha256,input_bytes:info.size,
+   ledger:{relative_path:media!.source_ref,dev:String(info.dev),ino:String(info.ino)},
+   normalized,
+  };
+  const digestOf=(value:unknown):string=>createHash('sha256').update(canonicalJsonOf(value)).digest('hex');
+  // The evidence is recomputed from those concrete inputs and must be the same digest.
+  const digest=digestOf(preimage);
+  expect(media!.proof_digest).toBe(digest);
+  // And the evidence is bound to EVERY one of its fields: a change of any single
+  // field changes the digest. A digest that ignored a field would pass the equality
+  // above and still say nothing about that field.
+  const mutations:readonly {readonly name:string;readonly digest:string}[]=[
+   {name:'tool_version',digest:digestOf({...preimage,tool_version:version+' (another tool)'})},
+   {name:'argv_profile',digest:digestOf({...preimage,argv_profile:[...preimage.argv_profile.slice(0,-1),'-show_streams_v2','<parent-pid-fd-path>']})},
+   {name:'input_sha256',digest:digestOf({...preimage,input_sha256:createHash('sha256').update(actual,'utf8').digest('hex')})},
+   {name:'input_bytes',digest:digestOf({...preimage,input_bytes:info.size+1})},
+   {name:'ledger.dev',digest:digestOf({...preimage,ledger:{...preimage.ledger,dev:String(info.dev+1)}})},
+   {name:'ledger.ino',digest:digestOf({...preimage,ledger:{...preimage.ledger,ino:String(info.ino+1)}})},
+   {name:'normalized',digest:digestOf({...preimage,normalized:{...normalized,audio:normalized.audio===true?false:true}})},
+  ];
+  for(const mutation of mutations){
+   expect(mutation.digest,`the probe evidence must change with ${mutation.name}`).not.toBe(digest);
+   expect(mutation.digest,`the probe evidence must change with ${mutation.name}`).not.toBe(media!.proof_digest);
+  }
+  // No two of the mutations collapse into the same evidence.
+  expect(new Set(mutations.map(mutation=>mutation.digest)).size).toBe(mutations.length);
+ });
+},300000);
+
+/**
+ * F03 — the working copy changes while the media probe runs: the pending round is
+ * refused, because the round would otherwise mix two epochs.
+ */
+it('F03 refuses a pending round when the working copy changes during the probe',async()=>{
+ let started:(()=>void)|undefined;
+ const began=new Promise<void>(resolve=>{started=resolve;});
+ const f=await nativeSourceFixture({childEvents:event=>{
+  if(event.kind==='started'&&/^\/proc\/\d+\/fd\/\d+$/.test(event.argument))started?.();
+ }});
+ try{
+  const reading=readOnce(f);
+  await began;
+  // A cache entry and an empty directory appear while the read is in flight.
+  mkdirSync(join(f.workspaceRoot,'.film','cache','probe'),{recursive:true});
+  writeFileSync(join(f.workspaceRoot,'.film','cache','probe','x'.repeat(20)+'.3.json'),'{}');
+  await expect(reading).rejects.toMatchObject({code:'NATIVE_SOURCE_CLOSURE_MOVED'});
+ }finally{
+  await f.close().catch(()=>undefined);
+ }
+},300000);
+
+/**
+ * R07 — after a successful delivery the resources belong to their owner, and the
+ * reader's close does not destroy them early.
+ */
+it('R07 keeps the delivered resources until their owner releases them',async()=>{
+ await withFixture(async f=>{
+  const facts=await readOnce(f);
+  // The reader closes: the delivered handles are the owner's now.
+  await f.reader.close();
+  // The closure still verifies: nothing was destroyed early.
+  expect(facts.verifyClosure()).toBe(true);
+  for(const handle of facts.retained)handle.close();
+  // And once the owner has released them, the closure is gone.
+  expect(facts.verifyClosure()).toBe(false);
+ });
+},300000);
+
+/**
+ * R03 — the caption set is closed: a translation beside the media that the committed
+ * source does not have is refused, not read.
+ */
+it('R03 refuses a translation beside the media that the committed source does not have',async()=>{
+ await withFixture(async f=>{
+  const vo=join(f.workspaceRoot,'assets','vo');
+  const media=readdirSync(vo).find(name=>name.endsWith('.wav'));
+  expect(media).toBeDefined();
+  const stem=media!.slice(0,media!.length-4);
+  writeFileSync(join(vo,`${stem}.zh.vtt`),'WEBVTT');
+  await expect(readOnce(f)).rejects.toMatchObject({code:'NATIVE_SOURCE_SIDECAR_UNPROVEN'});
+ });
+},300000);
+
+
+/**
+ * The code of the refusal a call produced.
+ *
+ * The refusal carries its code in a field; its message is human text. The assertions
+ * read the code, so a correct refusal passes and a wrong one does not.
+ */
+const refusalCode=(action:()=>unknown):string=>{
+ try{action();}catch(error){return String((error as {code?:unknown}).code??'');}
+ return '';
+};
+
+/**
+ * P06 — the place of a clip, resolved as the pinned native resolves it.
+ *
+ * A clip that states no place is the native's own zero; a clip that states a place
+ * which is not a number is refused; and the producer plan never replaces the
+ * document, it only compares with it.
+ */
+it('P06 resolves a clip without a place as the native does and refuses a disagreement',()=>{
+ // An omitted place with a plan of zero: the native's own value, and it is accepted.
+ expect(nativeClipPlacement(undefined,0)).toBe(0);
+ // An omitted place with a plan that says otherwise: the document wins and the
+ // difference is a refusal.
+ expect(refusalCode(()=>nativeClipPlacement(undefined,1.5))).toBe('NATIVE_SOURCE_PLACEMENT_MISMATCH');
+ // An explicit place that agrees with the plan is accepted.
+ expect(nativeClipPlacement(1.5,1.5)).toBe(1.5);
+ // An explicit place that disagrees with the plan is refused.
+ expect(refusalCode(()=>nativeClipPlacement(1.5,0))).toBe('NATIVE_SOURCE_PLACEMENT_MISMATCH');
+ // A place that is stated but is not a number is not an omission.
+ expect(refusalCode(()=>nativeClipPlacement('later',0))).toBe('NATIVE_SOURCE_PLACEMENT_INVALID');
+ expect(refusalCode(()=>nativeClipPlacement(Number.NaN,0))).toBe('NATIVE_SOURCE_PLACEMENT_INVALID');
+ expect(refusalCode(()=>nativeClipPlacement(-1,0))).toBe('NATIVE_SOURCE_PLACEMENT_INVALID');
+},60000);
+
+/**
+ * P06 — the reader's default is the pinned consumer's own value.
+ *
+ * The consumer is the approved module's own `layoutTracks`, loaded from the same
+ * approved artifact the loader uses: this is the real consumer, not a second
+ * handwritten formula.
+ */
+it('P06 places a clip without a place where the pinned consumer places it',async()=>{
+ const pinnedModule=resolve('var/native-hydration-r2/managed-native-expected/dist/native-pure-library.mjs');
+ const pinned=await import(pinnedModule) as {
+  filmShape:(doc:unknown,spans:readonly unknown[],media:Map<string,{audio:boolean;duration:number}>,guess:boolean)=>unknown;
+  layoutTracks:(evaluated:unknown)=>{readonly blocks:readonly {readonly startMs:number}[]}[];
+ };
+ // A film whose clip states no place.
+ const doc={stage:{w:1920,h:1080},tracks:[{clips:[{id:'c1',src:'assets/video/a.mp4',time:[0,1]}]}]};
+ const media=new Map([['assets/video/a.mp4',{audio:false,duration:1}]]);
+ const tracks=pinned.layoutTracks(pinned.filmShape(doc,[],media,false));
+ const start=tracks[0]?.blocks[0]?.startMs;
+ // The pinned consumer puts it at zero, and so does the reader.
+ expect(start).toBe(0);
+ expect(nativeClipPlacement(undefined,0)).toBe(start);
+},60000);
+
+/* ------------------------------------------------------------------ pure FS */
+
+/** The upstream's own key of a media file. */
+const upstreamMediaKey=(relativePath:string,bytes:number,mtimeMs:number):string=>
+ createHash('sha1').update(`${relativePath}\0${bytes}\0${Math.round(mtimeMs)}`).digest('hex').slice(0,20);
+
+/**
+ * The upstream's own probe answer, read by the fixed tool with the upstream argv.
+ *
+ * It is written here, from the upstream's rules, and not taken from the reader: a
+ * cache entry must agree with a probe that the reader did not make.
+ */
+const upstreamProbeCache=(absolute:string):{duration?:number;width?:number;height?:number;fps?:number;codec?:string;pixfmt?:string;audio:boolean}=>{
+ const answer=JSON.parse(execFileSync('ffprobe',['-v','error','-print_format','json','-show_format','-show_streams',absolute],
+  {encoding:'utf8',windowsHide:true,maxBuffer:8*1024*1024})) as {format?:{duration?:string;format_name?:string};streams?:{codec_type?:string;width?:number;height?:number;avg_frame_rate?:string;codec_name?:string;pix_fmt?:string;side_data_list?:{rotation?:number}[];tags?:{rotate?:number}}[]};
+ const video=answer.streams?.find(stream=>stream.codec_type==='video');
+ const audio=answer.streams?.some(stream=>stream.codec_type==='audio')===true;
+ const duration=Number(answer.format?.duration);
+ const kept=Number.isFinite(duration)&&duration>0&&!/image|png|mjpeg/.test(String(answer.format?.format_name??''))?duration:undefined;
+ const [numerator,denominator]=String(video?.avg_frame_rate??'0/1').split('/').map(Number);
+ const fps=numerator&&denominator?Math.round((numerator/denominator)*100)/100:undefined;
+ const turn=Number(video?.side_data_list?.find(entry=>entry.rotation!=null)?.rotation??video?.tags?.rotate??0);
+ const quarter=Math.abs(Math.round(turn/90))%2===1;
+ const width=video?.width;
+ const height=video?.height;
+ return {
+  ...(kept===undefined?{}:{duration:kept}),
+  ...(video===undefined?{}:quarter?{width:height!,height:width!}:{width:width!,height:height!}),
+  ...(fps===undefined?{}:{fps}),
+  ...(video?.codec_name?{codec:String(video.codec_name),pixfmt:String(video.pix_fmt??'')}:{}),
+  audio,
+ };
+};
+
+/**
+ * The SHA256 of a file, computed HERE and independently of the reader.
+ *
+ * It is a stream of 64 KiB, never the whole file in memory: the fact it is compared
+ * with is a fact about the bytes on the disk, and the comparison must not depend on
+ * the reader's own hashing.
+ */
+function streamingSha256(absolute:string):string{
+ const hash=createHash('sha256');
+ const descriptor=openSync(absolute,'r');
+ try{
+  const buffer=Buffer.allocUnsafe(64*1024);
+  let position=0;
+  for(;;){
+   const read=readSync(descriptor,buffer,0,buffer.length,position);
+   if(read===0)break;
+   hash.update(buffer.subarray(0,read));
+   position+=read;
+  }
+ }finally{closeSync(descriptor);}
+ return hash.digest('hex');
+}
+
+/** A small real tree for the pure closure cases. */
+function closureTree():string{
+ const root=mkdtempSync(join(tmpdir(),'n1n2-closure-'));
+ mkdirSync(join(root,'assets','vo'),{recursive:true});
+ mkdirSync(join(root,'.film'),{recursive:true});
+ writeFileSync(join(root,'film.html'),'<!doctype html><html><body><section></section></body></html>');
+ writeFileSync(join(root,'.film','settings.json'),'{"fps":30}\n');
+ writeFileSync(join(root,'assets','vo','001.wav'),'RIFF');
+ writeFileSync(join(root,'assets','vo','002.wav'),'RIFF');
+ return root;
+}
+
+/**
+ * P07 — the retained closure holds the tree it took and refuses what replaced it.
+ */
+it('P07 refuses a symbolic link, a same-bytes replacement and a restored change time',async()=>{
+ const root=closureTree();
+ let closure:RetainedNativeClosure|undefined;
+ try{
+  closure=await RetainedNativeClosure.open(root);
+  const film=await closure.retainFile('film.html');
+  expect(closure.verify()).toBe(true);
+  expect(closure.verifyFile(film)).toBe(true);
+  // The same bytes, a different file.
+  const copy=join(root,'film-copy.html');
+  writeFileSync(copy,readFileSync(join(root,'film.html')));
+  renameSync(copy,join(root,'film.html'));
+  expect(closure.verify()).toBe(false);
+  expect(closure.verifyFile(film)).toBe(true);
+  // A same-size write whose change time was restored: the content changed and the
+  // change time lies about it, so the closure must still see it.
+  const restored=closureTree();
+  try{
+   const other=await RetainedNativeClosure.open(restored);
+   const settings=await other.retainFile('.film/settings.json');
+   const before=statSync(join(restored,'.film','settings.json'));
+   writeFileSync(join(restored,'.film','settings.json'),'{"fps":60}\n');
+   utimesSync(join(restored,'.film','settings.json'),before.atime,before.mtime);
+   expect(other.verify()).toBe(false);
+   // The write changed the bytes under the descriptor the closure holds, so the byte
+   // proof of that file fails too: the restored change time lies about the content.
+   expect(other.verifyFile(settings)).toBe(false);
+   other.close();
+  }finally{rmSync(restored,{recursive:true,force:true});}
+  // A symbolic link in place of a file is a refusal, never a hop.
+  const linked=closureTree();
+  try{
+   unlinkSync(join(linked,'film.html'));
+   const {symlinkSync}=await import('node:fs');
+   symlinkSync(join(linked,'.film','settings.json'),join(linked,'film.html'));
+   await expect(RetainedNativeClosure.open(linked)).rejects.toMatchObject({code:'NATIVE_CLOSURE_UNSUPPORTED_TYPE'});
+  }finally{rmSync(linked,{recursive:true,force:true});}
+ }finally{
+  try{closure?.close();}catch{/* the closure reports its own failures */}
+  rmSync(root,{recursive:true,force:true});
+ }
+},60000);
+
+/**
+ * P07 — the budget is enforced before the bytes are read, and the total is bounded.
+ */
+it('P07 refuses a text file above the budget and bounds the total',async()=>{
+ const root=closureTree();
+ let closure:RetainedNativeClosure|undefined;
+ try{
+  // The total budget is checked against the bytes that are about to be read.
+  closure=await RetainedNativeClosure.open(root,{maxTotalTextBytes:40});
+  const first=await closure.retainFile('film.html');
+  await expect(closure.readText(first)).rejects.toMatchObject({code:'NATIVE_CLOSURE_BUDGET'});
+  closure.close();
+  // A file that is larger than the budget is refused before it is read.
+  const big=closureTree();
+  try{
+   writeFileSync(join(big,'big.txt'),'x'.repeat(1024));
+   const bounded=await RetainedNativeClosure.open(big,{maxTextBytes:100});
+   const file=await bounded.retainFile('big.txt');
+   await expect(bounded.readText(file)).rejects.toMatchObject({code:'NATIVE_CLOSURE_BUDGET'});
+   bounded.close();
+  }finally{rmSync(big,{recursive:true,force:true});}
+ }finally{
+  try{closure?.close();}catch{/* the closure reports its own failures */}
+  rmSync(root,{recursive:true,force:true});
+ }
+},60000);
+
+/**
+ * P07 — a release in flight is not released, and a failed release is not retried.
+ *
+ * The descriptors are counted per *allocation*, not per number: the operating system
+ * hands a number out again after it is closed, and a live allocation that reuses the
+ * number of a released one must still be released itself.
+ */
+it('P07 refuses to release while work is in flight and releases every allocation once',async()=>{
+ const root=closureTree();
+ let closure:RetainedNativeClosure|undefined;
+ const closed:number[]=[];
+ let fail=false;
+ try{
+  closure=await RetainedNativeClosure.open(root,{},{close:(fd:number)=>{
+   // The descriptor is closed FIRST and the failure is injected afterwards: no
+   // descriptor number is left open and none is closed twice.
+   closeSync(fd);
+   closed.push(fd);
+   if(fail){fail=false;throw new Error('injected close failure');}
+  }});
+  // The descriptors the walk used and released are gone; their numbers are free.
+  const walk=closed.slice();
+  expect(walk.length).toBeGreaterThan(0);
+  const film=await closure.retainFile('assets/vo/001.wav');
+  // The accepted operation is established before the release is asked for.
+  const pending=closure.readText(film);
+  let busy:unknown;
+  try{closure.close();}catch(error){busy=error;}
+  expect((busy as {code?:string}|undefined)?.code).toBe('NATIVE_CLOSURE_BUSY');
+  // The accepted operation still completes: its descriptor was not closed under it.
+  const text=await pending;
+  expect(typeof text).toBe('string');
+  // The release is attempted; the first release fails and every other one is still
+  // attempted.
+  fail=true;
+  await expect(Promise.resolve().then(()=>closure!.close())).rejects.toMatchObject({code:'NATIVE_CLOSURE_CLEANUP_FAILED'});
+  const release=closed.slice(walk.length);
+  expect(release.length).toBeGreaterThan(0);
+  // Each live allocation is released exactly once: no number repeats inside the
+  // release itself.
+  expect(new Set(release).size).toBe(release.length);
+  // The live allocation really did reuse a number the walk had released, and it was
+  // released all the same.
+  expect(release.some(fd=>walk.includes(fd))).toBe(true);
+  expect(closure.uncertain).toBe(true);
+  expect(closure.verify()).toBe(false);
+ }finally{
+  try{closure?.close();}catch{/* the closure reports its own failures */}
+  rmSync(root,{recursive:true,force:true});
+ }
+},60000);
+
+/**
+ * P07 — a release asked for from inside an accepted operation is refused.
+ *
+ * The operation is registered before it is invoked, so a release that comes from
+ * inside it finds the operation outstanding and must not destroy the descriptor the
+ * operation is about to use.
+ */
+it('P07 refuses a reentrant release from inside an accepted read',async()=>{
+ const root=closureTree();
+ let closure:RetainedNativeClosure|undefined;
+ let busy:unknown;
+ try{
+  closure=await RetainedNativeClosure.open(root,{},{onRead:()=>{
+   // A release from inside the accepted read must find it outstanding.
+   try{closure!.close();}catch(error){busy=error;}
+  }});
+  const film=await closure.retainFile('film.html');
+  const text=await closure.readText(film);
+  expect(typeof text).toBe('string');
+  expect((busy as {code?:string}|undefined)?.code).toBe('NATIVE_CLOSURE_BUSY');
+  // The refused release closed nothing: the closure is still whole.
+  expect(closure.verify()).toBe(true);
+ }finally{
+  try{closure?.close();}catch{/* the closure reports its own failures */}
+  rmSync(root,{recursive:true,force:true});
+ }
+},60000);
+
+/**
+ * P07 — a failure of the walk's own release is kept with the failure that stopped it.
+ */
+it('P07 keeps the failure of the walk release with the failure that stopped it',async()=>{
+ const root=closureTree();
+ try{
+  let failed=false;
+  let failure:unknown;
+  try{
+   await RetainedNativeClosure.open(root,{},{close:(fd:number)=>{
+    // The descriptor is closed FIRST and the failure is injected afterwards.
+    closeSync(fd);
+    if(!failed){failed=true;throw new Error('injected walk close failure');}
+   }});
+  }catch(error){failure=error;}
+  // The walk's own release failed: the open is refused, and the failure that stopped
+  // the walk is kept with it.
+  expect(failed).toBe(true);
+  expect((failure as {code?:string}|undefined)?.code).toBe('NATIVE_CLOSURE_CLEANUP_FAILED');
+  expect((failure as {cleanup_errors?:unknown[]}|undefined)?.cleanup_errors?.length).toBeGreaterThan(0);
+ }finally{
+  rmSync(root,{recursive:true,force:true});
+ }
+},60000);
+
+/**
+ * G01 — the reader owns the release state of the acquisition it asked for.
+ *
+ * The source acquisition fails AND its release fails: the failure is genuine, and
+ * the reader that started the acquisition must own it. An ordinary cause - the
+ * syscall error that stopped the work - is NOT a release failure and must never
+ * lock the reader.
+ */
+it('G01 adopts the genuine cleanup uncertainty of a rejected source acquisition',async()=>{
+ const f=await nativeSourceFixture();
+ let primary:unknown;
+ try{
+  let armed=false;
+  let swapped=false;
+  observeNativeFacts({
+   onSourceRead:(path:string)=>{
+    // The leaf the authority reads moves while it reads it: the NAMED primary.
+    if(swapped||path!=='film.html')return;
+    swapped=true;
+    const source=join(f.sourceRoot,'film.html');
+    const copy=join(f.sourceRoot,'film-copy.html');
+    writeFileSync(copy,readFileSync(source));
+    renameSync(copy,source);
+    // The release fault is armed HERE, after the enumeration, so the FIRST failure
+    // is the named primary and the SECOND one is the release.
+    armed=true;
+   },
+   closureOps:{close:(fd:number)=>{
+    // The descriptor is closed FIRST and the failure is injected afterwards.
+    closeSync(fd);
+    if(armed){armed=false;throw new Error('injected source release failure');}
+   }},
+  });
+  try{
+   // The refusal is the revision fence of the committed source.
+   await expect(readOnce(f)).rejects.toMatchObject({code:'REVISION_CONFLICT'});
+   // The reader owns the acquisition, so it owns its release state: the next read
+   // is refused, and the reader's close reports the causes.
+   await expect(readOnce(f)).rejects.toMatchObject({code:'NATIVE_SOURCE_READER_UNCERTAIN'});
+  }finally{observeNativeFacts(undefined);}
+ }catch(error){primary=error;}
+ // The reader's own close reports the real cleanup state: that is the behaviour
+ // under test, so it is asserted here instead of being swallowed.
+ const reported=await f.close().then(()=>null,error=>error);
+ const reportedCauses=(reported as {cleanup_errors?:unknown[]}|null)?.cleanup_errors??[];
+ if(primary!==undefined)withCleanup(primary,reportedCauses);
+ expect(reported).not.toBeNull();
+ expect(reportedCauses.length).toBeGreaterThan(0);
+},300000);
+
+/**
+ * G01 — the negative control: an ordinary failure leaves the reader usable.
+ *
+ * The refusal of the acquisition carries a cause - the syscall error that stopped
+ * it - and that cause is NOT a release failure. A reader that locked itself on any
+ * cause would refuse every later read, and that would be a refusal of the whole
+ * Host for one missing file.
+ */
+it('G01 keeps the reader usable after an ordinary failure of the acquisition',async()=>{
+ await withFixture(async f=>{
+  // The committed source's file is gone: the acquisition is refused with an
+  // ordinary reason, and no release failed.
+  const film=join(f.sourceRoot,'film.html');
+  const bytes=readFileSync(film);
+  rmSync(film);
+  await expect(readOnce(f)).rejects.toMatchObject({code:'REVISION_CONFLICT'});
+  writeFileSync(film,bytes);
+  // The reader is still usable: the next round reads the source again.
+  const facts=await readOnce(f);
+  expect(facts.verifyClosure()).toBe(true);
+  for(const handle of facts.retained)handle.close();
+ });
+},300000);
+
+/**
+ * G01 — a raw rejection that arrives AFTER the caller was cancelled.
+ *
+ * The reader asked for the acquisition, so it owns its release state even when the
+ * caller has gone: the late rejection with a genuine release failure must reach the
+ * reader's ledger, and the reader's close must report it.
+ */
+it('G01 adopts the genuine uncertainty of a raw rejection that arrives after the caller was cancelled',async()=>{
+ let rejectLate:((error:unknown)=>void)|undefined;
+ let enter:(()=>void)|undefined;
+ const entered=new Promise<void>(resolve=>{enter=resolve;});
+ const pending=new Promise<never>((_resolve,reject)=>{rejectLate=reject;});
+ const authority={acquireNativeFacts:()=>{enter?.();return pending;}} as unknown as CommittedSnapshotAuthority;
+ const lease={workspace_ref:'ws',project_id:'p',principal_id:'owner',transaction_id:'txn',snapshot_id:'snap',
+  source_digest:'digest',revision:1,native_project_id:'native',generation:1,root:'/tmp',
+  assertCurrent:()=>true,release:()=>{}} as unknown as ReturnType<CreatedNativeWorkspaceService['acquireExpectedLease']>;
+ const workspaces={acquireExpectedLease:()=>lease} as unknown as CreatedNativeWorkspaceService;
+ const reader=new CreatedNativeSourceReader({authority,workspaces,library:{} as NativeExpectedLibrary});
+ const binding={project_id:'p',native_project_id:'native',revision:1,snapshot_id:'snap',source_digest:'digest',
+  instance_generation:1,selection_version:0,workspace:{workspace_ref:'ws',snapshot_id:'snap',source_digest:'digest',revision:1},
+  isCurrent:()=>true} as unknown as NativeExpectedBinding;
+ const reading=reader.readSource({binding});
+ // The raw acquisition really entered before anything is cancelled.
+ await entered;
+ // The caller is cancelled: the reader closes while the acquisition is pending. The
+ // RAW close promise is kept - a derived promise would hide both of its outcomes.
+ const closing=reader.close();
+ void closing.then(()=>{},()=>{});
+ await expect(reading).rejects.toMatchObject({code:'NATIVE_SOURCE_ABORTED'});
+ // The raw acquisition now rejects with a GENUINE release failure.
+ const failure=new Error('the source release did not finish');
+ markRetainedCleanupFailures(failure,[new Error('the release of the source failed')]);
+ rejectLate?.(failure);
+ // The reader's own close reports the real cleanup state.
+ const reported=await closing.then(()=>null,error=>error);
+ expect(reported).not.toBeNull();
+ expect((reported as {cleanup_errors?:unknown[]}).cleanup_errors?.length).toBeGreaterThan(0);
+},60000);
+
+/**
+ * G02 — the liveness of the binding is fenced at the LAST moment.
+ *
+ * The binding goes stale while the round is in flight: the reader must not deliver
+ * facts it can no longer vouch for, and the refusal must happen before the
+ * delivery.
+ */
+it('G02 refuses the round when the binding goes stale during the read',async()=>{
+ let live=true;
+ const f=await nativeSourceFixture({childEvents:event=>{
+  // The binding goes stale while the media probe runs: after the first await of
+  // the round and before the final verification.
+  if(event.kind==='started'&&/^\/proc\/\d+\/fd\/\d+$/.test(event.argument))live=false;
+ }});
+ let primary:unknown;
+ try{
+  const binding={...f.binding,isCurrent:()=>live};
+  await expect(f.reader.readSource({binding})).rejects.toMatchObject({code:'NATIVE_SOURCE_BINDING_STALE'});
+ }catch(error){primary=error;}
+ const failures:unknown[]=[];
+ try{await f.close();}catch(error){failures.push(error);}
+ if(primary!==undefined)withCleanup(primary,failures);
+ if(failures.length>0){
+  const failure=new Error('The case could not release everything');
+  Object.defineProperty(failure,'cleanup_errors',{value:failures,enumerable:false,configurable:true});
+  throw failure;
+ }
+},300000);
+
+/**
+ * G02 — the delivery is linearized.
+ *
+ * The reader is closed INSIDE the last verification's own callback - after every
+ * other await and every other callback has returned. A reader that cannot vouch
+ * for what it holds must not hand out facts, and the refusal must take the
+ * existing all-attempt pre-delivery cleanup.
+ */
+it('G02 refuses the round when the reader is closed during the final verification',async()=>{
+ let armed=false;
+ let readerRef:CreatedNativeSourceReader|undefined;
+ let closing:Promise<void>|undefined;
+ const f=await nativeSourceFixture({
+  childEvents:event=>{
+   // The media probe is the last child before the final verification.
+   if(!armed&&event.kind==='started'&&/^\/proc\/\d+\/fd\/\d+$/.test(event.argument))armed=true;
+  },
+  closureOps:{close:(fd:number)=>{
+   closeSync(fd);
+   // The reader is closed from inside the verification's own callback. The close is
+   // started, not awaited: the callback must return, and the round must notice.
+   if(armed){armed=false;closing=readerRef?.close().then(()=>{},()=>{});}
+  }},
+ });
+ readerRef=f.reader;
+ let primary:unknown;
+ try{
+  await expect(readOnce(f)).rejects.toMatchObject({code:'NATIVE_SOURCE_READER_CLOSED'});
+ }catch(error){primary=error;}
+ await closing;
+ const failures:unknown[]=[];
+ try{await f.close();}catch(error){failures.push(error);}
+ if(primary!==undefined)withCleanup(primary,failures);
+ if(failures.length>0){
+  const failure=new Error('The case could not release everything');
+  Object.defineProperty(failure,'cleanup_errors',{value:failures,enumerable:false,configurable:true});
+  throw failure;
+ }
+},300000);
+
+/**
+ * G02 — the liveness of the working copy is fenced at the LAST moment.
+ *
+ * The view of the working copy is replaced while the round is in flight: the owner,
+ * the base and the control of that view are no longer the ones the round was made
+ * against, so the round must not be delivered.
+ */
+it('G02 refuses the round when the working copy view is invalidated during the read',async()=>{
+ let invalidated=false;
+ const f=await nativeSourceFixture({childEvents:event=>{
+  // The view of the working copy is invalidated while the media probe runs: the
+  // service invalidates every ref of a view it closes. A second preparation of the
+  // same binding would NOT do that - it reuses the cached view by design.
+  if(!invalidated&&event.kind==='started'&&/^\/proc\/\d+\/fd\/\d+$/.test(event.argument)){
+   invalidated=true;
+   void f.workspace.close();
+  }
+ }});
+ let primary:unknown;
+ try{
+  // The working copy's own liveness is checked when the round ends, and the
+  // invalidated view is refused there - before the delivery fence, which would
+  // refuse it as well.
+  await expect(f.reader.readSource({binding:f.binding})).rejects.toMatchObject({code:'NATIVE_SOURCE_CLOSURE_MOVED'});
+ }catch(error){primary=error;}
+ const failures:unknown[]=[];
+ try{await f.close();}catch(error){failures.push(error);}
+ if(primary!==undefined)withCleanup(primary,failures);
+ if(failures.length>0){
+  const failure=new Error('The case could not release everything');
+  Object.defineProperty(failure,'cleanup_errors',{value:failures,enumerable:false,configurable:true});
+  throw failure;
+ }
+},300000);
+
+/**
+ * G02 — a release that failed elsewhere refuses the round that is in flight.
+ *
+ * Another delivered proof fails to release while this round is in its final work:
+ * the reader can no longer say what it holds, so the round in flight is refused
+ * instead of being delivered.
+ */
+it('G02 refuses the round when another delivered proof fails to release',async()=>{
+ let armed=false;
+ let failNext=false;
+ let factsRef:NativeExpectedSourceFacts|undefined;
+ const f=await nativeSourceFixture({
+  childEvents:event=>{
+   if(!armed&&event.kind==='started'&&/^\/proc\/\d+\/fd\/\d+$/.test(event.argument))armed=true;
+  },
+  closureOps:{close:(fd:number)=>{
+   closeSync(fd);
+   if(armed){
+    armed=false;
+    // The first proof's own leaf fails to release: the reader becomes uncertain
+    // while the second round is still in flight.
+    const first=factsRef?.retained[0];
+    if(first!==undefined){
+     failNext=true;
+     try{first.close();}catch{/* the failure is the behaviour under test */}
+    }
+   }
+   if(failNext){failNext=false;throw new Error('injected delivered release failure');}
+  }},
+ });
+ let primary:unknown;
+ try{
+  const first=await readOnce(f);
+  factsRef=first;
+  // The second round: the failed release of the first proof happens inside its
+  // final verification, and the round must not be delivered.
+  await expect(readOnce(f)).rejects.toMatchObject({code:'NATIVE_SOURCE_READER_UNCERTAIN'});
+ }catch(error){primary=error;}
+ const failures:unknown[]=[];
+ if(factsRef)for(const handle of factsRef.retained){try{handle.close();}catch(error){failures.push(error);}}
+ try{await f.close();}catch(error){failures.push(error);}
+ // The release of the first proof failed ON PURPOSE: that is the behaviour under
+ // test, so it is asserted here and not thrown as a cleanup accident of the case.
+ expect(failures.length).toBeGreaterThan(0);
+ if(primary!==undefined)withCleanup(primary,failures);
+},300000);
+
+/**
+ * G03 — the pinned parser never opens the mutable path.
+ *
+ * The film's path is replaced between the bounded digest and the parse. The parser
+ * is given the RETAINED bytes, so it never opens that path: the refusal is the
+ * revision fence of the retained tree and NOT the engine's refusal of a film that
+ * is not a regular file.
+ */
+it('G03 refuses a film that is replaced between the bounded digest and the parse',async()=>{
+ await withFixture(async f=>{
+  const film=join(f.sourceRoot,'film.html');
+  let swapped=false;
+  observeNativeFacts({onSourceRead:(path:string)=>{
+   if(swapped||path!=='film.html')return;
+   swapped=true;
+   // The path of the film becomes a directory: a parser that opened the mutable
+   // path would fail with the engine's own refusal, not with the revision fence.
+   rmSync(film);
+   mkdirSync(film);
+  }});
+  try{
+   await expect(f.authority.acquireNativeFacts(f.projectId,f.transactionId,'owner'))
+    .rejects.toMatchObject({code:'REVISION_CONFLICT'});
+  }finally{observeNativeFacts(undefined);}
+ });
+},300000);
+
+/**
+ * G04 — a cache entry that the fixed producer did not draw is refused.
+ *
+ * The triple is self-consistent: the key is the upstream's own and the stamp is
+ * computed over the dependencies. That proves nothing about its ORIGIN, so it is
+ * refused - and nothing is deleted.
+ */
+it('G04 refuses a page frame entry that no fixed producer witnessed',async()=>{
+ await withFixture(async f=>{
+  const cache=join(f.workspaceRoot,'.film','cache','pageframes');
+  mkdirSync(cache,{recursive:true});
+  const key=nativeCacheKey({rel:'index.html',ms:0,width:480,overrides_json:null});
+  writeFileSync(join(cache,`${key}.jpg`),'not a real picture');
+  writeFileSync(join(cache,`${key}.json`),JSON.stringify({files:['index.html']}));
+  writeFileSync(join(cache,`${key}.stamp`),'0'.repeat(24));
+  await expect(readOnce(f)).rejects.toMatchObject({code:'NATIVE_SOURCE_CACHE_UNWITNESSED'});
+  // Nothing was deleted: the entries are still there for the native to own.
+  expect(readdirSync(cache).length).toBe(3);
+ });
+},300000);
+
+/**
+ * G04 — the poster keeps the native's LAST semantics and needs its own witness.
+ */
+it('G04 refuses a film poster that no fixed producer witnessed',async()=>{
+ await withFixture(async f=>{
+  mkdirSync(join(f.workspaceRoot,'.film','cache'),{recursive:true});
+  writeFileSync(join(f.workspaceRoot,'.film','cache','film-poster.jpg'),'not a real picture');
+  await expect(readOnce(f)).rejects.toMatchObject({code:'NATIVE_SOURCE_CACHE_UNWITNESSED'});
+ });
+},300000);
+
+/**
+ * G05 — the real subprocess faults of the media tool.
+ *
+ * The children are REAL local processes of this test and they emit ONLY a failure:
+ * none of them ever answers a probe, and no case may read a media fact from one.
+ * The version query stays the REAL fixed ffprobe, so it can never steal the
+ * branch under test.
+ */
+it('G05 refuses a real stdout overflow and a real stderr overflow',async()=>{
+ for(const overflow of ['stdout','stderr'] as const){
+  await withFixture(async f=>{
+   const library=await nativeExpectedLibraryLoader().load(nativeExpectedApprovalFromPin());
+   let replaced=0;
+   const reader=new CreatedNativeSourceReader({authority:f.authority as never,workspaces:f.workspace as never,library,
+    toolTransport:{spawn:(command:string,args:readonly string[],options:{readonly stdio:readonly ['ignore','pipe','pipe'];readonly windowsHide:boolean})=>{
+     // The version query is the REAL tool; only the media probe is replaced.
+     if(args[0]==='-version')return spawn(command,[...args],{stdio:['ignore','pipe','pipe'],windowsHide:options.windowsHide});
+     replaced+=1;
+     const script=overflow==='stdout'
+      ? 'process.stdout.write(Buffer.alloc(5*1024*1024))'
+      : 'process.stderr.write(Buffer.alloc(300*1024))';
+     return spawn(process.execPath,['-e',script],{stdio:['ignore','pipe','pipe'],windowsHide:options.windowsHide});
+    },deadlineMs:2000}});
+   await expect(reader.readSource({binding:f.binding})).rejects.toMatchObject({code:'NATIVE_PROBE_OUTPUT'});
+   // The branch that failed is the media probe, not the version query.
+   expect(replaced).toBe(1);
+   await reader.close();
+  });
+ }
+},600000);
+
+/**
+ * G05 — a real child that never finishes is killed and reaped, and the input it
+ * was reading stays held until it really ended.
+ */
+it('G05 kills and reaps a real hung child and keeps the input held until it ends',async()=>{
+ await withFixture(async f=>{
+  const library=await nativeExpectedLibraryLoader().load(nativeExpectedApprovalFromPin());
+  let held:string|undefined;
+  let openAtExit:boolean|undefined;
+  const reader=new CreatedNativeSourceReader({authority:f.authority as never,workspaces:f.workspace as never,library,
+   childEvents:event=>{
+    if(event.kind==='started'&&/^\/proc\/\d+\/fd\/\d+$/.test(event.argument))held=event.argument;
+    // At the child's own exit, the input it was reading is still held.
+    if(event.kind==='exited'&&held!==undefined)openAtExit=existsSync(held);
+   },
+   toolTransport:{spawn:(command:string,args:readonly string[],options:{readonly stdio:readonly ['ignore','pipe','pipe'];readonly windowsHide:boolean})=>{
+    if(args[0]==='-version')return spawn(command,[...args],{stdio:['ignore','pipe','pipe'],windowsHide:options.windowsHide});
+    // A REAL local child that never finishes on its own.
+    return spawn(process.execPath,['-e','setTimeout(()=>{},60000)'],{stdio:['ignore','pipe','pipe'],windowsHide:options.windowsHide});
+   },deadlineMs:250}});
+  await expect(reader.readSource({binding:f.binding})).rejects.toMatchObject({code:'NATIVE_PROBE_TIMEOUT'});
+  // The child really ended, and the descriptor it was reading was still held then.
+  expect(held).toMatch(/^\/proc\/\d+\/fd\/\d+$/);
+  expect(openAtExit).toBe(true);
+  await reader.close();
+ });
+},600000);
+
+/**
+ * G05 — the branch that failed is the named one.
+ */
+it('G05 proves the named media branch is the one that failed',async()=>{
+ await withFixture(async f=>{
+  const library=await nativeExpectedLibraryLoader().load(nativeExpectedApprovalFromPin());
+  const startedArguments:string[]=[];
+  const reader=new CreatedNativeSourceReader({authority:f.authority as never,workspaces:f.workspace as never,library,
+   childEvents:event=>{if(event.kind==='started')startedArguments.push(event.argument);},
+   toolTransport:{spawn:(command:string,args:readonly string[],options:{readonly stdio:readonly ['ignore','pipe','pipe'];readonly windowsHide:boolean})=>{
+    if(args[0]==='-version')return spawn(command,[...args],{stdio:['ignore','pipe','pipe'],windowsHide:options.windowsHide});
+    // A REAL local child that fails with its own exit code.
+    return spawn(process.execPath,['-e','process.exit(3)'],{stdio:['ignore','pipe','pipe'],windowsHide:options.windowsHide});
+   },deadlineMs:2000}});
+  await expect(reader.readSource({binding:f.binding})).rejects.toMatchObject({code:'NATIVE_PROBE_FAILED'});
+  // The version query was the real one, and the media probe was the child that failed.
+  expect(startedArguments.some(argument=>argument==='-version')).toBe(true);
+  expect(startedArguments.some(argument=>/^\/proc\/\d+\/fd\/\d+$/.test(argument))).toBe(true);
+  await reader.close();
+ });
+},600000);
+
+/**
+ * G05 — the real faults of a real child.
+ *
+ * A child that dies by a SIGNAL is not an ordinary exit, and a child that is
+ * CANCELLED while it runs is not a simulated late promise: the order of the child's
+ * own exit and of the read's rejection is what proves the input descriptor stayed
+ * held until the child really ended.
+ */
+it('G05 proves a real child that dies by a signal and a real child that is cancelled',async()=>{
+ // The abrupt child: it dies by a signal, and the runner says so.
+ await withFixture(async f=>{
+  const library=await nativeExpectedLibraryLoader().load(nativeExpectedApprovalFromPin());
+  const reader=new CreatedNativeSourceReader({authority:f.authority as never,workspaces:f.workspace as never,library,
+   toolTransport:{spawn:(command:string,args:readonly string[],options:{readonly stdio:readonly ['ignore','pipe','pipe'];readonly windowsHide:boolean})=>{
+    if(args[0]==='-version')return spawn(command,[...args],{stdio:['ignore','pipe','pipe'],windowsHide:options.windowsHide});
+    // A REAL local child that dies by a signal.
+    return spawn(process.execPath,['-e','process.kill(process.pid,"SIGKILL")'],{stdio:['ignore','pipe','pipe'],windowsHide:options.windowsHide});
+   },deadlineMs:2000}});
+  await expect(reader.readSource({binding:f.binding})).rejects.toMatchObject({code:'NATIVE_PROBE_INTERRUPTED'});
+  await reader.close();
+ });
+ // The cancelled child: the reader is closed while the REAL media child runs, and
+ // the child's own exit comes before the read is rejected.
+ await withFixture(async f=>{
+  const library=await nativeExpectedLibraryLoader().load(nativeExpectedApprovalFromPin());
+  const order:string[]=[];
+  let held:string|undefined;
+  let mediaStarted:((value:{pid:number;argument:string})=>void)|undefined;
+  const mediaBegan=new Promise<{pid:number;argument:string}>(resolve=>{mediaStarted=resolve;});
+  const reader=new CreatedNativeSourceReader({authority:f.authority as never,workspaces:f.workspace as never,library,
+   childEvents:event=>{
+    // The MEDIA child is the one whose argument is a descriptor of THIS process; the
+    // version query's argument is '-version' and is not it.
+    if(event.kind==='started'&&/^\/proc\/\d+\/fd\/\d+$/.test(event.argument)){
+     held=event.argument;
+     mediaStarted?.({pid:event.pid,argument:event.argument});
+     return;
+    }
+    if(event.kind==='exited'&&held!==undefined)order.push('media-exited');
+   },
+   toolTransport:{spawn:(command:string,args:readonly string[],options:{readonly stdio:readonly ['ignore','pipe','pipe'];readonly windowsHide:boolean})=>{
+    if(args[0]==='-version')return spawn(command,[...args],{stdio:['ignore','pipe','pipe'],windowsHide:options.windowsHide});
+    // A REAL local child that waits until it is killed.
+    return spawn(process.execPath,['-e','setTimeout(()=>{},60000)'],{stdio:['ignore','pipe','pipe'],windowsHide:options.windowsHide});
+   },deadlineMs:60000}});
+  const reading=reader.readSource({binding:f.binding});
+  // The reader is closed only while the REAL media child is really running.
+  const {pid,argument}=await mediaBegan;
+  expect(pid).toBeGreaterThan(0);
+  expect(argument).toMatch(/^\/proc\/\d+\/fd\/\d+$/);
+  const closing=reader.close().then(()=>{},()=>{});
+  await expect(reading).rejects.toMatchObject({code:expect.stringMatching(/^NATIVE_/)});
+  order.push('read-rejected');
+  await closing;
+  // The child's own exit came before the read was rejected.
+  expect(order).toContain('media-exited');
+  expect(order.indexOf('media-exited')).toBeLessThan(order.indexOf('read-rejected'));
+ });
+},600000);
+
+/**
+ * G06 — the settings of the working copy: added or deleted under a held proof.
+ *
+ * The style IS part of the committed source, so it is always there in a read; what
+ * the case proves is that a working copy whose settings file is gone is not the
+ * committed source any more, and that a held proof does not survive the change.
+ */
+it('G06 refuses a working copy whose settings file was deleted and sees it change under a proof',async()=>{
+ await withFacts(async (facts,f)=>{
+  const style=join(f.workspaceRoot,'.film','settings.json');
+  expect(existsSync(style)).toBe(true);
+  // The settings file is deleted: the working copy is not the committed source.
+  rmSync(style);
+  await expect(readOnce(f)).rejects.toMatchObject({code:'NATIVE_SOURCE_COPY_INCOMPLETE'});
+  // And a proof that was made while it was there does not survive its deletion.
+  expect(facts.verifyClosure()).toBe(false);
+ });
+},300000);
+
+/**
+ * G06 — a non-lexical supplier order reaches the ACTUAL consumer.
+ *
+ * This is a PROPAGATION fixture, not a claim about the order the platform returns:
+ * the platform's own vector is the case above. Here the supplier hands the actual
+ * pinned consumer an order that is not lexical, and the consumer takes it exactly as
+ * it is - and refuses a listing that is not the one it was given.
+ */
+it('P07 hands a non-lexical caption order to the actual consumer without changing it',async()=>{
+ // The SUPPLIER's order is not lexical, and the ACTUAL pinned consumer takes it as
+ // it is: the alternative lines of a cue carry their languages in the order of the
+ // listing they came from. This says nothing about the order the platform returns -
+ // the platform's own vector is the case above.
+ const film='<!doctype html>\n<html><head><meta charset="utf-8"></head><body>\n<section>\n<audio id="narration" src="assets/vo/001.wav" at="0"></audio>\n</section>\n</body></html>\n';
+ const vtt='WEBVTT\n\n00:00:00.000 --> 00:00:01.000\nhello\n';
+ const baseFiles:Record<string,string|null>={'film.html':film,'assets/vo/001.vtt':vtt,'assets/vo/001.en.vtt':vtt,'assets/vo/001.zh.vtt':vtt};
+ const baseMedia:Record<string,{readonly duration:number|null;readonly audio:boolean}>={'assets/vo/001.wav':{duration:1,audio:true}};
+ // Every run gets its OWN facts and its own maps, and the listing it is given is the
+ // one it keeps on every retry.
+ const run=async(listing:readonly string[])=>{
+  const files:Record<string,string|null>={...baseFiles};
+  const directories:Record<string,readonly string[]>={'assets/vo':listing};
+  const media:Record<string,{readonly duration:number|null;readonly audio:boolean}>={...baseMedia};
+  let result=await computeNativeEffectiveSidecars({upstream_sha:NATIVE_SIDECARS_UPSTREAM,files,directories,media});
+  for(let round=0;round<3&&result.status!=='computed';round+=1){
+   if(result.status!=='unsupported')break;
+   // The consumer's own tokens: a plain path is a FILE it wants, a directory and a
+   // media fact are prefixed.
+   for(const missing of result.missing){
+    if(missing.startsWith('directory:'))directories[missing.slice('directory:'.length)]=[];
+    else if(missing.startsWith('media:'))media[missing.slice('media:'.length)]={duration:null,audio:false};
+    else files[missing]=null;
+   }
+   result=await computeNativeEffectiveSidecars({upstream_sha:NATIVE_SIDECARS_UPSTREAM,files,directories,media});
+  }
+  return result;
+ };
+ // The listing is the COMPLETE membership of the directory - the media file is in
+ // it as well - and it is NOT lexical: the translations come out in the order of
+ // the listing.
+ const unsorted=await run(['001.wav','001.vtt','001.zh.vtt','001.en.vtt']);
+ expect(unsorted.status,unsorted.status==='unsupported'?`${unsorted.reason} missing=${unsorted.missing.join(',')}`:'computed').toBe('computed');
+ const languagesOf=(result:typeof unsorted):string[]=>{
+  const cues=(result.status==='computed'&&result.captions.state==='present'?result.captions.value.cues:[]) as readonly {alt?:Record<string,string>}[];
+  return cues.flatMap(cue=>Object.keys(cue.alt??{}));
+ };
+ // The order the supplier gave is the order the consumer used.
+ expect(languagesOf(unsorted)).toEqual(['zh','en']);
+ // And the sorted listing gives a DIFFERENT order: the consumer does not sort the
+ // listing it was given, and this is what proves it.
+ const sorted=await run(['001.en.vtt','001.vtt','001.wav','001.zh.vtt']);
+ expect(languagesOf(sorted)).toEqual(['en','zh']);
+ expect(languagesOf(sorted)).not.toEqual(languagesOf(unsorted));
+},60000);
+
+/**
+ * G06 — a legitimate negative fact: a media that has no transcript.
+ *
+ * The absence is proved and the native consumers really run with it; the file's
+ * later birth invalidates the proof that was made while it was absent.
+ */
+it('G06 accepts an absent heard transcript and refuses its later birth',async()=>{
+ await withFacts(async (facts,f)=>{
+  // The producer writes ONE transcript, for the narration. The video media has none
+  // at all, and that absence is a real fact of the producer, not a fixture's wish.
+  const video=readdirSync(join(f.workspaceRoot,'assets','video')).find(name=>name.endsWith('.mp4'));
+  expect(video).toBeDefined();
+  const transcript=join(f.workspaceRoot,'assets','video',video!.replace(/\.mp4$/,'.vtt'));
+  expect(existsSync(transcript)).toBe(false);
+  expect(facts.verifyClosure()).toBe(true);
+  // The file is born while the proof is held: the proof does not verify any more.
+  writeFileSync(transcript,'WEBVTT');
+  expect(facts.verifyClosure()).toBe(false);
+ });
+},300000);
+
+/**
+ * G06 — an empty directory born alone under a held proof.
+ */
+it('G06 refuses an empty directory born alone under a held proof',async()=>{
+ await withFacts(async (facts,f)=>{
+  const empty=join(f.workspaceRoot,'assets','empty-born');
+  expect(existsSync(empty)).toBe(false);
+  expect(facts.verifyClosure()).toBe(true);
+  // A directory with no file in it is a change of the tree all the same.
+  mkdirSync(empty);
+  expect(facts.verifyClosure()).toBe(false);
+ });
+},300000);
+
+/**
+ * G06 — a stale generation is refused at the reader.
+ */
+it('G06 refuses a stale generation at the reader',async()=>{
+ await withFixture(async f=>{
+  const stale={...f.binding,instance_generation:f.generation+1};
+  await expect(f.reader.readSource({binding:stale})).rejects.toMatchObject({code:'NATIVE_SOURCE_GENERATION_STALE'});
+ });
+},300000);
+
+/**
+ * G06 — a foreign lease consumed through the actual reader is refused.
+ *
+ * The predicate of another authority is not evidence: the reader must refuse the
+ * lease itself when it consumes it.
+ */
+it('G06 refuses a foreign facts lease consumed through the actual reader',async()=>{
+ await withFixture(async f=>{
+  const foreign=new CommittedSnapshotAuthority(f.host.revisions,f.host.snapshots,f.app.creation,vendorRoot);
+  const lease=await foreign.acquireNativeFacts(f.projectId,f.transactionId,'owner');
+  const reader=new CreatedNativeSourceReader({
+   authority:{acquireNativeFacts:async()=>lease,isNativeFactsLease:()=>false} as unknown as CommittedSnapshotAuthority,
+   workspaces:f.workspace,library:{} as NativeExpectedLibrary});
+  let primary:unknown;
+  try{
+   await expect(reader.readSource({binding:f.binding})).rejects.toMatchObject({code:'NATIVE_SOURCE_LEASE_FOREIGN'});
+  }catch(error){primary=error;}
+  const failures:unknown[]=[];
+  try{lease.release();}catch(error){failures.push(error);}
+  try{await reader.close();}catch(error){failures.push(error);}
+  if(primary!==undefined)withCleanup(primary,failures);
+  if(failures.length>0){
+   const failure=new Error('The case could not release everything');
+   Object.defineProperty(failure,'cleanup_errors',{value:failures,enumerable:false,configurable:true});
+   throw failure;
+  }
+ });
+},300000);
+
+/**
+ * G06 — an isolated parent swap that leaves NO extra file behind.
+ *
+ * The membership of the tree is the same before and after; only the IDENTITY of the
+ * parent moved, so the refusal cannot be an earlier membership refusal.
+ */
+it('G06 refuses an isolated parent swap that leaves no extra file behind',async()=>{
+ await withFixture(async f=>{
+  const facts=await readOnce(f);
+  expect(facts.verifyClosure()).toBe(true);
+  let swapped=false;
+  observeNativeFacts({onSourceRead:()=>{
+   if(swapped)return;
+   swapped=true;
+   // The parent of the media is replaced while the source is being read: the moved
+   // sibling is removed again, so nothing extra is left to refuse the tree earlier.
+   const parent=join(f.sourceRoot,'assets','video');
+   const moved=join(f.sourceRoot,'assets','video-moved');
+   renameSync(parent,moved);
+   mkdirSync(parent,{recursive:true});
+   for(const name of readdirSync(moved))writeFileSync(join(parent,name),readFileSync(join(moved,name)));
+   rmSync(moved,{recursive:true});
+  }});
+  try{
+   // The next round is refused: the source it reads is not the one it retained.
+   await expect(readOnce(f)).rejects.toMatchObject({code:'REVISION_CONFLICT'});
+   // And the proof that was made before the swap does not verify any more.
+   expect(facts.verifyClosure()).toBe(false);
+  }finally{observeNativeFacts(undefined);}
+  for(const handle of facts.retained)handle.close();
+ });
+},300000);
+
+/**
+ * G07 — a leaf that is a hardlink to another file is not a file of this tree.
+ */
+it('G07 refuses a workspace leaf hardlinked to an external file',async()=>{
+ // The DIRECT closure refuses an aliased leaf with its own reason; the READER turns
+ // the same thing into its own copy refusal (the F04 case). The nlink policy is not
+ // weakened by either of them.
+ const root=closureTree();
+ try{
+  const external=join(root,'external-film.html');
+  const film=join(root,'film.html');
+  writeFileSync(external,readFileSync(film));
+  rmSync(film);
+  linkSync(external,film);
+  const closure=await RetainedNativeClosure.open(root);
+  try{
+   await expect(closure.retainFile('film.html')).rejects.toMatchObject({code:'NATIVE_CLOSURE_ALIASED'});
+  }finally{try{closure.close();}catch{/* the closure reports its own failures */}}
+ }finally{rmSync(root,{recursive:true,force:true});}
+},60000);
+
+/**
+ * The cause chain of a failure, as far as it goes.
+ *
+ * A fresh reason keeps the original failure as its cause, so the chain is where the
+ * original reason is found.
+ */
+function causeChainOf(error:unknown):unknown[]{
+ const chain:unknown[]=[];
+ let current:unknown=error;
+ while(current!==undefined&&current!==null&&chain.length<8){
+  chain.push(current);
+  current=(current as {cause?:unknown}).cause;
+ }
+ return chain;
+}
+
+/**
+ * G01 — an alias and a release failure in the same acquisition.
+ *
+ * The leaf of the committed source is linked to another name AND its release fails.
+ * The refusal keeps the alias as its reason and the release failure as its cause,
+ * and the reader adopts the uncertainty.
+ */
+it('G01 keeps the alias reason and the release failure of the same acquisition',async()=>{
+ const f=await nativeSourceFixture();
+ const external=join(f.root,'external-source-film.html');
+ const source=join(f.sourceRoot,'film.html');
+ writeFileSync(external,readFileSync(source));
+ rmSync(source);
+ linkSync(external,source);
+ // The named release failure is an OBJECT, and that exact object is the oracle.
+ const releaseFailure=new Error('injected source release failure');
+ let armed=true;
+ let hits=0;
+ observeNativeFacts({closureOps:{close:(fd:number)=>{
+  const wasFile=fstatSync(fd).isFile();
+  closeSync(fd);
+  if(armed&&wasFile){armed=false;hits+=1;throw releaseFailure;}
+ }}});
+ let primary:unknown;
+ try{
+  // The READER itself: the acquisition is the reader's, so the reader owns both
+  // the reason and the release state.
+  const failure=await readOnce(f).then(()=>null,error=>error);
+  expect(failure).not.toBeNull();
+  // The reason of the refusal is the revision fence of the committed source...
+  expect((failure as {code?:string}).code).toBe('REVISION_CONFLICT');
+  // ...and the ORIGINAL alias is discoverable in the cause chain.
+  const chain=causeChainOf(failure);
+  expect(chain.map(error=>String((error as {code?:unknown}).code??''))).toContain('NATIVE_CLOSURE_ALIASED');
+  // The named release failure really happened, exactly once...
+  expect(hits).toBe(1);
+  // ...and it is the GENUINE cleanup failure of this refusal - not merely a cause.
+  expect(retainedCleanupFailures(failure)).toContain(releaseFailure);
+  // The reader owns the acquisition, so the next read is refused.
+  await expect(readOnce(f)).rejects.toMatchObject({code:'NATIVE_SOURCE_READER_UNCERTAIN'});
+ }catch(error){primary=error;}
+ finally{observeNativeFacts(undefined);}
+ // The READER's own close reports the real cleanup state - the fixture's close
+ // carries that report one level deeper, so the reader's own report is read here.
+ const reported=await f.reader.close().then(()=>null,error=>error);
+ const reportedCauses=(reported as {cleanup_errors?:unknown[]}|null)?.cleanup_errors??[];
+ expect(reported).not.toBeNull();
+ expect(reportedCauses).toContain(releaseFailure);
+ // The fixture's close reports the same failure: that is the behaviour under test,
+ // so it is expected here and not thrown as an accident of the case.
+ const failures:unknown[]=[];
+ try{await f.close();}catch(error){failures.push(error);}
+ if(primary!==undefined)withCleanup(primary,failures);
+},300000);
+
+
+/**
+ * G07 — a hardlink that appears AFTER the proof invalidates that proof.
+ */
+it('G07 invalidates an old proof when an external hardlink appears after it',async()=>{
+ await withFacts(async (facts,f)=>{
+  expect(facts.verifyClosure()).toBe(true);
+  linkSync(join(f.workspaceRoot,'film.html'),join(f.root,'external-link.html'));
+  // The file gained a name: it is an alias now, and the proof does not survive it.
+  expect(facts.verifyClosure()).toBe(false);
+ });
+},300000);
+
+/**
+ * G07 — one instance budget for both trees and every parallel proof.
+ */
+it('G07 holds both trees and a parallel proof under one descriptor pool',async()=>{
+ await withFixture(async f=>{
+  const pool=f.reader.descriptorPool;
+  const before=pool.used;
+  const first=await readOnce(f);
+  const afterOne=pool.used;
+  // The two trees of the one acquisition are held by ONE count.
+  expect(afterOne).toBeGreaterThan(before);
+  // A parallel proof draws from the SAME count.
+  const second=await readOnce(f);
+  expect(pool.used).toBeGreaterThan(afterOne);
+  for(const handle of first.retained)handle.close();
+  for(const handle of second.retained)handle.close();
+  // Everything the two rounds held is given back.
+  expect(pool.used).toBe(before);
+ });
+},300000);
+
+/**
+ * G07 — every nested and empty directory of both trees is held independently.
+ */
+it('G07 holds every nested and empty directory of both trees independently',async()=>{
+ await withFixture(async f=>{
+  // An empty directory the native itself produces: the reader allows it, and it is
+  // held by a descriptor of its own. An arbitrary directory is still refused.
+  const cache=join(f.workspaceRoot,'.film','cache','probe');
+  mkdirSync(cache,{recursive:true});
+  const facts=await readOnce(f);
+  const directories=f.reader.retainedDirectories;
+  // The empty native cache directory is held by its own descriptor.
+  expect(directories.some(entry=>entry.tree==='workspace'&&entry.relative_path==='.film/cache/probe')).toBe(true);
+  // The two trees hold their OWN allocation of the same relative path.
+  const workspaceEntry=directories.find(entry=>entry.tree==='workspace'&&entry.relative_path==='assets');
+  const sourceEntry=directories.find(entry=>entry.tree==='source'&&entry.relative_path==='assets');
+  expect(workspaceEntry).toBeDefined();
+  expect(sourceEntry).toBeDefined();
+  expect(`${workspaceEntry!.dev}:${workspaceEntry!.ino}`).not.toBe(`${sourceEntry!.dev}:${sourceEntry!.ino}`);
+  for(const handle of facts.retained)handle.close();
+ });
+},300000);
+
+/**
+ * P07 — the named primary and EVERY cleanup cause of a real failing unpack.
+ *
+ * The failure is the production one: the retained tree cannot be unpacked, and the
+ * descriptors that were already taken are released while the failure is being
+ * handled. The primary is the syscall failure that stopped the walk - it is named,
+ * and it keeps its own place. Three INDEPENDENT releases fail as well - the walk's
+ * own child descriptor on the nested unwind, the ancestry above the root and the
+ * root itself. Every descriptor is closed for real before its failure is reported,
+ * and every allocation is released exactly once.
+ *
+ * The child's own release really fails here: the case does not let it succeed in
+ * order to avoid the very defect it is about.
+ */
+it('P07 keeps the named primary and every cleanup cause of the real unpack path',async()=>{
+ const root=closureTree();
+ const resolved=resolve(root);
+ const primary=Object.assign(new Error('injected primary: the retained child directory could not be opened'),{code:'EIO'});
+ const pathOfFd=new Map<number,string>();
+ const opened:string[]=[];
+ const closed:string[]=[];
+ const cleanupFailures=new Map<string,Error>();
+ let fired=0;
+ let failure:unknown;
+ try{
+  await RetainedNativeClosure.open(root,{},{
+   open:(path:string,flags:number)=>{
+    // The named primary: the walk cannot open the directory below the media.
+    if(path.endsWith(sep+'assets'+sep+'vo')){fired+=1;throw primary;}
+    const descriptor=openSync(path,flags);
+    pathOfFd.set(descriptor,path);
+    opened.push(path);
+    return descriptor;
+   },
+   close:(descriptor:number)=>{
+    const path=pathOfFd.get(descriptor)??`#${descriptor}`;
+    closed.push(path);
+    // The descriptor is closed FIRST: the failure is reported afterwards, so no
+    // descriptor number is left open and none is closed twice.
+    closeSync(descriptor);
+    // Three NAMED allocations fail their release: the walk's own child on the nested
+    // unwind, the ancestry above the root and the root itself.
+    if(path===resolved+sep+'assets'||path===dirname(resolved)||path===resolved){
+     const cleanup=new Error(`injected release failure of ${path}`);
+     cleanupFailures.set(path,cleanup);
+     throw cleanup;
+    }
+   },
+  });
+ }catch(error){failure=error;}
+ try{
+  // The primary really fired: no case may pass on a failure that never happened.
+  expect(fired).toBe(1);
+  expect(failure).toBeDefined();
+  const causes=(failure as {cleanup_errors?:unknown[]}).cleanup_errors;
+  expect(Array.isArray(causes)).toBe(true);
+  // The named primary keeps its place: it is the FIRST cause, it is the very object
+  // that was injected, and the cleanup that followed it did not overwrite it.
+  expect(causes![0]).toBe(primary);
+  expect((primary as {code?:string}).code).toBe('EIO');
+  // Each of the THREE NAMED releases really failed, and each failure is kept.
+  expect(cleanupFailures.size).toBe(3);
+  expect([...cleanupFailures.keys()].sort()).toEqual([resolved+sep+'assets',dirname(resolved),resolved].sort());
+  for(const cleanup of cleanupFailures.values())expect(causes).toContain(cleanup);
+  expect(causes!.length).toBe(cleanupFailures.size+1);
+  // The refusal is the production one: the syscall error is kept as its cause and
+  // the reason of the refusal is the production reason.
+  expect((failure as {code?:string}).code).toBe('NATIVE_CLOSURE_UNSUPPORTED_TYPE');
+  // Every allocation that was taken was released exactly once, and no descriptor
+  // was released twice. The paths are the real ones, so a number that the operating
+  // system hands out again for another allocation is not a retry.
+  expect(opened.length).toBeGreaterThan(0);
+  expect(closed.length).toBe(opened.length);
+  expect(new Set(closed).size).toBe(closed.length);
+  expect([...closed].sort()).toEqual([...opened].sort());
+ }finally{
+  rmSync(root,{recursive:true,force:true});
+ }
+ // The uncertainty is sticky: a release that failed latches the closure, and a
+ // closure that cannot say what it holds can no longer prove anything.
+ const second=closureTree();
+ let closure:RetainedNativeClosure|undefined;
+ const released:number[]=[];
+ let armed=false;
+ try{
+  closure=await RetainedNativeClosure.open(second,{},{close:(descriptor:number)=>{
+   closeSync(descriptor);
+   released.push(descriptor);
+   if(armed){armed=false;throw new Error('injected final release failure');}
+  }});
+  await closure.retainFile('film.html');
+  // Only the final release is counted: the walk's own releases are done.
+  released.length=0;
+  armed=true;
+  let releaseFailure:unknown;
+  try{closure.close();}catch(error){releaseFailure=error;}
+  expect(releaseFailure).toBeDefined();
+  expect((releaseFailure as {code?:string}).code).toBe('NATIVE_CLOSURE_CLEANUP_FAILED');
+  // Every outstanding allocation was attempted, each exactly once, even though the
+  // first of them failed.
+  expect(released.length).toBeGreaterThan(0);
+  expect(new Set(released).size).toBe(released.length);
+  // The failure is reported once and never twice.
+  expect(closure.cleanupFailures.length).toBe(1);
+  // A repeated release does not retry the allocation whose release failed.
+  const attempted=released.length;
+  expect(()=>closure!.close()).not.toThrow();
+  expect(released.length).toBe(attempted);
+  expect(closure.cleanupFailures.length).toBe(1);
+ }finally{
+  try{closure?.close();}catch{/* the closure reports its own failures */}
+  rmSync(second,{recursive:true,force:true});
+ }
+},60000);
+
+/**
+ * P07 — an empty directory is evidence of its own, and a file that appears in it
+ * changes the closure.
+ */
+it('P07 proves an empty directory and sees the file that appears in it',async()=>{
+ const root=closureTree();
+ let closure:RetainedNativeClosure|undefined;
+ try{
+  mkdirSync(join(root,'assets','empty'),{recursive:true});
+  closure=await RetainedNativeClosure.open(root);
+  const directory=await closure.retainDirectory('assets/empty');
+  expect(directory.names).toEqual([]);
+  expect(closure.membership()).toContain('assets/empty');
+  expect(closure.verify()).toBe(true);
+  // A file that appears in the empty directory is a change of the closure.
+  writeFileSync(join(root,'assets','empty','late.txt'),'late');
+  expect(closure.verify()).toBe(false);
+ }finally{
+  try{closure?.close();}catch{/* the closure reports its own failures */}
+  rmSync(root,{recursive:true,force:true});
+ }
+},60000);
+
+/**
+ * P06 — the pinned native revision vectors, the byte-order mark included.
+ */
+it('P06 reproduces the five pinned native revision vectors',async()=>{
+ // The vectors of the pinned upstream, as recorded in the reader preflight.
+ const vectors=[
+  {text:'',native_rev:'e3b0c44298fc1c14'},
+  {text:'<html>film</html>',native_rev:'c193482f0796c9a9'},
+  {text:'第一章：你好，世界。🎬',native_rev:'06de29fb49055227'},
+  {text:'<html>\r\n第一章\r\n</html>',native_rev:'1e3d86711221cf60'},
+  {text:'﻿<html>标题</html>',native_rev:'3f847bbde4e77a30'},
+ ];
+ const root=mkdtempSync(join(tmpdir(),'n1n2-rev-'));
+ let closure:RetainedNativeClosure|undefined;
+ try{
+  // The membership is taken when the closure opens, so the files are written first.
+  for(const [index,vector] of vectors.entries())writeFileSync(join(root,`vector-${index}.txt`),Buffer.from(vector.text,'utf8'));
+  closure=await RetainedNativeClosure.open(root);
+  for(const [index,vector] of vectors.entries()){
+   const path=`vector-${index}.txt`;
+   const file=await closure.retainFile(path);
+   const text=await closure.readText(file);
+   // The bytes come back exactly, the byte-order mark included.
+   expect(text).toBe(vector.text);
+   expect(Buffer.from(text,'utf8').equals(Buffer.from(vector.text,'utf8'))).toBe(true);
+   // The native revision is the revision of the film's own bytes.
+   expect(createHash('sha256').update(text,'utf8').digest('hex').slice(0,16)).toBe(vector.native_rev);
+  }
+ }finally{
+  try{closure?.close();}catch{/* the closure reports its own failures */}
+  rmSync(root,{recursive:true,force:true});
+ }
+},60000);
+
+/**
+ * P06 — the listing is the host's numeric order and not a plain sort.
+ */
+it('P06 lists the media in the numeric order of the host',async()=>{
+ const paths=[
+  'assets/video/video10.mp4','assets/video/video2.mp4','assets/vo/001.wav','assets/video/video1.mp4',
+  'assets/.hidden/secret.mp4','assets/clip/非ASCII.mp4',
+ ];
+ const listing=nativeVideoListingOrder(paths);
+ // The pinned collation of the whole relative path: 'assets/clip/...' comes before
+ // 'assets/video/...' because the directory names decide, and the numbers inside the
+ // last one are compared numerically.
+ expect(listing).toEqual(['assets/clip/非ASCII.mp4','assets/video/video1.mp4','assets/video/video2.mp4','assets/video/video10.mp4']);
+ // The pinned rule also skips the hidden names, exactly as the native's own listing
+ // does: a hidden component is not a file of the project.
+ expect(listing).toEqual([...paths].filter(path=>path.endsWith('.mp4')&&!path.split('/').some(part=>part.startsWith('.')))
+  .sort((left,right)=>left.localeCompare(right,undefined,{numeric:true})));
+ // The order is the host's numeric collation, not a plain lexicographic one.
+ const plain=[...listing].sort();
+ expect(listing).not.toEqual(plain);
+ expect(process.versions.icu).toBeDefined();
+ expect(Intl.DateTimeFormat().resolvedOptions().locale).toBeTruthy();
+},60000);
+
+/**
+ * G02 — the liveness callbacks may re-enter the reader.
+ *
+ * The LAST call of the binding's liveness callback closes the reader and still
+ * answers true. The delivery fence therefore checks the reader's own state AFTER
+ * the callbacks, with nothing in between it and the delivery: no proof is handed
+ * out, and every pre-delivery resource is released.
+ */
+it('G02 refuses the round when the last liveness callback closes the reader',async()=>{
+ await withFixture(async f=>{
+  let calls=0;
+  let closing:Promise<void>|undefined;
+  const binding={...f.binding,isCurrent:()=>{
+   calls+=1;
+   // The last call closes the reader and still answers true.
+   if(calls>1&&closing===undefined)closing=f.reader.close().then(()=>{},()=>{});
+   return true;
+  }};
+  await expect(f.reader.readSource({binding})).rejects.toMatchObject({code:'NATIVE_SOURCE_READER_CLOSED'});
+  await closing;
+ });
+},300000);

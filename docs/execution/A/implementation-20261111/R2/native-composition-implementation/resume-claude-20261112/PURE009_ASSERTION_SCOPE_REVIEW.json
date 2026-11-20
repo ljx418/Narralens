@@ -1,0 +1,11 @@
+{
+  "at": "2026-11-12T10:01:58.114678+00:00",
+  "message": "msg_417dc84da3e4",
+  "source_test_sha256": "b4c2c3758ca902e26f8b911617bd90480bcb110ea29a5dc80ecf44bda82be7d1",
+  "actual093": "17PASS remains execution truth",
+  "original_requirement": "R07 primary plus every cleanup cause preserved across later cleanup",
+  "observation": "P07 keeps primary error asserts fired and EIO; close injection occurs in finally and exception swallowed; no allcleanup causes assertion. Walk-close checks nonempty only.",
+  "verdict": "COVERAGE_GAP_NOT_PRODUCT_FAILURE_PROVEN",
+  "action": "after094terminal+cleanup request focused pure real acquisition/unwind primary+multiple causes assertion, no current input edit",
+  "runtime094": "CONTINUES_UNCHANGED"
+}

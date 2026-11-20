@@ -1,0 +1,107 @@
+{
+  "at": "2026-11-15T16:05:17.046208+00:00",
+  "verdict": "FAIL_REAL_NORMAL_CHANNEL_RESET_NO_IMAGE",
+  "expected_exit": 0,
+  "actual_outer_exit": 1,
+  "kind": "failed",
+  "original_failure": {
+    "name": "CacheDrawError",
+    "message": "The control channel of the custodian failed: read ECONNRESET",
+    "code": "CHANNEL_ERROR"
+  },
+  "transport_failure": {
+    "name": "Error",
+    "code": "ECONNRESET",
+    "message": "read ECONNRESET",
+    "stack": "Error: read ECONNRESET\n    at Pipe.onStreamRead (node:internal/stream_base_commons:216:20)",
+    "cause": null,
+    "phase": null
+  },
+  "picture_bytes": null,
+  "source651_unchanged": true,
+  "independent_terminal": [
+    {
+      "role": "C",
+      "original": {
+        "pid": 1287847,
+        "ppid": 1287802,
+        "pgid": 1287847,
+        "sid": 1287847,
+        "start_ticks": 5083730,
+        "state": "S"
+      },
+      "independent_alive_observations": [
+        {
+          "pid": 1287847,
+          "ppid": 1287802,
+          "pgid": 1287847,
+          "sid": 1287847,
+          "start_ticks": 5083730,
+          "state": "D",
+          "role": "C",
+          "first_seen_at": "2026-11-15T16:04:32.440889+00:00",
+          "cmdline_sha256": "9affabcd4dcb649539dc3cbfd99c2a740c3160e84e3d0f962e9db7f26f2fb49a"
+        }
+      ],
+      "current": null,
+      "original_group_probe_signal0": "ESRCH"
+    },
+    {
+      "role": "N",
+      "original": {
+        "pid": 1287850,
+        "ppid": 1287847,
+        "pgid": 1287850,
+        "sid": 1287850,
+        "start_ticks": 5083735,
+        "state": "S"
+      },
+      "independent_alive_observations": [
+        {
+          "pid": 1287850,
+          "ppid": 1287847,
+          "pgid": 1287850,
+          "sid": 1287850,
+          "start_ticks": 5083735,
+          "state": "R",
+          "role": "N",
+          "first_seen_at": "2026-11-15T16:04:32.491300+00:00",
+          "cmdline_sha256": "8b00779e47aa3a1c6614e7ac3874054cb83fcbc6ea620d23912c4e143fd0203f"
+        }
+      ],
+      "current": null,
+      "original_group_probe_signal0": "ESRCH"
+    }
+  ],
+  "all_C_N_now_absent": true,
+  "original_groups_all_ESRCH": true,
+  "artifacts": {
+    "cache-worker-fixture.events": {
+      "sha256": "58d42673f83b1748e0ce6bcc509251e91c2bab1c81a4e72203a7527a6fa9ddfe",
+      "bytes": 299
+    },
+    "cache-worker-fixture.mjs": {
+      "sha256": "e3f4ccb1c4016a54356ce04be344b4ffff23f2f88698efe191570ad8407d03ab",
+      "bytes": 15045
+    },
+    "cache-worker-fixture.scenario": {
+      "sha256": "83d7d4df18591f6a966c7999355338c625e5a2f7c9cb0c35f11d3ed9f725e022",
+      "bytes": 7
+    },
+    "candidate.json": {
+      "sha256": "73a439f018b1a5cac323a17219c68920cbed570e863df4bc9ecb02b8938184c5",
+      "bytes": 4636
+    },
+    "final.json": {
+      "sha256": "1aac42956e33f4a22c1aac66205bab6d63aaf607ae5672afd677b542a256f741",
+      "bytes": 6294
+    },
+    "manifest.json": {
+      "sha256": "6389a91620eca5eeb88de3f533d1204450b722c0f14ac4e61a8c8e53860af4bb",
+      "bytes": 1191
+    }
+  },
+  "observer_acceptor_error": "Asserted no transport failure; correctly did not create PASS. This receipt performs the remaining independent terminal probes for failed case.",
+  "fault_mode": "NOT_RELEASED",
+  "next": "Preserve and diagnose this gate; no unchanged retry/no skip to R6"
+}

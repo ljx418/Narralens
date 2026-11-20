@@ -1,0 +1,68 @@
+{
+  "at": "2026-11-12T02:49:45.039739+00:00",
+  "head": "dd32f156ee576e65c5e0ed8e7f9dc228827a97fe",
+  "files_checked": 7356,
+  "changed": [],
+  "added": [],
+  "index_unchanged": true,
+  "protected_count": 42,
+  "protected_changed": [],
+  "source_sha256": "0d59ee891c9a1d3bf491e479639c67d61e35271f5af6b0e4bd708c34eece0795",
+  "test_sha256": "8f21cb81d38281364f0e654a128175de24dac96ffec89e77dbb44b21634dd510",
+  "independent_probe_sha256": "690ad4e9fb12010f9bbc327f3f69a21f577a285edc4082ffcfe0aff77435c57e",
+  "probe_matches_MAIN_record": true,
+  "captures": {
+    "root005-old-review-cases": {
+      "log_matches": true,
+      "result": {
+        "exit": 1,
+        "source_changed": [],
+        "source_added": [],
+        "log_sha256": "cf6d4791b48b6bd4c9d0d1333b822fd72705a5cc94dfe6b9e6cd42fdbbf73afb",
+        "finished_at": "2026-11-12T02:44:15.692242+00:00"
+      }
+    },
+    "root006-fixed-review-cases": {
+      "log_matches": true,
+      "result": {
+        "exit": 0,
+        "source_changed": [],
+        "source_added": [],
+        "log_sha256": "3afa9ac1d8da7e8f2aa5bd1290a206e34dd636e2cdac724368729cea33c4accd",
+        "finished_at": "2026-11-12T02:44:53.148233+00:00"
+      }
+    },
+    "root007-independent-probe": {
+      "log_matches": true,
+      "result": {
+        "exit": 0,
+        "source_changed": [],
+        "source_added": [],
+        "log_sha256": "d4ef53c2da393e7efbda1268de671c81518a80ad38116018a54c0d0c0cbb43cc",
+        "finished_at": "2026-11-12T02:45:11.186949+00:00"
+      }
+    },
+    "root008-original-probe": {
+      "log_matches": true,
+      "result": {
+        "exit": 0,
+        "source_changed": [],
+        "source_added": [],
+        "log_sha256": "34f3f42f5406fa03300d898bde73a65b2f4bf4cb4431843004a89744dcf8828a",
+        "finished_at": "2026-11-12T02:45:11.787104+00:00"
+      }
+    },
+    "root009-review-tsc": {
+      "log_matches": true,
+      "result": {
+        "exit": 0,
+        "source_changed": [],
+        "source_added": [],
+        "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "finished_at": "2026-11-12T02:45:19.040855+00:00"
+      }
+    }
+  },
+  "commands_completed": true,
+  "handoff": "Readonly review complete; all owned commands exited; no source/index writer; MAIN resumes ownership coordination"
+}

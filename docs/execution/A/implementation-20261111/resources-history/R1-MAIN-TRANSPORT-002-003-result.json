@@ -1,0 +1,31 @@
+{
+  "grant": {
+    "format": "narralens.dev-resource-ledger@1",
+    "status": "HELD",
+    "holder": "MAIN",
+    "queue": [
+      {
+        "lane": "MEDIA",
+        "status": "AWAIT_CORRECTED_CANDIDATE_READY",
+        "original_request": "msg_86b86d3a378c"
+      }
+    ],
+    "policy": "MAIN grants single heavy slot for Host/media/ffmpeg/Chromium/build/full gate; pure typecheck/unit permitted isolated",
+    "last_main_heavy": "R0 affected checks exit0, no owned heavy check running",
+    "evidence_limit": "operational coordination ledger, not proof of unrelated OS process absence",
+    "no_budget_ceiling": true,
+    "grant_id": "R1-MAIN-TRANSPORT-REGRESSION-003",
+    "granted_at": "2026-11-11T14:36:47.114810+00:00",
+    "exact_command": "corepack pnpm test tests/agent-driven/integration/created-native-ui-transport.test.ts tests/agent-driven/integration/controlled-native-session-capacity.test.ts tests/agent-driven/integration/created-native-entry.test.ts --maxWorkers=1 --minWorkers=1",
+    "cwd": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+    "scope": "new transport28 plus existing capacity/native-entry regression; actual pinned Studio/Host, no browser or rendering",
+    "request_message": "MEDIA released NOT_STARTED msg_6e02189d3772",
+    "source_fence": "freeze corrected tested input before command; no source/index mutation during command"
+  },
+  "commands_terminal": true,
+  "new_transport": "28/28 exit0",
+  "negative_control": "2 expected test failures, old code restored exactly",
+  "affected_regression": "34/34 exit0",
+  "cleanup": "all recorded test PIDs absent, harness listeners false/connection-refused test",
+  "freeze_commit": "cca95020ee4ede16ef133ecd6e08b6a27632adaa"
+}

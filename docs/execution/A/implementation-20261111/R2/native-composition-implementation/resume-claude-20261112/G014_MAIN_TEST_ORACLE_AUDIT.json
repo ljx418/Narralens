@@ -1,0 +1,34 @@
+{
+  "at": "2026-11-12T14:35:08.984623+00:00",
+  "scope": "same014 test oracle/branch audit on frozen016 bytes, no new scope",
+  "source": "tests/agent-driven/integration/created-native-source-reader.test.ts",
+  "sha256": "83d13030b19a6e3bc79eaa2104a53ab31cfc8214b9fbce8047a24cc34bb0d21a",
+  "message": "msg_b870c8d7d93f",
+  "findings": [
+    {
+      "id": "014-TEST-01",
+      "case": "G01 late raw rejection",
+      "fact": "reader.close().then(()=>{},()=>{}) swallows both outcomes; subsequent reported=closing.then(()=>null,error=>error) always null. Also require real acquisition entered before cancelling.",
+      "required": "Keep raw close promise; separately observe rejection; synchronize raw acquisition latch; assert genuine cleanup causes propagate."
+    },
+    {
+      "id": "014-TEST-02",
+      "case": "G05 real cancellation",
+      "fact": "close immediately after readSource without media-start latch; child-exited includes version child, so actual cancelled media branch not proven.",
+      "required": "Synchronize named real media PID start; exclude version events; assert media exit/reap/input-held/release/rejection order."
+    },
+    {
+      "id": "014-TEST-03",
+      "case": "G06 nonlexical supplier",
+      "fact": "Assertions only status/directory lookup and duplicate-entry refusal; none discriminate a consumer that sorts the supplied order.",
+      "required": "Supported order-dependent pinned-consumer fixture; assert exact nonlexical result and distinct sorted control."
+    },
+    {
+      "id": "014-TEST-04",
+      "case": "G01 first rejection cleanup",
+      "fact": "Close fault armed before acquisition enumeration; may fail enumeration-close rather than intended primary REVISION_CONFLICT plus cleanup failure.",
+      "required": "Explicit named primary and cleanup faults with boundary-hit/order assertions, preserve original error semantics."
+    }
+  ],
+  "runtime": "126 still in progress; must not edit or rerun during freeze; runtime result will determine actual failures, static findings not asserted as observed test failures."
+}

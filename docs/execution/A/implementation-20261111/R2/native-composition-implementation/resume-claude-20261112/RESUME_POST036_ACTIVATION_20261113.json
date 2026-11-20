@@ -1,0 +1,28 @@
+{
+  "at": "2026-11-13T07:04:17.018696+00:00",
+  "user_instruction": "ClaudeCode额度已经恢复 继续剩余的开发工作",
+  "status": "CLAUDE_RESUMED_SAME_TASK_DOC_CHECKPOINT_ONLY",
+  "task": "task_5dcbe8192764",
+  "run": "run_399f9dd3ce5a",
+  "old_dispatch": "ctx_297f7b8da2e1",
+  "old_verified": "stopped/process_stopped/exited",
+  "new_dispatch": "ctx_ae73a82c85e9",
+  "terminal": "term_2dc99ebb-91cc-4ec3-91c9-28fd81bfb66f",
+  "visible_title": "ClaudeCode｜N1-N2 恢复与集中修复",
+  "start_receipt": "ready,agentclaude,modeterminal,keptOpentrue",
+  "instruction_message": "msg_f1fc6fd3d581",
+  "checkpoint": "USER_AUTHORIZED_RESUME_20261113_POST036.md",
+  "baseline": "e2eff61b464d75d36598103d718cd2a75db5dfda",
+  "guarded22_match": true,
+  "protected_agents_match": true,
+  "index_empty": true,
+  "launch_precondition_rejection_preserved": {
+    "request_id": "34a12eb1-eea6-4fef-976e-3423593a1bd1",
+    "reason": "Task already reopened ready; retry-of requires failed/blocked task. No launch side effects. Inspected settled latest dispatch then used documented fresh start on same ready Task."
+  },
+  "source_release037": false,
+  "runtime_release": false,
+  "next": "Claude ACK, cleanup proof, unified corrected plan; MAIN source release then implementation/selfvalidation/frozen review; next-wiring docs only after acceptance",
+  "new429_rule": "immediate stop; no autonomous retry/provider switch/Codex takeover",
+  "goal_status_note": "User explicit recovery instruction revokes prior blocked condition; goal tool cannot set active. Objective remains unchanged/incomplete."
+}

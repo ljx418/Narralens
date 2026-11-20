@@ -1,0 +1,142 @@
+{
+  "format": "narralens.independent-frozen-review.findings@1",
+  "candidate_commit": "1d348d419120f23f45d958112ea8c43df5a04675",
+  "parent_commit": "e2eff61b464d75d36598103d718cd2a75db5dfda",
+  "cached_origin_main": "304c89134fdf9f834f7d69e3f4d5c89a68044c60",
+  "upstream_commit": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+  "reviewer": "Independent Codex reviewer A; no implementation edits; dispatched task_d4071ac7b4d1 / ctx_e657630bbb6b",
+  "conclusion": "REQUEST_CHANGES",
+  "business_runtime_executed": false,
+  "findings": [
+    {
+      "id": "A057-01",
+      "severity": "MAJOR",
+      "title": "Malformed public request escapes the folder serving callback",
+      "locations": [
+        "src/adapters/openfilm/openfilm-upstream.ts:654",
+        "src/adapters/openfilm/openfilm-upstream.ts:943"
+      ],
+      "requirements": [
+        "R02/tamper_and_authority",
+        "R07/drain_and_delivery"
+      ],
+      "basis": "Static reachable counterexample; no runtime reproduction executed.",
+      "reachability": "produceNativeCacheEntry -> servingFor -> createPinnedOpenFilmServingOwner -> loopback createServer -> folder.handle. Once this component listener exists, raw HTTP request targets are public input; no Host-private hook or caller-supplied capability is needed.",
+      "trigger": "Send raw request target //[ with the correct 127.0.0.1:<port> Host header. It contains no colon, backslash, NUL or dot component, so guards 641-653 admit it. new URL(url, base) treats // as an authority reference and throws for an unterminated IPv6 host.",
+      "violation": "The request must be refused within the serving boundary. The URL constructor is outside a catch, and the createServer callback at943-962 also has none; this synchronous exception escapes the HTTP handler. No uncaughtException handler was found in frozen src/tools, so the default Node outcome is process termination. This is a reachable public input defect, not a claim that the listener is already wired into the next Host stage.",
+      "minimal_fix": "Parse only a validated origin-form target, or catch URL parsing and return a bounded 400 response. Ensure every public parsing branch stays inside an HTTP error boundary.",
+      "required_regression": "In an isolated child process start the real pinned serving, send //[ over raw HTTP, assert 400 plus child liveness and a subsequent valid asset response; prove all listener/probe resources settle. Do not rely on fetch, which may normalize/reject the target before it reaches the server."
+    },
+    {
+      "id": "A057-02",
+      "severity": "MAJOR",
+      "title": "Text budget is checked after the initial full-file hashing read",
+      "locations": [
+        "src/host/agent-driven/retained-native-closure.ts:679",
+        "src/host/agent-driven/retained-native-closure.ts:685",
+        "src/host/agent-driven/retained-native-closure.ts:772",
+        "src/host/agent-driven/committed-snapshot-authority.ts:453",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:989"
+      ],
+      "requirements": [
+        "R07/budgets"
+      ],
+      "basis": "Direct source contradiction and inspection of the complete F06 assertions; no runtime executed.",
+      "reachability": "acquireNativeFacts -> #streamDigest.read -> retainFile -> #hash, then readText. The workspace reader also retains every leaf at711-724 before classifying text/cache files.",
+      "trigger": "The existing F06 case itself overwrites committed film.html with 9 MiB, above the 8 MiB text limit. retainFile accepts its current stat size and hashes all 9 MiB before readText rejects. A much larger corrupted referenced text has the same path.",
+      "violation": "R07 requires size checks before text reads and explicit total-byte bounds. F06 asserts onReadChunk observed zero bytes, but that observation exists only at #readAll1018, while #hash reads via readSync1000 without notifying it. Thus the test proves zero decoded-text reads, not zero pre-budget file reads; the advertised preflight does not bound actual input work.",
+      "minimal_fix": "Introduce an explicit bounded-text retention path or preflight classification that checks per-file and aggregate text limits before any hashing/read of that text; keep large media on a separate bounded streaming path. Instrument all underlying reads used by the assertion.",
+      "required_regression": "Run actual authority and actual workspace reader with an oversized known text and a cumulative-text overflow; count reads including initial digest/verification reads, assert refusal before any bytes of the rejected text are read, and check all descriptors are released. The old frozen implementation must fail the corrected assertion."
+    },
+    {
+      "id": "A057-03",
+      "severity": "MAJOR",
+      "title": "Normal retain/hash/verify use EOF loops instead of the captured media size",
+      "locations": [
+        "src/host/agent-driven/retained-native-closure.ts:994",
+        "src/host/agent-driven/retained-native-closure.ts:1094",
+        "src/host/agent-driven/retained-native-closure.ts:805",
+        "src/host/agent-driven/retained-native-closure.ts:824",
+        "src/host/agent-driven/retained-native-closure.ts:1066"
+      ],
+      "requirements": [
+        "R07/budgets",
+        "R07/drain_and_delivery"
+      ],
+      "basis": "Static control-flow review; concurrent growth reproduction remains NOT_RUN.",
+      "reachability": "retainFile uses #hash; authority #streamDigest hashes media again with hashFile; delivered handle.verify uses verifyFile -> #hashSync; whole closure.verify also uses #hashSync. These are normal production component paths, not the Host-private fault hooks.",
+      "trigger": "A separate writer grows an already opened regular file after the identity/size stat and while its descriptor is being hashed. The streaming buffer is bounded but the loop keeps reading until current EOF, with no captured-size byte counter, extra-byte refusal, time bound or cancellation yield.",
+      "violation": "The requested growth bound is missing on these paths. A sufficiently sustained writer can extend the work arbitrarily, and the synchronous loop blocks the event loop so reader.close and child timers cannot run. verifyFileExact already uses #hashBoundedSync at863, but that helper does not protect the ordinary retain/hash/verify paths. Existing P07 grows the file before readText, rather than during hashing, so it does not cover this window.",
+      "minimal_fix": "Use the captured stat size as the limit for every hash, refuse early EOF and a single extra byte, and recheck exact identity after hashing. Apply the same bounded primitive to hashFile, verifyFile and whole verify, preserving streaming media memory behavior.",
+      "required_regression": "Use an external process/barrier to append during initial retainFile, hashFile, verifyFile and verify; assert work stops at captured-size plus a bounded growth probe, refuses rather than truncates, and shutdown/cleanup completes. Exercise the normal methods, not only verifyFileExact."
+    },
+    {
+      "id": "A057-04",
+      "severity": "MAJOR",
+      "title": "Rejected pinned page-frame promise does not prove the page/browser work settled",
+      "locations": [
+        "src/adapters/openfilm/openfilm-upstream.ts:402",
+        "src/adapters/openfilm/openfilm-upstream.ts:412",
+        "src/adapters/openfilm/openfilm-upstream.ts:1109",
+        "src/host/agent-driven/created-native-workspace.ts:815"
+      ],
+      "upstream_locations": [
+        "packages/openfilm/studio/server/pageframes.mjs:268",
+        "packages/openfilm/studio/server/pageframes.mjs:274",
+        "packages/openfilm/studio/server/pageframes.mjs:280",
+        "packages/openfilm/studio/server/pageframes.mjs:299"
+      ],
+      "requirements": [
+        "R05/child_lifetime",
+        "R07/cleanup_uncertainty",
+        "R07/drain_and_delivery"
+      ],
+      "basis": "Static cross-repository lifetime counterexample on the pinned upstream timeout branch; not observed or reproduced in current captures.",
+      "reachability": "Actual registered bridge.draw -> issued producer.pageFrame -> pinned pageframes.withPage. A 45s job timeout or a failing/timed-out seek can occur on real media/resource stalls; it does not require an arbitrary injectable producer.",
+      "trigger": "In withPage the JOB timer launches void closeBrowser() and rejects the race without awaiting browser close. The catch calls forget(), whose page.then(p=>p.close()) is also fire-and-forget. W tracks only loaded.pageFrame; bridge finally calls endDraw immediately after that rejection, and workspace releases its PRE closure.",
+      "violation": "The accepted draw count and owned-call ledger represent promise settlement, not actual page/context/browser settlement on this branch. closeServing can consequently see zero accepted draws while teardown is still running, and a peer producer owner means owner.close need not close the shared browser. R07 requires accepted work/probes to settle before input release; Q02 proves the successful late-dependency branch only. No witness is minted on this failure, but resource-lifetime acceptance still fails.",
+      "minimal_fix": "Add a real per-call settlement contract in the pinned adapter layer and retain draw ownership until underlying timeout/forget cleanup is acknowledged. Do not treat a race rejection or fire-and-forget browser close as release evidence, and do not solve it by killing a peer owner. Preserve the upstream pin; any seam change needs explicit reviewed scope.",
+      "required_regression": "Under an exact resource grant drive the real pinned seek/job timeout with a peer producer owner; observe page/context or browser disconnection and all child/probe settlement before endDraw/tree release, verify the peer is not killed, no late request outlives the serving, and cleanup uncertainty is retained if settlement cannot be established."
+    },
+    {
+      "id": "A057-05",
+      "severity": "MAJOR",
+      "title": "A duration cache retained without its frame triple bypasses dependency identity checks",
+      "locations": [
+        "src/host/agent-driven/created-native-source-reader.ts:1226",
+        "src/host/agent-driven/created-native-source-reader.ts:1239",
+        "src/host/agent-driven/created-native-source-reader.ts:1245",
+        "src/host/agent-driven/created-native-source-reader.ts:1327"
+      ],
+      "requirements": [
+        "R04/native_cache",
+        "R02/tamper_and_authority"
+      ],
+      "basis": "Static full-path counterexample; new duration-only regression NOT_RUN.",
+      "reachability": "Real film.html pageframe draw at ms0 creates a witness including duration and triple. Reader later classifies only files currently present. Duration-only classification asks the current output authorization, but never validates that witness dependencies still have their original identities.",
+      "trigger": "After a valid pageframe draw (no poster), delete only its derived .jpg/.json/.stamp triple, keep film-duration.json intact, modify film.html in place and restore its exact bytes and original mtime. Its ctime changes. Take a fresh reader round. Source-copy digests still match, duration output identity and film mtime:size match, and the empty allowed pageframes directory is accepted.",
+      "violation": "With no triple present #proveWitnessedCache is never called, so its dependency identity comparison at1327-1331 never runs. The duration branch accepts a witness whose film dependency has changed/restored identity. Newly acquired closures only prove the current restored epoch and do not compare it to the historical draw. K04-b874-906 keeps the triple and therefore reaches the stronger check; it misses this reachable path. This is stale cache authorization, not proof of a forged Expected numeric duration, which is independently computed.",
+      "minimal_fix": "Validate all dependency identities of the current duration witness as well as its concrete duration output. Share the witness-dependency validation with pageframe/poster without requiring unrelated historical outputs to remain; preserve legitimate multi-frame/current-duration behavior.",
+      "required_regression": "Start with an actually accepted real draw and reader round, remove just the derived triple, restore film bytes+mtime after an in-place change, prove ctime moved, and assert fresh reader refusal with NATIVE_SOURCE_CACHE_STALE. Include a duration-only stable positive control and retain Q03 two-frame/no-fallback tests."
+    },
+    {
+      "id": "A057-06",
+      "severity": "MINOR",
+      "title": "Media poster/frame/wave cache admission is still filename/shape based",
+      "locations": [
+        "src/host/agent-driven/created-native-source-reader.ts:1205",
+        "src/host/agent-driven/created-native-source-reader.ts:1210",
+        "src/host/agent-driven/created-native-source-reader.ts:1217"
+      ],
+      "requirements": [
+        "R04/native_cache"
+      ],
+      "basis": "Static admission counterexample; no new runtime executed.",
+      "reachability": "The actual reader retains all workspace files and reaches #classifyCache for a cache path absent from committed source.",
+      "trigger": "Create .film/cache/posters/<correct-media-key>.jpg with arbitrary bytes, or frames/<correct-key>-0-32.jpg with arbitrary bytes, or waves/<correct-key>.json containing {}. The first two branches return after a key/width check; waves only parses an object.",
+      "violation": "These bytes have no concrete producer authorization. This falls short of the original R04 wording that forged cache is refused with no broad cache whitelist. Severity is limited because these outputs are not consumed as authoritative Expected facts by the reviewed reader; this is not an HTTP authorization bypass or a claim that arbitrary images alter the projection.",
+      "minimal_fix": "Refuse unsupported cache families until their producer output is proved, or explicitly narrow and approve the contract for retained, non-authoritative cache families. If retained, separate that weaker classification from a claim that the producer was verified.",
+      "required_regression": "Use each well-formed native key with deliberately fabricated output bytes and assert the documented refusal/non-authority behavior through the actual reader; do not use an unknown path that fails an earlier boundary."
+    }
+  ]
+}

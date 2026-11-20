@@ -1,0 +1,38 @@
+{
+  "at": "2026-11-12T02:39:30.917323+00:00",
+  "upstream": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+  "node_command": "node docs/execution/A/implementation-20261111/R2/native-reader-preflight/native-rev-vectors.mjs /mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm",
+  "node_exit": 0,
+  "python_checks": [
+    {
+      "native_rev": "e3b0c44298fc1c14",
+      "bytes": 0,
+      "passed": true
+    },
+    {
+      "native_rev": "c193482f0796c9a9",
+      "bytes": 17,
+      "passed": true
+    },
+    {
+      "native_rev": "06de29fb49055227",
+      "bytes": 34,
+      "passed": true
+    },
+    {
+      "native_rev": "1e3d86711221cf60",
+      "bytes": 26,
+      "passed": true
+    },
+    {
+      "native_rev": "3f847bbde4e77a30",
+      "bytes": 22,
+      "passed": true
+    }
+  ],
+  "artifacts": {
+    "native-rev-vectors.mjs": "7bbe0b907a4b12659ae9141e819bd81ebc300ef52affd2b9e80983b365a3902e",
+    "native-rev-vectors.json": "d84d97d756573b929b51ec862b59ca836c367942f7c9cfca72c084c2a2ac83a3"
+  },
+  "scope": "Pinned actual revOf versus independent Python hashlib. Not source port, native hydration, NativeAck, or browser acceptance."
+}

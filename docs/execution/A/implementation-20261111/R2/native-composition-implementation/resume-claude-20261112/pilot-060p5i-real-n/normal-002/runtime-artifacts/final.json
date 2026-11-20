@@ -1,0 +1,202 @@
+{
+  "kind": "positive-pilot-final",
+  "authoritative": true,
+  "publication_protocol": "positive-pilot-publication-v2",
+  "mode": "normal",
+  "root": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/var/native-cache-positive-pilot/run-eLLk2O",
+  "exit_code": 0,
+  "kind_of_run": "ok",
+  "fault_case_passed": false,
+  "terminal_proof": true,
+  "picture_sha256": "d592c3cbaf5d17852d9cff7fd0002db9a336e3d41acee2456689b86b5521b238",
+  "picture_bytes": 1024,
+  "picture_is_the_exact_one": true,
+  "original_failure": null,
+  "settlement_failure": null,
+  "cleanup_facts": [],
+  "reporting_failure": null,
+  "reporting_failures": [],
+  "evidence_errors": [],
+  "evidence_problems": [],
+  "manifest_error": null,
+  "required_artifacts": [
+    "candidate.json",
+    "cache-worker-fixture.mjs"
+  ],
+  "candidate_sha256": "00a91639652bbd578ecd61b5fa831fa7b7ba57d91dec927d75026e6cdfea77eb",
+  "candidate_bytes": 4328,
+  "manifest_sha256": "b4af1cb25c02de8a7989412e626050b73aca4c28fce86fd04b30561f1fd1d70c",
+  "manifest_bytes": 1191,
+  "terminal_proof_observations": {
+    "at": 1794761018260,
+    "proven": true,
+    "truncated": false,
+    "observations": [
+      {
+        "at": 1794761018258,
+        "kind": "custodian-epoch",
+        "presence": "gone",
+        "pid": 1374847,
+        "start_ticks": "5305588",
+        "state": null,
+        "reason": "the original epoch of the custodian"
+      },
+      {
+        "at": 1794761018258,
+        "kind": "worker-epoch",
+        "presence": "gone",
+        "pid": 1374849,
+        "start_ticks": null,
+        "state": null,
+        "reason": "the original epoch of the worker"
+      },
+      {
+        "at": 1794761018260,
+        "kind": "group",
+        "presence": "gone",
+        "pid": 1374849,
+        "start_ticks": null,
+        "state": null,
+        "reason": "the group of the worker"
+      },
+      {
+        "at": 1794761018260,
+        "kind": "known-target",
+        "presence": "gone",
+        "pid": 1374849,
+        "start_ticks": null,
+        "state": null,
+        "reason": "a member of the draw that was recorded while it was alive"
+      }
+    ]
+  },
+  "diagnostic_snapshot": {
+    "known": true,
+    "phase": "execution_settled",
+    "settled": true,
+    "cleanup_required": false,
+    "draw_id": "92bdb64928ba4883",
+    "ticket_digest": "92bdb64928ba48831ac13f8f79cb0ca9ed9cf2c876ac16823ee123741d4067aa",
+    "custodian": {
+      "pid": 1374847,
+      "ppid": 1374800,
+      "pgid": 1374847,
+      "sid": 1374847,
+      "start_ticks": 5305588,
+      "state": "S"
+    },
+    "custodian_born": true,
+    "custodian_closed": true,
+    "custodian_exit": {
+      "code": 0,
+      "signal": null
+    },
+    "worker": {
+      "pid": 1374849,
+      "ppid": 1374847,
+      "pgid": 1374849,
+      "sid": 1374849,
+      "start_ticks": 5305592,
+      "state": "S"
+    },
+    "forked": true,
+    "forked_pid": 1374849,
+    "exec_ok": true,
+    "recorded_targets": [
+      {
+        "pid": 1374849,
+        "start_ticks": "5305592"
+      }
+    ],
+    "receipt_summary": {
+      "kind": "DOMAIN_REAPED",
+      "outcome": "reaped",
+      "seq": 4,
+      "segments": 1,
+      "events_count": 6,
+      "waits_count": 1,
+      "identities_count": 1,
+      "exec_ok": true,
+      "echild": true,
+      "group_esrch": true,
+      "known_ids_gone": true,
+      "anchor_retained": true,
+      "identity_overflow": false,
+      "events_truncated": false,
+      "diagnostics_lost": false,
+      "state": "receipt_flush",
+      "events_digest": "f1ec34a4f8ecfbcf48e7f53dd5d540dc7de6246e8f839bb3fe709dd6f3f8c4b8",
+      "waits_digest": "b67f9f35bd2dc5ff2668a8bf1ce42f18a6f2ad45e21c4ebdeb74a642250d89f1",
+      "identities_digest": "1d40aa446f5c9a854e486ff3f5331fb124192c753db808bed877f5b1f4bfad6d"
+    },
+    "accumulator_summary": {
+      "segments": 1,
+      "received": 1,
+      "events": 6,
+      "waits": 1,
+      "identities": 1,
+      "refused": false,
+      "events_digest": "f1ec34a4f8ecfbcf48e7f53dd5d540dc7de6246e8f839bb3fe709dd6f3f8c4b8",
+      "waits_digest": "b67f9f35bd2dc5ff2668a8bf1ce42f18a6f2ad45e21c4ebdeb74a642250d89f1",
+      "identities_digest": "1d40aa446f5c9a854e486ff3f5331fb124192c753db808bed877f5b1f4bfad6d"
+    },
+    "latched_outcome": {
+      "kind": "candidate",
+      "code": null,
+      "message": null,
+      "native_phase": null
+    },
+    "cancel_provenance": null,
+    "cancel_secondary": null,
+    "cleanup_facts": [],
+    "terminal_proof": {
+      "at": 1794761018260,
+      "proven": true,
+      "truncated": false,
+      "observations": [
+        {
+          "at": 1794761018258,
+          "kind": "custodian-epoch",
+          "presence": "gone",
+          "pid": 1374847,
+          "start_ticks": "5305588",
+          "state": null,
+          "reason": "the original epoch of the custodian"
+        },
+        {
+          "at": 1794761018258,
+          "kind": "worker-epoch",
+          "presence": "gone",
+          "pid": 1374849,
+          "start_ticks": null,
+          "state": null,
+          "reason": "the original epoch of the worker"
+        },
+        {
+          "at": 1794761018260,
+          "kind": "group",
+          "presence": "gone",
+          "pid": 1374849,
+          "start_ticks": null,
+          "state": null,
+          "reason": "the group of the worker"
+        },
+        {
+          "at": 1794761018260,
+          "kind": "known-target",
+          "presence": "gone",
+          "pid": 1374849,
+          "start_ticks": null,
+          "state": null,
+          "reason": "a member of the draw that was recorded while it was alive"
+        }
+      ]
+    },
+    "observed_signals": [
+      "exit:code 0"
+    ],
+    "cleanup_failures": 0,
+    "run_directory": null,
+    "transport_failure": null
+  }
+}

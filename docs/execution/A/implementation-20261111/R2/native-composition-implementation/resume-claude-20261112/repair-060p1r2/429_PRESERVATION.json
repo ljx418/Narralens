@@ -1,0 +1,24 @@
+{
+  "at": "2026-11-14T09:53:04.420251+00:00",
+  "escalation": "msg_stop_1b09cb377de007fd4e2ec4ed",
+  "dispatch": "ctx_9adb0a2b7d0a",
+  "task": "task_4ba8760231b0",
+  "reason": "429 Token Plan limit (2056)",
+  "head": "1d348d419120f23f45d958112ea8c43df5a04675",
+  "changed_release_paths": [],
+  "new_release_paths_present": [],
+  "capture_paths": [],
+  "index": "",
+  "AGENTS_sha256": "37300463a72a612ae16e0a5fcfb496502c57c722b83781e0e2e8c9480594542b",
+  "stop_confirmation": {
+    "state": "stopped",
+    "stage": "process_stopped",
+    "liveness": "exited",
+    "processAction": "closed_agent_terminal",
+    "ptyKilled": true,
+    "receipt": "429_STOP_RECEIPT.txt",
+    "worker_show": "429_WORKER_SHOW.txt"
+  },
+  "resume": "Requires new explicit user recovery instruction; no automatic retry or takeover",
+  "secondary_error": "MiniMax safety classifier temporarily unavailable/rate-limited before Bash call; not repaired by credential/provider change"
+}

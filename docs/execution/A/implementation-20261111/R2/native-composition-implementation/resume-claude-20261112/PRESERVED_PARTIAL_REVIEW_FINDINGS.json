@@ -1,0 +1,21 @@
+{
+  "at": "2026-11-12T05:51:52.723615+00:00",
+  "source_message": "msg_ea20781abbbd",
+  "reviewer_dispatch": "ctx_3f52de60cbc1",
+  "scope": "preserved partial implementation; findings not independently reproduced by MAIN",
+  "status": "OPEN_PENDING_IMPLEMENTATION_AND_TEST_EVIDENCE",
+  "findings": [
+    "directory-inclusive membership compared to manifest file count",
+    "unbounded text read before limits",
+    "BOM stripping changes native revision input",
+    "closeSync on promises FileHandle risks stale descriptor closure by GC",
+    "cleanup errors swallowed",
+    "close during pending operation releases active descriptors",
+    "ancestors above root not retained",
+    "directory leaf missing O_DIRECTORY",
+    "film retain not idempotent"
+  ],
+  "acceptance_requirement": "Each applicable defect requires named regression oracle and captured actual result; no passed claim from review instruction alone. Existing fixed internal probe correction remains mandatory.",
+  "validation_grant": "tsc only; exact selected test/resource request required",
+  "source_or_index_changed_by_MAIN": false
+}

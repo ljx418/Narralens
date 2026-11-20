@@ -1,0 +1,71 @@
+{
+  "at": "2026-11-12T07:13:11.069613+00:00",
+  "grant_id": "N1N2-RESUME-BATCH-003",
+  "request": "msg_22e02c6ccbec",
+  "commands": [
+    {
+      "capture": "n1n2-claude-resume-034-batch-pure",
+      "argv": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "vitest",
+        "run",
+        "--config",
+        "vitest.config.ts",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts",
+        "-t",
+        "P0"
+      ],
+      "count": 8
+    },
+    {
+      "capture": "n1n2-claude-resume-035-batch-component",
+      "argv": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "vitest",
+        "run",
+        "--config",
+        "vitest.config.ts",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts",
+        "-t",
+        "R0"
+      ],
+      "count": 18
+    },
+    {
+      "capture": "n1n2-claude-resume-036-batch-regressions",
+      "argv": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "vitest",
+        "run",
+        "--config",
+        "vitest.config.ts",
+        "tests/agent-driven/integration/created-native-ack.test.ts",
+        "tests/agent-driven/integration/committed-snapshot-host.test.ts",
+        "tests/agent-driven/integration/created-native-workspace.test.ts"
+      ],
+      "count": "all exact3 files"
+    }
+  ],
+  "frozen_sha256": {
+    "tests/agent-driven/integration/created-native-ack.test.ts": "5f50db85c7c07a2ecf4faefc20ec2ec6c7ad4910fafe549c2edc76bbad729c7c",
+    "src/host/agent-driven/retained-native-closure.ts": "6f5dd97ba9095c1cd8733b57dc75d27bd25ebd5b87fc715d567de5be8aa60b22",
+    "src/host/m5/openfilm-native-expected.ts": "19110e45a83b6d5b611b4260620ce873f923f1e5a5b907bc6176c4b734fbeed3",
+    "tests/agent-driven/integration/helpers/native-source-fixture.ts": "9a648b146095a2075505c9fbf7f024935f72c71d9e081ede6310d9d3fa0ea109",
+    "src/host/agent-driven/committed-snapshot-authority.ts": "7421eedae0a9a4b2c028ac705adb376e64697cf0cf7ce40745dcbe4a7035d2a6",
+    "src/host/agent-driven/created-native-source-reader.ts": "93fb70c468af3649e0265d6fa1905d3833ecf413f787ff7db938ebd25e78b1cd",
+    "tests/agent-driven/integration/created-native-workspace.test.ts": "439d469032c9af2b83ceb826e0aead7cf5c2fe5c5693be7cbf18c8e67f0f615f",
+    "tests/agent-driven/integration/created-native-source-reader.test.ts": "7f270b9fbb61ad0fe39646e7dc89822c4428667031adb4ef9c2664b52a89320e",
+    "tests/agent-driven/integration/committed-snapshot-host.test.ts": "bfd0c6373b254050d32a6a99e7b6f8b9827dc24b6b2587515ab4c5aad2cd9037",
+    "src/host/agent-driven/created-native-workspace.ts": "b57bed5df0ea600a2aa1a5b2dc3df2873f794389ee5274f32efb52a6f3d653ad"
+  },
+  "compile033_matches_all10": true,
+  "metadata_correction": "Reported closure SHA had65hex characters; verified actual64hex 6f5dd97ba9095c1cd8733b57dc75d27bd25ebd5b87fc715d567de5be8aa60b22 equals recorded compile033 input. No code input change.",
+  "old_cleanup_sha256": "1141ba9e71c0adbb94c314bc7804c8cb7e6753d1e3ec07b1aa4748dc907a7129",
+  "acceptance": "not claimed"
+}

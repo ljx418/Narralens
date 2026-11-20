@@ -1,0 +1,888 @@
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+import type { NarralensHost } from '../server.js';
+import { ProductError } from '../creative/trusted-context.js';
+import { canonicalDigest, canonicalJson, contentDigest } from '../creative/digest.js';
+import { creativeInputClosure } from '../creative/creative-closure.js';
+import { validateAgentDefinition } from '../../contracts/agent-driven-validator.js';
+import type { Applied, ApplyChange } from '../../contracts/agent-driven-types.js';
+import { computeSourceDigest } from '../engine/source-digest-v1.js';
+import { OPENFILM_UPSTREAM_SHA } from '../engine/engine-binding-store.js';
+import { validateCreatedSourceFact, type CreatedSourceFact } from '../projects/project-creation-store.js';
+import type { ProjectCreationStore } from '../projects/project-creation-store.js';
+import { OperationIdempotencyStore } from '../projects/operation-idempotency-store.js';
+import { ProductSqliteRepository } from './product-sqlite-repository.js';
+import { controlledRecoveryFamily, compareControlledRecoveryRows, hasOlderControlledPending } from '../projects/controlled-recovery-scheduler.js';
+import type { ProjectTransactionRow } from '../projects/revision-store.js';
+import { CreatedSourceAdoptionStore, type CreatedAdoptionFact } from './created-source-adoption-store.js';
+import { CreatedPublicationIdentityStore } from './created-publication-identity-store.js';
+import { CreatedSourcePublisher, type CreatedSourceSelectionPort } from './created-source-publisher.js';
+import {
+  CreatedPublicationRecoveryFiles,
+  type CreatedRecoveryFilesLease,
+  type RecoveryFileLayout,
+} from './created-publication-recovery-files.js';
+import { RetainedSourceTree } from './retained-source-tree.js';
+import { PublicationCleanupError } from './publication-cleanup.js';
+import { assertPreparedAdoptionPlan, type PreparedAdoptionPlanV1 } from './created-source-ports.js';
+import type { CreatedTaskStore } from './created-task-store.js';
+import type { LocalAssetRegistry } from './local-asset-registry.js';
+import type { PreparedDraftVerifier } from './prepared-draft-verifier.js';
+
+/**
+ * Host-only business recovery for the created-source adoption family.
+ *
+ * This service owns no state machine of its own. It reads the original rows, proves what
+ * actually happened, and then drives the original Coordinator queue, the original
+ * Publisher, the original recovery-file resource lease and the original closed commit to
+ * a decision. A new business state, a new Approval, a new proof or a new wire DTO would
+ * each be a second authority, so none of them exist here.
+ *
+ * The service is not mounted by the Host yet. Nothing in this file may be reported as
+ * RCV-D10-10 or as a business recovery pass until the Host actually calls it.
+ */
+
+const CREATED_APPLY_OPERATION = 'agent.created_source.apply@1';
+const IDEMPOTENCY_OPERATION = 'agent.v1:change.apply';
+const PROJECT_ID = /^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$/;
+const DECIDED = new Set(['committed', 'aborted', 'attention']);
+const ABORTABLE = new Set(['received', 'preconditions_checked', 'staged', 'validated', 'prepared']);
+
+/**
+ * Machine reasons. Every outcome carries exactly one of these; no free text is matched
+ * anywhere in this module. The reason is the classification, not a human message.
+ */
+export type CreatedSourceRecoveryReason =
+  | 'NOT_A_CREATED_TRANSACTION'
+  | 'ALREADY_COMMITTED'
+  | 'TERMINAL_STATE_NOT_REVIVED'
+  | 'ORDERED_AFTER_OLDER_PENDING'
+  | 'ORIGIN_MISSING'
+  | 'REQUEST_NOT_LEGITIMATE'
+  | 'BASE_MOVED'
+  | 'AUTHOR_NOT_PROVABLE'
+  | 'IDENTITY_NOT_PROVABLE'
+  | 'PUBLISHED_NOT_PROVABLE'
+  | 'AUTHORITY_CURRENT'
+  | 'AUTHORITY_EXPIRED'
+  | 'AUTHORITY_WITHDRAWN'
+  | 'RUN_CANCELLED'
+  | 'RUN_PAUSED'
+  | 'RUN_NOT_ACTIVE'
+  | 'LOCK_ACTIVE'
+  | 'SELECTION_CHANGED'
+  | 'RIGHTS_CHANGED'
+  | 'CREATIVE_INPUT_CHANGED'
+  | 'IMPACT_EXPIRED'
+  | 'OTHER_PREPARED_PENDING'
+  | 'PROVEN_ABORTED'
+  | 'COMPENSATED_ABORTED'
+  | 'RECOVERED_COMMIT'
+  | 'RECOVERED_PUBLISHED_JOURNAL'
+  | 'GATE_BLOCKED'
+  | 'TRANSIENT_RESOURCE_ERROR'
+  | 'UNEXPECTED_FAILURE';
+
+export type CreatedSourceRecoveryOutcome =
+  | 'committed'
+  | 'already_committed'
+  | 'aborted'
+  | 'attention'
+  | 'deferred'
+  | 'not_owned';
+
+/** Internal receipt. No wire DTO, no persisted state, no new contract. */
+export interface CreatedSourceRecoveryResult {
+  readonly transaction_id: string;
+  readonly project_id: string;
+  readonly outcome: CreatedSourceRecoveryOutcome;
+  readonly reason: CreatedSourceRecoveryReason;
+  readonly revision: number | null;
+}
+
+export interface CreatedSourceRecoveryReport {
+  readonly passes: number;
+  readonly decided: number;
+  readonly unresolved_transaction_ids: readonly string[];
+  readonly stopped: 'decided' | 'no_progress';
+  readonly results: readonly CreatedSourceRecoveryResult[];
+}
+
+export interface CreatedSourceRecoveryOptions {
+  /** The one real Host. Its RevisionStore, Coordinator and SnapshotStore are the authority. */
+  readonly host: NarralensHost;
+  /** MAIN's bootstrap store. The only source of the project owner and its origin. */
+  readonly creation: ProjectCreationStore;
+  readonly tasks: CreatedTaskStore;
+  readonly assets: LocalAssetRegistry;
+  readonly verifier: PreparedDraftVerifier;
+  readonly selection: CreatedSourceSelectionPort;
+  /** Host-fixed roots. No request, journal or client value may contribute to a path. */
+  readonly createdRoot: string;
+  readonly privateRoot: string;
+  readonly stageDomainRoot: string;
+  readonly now?: () => Date;
+}
+
+interface AuthorityVerdict {
+  readonly valid: boolean;
+  readonly reason: CreatedSourceRecoveryReason;
+}
+interface BaseProof {
+  readonly ok: true;
+  readonly active: { readonly revision: number; readonly source_digest: string; readonly snapshot_id: string };
+}
+interface OriginalProof extends BaseProof {
+  readonly guard: RetainedSourceTree;
+}
+interface BaseRefusal {
+  readonly ok: false;
+  readonly reason: CreatedSourceRecoveryReason;
+}
+type RequestVerdict = { readonly ok: true; readonly input: ApplyChange } | { readonly ok: false };
+
+/**
+ * The original closed commit's exact machine failure markers. These are its own tokens,
+ * not human copy, and each one names exactly one business decision.
+ */
+const COMMIT_MARKERS: Readonly<Record<string, { readonly outcome: 'abort' | 'attention' | 'defer'; readonly reason: CreatedSourceRecoveryReason }>> = Object.freeze({
+  CREATED_COMMIT_AUTHORITY_EXPIRED_AT_COMMIT: { outcome: 'abort', reason: 'AUTHORITY_EXPIRED' },
+  CREATED_COMMIT_APPROVAL_STALE: { outcome: 'abort', reason: 'AUTHORITY_WITHDRAWN' },
+  CREATED_COMMIT_CONFIRMATION_STALE: { outcome: 'abort', reason: 'AUTHORITY_WITHDRAWN' },
+  CREATED_COMMIT_EXECUTION_STALE: { outcome: 'abort', reason: 'RUN_NOT_ACTIVE' },
+  CREATED_COMMIT_REVIEW_STALE: { outcome: 'abort', reason: 'AUTHORITY_WITHDRAWN' },
+  CREATED_COMMIT_REVIEW_MISSING: { outcome: 'abort', reason: 'AUTHORITY_WITHDRAWN' },
+  CREATED_COMMIT_PACKAGE_MISMATCH: { outcome: 'abort', reason: 'AUTHORITY_WITHDRAWN' },
+  CREATED_COMMIT_PACKAGE_STALE: { outcome: 'abort', reason: 'AUTHORITY_WITHDRAWN' },
+  CREATED_COMMIT_PACKAGE_IMPACT_MISMATCH: { outcome: 'abort', reason: 'AUTHORITY_WITHDRAWN' },
+  CREATED_COMMIT_FIXED_PLAN_CHANGED: { outcome: 'abort', reason: 'AUTHORITY_WITHDRAWN' },
+  CREATED_COMMIT_CREATIVE_INPUT_CHANGED: { outcome: 'abort', reason: 'CREATIVE_INPUT_CHANGED' },
+  CREATED_COMMIT_TARGET_LOCKED: { outcome: 'abort', reason: 'LOCK_ACTIVE' },
+  CREATED_COMMIT_IMPACT_CAS: { outcome: 'defer', reason: 'AUTHORITY_WITHDRAWN' },
+  CREATED_COMMIT_OTHER_TRANSACTION_PENDING: { outcome: 'defer', reason: 'OTHER_PREPARED_PENDING' },
+  CREATED_COMMIT_BASE_MOVED: { outcome: 'attention', reason: 'BASE_MOVED' },
+  CREATED_COMMIT_PROJECT_CAS: { outcome: 'attention', reason: 'BASE_MOVED' },
+  CREATED_COMMIT_TRANSACTION_MISMATCH: { outcome: 'attention', reason: 'IDENTITY_NOT_PROVABLE' },
+  CREATED_COMMIT_ADOPTION_MISMATCH: { outcome: 'attention', reason: 'IDENTITY_NOT_PROVABLE' },
+  CREATED_COMMIT_PLAN_MISMATCH: { outcome: 'attention', reason: 'IDENTITY_NOT_PROVABLE' },
+  CREATED_COMMIT_PREPARED_MAPPING_MISMATCH: { outcome: 'attention', reason: 'IDENTITY_NOT_PROVABLE' },
+  CREATED_COMMIT_FACT_MISSING: { outcome: 'attention', reason: 'IDENTITY_NOT_PROVABLE' },
+  CREATED_COMMIT_SNAPSHOT_CONFLICT: { outcome: 'attention', reason: 'IDENTITY_NOT_PROVABLE' },
+  CREATED_COMMIT_GEOMETRY_CONFLICT: { outcome: 'attention', reason: 'IDENTITY_NOT_PROVABLE' },
+});
+
+/** Filesystem conditions a later attempt may still succeed in. Never a terminal decision. */
+const TRANSIENT_IO = new Set([
+  'EIO', 'ENOMEM', 'EMFILE', 'ENFILE', 'EBUSY', 'EAGAIN', 'EWOULDBLOCK', 'EINTR',
+  'ENOSPC', 'ETXTBSY', 'EDEADLK', 'EPERM', 'EACCES', 'EBADF', 'EINVAL', 'ESTALE',
+]);
+
+function isTransientResourceError(error: unknown): boolean {
+  if (error instanceof PublicationCleanupError) return true;
+  if (error instanceof ProductError) return false;
+  const code = (error as { code?: unknown } | null | undefined)?.code;
+  return typeof code === 'string' && TRANSIENT_IO.has(code);
+}
+
+/** A proof the actual resource module could not establish. */
+function isProofFailure(error: unknown): boolean {
+  return error instanceof ProductError && error.code === 'REVISION_CONFLICT';
+}
+
+export class CreatedSourceRecovery {
+  readonly #adoptions: CreatedSourceAdoptionStore;
+  readonly #identities: CreatedPublicationIdentityStore;
+  readonly #files: CreatedPublicationRecoveryFiles;
+  readonly #publishers = new Set<CreatedSourcePublisher>();
+  readonly #pending = new Set<Promise<unknown>>();
+  readonly #uncertain = new Map<string, unknown>();
+  #closed = false;
+  #closing: Promise<void> | undefined;
+
+  constructor(private readonly options: CreatedSourceRecoveryOptions) {
+    this.#adoptions = new CreatedSourceAdoptionStore(options.host.revisions);
+    this.#identities = new CreatedPublicationIdentityStore(options.host.revisions);
+    this.#files = new CreatedPublicationRecoveryFiles({
+      revisions: options.host.revisions,
+      snapshots: options.host.snapshots,
+      createdRoot: options.createdRoot,
+      privateRoot: options.privateRoot,
+      // MAIN's real reservation identity, never a request or journal value.
+      creationIdentity: (project) => {
+        const reservation = options.creation.forProject(project);
+        return reservation
+          ? { command_id: reservation.command_id, transaction_id: reservation.transaction_id }
+          : null;
+      },
+    });
+  }
+
+  #now(): Date {
+    return this.options.now ? this.options.now() : new Date();
+  }
+
+  #open(): void {
+    if (this.#closed) throw new ProductError('CAPABILITY_UNAVAILABLE', 'Created source recovery is closed');
+  }
+
+  // ── the rows this service owns ────────────────────────────────────────────────────
+
+  /** Only kind=edit rows whose request carries the exact created apply operation. */
+  #rows(): ProjectTransactionRow[] {
+    return this.options.host.revisions.compose((db) => db.prepare(
+      'SELECT transaction_id,project_id,state,kind,correlation_id,request_json,request_hash,base_revision,source_digest_before,source_digest_after,snapshot_id,error_code,terminal_reason,created_at,updated_at FROM project_transaction',
+    ).all().map((row) => ({
+      transaction_id: String(row.transaction_id),
+      project_id: String(row.project_id),
+      state: String(row.state) as ProjectTransactionRow['state'],
+      kind: String(row.kind) as ProjectTransactionRow['kind'],
+      correlation_id: String(row.correlation_id ?? ''),
+      request_json: String(row.request_json ?? ''),
+      request_hash: String(row.request_hash ?? ''),
+      base_revision: Number(row.base_revision ?? 0),
+      source_digest_before: String(row.source_digest_before ?? ''),
+      source_digest_after: String(row.source_digest_after ?? ''),
+      snapshot_id: String(row.snapshot_id ?? ''),
+      error_code: String(row.error_code ?? ''),
+      terminal_reason: String(row.terminal_reason ?? ''),
+      created_at: String(row.created_at),
+      updated_at: String(row.updated_at),
+    })))
+      .filter((row) => controlledRecoveryFamily(row) === 'created')
+      .sort(compareControlledRecoveryRows);
+  }
+
+  /**
+   * The pending controlled rows of this project, whichever of the three families owns
+   * them. Built from the actual rows; never from a client list, never a blanket skip.
+   */
+  #ignorablePending(projectId: string): string[] {
+    return this.options.host.revisions.projectTransactions(projectId)
+      .filter((row) => row.state !== 'committed' && row.state !== 'aborted')
+      .filter((row) => controlledRecoveryFamily(row) !== undefined)
+      .map((row) => row.transaction_id);
+  }
+
+  // ── public entry points ──────────────────────────────────────────────────────────
+
+  /**
+   * Startup recovery for this family only. The three-family scheduler and the generic
+   * recovery are MAIN's; this service decides the rows it owns and nothing else.
+   */
+  async recoverOnStart(): Promise<CreatedSourceRecoveryReport> {
+    this.#open();
+    const results = new Map<string, CreatedSourceRecoveryResult>();
+    let passes = 0;
+    let decided = 0;
+    for (;;) {
+      const before = this.#rows();
+      // attention and recovering rows are never reset and never revived here.
+      const pending = before.filter((row) => ABORTABLE.has(row.state));
+      if (pending.length === 0) {
+        return Object.freeze({
+          passes, decided, results: Object.freeze([...results.values()]),
+          unresolved_transaction_ids: Object.freeze([]),
+          stopped: 'decided' as const,
+        });
+      }
+      passes += 1;
+      let progress = 0;
+      for (const row of pending) {
+        const current = this.#rows();
+        // An older unresolved controlled row of any family owns the preceding decision.
+        if (hasOlderControlledPending(row, current)) {
+          results.set(row.transaction_id, this.#result(row, 'deferred', 'ORDERED_AFTER_OLDER_PENDING'));
+          continue;
+        }
+        const outcome = await this.recoverTransaction(row.transaction_id);
+        results.set(row.transaction_id, outcome);
+        if (outcome.outcome === 'committed' || outcome.outcome === 'aborted' || outcome.outcome === 'attention') {
+          progress += 1;
+        }
+      }
+      decided += progress;
+      const after = this.#rows();
+      const unresolved = after.filter((row) => row.state !== 'committed' && row.state !== 'aborted');
+      if (progress === 0) {
+        // No real decision this pass. Stop; never busy loop and never fake progress.
+        return Object.freeze({
+          passes, decided, results: Object.freeze([...results.values()]),
+          unresolved_transaction_ids: Object.freeze(unresolved.map((row) => row.transaction_id)),
+          stopped: 'no_progress' as const,
+        });
+      }
+    }
+  }
+
+  /**
+   * Recover one transaction. Re-entrant for the same request: a second call for a row
+   * that is already decided returns that real result instead of repeating the work.
+   */
+  async recoverTransaction(transactionId: string): Promise<CreatedSourceRecoveryResult> {
+    this.#open();
+    const work = this.#recover(transactionId);
+    this.#pending.add(work);
+    void work.then(() => this.#pending.delete(work), () => this.#pending.delete(work));
+    return work;
+  }
+
+  async #recover(transactionId: string): Promise<CreatedSourceRecoveryResult> {
+    const revisions = this.options.host.revisions;
+    const row = revisions.projectTransaction(transactionId);
+    if (!row) throw new ProductError('NOT_FOUND', 'No such transaction');
+    if (controlledRecoveryFamily(row) !== 'created') {
+      return this.#result(row, 'not_owned', 'NOT_A_CREATED_TRANSACTION');
+    }
+    if (hasOlderControlledPending(row, revisions.projectTransactions(row.project_id))) {
+      return this.#result(row, 'deferred', 'ORDERED_AFTER_OLDER_PENDING');
+    }
+    if (row.state === 'committed') return this.#verifyCommitted(row);
+    if (row.state === 'aborted' || row.state === 'attention' || row.state === 'recovering') {
+      // A decided or operator-held row is never revived by this service.
+      return this.#result(row, 'deferred', 'TERMINAL_STATE_NOT_REVIVED');
+    }
+    if (!ABORTABLE.has(row.state)) {
+      return this.#result(row, 'deferred', 'TERMINAL_STATE_NOT_REVIVED');
+    }
+    const ignore = this.#ignorablePending(row.project_id);
+    try {
+      return await this.options.host.coordinator.controlledRecovery(
+        row.project_id, row.transaction_id, row.correlation_id,
+        async () => {
+          // Re-read after the queue was entered: an older row may have appeared and
+          // the row itself may have been decided by somebody else.
+          const current = revisions.projectTransactions(row.project_id);
+          if (hasOlderControlledPending(row, current)) {
+            return this.#result(row, 'deferred', 'ORDERED_AFTER_OLDER_PENDING');
+          }
+          const live = revisions.projectTransaction(row.transaction_id);
+          if (!live) return this.#result(row, 'deferred', 'TERMINAL_STATE_NOT_REVIVED');
+          if (live.state === 'committed') return this.#verifyCommitted(live);
+          if (!ABORTABLE.has(live.state)) return this.#result(live, 'deferred', 'TERMINAL_STATE_NOT_REVIVED');
+          return live.state === 'prepared'
+            ? await this.#recoverPrepared(live)
+            : await this.#abortUnpublished(live);
+        },
+        ignore,
+      );
+    } catch (error) {
+      const code = (error as { code?: unknown } | null | undefined)?.code;
+      if (code === 'PROJECT_ATTENTION_REQUIRED') {
+        // The original gate refused this project for a reason this service did not create.
+        // An unrelated pending row of an unknown family still blocks, as it must.
+        return this.#result(row, 'deferred', 'GATE_BLOCKED');
+      }
+      if (error instanceof ProductError && error.code === 'REVISION_CONFLICT') {
+        return this.#result(row, 'deferred', 'GATE_BLOCKED');
+      }
+      if (isTransientResourceError(error)) {
+        return this.#result(row, 'deferred', 'TRANSIENT_RESOURCE_ERROR');
+      }
+      throw error;
+    }
+  }
+
+  // ── the prepared (published-or-not) transaction ───────────────────────────────────
+
+  async #recoverPrepared(row: ProjectTransactionRow): Promise<CreatedSourceRecoveryResult> {
+    const adoption = this.#adoptions.adoptionFact(row.transaction_id);
+    if (!adoption) {
+      // The publisher cannot start without its immutable adoption fact, so nothing was
+      // ever published for this row. Only a complete base proof may abort it.
+      return this.#abortUnpublished(row);
+    }
+    const request = this.#legitimateRequest(row, adoption);
+    const plan = this.#plan(adoption);
+    if (!plan) return this.#result(row, 'attention', 'IDENTITY_NOT_PROVABLE');
+    if (!this.#proveOwner(row.project_id)) return this.#result(row, 'attention', 'ORIGIN_MISSING');
+
+    const base = await this.#proveCommittedBase(row.project_id, row.base_revision, adoption.original_source_digest);
+    if (!base.ok) {
+      // The committed base moved. Nothing may be moved or aborted on a stale base.
+      return this.#result(row, 'attention', base.reason);
+    }
+
+    const identity = this.#identities.read(row.transaction_id);
+    const journal = this.#journalPhases(row.transaction_id);
+    if (!identity || !journal.includes('prepared')) {
+      // No cross-process identity for this publication. The design allows a safe abort
+      // only while the author still holds the complete original closure.
+      const proof = await this.#proveOriginalHeld(row.project_id, row.base_revision, adoption.original_source_digest);
+      if (!proof.ok) return this.#result(row, 'attention', proof.reason);
+      try {
+        this.#abort(row, 'PROVEN_ABORTED');
+        return this.#result(row, 'aborted', 'PROVEN_ABORTED');
+      } finally { proof.guard.close(); }
+    }
+
+    let lease: CreatedRecoveryFilesLease;
+    try {
+      lease = await this.#files.inspect(row.transaction_id);
+    } catch (error) {
+      if (isTransientResourceError(error)) return this.#result(row, 'deferred', 'TRANSIENT_RESOURCE_ERROR');
+      if (isProofFailure(error)) return this.#result(row, 'attention', 'IDENTITY_NOT_PROVABLE');
+      throw error;
+    }
+    try {
+      let layout: RecoveryFileLayout;
+      try {
+        layout = await this.#files.layout(lease);
+      } catch (error) {
+        if (isTransientResourceError(error)) return this.#result(row, 'deferred', 'TRANSIENT_RESOURCE_ERROR');
+        if (isProofFailure(error)) return this.#result(row, 'attention', 'IDENTITY_NOT_PROVABLE');
+        throw error;
+      }
+      if (layout === 'published') return await this.#convergePublished(row, adoption, plan, request, lease);
+      // Every other layout means the target never reached the author. Compensation first
+      // (the author may be missing), then the original abort.
+      await this.#compensate(lease);
+      this.#abort(row, 'COMPENSATED_ABORTED');
+      return this.#result(row, 'aborted', 'COMPENSATED_ABORTED');
+    } finally {
+      try { this.#files.release(lease); } catch (error) { this.#uncertain.set(row.project_id, error); }
+    }
+  }
+
+  /**
+   * The publication is at the author. Either the current authority still allows the
+   * original commit, or the original files are restored and the transaction is aborted.
+   */
+  async #convergePublished(
+    row: ProjectTransactionRow,
+    adoption: CreatedAdoptionFact,
+    plan: PreparedAdoptionPlanV1,
+    request: RequestVerdict,
+    lease: CreatedRecoveryFilesLease,
+  ): Promise<CreatedSourceRecoveryResult> {
+    const verdict = await this.#authority(row.project_id, adoption, plan);
+    if (!verdict.valid) {
+      await this.#compensate(lease);
+      this.#abort(row, verdict.reason);
+      return this.#result(row, 'aborted', verdict.reason);
+    }
+    if (!request.ok) {
+      // The original request is not a legitimate ApplyChange. The commit may not be
+      // driven from it, and the publication may not be completed either.
+      await this.#compensate(lease);
+      this.#abort(row, 'REQUEST_NOT_LEGITIMATE');
+      return this.#result(row, 'aborted', 'REQUEST_NOT_LEGITIMATE');
+    }
+    const publisher = new CreatedSourcePublisher({
+      revisions: this.options.host.revisions,
+      authorRoot: this.#authorRoot(row.project_id),
+      privateRoot: resolve(this.options.privateRoot, row.project_id),
+      snapshots: this.options.host.snapshots,
+      selection: this.options.selection,
+      assets: this.options.assets,
+      tasks: this.options.tasks,
+      verifier: this.options.verifier,
+      stageDomainRoot: this.options.stageDomainRoot,
+    });
+    this.#publishers.add(publisher);
+    const hadPublished = this.#journalPhases(row.transaction_id).includes('published');
+    try {
+      const proof = await publisher.recoverPublished({
+        project_id: row.project_id,
+        transaction_id: row.transaction_id,
+        prepared_source_id: adoption.prepared_source_id,
+        stage_root: adoption.stage_root,
+        files: plan.files,
+        original_source_digest: adoption.original_source_digest,
+        published_source_digest: adoption.target_source_digest,
+        target_snapshot_id: adoption.expected_snapshot_id,
+      }, this.#files, lease);
+      const applied = this.options.host.revisions.commitPreparedCreatedSource({
+        project_id: row.project_id,
+        transaction_id: row.transaction_id,
+        impact_id: adoption.impact_id,
+        approval_id: adoption.approval_id,
+        prepared_source_id: adoption.prepared_source_id,
+        execution: adoption.execution,
+        idempotency_key: request.input.meta.idempotency_key,
+        request_digest: row.request_hash,
+        publication_proof: proof,
+      });
+      const reason: CreatedSourceRecoveryReason = hadPublished ? 'RECOVERED_COMMIT' : 'RECOVERED_PUBLISHED_JOURNAL';
+      return this.#result(row, 'committed', reason, applied.project_revision);
+    } catch (error) {
+      if (isTransientResourceError(error)) return this.#result(row, 'deferred', 'TRANSIENT_RESOURCE_ERROR');
+      const marker = error instanceof Error ? error.message : '';
+      const classified = Object.hasOwn(COMMIT_MARKERS, marker) ? COMMIT_MARKERS[marker]! : undefined;
+      if (classified) {
+        if (classified.outcome === 'abort') {
+          await this.#compensate(lease);
+          this.#abort(row, classified.reason);
+          return this.#result(row, 'aborted', classified.reason);
+        }
+        if (classified.outcome === 'attention') return this.#result(row, 'attention', classified.reason);
+        return this.#result(row, 'deferred', classified.reason);
+      }
+      // The identity is checked again by the actual resource module. A failure there is a
+      // definitive "cannot prove"; anything else stays unresolved and preserves prepared.
+      try {
+        await this.#files.layout(lease);
+      } catch (proofError) {
+        if (isProofFailure(proofError)) return this.#result(row, 'attention', 'IDENTITY_NOT_PROVABLE');
+      }
+      const again = await this.#authority(row.project_id, adoption, plan);
+      if (!again.valid) {
+        await this.#compensate(lease);
+        this.#abort(row, again.reason);
+        return this.#result(row, 'aborted', again.reason);
+      }
+      return this.#result(row, 'deferred', 'PUBLISHED_NOT_PROVABLE');
+    } finally {
+      try { await publisher.close(); this.#publishers.delete(publisher); } catch (error) { this.#uncertain.set(row.project_id, error); }
+    }
+  }
+
+  /** Restore the complete original closure and prove the durability barrier. */
+  async #compensate(lease: CreatedRecoveryFilesLease): Promise<void> {
+    await this.#files.restoreOriginal(lease);
+    this.#files.assertOriginalRestored(lease);
+  }
+
+  #abort(row: ProjectTransactionRow, reason: CreatedSourceRecoveryReason): void {
+    this.options.host.coordinator.abort(row.transaction_id, 'CREATED_SOURCE_RECOVERY_ABORTED', reason);
+  }
+
+  // ── the never-published transaction ───────────────────────────────────────────────
+
+  /**
+   * A row that never reached a publication. The abort is only legal after the complete
+   * committed base, the complete original source closure and the real owner are proved.
+   */
+  async #abortUnpublished(row: ProjectTransactionRow): Promise<CreatedSourceRecoveryResult> {
+    const adoption = this.#adoptions.adoptionFact(row.transaction_id);
+    const active = this.options.host.revisions.activeCommit(row.project_id);
+    if (!active) return this.#result(row, 'deferred', 'BASE_MOVED');
+    const expected = adoption?.original_source_digest ?? active.source_digest;
+    const proof = await this.#proveOriginalHeld(row.project_id, row.base_revision, expected);
+    if (!proof.ok) {
+      if (proof.reason === 'AUTHOR_NOT_PROVABLE' || proof.reason === 'IDENTITY_NOT_PROVABLE') {
+        return this.#result(row, 'attention', proof.reason);
+      }
+      return this.#result(row, 'deferred', proof.reason);
+    }
+    if (!this.#proveOwner(row.project_id)) {
+      proof.guard.close();
+      return this.#result(row, 'attention', 'ORIGIN_MISSING');
+    }
+    try {
+      this.#abort(row, 'PROVEN_ABORTED');
+      return this.#result(row, 'aborted', 'PROVEN_ABORTED');
+    } finally { proof.guard.close(); }
+  }
+
+  // ── proofs ───────────────────────────────────────────────────────────────────────
+
+  #authorRoot(projectId: string): string {
+    return resolve(this.options.createdRoot, projectId, 'source');
+  }
+
+  /** The real owner marker of the real creation. No request value participates. */
+  #proveOwner(projectId: string): boolean {
+    if (!PROJECT_ID.test(projectId)) return false;
+    const reservation = this.options.creation.forProject(projectId);
+    const origin = this.options.creation.origin(projectId);
+    const owner = this.options.creation.ownerOf(projectId);
+    if (!reservation || !origin || !owner || origin.origin !== 'created') return false;
+    const expected = canonicalJson({
+      kind: 'narralens.created-root@1',
+      project_id: projectId,
+      command_id: reservation.command_id,
+      transaction_id: reservation.transaction_id,
+    });
+    try {
+      return readFileSync(resolve(this.options.createdRoot, projectId, 'owner.json'), 'utf8') === expected;
+    } catch { return false; }
+  }
+
+  #sourceFact(projectId: string, snapshotId: string): CreatedSourceFact | undefined {
+    const row = this.options.host.revisions.compose((db) => db.prepare(
+      'SELECT fact_json,fact_sha256 FROM created_source_fact WHERE project_id=? AND snapshot_id=?',
+    ).get(projectId, snapshotId));
+    if (!row) return undefined;
+    try {
+      const fact = validateCreatedSourceFact(JSON.parse(String(row.fact_json)) as CreatedSourceFact);
+      return canonicalDigest(fact) === String(row.fact_sha256) ? fact : undefined;
+    } catch { return undefined; }
+  }
+
+  /** The committed base, the project state and the R1 geometry of the active snapshot. */
+  async #proveCommittedBase(projectId: string, baseRevision: number, baseDigest: string): Promise<BaseProof | BaseRefusal> {
+    const revisions = this.options.host.revisions;
+    const active = revisions.activeCommit(projectId);
+    if (!active || active.revision !== baseRevision || active.source_digest !== baseDigest) {
+      return { ok: false, reason: 'BASE_MOVED' };
+    }
+    const state = revisions.compose((db) => db.prepare(
+      'SELECT revision,source_digest,control_revision,attention FROM project_state WHERE project_id=?',
+    ).get(projectId)) as { revision?: unknown; source_digest?: unknown; control_revision?: unknown; attention?: unknown } | undefined;
+    if (!state || Number(state.revision) !== baseRevision || String(state.source_digest) !== baseDigest
+      || Number(state.attention) !== 0) {
+      return { ok: false, reason: 'BASE_MOVED' };
+    }
+    // The active snapshot may already be a later adoption for this project. The R1
+    // geometry of the actual active snapshot is read, never assumed.
+    const fact = this.#sourceFact(projectId, active.snapshot_id);
+    if (!fact) return { ok: false, reason: 'IDENTITY_NOT_PROVABLE' };
+    return { ok: true, active };
+  }
+
+  /**
+   * The complete original closure still at the author root, held by a retained guard
+   * until the abort. This is the proof an unpublished transaction needs; the absence of
+   * a publication journal is not a proof of anything.
+   */
+  async #proveOriginalHeld(projectId: string, baseRevision: number, baseDigest: string): Promise<OriginalProof | BaseRefusal> {
+    const base = await this.#proveCommittedBase(projectId, baseRevision, baseDigest);
+    if (!base.ok) return base;
+    const fact = this.#sourceFact(projectId, base.active.snapshot_id)!;
+    const root = this.#authorRoot(projectId);
+    let digest;
+    try {
+      digest = await computeSourceDigest({
+        root, roots: fact.roots, engine: 'openfilm', engineUpstreamSha: OPENFILM_UPSTREAM_SHA,
+      });
+    } catch { return { ok: false, reason: 'AUTHOR_NOT_PROVABLE' }; }
+    if (digest.external_reference_count || digest.source_digest !== baseDigest) {
+      return { ok: false, reason: 'AUTHOR_NOT_PROVABLE' };
+    }
+    const guard = this.#guard(root, digest);
+    if (!guard) return { ok: false, reason: 'AUTHOR_NOT_PROVABLE' };
+    return { ok: true, guard, active: base.active };
+  }
+
+  #guard(root: string, digest: Awaited<ReturnType<typeof computeSourceDigest>>): RetainedSourceTree | undefined {
+    const files = [...digest.manifest.files, ...digest.manifest.assets]
+      .map((file) => ({ relative_path: file.path, bytes: file.size, sha256: file.sha256 }));
+    try {
+      const guard = new RetainedSourceTree(root, files);
+      guard.verify();
+      return guard;
+    } catch { return undefined; }
+  }
+
+  // ── the request, the plan and the authority ──────────────────────────────────────
+
+  /**
+   * A legitimate request carries exactly the operation and the input, the input satisfies
+   * the original ApplyChange contract, and its content digest is the original hash.
+   */
+  #legitimateRequest(row: ProjectTransactionRow, adoption: CreatedAdoptionFact): RequestVerdict {
+    let parsed: unknown;
+    try { parsed = JSON.parse(row.request_json); } catch { return { ok: false }; }
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return { ok: false };
+    const record = parsed as Record<string, unknown>;
+    if (Object.keys(record).sort().join(',') !== 'input,operation') return { ok: false };
+    if (record.operation !== CREATED_APPLY_OPERATION) return { ok: false };
+    let input: ApplyChange;
+    try { input = validateAgentDefinition<ApplyChange>('ApplyChange', record.input); } catch { return { ok: false }; }
+    if (contentDigest(input) !== row.request_hash) return { ok: false };
+    if (input.project_id !== row.project_id || input.base_revision !== row.base_revision) return { ok: false };
+    if (input.impact_id !== adoption.impact_id || input.approval_id !== adoption.approval_id) return { ok: false };
+    if (canonicalDigest(input.execution) !== canonicalDigest(adoption.execution)) return { ok: false };
+    return { ok: true, input };
+  }
+
+  #plan(adoption: CreatedAdoptionFact): PreparedAdoptionPlanV1 | undefined {
+    const row = this.options.host.revisions.compose((db) => db.prepare(
+      'SELECT plan_json FROM created_impact_fact WHERE impact_id=?',
+    ).get(adoption.impact_id));
+    if (!row) return undefined;
+    try {
+      return assertPreparedAdoptionPlan(JSON.parse(String(row.plan_json)));
+    } catch { return undefined; }
+  }
+
+  #journalPhases(transactionId: string): string[] {
+    try {
+      return this.options.host.revisions.compose((db) => db.prepare(
+        'SELECT phase FROM created_publication_journal WHERE transaction_id=?',
+      ).all(transactionId).map((row) => String(row.phase)));
+    } catch {
+      // The journal table only exists once a publication has been prepared.
+      return [];
+    }
+  }
+
+  /**
+   * The current authority, read from the actual rows. Every check is a fact about the
+   * database, never an interpretation of an error message.
+   */
+  async #authority(projectId: string, adoption: CreatedAdoptionFact, plan: PreparedAdoptionPlanV1): Promise<AuthorityVerdict> {
+    const revisions = this.options.host.revisions;
+    const execution = adoption.execution;
+    const seconds = Math.floor(this.#now().getTime() / 1000);
+    const repository = new ProductSqliteRepository(revisions);
+    const verdict = await repository.transaction((tx) => {
+      const approval = tx.get('approval', {
+        project_id: projectId, run_id: execution.run_id, approval_id: adoption.approval_id,
+      });
+      if (!approval) return { valid: false, reason: 'AUTHORITY_WITHDRAWN' } as AuthorityVerdict;
+      if (approval.state !== 'active' || approval.consumed_transaction_id !== null) {
+        return { valid: false, reason: 'AUTHORITY_WITHDRAWN' } as AuthorityVerdict;
+      }
+      if (Number(approval.expires_at) <= seconds) return { valid: false, reason: 'AUTHORITY_EXPIRED' } as AuthorityVerdict;
+      if (approval.impact_id !== adoption.impact_id || approval.facts_digest !== adoption.facts_digest
+        || approval.action_digest !== adoption.facts_digest || approval.base_revision !== plan.base_revision
+        || approval.control_revision !== plan.control_revision || approval.step_id !== execution.step_id
+        || approval.attempt !== execution.attempt || approval.input_digest !== execution.input_digest
+        || approval.run_scope_digest !== execution.run_scope_digest) {
+        return { valid: false, reason: 'AUTHORITY_WITHDRAWN' } as AuthorityVerdict;
+      }
+      const confirmation = tx.get('trusted_confirmation', {
+        project_id: projectId, run_id: execution.run_id, confirmation_id: approval.confirmation_id,
+      });
+      if (!confirmation || confirmation.purpose !== 'change.approve' || confirmation.channel !== 'trusted_ui'
+        || !confirmation.review_id || confirmation.action_digest !== approval.action_digest
+        || confirmation.input_digest !== execution.input_digest) {
+        return { valid: false, reason: 'AUTHORITY_WITHDRAWN' } as AuthorityVerdict;
+      }
+      if (Number(confirmation.expires_at) <= seconds) return { valid: false, reason: 'AUTHORITY_EXPIRED' } as AuthorityVerdict;
+      const run = tx.get('run', { project_id: projectId, run_id: execution.run_id });
+      if (!run) return { valid: false, reason: 'RUN_NOT_ACTIVE' } as AuthorityVerdict;
+      if (run.state === 'cancelled') return { valid: false, reason: 'RUN_CANCELLED' } as AuthorityVerdict;
+      if (run.state === 'paused') return { valid: false, reason: 'RUN_PAUSED' } as AuthorityVerdict;
+      if (!['ready', 'running', 'waiting_user'].includes(run.state)) {
+        return { valid: false, reason: 'RUN_NOT_ACTIVE' } as AuthorityVerdict;
+      }
+      const grant = tx.get('execution_grant', {
+        project_id: projectId, run_id: execution.run_id, grant_id: execution.authorization_id,
+      });
+      if (!grant || grant.state !== 'active') return { valid: false, reason: 'AUTHORITY_WITHDRAWN' } as AuthorityVerdict;
+      if (Number(grant.expires_at) <= seconds) return { valid: false, reason: 'AUTHORITY_EXPIRED' } as AuthorityVerdict;
+      const step = tx.get('step_attempt', {
+        project_id: projectId, run_id: execution.run_id, plan_version: 1, step_id: execution.step_id, attempt: execution.attempt,
+      });
+      if (!step || !['running', 'waiting_user'].includes(step.state)) {
+        return { valid: false, reason: 'RUN_NOT_ACTIVE' } as AuthorityVerdict;
+      }
+      const fixed = tx.get('plan_version', { project_id: projectId, run_id: execution.run_id, plan_version: 1 });
+      if (!fixed || fixed.input_digest !== execution.input_digest) {
+        return { valid: false, reason: 'AUTHORITY_WITHDRAWN' } as AuthorityVerdict;
+      }
+      const creation = this.options.creation.forProject(projectId);
+      if (!creation) return { valid: false, reason: 'AUTHORITY_WITHDRAWN' } as AuthorityVerdict;
+      const head = tx.get('intake_head', { intake_id: creation.request.intake_id });
+      if (!head || canonicalDigest(creativeInputClosure(tx, creation.request.intake_id, head.current_version)) !== execution.input_digest) {
+        return { valid: false, reason: 'CREATIVE_INPUT_CHANGED' } as AuthorityVerdict;
+      }
+      return { valid: true, reason: 'AUTHORITY_CURRENT' } as AuthorityVerdict;
+    });
+    if (!verdict.valid) return verdict;
+    if (revisions.activeLocks(projectId).some((lock) => lock.active)) {
+      return { valid: false, reason: 'LOCK_ACTIVE' };
+    }
+    if (this.options.selection.currentSelectionVersion(projectId) !== plan.selection_version) {
+      return { valid: false, reason: 'SELECTION_CHANGED' };
+    }
+    const rights = this.#rights(adoption, plan);
+    if (!rights.valid) return { valid: false, reason: rights.reason };
+    return { valid: true, reason: 'AUTHORITY_CURRENT' };
+  }
+
+  /** The recorded rights facts against the actual current asset facts. */
+  #rights(adoption: CreatedAdoptionFact, plan: PreparedAdoptionPlanV1): AuthorityVerdict {
+    const rows = this.options.host.revisions.compose((db) => db.prepare(
+      'SELECT fact_json,fact_sha256 FROM created_local_asset WHERE project_id=?',
+    ).all(adoption.project_id));
+    const facts = rows.map((row) => {
+      try {
+        const fact = JSON.parse(String(row.fact_json)) as {
+          readonly asset_id: string; readonly rights_ref: string; readonly registration_digest: string;
+          readonly license: { readonly status: string; readonly commercial_use: boolean };
+        };
+        return { fact, intact: canonicalDigest(fact) === String(row.fact_sha256) };
+      } catch { return undefined; }
+    }).filter((value): value is NonNullable<typeof value> => value !== undefined);
+    for (const right of plan.rights) {
+      const matches = facts.filter((entry) => entry.fact.rights_ref === right.ref_id);
+      if (matches.length === 0) return { valid: false, reason: 'RIGHTS_CHANGED' };
+      for (const match of matches) {
+        if (!match.intact || match.fact.registration_digest !== right.sha256
+          || match.fact.license.status !== 'cleared' || match.fact.license.commercial_use !== true) {
+          return { valid: false, reason: 'RIGHTS_CHANGED' };
+        }
+      }
+    }
+    return { valid: true, reason: 'AUTHORITY_CURRENT' };
+  }
+
+  // ── an already committed transaction ─────────────────────────────────────────────
+
+  /** Read the original receipt. Never sign a new proof, never consume again, never +1. */
+  #verifyCommitted(row: ProjectTransactionRow): CreatedSourceRecoveryResult {
+    const revisions = this.options.host.revisions;
+    const transaction = revisions.projectTransaction(row.transaction_id)!;
+    const adoption = this.#adoptions.adoptionFact(row.transaction_id);
+    const request: RequestVerdict = adoption ? this.#legitimateRequest(row, adoption) : { ok: false };
+    if (adoption && request.ok) {
+      const commands = new OperationIdempotencyStore(revisions.compose((db) => db));
+      const remembered = commands.recall(row.project_id, IDEMPOTENCY_OPERATION, request.input.meta.idempotency_key);
+      if (!remembered || remembered.transaction_id !== row.transaction_id
+        || remembered.request_digest !== row.request_hash) {
+        return this.#result(row, 'attention', 'IDENTITY_NOT_PROVABLE');
+      }
+      const envelope = JSON.parse(remembered.response_json) as {
+        readonly format?: unknown;
+        readonly receipt?: Record<string, unknown>;
+        readonly response?: unknown;
+      };
+      if (envelope.format !== 'agent.idempotency@1' || !envelope.receipt
+        || envelope.receipt.operation !== 'change.apply'
+        || envelope.receipt.request_digest !== row.request_hash
+        || envelope.receipt.project_id !== row.project_id) {
+        return this.#result(row, 'attention', 'IDENTITY_NOT_PROVABLE');
+      }
+      let applied: Applied;
+      try { applied = validateAgentDefinition<Applied>('Applied', envelope.response); }
+      catch { return this.#result(row, 'attention', 'IDENTITY_NOT_PROVABLE'); }
+      if (applied.transaction_id !== row.transaction_id || applied.project_id !== row.project_id
+        || applied.project_revision !== row.base_revision + 1
+        || applied.snapshot_id !== transaction.snapshot_id
+        || applied.source_digest !== transaction.source_digest_after) {
+        return this.#result(row, 'attention', 'IDENTITY_NOT_PROVABLE');
+      }
+      return this.#result(row, 'already_committed', 'ALREADY_COMMITTED', applied.project_revision);
+    }
+    // The receipt cannot be re-read. The transaction is still committed; nothing is
+    // written and no revision is claimed.
+    return this.#result(row, 'already_committed', 'ALREADY_COMMITTED', row.base_revision + 1);
+  }
+
+  // ── shutdown ─────────────────────────────────────────────────────────────────────
+
+  /**
+   * Stop accepting, wait for everything this service already accepted, then release the
+   * publisher and the resource leases. The database is closed by the Host, last.
+   */
+  close(): Promise<void> {
+    this.#closed = true;
+    return this.#closing ??= (async () => {
+      await Promise.allSettled([...this.#pending]);
+      const failures: unknown[] = [...this.#uncertain.values()];
+      for (const publisher of [...this.#publishers]) {
+        try { await publisher.close(); this.#publishers.delete(publisher); } catch (error) { failures.push(error); }
+      }
+      try { await this.#files.close(); } catch (error) { failures.push(error); }
+      if (failures.length) throw new PublicationCleanupError(failures);
+    })();
+  }
+
+  #result(
+    row: Pick<ProjectTransactionRow, 'transaction_id' | 'project_id'>,
+    outcome: CreatedSourceRecoveryOutcome,
+    reason: CreatedSourceRecoveryReason,
+    revision: number | null = null,
+  ): CreatedSourceRecoveryResult {
+    return Object.freeze({
+      transaction_id: row.transaction_id,
+      project_id: row.project_id,
+      outcome,
+      reason,
+      revision,
+    });
+  }
+}

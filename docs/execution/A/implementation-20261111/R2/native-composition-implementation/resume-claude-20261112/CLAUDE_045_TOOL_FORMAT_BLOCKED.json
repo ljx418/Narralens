@@ -1,0 +1,27 @@
+{
+  "at": "2026-11-13T09:42:20.116360+00:00",
+  "status": "BLOCKED_CLAUDE_TOOL_CALL_FORMAT",
+  "dispatch": "ctx_ae73a82c85e9",
+  "task": "task_5dcbe8192764",
+  "run": "run_399f9dd3ce5a",
+  "latest_wake": "msg_stop_8310a6ceee50d6342b6f9d19",
+  "consecutive_malformed_turns": 3,
+  "last_actual_test": {
+    "capture": "n1n2-claude-045-focused-lifecycle-001",
+    "passed": 14,
+    "failed": 1,
+    "filtered_notrun": 16,
+    "full_file": "NOT_RUN"
+  },
+  "current_capture_inputs_match": 626,
+  "head": "e2eff61b464d75d36598103d718cd2a75db5dfda",
+  "index_empty": true,
+  "observed_liveness": "worker-show state ready, liveness live, retained terminal; stopReason finished means ended turn, not proof CLI process exited",
+  "cause": "Repeated malformed MiniMax tool syntax; underlying provider/protocol/context cause UNKNOWN; no new429 observed",
+  "action": "Stop further automatic steering to this broken context. Preserve dirty source and failure captures; no production takeover, provider/credential/config change, reset or freshwriter. Source/runtime release suspended pending tool-channel recovery and explicit controlled reactivation.",
+  "recovery_requirements": [
+    "Restore working Claude tool calls, then verify current source/head/index/captures and unique writer before reactivating045.",
+    "If replacing this context, first cancel/fence old exact assignment and prove process/writer state; use documented sameTask recovery, do not launch a second writer concurrently.",
+    "Codex implementation takeover requires user explicit instruction; no assumption from this wake."
+  ]
+}

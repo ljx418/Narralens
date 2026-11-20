@@ -1,0 +1,638 @@
+{
+  "status": "INTERFACE_CHECK_PENDING_NOT_CODE_RELEASE",
+  "frozen_base": "../relaunch-20261111/03_OWNERSHIP_AND_DEPENDENCIES.json",
+  "delta": "ownership-delta.json",
+  "files": [
+    {
+      "path": "src/host/server.ts",
+      "writer": "bridge-Claude",
+      "exists_at_observation": true
+    },
+    {
+      "path": "src/host/agent-driven/creation-application.ts",
+      "writer": "bridge-Claude",
+      "exists_at_observation": true
+    },
+    {
+      "path": "src/host/agent-driven/application-dispatcher.ts",
+      "writer": "bridge-Claude",
+      "exists_at_observation": true
+    },
+    {
+      "path": "src/host/agent-driven/project-context-service.ts",
+      "writer": "bridge-Claude",
+      "exists_at_observation": true
+    },
+    {
+      "path": "src/host/agent-driven/created-task-store.ts",
+      "writer": "bridge-Claude",
+      "exists_at_observation": true
+    },
+    {
+      "path": "src/host/agent-driven/created-task-gate.ts",
+      "writer": "bridge-Claude",
+      "exists_at_observation": true
+    },
+    {
+      "path": "src/host/agent-driven/created-task-worker.ts",
+      "writer": "bridge-Claude",
+      "exists_at_observation": true
+    },
+    {
+      "path": "src/host/agent-driven/local-asset-registry.ts",
+      "writer": "bridge-Claude",
+      "exists_at_observation": true
+    },
+    {
+      "path": "src/host/agent-driven/committed-snapshot-authority.ts",
+      "writer": "bridge-Claude",
+      "exists_at_observation": true
+    },
+    {
+      "path": "src/host/agent-driven/product-sqlite-repository.ts",
+      "writer": "bridge-Claude",
+      "exists_at_observation": true
+    },
+    {
+      "path": "src/host/agent-driven/created-run-facts.ts",
+      "writer": "bridge-Claude",
+      "exists_at_observation": false
+    },
+    {
+      "path": "src/host/agent-driven/created-run-authority.ts",
+      "writer": "bridge-Claude",
+      "exists_at_observation": false
+    },
+    {
+      "path": "src/host/agent-driven/created-task-application.ts",
+      "writer": "bridge-Claude",
+      "exists_at_observation": false
+    },
+    {
+      "path": "src/host/agent-driven/created-source-change-service.ts",
+      "writer": "bridge-Claude",
+      "exists_at_observation": false
+    },
+    {
+      "path": "src/host/agent-driven/created-source-impact-store.ts",
+      "writer": "bridge-Claude",
+      "exists_at_observation": false
+    },
+    {
+      "path": "src/host/agent-driven/created-source-adoption-store.ts",
+      "writer": "bridge-Claude",
+      "exists_at_observation": false
+    },
+    {
+      "path": "src/host/agent-driven/created-source-adoption-service.ts",
+      "writer": "bridge-Claude",
+      "exists_at_observation": false
+    },
+    {
+      "path": "src/host/agent-driven/created-source-publisher.ts",
+      "writer": "bridge-Claude",
+      "exists_at_observation": false
+    },
+    {
+      "path": "src/host/agent-driven/fixed-phase-executor.ts",
+      "writer": "bridge-Claude",
+      "exists_at_observation": false
+    },
+    {
+      "path": "src/host/agent-driven/created-render-delivery-store.ts",
+      "writer": "bridge-Claude",
+      "exists_at_observation": false
+    },
+    {
+      "path": "src/host/agent-driven/local-asset-http.ts",
+      "writer": "bridge-Claude",
+      "exists_at_observation": false
+    },
+    {
+      "path": "src/host/agent-driven/asset-inventory.ts",
+      "writer": "bridge-Claude",
+      "exists_at_observation": false
+    },
+    {
+      "path": "src/host/creative/execution-guard.ts",
+      "writer": "bridge-Claude",
+      "exists_at_observation": true
+    },
+    {
+      "path": "src/host/creative/fixed-workflow-service.ts",
+      "writer": "bridge-Claude",
+      "exists_at_observation": true
+    },
+    {
+      "path": "src/host/creative/product-repository.ts",
+      "writer": "bridge-Claude",
+      "exists_at_observation": true
+    },
+    {
+      "path": "src/host/projects/revision-store.ts",
+      "writer": "bridge-Claude",
+      "exists_at_observation": true
+    },
+    {
+      "path": "src/host/projects/project-creation-store.ts",
+      "writer": "bridge-Claude",
+      "exists_at_observation": true
+    },
+    {
+      "path": "src/host/projects/project-coordinator.ts",
+      "writer": "bridge-Claude",
+      "exists_at_observation": true
+    },
+    {
+      "path": "src/host/projects/project-resolver.ts",
+      "writer": "bridge-Claude",
+      "exists_at_observation": true
+    },
+    {
+      "path": "src/host/impact/impact-store.ts",
+      "writer": "bridge-Claude",
+      "exists_at_observation": true
+    },
+    {
+      "path": "src/host/agent-driven/start-runtime.ts",
+      "writer": "bridge-Claude",
+      "exists_at_observation": true
+    },
+    {
+      "path": "src/host/agent-driven/observation-cursor-ports.ts",
+      "writer": "bridge-Claude",
+      "exists_at_observation": true
+    },
+    {
+      "path": "src/mcp/mcp-server.ts",
+      "writer": "bridge-Claude",
+      "exists_at_observation": true
+    },
+    {
+      "path": "src/mcp/host-application-ports.ts",
+      "writer": "bridge-Claude",
+      "exists_at_observation": true
+    },
+    {
+      "path": "src/mcp/host-error-mapping.ts",
+      "writer": "bridge-Claude",
+      "exists_at_observation": true
+    },
+    {
+      "path": "src/mcp/asset-inventory-resource.ts",
+      "writer": "bridge-Claude",
+      "exists_at_observation": false
+    },
+    {
+      "path": "src/mcp/stdio-main.ts",
+      "writer": "bridge-Claude",
+      "exists_at_observation": true
+    },
+    {
+      "path": "src/launcher/workbench-entry.ts",
+      "writer": "bridge-Claude",
+      "exists_at_observation": true
+    },
+    {
+      "path": "skills/narralens/SKILL.md",
+      "writer": "bridge-Claude",
+      "exists_at_observation": true
+    },
+    {
+      "path": "contracts/agent-local-assets-v1.schema.json",
+      "writer": "bridge-Claude",
+      "exists_at_observation": false
+    },
+    {
+      "path": "contracts/agent-local-assets-v1.registry.json",
+      "writer": "bridge-Claude",
+      "exists_at_observation": false
+    },
+    {
+      "path": "src/contracts/agent-local-assets-types.ts",
+      "writer": "bridge-Claude",
+      "exists_at_observation": false
+    },
+    {
+      "path": "src/contracts/agent-local-assets-validator.ts",
+      "writer": "bridge-Claude",
+      "exists_at_observation": false
+    },
+    {
+      "path": "tests/agent-driven/integration/host-application.test.ts",
+      "writer": "bridge-Claude",
+      "exists_at_observation": true
+    },
+    {
+      "path": "tests/agent-driven/integration/host-close-lifecycle.test.ts",
+      "writer": "bridge-Claude",
+      "exists_at_observation": true
+    },
+    {
+      "path": "tests/agent-driven/integration/creative-context-host.test.ts",
+      "writer": "bridge-Claude",
+      "exists_at_observation": true
+    },
+    {
+      "path": "tests/agent-driven/integration/created-task-store.test.ts",
+      "writer": "bridge-Claude",
+      "exists_at_observation": true
+    },
+    {
+      "path": "tests/agent-driven/integration/created-task-gate.test.ts",
+      "writer": "bridge-Claude",
+      "exists_at_observation": true
+    },
+    {
+      "path": "tests/agent-driven/integration/created-task-worker.test.ts",
+      "writer": "bridge-Claude",
+      "exists_at_observation": true
+    },
+    {
+      "path": "tests/agent-driven/integration/created-run-authority.test.ts",
+      "writer": "bridge-Claude",
+      "exists_at_observation": false
+    },
+    {
+      "path": "tests/agent-driven/integration/created-source-change.test.ts",
+      "writer": "bridge-Claude",
+      "exists_at_observation": false
+    },
+    {
+      "path": "tests/agent-driven/integration/created-source-adoption.test.ts",
+      "writer": "bridge-Claude",
+      "exists_at_observation": false
+    },
+    {
+      "path": "tests/agent-driven/integration/created-source-process-recovery.test.ts",
+      "writer": "bridge-Claude",
+      "exists_at_observation": false
+    },
+    {
+      "path": "tests/agent-driven/integration/created-render-delivery.test.ts",
+      "writer": "bridge-Claude",
+      "exists_at_observation": false
+    },
+    {
+      "path": "tests/agent-driven/integration/created-delivery-recovery.test.ts",
+      "writer": "bridge-Claude",
+      "exists_at_observation": false
+    },
+    {
+      "path": "tests/agent-driven/integration/local-assets-transport.test.ts",
+      "writer": "bridge-Claude",
+      "exists_at_observation": false
+    },
+    {
+      "path": "tests/agent-driven/bridge/mcp-host-client.test.ts",
+      "writer": "bridge-Claude",
+      "exists_at_observation": true
+    },
+    {
+      "path": "tests/agent-driven/bridge/mcp-registry.test.ts",
+      "writer": "bridge-Claude",
+      "exists_at_observation": true
+    },
+    {
+      "path": "tests/agent-driven/bridge/mcp-stdio-client.test.ts",
+      "writer": "bridge-Claude",
+      "exists_at_observation": true
+    },
+    {
+      "path": "tests/agent-driven/bridge/cursor-events.test.ts",
+      "writer": "bridge-Claude",
+      "exists_at_observation": true
+    },
+    {
+      "path": "tests/agent-driven/product/fixed-workflow-service.test.ts",
+      "writer": "bridge-Claude",
+      "exists_at_observation": true
+    },
+    {
+      "path": "tests/agent-driven/product/execution-guard.test.ts",
+      "writer": "bridge-Claude",
+      "exists_at_observation": true
+    },
+    {
+      "path": "package.json",
+      "writer": "bridge-Claude",
+      "exists_at_observation": true
+    },
+    {
+      "path": "src/app/observation/WorkflowTopBar.tsx",
+      "writer": "product-Claude",
+      "exists_at_observation": true
+    },
+    {
+      "path": "src/app/observation/CreativeReviewPanel.tsx",
+      "writer": "product-Claude",
+      "exists_at_observation": true
+    },
+    {
+      "path": "src/app/observation/NativeSyncIndicator.tsx",
+      "writer": "product-Claude",
+      "exists_at_observation": false
+    },
+    {
+      "path": "src/app/observation/LocalAssetRegistrationPanel.tsx",
+      "writer": "product-Claude",
+      "exists_at_observation": false
+    },
+    {
+      "path": "src/app/observation/content-views.tsx",
+      "writer": "product-Claude",
+      "exists_at_observation": true
+    },
+    {
+      "path": "src/app/observation/observation.css",
+      "writer": "product-Claude",
+      "exists_at_observation": true
+    },
+    {
+      "path": "src/app/observation/index.ts",
+      "writer": "product-Claude",
+      "exists_at_observation": true
+    },
+    {
+      "path": "src/app/system/SystemControlPanel.tsx",
+      "writer": "product-Claude",
+      "exists_at_observation": true
+    },
+    {
+      "path": "src/app/system/system.css",
+      "writer": "product-Claude",
+      "exists_at_observation": true
+    },
+    {
+      "path": "src/app/system/index.ts",
+      "writer": "product-Claude",
+      "exists_at_observation": true
+    },
+    {
+      "path": "src/app/m5/M5Panel.tsx",
+      "writer": "product-Claude",
+      "exists_at_observation": true
+    },
+    {
+      "path": "src/app/m5/GatewayApiClient.ts",
+      "writer": "product-Claude",
+      "exists_at_observation": true
+    },
+    {
+      "path": "src/app/m5/SelectionCoordinator.ts",
+      "writer": "product-Claude",
+      "exists_at_observation": true
+    },
+    {
+      "path": "src/app/main.tsx",
+      "writer": "product-Claude",
+      "exists_at_observation": true
+    },
+    {
+      "path": "src/app/owned-project-client.ts",
+      "writer": "product-Claude",
+      "exists_at_observation": true
+    },
+    {
+      "path": "src/app/agent-workbench-client.ts",
+      "writer": "product-Claude",
+      "exists_at_observation": false
+    },
+    {
+      "path": "src/host/m5/openfilm-studio-gateway.ts",
+      "writer": "product-Claude",
+      "exists_at_observation": true
+    },
+    {
+      "path": "src/host/m5/native-observation.ts",
+      "writer": "product-Claude",
+      "exists_at_observation": false
+    },
+    {
+      "path": "src/host/m5/openfilm-native-expected.ts",
+      "writer": "product-Claude",
+      "exists_at_observation": false
+    },
+    {
+      "path": "src/host/m5/native-ack-store.ts",
+      "writer": "product-Claude",
+      "exists_at_observation": false
+    },
+    {
+      "path": "src/host/m5/openfilm-studio-ui-pin.json",
+      "writer": "product-Claude",
+      "exists_at_observation": false
+    },
+    {
+      "path": "tools/agent-driven/product/build-native-hydration.ts",
+      "writer": "product-Claude",
+      "exists_at_observation": false
+    },
+    {
+      "path": "tests/agent-driven/product/observation-ui.test.tsx",
+      "writer": "product-Claude",
+      "exists_at_observation": true
+    },
+    {
+      "path": "tests/agent-driven/product/local-asset-registration.test.tsx",
+      "writer": "product-Claude",
+      "exists_at_observation": false
+    },
+    {
+      "path": "tests/agent-driven/integration/created-native-ack.test.ts",
+      "writer": "product-Claude",
+      "exists_at_observation": false
+    },
+    {
+      "path": "tests/agent-driven/integration/created-workbench-review.test.ts",
+      "writer": "product-Claude",
+      "exists_at_observation": false
+    },
+    {
+      "path": "tests/agent-driven/integration/created-workbench-headless.test.ts",
+      "writer": "product-Claude",
+      "exists_at_observation": false
+    },
+    {
+      "path": "src/host/agent-driven/created-draft-processor.ts",
+      "writer": "media-Claude",
+      "exists_at_observation": true
+    },
+    {
+      "path": "src/host/agent-driven/prepared-draft-verifier.ts",
+      "writer": "media-Claude",
+      "exists_at_observation": true
+    },
+    {
+      "path": "src/host/engine/source-digest-v1.ts",
+      "writer": "media-Claude",
+      "exists_at_observation": true
+    },
+    {
+      "path": "src/host/render/native-draft-assembler.ts",
+      "writer": "media-Claude",
+      "exists_at_observation": true
+    },
+    {
+      "path": "src/host/render/native-draft-plan.ts",
+      "writer": "media-Claude",
+      "exists_at_observation": true
+    },
+    {
+      "path": "src/host/render/native-draft-io.ts",
+      "writer": "media-Claude",
+      "exists_at_observation": true
+    },
+    {
+      "path": "src/host/render/assembly-ports.ts",
+      "writer": "media-Claude",
+      "exists_at_observation": true
+    },
+    {
+      "path": "src/host/render/render-snapshot.ts",
+      "writer": "media-Claude",
+      "exists_at_observation": true
+    },
+    {
+      "path": "src/host/render/ports.ts",
+      "writer": "media-Claude",
+      "exists_at_observation": true
+    },
+    {
+      "path": "src/host/render/native-renderer.ts",
+      "writer": "media-Claude",
+      "exists_at_observation": true
+    },
+    {
+      "path": "src/host/render/preview-prepared-source.ts",
+      "writer": "media-Claude",
+      "exists_at_observation": false
+    },
+    {
+      "path": "src/host/render/committed-render-phases.ts",
+      "writer": "media-Claude",
+      "exists_at_observation": false
+    },
+    {
+      "path": "src/host/delivery/qc.ts",
+      "writer": "media-Claude",
+      "exists_at_observation": true
+    },
+    {
+      "path": "src/host/delivery/download.ts",
+      "writer": "media-Claude",
+      "exists_at_observation": true
+    },
+    {
+      "path": "src/host/delivery/delivery-service.ts",
+      "writer": "media-Claude",
+      "exists_at_observation": true
+    },
+    {
+      "path": "src/host/delivery/published-package-store.ts",
+      "writer": "media-Claude",
+      "exists_at_observation": true
+    },
+    {
+      "path": "tests/agent-driven/integration/created-draft-processor.test.ts",
+      "writer": "media-Claude",
+      "exists_at_observation": true
+    },
+    {
+      "path": "tests/agent-driven/integration/source-digest-resource-boundary.test.ts",
+      "writer": "media-Claude",
+      "exists_at_observation": true
+    },
+    {
+      "path": "tests/agent-driven/media/native-draft.test.ts",
+      "writer": "media-Claude",
+      "exists_at_observation": true
+    },
+    {
+      "path": "tests/agent-driven/media/native-draft-real-render.test.ts",
+      "writer": "media-Claude",
+      "exists_at_observation": true
+    },
+    {
+      "path": "tests/agent-driven/media/native-renderer.test.ts",
+      "writer": "media-Claude",
+      "exists_at_observation": true
+    },
+    {
+      "path": "tests/agent-driven/media/render-snapshot.test.ts",
+      "writer": "media-Claude",
+      "exists_at_observation": true
+    },
+    {
+      "path": "tests/agent-driven/media/qc.test.ts",
+      "writer": "media-Claude",
+      "exists_at_observation": true
+    },
+    {
+      "path": "tests/agent-driven/media/download.test.ts",
+      "writer": "media-Claude",
+      "exists_at_observation": true
+    },
+    {
+      "path": "tests/agent-driven/media/delivery-service.test.ts",
+      "writer": "media-Claude",
+      "exists_at_observation": true
+    },
+    {
+      "path": "tests/agent-driven/media/published-package-store.test.ts",
+      "writer": "media-Claude",
+      "exists_at_observation": true
+    },
+    {
+      "path": "tests/agent-driven/media/committed-render-phases.test.ts",
+      "writer": "media-Claude",
+      "exists_at_observation": false
+    },
+    {
+      "path": "tests/agent-driven/media/preview-prepared-source.test.ts",
+      "writer": "media-Claude",
+      "exists_at_observation": false
+    },
+    {
+      "path": "src/host/agent-driven/review-media-http.ts",
+      "writer": "bridge-Claude",
+      "exists_at_observation": false
+    },
+    {
+      "path": "tests/agent-driven/integration/review-media-transport.test.ts",
+      "writer": "bridge-Claude",
+      "exists_at_observation": false
+    },
+    {
+      "path": "src/host/agent-driven/created-review-gate-store.ts",
+      "writer": "bridge-Claude",
+      "exists_at_observation": false
+    },
+    {
+      "path": "tests/agent-driven/integration/created-qc-review.test.ts",
+      "writer": "bridge-Claude",
+      "exists_at_observation": false
+    },
+    {
+      "path": "tests/agent-driven/integration/created-schema-upgrade.test.ts",
+      "writer": "bridge-Claude",
+      "exists_at_observation": false
+    },
+    {
+      "path": "contracts/agent-workbench-ui-v1.registry.json",
+      "writer": "bridge-Claude"
+    },
+    {
+      "path": "src/host/m5/controlled-studio-access.ts",
+      "writer": "product-Claude"
+    },
+    {
+      "path": "src/host/m5/controlled-studio-browser.ts",
+      "writer": "product-Claude"
+    },
+    {
+      "path": "tests/agent-driven/integration/created-native-ui-transport.test.ts",
+      "writer": "product-Claude"
+    }
+  ]
+}

@@ -1,0 +1,863 @@
+{
+  "format": "narralens.P1R.integration-static-review@1",
+  "verdict": "REQUEST_CHANGES",
+  "binding": "22 actual current dirty files match INPUT_SNAPSHOT, historical HEAD not acceptance",
+  "counts": {
+    "BLOCKER": 0,
+    "MAJOR": 10,
+    "MINOR": 1,
+    "NOTE": 2
+  },
+  "findings": [
+    {
+      "id": "IR-01",
+      "severity": "MAJOR",
+      "title": "completion失败仍释放active scope；清理不确定没有维持全生产barrier",
+      "locations": [
+        {
+          "path": "src/host/agent-driven/created-native-workspace.ts",
+          "line": 733
+        },
+        {
+          "path": "src/host/agent-driven/created-native-workspace.ts",
+          "line": 750
+        },
+        {
+          "path": "src/host/agent-driven/created-native-workspace.ts",
+          "line": 759
+        },
+        {
+          "path": "src/host/agent-driven/created-native-workspace.ts",
+          "line": 949
+        },
+        {
+          "path": "src/adapters/openfilm/openfilm-upstream.ts",
+          "line": 526
+        },
+        {
+          "path": "src/adapters/openfilm/cache-process-supervisor.ts",
+          "line": 777
+        },
+        {
+          "path": "src/adapters/openfilm/cache-production-scope.ts",
+          "line": 442
+        }
+      ],
+      "concrete_trigger": "PRE/POST的release抛真实cleanup异常，state.tree_release=false；或父drain未证后退出。factory构造supervisor时未传实际scope，#holdForCleanup不能标记该scope。",
+      "impact": "mint返回null、complete返回false，outer finally仍无条件release；release只检查cleanup_required而非phase completion，于是service自身uncertain但全局root/容量被归还，别的owner可进入同物理根。同一operation也已reject，不再是完整promise pending。",
+      "minimum_fix": "绑定真实scope到run责任，在所有父/tree不确定分支保留wholeProduction与scope；只在完整真实completion成功消费后释放。未出生/NOT_OWNED拒绝路径需签明真实零资源阶段，不能把普通finally可达当execution证明。",
+      "counterfactual_test": "故障注入一棵tree close失败与父drain不确定，观察同root另一owner排队不获准/PRE责任仍持有；真正reconcile完成后原失败返回且仅一次release。",
+      "case_mapping": [
+        "P1-F04",
+        "ISO-06",
+        "ISO-10",
+        "ISO-11",
+        "R07-cleanup_uncertainty"
+      ],
+      "contract": "ADR060 rev3 and 060P1R_PRIVATE_CONTRACT sections A/B/C; prior P1 findings as linked",
+      "authority_limit": "Host-private lifecycle/code interface; no assertion of a public HTTP capability-forgery exploit",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "id": "IR-02",
+      "severity": "MAJOR",
+      "title": "所谓私有一次completion实际由导出mint接受布尔receipt并可重复消费",
+      "locations": [
+        {
+          "path": "src/adapters/openfilm/cache-production-scope.ts",
+          "line": 387
+        },
+        {
+          "path": "src/adapters/openfilm/cache-production-scope.ts",
+          "line": 397
+        },
+        {
+          "path": "src/adapters/openfilm/cache-production-scope.ts",
+          "line": 400
+        },
+        {
+          "path": "src/adapters/openfilm/cache-production-scope.ts",
+          "line": 418
+        },
+        {
+          "path": "src/adapters/openfilm/cache-production-scope.ts",
+          "line": 424
+        }
+      ],
+      "concrete_trigger": "任何持同一真实scope的Host-private调用者导入mint，传三个{settled:true,digest:null}；消费后再标held并重用同一个completion。",
+      "impact": "没有owner/reservation/阶段issuer或真实receipt认证，outcome可任填；WeakMap只证明调用过该导出函数，consume也不delete/消费一次，不复核generation/active/原outcome。现有scheduler测试本身用手造布尔receipt证明这条路径可通，与合同禁止caller布尔mint相反。",
+      "minimum_fix": "将mint权限封在真实scope owner闭包，用各阶段私有issuer签发的receipt且绑定reservation/root/generation/outcome；消费验证同一active责任并立即删除/标spent，不能有通用导出mint(raw booleans)。",
+      "counterfactual_test": "外部Host模块持真实scope但仅伪造phase shape不得mint；外来receipt/原outcome不符拒绝；消费后同completion再次clear held必须失败。",
+      "case_mapping": [
+        "P1-F04",
+        "ISO-11",
+        "ISO-16"
+      ],
+      "contract": "ADR060 rev3 and 060P1R_PRIVATE_CONTRACT sections A/B/C; prior P1 findings as linked",
+      "authority_limit": "Host-private lifecycle/code interface; no assertion of a public HTTP capability-forgery exploit",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "id": "IR-03",
+      "severity": "MAJOR",
+      "title": "execution证明与reconcile均未验证custodian receipt/可接受退出",
+      "locations": [
+        {
+          "path": "src/adapters/openfilm/cache-process-supervisor.ts",
+          "line": 698
+        },
+        {
+          "path": "src/adapters/openfilm/cache-process-supervisor.ts",
+          "line": 738
+        },
+        {
+          "path": "src/adapters/openfilm/cache-process-supervisor.ts",
+          "line": 1180
+        },
+        {
+          "path": "src/adapters/openfilm/cache-process-supervisor.ts",
+          "line": 1223
+        },
+        {
+          "path": "src/adapters/openfilm/cache-process-supervisor.ts",
+          "line": 1289
+        }
+      ],
+      "concrete_trigger": "C报告DOMAIN_REAPED但outcome=unknown、echild=false或identity/draw不符；或C异常死亡且Host所见N组刚好gone，或尚未保存worker identity。",
+      "impact": "run只校验kind；facts.receipt赋值后从不被证明函数读取，reconcile也不检查receipt。#proveDomainGone只需C close及已知组/少量knownIDs gone，worker=null可直接成功；C退出code/signal未成为资格门。#terminate还会把仍在回收的C升级SIGKILL，随后同一弱证明可能settle，不能证明C已reap全部收养children。",
+      "minimum_fix": "严格校验协议/seq/digest/draw/C/N身份、outcome=reaped/ECHILD/组及knownIDs等完整receipt，并结合真实C exit/close与fresh观察；缺失/unknown/坏receipt或C意外死亡必须hold。异常清理不能主动杀掉唯一reaper后声称正常结算。失败路径的receipt也须持续接收并保存，不能只在成功候选分支读一次。",
+      "counterfactual_test": "缺receipt、wrong draw/identity、unknown/ECHILD=false、C非0或SIGKILL、preNidentity阶段C崩溃，各自保持barrier；合法完整回执+真实close作正向对照。",
+      "case_mapping": [
+        "P1-F02",
+        "P1-F03",
+        "P1-F05",
+        "ISO-09",
+        "ISO-10",
+        "ISO-11"
+      ],
+      "contract": "ADR060 rev3 and 060P1R_PRIVATE_CONTRACT sections A/B/C; prior P1 findings as linked",
+      "authority_limit": "Host-private lifecycle/code interface; no assertion of a public HTTP capability-forgery exploit",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "id": "IR-04",
+      "severity": "MAJOR",
+      "title": "candidate状态阻止后续失败锁存，取消/协议/洪水不再优先",
+      "locations": [
+        {
+          "path": "src/adapters/openfilm/cache-process-supervisor.ts",
+          "line": 762
+        },
+        {
+          "path": "src/adapters/openfilm/cache-process-supervisor.ts",
+          "line": 1139
+        },
+        {
+          "path": "src/adapters/openfilm/cache-process-supervisor.ts",
+          "line": 1167
+        },
+        {
+          "path": "src/adapters/openfilm/cache-process-supervisor.ts",
+          "line": 1198
+        }
+      ],
+      "concrete_trigger": "已接收合法picture并置latched.kind=candidate后，closed/receipt缺失、协议错误或超限；#latchFailure被调用。",
+      "impact": "#latchFailure对candidate直接return。facts.error仍null，后续#fail可能只产生空结果，held reconcile则走candidate成功分支；候选以后本应取消/失败的事实未锁存。",
+      "minimum_fix": "candidate不是终态：后续第一次failure/cancel必须覆盖candidate资格并保存原error；只有失败之间首因不覆盖。将实际取消signal接入该状态机，最后交付前检查它。",
+      "counterfactual_test": "候选后missing/fatal receipt、late flood、cancel竞态，证明原失败/取消原因保持且零witness，之后正常对照能成功。",
+      "case_mapping": [
+        "P1-F09",
+        "ISO-07",
+        "ISO-08",
+        "ISO-15"
+      ],
+      "contract": "ADR060 rev3 and 060P1R_PRIVATE_CONTRACT sections A/B/C; prior P1 findings as linked",
+      "authority_limit": "Host-private lifecycle/code interface; no assertion of a public HTTP capability-forgery exploit",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "id": "IR-05",
+      "severity": "MAJOR",
+      "title": "按owner+root取最后登记责任，排队请求可遮蔽正在held的真实draw",
+      "locations": [
+        {
+          "path": "src/adapters/openfilm/openfilm-upstream.ts",
+          "line": 1148
+        },
+        {
+          "path": "src/adapters/openfilm/openfilm-upstream.ts",
+          "line": 1486
+        },
+        {
+          "path": "src/adapters/openfilm/openfilm-upstream.ts",
+          "line": 1508
+        },
+        {
+          "path": "src/adapters/openfilm/openfilm-upstream.ts",
+          "line": 1547
+        },
+        {
+          "path": "src/host/agent-driven/created-native-workspace.ts",
+          "line": 477
+        }
+      ],
+      "concrete_trigger": "同一issued producer/root上A正在执行或held，另一个direct/bridge调用B先登记后排队；inspect/reconcile A时list最后一项已是B。",
+      "impact": "bridge/workspace会暴露或推进B的reserved handle，A无法通过生产reconcile找回；A父drain后还会把B.parentDrained写true。没有把具体bridge/draw/scope责任绑定到continuation，两个同root serving bridge也会共享这条root查询。",
+      "minimum_fix": "将每次bridge.draw同步捕获其实际responsibility并闭包贯穿execution/parent receipt；inspect列出未结责任或稳定issued handle，reconcile直接由该handle找对应责任，不以最新root记录替代。",
+      "counterfactual_test": "A held时排队B，A的旧真实handle仍可正确reconcile，B不能被误标parentDrained；foreign bridge/service真实handle拒绝。",
+      "case_mapping": [
+        "P1-F03",
+        "P1-F04",
+        "ISO-06",
+        "ISO-11"
+      ],
+      "contract": "ADR060 rev3 and 060P1R_PRIVATE_CONTRACT sections A/B/C; prior P1 findings as linked",
+      "authority_limit": "Host-private lifecycle/code interface; no assertion of a public HTTP capability-forgery exploit",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "id": "IR-06",
+      "severity": "MAJOR",
+      "title": "责任历史无限保留且保存完整JPEG Buffer",
+      "locations": [
+        {
+          "path": "src/adapters/openfilm/openfilm-upstream.ts",
+          "line": 435
+        },
+        {
+          "path": "src/adapters/openfilm/openfilm-upstream.ts",
+          "line": 458
+        },
+        {
+          "path": "src/adapters/openfilm/openfilm-upstream.ts",
+          "line": 569
+        }
+      ],
+      "concrete_trigger": "长寿producer连续完成多个合法draw。",
+      "impact": "WeakMap value数组只append从不删，outcome保存settlement.picture完整Buffer；每draw至多8MiB累计保留，不受2active/32queue限制。普通成功路径会持续增长内存，close遍历全部历史。",
+      "minimum_fix": "active/held责任用Map按draw保存；全生产结束后删除大对象和已结记录，只保留有界摘要/诊断，真正held仍保留。",
+      "counterfactual_test": "循环多个成功draw后只剩当前active/held和有界summary，历史Buffer无强引用；同时held诊断仍可reconcile。",
+      "case_mapping": [
+        "R07-budgets",
+        "ISO-16"
+      ],
+      "contract": "ADR060 rev3 and 060P1R_PRIVATE_CONTRACT sections A/B/C; prior P1 findings as linked",
+      "authority_limit": "Host-private lifecycle/code interface; no assertion of a public HTTP capability-forgery exploit",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "id": "IR-07",
+      "severity": "MAJOR",
+      "title": "无workspace的bridge在父drain之前归还direct scope",
+      "locations": [
+        {
+          "path": "src/adapters/openfilm/openfilm-upstream.ts",
+          "line": 548
+        },
+        {
+          "path": "src/adapters/openfilm/openfilm-upstream.ts",
+          "line": 585
+        },
+        {
+          "path": "src/adapters/openfilm/openfilm-upstream.ts",
+          "line": 1521
+        },
+        {
+          "path": "src/adapters/openfilm/openfilm-upstream.ts",
+          "line": 1546
+        }
+      ],
+      "concrete_trigger": "通过已签发真实bridge.draw调用，未携带workspace ambient scope；producer取得direct scope，execution结束后父probe/源流仍在。",
+      "impact": "producer.pageFrame自己的finally先release，然后bridge才freeze/drain/endDraw；下一同root draw可在旧父资源未结时写。producer.close所等settled也在父drain前resolve，与完整accepted生产责任合同不符。",
+      "minimum_fix": "bridge自身取得并持有包含execution+parent阶段的真实scope/责任，producer复用ambient不提前释放；真正裸factory仅execution模式须构造期明确区分，不让bridge冒充无父资源direct调用。",
+      "counterfactual_test": "真实bridge的父probe/source close被barrier延后，下一同root draw和close保持等待；drain/endDraw真实完成才一次归还根。",
+      "case_mapping": [
+        "P1-F04",
+        "P1-F08",
+        "ISO-06",
+        "ISO-12",
+        "ISO-13"
+      ],
+      "contract": "ADR060 rev3 and 060P1R_PRIVATE_CONTRACT sections A/B/C; prior P1 findings as linked",
+      "authority_limit": "Host-private lifecycle/code interface; no assertion of a public HTTP capability-forgery exploit",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "id": "IR-08",
+      "severity": "MAJOR",
+      "title": "decoder外的frame队列仍无界，三次READY也重新各给30秒",
+      "locations": [
+        {
+          "path": "src/adapters/openfilm/cache-process-supervisor.ts",
+          "line": 861
+        },
+        {
+          "path": "src/adapters/openfilm/cache-process-supervisor.ts",
+          "line": 869
+        },
+        {
+          "path": "src/adapters/openfilm/cache-process-supervisor.ts",
+          "line": 934
+        },
+        {
+          "path": "src/adapters/openfilm/cache-process-supervisor.ts",
+          "line": 960
+        },
+        {
+          "path": "src/adapters/openfilm/cache-process-supervisor.ts",
+          "line": 1010
+        },
+        {
+          "path": "src/adapters/openfilm/cache-process-supervisor.ts",
+          "line": 1026
+        }
+      ],
+      "concrete_trigger": "远端持续写很多完整小frame，每次feed未消费buffer很小但controlFrames/drawFrames累积；或每个启动阶段接近30秒才响应。",
+      "impact": "decoder把完整frame移出后外部数组无限push，未限制阶段帧数/总积压；控制decode失败只改drawFailure而nextControl不看，洪水也仅flag。完整两级READY实际可近90秒，违反已冻结总30秒；Host draw EOF也无即时控制cancel监听。",
+      "minimum_fix": "约束包含解析后队列的总bytes/count并按协议阶段立即拒绝，超限/EOF触发同一cleanup；所有启动步骤共享一个绝对READY deadline，不能每个next重置。",
+      "counterfactual_test": "每次仅发合法尺寸小帧的累计洪水、无waiter积压、control decode错误、draw EOF以及三阶段延迟，均真实有界失败清理，正常批量metadata+JPEG可通过。",
+      "case_mapping": [
+        "P1-F06",
+        "P1-F07",
+        "ISO-07",
+        "ISO-08"
+      ],
+      "contract": "ADR060 rev3 and 060P1R_PRIVATE_CONTRACT sections A/B/C; prior P1 findings as linked",
+      "authority_limit": "Host-private lifecycle/code interface; no assertion of a public HTTP capability-forgery exploit",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "id": "IR-09",
+      "severity": "MAJOR",
+      "title": "P2a helper/断言不能证明目标场景且失败时会漏清理",
+      "locations": [
+        {
+          "path": "tests/agent-driven/integration/helpers/cache-worker-fixture.mjs",
+          "line": 194
+        },
+        {
+          "path": "tests/agent-driven/integration/helpers/cache-probe-fixture.mjs",
+          "line": 99
+        },
+        {
+          "path": "tests/agent-driven/integration/cache-frame-duration-lifetime.test.ts",
+          "line": 86
+        },
+        {
+          "path": "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts",
+          "line": 75
+        },
+        {
+          "path": "tests/agent-driven/integration/cache-serving-drain.test.ts",
+          "line": 106
+        }
+      ],
+      "concrete_trigger": "fault worker用go.ticket_digest（Host仅发送ticket）回结果；foreign-hello模式在HELLO之后才由rel解析；probe helper仅unref interval+未决顶层await；probe断言在kill前失败。",
+      "impact": "worker先撞PROTOCOL_FOREIGN，不能证明预期正常/TERM-ignore/late分支；foreign HELLO场景实际未实现。probe helper不保证活着（未决Promise不保活，且close-stdio模式后续写已end stderr有错误风险）。测试没有finally清理，断言失败可留下被测child；custodian正常测试却调用fixtureSupervisor并只看Host组计数，源流测试也没制造close前barrier/FD事实。",
+      "minimum_fix": "worker按go.ticket计算digest，preHELLO故障由受控fixture启动协议具名提供；probe用明确ref存活句柄且结束后不写已关stderr；测试启动即注册所有真实child到finally/afterEach TERM-KILL-close账本，UNKNOWN保留目录。增加真正正常成功/目标故障直接receipt、Z与FD事件断言，不用rejects任意错误/Host组计数。",
+      "counterfactual_test": "先非故障fixture完整成功；每scenario断言具体命中原因；故意让中途expect失败仍真正reap全部child；真实source close延迟与probe callback/error/exit/close完整事件矩阵。",
+      "case_mapping": [
+        "ISO-01",
+        "ISO-09",
+        "ISO-10",
+        "ISO-12",
+        "ISO-13",
+        "ISO-18"
+      ],
+      "contract": "ADR060 rev3 and 060P1R_PRIVATE_CONTRACT sections A/B/C; prior P1 findings as linked",
+      "authority_limit": "Host-private lifecycle/code interface; no assertion of a public HTTP capability-forgery exploit",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "id": "IR-10",
+      "severity": "MAJOR",
+      "title": "被称为纯identity门的测试确实调用真实Python spawn路径",
+      "locations": [
+        {
+          "path": "tests/agent-driven/integration/cache-process-identity.test.ts",
+          "line": 37
+        },
+        {
+          "path": "tests/agent-driven/integration/cache-process-identity.test.ts",
+          "line": 182
+        },
+        {
+          "path": "src/adapters/openfilm/cache-process-supervisor.ts",
+          "line": 608
+        },
+        {
+          "path": "src/adapters/openfilm/cache-process-supervisor.ts",
+          "line": 825
+        }
+      ],
+      "concrete_trigger": "已捕获identity整文件中的starts a draw only once执行owner.start(handle)。",
+      "impact": "start直接执行#run，立即spawn /usr/bin/python3.12 -I -S -B /nonexistent/custodian.py；没有stub或阻断seam。源码证明spawn调用被执行，捕获未记录child PID/close，不能从29/29推称无child；这不代表真实custodian/prctl已经跑过。测试故意不await first，未保证所启动child settled。",
+      "minimum_fix": "将首次start需要真实child的断言移到明确P2a并等待清理；纯阶段测试抽取不出生的状态过渡/受审私有seam，不在纯门中调用实际#run。纠正报告的绝对无真实进程陈述，保留现有capture。",
+      "counterfactual_test": "纯门以spawn-call observer/fitness证明零birth call；P2a重复start用真实child证明一次birth并最终close。",
+      "case_mapping": [
+        "P1-F03",
+        "P1-F11",
+        "EVIDENCE",
+        "ISO-07"
+      ],
+      "contract": "ADR060 rev3 and 060P1R_PRIVATE_CONTRACT sections A/B/C; prior P1 findings as linked",
+      "authority_limit": "Host-private lifecycle/code interface; no assertion of a public HTTP capability-forgery exploit",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "id": "IR-11",
+      "severity": "MINOR",
+      "title": "workspace排队未传已有abort",
+      "locations": [
+        {
+          "path": "src/host/agent-driven/created-native-workspace.ts",
+          "line": 733
+        },
+        {
+          "path": "src/host/agent-driven/created-native-workspace.ts",
+          "line": 1133
+        }
+      ],
+      "concrete_trigger": "workspace生产在等scope时service.close触发#abort.abort。",
+      "impact": "acquire只传mode，没有signal，queue不立即取消；虽然后续lease guard防late GO，close仍无谓等待30秒deadline，未实现F08/合同所承诺的取消排队。",
+      "minimum_fix": "传service已有abort signal并在scope grant后的准入门复核；queue取消只归还已占用部分。",
+      "counterfactual_test": "占满两scope后排队workspace生产，close立即移除自己的reservation、零PRE/child，另owner不受影响。",
+      "case_mapping": [
+        "P1-F08",
+        "ISO-07",
+        "ISO-16"
+      ],
+      "contract": "ADR060 rev3 and 060P1R_PRIVATE_CONTRACT sections A/B/C; prior P1 findings as linked",
+      "authority_limit": "Host-private lifecycle/code interface; no assertion of a public HTTP capability-forgery exploit",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "id": "IR-N01",
+      "severity": "NOTE",
+      "title": "两次新的开发失败仍缺原始证据，不能与旧失败混淆",
+      "path": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/parallel/lane-product/A-R2-20261112/N1N2-native-source/n1n2-claude-060p1r-report.md",
+      "line": 96,
+      "facts": "报告承认P1R另有两次未经recorder的新identity/scheduler断言失败。已检查W/docs与W/var中060p1r失败命名记录，未找到原命令/exit/log/input；11条可核验成功capture不能替代它们。具体失败argv、时刻与日志路径为UNRECORDED/UNKNOWN，不把最终成功命令冒充原失败命令。release明确all_failures_must_be_recorded_before_first_run=true，承认不等于已留存。",
+      "generation": "generate-001记录是许可的较早generation之后同字节重复；source_changed=[]和manifest hash相符，不能称为捕获了首次源码mutation。不得补造旧日志。"
+    },
+    {
+      "id": "IR-N02",
+      "severity": "NOTE",
+      "title": "默认Q2上游probe未被擅自替换，但当前promise不是普遍reap证明",
+      "facts": "frameDuration仍为固定上游promise，源stream现在error保留/close单独settle、destroy异常保留确有改善。父probe正常/error/kill路径、source-FD barrier与freeze输入仍需P2a直接证据，未跑本身不是新codefinding；必须补实际ffprobe及注入live-error对照，不能只跑小Node helper。"
+    }
+  ],
+  "prior_findings_static_status": {
+    "P1-F01": "STATIC_PARSER_REPAIR_PRESENT; actual kernel/worker NOT_RUN",
+    "P1-F02": "NOT_CLOSED_IR03",
+    "P1-F03": "ISSUER_AND_HANDOFF_GATES_PRESENT; receipt proof still IR03 and bridge binding IR05",
+    "P1-F04": "NOT_CLOSED_IR01_IR02_IR05_IR07",
+    "P1-F05": "TWO_LEVEL_IDENTITY_PRESENT; custodian kill/proof still IR03",
+    "P1-F06": "JPEG_DEADLINE_PRESENT; READY budget still IR08",
+    "P1-F07": "DECODER_PARTIAL; external queues still IR08",
+    "P1-F08": "PRODUCER_SYNCHRONOUS_REGISTRATION_AND_CLOSE_PRESENT; parent stage IR07/workspace abort IR11",
+    "P1-F09": "NOT_CLOSED_IR04",
+    "P1-F10": "ERROR_CLOSE_SEPARATION_PRESENT; true FD/probe P2a NOT_RUN",
+    "P1-F11": "ACTUAL_PGID_ASSERTION_PRESENT; pure test scope IR10"
+  },
+  "original17": [
+    {
+      "group": "R01",
+      "requirement": "producer_chain",
+      "status": "NO_WHOLE_REQUIREMENT_REACCEPTANCE_IN_THIS_STATIC_REVIEW",
+      "runtime": "NOT_RUN",
+      "limit": "Prior historical ten-file/84 scope does not replace P1R release scope"
+    },
+    {
+      "group": "R01",
+      "requirement": "independent_trees",
+      "status": "NO_WHOLE_REQUIREMENT_REACCEPTANCE_IN_THIS_STATIC_REVIEW",
+      "runtime": "NOT_RUN",
+      "limit": "Prior historical ten-file/84 scope does not replace P1R release scope"
+    },
+    {
+      "group": "R02",
+      "requirement": "tamper_and_authority",
+      "status": "NO_WHOLE_REQUIREMENT_REACCEPTANCE_IN_THIS_STATIC_REVIEW",
+      "runtime": "NOT_RUN",
+      "limit": "Prior historical ten-file/84 scope does not replace P1R release scope"
+    },
+    {
+      "group": "R03",
+      "requirement": "complete_dependencies",
+      "status": "NO_WHOLE_REQUIREMENT_REACCEPTANCE_IN_THIS_STATIC_REVIEW",
+      "runtime": "NOT_RUN",
+      "limit": "Prior historical ten-file/84 scope does not replace P1R release scope"
+    },
+    {
+      "group": "R04",
+      "requirement": "native_cache",
+      "status": "NO_WHOLE_REQUIREMENT_REACCEPTANCE_IN_THIS_STATIC_REVIEW",
+      "runtime": "NOT_RUN",
+      "limit": "Prior historical ten-file/84 scope does not replace P1R release scope"
+    },
+    {
+      "group": "R05",
+      "requirement": "actual_probe",
+      "status": "NO_WHOLE_REQUIREMENT_REACCEPTANCE_IN_THIS_STATIC_REVIEW",
+      "runtime": "NOT_RUN",
+      "limit": "Prior historical ten-file/84 scope does not replace P1R release scope"
+    },
+    {
+      "group": "R05",
+      "requirement": "child_lifetime",
+      "status": "NO_WHOLE_REQUIREMENT_REACCEPTANCE_IN_THIS_STATIC_REVIEW",
+      "runtime": "NOT_RUN",
+      "limit": "Prior historical ten-file/84 scope does not replace P1R release scope"
+    },
+    {
+      "group": "R06",
+      "requirement": "native_bytes_and_order",
+      "status": "NO_WHOLE_REQUIREMENT_REACCEPTANCE_IN_THIS_STATIC_REVIEW",
+      "runtime": "NOT_RUN",
+      "limit": "Prior historical ten-file/84 scope does not replace P1R release scope"
+    },
+    {
+      "group": "R07",
+      "requirement": "budgets",
+      "status": "NO_WHOLE_REQUIREMENT_REACCEPTANCE_IN_THIS_STATIC_REVIEW",
+      "runtime": "NOT_RUN",
+      "limit": "Prior historical ten-file/84 scope does not replace P1R release scope"
+    },
+    {
+      "group": "R07",
+      "requirement": "per_allocation_fd_lifetime",
+      "status": "NO_WHOLE_REQUIREMENT_REACCEPTANCE_IN_THIS_STATIC_REVIEW",
+      "runtime": "NOT_RUN",
+      "limit": "Prior historical ten-file/84 scope does not replace P1R release scope"
+    },
+    {
+      "group": "R07",
+      "requirement": "cleanup_uncertainty",
+      "status": "NO_WHOLE_REQUIREMENT_REACCEPTANCE_IN_THIS_STATIC_REVIEW",
+      "runtime": "NOT_RUN",
+      "limit": "Prior historical ten-file/84 scope does not replace P1R release scope"
+    },
+    {
+      "group": "R07",
+      "requirement": "drain_and_delivery",
+      "status": "NO_WHOLE_REQUIREMENT_REACCEPTANCE_IN_THIS_STATIC_REVIEW",
+      "runtime": "NOT_RUN",
+      "limit": "Prior historical ten-file/84 scope does not replace P1R release scope"
+    },
+    {
+      "group": "R01/R02",
+      "requirement": "lease_isolation",
+      "status": "NO_WHOLE_REQUIREMENT_REACCEPTANCE_IN_THIS_STATIC_REVIEW",
+      "runtime": "NOT_RUN",
+      "limit": "Prior historical ten-file/84 scope does not replace P1R release scope"
+    },
+    {
+      "group": "REG",
+      "requirement": "existing_behavior",
+      "status": "NO_WHOLE_REQUIREMENT_REACCEPTANCE_IN_THIS_STATIC_REVIEW",
+      "runtime": "NOT_RUN",
+      "limit": "Prior historical ten-file/84 scope does not replace P1R release scope"
+    },
+    {
+      "group": "EVIDENCE",
+      "requirement": "frozen_capture",
+      "status": "NO_WHOLE_REQUIREMENT_REACCEPTANCE_IN_THIS_STATIC_REVIEW",
+      "runtime": "NOT_RUN",
+      "limit": "Prior historical ten-file/84 scope does not replace P1R release scope"
+    },
+    {
+      "group": "REVIEW",
+      "requirement": "independent_acceptance",
+      "status": "NO_WHOLE_REQUIREMENT_REACCEPTANCE_IN_THIS_STATIC_REVIEW",
+      "runtime": "NOT_RUN",
+      "limit": "Prior historical ten-file/84 scope does not replace P1R release scope"
+    },
+    {
+      "group": "NEXT",
+      "requirement": "next_integration_plan",
+      "status": "PENDING_AFTER_ACCEPTANCE",
+      "runtime": "NOT_RUN",
+      "limit": "Prior historical ten-file/84 scope does not replace P1R release scope"
+    }
+  ],
+  "ISO01_18": [
+    {
+      "id": "ISO-01",
+      "runtime": "NOT_RUN",
+      "new_test_presence_is_not_evidence": true
+    },
+    {
+      "id": "ISO-02",
+      "runtime": "NOT_RUN",
+      "new_test_presence_is_not_evidence": true
+    },
+    {
+      "id": "ISO-03",
+      "runtime": "NOT_RUN",
+      "new_test_presence_is_not_evidence": true
+    },
+    {
+      "id": "ISO-04",
+      "runtime": "NOT_RUN",
+      "new_test_presence_is_not_evidence": true
+    },
+    {
+      "id": "ISO-05",
+      "runtime": "NOT_RUN",
+      "new_test_presence_is_not_evidence": true
+    },
+    {
+      "id": "ISO-06",
+      "runtime": "NOT_RUN",
+      "new_test_presence_is_not_evidence": true
+    },
+    {
+      "id": "ISO-07",
+      "runtime": "NOT_RUN",
+      "new_test_presence_is_not_evidence": true
+    },
+    {
+      "id": "ISO-08",
+      "runtime": "NOT_RUN",
+      "new_test_presence_is_not_evidence": true
+    },
+    {
+      "id": "ISO-09",
+      "runtime": "NOT_RUN",
+      "new_test_presence_is_not_evidence": true
+    },
+    {
+      "id": "ISO-10",
+      "runtime": "NOT_RUN",
+      "new_test_presence_is_not_evidence": true
+    },
+    {
+      "id": "ISO-11",
+      "runtime": "NOT_RUN",
+      "new_test_presence_is_not_evidence": true
+    },
+    {
+      "id": "ISO-12",
+      "runtime": "NOT_RUN",
+      "new_test_presence_is_not_evidence": true
+    },
+    {
+      "id": "ISO-13",
+      "runtime": "NOT_RUN",
+      "new_test_presence_is_not_evidence": true
+    },
+    {
+      "id": "ISO-14",
+      "runtime": "NOT_RUN",
+      "new_test_presence_is_not_evidence": true
+    },
+    {
+      "id": "ISO-15",
+      "runtime": "NOT_RUN",
+      "new_test_presence_is_not_evidence": true
+    },
+    {
+      "id": "ISO-16",
+      "runtime": "NOT_RUN",
+      "new_test_presence_is_not_evidence": true
+    },
+    {
+      "id": "ISO-17",
+      "runtime": "NOT_RUN",
+      "new_test_presence_is_not_evidence": true
+    },
+    {
+      "id": "ISO-18",
+      "runtime": "NOT_RUN",
+      "new_test_presence_is_not_evidence": true
+    }
+  ],
+  "capture_audit": [
+    {
+      "capture": "n1n2-claude-060p1r-custodian-syntax-001",
+      "argv": [
+        "/usr/bin/python3.12",
+        "-I",
+        "-S",
+        "-B",
+        "-c",
+        "import ast,pathlib; ast.parse(pathlib.Path('src/adapters/openfilm/cache-process-custodian.py').read_text(encoding='utf-8')); print('CUSTODIAN_SYNTAX_OK')"
+      ],
+      "exit": 0,
+      "log_sha256": "dd8ee964b960e83ee2ed8f892492ac84dc2c0ea3c9ddb84f9b29e3922f08b97c",
+      "inputs_count": 646,
+      "source_changed": [],
+      "covered_22_snapshot_entries_match": true,
+      "limit": "Reviewer verified captured log/exit and covered bound-source subset; full646 current-file comparison is MAIN_CAPTURE_AUDIT evidence, not independent reading of user/config data"
+    },
+    {
+      "capture": "n1n2-claude-060p1r-generate-001",
+      "argv": [
+        "node",
+        "tools/openfilm-cache-worker-integrity.mjs",
+        "--generate"
+      ],
+      "exit": 0,
+      "log_sha256": "3a061efbd84352db280b0d1dd68b2f7df1992d518d3b9ff8292cc56f780645fd",
+      "inputs_count": 646,
+      "source_changed": [],
+      "covered_22_snapshot_entries_match": true,
+      "limit": "Reviewer verified captured log/exit and covered bound-source subset; full646 current-file comparison is MAIN_CAPTURE_AUDIT evidence, not independent reading of user/config data"
+    },
+    {
+      "capture": "n1n2-claude-060p1r-identity-001",
+      "argv": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "vitest",
+        "run",
+        "--config",
+        "vitest.config.ts",
+        "tests/agent-driven/integration/cache-process-identity.test.ts"
+      ],
+      "exit": 0,
+      "log_sha256": "fa7358a3773a9754e288dbdae67569351e133e8bf7858dd4ec029cafe83d58c8",
+      "inputs_count": 646,
+      "source_changed": [],
+      "covered_22_snapshot_entries_match": true,
+      "limit": "Reviewer verified captured log/exit and covered bound-source subset; full646 current-file comparison is MAIN_CAPTURE_AUDIT evidence, not independent reading of user/config data"
+    },
+    {
+      "capture": "n1n2-claude-060p1r-integrity-check-001",
+      "argv": [
+        "node",
+        "tools/openfilm-cache-worker-integrity.mjs",
+        "--check"
+      ],
+      "exit": 0,
+      "log_sha256": "7480083d801311b007ec2f2a6c4717621f8aed33de5e17dd7ba35815b0d68e68",
+      "inputs_count": 646,
+      "source_changed": [],
+      "covered_22_snapshot_entries_match": true,
+      "limit": "Reviewer verified captured log/exit and covered bound-source subset; full646 current-file comparison is MAIN_CAPTURE_AUDIT evidence, not independent reading of user/config data"
+    },
+    {
+      "capture": "n1n2-claude-060p1r-m21-lock-001",
+      "argv": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "vitest",
+        "run",
+        "--config",
+        "vitest.config.ts",
+        "tests/m2.1/openfilm-upstream-lock.test.ts"
+      ],
+      "exit": 0,
+      "log_sha256": "7b00699e22b9a130d2614885d9b545ac6e84c752a85f29bd7ff6908a0a1b35b6",
+      "inputs_count": 646,
+      "source_changed": [],
+      "covered_22_snapshot_entries_match": true,
+      "limit": "Reviewer verified captured log/exit and covered bound-source subset; full646 current-file comparison is MAIN_CAPTURE_AUDIT evidence, not independent reading of user/config data"
+    },
+    {
+      "capture": "n1n2-claude-060p1r-scheduler-001",
+      "argv": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "vitest",
+        "run",
+        "--config",
+        "vitest.config.ts",
+        "tests/agent-driven/integration/cache-production-scope.test.ts"
+      ],
+      "exit": 0,
+      "log_sha256": "a59a2057ad26195974a86af5a2b368fb7390b55b6a42d78b81b97b6bd1f3c120",
+      "inputs_count": 646,
+      "source_changed": [],
+      "covered_22_snapshot_entries_match": true,
+      "limit": "Reviewer verified captured log/exit and covered bound-source subset; full646 current-file comparison is MAIN_CAPTURE_AUDIT evidence, not independent reading of user/config data"
+    },
+    {
+      "capture": "n1n2-claude-060p1r-syntax-policy-001",
+      "argv": [
+        "node",
+        "--check",
+        "src/adapters/openfilm/cache-worker-policy.mjs"
+      ],
+      "exit": 0,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "inputs_count": 646,
+      "source_changed": [],
+      "covered_22_snapshot_entries_match": true,
+      "limit": "Reviewer verified captured log/exit and covered bound-source subset; full646 current-file comparison is MAIN_CAPTURE_AUDIT evidence, not independent reading of user/config data"
+    },
+    {
+      "capture": "n1n2-claude-060p1r-syntax-probe-fixture-001",
+      "argv": [
+        "node",
+        "--check",
+        "tests/agent-driven/integration/helpers/cache-probe-fixture.mjs"
+      ],
+      "exit": 0,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "inputs_count": 646,
+      "source_changed": [],
+      "covered_22_snapshot_entries_match": true,
+      "limit": "Reviewer verified captured log/exit and covered bound-source subset; full646 current-file comparison is MAIN_CAPTURE_AUDIT evidence, not independent reading of user/config data"
+    },
+    {
+      "capture": "n1n2-claude-060p1r-syntax-worker-001",
+      "argv": [
+        "node",
+        "--check",
+        "src/adapters/openfilm/openfilm-cache-worker.mjs"
+      ],
+      "exit": 0,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "inputs_count": 646,
+      "source_changed": [],
+      "covered_22_snapshot_entries_match": true,
+      "limit": "Reviewer verified captured log/exit and covered bound-source subset; full646 current-file comparison is MAIN_CAPTURE_AUDIT evidence, not independent reading of user/config data"
+    },
+    {
+      "capture": "n1n2-claude-060p1r-syntax-worker-fixture-001",
+      "argv": [
+        "node",
+        "--check",
+        "tests/agent-driven/integration/helpers/cache-worker-fixture.mjs"
+      ],
+      "exit": 0,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "inputs_count": 646,
+      "source_changed": [],
+      "covered_22_snapshot_entries_match": true,
+      "limit": "Reviewer verified captured log/exit and covered bound-source subset; full646 current-file comparison is MAIN_CAPTURE_AUDIT evidence, not independent reading of user/config data"
+    },
+    {
+      "capture": "n1n2-claude-060p1r-typecheck-001",
+      "argv": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "tsc",
+        "--noEmit"
+      ],
+      "exit": 0,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "inputs_count": 646,
+      "source_changed": [],
+      "covered_22_snapshot_entries_match": true,
+      "limit": "Reviewer verified captured log/exit and covered bound-source subset; full646 current-file comparison is MAIN_CAPTURE_AUDIT evidence, not independent reading of user/config data"
+    }
+  ],
+  "P2a_safety_prerequisites": [
+    "修复IR01–IR08的owner/receipt/terminal关键缺口后冻结新的精确bytes再静态检查，不能直接批准当前整文件P2a。",
+    "先修IR09/IR10的helper存活、真实协议命中和所有断言失败finally cleanup；每个真实child启动即登记真实handle/identity，最后TERM→KILL→真实close/reap，UNKNOWN保留目录。",
+    "非浏览器P2a只给明确scenario/argv/cwd/输出根/一heavy slot；custodian/receipt/ECHILD/Z/peer/失联负例逐个有正常成功对照，小helper不代表Chrome。",
+    "实际loopback/source/drain/probe需分别精确grant；Q2保持默认，真实ffprobe normal/cache与error/kill回调事件pilot后才考虑具名窄owner。",
+    "当前cache-process-settlement及旧witness/reader包含真实浏览器路径，不能把报告§7全命令当non-browser P2a；Chrome只在另票P2b。",
+    "执行前固定Python/Node/worker/policy/integrity摘要、两通道FD/receipt及owned child HOME/XDG隔离；当前#childEnvironment仍复制父HOME/XDG，应先落实私有合同D，不读取用户配置来验证。",
+    "严格recorder在第一次开发测试之前启用；新失败独立捕获，不覆盖11条成功和两次UNRECORDED承认。"
+  ],
+  "all_reviewer_runtime": "NOT_RUN",
+  "claim_limit": "Independent static integration review only; no source edits, P2a/N1N2/business or human PASS"
+}

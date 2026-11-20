@@ -1,0 +1,47 @@
+{
+  "at": "2026-11-15T03:12:59.655099+00:00",
+  "final_selected": [
+    "n1n2-claude-060p5b-tsc-004",
+    "n1n2-claude-060p5b-vitest-identity-004",
+    "n1n2-claude-060p5b-python-005",
+    "n1n2-claude-060p5b-vitest-pilot-005",
+    "n1n2-claude-060p5b-check-001"
+  ],
+  "final_all_match": true,
+  "inputs": [
+    651
+  ],
+  "recorded_failures": 7,
+  "incomplete": [
+    {
+      "capture": "n1n2-claude-060p5b-python-001",
+      "status": "INCOMPLETE_NO_EXIT_OR_RESULT",
+      "files": {
+        "n1n2-claude-060p5b-python-001.claim.json": "47d0301019eb039e63eaa28d9826d741e554ad64362d8b6f6ef394592e859bd3",
+        "n1n2-claude-060p5b-python-001.cmd.json": "4caf0130dd2d093c32bb8a050a3085cd993ccae388595111907ad85facd5d71d",
+        "n1n2-claude-060p5b-python-001.inputs.json": "7a9796759d7eff52f7736efb2eb4328ef6c74bef29f39c350e6d40abac310d9e",
+        "n1n2-claude-060p5b-python-001.stop-evidence.json": "fa0e2517f185af36335c3826c5d40ec98d38d8b2799115eb6881ce881bfb791e",
+        "n1n2-claude-060p5b-python-001.txt": "2fc0f883e6c3bf1e4b68c6b5990efc5bd8be65bfac1442f8a0a7e2463fc51c4d"
+      },
+      "author_stop_evidence": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p5b-python-001.stop-evidence.json"
+    }
+  ],
+  "raw_summaries": {
+    "n1n2-claude-060p5b-tsc-004": [],
+    "n1n2-claude-060p5b-vitest-identity-004": [
+      " Test Files  1 passed (1)",
+      "      Tests  68 passed (68)"
+    ],
+    "n1n2-claude-060p5b-python-005": [
+      "Ran 46 tests in 0.044s",
+      "OK"
+    ],
+    "n1n2-claude-060p5b-vitest-pilot-005": [
+      " Test Files  1 passed (1)",
+      "      Tests  14 passed (14)"
+    ],
+    "n1n2-claude-060p5b-check-001": [
+      "{\"ok\":true,\"checked\":8}"
+    ]
+  }
+}

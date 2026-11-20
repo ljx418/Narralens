@@ -1,0 +1,301 @@
+{
+  "format": "narralens.R5B.positive-owner.static-review@1",
+  "verdict": "REQUEST_CHANGES",
+  "binding": {
+    "accepted_worker_done": "msg_2ff3b08e2fb6",
+    "implementation_task": "task_af87a2249ff8",
+    "implementation_dispatch": "ctx_f6b0485fe1f0",
+    "historical_head": "1d348d419120f23f45d958112ea8c43df5a04675",
+    "accepted_new_commit": null
+  },
+  "counts": {
+    "BLOCKER": 0,
+    "MAJOR": 6,
+    "MINOR": 0
+  },
+  "findings": [
+    {
+      "id": "R5B-O01",
+      "severity": "MAJOR",
+      "status": "STILL_OPEN",
+      "prior_ids": [
+        "R3-I05",
+        "R3-C02"
+      ],
+      "title": "Persistent owner is registered after start, and the exceptional finally never completes cleanup",
+      "locations": [
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 186
+        },
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 551
+        },
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 579
+        },
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 594
+        },
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 604
+        },
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 651
+        },
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 663
+        }
+      ],
+      "trigger": "createRoot partially succeeds then a subdirectory mkdir fails; copy/scenario/constructor/reserve rejects; or after real N birth readHelperEvents/observation/sleep/assertion orchestration throws while the draw is not yet settled.",
+      "actual_path": "Root creation, pin checks, copying, supervisor construction, reserve and start all precede try606. Registry appears only604 and requires every field already present. Catch651 requests cancel, performs just one inspect and falls through; finally663 writes evidence but performs no cancel/raw-settlement/fresh-reconcile barrier. Hence postbirth error can return terminalProof=false while actual cleanup is still running/held; a retained Map alone has no continuing reconcile owner.",
+      "impact": "No persistent root record exists on early setup failures. A real N failure can finish the tool's owning continuation before complete settlement; later held state is never actively reconciled by that continuation. This is unsafe for the precise normal/expected-fault pilots, independently of R7 workspace findings.",
+      "contract": "R5B SPEC D/E: synchronous partial-resource ownership from root creation, all early failures in one persistent registry/finally, no returning or throwing out of an unresolved owned domain.",
+      "minimal_fix": "Create/register a partial entry synchronously at mkdtemp, attach each supervisor/handle/start promise before its next side effect, and put all setup inside one try/finally. Finally must idempotently request owned cancel when needed, await original raw result and inspect/reconcile to fresh terminal proof without responsibility expiry; preserve original errors, C, handle and root on unknown. Do not kill C or bare groups. Verify copied fixture digest as well as source pin before start.",
+      "decisive_mock": "Drive actual runPositivePilot with mkdir-after-mkdtemp/copy/ctor/reserve/start rejection and postbirth event-read exception. Assert registry fields at each creation boundary; after exception, original tool promise must remain pending while real stub state is held, requestCancel once, reconcile until fresh settlement, and preserve root/error. Existing14 tests do not inject ctor/reserve/root-creation exceptions or this catch barrier.",
+      "future_runtime": "After repair and new MAIN ticket, one exact normal and one deliberate failure with real C/N close/receipt; induced startup failures need separately authorized pilots.",
+      "gate": "BLOCKS_EXACT_MINIMAL_N_PILOTS",
+      "runtime": "NOT_RUN; static reachable counterexample, not captured old-code failure"
+    },
+    {
+      "id": "R5B-O02",
+      "severity": "MAJOR",
+      "status": "NEW",
+      "prior_ids": [
+        "R3-I05",
+        "R3-C02"
+      ],
+      "title": "Original cancel error is replaced, arbitrary failure can qualify as expected, and held recovery drops the raw outcome",
+      "locations": [
+        {
+          "path": "src/adapters/openfilm/cache-process-supervisor.ts",
+          "line": 1648
+        },
+        {
+          "path": "src/adapters/openfilm/cache-process-supervisor.ts",
+          "line": 1796
+        },
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 629
+        },
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 634
+        },
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 651
+        },
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 687
+        }
+      ],
+      "trigger": "Expected-fault mode calls real requestCancel with its deliberate Error; alternatively another infrastructure/protocol failure has already latched, or settlement arrives only after the tool's 30-second await window.",
+      "actual_path": "requestCancel calls #latchFailure, which allocates a new CacheDrawError(DRAW_CANCELLED) instead of retaining the provided object. Pilot judge only requires the local originalFailure.code to be EXPECTED_ASSERTION_FAILURE and settlementFailure!==null, never equality/expected origin, picture===null or absence of unexpected cleanup failures. After held polling634 it never awaits/reads startPromise again, so picture/settlementFailure/originalFailure omit the actual terminal result. Catch653 also unconditionally overwrites a prior failure. StubSupervisor.requestCancel instead returns the exact original object, masking the production mismatch.",
+      "impact": "A different already-latched failure can be certified fault-observed. Conversely a correctly cleaned expected failure recovered from held can never qualify because settlementFailure stays null. Evidence can lose the real original failure/late raw result.",
+      "contract": "R5B SPEC C/D: first original Error preserved, expected exit1 qualifies only for exact deliberate cancellation and complete clean terminal proof, late settlement returns original outcome.",
+      "minimal_fix": "Retain the original in-process cancel Error in supervisor settlement while keeping bounded diagnostic latch separately. After any held reconciliation consume the same original settlement promise. Latch tool originalFailure once; judge requires exact deliberate error/origin, null picture, complete terminal proof, no unexpected prior/cleanup/evidence/reporting failure. Preserve and report unexpected errors rather than accepting any non-null settlement error.",
+      "decisive_mock": "Compose actual supervisor requestCancel/start with tool orchestration; assert settlement.error===deliberate. Negative controls: prior transport error, different Error/code, cleanup error, non-null picture, and held-then-failed raw result. Each unexpected case must faultCasePassed=false; legitimate exact held cancellation must preserve the same original Error and qualify.",
+      "future_runtime": "Exact silent fixture fault after same-epoch GO/live must return only the deliberate cancellation, no image and complete terminal proof; any unrelated failure rejects expected-fault qualification.",
+      "gate": "BLOCKS_EXPECTED_ASSERTION_FAILURE_PILOT",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "id": "R5B-O03",
+      "severity": "MAJOR",
+      "status": "NEW",
+      "prior_ids": [
+        "R3-I05"
+      ],
+      "title": "Known PID is mistaken for same live N epoch when injecting the deliberate fault",
+      "locations": [
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 217
+        },
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 437
+        },
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 446
+        },
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 462
+        },
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 611
+        }
+      ],
+      "trigger": "After the helper wrote go, N is already zombie, or observation returns a different start_ticks/PID; the old go record remains readable.",
+      "actual_path": "REAL observeIdentity returns presence known for any readable stat, including state Z, and omits state from its returned identity. waitForLiveWorker accepts any known identity without comparing observed pid/start_ticks to diagnostic worker. waitForAuthorisation accepts any go event without binding its pid to that worker. The returned startTicks is unused.",
+      "impact": "Deliberate failure can be injected without proving the same N is currently alive; the expected-fault pilot may pass without reaching the exact live cleanup scenario required by the release.",
+      "contract": "R5B SPEC D and task exact-next-gate: actual same N epoch HELLO+GO+live before injection; observations are facts, not capabilities.",
+      "minimal_fix": "Observe stat with validated known/gone/unknown and explicit process state; require exact pid and start_ticks equality to supervisor's accepted N epoch and exclude Z/dead states. Bind go event pid to that N and perform final fresh live-epoch check immediately before synchronous requestCancel. Keep failures/unknown distinct from deliberate assertion.",
+      "decisive_mock": "Use actual wait/orchestration with go from different pid, same pid/new ticks, known Z, malformed/unknown stat, and a valid same-epoch S/R control. Only control may inject EXPECTED_ASSERTION_FAILURE.",
+      "future_runtime": "Persist same-epoch go and final live stat with cancellation event ordering in the precise fault pilot.",
+      "gate": "BLOCKS_EXPECTED_ASSERTION_FAILURE_PILOT",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "id": "R5B-O04",
+      "severity": "MAJOR",
+      "status": "NEW",
+      "prior_ids": [
+        "R3-I05"
+      ],
+      "title": "Reporting boundary is unused and does not guard the actual CLI stderr writes",
+      "locations": [
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 282
+        },
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 537
+        },
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 738
+        },
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 772
+        },
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 787
+        }
+      ],
+      "trigger": "CLI output is piped to a destination that fails asynchronously with EPIPE, emits error, or its write callback fails; this also applies to reporting an early tool error.",
+      "actual_path": "runPositivePilot creates boundary with stream=null and a one-argument wrapper. It never calls reporting.report, so pending remains zero, settled returns immediately and firstFailure remains null. main bypasses it using deps.writeStderr; REAL writeStderr calls process.stderr.write without callback/error listener. Final green qualification and persisted files precede this actual output.",
+      "impact": "Async reporting failure may be unhandled, can crash the owner on an early unresolved path, and cannot disqualify a green candidate as promised. No mock case drives real default reporting wiring.",
+      "contract": "R5B SPEC D: destination listener installed before work, all async reporting completion handled, final result/evidence/exit reflect reporting failure; reuse equivalent typed boundary must actually be wired.",
+      "minimal_fix": "Install one real stderr boundary before setup and route refusal/final output through it, including callbacks/error events. Await actual writes and incorporate reporting failure into final qualification; distinguish candidate evidence from the final committed outcome and persist a final qualification/manifest after required evidence writes. Do not let reporting exceptions escape an unresolved resource owner.",
+      "decisive_mock": "Drive main using an EventEmitter destination with same-error callback+event, delayed EPIPE callback, synchronous write throw and final-output-only failure. Ensure single counted error, no unhandled rejection/event, original owner continues cleanup and normal cannot return a qualifying green result.",
+      "future_runtime": "Under later exact authorization, closed-output destination control must retain clean C/N settlement and report failed qualification rather than a green receipt.",
+      "gate": "BLOCKS_EXACT_MINIMAL_N_PILOTS",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "id": "R5B-O05",
+      "severity": "MAJOR",
+      "status": "STILL_OPEN",
+      "prior_ids": [
+        "R3-C04"
+      ],
+      "title": "No-birth and pre-authorisation held failures cannot reconcile even after real close becomes available",
+      "locations": [
+        {
+          "path": "src/adapters/openfilm/cache-process-supervisor.ts",
+          "line": 1573
+        },
+        {
+          "path": "src/adapters/openfilm/cache-process-supervisor.ts",
+          "line": 1585
+        },
+        {
+          "path": "src/adapters/openfilm/cache-process-supervisor.ts",
+          "line": 2585
+        },
+        {
+          "path": "tools/native-cache-normal-pilot.ts",
+          "line": 505
+        }
+      ],
+      "trigger": "A spawn-no-PID error, or C that was never authorised, has delayed actual close past bounded cleanup proof. #fail marks cleanup-held; close/exit and fresh C-gone proof arrive later.",
+      "actual_path": "#proveDomainGone now correctly models no-birth true only after close, and born pre-authorisation requires exit/close. But reconcile unconditionally throws DRAW_NO_IDENTITY when both worker and forkedPid are null before invoking that same proof. Tool poll catches it forever; the original promise never settles despite complete raw cleanup. The new immediate-close test covers only the early-close case; the no-HELLO test only asserts a rejection, not successful fresh recovery.",
+      "impact": "Ordinary failed startup that legitimately entered unknown cannot recover to its original failed result; precise pilot remains permanently owned/pending even when no resources remain. This is not a request to treat missing fork receipt as authority.",
+      "contract": "R5B SPEC A: run and reconcile share distinct no-birth/pre-authorisation/authorised models, real error is not close, fresh completed cleanup returns original failure.",
+      "minimal_fix": "Select reconciliation proof by actual birth/authorisation ledger. Permit fresh no-birth+actual-close or born-but-never-authorised+exit/close+epoch-gone proof with no fictitious worker; keep authorise-sent/missing or contradictory fork/receipt UNKNOWN. Consume same raw outcome, release only execution/run resources once.",
+      "decisive_mock": "Actual supervisor fake ChildProcess close delayed beyond cleanup budgets: first inspect held, then no-PID close without exit, then reconcile settles original failure. Separate born/no-authorise exit+close control and authorise-sent/missing fork proof must stay held. Do not just change exported validator tests.",
+      "future_runtime": "Separate authorised infrastructure pilot after baseline can confirm delayed-close startup recovery; no runtime release here.",
+      "gate": "BLOCKS_STARTUP_FAILURE_SAFETY_FOR_EXACT_MINIMAL_PILOT",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "id": "R5B-O06",
+      "severity": "MAJOR",
+      "status": "STILL_OPEN",
+      "prior_ids": [
+        "R3-C02",
+        "R3-I05"
+      ],
+      "title": "Legacy wrapper retarget still self-pins current C, substitutes Host group count and treats timeout as runner close",
+      "locations": [
+        {
+          "path": "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts",
+          "line": 145
+        },
+        {
+          "path": "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts",
+          "line": 157
+        },
+        {
+          "path": "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts",
+          "line": 160
+        },
+        {
+          "path": "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts",
+          "line": 179
+        },
+        {
+          "path": "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts",
+          "line": 202
+        }
+      ],
+      "trigger": "Legacy lifecycle entry is later used with unreviewed current C bytes or the nofork runner's exit precedes stdio close/close never arrives.",
+      "actual_path": "Both legacy entries derive expectedCustodianSha256 from the file being run, automatically accepting current bytes. nofork wrapper still resolves cleanup from exitCode/signalCode or a 5s timer, not a shared actual close ledger, and uses unchanged Host PGID count as 'nothing forked' assertion. Positive entry imports the new runner but inherits O01..04; ownRoot occurs only after returned outcome. Wrapper can leave runner pipe unread/unknown while calling the case finished.",
+      "impact": "Retargeting did not preserve the reviewed runner pin and end-to-end owner/close qualification. Host group count cannot prove detached N absence. This is a legacy-entry repair requirement, not permission to run that mixed file or a claim that these wrapper lines execute in the two fixed standalone CLIs.",
+      "contract": "R5B SPEC D: legacy entry retarget without flag/pin downgrade, no Host group-count surrogate, no timer as real end.",
+      "minimal_fix": "Use an explicit reviewed C pin/assignment input; assert the runner's actual nofork receipt/case qualification. Register wrapper child error/exit/close and bounded pipe ownership before await, wait actual close or retain wrapper owner as unknown. Remove group-count proof surrogate; leave standalone reviewed nofork kill authority inside its own tool only.",
+      "decisive_mock": "Wrapper process adapter: changed C pin refuses before effect; exit-before-close stays pending; no close remains unknown; child error/pipe failure is owned. Verify receipt/no-authorisation facts instead of Host member count.",
+      "future_runtime": "Legacy mixed file remains NOT_RUN and excluded from exact next gate; retest it only under later explicit assignment.",
+      "gate": "LEGACY_ENTRY_ONLY; not an additional reason to require unrelated R7 before standalone pilots",
+      "runtime": "NOT_RUN"
+    }
+  ],
+  "prior_findings": [
+    {
+      "prior_id": "R3-C04",
+      "status": "STILL_OPEN",
+      "basis": "Immediate no-birth and failed-exec raw-proof paths improved; held no-birth/pre-authorisation recovery still R5B-O05. No kernel acceptance."
+    },
+    {
+      "prior_id": "R3-C05",
+      "status": "CLOSED_STATIC",
+      "basis": "Real census accounts for forkPID even with worker_identity=None; persistent TerminationActions and fresh group lookup wire owed KILL. Actual adapter mock assertions inspected; no actual kernel evidence."
+    },
+    {
+      "prior_id": "R3-C02 positive-owner / legacy retarget",
+      "status": "STILL_OPEN",
+      "basis": "R5B-O01..04/O06; prior separately reviewed standalone nofork scope is preserved."
+    },
+    {
+      "prior_id": "R3-I05 positive-owner",
+      "status": "STILL_OPEN",
+      "basis": "R5B-O01..04; immutable7/hash and exact-picture improvements do not complete ownership."
+    }
+  ],
+  "runtime": "ALL_REVIEWER_BUSINESS_RUNTIME_NOT_RUN",
+  "next_gate": {
+    "normal": "NOT_STATIC_SAFE; no runtime grant",
+    "assertion_failure": "NOT_STATIC_SAFE; no runtime grant",
+    "legacy_mixed_file": "NOT_RELEASED",
+    "unrelated_R6_R7": "OPEN, not prerequisites newly imposed by this review"
+  },
+  "capture_note": "python-001 INCOMPLETE/INTERRUPTED; no .exit/.result, historical PID/exit UNKNOWN; author TaskStop report and later absence are not exit-code proof.",
+  "evidence_prerequisites": "Save actual final fresh group/ID observations and artifact SHA list; expected-fault requires no image/exact original error, not arbitrary exit1 or picture_exacttrue.",
+  "original17_ISO18_N1N2_NEXT": "NOT_ACCEPTED / NOT_RUN"
+}

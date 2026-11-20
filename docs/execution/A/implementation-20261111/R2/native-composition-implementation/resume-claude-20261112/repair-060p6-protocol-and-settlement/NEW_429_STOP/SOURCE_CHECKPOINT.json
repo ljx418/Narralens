@@ -1,0 +1,49 @@
+{
+  "at": "2026-11-15T18:59:56.017492+00:00",
+  "head": "1d348d419120f23f45d958112ea8c43df5a04675",
+  "branch": "agent-driven/main-a-integration",
+  "source8": {
+    "src/adapters/openfilm/cache-process-supervisor.ts": "ba18b14069cb9f08563b65b99935a155f7f1b8bfd0c4b71a0f4da2095db70edc",
+    "src/adapters/openfilm/cache-process-custodian.py": "40947936b36f94ea53b00ecf4f851c528484cea457f1ed4fef7aa031bba896a9",
+    "src/adapters/openfilm/cache-worker-integrity.json": "dc68cb3d4417c065d83c0564e7bbf38e315be54d8afb32afd2b98eb6a268959f",
+    "tests/agent-driven/integration/cache-process-identity.test.ts": "40b04e9fdda53c03030e17affe332e4a00284c62968ced7382826ff05c0c8479",
+    "tests/agent-driven/integration/helpers/cache-custodian-unit.py": "9f2fd35dd8db63e53d4cc9965ecfa18465438cff593b9bebcbbeed018fe399dc",
+    "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts": "02046365388e1977887511acbfb09e21dba352b79d2ed08c81053a8a0a02800d",
+    "tools/native-cache-normal-pilot.ts": "e4db3499f715d5b6b5634568677a6688cf80a897c9321c45e93cda98c6a19ebb",
+    "tests/agent-driven/integration/native-cache-normal-pilot.test.ts": "23c8decaa4fd766b7a6b5d56e452003f90aaa4b6e0bf177acf4b99c1105718ee"
+  },
+  "protected7": {
+    "tools/native-cache-nofork-pilot.mjs": {
+      "sha256": "73fed24c66ec310ccd811fdd7e4dfb51be6d22875ce81a50e1a86a47072fe00d",
+      "matches_expected": true
+    },
+    "tests/agent-driven/integration/helpers/native-cache-nofork-pilot.test.mjs": {
+      "sha256": "feb9786b4f38044382ab6ac2ca8435f3bdf89ae83c0882b47177573136deb5ce",
+      "matches_expected": true
+    },
+    "tests/agent-driven/integration/helpers/cache-worker-fixture.mjs": {
+      "sha256": "e3f4ccb1c4016a54356ce04be344b4ffff23f2f88698efe191570ad8407d03ab",
+      "matches_expected": true
+    },
+    "src/host/agent-driven/retained-native-closure.ts": {
+      "sha256": "fd896104149d6cd2663b63a59d50beabbeee546f3e3f46a5d6bf07fbe662ede9",
+      "matches_expected": true
+    },
+    "src/host/agent-driven/created-native-workspace.ts": {
+      "sha256": "d83edbdac8cd6dd7db6b5d18f1d0f5d3beb028279297a822f59f97f6504d562c",
+      "matches_expected": true
+    },
+    "src/adapters/openfilm/openfilm-upstream.ts": {
+      "sha256": "17fe1138e50bc30df5c26b74e1e0ff9393140c070e1233676d2811485890a2b6",
+      "matches_expected": true
+    },
+    "AGENTS.md": {
+      "sha256": "37300463a72a612ae16e0a5fcfb496502c57c722b83781e0e2e8c9480594542b",
+      "matches_expected": true
+    }
+  },
+  "recorder_sha256": "88cd47ec732a340f54cdd4bb05b05878887697eebb0ddc94b1ccd7d0e434fd10",
+  "git_index_empty": true,
+  "own_report_sha256": "9ff59982a3c3a7722a7d6cf79597b666a0d7ef923a42529033c1641216d5e11a",
+  "implementation_status": "INCOMPLETE_UNREVIEWED; no final six same-source capture set accepted"
+}

@@ -1,0 +1,23 @@
+{
+  "at": "2026-11-15T19:01:20.157705+00:00",
+  "pid_presence": {
+    "1596768": false,
+    "1596765": false,
+    "1596763": false
+  },
+  "capture_result": {
+    "exit": -15,
+    "source_changed": [
+      "src/adapters/openfilm/cache-process-custodian.py",
+      "src/adapters/openfilm/cache-process-supervisor.ts",
+      "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts",
+      "tests/agent-driven/integration/cache-process-identity.test.ts",
+      "tests/agent-driven/integration/helpers/cache-custodian-unit.py",
+      "tests/agent-driven/integration/native-cache-normal-pilot.test.ts"
+    ],
+    "source_added": [],
+    "log_sha256": "32e1403ee7bacd401c9e6c496471fb1b324ecc70c84604fa6c99b86e04b0c4d1",
+    "finished_at": "2026-11-15T19:01:10.638519+00:00"
+  },
+  "interpretation": "MAIN exact pidfd safety termination of hung pure test, not natural semantic failure or passing acceptance; source_changed during run retained"
+}

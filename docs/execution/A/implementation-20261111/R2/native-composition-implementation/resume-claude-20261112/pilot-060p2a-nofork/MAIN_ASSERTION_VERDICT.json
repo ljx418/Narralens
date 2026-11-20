@@ -1,0 +1,48 @@
+{
+  "at": "2026-11-15T02:14:16.622961+00:00",
+  "status": "PASS_EXACT_NOFORK_EXPECTED_ASSERTION_FAILURE",
+  "checks": {
+    "runner_expected_exit1": true,
+    "source_immutable": true,
+    "log_digest": true,
+    "exact_expected_fault": true,
+    "no_unexpected_failure": true,
+    "all_assertions": true,
+    "full_cleanup": true,
+    "no_reporting_or_held_error": true,
+    "diagnostics_clean": true,
+    "preflight_pins": true,
+    "observed_C": true,
+    "observed_C_no_children": true,
+    "all_observed_epochs_gone": true
+  },
+  "inputs_verified": 649,
+  "mismatches": [],
+  "runtime_root": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/var/native-cache-pilot/run-Ecefaa",
+  "capture": "n1n2-main-060p2a-nofork-assertion-failure-001",
+  "actual_C": {
+    "pid": 187139,
+    "state": "R",
+    "ppid": 187132,
+    "pgid": 187139,
+    "sid": 187139,
+    "start_ticks": "289460"
+  },
+  "exit": {
+    "code": 4,
+    "signal": null
+  },
+  "close": {
+    "code": 4,
+    "signal": null
+  },
+  "artifacts": {
+    "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/var/native-cache-pilot/run-Ecefaa/outcome.json": "62f91c031b86e7fb8f0d93fb796b981dde9f1cff45bb805afdb10c465b2b0cc2",
+    "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/var/native-cache-pilot/run-Ecefaa/preflight.json": "0d2fd9b154ebf078a78bdb8827fb016696d309182f3748566b020ae3a929c494",
+    "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/pilot-060p2a-nofork/ASSERTION_PROC_RECEIPT.json": "74a9ec28752c55b445c340d48b345d5b8704f27c9fa1d915743d2869669c5036",
+    "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/pilot-060p2a-nofork/ASSERTION_MONITOR_ROLE_ANNOTATION.json": "7c5b82d361092814d4ab7be94f8754ea814ac11e464e99acc10bf2f8f185c0f3",
+    "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-main-060p2a-nofork-assertion-failure-001.inputs.json": "6b0b5a47d1ef5a07eca7a7a5f0826813003d60a5a83c2e99364c381dcdf6d4f0",
+    "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-main-060p2a-nofork-assertion-failure-001.result.json": "1191f9b58ea9fd01ccd5430b27ed5c2e315bf351bdd9c4cc23e523c8e1446805"
+  },
+  "limits": "Exactnoforkfailure cleanup only; rawHELLO notpersisted; no N, adopteddescendants, multisegmentreceipt, media orproductionacceptance"
+}

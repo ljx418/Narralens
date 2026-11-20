@@ -1,0 +1,46 @@
+{
+  "at": "2026-11-12T16:00:48.164780+00:00",
+  "status": "1563PASS15719PASS15861PASS_159_ALREADY_STARTED",
+  "grant": "N1N2-RESUME-CONDITIONAL-BATCH-020",
+  "results": [
+    {
+      "capture": "n1n2-claude-resume-156-gate-alias-focused",
+      "result": {
+        "exit": 0,
+        "source_changed": [],
+        "source_added": [],
+        "log_sha256": "feb386e692afc04ceca73387baa1bab2a4cf0db0bc42b8d961a0a86ed90a0f83",
+        "finished_at": "2026-11-12T15:47:17.269153+00:00"
+      },
+      "actualpassed": 3,
+      "filtered": 77
+    },
+    {
+      "capture": "n1n2-claude-resume-157-gate-pure",
+      "result": {
+        "exit": 0,
+        "source_changed": [],
+        "source_added": [],
+        "log_sha256": "8cc2591108744e2a90d139fd456bc51c96dbabb906a8171347827784baa7f664",
+        "finished_at": "2026-11-12T15:47:42.990549+00:00"
+      },
+      "actualpassed": 19,
+      "filtered": 61
+    },
+    {
+      "capture": "n1n2-claude-resume-158-gate-component",
+      "result": {
+        "exit": 0,
+        "source_changed": [],
+        "source_added": [],
+        "log_sha256": "e81de0b781d65c158ff9c7f011d01575c7becb6f371cdf6a1dd52275a012a4f3",
+        "finished_at": "2026-11-12T15:58:15.280919+00:00"
+      },
+      "actualpassed": 61,
+      "filtered": 19
+    }
+  ],
+  "current13hashes": "MATCH",
+  "159": "CLAIM_EXISTS_NO_TERMINAL_RESULT; finishalreadystartedunmodified, no newruntime",
+  "scope_limit": "Full80reader tests green; original17notclosed, independentK01BLOCKER+K02-K06MAJOR stillrequirecorrective021; no acceptance orbrowserPASS"
+}

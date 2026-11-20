@@ -1,0 +1,60 @@
+{
+  "at": "2026-11-15T08:44:58.214555+00:00",
+  "verdict": "REQUEST_CHANGES_FOUR_ROOT_GROUPS_GUARDS_FIRST",
+  "reviews": {
+    "startup-reaper": {
+      "message": "msg_984289b50351",
+      "verified_inputs": 91,
+      "review_sha256": "746b89db468753414a6fc779284b2cefd49f35f929447b16585ff20d6f0fcda7",
+      "findings": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p5d-lifecycle-and-final-qualification/independent-review/startup-reaper-review/FINDINGS.json"
+    },
+    "positive-owner": {
+      "message": "msg_c8b62a563085",
+      "verified_inputs": 228,
+      "review_sha256": "9b26de61b6d9c229fa1c5e919ea99b334df7657e835b1ec9fa2b46c555966db0",
+      "findings": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p5d-lifecycle-and-final-qualification/independent-review/positive-owner-review/FINDINGS.json"
+    }
+  },
+  "groups": [
+    {
+      "id": "PURE_OS_GUARDS",
+      "ids": [
+        "R5D-N04",
+        "R5D-O03",
+        "R5D-NOTE-01"
+      ],
+      "priority": "Before any next pure runtime",
+      "required": "denybydefault TS process.kill/Python privilegedraw calls; explicitpercase behavior; ledger catches swallowed denial; no livefixedPID experiment"
+    },
+    {
+      "id": "ORIGINAL_GROUP_PROOF",
+      "ids": [
+        "R5D-N01",
+        "R5D-O04"
+      ],
+      "required": "immutableoriginalgroup proof obligation independentof revoked signal; unknownprobe held, laterESRCH converge; no destructiveauthority regain"
+    },
+    {
+      "id": "REQUIRED_ARTIFACT_HASHES",
+      "ids": [
+        "R5D-N02",
+        "R5D-O01"
+      ],
+      "required": "allrequirednames/fullhash/rowerrors and final links beforejudgement; not just top-levelerror"
+    },
+    {
+      "id": "FINAL_PUBLICATION_AND_CONSUMERS",
+      "ids": [
+        "R5D-N03",
+        "R5D-O02"
+      ],
+      "required": "stagedsame-rootfinal publication, returnedeligibilityrevocation, private CLI evidenceerror exit3, jointfinal+hash+outerexitv2, actuallegacyconsumption"
+    }
+  ],
+  "notes": [
+    "R5D-NOTE-02 include already computed bounded receipt digest facts; do not fabricate savedrawsegments",
+    "R5D-NOTE-03 raw Python syscall incident not pure compliant; preserve source/log/limits and no retrospective noimpact claim"
+  ],
+  "runtime": "No actualC/N/productOS/CLI/Host/media; tests allowed only after MAIN guard read approval",
+  "new429": "STOP_NO_RETRY_NO_TAKEOVER"
+}

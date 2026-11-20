@@ -1,0 +1,41 @@
+{
+  "format": "narralens.a-r0-review-decision@1",
+  "status": "R0_BASELINE_FREEZE_APPROVED",
+  "scope": "preserved current source-only task/prepared-proof components; not production A integration",
+  "parent_head": "838ba5f2c8500f0103f56dbe51264ea9f70086fc",
+  "review": {
+    "dispatch": "ctx_fe84a1a5c726",
+    "task": "task_c7c404aa839e",
+    "outcome": "PASS_SCOPE_ONLY",
+    "blocker": 0,
+    "major": 0,
+    "minor": 1,
+    "report_sha256": "c2bf30b6c7bc4025f2a71537815ab8319e467059d29482f28d94c7a3d0083699"
+  },
+  "validation": {
+    "typecheck_exit": 0,
+    "affected_files": 8,
+    "affected_tests": 123,
+    "exit": 0,
+    "python_vectors": 10,
+    "python_failures": 0
+  },
+  "carry_forward": [
+    {
+      "id": "R0-M01",
+      "owner": "BRIDGE",
+      "deadline": "R1 before production task worker registration",
+      "required": "same-DB graceful lease release plus pending CP/checkpoint/event; real shutdown/reopen/resume regression; preserve cancellation"
+    }
+  ],
+  "source_inputs": "current-inputs.json",
+  "authorization": "../authorization.json",
+  "common_commit_sha": "recorded after actual git commit in canonical state.json, not fabricated/self-referential",
+  "not_claimed": [
+    "production task registration",
+    "A acceptance",
+    "V1",
+    "B",
+    "real human media"
+  ]
+}

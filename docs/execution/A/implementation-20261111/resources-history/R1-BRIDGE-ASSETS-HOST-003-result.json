@@ -1,0 +1,33 @@
+{
+  "grant": {
+    "format": "narralens.dev-resource-ledger@1",
+    "status": "HELD",
+    "holder": "BRIDGE Claude via BRIDGE Codex",
+    "queue": [
+      {
+        "lane": "MAIN",
+        "purpose": "MEDIA independent findingsM1/M2/m1/m2 causal regressions",
+        "command": "corepack pnpm test tests/agent-driven/media/preview-prepared-source.test.ts --maxWorkers=1 --minWorkers=1",
+        "scope": "11 cases includes7 new interleavings plus original4; real renderer except2 explicitly copy-inspection-only cases",
+        "status": "AWAIT_BRIDGE003_TERMINAL_AND_CLEANUP"
+      }
+    ],
+    "policy": "MAIN grants single heavy slot for Host/media/ffmpeg/Chromium/build/full gate; pure typecheck/unit permitted isolated",
+    "last_main_heavy": "all actualmedia/creation regressions terminal; exact logs and artifacts retained",
+    "evidence_limit": "operational coordination ledger, not proof of unrelated OS process absence",
+    "no_budget_ceiling": true,
+    "grant_id": "R1-BRIDGE-ASSETS-HOST-003",
+    "granted_at": "2026-11-11T15:09:16.811296+00:00",
+    "exact_command": "corepack pnpm exec vitest run tests/agent-driven/integration/local-assets-transport.test.ts tests/agent-driven/integration/host-application.test.ts tests/agent-driven/integration/creative-context-host.test.ts tests/agent-driven/integration/created-task-gate.test.ts --maxWorkers=1 --minWorkers=1",
+    "cwd": "/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE",
+    "scope": "authorized once current safe05889 integration ends and new actual SHA/input hashes frozen; reservation is not execution proof",
+    "request_message": "msg_d766fdaf314d",
+    "source_fence": "freeze corrected tested input before command; no source/index mutation during command"
+  },
+  "command_exit": 1,
+  "cases": "23/24, localassets3PASS,1context409vs503FAIL",
+  "log_sha256": "7c00be1cdfc1f07790fa1c839f7819f4dce4190f3467b4da242c82fe8edf1124",
+  "cleanup": "child and parent confirm no active commands, unchanged preexistinglisteners; explicit writer stop before MAIN takeover",
+  "formal_reworks": 3,
+  "dirty_source": "preserve two uncommitted earlier attempted fixes; not Hostvalidated"
+}

@@ -1,0 +1,12 @@
+{
+  "at": "2026-11-13T02:23:50.256065+00:00",
+  "request": "msg_3b15387b5da6",
+  "decision": "RUNTIME_NOT_GRANTED_RAW_TIME_ASSERTION_INCORRECT",
+  "source_sha256": "e72d12ff00b714654f3e4a3126de522fe8131870b41c5329f2776f38cef40d6e",
+  "exact_bytes": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/e72d12ff00b714654f3e4a3126de522fe8131870b41c5329f2776f38cef40d6e.txt",
+  "reason": "raw film uses frameSeconds toFixed12:31/30 ->1.033333333333; test confuses parser millisecond normalization1.033 with raw source. Validate raw path/fragment independently and numeric31/30, no production helper self-proof.",
+  "main_review_note": "Prior static review caught order but did not simultaneously catch wrong raw time assumption; corrected before business runtime",
+  "compile019": "Compilation only, preserve",
+  "source_release": "031 remains sole single-path source authorization; other14 frozen",
+  "business_acceptance": "NOT_RUN"
+}

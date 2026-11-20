@@ -1,0 +1,87 @@
+{
+  "at": "2026-11-14T15:03:44.836532+00:00",
+  "rows": [
+    {
+      "capture": "n1n2-claude-060p1r4-check-test-001",
+      "exit": 0,
+      "inputs": 649,
+      "current_mismatches": [],
+      "source_changed": [],
+      "source_added": [],
+      "log_matches": true,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "capture": "n1n2-claude-060p1r4-check-tool-001",
+      "exit": 0,
+      "inputs": 649,
+      "current_mismatches": [],
+      "source_changed": [],
+      "source_added": [],
+      "log_matches": true,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "capture": "n1n2-claude-060p1r4-test-001",
+      "exit": 1,
+      "inputs": 649,
+      "current_mismatches": [
+        "tests/agent-driven/integration/helpers/native-cache-nofork-pilot.test.mjs",
+        "tools/native-cache-nofork-pilot.mjs"
+      ],
+      "source_changed": [],
+      "source_added": [],
+      "log_matches": true,
+      "log_sha256": "5fcaded8aa29152a2945466bb4e82df3fa48a936762fd1c3f5649b7513affd69"
+    },
+    {
+      "capture": "n1n2-claude-060p1r4-test-002",
+      "exit": 1,
+      "inputs": 649,
+      "current_mismatches": [
+        "tests/agent-driven/integration/helpers/native-cache-nofork-pilot.test.mjs",
+        "tools/native-cache-nofork-pilot.mjs"
+      ],
+      "source_changed": [],
+      "source_added": [],
+      "log_matches": true,
+      "log_sha256": "e754ee96e48af39d5c012bbe7af26a37da00390e85bde753365b6fb217d70ff7"
+    },
+    {
+      "capture": "n1n2-claude-060p1r4-test-003",
+      "exit": 1,
+      "inputs": 649,
+      "current_mismatches": [
+        "tests/agent-driven/integration/helpers/native-cache-nofork-pilot.test.mjs",
+        "tools/native-cache-nofork-pilot.mjs"
+      ],
+      "source_changed": [],
+      "source_added": [],
+      "log_matches": true,
+      "log_sha256": "944b385c09e584309163ea3d9924112fa12d5d0be7eb619eeebf063b966c3e94"
+    },
+    {
+      "capture": "n1n2-claude-060p1r4-test-004",
+      "exit": 1,
+      "inputs": 649,
+      "current_mismatches": [
+        "tests/agent-driven/integration/helpers/native-cache-nofork-pilot.test.mjs"
+      ],
+      "source_changed": [],
+      "source_added": [],
+      "log_matches": true,
+      "log_sha256": "c04bb651f5406159d0cf0c872f4c3d37ebbcaa9ba2984d366d897e256d93d77a"
+    },
+    {
+      "capture": "n1n2-claude-060p1r4-test-005",
+      "exit": 0,
+      "inputs": 649,
+      "current_mismatches": [],
+      "source_changed": [],
+      "source_added": [],
+      "log_matches": true,
+      "log_sha256": "29615c1356e21e7b213123628b5259fb44112f7b74ccec287b17ff29982a2741"
+    }
+  ],
+  "limits": "Historical failed capture input drifts do not certify finalbytes. Mock/syntax only, not actual C/prctl/signal/close semantics."
+}

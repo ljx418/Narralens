@@ -1,4 +1,29 @@
+## 2026-11-20 当前流程与维护授权（优先于以下历史快照）
+
+用户批准流程规范、剩余计划、目录归档和Git同步。必读docs/process/README.md、01_DELIVERY_SPEC.md、02_REMAINING_PLAN.md、03_TEAM_AND_OWNERSHIP.md、04_VALIDATION_AND_HANDOFF_SPEC.md；当前状态以00_CURRENT_STATE.json及真实原始记录为准。大批交付、内部小闭环、交还缺项拒绝、在途测试禁止改受测输入、具名命令预约、候选检查点和独立审查必须执行。元数据检查不等于产品验收。
+ClaudeCode继续负责实现，Codex设计/可执行验收样例/独立审查；未启用Codex接写核心可选路线。新429仍立即停，不自动重试/重启/切供应商或接手；额度恢复不豁免未来429。本维护轮不启动产品实现；下一goal重新核唯一writer与当前SHA后发精确票。禁止把上传WIP检查点称阶段通过或合main。
+
+## 最新用户规则：ClaudeCode 429 必须停下（2026-11-12）
+
+ClaudeCode 报 429 时，停止该实现任务，保留源码、未提交工作、日志和失败证据，向用户报告；未经用户对此次接手的明确授权，MAIN、领域 Codex 或其他 Agent 都不得代替它继续开发。旧 goal、旧 ReleaseAssignment 的“429 自动接手”、额度恢复、常规开发批准或“同阶段超过两次返工由 MAIN 接管”均不能代替这项明确授权。不得自动重试 Claude 请求、重启旧窗口、换供应商或更换凭据绕过。先停止继续派发，核对并记录原调用及所属子进程状态；仅观察超时不能认定进程已停，不得双写。只可进行保全现场、必要安全清理和只读诊断；不得将任务标为完成或 PASS。用户明确授权接手后，再确认原 writer 已停、保留全部工作并完成唯一写入者交接。此规则覆盖本文件下方及历史计划中冲突的 429 自动接手条款。
+
+## 2026-11-11 最新授权：A恢复后实际开发
+
+用户新active goal明确批准按docs/execution/A/relaunch-20261111审定包进入A实际开发，覆盖旧暂停/仅准备文字。MAIN先R0当前字节复审、受影响验证、真实共同commit及精确ReleaseAssignment，再通过Orca领域Codex管理Claude实施与自验证；无release不跨owner写。当前进度与授权记录在canonical docs/execution/A/implementation-20261111，不修改已封存relaunch包。B仍不进入；不代签人验。Claude凭据事件处置仍UNKNOWN，不能假称已轮换；当前用户goal已明确授权ClaudeCode实施，不将轮换建议设为重复开工审批。按MAIN精确release交接后可调现有CLI，不读改配置；后续用户限制优先。429必须停下且用户明确授权后方可接手、超过两次返工MAIN接管、Headless静音、保全原候选与旧Gate历史继续有效。
+
 # Narralens 多Agent工作约定
+
+## 2026-11-11 当前Goal：仅恢复A准备与Orca窗口管理
+
+用户已激活A恢复准备目标，覆盖上一节“等待恢复指令”：允许组织三个领域Codex、详细设计/验收文档、主控审核和ClaudeCode启动准备；新增要求由主控管理Orca可见Claude窗口。本轮Claude只读接手检查，禁止产品代码实现、业务测试/渲染/服务启动及B阶段。交付入口docs/execution/A/relaunch-20261111/00_READ_FIRST.md；实际Dispatch以orca-dispatches.json及后续子窗口回执为准。阶段目标止于开发启动门，不把历史A实现授权自动延伸为本轮实现许可。
+
+## 2026-11-11 最新批准：三级窗口交付流程
+
+主Codex管理总计划/总架构/公共合同、审核领域详细设计和验收方案、协调集成与大阶段验收；BRIDGE/PRODUCT/MEDIA领域Codex分别设计、管理所属ClaudeCode与复核交付；ClaudeCode（MiniMax）主要负责编码、接线与开发子阶段自验证。详见docs/agent-driven-v1/11_AGENT_DELIVERY_PROCESS.md（从本记忆文件访问为agent-driven-v1/11_AGENT_DELIVERY_PROCESS.md）。新窗口必读该流程及TASK/HANDOFF，再复核真实HEAD/dirty/进程；不可凭旧快照重写候选或恢复暂停任务。
+
+公共共享文件由MAIN管理，可显式独占释放给一个Claude实现，不要求MAIN亲写全部核心。独立worktree、分时单writer；详细设计/验收方案经MAIN审定后释放实现；领域先复核，MAIN再集成并组织大阶段独立验收。429停下并报告，只有用户明确授权接手后再核对原writer停止并交接；同阶段超过两次返工由MAIN接管根因与必要修复，参与实现者不自签独立审查。
+
+本轮用户授权是流程文档调整与剩余计划/goal提示词，不是恢复开发或启动窗口；保持当前暂停，待后续恢复指令。A未完成，MAIN有未提交实现须保全。历史“仅文档/未释放”不覆盖已存在的A授权，但已授权也不取消当前暂停。
 
 最新已批准体验基线：docs/agent-driven-v1/s0-r4/prototype.html。用户批准R4原型通过，作为V1前端体验出门门限；冻结见同目录FREEZE.json/APPROVAL.json，验收见docs/agent-driven-v1/V1_FRONTEND_EXIT_GATE.md（R4-UX-01..12）。已有工程改单镜、顶部可折叠横向工作流、可继续剪辑的非模态系统侧面板必须保持。原型人工PASS；真实产品验收NOT_RUN，IT-P02/生产release未据此释放，历史Gate不变。
 
@@ -25,7 +50,7 @@
 
 **同一lane只有一个写入者。** Codex设计/文档与Claude实现分时执行；Claude写入时Codex仅只读观察，不并发改文件、Git索引、分支或运行根。每个lane在自身`docs/parallel/lane-*/`维护`TASK.md`与`HANDOFF.md`，记录任务状态、当前writer、base/contract/HEAD、dirty文件、命令/进程、日志与接手理由。默认Codex是lane负责人，Claude仅接已释放的实现任务。
 
-遇到Claude **429**，无需再问用户，Codex自动接手已授权剩余实现。先确认原Claude调用/子进程已结束或停止并记录，不能只凭一个429日志判断全部进程停止；记录错误与未完成工作，复核HEAD/差异、保留全部未提交内容，移交唯一writer后继续。不得reset/stash覆盖，不把失败或未完成测试写PASS；不得新增付费请求、外传或更换凭据。Claude恢复后默认仍停，直到Codex显式移交，禁止双写/自动抢回。
+遇到 Claude **429**，必须停止该实现任务并向用户报告，保全源码、dirty 工作、日志及失败证据。未经用户明确授权此次接手，Codex/MAIN/其他 Agent 不得继续实现；不自动重试、不重启旧窗口、不更换供应商或凭据。核对原调用及所属子进程状态，观察超时不能当作已停。只允许保全、必要安全清理与只读诊断。用户授权后须确认原 writer 已停，再完成唯一写入者移交；不得 reset/stash 覆盖、不得把未完成写 PASS。旧自动接手规则已废止。
 
 Codex接手实现后，其自测只能称内部验证，不能自签独立外审。该候选由未参与实现的MAIN/其他干净只读审查上下文复核；若MAIN也参与实现，则另取未参与的审查上下文。独立复核暂不可得时标`REVIEW_PENDING`，可继续无依赖的已授权工作，不能越过相关验收门。
 
@@ -65,3 +90,9 @@ Codex接手实现后，其自测只能称内部验证，不能自签独立外审
 ## 最新授权：A轮实际开发（2026-11-09）
 
 用户已设置active goal，明确授权实际开发并验收IT-A01..A06；此前仅文档/未释放描述为历史快照，由本节及docs/execution/A实际ReleaseAssignment覆盖。以已批准final-review、cp-a0和execution-planning为目标，不重写或调绿其历史状态。MAIN复核基线、冻结合同并发放具体范围后连续实现。A末真实短片/原生编辑/关服重开/改单镜双导出、全量/恢复/独立审查通过，报告及服务就绪后停在人工验收入口，不代签人验、不进入B。保留用户工作，静音Headless，不擅自付费/外传/J盘。
+
+## Orca三级窗口与模型身份检查的持久补充
+
+主控通过版本匹配的orca-cli/orchestration实际管理领域Codex及其Claude，记录Task/Dispatch/handle、父子关系、cwd/路径映射、writer与scope；输入接收不等于任务已执行，超时/静默不等于退出，不重复fresh启动。当前准备窗口在父folder，只读源码用绝对路径；实施前必须把实际工作区/cwd与release目录核对一致。
+
+模型只用会话已显示标识，不能因CLI品牌推断供应商，无法确认写UNKNOWN；禁止读取/grep用户配置、凭据、.env、~/.claude、~/.codex或dump全量env来确认模型。PRODUCT子窗口曾违规读配置使token进入其工具输出，事件见docs/execution/A/relaunch-20261111/audit/CREDENTIAL_EVENT.md；不复述值，不掩盖，不自行轮换。既有Codex/Claude研发会话由用户明确要求启动，不代表产品新增媒体/模型provider费用或素材外传获批。

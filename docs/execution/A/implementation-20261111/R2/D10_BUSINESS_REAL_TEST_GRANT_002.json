@@ -1,0 +1,48 @@
+{
+  "grant_id": "R2-BRIDGE-D10-BUSINESS-REAL-002",
+  "issued_at": "2026-11-12T01:58:49.467615+00:00",
+  "holder": "Claude ctx_283c06941e68 only under BRIDGE ctx_582d083346ef",
+  "cwd": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+  "status": "RESERVED_PREPARE_REPAIRED_CANDIDATE_BEFORE_RUN",
+  "ack": "msg_1ce1302f1ac5 via msg_3a99e98dc776",
+  "commands": [
+    [
+      "corepack",
+      "pnpm",
+      "exec",
+      "vitest",
+      "run",
+      "--config",
+      "vitest.config.ts",
+      "tests/agent-driven/integration/created-source-recovery.test.ts",
+      "-t",
+      "marker-only request|published author bytes were tampered"
+    ],
+    [
+      "corepack",
+      "pnpm",
+      "exec",
+      "vitest",
+      "run",
+      "--config",
+      "vitest.config.ts",
+      "tests/agent-driven/integration/created-source-recovery.test.ts"
+    ],
+    [
+      "corepack",
+      "pnpm",
+      "exec",
+      "vitest",
+      "run",
+      "--config",
+      "vitest.config.ts",
+      "tests/agent-driven/integration/created-source-adoption.test.ts"
+    ]
+  ],
+  "ordering": "Own source fixed and frozen; selected2counterexamples against exact archived candidate1 expect genuine assertionFAIL; restore exact repaired source; same selected tests PASS; then twofullfiles serial. No recoverOnStart loop test selected on oldsource.",
+  "control_scope": "ONLY src/host/agent-driven/created-source-recovery.ts may temporarily use exact R2/orca-restart-20261112/1-created-source-recovery.ts.source.txt bytes, verified SHA from observed.json. Candidate backup and phase record mandatory in ownD10-business docs; no other source swaps.",
+  "safety": "One writer; no captures/compiler/helper while swapping; no node_modules links/copies/worktree creation; no git/index operations; await realcommand/descendants terminal before restore; finally restore and assert candidate/test hashes; reboot leaves phase journal and preserved bytes, no PASS claim",
+  "logs": "Existing read-only run-recorded.py unique d10-business-* prefixes; no overwrite. All raw exits including expected oldnegative remain.",
+  "prohibited": "No Host production wiring/provider/network/J/paid/download/build/browser/fullsuite/pin/contracts/DDL/othercore changes",
+  "claude_429": "STOP affected task, preserve; NO replacement without user explicitauthorization"
+}

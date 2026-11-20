@@ -1,0 +1,29 @@
+{
+  "release": "N1N2_ORIGINAL014_ROUND3_CORRECTIVE_021",
+  "at": "2026-11-12T15:59:43.533420+00:00",
+  "status": "CONDITIONAL_ON020_STARTED_RUNTIME_TERMINAL_AND_OWN_CLEANUP",
+  "baseline_grant": "BATCH_020_GRANT.json",
+  "source_head": "e2eff61b464d75d36598103d718cd2a75db5dfda",
+  "input_review": "independent-coverage-audit-round3/REVIEW.md",
+  "findings": {
+    "BLOCKER": [
+      "K01"
+    ],
+    "MAJOR": [
+      "K02",
+      "K03",
+      "K04",
+      "K05",
+      "K06"
+    ]
+  },
+  "instructions": "ROUND3_K01_K06_CORRECTIVE_RELEASE_021.md",
+  "instructions_sha256": "43bf7f40a4b21a896c7972da8b4420981ca2f70043de8e84e7443d1e156a1b5c",
+  "original_scope_preserved": true,
+  "optional_extra_test_path": "tests/agent-driven/integration/helpers/created-draft-fixture.ts",
+  "optional_extra_constraints": "Recordprehash+minimaloptionaloptions/defaultunchanged+affectedtests beforeediting; notifyMAIN, no blankettestdirectoryrelease",
+  "runtime": "Onlystandingrecordedserialtsc after020cleanup; freshgrantsneeded forbusiness tests.159withdrawifnotstarted.",
+  "implementation_writer": "ctx_b4086093cd96",
+  "no_new_stage": true,
+  "new429": "STOP_NO_RETRY_NO_TAKEOVER"
+}

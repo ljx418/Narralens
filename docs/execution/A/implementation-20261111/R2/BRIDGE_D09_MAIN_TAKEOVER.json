@@ -1,0 +1,41 @@
+{
+  "format": "narralens.main-takeover@1",
+  "status": "PLANNED_INPUT_FROZEN_NO_IMPORT_YET",
+  "source_freeze": "0e07402859d8daef96eda391963e0e1b8c192c21",
+  "source_implementation": "10d97994df80ebc8e2ad95aaeba912709690b345",
+  "review": "REQUEST_CHANGES B1 final expiry; M1 cleanup/replay uncertainty",
+  "writer": "MAIN only, lane retained readonly",
+  "paths": [
+    {
+      "path": "src/host/agent-driven/created-run-authority.ts",
+      "lane_sha256": "19cdee1468deb63740bff6eedf0e676766897b13045bad2bedfcf0d616cee220",
+      "main_before_sha256": "571da409fd742705d1293cab81312a24766410679e223c354590724f98fa749a"
+    },
+    {
+      "path": "src/host/creative/fixed-workflow-service.ts",
+      "lane_sha256": "e0a2718b1a98aa0fcaa5d2150dca0aa25614b655b2c89a9a3408abd7ecb86e7f",
+      "main_before_sha256": "8a2eaded89c7c160b687019b614a1e9c6a080865488933affdff0e9517139995"
+    },
+    {
+      "path": "src/host/creative/product-repository.ts",
+      "lane_sha256": "803ec45b79c24ce75af096ff2e93995f40e1777ae80ec5f29d835fcd8b2a8394",
+      "main_before_sha256": "f071a02f1ed691e70a7f7cc774c6f4b5948c088e4a8411491fb51adb7affc3b7"
+    },
+    {
+      "path": "tests/agent-driven/integration/created-run-authority.test.ts",
+      "lane_sha256": "3a9c8f1002f6f363c55907db5912ea0222231754cc3a1f5bc5a01ebd2eb228d2",
+      "main_before_sha256": "31d3fdc0df8a08a01a65148396a11837afdc55600a012be9d7bbe0a2c698f008"
+    },
+    {
+      "path": "tests/agent-driven/product/fixed-workflow-service.test.ts",
+      "lane_sha256": "da7e39a1a05d11060497eaaf2f3a3210351f74149491f78d91b1e26dad2b8f6d",
+      "main_before_sha256": "3806c0398ccb33d014b21fcca03fd1c0df624d2a606dce2596977f04ecf8d750"
+    }
+  ],
+  "constraints": [
+    "No old readonly MAIN dependency import",
+    "Wait real024 current input terminal before modifying any source or index",
+    "Preserve lane evidence/drafts and existing ledger",
+    "No public contract/status/JobKind/second approval authority"
+  ]
+}

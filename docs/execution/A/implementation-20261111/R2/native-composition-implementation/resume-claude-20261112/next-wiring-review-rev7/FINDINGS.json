@@ -1,0 +1,103 @@
+{
+  "format": "narralens.independent-document-recheck@1",
+  "revision_reviewed": 7,
+  "verdict": "REQUEST_CHANGES",
+  "claim_limit": "Document preparation review only; not implementation-ready or runtime acceptance",
+  "source_commit": "1d348d419120f23f45d958112ea8c43df5a04675",
+  "counts": {
+    "BLOCKER": 0,
+    "MAJOR": 1,
+    "MINOR": 0
+  },
+  "prior_findings": [
+    {
+      "id": "NW6-A01",
+      "status": "PARTIALLY_CLOSED",
+      "closed_parts": [
+        "WeakMap issued request from actual authenticated principal; JSON/three-field caller cannot mint",
+        "actual session/owner/run/package/receipt/rights/dual-marker/schema/S01 binding specified",
+        "review-media-http/dispatcher/CreationApplication exact narrow wiring",
+        "open/read/backpressure/descriptor close windows and live session distinction",
+        "DB/socket non-atomic and already-written byte boundary honest"
+      ],
+      "remaining": "NW7-A01 finalization resource ownership and post-release guard contract"
+    },
+    {
+      "id": "NW6-A02",
+      "status": "DOCUMENT_FIX_CLOSED",
+      "evidence": "03_CLAUDE_HANDOFF.md:5 now mandatory 00–07 with 06 normative target and 07 accepted-commit reanchor distinction"
+    }
+  ],
+  "findings": [
+    {
+      "id": "NW7-A01",
+      "severity": "MAJOR",
+      "classification": "DOCUMENT_FINALIZATION_CONTRACT_GAP",
+      "continues": "NW6-A01",
+      "title": "释放S01租约后的最终复核缺少已选定的资源所有权和可调用合同",
+      "sources": [
+        {
+          "path": "next-wiring-draft/04_PATHS_PORTS_AND_PRODUCERS.md",
+          "line": 63
+        },
+        {
+          "path": "next-wiring-draft/04_PATHS_PORTS_AND_PRODUCERS.md",
+          "line": 64
+        },
+        {
+          "path": "next-wiring-draft/04_PATHS_PORTS_AND_PRODUCERS.md",
+          "line": 65
+        },
+        {
+          "path": "next-wiring-draft/04_PATHS_PORTS_AND_PRODUCERS.md",
+          "line": 72
+        },
+        {
+          "path": "next-wiring-draft/06_REVIEW_PUBLICATION_SCHEMA_PROPOSAL.md",
+          "line": 143
+        }
+      ],
+      "contract_conflict": "assertCurrent明确验证持有的S01租约；release明确释放它。describe又要求异步release完成后由authority对同一事实最后同步复核，且禁止使用已释放lease。拟合同只有acquire/assertCurrent/release，没有定义释放后复核的入口、其保留的真实依赖或最终释放动作。把异步资源close和最终失效标记分开是可行方向，但尚未选定是否真正保留S01租约及其依赖，而不只是保留一个valid标记。",
+      "trigger": "无session/包/marker变化的正常describe：候选descriptor形成，await handle.close成功，await scope.release成功且按合同释放S01租约，然后执行最后一门。",
+      "counterexample": "若实现者复用唯一已定义的scope.assertCurrent，租约已释放，应拒绝，因此零变更正常对照也无法成功；若为成功而跳过租约有效性或只用旧facts与新鲜DB行，则没有证明原S01授权条件，异步release期间的原授权失效可能漏检。重新acquire真实租约通常是异步且要再释放，不能把它默认为已定义的最后同步门。不是声称所有可能设计均不可行，而是当前文档仍把必须选择的finalization分支交给自动开发猜测。",
+      "historical_evidence": [
+        {
+          "path": "src/host/agent-driven/created-native-workspace.ts",
+          "commit": "1d348d419120f23f45d958112ea8c43df5a04675",
+          "line": 80,
+          "detail": "NativeWorkspaceLease有同步assertCurrent/release，释放会标记该lease released；934–935分别为guard与released=true。仅用来说明租约释放与guard不可混为保留标记，不要求未接受057实现未来W3。"
+        }
+      ],
+      "minimal_revision": [
+        "选定并写明两阶段finalization接口，而非仅说实现可拆分：异步prepare/drain负责media close及异步清理，但明确保留最终门所需的原请求能力、真实S01 guard lease及全部依赖、预算和DB；列出状态与唯一owner。",
+        "定义仅Host transport可调用的一次性同步finish/commitDelivery（或等价方法）：在仍持有真实依赖时做最后新鲜复核，完成可同步且可检查结果的终端释放/失效，再在同一无await路径交付；失败不交付。说明重复finish/release、取消和清理失败的settlement与DB关闭归属。若所选真实S01 lease不能满足同步终端动作，明确需要的最小受审hook/替代证明，不把已释放lease或旧快照当新授权。",
+        "删除“先完整release S01，再使用未定义authority复核”的悬空分支，或为该分支提供独立仍有效且保留真实依赖的delivery capability合同。describe候选值跨dispatcher await时仍须带Host私有最终交付能力直达最后response边界，不能在业务方法return时丢掉guard。无需修改public DTO/DDL/renderer。"
+      ],
+      "case_mapping": [
+        "PUB-RD01",
+        "NW-API03",
+        "S01-L01",
+        "S01-L02"
+      ],
+      "acceptance_addendum": "加入零变更最终化成功对照，记录异步media close/drain期间S01依赖仍真正held，最后guard与终端动作恰好一次；在prepare/drain窗口撤session/换包/改marker或使S01授权失效均无新增交付；重复close/release和失败分支不早关DB、不伪造成功。所有业务运行NOT_RUN。"
+    }
+  ],
+  "invariants_verified": {
+    "manifest_files": "8/8 raw-byte SHA256 matches",
+    "archived_rev6": "8/8 markdown raw bytes match prior independent INPUTS",
+    "authorities": "12/12 unchanged referenced SHA256",
+    "candidate_hashes": "7/7 fixed git blob SHA256/length matches",
+    "original_28_cases": "28/28 complete rows identical to reviewed rev6",
+    "ddl": "unchanged exact SQL bytes and hash",
+    "migration_detail": "unchanged exact canonical detail bytes and hash",
+    "accepted_native_commit": null,
+    "implementation_release": false,
+    "business_acceptance": "NOT_RUN"
+  },
+  "runtime": "ALL_NOT_RUN",
+  "not_new_defects": [
+    "N1N2/060 not yet accepted and final reanchor remains required",
+    "No cross-process DB/socket atomic revocation or recall of in-flight bytes is claimed",
+    "Exact final ReleaseAssignment paths/argv/resources/error literals and supported rollback still to freeze"
+  ]
+}

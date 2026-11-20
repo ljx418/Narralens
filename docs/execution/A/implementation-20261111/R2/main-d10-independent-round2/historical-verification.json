@@ -1,0 +1,64 @@
+{
+  "four_files": {
+    "src/host/agent-driven/created-source-recovery.ts": {
+      "sha256": "e90f63b07e1659999a0ec8916b35fb42ce5c94875c4a73a22894ecd63105a0b7",
+      "ticket_match": true,
+      "frozen_match": true
+    },
+    "src/host/agent-driven/created-source-adoption-service.ts": {
+      "sha256": "9e140f5887b6e8ad5f406517504043ade1eaaa9df8978fee8a2d99d82c46ddb7",
+      "ticket_match": true,
+      "frozen_match": true
+    },
+    "tests/agent-driven/integration/created-source-recovery.test.ts": {
+      "sha256": "eda8cbbc0ba78368db5893def66b956888df97c3c8e65b3a59099b22ff077e13",
+      "ticket_match": true,
+      "frozen_match": true
+    },
+    "tests/agent-driven/integration/created-source-adoption.test.ts": {
+      "sha256": "04eb25fa45efede7d101878d0c603d96b8947f377c49896dc3422a74ed644548",
+      "ticket_match": true,
+      "frozen_match": true
+    }
+  },
+  "captures": {
+    "main-d10-fixed-full-006": {
+      "exit": 0,
+      "log_matches": true
+    },
+    "main-d10-fixed-lifecycle-003": {
+      "exit": 0,
+      "log_matches": true
+    },
+    "main-d10-old-authorization-002": {
+      "exit": 1,
+      "log_matches": true
+    },
+    "main-d10-old-lifecycle-001": {
+      "exit": 1,
+      "log_matches": true
+    },
+    "main-d10-original-probe-005": {
+      "exit": 0,
+      "log_matches": true
+    },
+    "main-d10-type-004": {
+      "exit": 2,
+      "log_matches": true
+    },
+    "main-d10-type-007": {
+      "exit": 0,
+      "log_matches": true
+    }
+  },
+  "final_inputs": {
+    "main-d10-fixed-full-006": {
+      "count": 620,
+      "changed": []
+    },
+    "main-d10-type-007": {
+      "count": 620,
+      "changed": []
+    }
+  }
+}

@@ -1,0 +1,54 @@
+{
+  "phase": "A_IMPLEMENTATION",
+  "baseAndContractSHA": "ca5b67a8285b130c79055317c6202f73cfbb99c8",
+  "main": {
+    "role": "shared contracts, DB, security, Host integration and official acceptance",
+    "status": "RUNNING",
+    "baselineExecHandle": 62928,
+    "isolatedDirectory": "Narralens-agents/main-integration",
+    "microResults": {
+      "schemaAndContract": 10,
+      "productSQL": 7,
+      "durableCursor": 3,
+      "combinedTypecheck": "known PRODUCT candidate 8 errors; repair pending integration"
+    }
+  },
+  "lanes": [
+    {
+      "role": "bridge",
+      "codexLead": "/root/a_bridge_lead",
+      "directory": "Narralens-agents/bridge-observability",
+      "claudeSession": "d94ac073-b5b8-42c6-9b4d-f0eef57d7850",
+      "pid": 3614630,
+      "execHandle": 44062,
+      "status": "RUNNING_LIGHT_VALIDATION",
+      "writer": "CLAUDE"
+    },
+    {
+      "role": "product",
+      "codexLead": "/root/a_product_lead",
+      "directory": "Narralens-agents/product-workbench",
+      "claudeSession": "4548ddcb-e870-405b-863f-a17a4a7ed683",
+      "pid": null,
+      "execHandle": null,
+      "status": "REPAIR1_TERMINAL_AWAITING_RETEST",
+      "writer": "CODEX_DOCUMENTATION",
+      "sourceSHA": "5ae49ea321ed70cba177ff43b5f381f15d0aba8d"
+    },
+    {
+      "role": "media",
+      "codexLead": "/root/a_media_lead",
+      "directory": "Narralens-agents/media-delivery",
+      "claudeSession": "25d0705c-223a-4408-a5c6-2222e7c59c1e",
+      "pid": null,
+      "execHandle": null,
+      "status": "REPAIR1_TERMINAL_AWAITING_FIRST_LIGHT_TEST",
+      "writer": "CODEX_DOCUMENTATION",
+      "sourceSHA": "9e1de1879c214f4a1e00e195ced4bd8e8c6085e0"
+    }
+  ],
+  "testPolicy": "MAIN full baseline exclusive; other lanes no installs/tests until released",
+  "humanMediaInput": "REQUESTED_PENDING",
+  "humanAcceptance": "NOT_RUN",
+  "observation": "snapshot from explicit lane lead PID/session observations; re-poll handles before assuming liveness"
+}

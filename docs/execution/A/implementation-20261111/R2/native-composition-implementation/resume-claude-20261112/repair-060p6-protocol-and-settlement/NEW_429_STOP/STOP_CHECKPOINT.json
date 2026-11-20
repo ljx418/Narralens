@@ -1,0 +1,51 @@
+{
+  "at": "2026-11-15T19:02:23.546336+00:00",
+  "state": "STOPPED_NEW_429_AWAIT_USER_EXPLICIT_RESUME",
+  "message": "msg_stop_e57215b74e2ac6c166c46f14",
+  "task": "task_8f3cf88b44bc",
+  "dispatch": "ctx_17cf94883a53",
+  "terminal": "term_237147d43cbacc5d4858d8355ade6696",
+  "stop_reason": "API 429 Token Plan usage limit (2056); preceding Bash classifier also rate-limited",
+  "guarded_worker_stop": "confirmed state=stopped, exact agent terminal closed",
+  "source8_preserved": {
+    "src/adapters/openfilm/cache-process-supervisor.ts": "ba18b14069cb9f08563b65b99935a155f7f1b8bfd0c4b71a0f4da2095db70edc",
+    "src/adapters/openfilm/cache-process-custodian.py": "40947936b36f94ea53b00ecf4f851c528484cea457f1ed4fef7aa031bba896a9",
+    "src/adapters/openfilm/cache-worker-integrity.json": "dc68cb3d4417c065d83c0564e7bbf38e315be54d8afb32afd2b98eb6a268959f",
+    "tests/agent-driven/integration/cache-process-identity.test.ts": "40b04e9fdda53c03030e17affe332e4a00284c62968ced7382826ff05c0c8479",
+    "tests/agent-driven/integration/helpers/cache-custodian-unit.py": "9f2fd35dd8db63e53d4cc9965ecfa18465438cff593b9bebcbbeed018fe399dc",
+    "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts": "02046365388e1977887511acbfb09e21dba352b79d2ed08c81053a8a0a02800d",
+    "tools/native-cache-normal-pilot.ts": "e4db3499f715d5b6b5634568677a6688cf80a897c9321c45e93cda98c6a19ebb",
+    "tests/agent-driven/integration/native-cache-normal-pilot.test.ts": "23c8decaa4fd766b7a6b5d56e452003f90aaa4b6e0bf177acf4b99c1105718ee"
+  },
+  "protected7_match": true,
+  "source_write_release": false,
+  "runtime_release": false,
+  "heavy_slot_reserved": false,
+  "automatic_retry": false,
+  "codex_takeover": false,
+  "hung_test_cleanup": {
+    "capture": "n1n2-claude-060p6-complete-python-003",
+    "exact_test_pid": 1596768,
+    "start_ticks": 5939920,
+    "action": "MAIN exact pidfd SIGTERM safety cleanup, recorder allowed natural completion",
+    "actual_exit": -15,
+    "log_sha256": "32e1403ee7bacd401c9e6c496471fb1b324ecc70c84604fa6c99b86e04b0c4d1",
+    "source_changed": [
+      "src/adapters/openfilm/cache-process-custodian.py",
+      "src/adapters/openfilm/cache-process-supervisor.ts",
+      "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts",
+      "tests/agent-driven/integration/cache-process-identity.test.ts",
+      "tests/agent-driven/integration/helpers/cache-custodian-unit.py",
+      "tests/agent-driven/integration/native-cache-normal-pilot.test.ts"
+    ],
+    "processes_gone": true,
+    "classification": "NOT_SEMANTIC_TEST_FAILURE_NOT_PASS"
+  },
+  "procedural_findings": [
+    "Worker used forbidden timeout wrappers around some recorder invocations; preserve actual logs/results, do not infer timeout was reached",
+    "python003 stayed live while six input paths changed; source_changed recorded by original recorder at natural completion after exact test termination; not eligible as immutable-input acceptance",
+    "Last attempted pilot008/python007 Bash was rejected by classifier; no inferred execution or exit"
+  ],
+  "pending": "C06..08 incomplete/unreviewed; no final same-input six accepted; no actual new kernel release; C09/R6/R7/R8/N1N2/original17+ISO18/freeze/NEXT remain open",
+  "resume_rule": "Require explicit user resume/reassignment after this fresh429, then verify sole writer and rebind current dirty pins before implementation; no retry now"
+}

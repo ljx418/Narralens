@@ -1,0 +1,163 @@
+{
+  "format": "narralens.release-assignment@1",
+  "assignment_id": "A-MAIN-CORE-001",
+  "ticket": [
+    "IT-A01",
+    "IT-A02",
+    "IT-A03",
+    "IT-A04",
+    "IT-A05",
+    "IT-A06"
+  ],
+  "phase": "A",
+  "status": "RELEASED",
+  "recordedAt": "2026-11-09T13:15:06.103910+00:00",
+  "authorization": {
+    "source": "active user goal",
+    "scope": "actual A01-A06 implementation and acceptance; stop before human decision"
+  },
+  "base_sha": "ca5b67a8285b130c79055317c6202f73cfbb99c8",
+  "contract_sha": "ca5b67a8285b130c79055317c6202f73cfbb99c8",
+  "contract_manifest_sha256": "532cd43c963a1c94de5f8ce34f3c6eb7281fded80047f74dc5dbe1a70aa65170",
+  "directory": "/mnt/c/workspace/videoworkline/Narralens",
+  "branch": "migration/m2.2-coordinator-persistence",
+  "owner": "MAIN",
+  "writer": "Codex /root",
+  "session": "01a129f8-b21a-7523-a6c0-620fbec2da27",
+  "allowed_files": [
+    "contracts/agent-driven-a.schema.json",
+    "contracts/agent-driven-a.registry.json",
+    "contracts/agent-driven-a.migration.sql",
+    "src/contracts/agent-driven-types.ts",
+    "src/contracts/agent-driven-validator.ts",
+    "src/host/server.ts",
+    "src/host/start.ts",
+    "src/host/security.ts",
+    "src/host/api-error.ts",
+    "src/host/projects/revision-store.ts",
+    "src/host/projects/project-creation-service.ts",
+    "src/host/projects/project-catalog.ts",
+    "src/host/projects/project-resolver.ts",
+    "src/host/projects/snapshot-store.ts",
+    "src/host/projects/project-coordinator.ts",
+    "src/host/engine/openfilm-composition.ts",
+    "src/adapters/openfilm/openfilm-engine-adapter.ts",
+    "src/app/m5/M5Panel.tsx",
+    "src/host/m5/studio-host-bridge.ts",
+    "src/host/m5/workbench-service.ts",
+    "src/host/persistent-job-store.ts",
+    "src/host/outbox.ts",
+    "package.json",
+    "pnpm-lock.yaml",
+    "AGENTS.md"
+  ],
+  "allowed_new_prefixes": [
+    "src/host/agent-driven/",
+    "tests/agent-driven/integration/",
+    "docs/execution/A/",
+    "docs/evidence/AGENT_DRIVEN/A/",
+    "tools/agent-driven/"
+  ],
+  "forbidden_paths": [
+    "old frozen s0/s0-r4/evidence contents",
+    "other lane working trees except explicit reviewed integration",
+    "J drive without authorization",
+    "B feature implementation"
+  ],
+  "inputs": [
+    "approved CP-A0 80defs/31routes",
+    "existing coordinator/revision/snapshot/locks/outbox",
+    "lane typed ports and completed reviewed commits"
+  ],
+  "outputs": [
+    "shared persistence and authorization",
+    "Host route composition and run gates",
+    "controlled general bootstrap",
+    "native acknowledgement",
+    "real snapshot render integration",
+    "A evidence and human-review services"
+  ],
+  "producer": "MAIN",
+  "consumers": [
+    "BRIDGE",
+    "PRODUCT",
+    "MEDIA",
+    "existing Host/Studio"
+  ],
+  "dependencies": {
+    "documentation": "USER_APPROVED",
+    "runtimeContract": "COMMITTED ca5b67a",
+    "legacyBaseline": "RUNNING exec62928",
+    "mediaAuthorization": "REQUESTED_PENDING"
+  },
+  "acceptance_case_ids": [
+    "A-COLD",
+    "A-MCP",
+    "A-CREATE",
+    "A-FILM",
+    "A-WRITE",
+    "A-ENTRANCES",
+    "A-EVENTS",
+    "A-CANCEL",
+    "A-UI",
+    "A-REOPEN",
+    "T20-A..H"
+  ],
+  "commands": [
+    {
+      "argv": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "tsc",
+        "--noEmit"
+      ],
+      "cwd": "/mnt/c/workspace/videoworkline/Narralens",
+      "expectedExit": 0
+    },
+    {
+      "argv": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "vitest",
+        "run",
+        "--config",
+        "vitest.config.ts",
+        "tests/agent-driven/integration"
+      ],
+      "cwd": "/mnt/c/workspace/videoworkline/Narralens",
+      "expectedExit": 0
+    },
+    {
+      "argv": [
+        "corepack",
+        "pnpm",
+        "check"
+      ],
+      "cwd": "/mnt/c/workspace/videoworkline/Narralens",
+      "expectedExit": 0
+    }
+  ],
+  "fixtures": "authorized A media manifest pending; never substitute synthetic speech",
+  "runtime": "MAIN var/dist/DB/staging separate from lane roots; headless browser own profile",
+  "resource_reservation": "resource-reservation.json: MAIN baseline exclusive, later serialized heavy gates",
+  "business_scope": "A authorized-local fixed workflow only",
+  "network": "existing authorized CLI/config and pinned npm dependency acquisition; product runtime loopback only, no external media requests",
+  "external_transfer": "no new transfer authorization",
+  "cost": "no paid media/provider/model calls",
+  "rollback": "disable new route/mount; preserve legacy and immutable snapshots; content rollback via controlled new revision",
+  "stop_conditions": [
+    "user human acceptance",
+    "missing human-owned authorized input after independent work exhausted",
+    "high-risk specification/architecture decision",
+    "genuine external blocking state"
+  ],
+  "handoff": "CONTINUE.md + lane TASK/HANDOFF",
+  "evidence": "logs and future docs/evidence/AGENT_DRIVEN/A/<frozen-code-sha>",
+  "independent_review": "NOT_RUN for production; module authors cannot self-sign",
+  "human_gate": "NOT_RUN; stop before A acceptance and never enter B",
+  "isolatedDevelopmentDirectory": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+  "isolatedDevelopmentBranch": "agent-driven/main-a-integration",
+  "isolationReason": "baseline still reads canonical source; MAIN codes in same-repository worktree without altering baseline files"
+}

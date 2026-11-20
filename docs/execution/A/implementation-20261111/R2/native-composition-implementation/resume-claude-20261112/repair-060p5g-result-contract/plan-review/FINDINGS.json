@@ -1,0 +1,174 @@
+{
+  "format": "narralens.R5G.result-contract.plan-review@1",
+  "verdict": "PLAN_READY_FOR_SINGLE_BATCH_IMPLEMENTATION",
+  "counts": {
+    "BLOCKER": 0,
+    "MAJOR": 0,
+    "MINOR": 0
+  },
+  "findings": [],
+  "binding": {
+    "review_task": "task_ca3cf8233a53",
+    "review_dispatch": "ctx_f3317764d1b0",
+    "contract_sha256": "493f86e334b25a4d2fa240b2248f485c910f379747b9c7e1e91ec4b82f124319",
+    "release_draft_sha256": "c4e98791cdaeee6e4908efd3696bb41fe3b36bd3ad1c06075d236284b0310301",
+    "start_binding_sha256": "5f0c64fe8e7a5501d63d3812bbf68c54d64644c91e9b30cd261264106488d862",
+    "historical_head": "1d348d419120f23f45d958112ea8c43df5a04675",
+    "accepted_new_commit": null
+  },
+  "prior_findings": [
+    {
+      "prior_id": "R5F-O01",
+      "plan_status": "COVERED",
+      "implementation_status": "STILL_OPEN",
+      "basis": "F01-F08/F10 require own mandatory fields, typed null/error separation, candidate/final/outcome facts equality, actual diagnostic equality plus normal transport/latched gate. C01-C04/C08 and parameterized delete/wrongtype/contradiction matrix directly cover known counterexamples."
+    },
+    {
+      "prior_id": "R5F-O02",
+      "plan_status": "COVERED",
+      "implementation_status": "STILL_OPEN",
+      "basis": "F02/F03 compare canonical errors while checking real object/cause relation; F06/F08/F09 bind null image, actual cleanup/latched/transport and exact cancel fields. C05/C06 plus valid wrapper-cause and ordinary failure controls C07 close the planned fault semantic gap."
+    }
+  ],
+  "matrix": [
+    {
+      "id": "F01",
+      "status": "PLAN_COVERS",
+      "cases": [
+        "C04",
+        "C07",
+        "C09"
+      ],
+      "basis": "Explicit enum and combinations; matching failed1 remains reliable/nonaccepted; invalid combinations/mismatch3."
+    },
+    {
+      "id": "F02",
+      "status": "PLAN_COVERS",
+      "cases": [
+        "C01",
+        "C02",
+        "C06"
+      ],
+      "basis": "Serialized own bounded name/message/code versus canonical actual original; explicit null separated from missing/wrong type."
+    },
+    {
+      "id": "F03",
+      "status": "PLAN_COVERS",
+      "cases": [
+        "C02",
+        "C05",
+        "C06",
+        "C07"
+      ],
+      "basis": "Actual original/settlement objects retained; exact identity/direct cause checked before fault acceptance; wrapper-cause positive control preserved."
+    },
+    {
+      "id": "F04",
+      "status": "PLAN_COVERS",
+      "cases": [
+        "C01",
+        "C04",
+        "C07"
+      ],
+      "basis": "Whole retained bounded cleanup order/content across all three sources; consistent nonempty ordinary1."
+    },
+    {
+      "id": "F05",
+      "status": "PLAN_COVERS",
+      "cases": [
+        "C01",
+        "C08",
+        "C09"
+      ],
+      "basis": "Boolean and actual proof observations checked; success requires actual nonnull proven snapshot; ordinary unsuccessful proof need not have success shape."
+    },
+    {
+      "id": "F06",
+      "status": "PLAN_COVERS",
+      "cases": [
+        "C04",
+        "C09"
+      ],
+      "basis": "Existing expected constants, all actual image/hash/bytes/exact facts consistent; fault null bytes as well as null hash."
+    },
+    {
+      "id": "F07",
+      "status": "PLAN_COVERS",
+      "cases": [
+        "C03",
+        "C08"
+      ],
+      "basis": "One once-captured actual frozen snapshot returned privately; serialized facts equal baseline; known critical shape validated independently of equality."
+    },
+    {
+      "id": "F08",
+      "status": "PLAN_COVERS",
+      "cases": [
+        "C01",
+        "C03",
+        "C07"
+      ],
+      "basis": "Actual diagnostic cleanup/transport/latched result gates. Additional-failure evidence disagreeing with claimed success3; consistent failed1 ordinary."
+    },
+    {
+      "id": "F09",
+      "status": "PLAN_COVERS",
+      "cases": [
+        "C05",
+        "C06",
+        "C07"
+      ],
+      "basis": "Existing provenance code and actual original error name/code/message/truncation bound, not just two booleans."
+    },
+    {
+      "id": "F10",
+      "status": "PLAN_COVERS",
+      "cases": [
+        "C09"
+      ],
+      "basis": "Preserves real bytes/all-artifact/protocol/read/report/publish gates; mandatory missing values not implicitly null. Per-field three-class negative matrix applies here as well."
+    },
+    {
+      "id": "C10",
+      "status": "PLAN_COVERS",
+      "cases": [],
+      "basis": "Preserves historical5s failure, current20s harness budget and unproven-cause limitation; prohibits additional budget inflation/product-deadline weakening."
+    }
+  ],
+  "implementation_notes_not_findings": [
+    {
+      "topic": "Private actual snapshot",
+      "note": "An actual diagnostic baseline is needed because current PositivePilotOutcome has no transport/latched/terminal-detail facts. Return the exact snapshot already captured at tools:1489; keep the same observation for candidate/final/outcome, including explicit null on early setup failure. Readonly/JSON facts grant no cleanup or creative authority. Trusted in-process actual outcome remains the premise; this checker is not an authenticator for arbitrary reconstructed JSON outcomes."
+    },
+    {
+      "topic": "No-root/publication failure",
+      "note": "F01/F10 gates must run before demanding nonexistent persisted records. No allocated root/publication false remains unreliable3, no cwd writes and no phantom resources. Existing no-root regression remains in the batch; bad CLI arguments stay2."
+    },
+    {
+      "topic": "Ordinary failure and native envelopes",
+      "note": "F02/F03 bounded name/message/code apply to serialized Error facts. Actual unknown thrown values still use existing boundedError projection. snapshot.transport_failure uses its existing CacheNativeErrorEnvelope shape with stack/cause/phase, not the smaller three-field error shape. Coherent early setup null snapshot or failed proof remains valid ordinary evidence when publication is complete."
+    },
+    {
+      "topic": "Mock proof fixtures",
+      "note": "Current StubSupervisor.diagnosticSnapshot:479 returns terminal_proof:null even after a simulated successful settlement. F05 will require adapting these explicit pure mock facts for success, including returned snapshot typing, or using actual-supervisor/mock-protocol controls; do not relax production F05 to preserve an underspecified stub. No fabricated kernel evidence follows from a mocked proven flag."
+    },
+    {
+      "topic": "Scope/final release",
+      "note": "Draft remains false for source_write_release/runtime_release; original eight existing paths and six recorder command forms, protected7 and no new public API/kernel scope. MAIN must issue the exact formal release after document acceptance; this review issues no implementation/runtime command."
+    }
+  ],
+  "runtime": "ALL_REVIEWER_TESTS_PRODUCT_IMPORTS_CLI_KERNEL_BUSINESS_RUNTIME_NOT_RUN",
+  "no_runtime_grant": true,
+  "no_implementation_acceptance": true,
+  "not_accepted": [
+    "real N",
+    "N1N2",
+    "R6",
+    "R7",
+    "R8/freeze commit",
+    "original17",
+    "ISO18",
+    "NEXT",
+    "V1"
+  ]
+}

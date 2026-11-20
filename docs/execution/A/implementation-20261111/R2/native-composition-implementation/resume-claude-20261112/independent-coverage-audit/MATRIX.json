@@ -1,0 +1,796 @@
+{
+  "status": "READ_ONLY_GAP_AUDIT_NOT_EXTERNAL_PASS",
+  "task_id": "task_59ec0f29cf45",
+  "dispatch_id": "ctx_1cb85a138c29",
+  "baseline": "e2eff61b464d75d36598103d718cd2a75db5dfda",
+  "source_root": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+  "authority_grant": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/BATCH_003_GRANT.json",
+  "source_sha256": {
+    "tests/agent-driven/integration/created-native-ack.test.ts": {
+      "grant": "5f50db85c7c07a2ecf4faefc20ec2ec6c7ad4910fafe549c2edc76bbad729c7c",
+      "start": "5f50db85c7c07a2ecf4faefc20ec2ec6c7ad4910fafe549c2edc76bbad729c7c",
+      "end": "5f50db85c7c07a2ecf4faefc20ec2ec6c7ad4910fafe549c2edc76bbad729c7c",
+      "start_matches_grant": true,
+      "end_matches_start": true
+    },
+    "src/host/agent-driven/retained-native-closure.ts": {
+      "grant": "6f5dd97ba9095c1cd8733b57dc75d27bd25ebd5b87fc715d567de5be8aa60b22",
+      "start": "6f5dd97ba9095c1cd8733b57dc75d27bd25ebd5b87fc715d567de5be8aa60b22",
+      "end": "6f5dd97ba9095c1cd8733b57dc75d27bd25ebd5b87fc715d567de5be8aa60b22",
+      "start_matches_grant": true,
+      "end_matches_start": true
+    },
+    "src/host/m5/openfilm-native-expected.ts": {
+      "grant": "19110e45a83b6d5b611b4260620ce873f923f1e5a5b907bc6176c4b734fbeed3",
+      "start": "19110e45a83b6d5b611b4260620ce873f923f1e5a5b907bc6176c4b734fbeed3",
+      "end": "19110e45a83b6d5b611b4260620ce873f923f1e5a5b907bc6176c4b734fbeed3",
+      "start_matches_grant": true,
+      "end_matches_start": true
+    },
+    "tests/agent-driven/integration/helpers/native-source-fixture.ts": {
+      "grant": "9a648b146095a2075505c9fbf7f024935f72c71d9e081ede6310d9d3fa0ea109",
+      "start": "9a648b146095a2075505c9fbf7f024935f72c71d9e081ede6310d9d3fa0ea109",
+      "end": "9a648b146095a2075505c9fbf7f024935f72c71d9e081ede6310d9d3fa0ea109",
+      "start_matches_grant": true,
+      "end_matches_start": true
+    },
+    "src/host/agent-driven/committed-snapshot-authority.ts": {
+      "grant": "7421eedae0a9a4b2c028ac705adb376e64697cf0cf7ce40745dcbe4a7035d2a6",
+      "start": "7421eedae0a9a4b2c028ac705adb376e64697cf0cf7ce40745dcbe4a7035d2a6",
+      "end": "7421eedae0a9a4b2c028ac705adb376e64697cf0cf7ce40745dcbe4a7035d2a6",
+      "start_matches_grant": true,
+      "end_matches_start": true
+    },
+    "src/host/agent-driven/created-native-source-reader.ts": {
+      "grant": "93fb70c468af3649e0265d6fa1905d3833ecf413f787ff7db938ebd25e78b1cd",
+      "start": "93fb70c468af3649e0265d6fa1905d3833ecf413f787ff7db938ebd25e78b1cd",
+      "end": "93fb70c468af3649e0265d6fa1905d3833ecf413f787ff7db938ebd25e78b1cd",
+      "start_matches_grant": true,
+      "end_matches_start": true
+    },
+    "tests/agent-driven/integration/created-native-workspace.test.ts": {
+      "grant": "439d469032c9af2b83ceb826e0aead7cf5c2fe5c5693be7cbf18c8e67f0f615f",
+      "start": "439d469032c9af2b83ceb826e0aead7cf5c2fe5c5693be7cbf18c8e67f0f615f",
+      "end": "439d469032c9af2b83ceb826e0aead7cf5c2fe5c5693be7cbf18c8e67f0f615f",
+      "start_matches_grant": true,
+      "end_matches_start": true
+    },
+    "tests/agent-driven/integration/created-native-source-reader.test.ts": {
+      "grant": "7f270b9fbb61ad0fe39646e7dc89822c4428667031adb4ef9c2664b52a89320e",
+      "start": "7f270b9fbb61ad0fe39646e7dc89822c4428667031adb4ef9c2664b52a89320e",
+      "end": "7f270b9fbb61ad0fe39646e7dc89822c4428667031adb4ef9c2664b52a89320e",
+      "start_matches_grant": true,
+      "end_matches_start": true
+    },
+    "tests/agent-driven/integration/committed-snapshot-host.test.ts": {
+      "grant": "bfd0c6373b254050d32a6a99e7b6f8b9827dc24b6b2587515ab4c5aad2cd9037",
+      "start": "bfd0c6373b254050d32a6a99e7b6f8b9827dc24b6b2587515ab4c5aad2cd9037",
+      "end": "bfd0c6373b254050d32a6a99e7b6f8b9827dc24b6b2587515ab4c5aad2cd9037",
+      "start_matches_grant": true,
+      "end_matches_start": true
+    },
+    "src/host/agent-driven/created-native-workspace.ts": {
+      "grant": "b57bed5df0ea600a2aa1a5b2dc3df2873f794389ee5274f32efb52a6f3d653ad",
+      "start": "b57bed5df0ea600a2aa1a5b2dc3df2873f794389ee5274f32efb52a6f3d653ad",
+      "end": "b57bed5df0ea600a2aa1a5b2dc3df2873f794389ee5274f32efb52a6f3d653ad",
+      "start_matches_grant": true,
+      "end_matches_start": true
+    }
+  },
+  "all10_start_end_stable": true,
+  "end_hash_observed_utc": "2026-11-12T07:25:14.078324+00:00",
+  "supporting_read_sha256": {
+    "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/src/host/m5/native-effective-sidecars.ts": "5178b7599024f0a3aeab13919fe2f83d964ececcd9f63d0f25f9301cd6a85c65",
+    "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/helpers/created-draft-fixture.ts": "a584e60359237c3bb45a54640f8320aa9827bd2d474be2770f1ea410d9feb218",
+    "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tools/agent-driven/product/native-inputs/expected-projection.mjs": "3500b1d6485791b13ec9364c6eb80740531142c16754877e21923ad73e9d494e",
+    "/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm/packages/openfilm/studio/server/files.mjs": "93d65bb02d76ab09e112588d7a852b3d4ada3083ebcd1d9ea2e7d216e82dcf99",
+    "/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm/packages/openfilm/studio/server/derived.mjs": "fdc4ae961d25735a87fe1d6e1012cb55278c4c04073a2a5f804548ab06384a99",
+    "/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm/packages/openfilm/studio/server/pageframes.mjs": "87d82f73add17d699aab963a99e45b4406cf68ecf547389b61a24083658f2828"
+  },
+  "captures": [
+    {
+      "capture": "n1n2-claude-resume-034-batch-pure",
+      "exit": 0,
+      "finished_at": "2026-11-12T07:13:57.324892+00:00",
+      "log_sha256": "2df7f22afccda8cba9a772720c125d27c34be3bee265459420a8d7e11bd37eea",
+      "log_matches_receipt": true,
+      "all10_inputs_match_grant": true,
+      "source_changed": [],
+      "source_added": [],
+      "counts": "8 passed /18 skipped"
+    },
+    {
+      "capture": "n1n2-claude-resume-035-batch-component",
+      "exit": 0,
+      "finished_at": "2026-11-12T07:18:12.246962+00:00",
+      "log_sha256": "82d64e914fab5b2371dd77d22e1e5ee82f784d118cd526bab4a354a43aac7da5",
+      "log_matches_receipt": true,
+      "all10_inputs_match_grant": true,
+      "source_changed": [],
+      "source_added": [],
+      "counts": "18 passed /8 skipped"
+    },
+    {
+      "capture": "n1n2-claude-resume-036-batch-regressions",
+      "exit": 0,
+      "finished_at": "2026-11-12T07:21:12.264716+00:00",
+      "log_sha256": "4c84e9e75dea48f0f68a07380b57bfd2003d24790b0b1c6b895429a30c50f04f",
+      "log_matches_receipt": true,
+      "all10_inputs_match_grant": true,
+      "source_changed": [],
+      "source_added": [],
+      "counts": "107 passed:85 Expected/ack +11 committed snapshot +11 workspace",
+      "observation": "Read completed capture after explicit MAIN msg_fe37a994c226; earlier pending observation preserved in REVIEW, no polling loop"
+    }
+  ],
+  "findings": [
+    {
+      "id": "F01",
+      "severity": "BLOCKER",
+      "groups": [
+        "R07",
+        "R02"
+      ],
+      "title": "Verification and negative-walk close failures can remain authoritative",
+      "refs": [
+        "src/host/agent-driven/retained-native-closure.ts:720",
+        "src/host/agent-driven/retained-native-closure.ts:496",
+        "src/host/agent-driven/retained-native-closure.ts:735",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:792",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:866"
+      ],
+      "detail": "verifyMembership opens temporary child directories, but its finally catches closeOwned failure and ignores it. closeOwned marks released then invokes close, without latching uncertainty itself. With valid membership and a failed temporary close, walk can return true and verify can remain true, losing cleanup evidence and leaking an uncertain allocation. retainAbsent likewise suppresses intermediate-parent close failures; those temporary descriptors are not registered for later closeAll, contrary to its comment. Existing injected-close cases arm at final release or open enumeration, not verification or the intermediate negative walk. This is a static control-flow finding; no fault injection was executed by reviewer.",
+      "proposed": "Within existing private resources, preserve every close failure, latch uncertainty before a later proof can verify, and cover verify/negative temporary allocations without retrying numeric FDs."
+    },
+    {
+      "id": "F02",
+      "severity": "MAJOR",
+      "groups": [
+        "R03"
+      ],
+      "title": "Proved absences are checked as positive files; dependency closure is incomplete",
+      "refs": [
+        "src/host/agent-driven/created-native-source-reader.ts:739",
+        "src/host/agent-driven/created-native-source-reader.ts:795",
+        "src/host/agent-driven/created-native-source-reader.ts:875",
+        "src/host/m5/native-effective-sidecars.ts:2876",
+        "src/host/m5/native-effective-sidecars.ts:2885",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:256"
+      ],
+      "detail": "Reader concatenates consumed_paths and negative_lookups then requires workspaceRetained.has for every entry. An actually absent .film/subtitles.json or a heard-media transcript is intentionally null and entered in the closure negative ledger, never the positive file map: a legitimate default/untranscribed case is refused with DEPENDENCY_UNPROVEN. Consumer directory_lookups/media_lookups are not cross-checked at this point. There is one precomputed supply pass rather than required bounded missing-dependency discovery. Existing tests assert new markers/unknown/removal refusals, not valid absent style/transcript or full dependency ledger correctness.",
+      "proposed": "Check positive, negative, directory and media dependencies against their appropriate existing private ledgers; supply missing safe dependencies within original bounds and assert legitimate absence as well as later birth rejection."
+    },
+    {
+      "id": "F03",
+      "severity": "MAJOR",
+      "groups": [
+        "R01",
+        "R02"
+      ],
+      "title": "Source identities are first retained after asynchronous digest and lineage reads",
+      "refs": [
+        "src/host/agent-driven/committed-snapshot-authority.ts:355",
+        "src/host/agent-driven/committed-snapshot-authority.ts:360",
+        "src/host/agent-driven/committed-snapshot-authority.ts:362",
+        "src/host/agent-driven/committed-snapshot-authority.ts:373",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:223"
+      ],
+      "detail": "acquireNativeFacts computes digest and parses producer/film before opening retained source closure. An equal-byte source leaf/parent replacement after those asynchronous reads but before closure.open becomes the accepted initial identity; byte equality at retainFile cannot establish it is the identity at read admission. This is an in-progress round swap, not the independently new stable round permitted by MAIN clarification. The pending-round test changes workspace film only after a media child starts, long after source closure exists, and cannot expose this earlier source window.",
+      "proposed": "Retain and fence original source identity across the whole authority acquisition and add the originally required source/parent equal-byte replacement barrier case; retain separate fresh-round success semantics."
+    },
+    {
+      "id": "F04",
+      "severity": "MAJOR",
+      "groups": [
+        "R01",
+        "R02",
+        "R03"
+      ],
+      "title": "Physical alias rejection and directory classification are unproved and incomplete",
+      "refs": [
+        "src/host/agent-driven/retained-native-closure.ts:387",
+        "src/host/agent-driven/retained-native-closure.ts:330",
+        "src/host/agent-driven/created-native-source-reader.ts:580",
+        "src/host/agent-driven/created-native-source-reader.ts:602",
+        "src/host/agent-driven/committed-snapshot-authority.ts:367",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:443",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:885"
+      ],
+      "detail": "Regular-file checks contain no hardlink/nlink or cross-tree dev/ino alias check. Replacing a workspace leaf with a hardlink to committed source before a fresh read satisfies same bytes and regular-file checks, defeating physical independence even with two descriptor objects. Derived classification sees fileMembership only, so a preexisting unknown empty workspace directory (e.g. .film/history) has no classification branch. Pure empty-directory test proves a later file invalidates one closure, not physical independence or permitted directory set. These are static scenarios, not executed mutations.",
+      "proposed": "Establish existing safe-root/physical-tree invariants and explicit permitted directory membership, with same-path independent resources and hardlink/unknown-empty-directory vectors; no DTO change required."
+    },
+    {
+      "id": "F05",
+      "severity": "MAJOR",
+      "groups": [
+        "R04"
+      ],
+      "title": "Page cache pairing accepts arbitrary key/dependencies and orphan film poster",
+      "refs": [
+        "src/host/agent-driven/created-native-source-reader.ts:1013",
+        "src/host/agent-driven/created-native-source-reader.ts:1014",
+        "src/host/agent-driven/created-native-source-reader.ts:1025",
+        "src/host/agent-driven/created-native-source-reader.ts:1034",
+        "/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm/packages/openfilm/studio/server/pageframes.mjs:70",
+        "/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm/packages/openfilm/studio/server/pageframes.mjs:100",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:307"
+      ],
+      "detail": "Any 24hex pageframe triple passes if JSON files is an array of existing paths and stamp matches those paths, including an empty array with SHA256(empty) stamp; no binding of key to black/page/ms/width/overrides or required originating page is established. film-poster.jpg unconditionally returns. This is weaker than original approved producer/key/pairing requirement; these bytes are not expected media authority, so this finding is about cache admissibility, not a fabricated probe duration exploit. Tests cover probe cache only and never reach these page cache branches.",
+      "proposed": "Use exact existing pinned producer/key/pairing evidence for accepted page derivatives, or honestly reject unprovable pairing; add targeted original R04 cases rather than broaden whitelist or alter artifacts."
+    },
+    {
+      "id": "F06",
+      "severity": "MAJOR",
+      "groups": [
+        "R07"
+      ],
+      "title": "Authority preflight bypasses retained text and descriptor budgets",
+      "refs": [
+        "src/host/agent-driven/committed-snapshot-authority.ts:289",
+        "src/host/agent-driven/committed-snapshot-authority.ts:290",
+        "src/host/agent-driven/committed-snapshot-authority.ts:235",
+        "src/host/agent-driven/committed-snapshot-authority.ts:362",
+        "src/host/agent-driven/retained-native-closure.ts:18",
+        "src/host/agent-driven/retained-native-closure.ts:346",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:755"
+      ],
+      "detail": "streamDigest calls handle.readFile on nonmedia before testing 8MiB; retained closure and total/path/depth limits are acquired only after this graph walk. Thus a huge referenced text allocates before limit rejection; many sublimit texts can accumulate in cache without 64MiB guard. nativeLineage separately permits up to64MiB JSON. No FD estimate/instance budget exists before per-leaf parent chains:4096 paths can allocate many more than4096 descriptors, reaching EMFILE rather than controlled admission. Pure closure text tests cannot detect authority preflight allocations because they never invoke acquireNativeFacts.",
+      "proposed": "Apply approved limits before and during the actual authority reads and estimate descriptor allocations within existing instance policy; verify original growth/path/depth/resource error cases under a future exact grant."
+    },
+    {
+      "id": "F07",
+      "severity": "MAJOR",
+      "groups": [
+        "R07"
+      ],
+      "title": "Cleanup reporting differs before and after transfer",
+      "refs": [
+        "src/host/agent-driven/committed-snapshot-authority.ts:423",
+        "src/host/agent-driven/created-native-source-reader.ts:486",
+        "src/host/agent-driven/created-native-source-reader.ts:522",
+        "src/host/agent-driven/created-native-source-reader.ts:556",
+        "src/host/agent-driven/created-native-source-reader.ts:272",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:632",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:648"
+      ],
+      "detail": "Authority catch invokes closure.close before rethrow: if close throws it replaces primary instead of retaining primary plus causes. Reader delivered-handle and ordinary failed-read cleanup paths latch cleanupUncertain and throw causes locally, but do not append to cleanupFailures; reader.close reports only cleanupFailures (populated for late adopt cleanup). Therefore reader.close can resolve after a delivered release failed, despite its comment promising real cleanup reporting. Current delivered failure test checks only later read rejection, never reader.close failure/cause preservation. Existing Expected primary+cleanup tests use faultyReader, not these implementations.",
+      "proposed": "Preserve original primary plus all cleanup causes and keep uncertainty observable across new-reader close without reattempting any allocation; extend the original before/after transfer cases."
+    },
+    {
+      "id": "F08",
+      "severity": "MAJOR",
+      "groups": [
+        "R01",
+        "R02"
+      ],
+      "title": "Facts guard does not revisit producer/consumer DB lineage",
+      "refs": [
+        "src/host/agent-driven/committed-snapshot-authority.ts:222",
+        "src/host/agent-driven/committed-snapshot-authority.ts:224",
+        "src/host/agent-driven/committed-snapshot-authority.ts:404",
+        "src/host/agent-driven/committed-snapshot-authority.ts:410",
+        "src/host/agent-driven/committed-snapshot-authority.ts:179",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:418"
+      ],
+      "detail": "Initial nativeLineage checks adopted-source/adoption/impact plan and consumer graph. assertCurrent later checks closure.verify and canonicalDigest(#bind), whose fields come from owner, committed transaction, snapshot row and creation.sourceFact. Changes/corruption to created_impact_fact.plan_sha256/plan_json or adopted lineage facts after issue are outside that digest, so a held lease can remain current after its original producer authority is no longer provable. The source-lease test only checks instance brand/clone rejection, not post-issue DB lineage corruption. Current workspace guard checks active commit/owner but not control; binding.isCurrent supplies session/control fence via Expected, not independent new-reader DB evidence.",
+      "proposed": "Retain a synchronous authority fence over original relevant producer bindings using existing private stores, and assert the original post-issue DB/owner/commit/generation fault vectors; leave selection-ledger and HTTP/Ack integration for later tickets."
+    },
+    {
+      "id": "F09",
+      "severity": "MAJOR",
+      "groups": [
+        "R05",
+        "R07"
+      ],
+      "title": "Probe success and one cancel case leave original media/failure semantics unproved",
+      "refs": [
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:332",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:672",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:539",
+        "src/host/agent-driven/created-native-source-reader.ts:330",
+        "src/host/agent-driven/created-native-source-reader.ts:100",
+        "tests/agent-driven/integration/helpers/created-draft-fixture.ts:32"
+      ],
+      "detail": "Actual held-FD ffprobe and close-child evidence are meaningful. But R05 compares only video duration/audio/fps against locally reimplemented normalization and merely checks digest hex shape; 3s color fixture has no rotated/multi-video-stream vector. No timeout/output overrun/spawn/nonzero/malformed tool, hanging child, duration-vs-trim/subtitle mismatch or probe-time source/parent replacement case exists in the26 tests. A normalization/provenance or output-limit defect can leave all those current assertions green.",
+      "proposed": "Cover those explicit original N1N2 semantics with real diagnostic tools/media and narrow branch assertions under MAIN-approved future commands; do not call diagnostics Chinese films or require V1 integration for component acceptance."
+    },
+    {
+      "id": "F10",
+      "severity": "MINOR",
+      "groups": [
+        "R06"
+      ],
+      "title": "Ordering oracle and environment evidence do not establish consumer parity",
+      "refs": [
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:351",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:941",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:954",
+        "src/host/agent-driven/created-native-source-reader.ts:143",
+        "/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm/packages/openfilm/studio/server/files.mjs:215",
+        "tests/agent-driven/integration/helpers/created-draft-fixture.ts:42"
+      ],
+      "detail": "Component fixture reuses a single video asset for its shots; its self-sorted listing is insensitive to numeric-order defects. Multi-path pure test exercises reader helper and a second handwritten locale sort, not actual pinned listFiles, and has no real caption translation-directory order comparator. ICU/locale existence assertions do not record their values. Source static comparison supports numeric rule, but real filesystem consumer parity required by R06 remains unproved.",
+      "proposed": "Use the original multi-video/nonASCII real FS listing comparison against pinned consumer plus separate caption order and actual environment fingerprint; no new ordering contract."
+    }
+  ],
+  "matrix": [
+    {
+      "group": "R01",
+      "requirement": "Real bootstrap / SOURCE_ONLY / controlled committed rich source",
+      "evidence_level": "REAL_HOST_DB_PRODUCER_COMPONENT",
+      "source": [
+        "tests/agent-driven/integration/helpers/native-source-fixture.ts:88",
+        "tests/agent-driven/integration/helpers/native-source-fixture.ts:155",
+        "tests/agent-driven/integration/helpers/native-source-fixture.ts:191",
+        "src/host/agent-driven/committed-snapshot-authority.ts:222"
+      ],
+      "actual_test_assertions": [
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:115",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:126",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:149"
+      ],
+      "established_scope": "034/035 are captured executions, not executions by reviewer; 035 smoke asserts committed identity and four hydrated parts; fixture uses real publisher and commitPreparedCreatedSource after real worker output.",
+      "remaining_unproven": "Fixture seeds accepted review/approval/prepared authorization and transaction stages (F:157-184); this is explicitly permitted component policy, not actual public change.prepare/apply, human review or Studio. Rich source present; negative rights/lineage corruption on new facts lease not asserted.",
+      "findings": [
+        "F08"
+      ],
+      "status": "PARTIAL"
+    },
+    {
+      "group": "R01",
+      "requirement": "Independent source/workspace physical identities and membership",
+      "evidence_level": "REAL_FS_PARTIAL_STATIC",
+      "source": [
+        "src/host/agent-driven/created-native-source-reader.ts:580",
+        "src/host/agent-driven/created-native-source-reader.ts:589",
+        "src/host/agent-driven/retained-native-closure.ts:387",
+        "src/host/agent-driven/committed-snapshot-authority.ts:367"
+      ],
+      "actual_test_assertions": [
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:445",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:450"
+      ],
+      "established_scope": "Separate closure instances and per-tree leaf objects are implemented; releasing all but last preserves closure, last revokes it.",
+      "remaining_unproven": "No assertion compares both trees dev/ino/FD allocations per same relative path; no hardlink/alias rejection vector; no complete two-tree nested/empty-directory retained ownership assertion.",
+      "findings": [
+        "F03",
+        "F04"
+      ],
+      "status": "PARTIAL"
+    },
+    {
+      "group": "R02",
+      "requirement": "Same bytes/new inode: old proof vs fresh stable round",
+      "evidence_level": "REAL_FS_EXPECTED",
+      "source": [
+        "src/host/agent-driven/retained-native-closure.ts:631",
+        "src/host/agent-driven/created-native-source-reader.ts:749"
+      ],
+      "actual_test_assertions": [
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:190",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:200",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:201",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:203",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:208"
+      ],
+      "established_scope": "Old actual Expected proof and verifyClosure refuse replaced workspace film; new stable read succeeds for equal committed bytes; changed bytes refused.",
+      "remaining_unproven": "Only workspace film, not source leaf, source/workspace roots or parent chains; does not imply all R02 faults tested.",
+      "findings": [],
+      "status": "PARTIAL"
+    },
+    {
+      "group": "R02",
+      "requirement": "Swap during in-flight acquisition / probe",
+      "evidence_level": "REAL_CHILD_WORKSPACE_FS_PARTIAL",
+      "source": [
+        "src/host/agent-driven/committed-snapshot-authority.ts:355",
+        "src/host/agent-driven/committed-snapshot-authority.ts:362",
+        "src/host/agent-driven/created-native-source-reader.ts:645",
+        "src/host/agent-driven/created-native-source-reader.ts:749"
+      ],
+      "actual_test_assertions": [
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:226",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:239",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:241"
+      ],
+      "established_scope": "Real child started event barriers a workspace-film swap; pending read rejects CLOSURE_MOVED.",
+      "remaining_unproven": "Source tree identity is first retained after digest and pinned parsing; source equal-byte/parent swaps before closure open are untested and can be accepted in this same read, distinct from an independent fresh round. Parent/root swaps during actual media probe also absent.",
+      "findings": [
+        "F03"
+      ],
+      "status": "PARTIAL"
+    },
+    {
+      "group": "R02",
+      "requirement": "Same size/restored mtime and symlink/special files",
+      "evidence_level": "PURE_REAL_FS_PLUS_LEGACY_REGRESSION",
+      "source": [
+        "src/host/agent-driven/retained-native-closure.ts:314",
+        "src/host/agent-driven/retained-native-closure.ts:330",
+        "src/host/agent-driven/retained-native-closure.ts:726"
+      ],
+      "actual_test_assertions": [
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:730",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:735",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:744",
+        "tests/agent-driven/integration/committed-snapshot-host.test.ts:84"
+      ],
+      "established_scope": "Pure closure changed bytes/restored mtime and symlink rejection are asserted. Legacy SnapshotReadPort has FIFO and parser drift cases.",
+      "remaining_unproven": "New native acquisition/reader special FIFO/socket/device/hardlink and source-side restored-mtime vectors absent; legacy adapter FIFO case is a different branch.",
+      "findings": [
+        "F04"
+      ],
+      "status": "PARTIAL"
+    },
+    {
+      "group": "R02",
+      "requirement": "Owner / DB / transaction / commit / control / generation fences",
+      "evidence_level": "STATIC_PLUS_BRAND_COMPONENT",
+      "source": [
+        "src/host/agent-driven/created-native-workspace.ts:115",
+        "src/host/agent-driven/created-native-workspace.ts:264",
+        "src/host/agent-driven/committed-snapshot-authority.ts:404",
+        "src/host/agent-driven/created-native-source-reader.ts:462"
+      ],
+      "actual_test_assertions": [
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:390",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:408",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:424",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:428"
+      ],
+      "established_scope": "Exact issuing-instance predicates reject copied/foreign leases; workspace parallel/repeated acquisitions preserve independent release.",
+      "remaining_unproven": "Tests call isLease/isNativeFactsLease, not inject foreign source lease into actual reader; no real awaited owner/control/active-commit/generation transition, unknown ref or invalidated/ref replacement on new reader. Existing Expected injected binding tests cover its fence, not new DB guard. Producer rows not revalidated by lease guard.",
+      "findings": [
+        "F08"
+      ],
+      "status": "PARTIAL"
+    },
+    {
+      "group": "R03",
+      "requirement": "Positive and negative settings/markers/style/transcript/translation",
+      "evidence_level": "REAL_FS_PARTIAL",
+      "source": [
+        "src/host/agent-driven/created-native-source-reader.ts:612",
+        "src/host/agent-driven/created-native-source-reader.ts:739",
+        "src/host/agent-driven/created-native-source-reader.ts:855"
+      ],
+      "actual_test_assertions": [
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:259",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:264",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:269"
+      ],
+      "established_scope": "New markers, unknown file and removed committed .vtt are refused with specific codes.",
+      "remaining_unproven": "Absent-style / absent-transcript success is not asserted; source/workspace additions/deletions per settings/style/translation and missing directory birth are absent; negative lookups currently require positive membership.",
+      "findings": [
+        "F02"
+      ],
+      "status": "PARTIAL"
+    },
+    {
+      "group": "R03",
+      "requirement": "Empty directory and exact caption listing order",
+      "evidence_level": "PURE_REAL_FS_PARTIAL",
+      "source": [
+        "src/host/agent-driven/retained-native-closure.ts:410",
+        "src/host/agent-driven/retained-native-closure.ts:663",
+        "src/host/agent-driven/created-native-source-reader.ts:858"
+      ],
+      "actual_test_assertions": [
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:891",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:893",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:897"
+      ],
+      "established_scope": "Retained empty directory exists and later file appearance invalidates pure closure.",
+      "remaining_unproven": "No component test adds initially absent empty directory under held proof, no parent replacement, no actual captions translation order test, no returned directory/media dependency cross-check. Unknown preexisting empty workspace dirs bypass file-only classifier.",
+      "findings": [
+        "F02",
+        "F04"
+      ],
+      "status": "PARTIAL"
+    },
+    {
+      "group": "R04",
+      "requirement": "Native ID / unknown metadata / forged probe / atomic temp",
+      "evidence_level": "REAL_FS_PROBE_COMPONENT",
+      "source": [
+        "src/host/agent-driven/created-native-source-reader.ts:917",
+        "src/host/agent-driven/created-native-source-reader.ts:954"
+      ],
+      "actual_test_assertions": [
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:289",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:294",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:299"
+      ],
+      "established_scope": "Exact mismatch/forged/temp error codes asserted; unknown .film metadata covered R03.",
+      "remaining_unproven": "No valid native id derivation through actual Supervisor in this reader fixture; component native ID is policy fixture data, legitimately not production integration.",
+      "findings": [],
+      "status": "PARTIAL"
+    },
+    {
+      "group": "R04",
+      "requirement": "Legitimate cache invalidates old round, stable next round",
+      "evidence_level": "REAL_TOOL_WITH_REIMPLEMENTED_ORACLE",
+      "source": [
+        "src/host/agent-driven/created-native-source-reader.ts:973"
+      ],
+      "actual_test_assertions": [
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:317",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:321",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:323"
+      ],
+      "established_scope": "A direct ffprobe-derived probe cache invalidates old closure and next stable read verifies.",
+      "remaining_unproven": "Cache helper reimplements upstream normalization; actual native derived.probe cache producer is not invoked; no legitimate poster/frame/wave/pageframe pairing or forged same-key page cache vectors.",
+      "findings": [
+        "F05"
+      ],
+      "status": "PARTIAL"
+    },
+    {
+      "group": "R05",
+      "requirement": "Same-held-FD probe and normalized duration/fps/audio/provenance",
+      "evidence_level": "REAL_DIAGNOSTIC_MEDIA_TOOL",
+      "source": [
+        "src/host/agent-driven/created-native-source-reader.ts:413",
+        "src/host/agent-driven/retained-native-closure.ts:585",
+        "src/host/agent-driven/created-native-source-reader.ts:675"
+      ],
+      "actual_test_assertions": [
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:338",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:339",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:341",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:343",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:564"
+      ],
+      "established_scope": "Real ffprobe media call uses parent process FD path; video duration/audio/fps match a second direct tool result; origin asserted.",
+      "remaining_unproven": "3-second color video and sine voice from created-draft-fixture.ts:32-36 are diagnostic. Width/height/rotation/first-video choice and audio source not asserted, digest only hex shape (not independent provenance recomputation), source swap while probing absent. No subtitle/trim-duration disagreement vector.",
+      "findings": [
+        "F09"
+      ],
+      "status": "PARTIAL"
+    },
+    {
+      "group": "R05",
+      "requirement": "Max probes, timeout/output limits, failed tools",
+      "evidence_level": "STATIC_ONLY",
+      "source": [
+        "src/host/agent-driven/created-native-source-reader.ts:27",
+        "src/host/agent-driven/created-native-source-reader.ts:330",
+        "src/host/agent-driven/created-native-source-reader.ts:369",
+        "src/host/agent-driven/created-native-source-reader.ts:642"
+      ],
+      "actual_test_assertions": [],
+      "established_scope": "Media probes awaited sequentially within one proof, therefore <=2 simultaneous per proof statically; 30s / 4MiB / 256KiB constants reject after tool close.",
+      "remaining_unproven": "No executed timeout/hang/stdout/stderr overflow, spawn error, nonzero exit, malformed output, null-duration case or maximum-active-probe observation. Constants are runtime guards, not developer work ceilings.",
+      "findings": [
+        "F09"
+      ],
+      "status": "PARTIAL"
+    },
+    {
+      "group": "R05/R07",
+      "requirement": "Actual child exit before input FD close",
+      "evidence_level": "REAL_CHILD_COMPONENT",
+      "source": [
+        "src/host/agent-driven/created-native-source-reader.ts:378",
+        "src/host/agent-driven/retained-native-closure.ts:590"
+      ],
+      "actual_test_assertions": [
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:560",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:575",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:580",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:581"
+      ],
+      "established_scope": "Real probe child event observed, held input exists at exited event and is absent after close; child exit precedes close return.",
+      "remaining_unproven": "read-rejected marker is pushed only after awaiting close (T:568-572), so it alone does not establish actual promise-rejection ordering. No slow/hung/abrupt/timeout child variants, input-close callback sequence or failed-kill uncertainty vector. Positive event/FD assertion remains useful.",
+      "findings": [
+        "F09"
+      ],
+      "status": "PARTIAL"
+    },
+    {
+      "group": "R06",
+      "requirement": "Native UTF8/BOM/CRLF revision vectors",
+      "evidence_level": "PURE_REAL_FS_ALGORITHM",
+      "source": [
+        "src/host/agent-driven/retained-native-closure.ts:536",
+        "src/host/agent-driven/created-native-source-reader.ts:609"
+      ],
+      "actual_test_assertions": [
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:909",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:927",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:930"
+      ],
+      "established_scope": "Five bytes/text vectors preserved by closure; test recomputes SHA256 prefix and checks frozen values. Preflight records actual pinned revOf vectors.",
+      "remaining_unproven": "Vectors do not run actual reader/producer film path for BOM/CRLF; not proof of arbitrary parser equivalence.",
+      "findings": [],
+      "status": "PARTIAL"
+    },
+    {
+      "group": "R06",
+      "requirement": "Actual pinned listFiles numeric order vs caption raw order",
+      "evidence_level": "PURE_ALGORITHM_PLUS_REAL_SINGLE_MEDIA",
+      "source": [
+        "src/host/agent-driven/created-native-source-reader.ts:143",
+        "src/host/agent-driven/created-native-source-reader.ts:627",
+        "/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm/packages/openfilm/studio/server/files.mjs:166"
+      ],
+      "actual_test_assertions": [
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:357",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:946",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:950",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:954"
+      ],
+      "established_scope": "Known video2/video10/nonASCII array checks implementation ordering; component listing is nonempty and self-sorted.",
+      "remaining_unproven": "Component has one unique video (created-draft-fixture.ts:32,42), so wrong multi-video numeric order can pass; no actual pinned listFiles result comparison or filesystem multi-video vector. Caption readdir order independent not compared. Tests assert ICU/locale exist but do not emit actual Node/ICU/locale fingerprint.",
+      "findings": [
+        "F10"
+      ],
+      "status": "PARTIAL"
+    },
+    {
+      "group": "R07",
+      "requirement": "Bounded text, growth, totals, paths/depth/FD",
+      "evidence_level": "PURE_PARTIAL_STATIC",
+      "source": [
+        "src/host/agent-driven/retained-native-closure.ts:18",
+        "src/host/agent-driven/retained-native-closure.ts:528",
+        "src/host/agent-driven/committed-snapshot-authority.ts:289"
+      ],
+      "actual_test_assertions": [
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:760",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:762",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:768",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:770"
+      ],
+      "established_scope": "Pure closure rejects preexisting oversized single text and total limit. Streaming media hashing uses 64KiB buffer.",
+      "remaining_unproven": "Authority preflight reads nonmedia whole before checking 8MiB and has no cumulative/path/depth cap before closure; no FD preflight budget. No growth, aggregate multi-file, path/depth, EMFILE/ENOMEM/EIO/EACCES/Nth-open faults.",
+      "findings": [
+        "F06"
+      ],
+      "status": "PARTIAL"
+    },
+    {
+      "group": "R07",
+      "requirement": "Per-allocation FD ownership, no raw numeric retry",
+      "evidence_level": "PURE_REAL_FS_WITH_INJECTED_CLOSE",
+      "source": [
+        "src/host/agent-driven/retained-native-closure.ts:86",
+        "src/host/agent-driven/retained-native-closure.ts:735",
+        "src/host/agent-driven/retained-native-closure.ts:769"
+      ],
+      "actual_test_assertions": [
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:799",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:812",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:817",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:820"
+      ],
+      "established_scope": "OS actually reuses a walk FD number and later retained allocation is attempted; close marks allocation released before callback.",
+      "remaining_unproven": "No assertion snapshots attempts then calls close twice to prove no retries for new closure; no precise expected full set/count of all outstanding allocations, no injected Nth-open failures. Accepted Expected tests of duplicate resource are separate.",
+      "findings": [
+        "F01"
+      ],
+      "status": "PARTIAL"
+    },
+    {
+      "group": "R07",
+      "requirement": "Cleanup primary + all causes, sticky failure, reentry",
+      "evidence_level": "PURE_PLUS_COMPONENT_INJECTION",
+      "source": [
+        "src/host/agent-driven/retained-native-closure.ts:496",
+        "src/host/agent-driven/retained-native-closure.ts:720",
+        "src/host/agent-driven/committed-snapshot-authority.ts:423",
+        "src/host/agent-driven/created-native-source-reader.ts:549"
+      ],
+      "actual_test_assertions": [
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:812",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:821",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:843",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:875",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:648"
+      ],
+      "established_scope": "Closure busy/read reentry, final close failure, walk-open cleanup failure, delivered release latching later reader admission are covered.",
+      "remaining_unproven": "No verification-walk close failure or negative-walk intermediate close failure; errors swallowed on these paths; native authority catch can replace primary with close failure. No second-close-callback reentry / combined primary+multiple-cleanup count.",
+      "findings": [
+        "F01",
+        "F07"
+      ],
+      "status": "PARTIAL"
+    },
+    {
+      "group": "R07",
+      "requirement": "Canceled caller vs drained raw acquisitions",
+      "evidence_level": "INJECTED_LIFECYCLE_COMPONENT",
+      "source": [
+        "src/host/agent-driven/created-native-source-reader.ts:299"
+      ],
+      "actual_test_assertions": [
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:491",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:513",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:516",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:524"
+      ],
+      "established_scope": "Deferred fake authority acquisition keeps close pending while caller rejects; late fake source release exactly once, workspace release exactly once.",
+      "remaining_unproven": "This is intentionally not real DB/FD acquisition; no raw rejection or late cleanup throw variant for new reader. Must not count as real Host-drain proof.",
+      "findings": [],
+      "status": "PARTIAL"
+    },
+    {
+      "group": "R07",
+      "requirement": "Transfer resource lifetime / reader close after delivery",
+      "evidence_level": "REAL_FS_PARTIAL_STATIC",
+      "source": [
+        "src/host/agent-driven/created-native-source-reader.ts:469",
+        "src/host/agent-driven/created-native-source-reader.ts:543",
+        "src/host/agent-driven/created-native-source-reader.ts:755"
+      ],
+      "actual_test_assertions": [
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:449",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:453"
+      ],
+      "established_scope": "Last retained leaf releases owner; directory/negative owners travel privately; deepFreeze present statically.",
+      "remaining_unproven": "No test closes reader after successful delivery then asserts delivered resources remain usable until owner release; no assertions for Object.isFrozen nested facts, no callback failure before/after transfer. Delivered cleanup failures are not recorded for reader.close.",
+      "findings": [
+        "F07"
+      ],
+      "status": "PARTIAL"
+    },
+    {
+      "group": "AUTHORITY",
+      "requirement": "Sole writer / released paths / no independent final PASS",
+      "evidence_level": "READ_ONLY_AUDIT",
+      "source": [
+        "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/BATCH_003_GRANT.json"
+      ],
+      "actual_test_assertions": [],
+      "established_scope": "Only REVIEW.md and MATRIX.json written here; Claude ctx_e5e736e1846b remains sole implementation/heavy holder.",
+      "remaining_unproven": "No implementation, tests, Host, tool probes, provider/network/build/tsc/browser executed by reviewer; no grant or final external acceptance issued.",
+      "findings": [],
+      "status": "PARTIAL"
+    },
+    {
+      "group": "REG",
+      "requirement": "Original Expected lifecycle / legacy render / approved loader",
+      "evidence_level": "STATIC_DIFF_PLUS_CAPTURED_REGRESSION",
+      "source": [
+        "src/host/m5/openfilm-native-expected.ts:625",
+        "tests/agent-driven/integration/created-native-ack.test.ts:667",
+        "tests/agent-driven/integration/created-native-ack.test.ts:1971",
+        "tests/agent-driven/integration/committed-snapshot-host.test.ts:35"
+      ],
+      "actual_test_assertions": [
+        "tests/agent-driven/integration/created-native-ack.test.ts:681",
+        "tests/agent-driven/integration/created-native-ack.test.ts:1981",
+        "tests/agent-driven/integration/created-native-ack.test.ts:1983",
+        "tests/agent-driven/integration/created-native-ack.test.ts:2051",
+        "tests/agent-driven/integration/created-native-ack.test.ts:2109"
+      ],
+      "established_scope": "Read-only git diff shows Expected prove/assertCurrent/release/close bodies unchanged; loader only adds parser types/exports/check. Original ack assertions preserved, new missing-export case. Legacy render tests bodies continue using readSnapshot.",
+      "remaining_unproven": "036 completed exit0/107 assertions, including existing Expected lifecycle and legacy readSnapshot/workspace branches; staged/injected lifecycle cases still do not prove new native reader cleanup paths.",
+      "findings": [],
+      "status": "PARTIAL"
+    },
+    {
+      "group": "EVIDENCE",
+      "requirement": "Exact frozen capture and source stability",
+      "evidence_level": "CAPTURE_RECORDS_PLUS_INDEPENDENT_HASH",
+      "source": [],
+      "actual_test_assertions": [],
+      "established_scope": "Initial and final all10 SHA256 match grant and source freeze; 034/035/036 actual exits0 and log SHA256 verified, per-input ten hashes match grant (8+18+107=133 actual passed assertions).",
+      "remaining_unproven": "No candidate commit/final independent acceptance; 017/018/019/021/022/023 remain historical failures and were not reclassified.",
+      "findings": [],
+      "status": "PARTIAL"
+    }
+  ],
+  "limits": [
+    "Static source/test-body audit and existing capture review only; reviewer executed no tests, tsc, Host, media, subprocess diagnostics, network, browser, build, install or provider calls.",
+    "Only this audit directory written; no source/index/config/test/tool mutations; no test authority issued; no frozen candidate commit means no final external PASS.",
+    "Original historical failure captures not upgraded; S01/S02/Ack/Context/Studio/public adoption/human Chinese films/V1 excluded from N1N2 as ticket explicitly states.",
+    "All suggested fault/mutation cases are PROPOSED_NOT_RUN. No rollback requested for source movement; start/end byte versions recorded."
+  ],
+  "validated_source_freeze": {
+    "path": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/VALIDATED_CANDIDATE_SOURCE_FREEZE.json",
+    "sha256": "b6369d764454e9e52c8b3bf8cc11093554bfea4cf018673713296c84f8e8046e",
+    "candidate_commit": "NOT_CREATED_PENDING_REQUIREMENT_GAP_AUDIT",
+    "received_message": "msg_fe37a994c226"
+  }
+}

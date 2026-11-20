@@ -1,0 +1,43 @@
+{
+  "grant_id": "N1N2-RESUME-PREFLIGHT-PURE-015",
+  "at": "2026-11-12T14:11:41.990891+00:00",
+  "request": "msg_c2049753320f",
+  "holder": "ctx_b4086093cd96",
+  "cwd": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+  "frozen_sha256": {
+    "src/host/agent-driven/retained-native-closure.ts": "bd83a07eb2e9d7ca4acbd30e131a19b225b7f82b50a574b64f178b86ec297c29",
+    "src/host/agent-driven/committed-snapshot-authority.ts": "53321dfe1560b8403d9b78ca643eb24ff4ce6360a619cee30adbff0fc7b8bca5",
+    "src/host/agent-driven/created-native-source-reader.ts": "20f20dad2ac532e43832ec26e426343fd3794d13c85df09b2d6b5f67c81c4e22",
+    "src/host/agent-driven/created-native-workspace.ts": "a04defc20f7e88ebfa5041d6153bc64d1d2b520670aa96916f65b2aaad87c38c",
+    "src/host/agent-driven/native-cache-witness.ts": "b5aad45d437f2807ee309dbb2787abb7eefbe637ea2eea35671bc0805fe2a838",
+    "src/adapters/openfilm/openfilm-upstream.ts": "89cf1859f5c0834871031d05dd22562492944475842c82d5dbd0cfab9e183cb5",
+    "tests/agent-driven/integration/created-native-source-reader.test.ts": "18e5e73ddb7438f552d3a3bab8cd86ea90ed8d31879b058c0f3721aacfe3cfb3",
+    "tests/agent-driven/integration/helpers/native-source-fixture.ts": "19cb73cb9d69394e550699d3363128a4ea60e96a3f28f22e1ea4fce01c6dda0a",
+    "tests/agent-driven/integration/committed-snapshot-host.test.ts": "bfd0c6373b254050d32a6a99e7b6f8b9827dc24b6b2587515ab4c5aad2cd9037",
+    "tests/agent-driven/integration/native-cache-witness.test.ts": "a11e20be296f43c08e7b4780ee4eec3e95c56a81d58db0581eca2df9bf920f8a",
+    "src/host/m5/openfilm-native-expected.ts": "19110e45a83b6d5b611b4260620ce873f923f1e5a5b907bc6176c4b734fbeed3",
+    "tests/agent-driven/integration/created-native-workspace.test.ts": "439d469032c9af2b83ceb826e0aead7cf5c2fe5c5693be7cbf18c8e67f0f615f",
+    "tests/agent-driven/integration/created-native-ack.test.ts": "5f50db85c7c07a2ecf4faefc20ec2ec6c7ad4910fafe549c2edc76bbad729c7c"
+  },
+  "commands": [
+    {
+      "capture": "n1n2-claude-resume-117-gate-pure",
+      "argv": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "vitest",
+        "run",
+        "--config",
+        "vitest.config.ts",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts",
+        "-t",
+        "P0|F01|F10 lists|F10 keeps"
+      ],
+      "expected_cases": 18,
+      "filtered": 53
+    }
+  ],
+  "scope": "interimPUREdefectdiscoveryONLY;knownG04+otheroriginalscopepreflightissues remain;NOcomponent/browser/legacy",
+  "execution": "unchangedrecorderonce;frozenALLsrc/tests/tools/config/indexuntilterminal+cleanup;new429STOP"
+}

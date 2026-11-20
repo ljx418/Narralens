@@ -1,0 +1,698 @@
+import {createHash} from 'node:crypto';
+import {closeSync,constants,fstatSync,lstatSync,openSync,readdirSync,readSync,realpathSync} from 'node:fs';
+import {dirname,resolve,sep} from 'node:path';
+
+/** A private, bounded budget. It is a protection with a failure meaning, never a
+ *  silent downgrade: an overflow is a refusal, not a truncated success. */
+export interface RetainedNativeBudget {
+  /** How many paths one closure may hold. */
+  readonly maxPaths:number;
+  /** How many bytes one text file may have. */
+  readonly maxTextBytes:number;
+  /** How many text bytes one closure may read in total. */
+  readonly maxTotalTextBytes:number;
+  /** How deep the retained tree may be. */
+  readonly maxDepth:number;
+}
+
+export const RETAINED_NATIVE_BUDGET:RetainedNativeBudget=Object.freeze({
+ maxPaths:4096,maxTextBytes:8*1024*1024,maxTotalTextBytes:64*1024*1024,maxDepth:12,
+});
+
+/** The failure of a retained closure. The code is the message; no absolute path
+ *  and no credential is ever disclosed. */
+export class RetainedNativeError extends Error {
+ constructor(readonly code:string,message:string){super(message);this.name='RetainedNativeError';}
+}
+
+/** Attach cleanup causes to a failure without making them public. */
+function attachCauses(error:unknown,causes:readonly unknown[]):boolean{
+ if(typeof error!=='object'||error===null)return false;
+ try{Object.defineProperty(error,'cleanup_errors',{value:causes,enumerable:false,writable:false,configurable:true});return true;}
+ catch{return false;}
+}
+
+function fail(code:string,message:string,causes?:readonly unknown[]):never{
+ const error=new RetainedNativeError(code,message);
+ if(causes&&causes.length>0)attachCauses(error,causes);
+ throw error;
+}
+const directoryFlags=constants.O_RDONLY|constants.O_DIRECTORY|constants.O_NOFOLLOW;
+const fileFlags=constants.O_RDONLY|constants.O_NONBLOCK|constants.O_NOFOLLOW;
+const HASH_BUFFER=64*1024;
+/** How many ancestors above the root are retained. The immediate parent is required. */
+const MAX_ANCESTORS=8;
+
+/** One retained file, as the facts of it. The object itself carries no authority:
+ *  the closure holds the descriptor and recognises the exact object it issued. */
+export interface RetainedNativeFile {
+ readonly relative_path:string;
+ readonly bytes:number;
+ readonly mtime_ms:number;
+ readonly sha256:string;
+ /** The device the file was on, as decimal text. It is part of the ledger identity. */
+ readonly dev:string;
+ /** The inode the file had, as decimal text. It is part of the ledger identity. */
+ readonly ino:string;
+}
+
+/** One retained directory, in the order the platform really returned its names. */
+export interface RetainedNativeDirectory {
+ readonly relative_path:string;
+ readonly names:readonly string[];
+}
+
+/** One proved absence: the nearest directory that does exist and the tail that does not. */
+export interface RetainedNativeAbsent {
+ readonly relative_path:string;
+ readonly nearest_existing_parent:string|null;
+}
+
+interface Membership {
+ readonly path:string;
+ readonly isDirectory:boolean;
+ readonly dev:bigint;
+ readonly ino:bigint;
+ readonly size:bigint;
+ readonly mtimeNs:bigint;
+ readonly ctimeNs:bigint;
+}
+interface FileRecord {
+ readonly fd:number;
+ readonly membership:Membership;
+ sha256:string;
+ bytes:number;
+ released:boolean;
+}
+interface DirectoryRecord {
+ readonly fd:number;
+ readonly membership:Membership;
+ readonly names:readonly string[];
+ released:boolean;
+}
+interface AbsentRecord {
+ readonly relative_path:string;
+ readonly parent:string|null;
+ readonly tail:readonly string[];
+ readonly parentDev:bigint|null;
+ readonly parentIno:bigint|null;
+ readonly parentFd:number|undefined;
+}
+interface AncestorRecord {
+ readonly fd:number;
+ readonly path:string;
+ readonly dev:bigint;
+ readonly ino:bigint;
+}
+
+const isSafeRelative=(value:string):boolean=>
+ typeof value==='string'&&value.length>0&&value.length<=4096&&!value.includes('\\')&&!value.includes('\0')
+ &&!value.startsWith('/')&&!value.includes(':')&&value.split('/').every(part=>part!==''&&part!=='.'&&part!=='..');
+const fdPath=(fd:number)=>'/proc/self/fd/'+fd;
+const codeOf=(error:unknown):string=>String((error as {code?:unknown}).code);
+
+/** The retained closure of one tree.
+ *
+ * It holds the real descriptors of the files and directories it was asked to keep, the
+ * parent chain that anchors them to the root, the ancestry above the root, and the
+ * *whole* membership of the tree as it was when the closure was opened. Nothing here is
+ * a structural capability: the closure recognises the objects it issued and refuses a
+ * copy of one.
+ *
+ * One owner per descriptor: the closure owns every number it opened, closes each of
+ * them exactly once, and never retries a number.
+ */
+export class RetainedNativeClosure {
+ readonly #root:string;
+ readonly #rootFd:number;
+ readonly #rootMembership:Membership;
+ readonly #budget:RetainedNativeBudget;
+ readonly #files=new Map<string,FileRecord>();
+ readonly #issuedFiles=new WeakMap<object,FileRecord>();
+ readonly #directories=new Map<string,DirectoryRecord>();
+ readonly #issuedDirectories=new WeakMap<object,DirectoryRecord>();
+ readonly #absents=new Map<string,AbsentRecord>();
+ readonly #issuedAbsents=new WeakMap<object,AbsentRecord>();
+ readonly #chains=new Set<number>();
+ readonly #membership=new Map<string,Membership>();
+ readonly #ancestors:AncestorRecord[]=[];
+ readonly #pending=new Set<Promise<unknown>>();
+ #textBytes=0;
+ #closed=false;
+ #uncertain=false;
+ /** The descriptors this closure has already closed. A number is never closed twice. */
+ readonly #released=new Set<number>();
+
+ private constructor(root:string,rootFd:number,rootMembership:Membership,budget:RetainedNativeBudget){
+  this.#root=root;this.#rootFd=rootFd;this.#rootMembership=rootMembership;this.#budget=budget;
+ }
+
+ /** Open a tree and take its whole membership.
+  *
+  * The root must be a real directory, not a symlink and not an alias of another path.
+  * Every entry below it must be a regular file or a directory: a symlink, a FIFO, a
+  * socket or a device is a refusal, never a skipped row. */
+ static async open(root:string,budget:Partial<RetainedNativeBudget>={}):Promise<RetainedNativeClosure>{
+  const limits:RetainedNativeBudget=Object.freeze({...RETAINED_NATIVE_BUDGET,...budget});
+  const path=resolve(root);
+  let info;
+  try{info=lstatSync(path,{bigint:true});}catch{fail('NATIVE_CLOSURE_ROOT_INVALID','The retained root is not there');}
+  if(!info.isDirectory()||info.isSymbolicLink()||realpathSync(path)!==path)fail('NATIVE_CLOSURE_ROOT_INVALID','The retained root is not a real directory');
+  let rootFd:number;
+  try{rootFd=openSync(path,directoryFlags);}catch{fail('NATIVE_CLOSURE_ROOT_INVALID','The retained root could not be opened');}
+  const closure=new RetainedNativeClosure(path,rootFd,MembershipOf(path,'',true),limits);
+  try{
+   closure.#retainAncestry(path);
+   closure.#enumerate(rootFd,path,'',0,limits);
+  }catch(error){closure.#closeAll();throw error;}
+  return closure;
+ }
+
+ /** Retain the ancestry above the root.
+  *
+  * The root's own inode is not enough: a root can be moved under a replaced parent and
+  * keep its inode. Each ancestor is therefore opened and held, so the guard can see
+  * that the chain above the root is still the one it was. */
+ #retainAncestry(root:string):void{
+  let current=dirname(root);
+  for(let depth=0;depth<MAX_ANCESTORS&&current!==''&&current!==sep;depth+=1){
+   let fd:number;
+   try{fd=openSync(current,directoryFlags);}
+   catch{break;}
+   const parent=dirname(current);
+   if(parent===current)break;
+   try{
+    const held=fstatSync(fd,{bigint:true});
+    if(!held.isDirectory()){closeSync(fd);this.#released.add(fd);break;}
+    this.#ancestors.push({fd,path:current,dev:held.dev,ino:held.ino});
+   }catch(error){closeSync(fd);this.#released.add(fd);throw error;}
+   current=parent;
+  }
+ }
+
+ get root():string{return this.#root;}
+ get closed():boolean{return this.#closed;}
+ /** Sticky: while it holds, this closure cannot say that everything it took is released. */
+ get uncertain():boolean{return this.#uncertain;}
+
+ /** Every path of the tree, files and directories alike, as it was when the closure was opened. */
+ membership():readonly string[]{return [...this.#membership.keys()];}
+ /** Only the files of the tree. A directory is evidence of its own, never a file. */
+ fileMembership():readonly string[]{return [...this.#membership.values()].filter(entry=>!entry.isDirectory).map(entry=>entry.path);}
+ /** Every directory of the tree, as it was when the closure was opened. */
+ directories():readonly string[]{return [...this.#membership.values()].filter(entry=>entry.isDirectory).map(entry=>entry.path);}
+ files():readonly RetainedNativeFile[]{return [...this.#files.values()].map(record=>this.#issuedFile(record));}
+ retainedDirectories():readonly RetainedNativeDirectory[]{return [...this.#directories.values()].map(record=>this.#issuedDirectory(record));}
+ negatives():readonly RetainedNativeAbsent[]{return [...this.#absents.values()].map(record=>this.#issuedAbsent(record));}
+
+ #issuedFile(record:FileRecord):RetainedNativeFile{
+  const issued=Object.freeze({relative_path:record.membership.path,bytes:record.bytes,
+   mtime_ms:Number(record.membership.mtimeNs/1000000n),sha256:record.sha256,
+   dev:record.membership.dev.toString(),ino:record.membership.ino.toString()});
+  this.#issuedFiles.set(issued,record);return issued;
+ }
+ #issuedDirectory(record:DirectoryRecord):RetainedNativeDirectory{
+  const issued=Object.freeze({relative_path:record.membership.path,names:Object.freeze([...record.names])});
+  this.#issuedDirectories.set(issued,record);return issued;
+ }
+ #issuedAbsent(record:AbsentRecord):RetainedNativeAbsent{
+  const issued=Object.freeze({relative_path:record.relative_path,nearest_existing_parent:record.parent});
+  this.#issuedAbsents.set(issued,record);return issued;
+ }
+
+ /** Admit one asynchronous operation. A closure is never closed while an accepted
+  *  operation can still use a descriptor it holds. */
+ #admit<T>(operation:()=>Promise<T>):Promise<T>{
+  if(this.#closed)return Promise.reject(new RetainedNativeError('NATIVE_CLOSURE_CLOSED','The retained closure is closed'));
+  if(this.#uncertain)return Promise.reject(new RetainedNativeError('NATIVE_CLOSURE_UNCERTAIN','The retained closure cannot say what it holds'));
+  const promise=operation();
+  this.#pending.add(promise);
+  void promise.then(()=>this.#pending.delete(promise),()=>this.#pending.delete(promise));
+  return promise;
+ }
+ /** Wait for every accepted operation to finish. */
+ async drain():Promise<void>{while(this.#pending.size>0)await Promise.allSettled([...this.#pending]);}
+ /** Whether an accepted operation is still outstanding. */
+ get busy():boolean{return this.#pending.size>0;}
+
+ #enumerate(rootFd:number,absolute:string,relative:string,depth:number,limits:RetainedNativeBudget):void{
+  if(depth>limits.maxDepth)fail('NATIVE_CLOSURE_BUDGET','The retained tree is deeper than the budget allows');
+  let entries;
+  try{entries=readdirSync(fdPath(rootFd),{withFileTypes:true});}catch{fail('NATIVE_CLOSURE_ROOT_INVALID','The retained tree could not be listed');}
+  for(const entry of entries){
+   const childAbsolute=absolute+sep+entry.name;
+   const childRelative=relative===''?entry.name:relative+'/'+entry.name;
+   if(this.#membership.size>=limits.maxPaths)fail('NATIVE_CLOSURE_BUDGET','The retained tree has more paths than the budget allows');
+   let info;
+   try{info=lstatSync(childAbsolute,{bigint:true});}catch{fail('NATIVE_CLOSURE_ROOT_INVALID','A retained path could not be examined');}
+   if(info.isSymbolicLink())fail('NATIVE_CLOSURE_UNSUPPORTED_TYPE','A retained path is a symbolic link');
+   if(info.isDirectory()){
+    this.#membership.set(childRelative,MembershipOf(childAbsolute,childRelative,true));
+    let childFd:number;
+    try{childFd=openSync(childAbsolute,directoryFlags);}catch{fail('NATIVE_CLOSURE_UNSUPPORTED_TYPE','A retained directory could not be opened');}
+    try{this.#enumerate(childFd,childAbsolute,childRelative,depth+1,limits);}finally{try{closeSync(childFd);this.#released.add(childFd);}catch{/* the walk's own descriptor */}}
+    continue;
+   }
+   if(!info.isFile())fail('NATIVE_CLOSURE_UNSUPPORTED_TYPE','A retained path is not a regular file');
+   this.#membership.set(childRelative,MembershipOf(childAbsolute,childRelative,false));
+  }
+ }
+
+ /** Open the parent chain of a relative path and return the leaf descriptor.
+  *  Every component is opened with O_NOFOLLOW, so a symlink anywhere in the chain is
+  *  a refusal rather than a hop. The chain descriptors belong to the closure: it keeps
+  *  them (they anchor the leaf to the root) and releases them with everything else. */
+ #openChain(relativePath:string):{fd:number|undefined;parents:number[]}{
+  if(!isSafeRelative(relativePath))fail('NATIVE_CLOSURE_PATH_INVALID','The retained path is not a safe relative path');
+  const parts=relativePath.split('/');
+  const parents:number[]=[];
+  let parent=this.#rootFd;
+  try{
+   for(const name of parts.slice(0,-1)){
+    const fd=openSync(fdPath(parent)+'/'+name,directoryFlags);
+    parents.push(fd);
+    parent=fd;
+   }
+   const fd=openSync(fdPath(parent)+'/'+parts[parts.length-1]!,fileFlags);
+   return {fd,parents};
+  }catch(error){
+   for(const fd of parents){try{closeSync(fd);this.#released.add(fd);}catch{/* already closed */}}
+   throw error;
+  }
+ }
+
+ /** Retain one file of the tree: its descriptor, its identity and its digest.
+  *  The digest is a bounded stream, never a whole read of a media file.
+  *
+  *  Retaining the same path twice returns the same retained object: a file is one
+  *  resource, and a second descriptor would be a second owner of the same bytes. */
+ async retainFile(relativePath:string):Promise<RetainedNativeFile>{
+  const existing=this.#files.get(relativePath);
+  if(existing!==undefined)return this.#issuedFile(existing);
+  return this.#admit(async()=>{
+   const current=this.#files.get(relativePath);
+   if(current!==undefined)return this.#issuedFile(current);
+   const membership=this.#membership.get(relativePath);
+   if(membership===undefined)fail('NATIVE_CLOSURE_NOT_FOUND','The retained path is not a member of the tree');
+   if(membership.isDirectory)fail('NATIVE_CLOSURE_NOT_REGULAR','The retained path is a directory');
+   let opened:{fd:number|undefined;parents:number[]};
+   try{opened=this.#openChain(relativePath);}catch(error){
+    if(codeOf(error)==='ENOENT'||codeOf(error)==='ENOTDIR')fail('NATIVE_CLOSURE_NOT_FOUND','The retained file is not there');
+    throw error;
+   }
+   const fd=opened.fd;
+   if(fd===undefined){for(const parent of opened.parents){try{closeSync(parent);this.#released.add(parent);}catch{/* already closed */}}fail('NATIVE_CLOSURE_NOT_FOUND','The retained file is not there');}
+   try{
+    const info=fstatSync(fd,{bigint:true});
+    if(!info.isFile())fail('NATIVE_CLOSURE_NOT_REGULAR','The retained path is not a regular file');
+    if(info.dev!==membership.dev||info.ino!==membership.ino||info.size!==membership.size)fail('NATIVE_CLOSURE_MEMBERSHIP_MOVED','The retained file is not the file the closure took');
+    const digest=this.#hash(fd);
+    for(const parent of opened.parents)this.#chains.add(parent);
+    const record:FileRecord={fd,membership,sha256:digest.sha256,bytes:digest.bytes,released:false};
+    this.#files.set(relativePath,record);
+    return this.#issuedFile(record);
+   }catch(error){
+    try{closeSync(fd);this.#released.add(fd);}catch{/* already closed */}
+    for(const parent of opened.parents){try{closeSync(parent);this.#released.add(parent);}catch{/* already closed */}}
+    throw error;
+   }
+  });
+ }
+
+ /** Retain one directory of the tree, with the names in the order the platform
+  *  really returned them. The native listing order is not a sorted order. */
+ async retainDirectory(relativePath:string):Promise<RetainedNativeDirectory>{
+  const existing=this.#directories.get(relativePath);
+  if(existing!==undefined)return this.#issuedDirectory(existing);
+  return this.#admit(async()=>{
+   const current=this.#directories.get(relativePath);
+   if(current!==undefined)return this.#issuedDirectory(current);
+   const membership=this.#membership.get(relativePath);
+   if(membership===undefined)fail('NATIVE_CLOSURE_NOT_FOUND','The retained directory is not a member of the tree');
+   if(!membership.isDirectory)fail('NATIVE_CLOSURE_NOT_REGULAR','The retained path is not a directory');
+   let opened:{fd:number|undefined;parents:number[]};
+   try{opened=this.#openChain(relativePath);}catch(error){
+    if(codeOf(error)==='ENOENT'||codeOf(error)==='ENOTDIR')fail('NATIVE_CLOSURE_NOT_FOUND','The retained directory is not there');
+    throw error;
+   }
+   const fd=opened.fd;
+   if(fd===undefined){for(const parent of opened.parents){try{closeSync(parent);this.#released.add(parent);}catch{/* already closed */}}fail('NATIVE_CLOSURE_NOT_FOUND','The retained directory is not there');}
+   try{
+    const info=fstatSync(fd,{bigint:true});
+    if(!info.isDirectory()||info.dev!==membership.dev||info.ino!==membership.ino)fail('NATIVE_CLOSURE_MEMBERSHIP_MOVED','The retained directory is not the directory the closure took');
+    const names=readdirSync(fdPath(fd),{withFileTypes:true}).map(entry=>entry.name);
+    for(const parent of opened.parents)this.#chains.add(parent);
+    const record:DirectoryRecord={fd,membership,names:Object.freeze(names),released:false};
+    this.#directories.set(relativePath,record);
+    return this.#issuedDirectory(record);
+   }catch(error){
+    try{closeSync(fd);this.#released.add(fd);}catch{/* already closed */}
+    for(const parent of opened.parents){try{closeSync(parent);this.#released.add(parent);}catch{/* already closed */}}
+    throw error;
+   }
+  });
+ }
+
+ /** Retain one proved absence: the nearest directory that does exist and the tail
+  *  of the path that does not. A permission or an I/O failure is not an absence. */
+ async retainAbsent(relativePath:string):Promise<RetainedNativeAbsent>{
+  const existing=this.#absents.get(relativePath);
+  if(existing!==undefined)return this.#issuedAbsent(existing);
+  return this.#admit(async()=>{
+   const current=this.#absents.get(relativePath);
+   if(current!==undefined)return this.#issuedAbsent(current);
+   if(!isSafeRelative(relativePath))fail('NATIVE_CLOSURE_PATH_INVALID','The retained path is not a safe relative path');
+   const parts=relativePath.split('/');
+   const parents:number[]=[];
+   let parent=this.#rootFd;
+   let parentPath='';
+   try{
+    for(let index=0;index<parts.length-1;index+=1){
+     const name=parts[index]!;
+     let fd:number;
+     try{fd=openSync(fdPath(parent)+'/'+name,directoryFlags);}
+     catch(error){
+      const code=codeOf(error);
+      if(code!=='ENOENT'&&code!=='ENOTDIR')throw error;
+      // The nearest existing parent is the last one that opened; the tail is the rest.
+      const record=this.#recordAbsent(relativePath,parentPath,parts.slice(index),parent,parents);
+      return this.#issuedAbsent(record);
+     }
+     parents.push(fd);
+     parent=fd;parentPath=parentPath===''?name:parentPath+'/'+name;
+    }
+    const leaf=parts[parts.length-1]!;
+    let present=false;
+    try{lstatSync(fdPath(parent)+'/'+leaf);present=true;}catch(error){
+     const code=codeOf(error);
+     if(code!=='ENOENT'&&code!=='ENOTDIR')throw error;
+    }
+    if(present)fail('NATIVE_CLOSURE_MEMBERSHIP_MOVED','The retained path is present and cannot be an absence');
+    const record=this.#recordAbsent(relativePath,parentPath,[leaf],parent,parents);
+    return this.#issuedAbsent(record);
+   }finally{
+    // The nearest existing parent stays open: it is the proof of the absence. Every
+    // other descriptor of the walk is released, and a failure there is kept.
+    const kept=this.#absents.get(relativePath)?.parentFd;
+    for(const fd of parents)if(fd!==kept){try{closeSync(fd);this.#released.add(fd);}catch{/* already closed */}}
+   }
+  });
+ }
+
+ /** Record an absence and keep the descriptor of its nearest existing parent. */
+ #recordAbsent(relativePath:string,parentPath:string,tail:readonly string[],parent:number,parents:readonly number[]):AbsentRecord{
+  const nearest=parents.length>0?parents[parents.length-1]!:parent;
+  const keep=parents.length>0?nearest:undefined;
+  if(keep!==undefined)this.#chains.add(keep);
+  const parentMembership=this.#membership.get(parentPath);
+  const record:AbsentRecord={relative_path:relativePath,parent:parentPath===''?null:parentPath,tail,
+   parentDev:parentMembership?.dev??null,parentIno:parentMembership?.ino??null,parentFd:keep};
+  this.#absents.set(relativePath,record);
+  return record;
+ }
+
+ /** Read a retained file as text. The bytes must be exactly valid UTF-8: a lossy
+  *  decode would change the film's own revision.
+  *
+  *  The budget is enforced *before* the read and *during* it: a file that is larger
+  *  than the budget is never read into memory, and a file that grows while it is read
+  *  is not the file the closure took. The UTF-8 BOM is preserved, because the film's
+  *  revision is the revision of its own bytes. */
+ async readText(file:RetainedNativeFile):Promise<string>{
+  return this.#admit(async()=>{
+   const record=this.#issuedFiles.get(file);
+   if(record===undefined)fail('NATIVE_CLOSURE_CAPABILITY_INVALID','The retained file is not one this closure issued');
+   if(record.released)fail('NATIVE_CLOSURE_CAPABILITY_INVALID','The retained file was already released');
+   const info=fstatSync(record.fd,{bigint:true});
+   if(!info.isFile()||info.dev!==record.membership.dev||info.ino!==record.membership.ino)fail('NATIVE_CLOSURE_MEMBERSHIP_MOVED','The retained file is not the file the closure took');
+   if(info.size>BigInt(this.#budget.maxTextBytes))fail('NATIVE_CLOSURE_BUDGET','The retained text is larger than the budget allows');
+   if(this.#textBytes+Number(info.size)>this.#budget.maxTotalTextBytes)fail('NATIVE_CLOSURE_BUDGET','The retained text is larger than the total budget allows');
+   const bytes=this.#readAll(record.fd,Number(info.size));
+   if(bytes.length>this.#budget.maxTextBytes)fail('NATIVE_CLOSURE_BUDGET','The retained text is larger than the budget allows');
+   if(this.#textBytes+bytes.length>this.#budget.maxTotalTextBytes)fail('NATIVE_CLOSURE_BUDGET','The retained text is larger than the total budget allows');
+   let text:string;
+   // `ignoreBOM` keeps the byte-order mark as a character, so the film's own bytes and
+   // the film's own revision are the same. A decoder that strips it would change them.
+   try{text=new TextDecoder('utf-8',{fatal:true,ignoreBOM:true}).decode(bytes);}
+   catch{fail('NATIVE_CLOSURE_TEXT_INVALID','The retained text is not valid UTF-8');}
+   if(!Buffer.from(text,'utf8').equals(bytes))fail('NATIVE_CLOSURE_TEXT_INVALID','The retained text does not re-encode to its own bytes');
+   this.#textBytes+=bytes.length;
+   return text;
+  });
+ }
+
+ /** Hash a retained file again, from the descriptor that still holds it. */
+ async hashFile(file:RetainedNativeFile):Promise<{sha256:string;bytes:number}>{
+  return this.#admit(async()=>{
+   const record=this.#issuedFiles.get(file);
+   if(record===undefined)fail('NATIVE_CLOSURE_CAPABILITY_INVALID','The retained file is not one this closure issued');
+   if(record.released)fail('NATIVE_CLOSURE_CAPABILITY_INVALID','The retained file was already released');
+   return this.#hash(record.fd);
+  });
+ }
+
+ /** The synchronous guard of one retained file.
+  *
+  * It answers whether the descriptor still holds the file that was taken: the same
+  * device, the same inode, the same size and the same bytes. It never throws. */
+ verifyFile(file:RetainedNativeFile):boolean{
+  try{
+   const record=this.#issuedFiles.get(file);
+   if(record===undefined||record.released)return false;
+   if(this.#closed||this.#uncertain)return false;
+   const info=fstatSync(record.fd,{bigint:true});
+   if(!info.isFile())return false;
+   if(info.dev!==record.membership.dev||info.ino!==record.membership.ino||info.size!==record.membership.size)return false;
+   return this.#hashSync(record.fd)===record.sha256;
+  }catch{return false;}
+ }
+
+ /** Release one retained file's descriptor.
+  *
+  * The descriptor is closed exactly once; a number is never closed twice and never
+  * retried. A failure latches the closure as uncertain: it can then say nothing about
+  * what it holds. */
+ releaseFile(file:RetainedNativeFile):void{
+  const record=this.#issuedFiles.get(file);
+  if(record===undefined)fail('NATIVE_CLOSURE_CAPABILITY_INVALID','The retained file is not one this closure issued');
+  if(record.released)return;
+  record.released=true;
+  const failures:unknown[]=[];
+  try{this.#closeDescriptor(record.fd);}catch(error){failures.push(error);}
+  this.#uncertain=this.#uncertain||failures.length>0;
+  if(failures.length>0)fail('NATIVE_CLOSURE_CLEANUP_FAILED','The retained descriptor could not be released',failures);
+ }
+
+ /** The only path a probe may be given: the descriptor this closure holds, reached
+  *  through the parent process. It is never a path that could be swapped. */
+ probePath(file:RetainedNativeFile):string{
+  const record=this.#issuedFiles.get(file);
+  if(record===undefined)fail('NATIVE_CLOSURE_CAPABILITY_INVALID','The retained file is not one this closure issued');
+  if(record.released)fail('NATIVE_CLOSURE_CAPABILITY_INVALID','The retained file was already released');
+  if(this.#closed)fail('NATIVE_CLOSURE_CLOSED','The retained closure is closed');
+  return '/proc/'+process.pid+'/fd/'+record.fd;
+ }
+
+ #hash(fd:number):{sha256:string;bytes:number}{
+  const hash=createHash('sha256');
+  const buffer=Buffer.allocUnsafe(HASH_BUFFER);
+  let position=0;
+  let bytes=0;
+  for(;;){
+   const bytesRead=readSync(fd,buffer,0,buffer.length,position);
+   if(bytesRead===0)break;
+   hash.update(buffer.subarray(0,bytesRead));
+   position+=bytesRead;bytes+=bytesRead;
+  }
+  return {sha256:hash.digest('hex'),bytes};
+ }
+
+ /** Read a file whole, but only after the budget has cleared it, and only as many
+  *  bytes as the descriptor said it had. A file that grew is refused, not truncated. */
+ #readAll(fd:number,expected:number):Buffer{
+  const buffer=Buffer.allocUnsafe(HASH_BUFFER);
+  const parts:Buffer[]=[];
+  let position=0;
+  let bytes=0;
+  for(;;){
+   const bytesRead=readSync(fd,buffer,0,buffer.length,position);
+   if(bytesRead===0)break;
+   if(bytes+bytesRead>expected)fail('NATIVE_CLOSURE_MEMBERSHIP_MOVED','The retained file grew while it was read');
+   parts.push(Buffer.from(buffer.subarray(0,bytesRead)));
+   position+=bytesRead;bytes+=bytesRead;
+  }
+  if(bytes!==expected)fail('NATIVE_CLOSURE_MEMBERSHIP_MOVED','The retained file changed while it was read');
+  return Buffer.concat(parts);
+ }
+
+ /** The synchronous closure guard.
+  *
+  * It answers whether the *whole* tree is still the one that was taken: the root, the
+  * ancestry above it, every parent chain, every file's identity and bytes, every
+  * directory's listing in its real order, and every proved absence. It never throws
+  * and it is never true by default. */
+ verify():boolean{
+  if(this.#closed||this.#uncertain)return false;
+  try{
+   const rootInfo=lstatSync(this.#root,{bigint:true});
+   if(!rootInfo.isDirectory()||rootInfo.isSymbolicLink()||realpathSync(this.#root)!==this.#root)return false;
+   if(rootInfo.dev!==this.#rootMembership.dev||rootInfo.ino!==this.#rootMembership.ino)return false;
+   for(const ancestor of this.#ancestors){
+    const info=lstatSync(ancestor.path,{bigint:true});
+    if(!info.isDirectory()||info.isSymbolicLink())return false;
+    if(info.dev!==ancestor.dev||info.ino!==ancestor.ino)return false;
+    const held=fstatSync(ancestor.fd,{bigint:true});
+    if(held.dev!==ancestor.dev||held.ino!==ancestor.ino)return false;
+   }
+   if(!this.#verifyMembership())return false;
+   for(const record of this.#files.values()){
+    if(record.released)continue;
+    const path=this.#root+sep+record.membership.path;
+    const info=lstatSync(path,{bigint:true});
+    if(!info.isFile()||info.isSymbolicLink())return false;
+    if(info.dev!==record.membership.dev||info.ino!==record.membership.ino)return false;
+    const held=fstatSync(record.fd,{bigint:true});
+    if(held.dev!==info.dev||held.ino!==info.ino||held.size!==record.membership.size)return false;
+    if(this.#hashSync(record.fd)!==record.sha256)return false;
+   }
+   for(const record of this.#directories.values()){
+    if(record.released)continue;
+    const path=this.#root+sep+record.membership.path;
+    const info=lstatSync(path,{bigint:true});
+    if(!info.isDirectory()||info.isSymbolicLink())return false;
+    if(info.dev!==record.membership.dev||info.ino!==record.membership.ino)return false;
+    const names=readdirSync(fdPath(record.fd),{withFileTypes:true}).map(entry=>entry.name);
+    if(names.length!==record.names.length)return false;
+    for(let index=0;index<names.length;index+=1)if(names[index]!==record.names[index])return false;
+   }
+   for(const record of this.#absents.values()){
+    if(record.parent!==null&&record.parentDev!==null&&record.parentIno!==null){
+     const info=lstatSync(this.#root+sep+record.parent,{bigint:true});
+     if(!info.isDirectory()||info.isSymbolicLink())return false;
+     if(info.dev!==record.parentDev||info.ino!==record.parentIno)return false;
+    }
+    let current=record.parent??'';
+    for(const name of record.tail){
+     const child=current===''?name:current+'/'+name;
+     try{lstatSync(this.#root+sep+child);return false;}
+     catch(error){if(codeOf(error)!=='ENOENT')return false;}
+     current=child;
+    }
+   }
+   return true;
+  }catch{return false;}
+ }
+
+ #hashSync(fd:number):string{
+  const hash=createHash('sha256');
+  const buffer=Buffer.allocUnsafe(HASH_BUFFER);
+  let position=0;
+  for(;;){
+   const bytesRead=readSync(fd,buffer,0,buffer.length,position);
+   if(bytesRead===0)break;
+   hash.update(buffer.subarray(0,bytesRead));
+   position+=bytesRead;
+  }
+  return hash.digest('hex');
+ }
+
+ /** Re-walk the whole tree and compare it with the membership the closure took. */
+ #verifyMembership():boolean{
+  const seen=new Set<string>();
+  const walk=(fd:number,absolute:string,relative:string,depth:number):boolean=>{
+   if(depth>this.#budget.maxDepth)return false;
+   let entries;
+   try{entries=readdirSync(fdPath(fd),{withFileTypes:true});}catch{return false;}
+   for(const entry of entries){
+    const childAbsolute=absolute+sep+entry.name;
+    const childRelative=relative===''?entry.name:relative+'/'+entry.name;
+    const recorded=this.#membership.get(childRelative);
+    if(recorded===undefined)return false;
+    seen.add(childRelative);
+    let info;
+    try{info=lstatSync(childAbsolute,{bigint:true});}catch{return false;}
+    if(info.isSymbolicLink())return false;
+    if(recorded.isDirectory){
+     if(!info.isDirectory())return false;
+     if(info.dev!==recorded.dev||info.ino!==recorded.ino)return false;
+     let childFd:number;
+     try{childFd=openSync(childAbsolute,directoryFlags);}catch{return false;}
+     try{if(!walk(childFd,childAbsolute,childRelative,depth+1))return false;}finally{try{closeSync(childFd);this.#released.add(childFd);}catch{/* the walk's own descriptor */}}
+     continue;
+    }
+    if(!info.isFile())return false;
+    if(info.dev!==recorded.dev||info.ino!==recorded.ino)return false;
+    if(info.size!==recorded.size)return false;
+    if(info.mtimeNs!==recorded.mtimeNs||info.ctimeNs!==recorded.ctimeNs)return false;
+   }
+   return true;
+  };
+  if(!walk(this.#rootFd,this.#root,'',0))return false;
+  return seen.size===this.#membership.size;
+ }
+
+ /** Close one descriptor exactly once. */
+ #closeDescriptor(fd:number):void{
+  if(this.#released.has(fd))return;
+  this.#released.add(fd);
+  closeSync(fd);
+ }
+
+ /** Release every descriptor this closure still holds.
+  *
+  * Every one is attempted even when an earlier one failed, and a failure latches the
+  * closure as uncertain: it can then say nothing about what it holds. A descriptor
+  * number is never closed twice and never retried. */
+ close():void{
+  if(this.#closed&&this.#released.has(this.#rootFd))return;
+  if(this.#pending.size>0){
+   // A descriptor an accepted operation can still use is not released here.
+   this.#uncertain=true;
+   fail('NATIVE_CLOSURE_BUSY','The retained closure still has accepted work in flight');
+  }
+  this.#closed=true;
+  this.#closeAll();
+ }
+
+ /** Drain the accepted work and then release everything. */
+ async release():Promise<void>{
+  await this.drain();
+  if(this.#closed&&this.#released.has(this.#rootFd))return;
+  this.#closed=true;
+  this.#closeAll();
+ }
+
+ #closeAll():void{
+  const failures:unknown[]=[];
+  for(const record of this.#files.values()){
+   if(record.released)continue;
+   record.released=true;
+   try{this.#closeDescriptor(record.fd);}catch(error){failures.push(error);}
+  }
+  for(const record of this.#directories.values()){
+   if(record.released)continue;
+   record.released=true;
+   try{this.#closeDescriptor(record.fd);}catch(error){failures.push(error);}
+  }
+  for(const fd of this.#chains){try{this.#closeDescriptor(fd);}catch(error){failures.push(error);}}
+  this.#chains.clear();
+  for(const record of this.#absents.values()){
+   if(record.parentFd===undefined)continue;
+   try{this.#closeDescriptor(record.parentFd);}catch(error){failures.push(error);}
+  }
+  for(const ancestor of this.#ancestors){try{this.#closeDescriptor(ancestor.fd);}catch(error){failures.push(error);}}
+  try{this.#closeDescriptor(this.#rootFd);}catch(error){failures.push(error);}
+  if(failures.length>0){
+   this.#uncertain=true;
+   const error=new RetainedNativeError('NATIVE_CLOSURE_CLEANUP_FAILED','The retained closure could not release everything');
+   attachCauses(error,failures);
+   throw error;
+  }
+ }
+}
+
+/** The identity of one path, as the platform reports it. */
+function MembershipOf(path:string,relative:string,isDirectory:boolean):Membership{
+ const info=lstatSync(path,{bigint:true});
+ return {path:relative,isDirectory,dev:info.dev,ino:info.ino,size:info.size,mtimeNs:info.mtimeNs,ctimeNs:info.ctimeNs};
+}

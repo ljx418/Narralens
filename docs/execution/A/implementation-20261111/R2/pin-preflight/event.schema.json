@@ -1,0 +1,380 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://narralens.local/internal/managed-native-hydration-v1.schema.json",
+  "description": "Internal optional managed StudioHost hydration callback, not CP-A0 route/tool. Native project/view scope must be checked by MAIN.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "project_id",
+    "editor_view_id",
+    "document_epoch",
+    "hydration_epoch",
+    "parts"
+  ],
+  "properties": {
+    "project_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "editor_view_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "document_epoch": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "hydration_epoch": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "parts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "settings",
+        "subtitle_style",
+        "captions",
+        "markers"
+      ],
+      "properties": {
+        "settings": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "state",
+            "origin",
+            "effective_sha256"
+          ],
+          "properties": {
+            "state": {
+              "enum": [
+                "pending",
+                "hydrated",
+                "absent_default",
+                "dirty",
+                "failed",
+                "unsupported"
+              ]
+            },
+            "origin": {
+              "enum": [
+                "project",
+                "explicit_default",
+                "browser_preference"
+              ]
+            },
+            "effective_sha256": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "state": {
+                    "enum": [
+                      "pending",
+                      "dirty",
+                      "failed",
+                      "unsupported"
+                    ]
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "effective_sha256": {
+                    "type": "null"
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "state": {
+                    "enum": [
+                      "hydrated",
+                      "absent_default"
+                    ]
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "effective_sha256": {
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{64}$"
+                  },
+                  "origin": {
+                    "enum": [
+                      "project",
+                      "explicit_default"
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "subtitle_style": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "state",
+            "origin",
+            "effective_sha256"
+          ],
+          "properties": {
+            "state": {
+              "enum": [
+                "pending",
+                "hydrated",
+                "absent_default",
+                "dirty",
+                "failed",
+                "unsupported"
+              ]
+            },
+            "origin": {
+              "enum": [
+                "project",
+                "explicit_default",
+                "browser_preference"
+              ]
+            },
+            "effective_sha256": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "state": {
+                    "enum": [
+                      "pending",
+                      "dirty",
+                      "failed",
+                      "unsupported"
+                    ]
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "effective_sha256": {
+                    "type": "null"
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "state": {
+                    "enum": [
+                      "hydrated",
+                      "absent_default"
+                    ]
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "effective_sha256": {
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{64}$"
+                  },
+                  "origin": {
+                    "enum": [
+                      "project",
+                      "explicit_default"
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "captions": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "state",
+            "origin",
+            "effective_sha256"
+          ],
+          "properties": {
+            "state": {
+              "enum": [
+                "pending",
+                "hydrated",
+                "absent_default",
+                "dirty",
+                "failed",
+                "unsupported"
+              ]
+            },
+            "origin": {
+              "enum": [
+                "project",
+                "explicit_default",
+                "browser_preference"
+              ]
+            },
+            "effective_sha256": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "state": {
+                    "enum": [
+                      "pending",
+                      "dirty",
+                      "failed",
+                      "unsupported"
+                    ]
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "effective_sha256": {
+                    "type": "null"
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "state": {
+                    "enum": [
+                      "hydrated",
+                      "absent_default"
+                    ]
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "effective_sha256": {
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{64}$"
+                  },
+                  "origin": {
+                    "enum": [
+                      "project",
+                      "explicit_default"
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "markers": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "state",
+            "origin",
+            "effective_sha256"
+          ],
+          "properties": {
+            "state": {
+              "enum": [
+                "pending",
+                "hydrated",
+                "absent_default",
+                "dirty",
+                "failed",
+                "unsupported"
+              ]
+            },
+            "origin": {
+              "enum": [
+                "project",
+                "explicit_default",
+                "browser_preference"
+              ]
+            },
+            "effective_sha256": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "state": {
+                    "enum": [
+                      "pending",
+                      "dirty",
+                      "failed",
+                      "unsupported"
+                    ]
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "effective_sha256": {
+                    "type": "null"
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "state": {
+                    "enum": [
+                      "hydrated",
+                      "absent_default"
+                    ]
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "effective_sha256": {
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{64}$"
+                  },
+                  "origin": {
+                    "enum": [
+                      "project",
+                      "explicit_default"
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}

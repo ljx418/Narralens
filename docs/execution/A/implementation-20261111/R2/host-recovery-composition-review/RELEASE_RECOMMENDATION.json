@@ -1,0 +1,164 @@
+{
+  "status": "RECOMMENDATION_NOT_RELEASED",
+  "base": "abf34c9a04ae31639ce9ea2180fda32458413a17",
+  "owner": "MAIN sole coordinator; no writer authorized by this document",
+  "execution": "NOT_RUN; no heavy grant",
+  "pending_delta": "MAIN imports dd32f156 exact NativeExpected and created-native-ack lifecycle blobs; rebase baseline/hash before release",
+  "release_groups": {
+    "HC_CORE": {
+      "depends_on": [
+        "D10 bounded acceptance",
+        "real native selection/reader prerequisite",
+        "exact post-import base"
+      ],
+      "files": [
+        {
+          "path": "src/host/server.ts",
+          "purpose": "startup promise, one scheduler, per-family hook and teardown, constructor lease-exclusion binding"
+        },
+        {
+          "path": "src/host/projects/project-coordinator.ts",
+          "purpose": "fresh internal ownership filter and startup dedicated-lease exclusions only"
+        },
+        {
+          "path": "src/host/adoption/adoption-coordinator.ts",
+          "purpose": "classify exact kind/family before unreadable/attention handling"
+        },
+        {
+          "path": "src/host/history/history-service.ts",
+          "purpose": "require same classifier before handler ownership"
+        },
+        {
+          "path": "src/host/agent-driven/creation-application.ts",
+          "purpose": "real shared deps/recovery/selection composition, roots, lifecycle"
+        },
+        {
+          "path": "src/host/agent-driven/start-runtime.ts",
+          "purpose": "fixed durable publication root, inherited ownership assertion, preserve cleanup failures"
+        },
+        {
+          "path": "src/host/projects/project-creation-service.ts",
+          "purpose": "bounded unresolved bootstrap report and no worker admission for unresolved projects"
+        },
+        {
+          "path": "tests/agent-driven/integration/host-recovery-composition.test.ts",
+          "purpose": "new actual startup/generic/close tests"
+        },
+        {
+          "path": "tests/agent-driven/integration/controlled-recovery-families.test.ts",
+          "purpose": "unknown/malformed/wrong-kind regression"
+        },
+        {
+          "path": "tests/agent-driven/integration/job-recovery-authority.test.ts",
+          "purpose": "startup reaper exclusion regression"
+        },
+        {
+          "path": "tests/m2.2/host-coordinator-integration.test.ts",
+          "purpose": "legacy generic compatibility"
+        }
+      ]
+    },
+    "HC_NATIVE_PREREQUISITE": {
+      "files": [
+        {
+          "path": "src/host/agent-driven/created-native-expected-source.ts",
+          "purpose": "NEW actual retained snapshot/workspace reader, no fake facts"
+        },
+        {
+          "path": "src/host/agent-driven/created-native-selection-mapping.ts",
+          "purpose": "NEW actual committed clip/frame mapping"
+        },
+        {
+          "path": "src/host/agent-driven/creation-application.ts",
+          "purpose": "observation/Context/native grant binding and same-DB Ack"
+        },
+        {
+          "path": "tests/agent-driven/integration/created-native-ack.test.ts",
+          "purpose": "real composition cases after exact lifecycle import"
+        }
+      ],
+      "blockers": [
+        "Actual approved pinned native loader/build identity must be located and validated, not fabricated; exact loader implementation path needs addendum if existing loader cannot be reused",
+        "Real reader full closure and negative facts; no source workspace rootFor shortcut",
+        "Reconcile imported async lifecycle before closing observation"
+      ]
+    },
+    "HC_CRASH_INSTRUMENTATION": {
+      "depends_on": [
+        "HC_CORE",
+        "public actual review/change producer ticket",
+        "MAIN single heavy slot"
+      ],
+      "files": [
+        {
+          "path": "src/host/agent-driven/created-source-publisher.ts",
+          "purpose": "optional constructor-only test barriers at persistent/physical boundaries; no production HTTP switches"
+        },
+        {
+          "path": "src/host/agent-driven/created-source-adoption-service.ts",
+          "purpose": "constructor-only barrier before/after original closed commit, forwarding Publisher test seam"
+        },
+        {
+          "path": "src/host/agent-driven/created-source-recovery.ts",
+          "purpose": "constructor-only forwarding of existing recovery-files test barriers"
+        },
+        {
+          "path": "tests/agent-driven/integration/host-recovery-crash.test.ts",
+          "purpose": "NEW parent actual kill/restart matrix"
+        },
+        {
+          "path": "tests/agent-driven/integration/helpers/host-recovery-child.ts",
+          "purpose": "NEW real owned child IPC barriers; no alternate commit/proof"
+        }
+      ]
+    }
+  },
+  "internal_signature_drafts_NOT_EXISTING": [
+    "AgentHostApplication.recoverCreatedSourcesBeforeGeneric?(): Promise<CreatedSourceRecoveryReport> (Host owns scheduler, existing bootstrap hook remains separate)",
+    "ProjectCoordinatorDeps.startupLeaseExclusions?: () => readonly string[] (Host closure, no external supplied IDs)",
+    "NarralensHostDeps.assertStartupOwnership?: () => void (disk production must require original FD9 assertion; explicit non-production in-memory tests only)",
+    "CreationApplicationOptions.createdPublicationRoot: string (fixed original runtime root, normal/recovery same)",
+    "ProjectCreationService.recoverBeforeGeneric(): Promise<{unresolved_project_ids: readonly string[]}> plus worker exclusion internal to same instance"
+  ],
+  "existing_ports_reuse": [
+    "ControlledRecoveryScheduler(revisions,handlers).recover()",
+    "CreatedSourceRecovery({host,creation,tasks,assets,verifier,selection,createdRoot,privateRoot,stageDomainRoot})",
+    "NativeObservationService.currentSelectionVersion(project_id)",
+    "NativeExpectedSourcePort + NativeSelectionMappingPort + NativeAckStore same original DB"
+  ],
+  "must_not_change": [
+    "contracts/**",
+    "DDL/schema or cp_a0 namespace",
+    "RevisionStore.commitPreparedCreatedSource nine-field shape and pending SQL",
+    "recoveryGate semantics",
+    "owned-runtime FD9/flock protocol",
+    "ProjectWriteActor legacy journal algorithm",
+    "CreatedPublicationRecoveryFiles resource/identity/compensation algorithm",
+    "ControlledRecoveryScheduler finite-set algorithm",
+    "AGENTS.md",
+    "dependencies/config/lockfiles/provider credentials",
+    "any existing dirty files outside specifically released paths"
+  ],
+  "conditional_core_followup": {
+    "status": "NOT_RELEASED_REQUIRES_REAL_COUNTEREXAMPLE_AND_ARCHITECTURE_REVIEW",
+    "candidate_paths": [
+      "src/host/projects/revision-store.ts",
+      "src/host/projects/project-coordinator.ts",
+      "tests/agent-driven/integration/host-recovery-composition.test.ts"
+    ],
+    "condition": "Proven actual producer-compatible multi-prepared chain blocked by strict closedcommit; never relax by arbitrary ignore/force or invented terminal states"
+  },
+  "public_producer_followup": {
+    "status": "SEPARATE_PRECISE_TICKET_REQUIRED",
+    "known_entities": [
+      "CreatedSourceChangeService",
+      "CreatedSourceAdoptionService",
+      "CreatedPreparedSourceStore",
+      "PreparedReviewMediaReaderImpl trusted binding producer",
+      "ApplicationDispatcher actual change handlers"
+    ],
+    "not_claimed": "This review does not authorize broad route/media changes or declare public adoption operational"
+  },
+  "rollback": "Before implementation archive current bytes/dirty and issue exact source commit; revert only newly committed release changes under MAIN, never reset/stash or erase pending runtime/old logs; failed deployment retains same runtime for audited recovery",
+  "acceptance": "See ACCEPTANCE_CASES.md, ALL NOT_RUN; no implementation/Host/A PASS"
+}

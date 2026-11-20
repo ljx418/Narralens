@@ -1,0 +1,31 @@
+{
+  "format": "narralens.a-ownership-delta@1",
+  "status": "MAIN_INTERFACE_SELECTION_AWAITING_DOMAIN_CHECK",
+  "base_ownership": "../relaunch-20261111/03_OWNERSHIP_AND_DEPENDENCIES.json",
+  "reason": "CR-R1-001",
+  "new_owners": [
+    {
+      "path": "contracts/agent-workbench-ui-v1.registry.json",
+      "writer": "bridge-Claude"
+    },
+    {
+      "path": "src/host/m5/controlled-studio-access.ts",
+      "writer": "product-Claude"
+    },
+    {
+      "path": "src/host/m5/controlled-studio-browser.ts",
+      "writer": "product-Claude"
+    },
+    {
+      "path": "tests/agent-driven/integration/created-native-ui-transport.test.ts",
+      "writer": "product-Claude"
+    }
+  ],
+  "existing_owner_now_in_R1": [
+    {
+      "path": "src/host/m5/openfilm-studio-gateway.ts",
+      "writer": "product-Claude"
+    }
+  ],
+  "protected": "all original frozen contracts/SQL/vendor untouched; no implementation activation by this file"
+}

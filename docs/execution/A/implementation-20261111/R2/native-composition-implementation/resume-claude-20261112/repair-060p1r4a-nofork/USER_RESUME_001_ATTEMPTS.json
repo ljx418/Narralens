@@ -1,0 +1,21 @@
+{
+  "at": "2026-11-15T01:34:14.114851+00:00",
+  "same_task_attempts": [
+    {
+      "dispatchId": "ctx_2374440a108d",
+      "taskId": "task_8671e8821f8d",
+      "state": "stopped",
+      "outcome": "failed",
+      "liveness": "exited",
+      "terminal": "term_9aa3298ded89d9f5bcb86879bd84556e",
+      "terminalState": "retained",
+      "workspace": "2e732423-9bcc-494c-a0ed-e27a9488f313::C:\\workspace\\videoworkline\\Narralens-agents\\main-integration",
+      "host": "local",
+      "attention": [
+        "failure"
+      ],
+      "next": "\"orca-ide\" \"orchestration\" \"worker-release\" \"--dispatch\" \"ctx_2374440a108d\""
+    }
+  ],
+  "scope": "Newest worker list contains original stopped task; no new attempt since it"
+}

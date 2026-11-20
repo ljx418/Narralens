@@ -1,0 +1,62 @@
+{
+  "at": "2026-11-12T06:36:57.495469+00:00",
+  "grant_id": "N1N2-RESUME-BATCH-001",
+  "request": "msg_83bd0ad541d9",
+  "request_sha256": "0592012d4b87d512a639f6ed1d2a17bd9d02f892c50f313d43df490a04a00e61",
+  "commands": [
+    {
+      "capture": "n1n2-claude-resume-017-batch-pure",
+      "argv": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "vitest",
+        "run",
+        "--config",
+        "vitest.config.ts",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts",
+        "-t",
+        "P0"
+      ],
+      "class": "pure FS",
+      "selected": 7
+    },
+    {
+      "capture": "n1n2-claude-resume-018-batch-component",
+      "argv": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "vitest",
+        "run",
+        "--config",
+        "vitest.config.ts",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts",
+        "-t",
+        "R0"
+      ],
+      "class": "heavy local component",
+      "selected": 15
+    },
+    {
+      "capture": "n1n2-claude-resume-019-batch-regressions",
+      "argv": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "vitest",
+        "run",
+        "--config",
+        "vitest.config.ts",
+        "tests/agent-driven/integration/created-native-ack.test.ts",
+        "tests/agent-driven/integration/committed-snapshot-host.test.ts",
+        "tests/agent-driven/integration/created-native-workspace.test.ts"
+      ],
+      "class": "mixed pure/heavy legacy regression",
+      "selected": "all existing tests in exact three files"
+    }
+  ],
+  "source_fence": "All source/test/tool/config/index inputs immutable for entire serial batch; each exact command once only. Unknown cleanup blocks subsequent command.",
+  "open_gap": "Diagnostic/internal validation, not full gate. Observer currently may only test version child; same-held-mediaFD cancellation remains UNPROVEN.",
+  "no_original_scope_change": true
+}

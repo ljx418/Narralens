@@ -1,0 +1,53 @@
+{
+  "format": "narralens.precise-release@1",
+  "stage": "N1N2_REAL_NATIVE_SOURCE_AND_RETAINED_FACTS",
+  "base": "e2eff61b464d75d36598103d718cd2a75db5dfda",
+  "cwd": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+  "writer": "single Claude implementation child supervised by PRODUCT Codex; pending actual child dispatch/ACK",
+  "supervisor": "PRODUCT Codex follow-up, receipt pending",
+  "main_owns": "scope/contract/resource/commit/final acceptance; no other source/index writer while child works",
+  "existing_paths": {
+    "src/host/agent-driven/committed-snapshot-authority.ts": "80088c1cac9c87817dee9f944c6a15e35f90800c4db4df84678483a4d4ce7740",
+    "src/host/agent-driven/created-native-workspace.ts": "90fa46ca3bc677bd687060ed7f3fb89f653b7cea89688641b0a43cd63ab467f4",
+    "src/host/m5/openfilm-native-expected.ts": "0d59ee891c9a1d3bf491e479639c67d61e35271f5af6b0e4bd708c34eece0795",
+    "tests/agent-driven/integration/created-native-workspace.test.ts": "439d469032c9af2b83ceb826e0aead7cf5c2fe5c5693be7cbf18c8e67f0f615f",
+    "tests/agent-driven/integration/committed-snapshot-host.test.ts": "bfd0c6373b254050d32a6a99e7b6f8b9827dc24b6b2587515ab4c5aad2cd9037",
+    "tests/agent-driven/integration/created-native-ack.test.ts": "8f21cb81d38281364f0e654a128175de24dac96ffec89e77dbb44b21634dd510"
+  },
+  "new_paths": [
+    "src/host/agent-driven/retained-native-closure.ts",
+    "src/host/agent-driven/created-native-source-reader.ts",
+    "tests/agent-driven/integration/created-native-source-reader.test.ts",
+    "tests/agent-driven/integration/helpers/native-source-fixture.ts"
+  ],
+  "protected_agents_sha256": "37300463a72a612ae16e0a5fcfb496502c57c722b83781e0e2e8c9480594542b",
+  "protected": [
+    "contracts/**",
+    "src/contracts/**",
+    "package.json",
+    "pnpm-lock.yaml",
+    "config/dependencies",
+    "src/host/server.ts",
+    "src/host/agent-driven/creation-application.ts",
+    "src/host/agent-driven/start-runtime.ts",
+    "src/host/projects/**",
+    "src/host/m5/native-observation.ts",
+    "src/host/m5/native-ack-store.ts",
+    "src/host/agent-driven/created-source-recovery.ts",
+    "src/host/agent-driven/created-source-adoption-service.ts",
+    "src/host/agent-driven/created-source-publisher.ts",
+    "src/host/agent-driven/created-publication-recovery-files.ts",
+    "src/host/agent-driven/retained-source-tree.ts",
+    "approved pins/build inputs",
+    "AGENTS.md",
+    "all user dirty files"
+  ],
+  "evidence_roots": [
+    "docs/parallel/lane-product/A-R2-20261112/N1N2-native-source/",
+    "docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-*"
+  ],
+  "git_index": "MAIN only; child/supervisor no add/commit/checkout/reset/stash/cherry-pick/push",
+  "gate": "internal evidenced N1N2 then independent review; whole A not complete",
+  "claude_429": "STOP and preserve; no automatic retry/provider/credential switch or Codex/MAIN implementation takeover without explicit user authorization for this occurrence",
+  "at": "2026-11-12T04:47:13.891898+00:00"
+}

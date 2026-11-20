@@ -1,0 +1,27 @@
+{
+  "at": "2026-11-15T14:05:48.835931+00:00",
+  "verdict": "REQUEST_CHANGES_BEFORE_MINIMAL_N",
+  "startup": {
+    "verdict": "STATIC_SAFE_CONDITIONAL_ON_OWNER",
+    "verified_inputs": 95,
+    "review_sha256": "90eac56e16ee7780b97019852b688783a58f46877f3ea7cf86b828bada054031"
+  },
+  "owner": {
+    "verdict": "REQUEST_CHANGES",
+    "verified_inputs": 705,
+    "review_sha256": "91c3f5331599fe209b76ff73f45d0a5fa9ee72ed23a458c4a572dff9d1356a23",
+    "worker_done": "msg_a70ca9a0d6ff"
+  },
+  "closed_static": [
+    "original group proof remains after revocation",
+    "pure OS guards and exact scripts",
+    "staged final write failure revokes qualification"
+  ],
+  "open": [
+    "R5E-O01 all published artifact rows failclosed",
+    "R5E-O02 ONE actual-byte checker used by main/legacy/pure tests",
+    "R5E-O03 bounded existing digest strings persisted"
+  ],
+  "scope": "original8; no actualN; not R6/R7/R8",
+  "new429": "STOP_NO_RETRY_NO_TAKEOVER"
+}

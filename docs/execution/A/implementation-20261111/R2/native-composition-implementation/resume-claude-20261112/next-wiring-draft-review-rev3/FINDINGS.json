@@ -1,0 +1,25 @@
+{
+  "format": "narralens.review-publication-schema-proposal-review@1",
+  "status": "DRAFT_GAP_REVIEW_NOT_FINAL_RELEASE_PASS",
+  "scope": "read-only static review of annex 06 against actual MAIN source",
+  "ddl_sha256_recomputed": "be75d5683a25861ab2cbe14d0a12c4bbde050a342288e2f254f577a2a6623e56",
+  "ddl_sha256_matches_annex": true,
+  "draft_documents_bound": 7,
+  "source_files_bound": 9,
+  "manifest_bound": true,
+  "source_drift_detected": false,
+  "new_blocking_findings": [],
+  "design_gates_not_implemented_or_tested": [
+    "strict whole-receipt/five-slot validation",
+    "exact schema namespace verifier and marker validation",
+    "explicit same-RevisionStore installer and bootstrap ordering",
+    "cross-table project/run/package/attempt verification",
+    "transactional command replay without rerender",
+    "error mapping and stale media read integration",
+    "DB-close/crash/reopen behavior"
+  ],
+  "business_acceptance": "NOT_RUN",
+  "accepted_native_commit": null,
+  "implementation_release": false,
+  "claim_limit": "proposal gap review only; no implementation, SQLite/runtime execution, test, Host/media/browser acceptance, or final release PASS"
+}

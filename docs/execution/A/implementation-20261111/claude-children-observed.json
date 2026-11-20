@@ -1,0 +1,60 @@
+{
+  "run": "run_399f9dd3ce5a",
+  "scope": "real R1 implementation children; working observations only, no acceptance claim",
+  "children": [
+    {
+      "dispatch": "ctx_b8584d6549f3",
+      "task": "task_8d693cc169fc",
+      "parent_task": "task_2b6d7608940d",
+      "state": {
+        "worker": "ready",
+        "dispatch": "dispatched",
+        "detail": "input_accepted",
+        "activity": "working"
+      },
+      "liveness": {
+        "verdict": "live",
+        "observedAt": 1794405970177,
+        "source": "agent_status"
+      },
+      "terminal": "term_2cfb82ae-9ecd-439a-9dfb-de909a53ac92",
+      "workspace": "2e732423-9bcc-494c-a0ed-e27a9488f313::\\\\wsl.localhost\\Ubuntu-24.04\\home\\administrator\\orca\\workspaces\\Narralens\\Narralens-A-R1-BRIDGE"
+    },
+    {
+      "dispatch": "ctx_0c5994b7463b",
+      "task": "task_02dd86ffb3f7",
+      "parent_task": "task_0b49b1b287cb",
+      "state": {
+        "worker": "ready",
+        "dispatch": "dispatched",
+        "detail": "input_accepted",
+        "activity": "working"
+      },
+      "liveness": {
+        "verdict": "live",
+        "observedAt": 1794405989606,
+        "source": "agent_status"
+      },
+      "terminal": "term_1dd8c35d-2034-436e-908d-bf371405991f",
+      "workspace": "2e732423-9bcc-494c-a0ed-e27a9488f313::\\\\wsl.localhost\\Ubuntu-24.04\\home\\administrator\\orca\\workspaces\\Narralens\\Narralens-A-R1-MEDIA"
+    },
+    {
+      "dispatch": "ctx_cb5959acbeb8",
+      "task": "task_7afe2fb90cf2",
+      "parent_task": "task_9e9e39498505",
+      "state": {
+        "worker": "ready",
+        "dispatch": "dispatched",
+        "detail": "input_accepted",
+        "activity": "working"
+      },
+      "liveness": {
+        "verdict": "live",
+        "observedAt": 1794405990797,
+        "source": "agent_status"
+      },
+      "terminal": "term_491735f2-627f-42e6-b7e2-c2143a9b6e8c",
+      "workspace": "2e732423-9bcc-494c-a0ed-e27a9488f313::\\\\wsl.localhost\\Ubuntu-24.04\\home\\administrator\\orca\\workspaces\\Narralens\\Narralens-A-R1-PRODUCT"
+    }
+  ]
+}

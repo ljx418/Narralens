@@ -1,0 +1,133 @@
+{
+  "format": "narralens.R5I.positive-owner.static-review@1",
+  "verdict": "SAFE_FOR_SEPARATELY_PINNED_NORMAL002_AND_FAULT",
+  "counts": {
+    "BLOCKER": 0,
+    "MAJOR": 0,
+    "MINOR": 0,
+    "NOTE": 2
+  },
+  "binding": {
+    "review_task": "task_eafe4389a414",
+    "review_dispatch": "ctx_d45b4a306bd3",
+    "implementation_handback": "msg_8b3fe86a9f7b",
+    "historical_head": "1d348d419120f23f45d958112ea8c43df5a04675",
+    "accepted_new_commit": null
+  },
+  "findings": [
+    {
+      "id": "R5I-NOTE01",
+      "severity": "NOTE",
+      "status": "MAIN_CORRECTION_APPLIES",
+      "title": "Historical normal001 reset causality remains inferred",
+      "locations": [
+        {
+          "path": "docs/parallel/lane-product/A-R2-20261112/N1N2-native-source/n1n2-claude-060p5i-report.md",
+          "line": 42
+        },
+        {
+          "path": "repair-060p5i-normal-transport/MAIN_EVIDENCE_BOUNDARY_CORRECTION.json",
+          "line": 1
+        }
+      ],
+      "actual_evidence": "Normal001 original/mirror evidence shows failed/exit1, CHANNEL_ERROR read ECONNRESET, no picture, physical terminal proof, helper scenario/go/answered without finalized and recorded CANCEL:custodian. It contains no saved raw control frames. Helper receives draw-channel messages, while Host sends FINALIZE to C's distinct control channel; C reacts to either FINALIZE or CANCEL.",
+      "impact": "OWN1.1/1.2 inference that no helper finalized proves Host never sent FINALIZE, or receipt+exit0 uniquely proves CANCEL triggered termination, is not supported. MAIN's explicit correction is authoritative for this review and removes those overclaims; this is not a new implementation blocker or a reason to rewrite unrelated code.",
+      "minimal_correction": "Use MAIN correction plus this review when describing normal001. Retain FAIL/root/frames-not-saved limitation; do not call actualnormal001 solved, historical reset direction proved, or old5s/20s diagnosed.",
+      "runtime": "Reviewer did not rerun normal001 or sample current processes"
+    },
+    {
+      "id": "R5I-NOTE02",
+      "severity": "NOTE",
+      "status": "DYNAMIC_COVERAGE_LIMIT",
+      "title": "Actual EOF callback tests establish command behavior, not every late-error or historical timing branch",
+      "locations": [
+        {
+          "path": "tests/agent-driven/integration/native-cache-normal-pilot.test.ts",
+          "line": 3530
+        },
+        {
+          "path": "tests/agent-driven/integration/native-cache-normal-pilot.test.ts",
+          "line": 3549
+        },
+        {
+          "path": "src/adapters/openfilm/cache-process-supervisor.ts",
+          "line": 2241
+        },
+        {
+          "path": "src/adapters/openfilm/cache-process-supervisor.ts",
+          "line": 2263
+        }
+      ],
+      "actual_evidence": "Authorized test invokes actual draw end handler after await runTheNormalDraw has returned its settled result, checks exactly AUTHORIZE_FORK/FINALIZE and no CANCEL. Unauthorized silent case invokes actual EOF before any candidate and checks CANCEL/no FINALIZE plus failed/no image. Both actual handlers are reached. Reporting Writable EPIPE tests and stub transport-failure records are not direct draw/control socket error injections after candidate.",
+      "impact": "No new swallowing path found: child error and draw/control error handlers remain unconditional latching and final latched outcome is checked after domain proof. Static nonregression supports the narrow pilot recommendation. Do not claim comprehensive dynamic ECONNRESET/EPIPE-aftercandidate, closed-ack or in-flight EOF-to-receipt timing coverage from these tests.",
+      "future_test_design": "Under existing persistent OS guards, emit draw/control error and child error after the actual candidate/FINALIZE but before receipt/close, then let the same fake owner complete receipt/close; assert original failure, no image delivery, and owned terminal completion. Separately emit authorized EOF while FINALIZE is in flight. These are unexecuted designs; genuine fault runtime remains future scoped work, not a demand to reopen kernel algorithms.",
+      "runtime": "NOT_RUN by reviewer"
+    }
+  ],
+  "closure": [
+    {
+      "topic": "Actual minimal source delta",
+      "status": "CLOSED_STATIC",
+      "basis": "Current supervisor onDrawEnd:2388 computes cacheDrawEndFailure(finalizeAfterOk), latches pre-finalize EOF failure, and requests CANCEL only when failure!==null. In-memory static replacement of the added comment+if block with the old unconditional call reconstructs exactly previous R5H SHA7706449e8f259a6e17e9ca2a40af8a5c344cef827a01c7881fc04a4a570b9b63. Thus the actual production delta is this guarded command plus comments; handlers and remaining lifecycle bytes unchanged."
+    },
+    {
+      "topic": "Unauthorised EOF / genuine errors",
+      "status": "CLOSED_STATIC_NARROW_SCOPE",
+      "basis": "Pre-finalize EOF still latches DRAW_EOF_BEFORE_FINALIZE and enters one-shot owned CANCEL. CHANNEL_ERROR/CUSTODIAN_ERROR handlers remain independent of finalizeAfterOk; #fail/terminal proof and final latch check prevent physical cleanup becoming business success. No new signal/group/identity/revoked/unknown authority change."
+    },
+    {
+      "topic": "R5H-O01 test targeting",
+      "status": "CLOSED_STATIC",
+      "basis": "NULL_BASELINE_FIELDS:2954 now includes actual field; each callback asserts id===where+'.'+field and directly mutates data[field]. Four fields×delete/undefined/wrongtype/non-null object use real writer/publisher hashes and actual checker; unchanged explicit-null ordinary1 control retained."
+    },
+    {
+      "topic": "Result checker and source boundary",
+      "status": "UNCHANGED_STATIC_SAFE_SUBCOMPONENT",
+      "basis": "Tool SHA exactly R5H e4db3499...; no F-table re-review implied. Original cause/wrapper, cleanup, diagnostic, no-root and byte/publication semantics retained; same single checker consumed by main and legacy."
+    }
+  ],
+  "mutant_evidence": {
+    "capture": "n1n2-claude-060p5i-pilot-oldlogic-red-002",
+    "exit": 1,
+    "failed": 1,
+    "passed": 263,
+    "mutant_supervisor_sha256": "10c1d4f9dd5343b02fd149e240f05d43b5e640b97e8c46236ed74d3daae45070",
+    "different_from_final": [
+      "src/adapters/openfilm/cache-process-supervisor.ts",
+      "src/adapters/openfilm/cache-worker-integrity.json"
+    ],
+    "tests_same_final": true,
+    "observed_assertion": "Expected AUTHORIZE_FORK/FINALIZE; received extra CANCEL in actual callback test.",
+    "limit": "Author describes a single-condition behavioral mutant. Captured input hashes/log prove the changed source paths and assertion; no full mutant source/patch was among inspected artifacts, so exact byte-level mutant-only-condition equivalence is not independently certified. This is separate from the exact current-versus-R5H reconstruction check; no historical normal001 transcript inferred."
+  },
+  "pins": {
+    "supervisor_sha256": "c697636065d6f9c88c806f23eb5cd75d88c1bd9b70ea61b385da41382ff7b755",
+    "custodian_sha256": "bd06d7d7f79d6d2ccf2204a4e27ed5aba5364cbcda71785a67ac3ab887306b79",
+    "tool_sha256": "e4db3499f715d5b6b5634568677a6688cf80a897c9321c45e93cda98c6a19ebb",
+    "helper_sha256": "e3f4ccb1c4016a54356ce04be344b4ffff23f2f88698efe191570ad8407d03ab",
+    "source_integrity_manifest_sha256": "c39d7e47d67f7d19a0fb9303271c4e3ad6e06dbe1c3dbc375107e8d88dba071a",
+    "pure_pilot_test_sha256": "63a5a2e25f618f634ec1c5f59583ecc413b1d86a62c4330850731c301439e2a4"
+  },
+  "recommendation": "MAIN may consider a separately released/pinned normal002 under current supervisor+manifest+all-input bytes, not old R5H pins; only after independently accepted normal002 should MAIN separately release assertion-failure. This review authorizes neither execution.",
+  "remaining_limits": [
+    "normal001 remains FAIL with preserved original root and mirror; C/N physical cleanup does not make it a normal PASS.",
+    "Current realnormal002 and realfault NOT_RUN; no guarantee the historical ECONNRESET is eliminated.",
+    "5s/20s old mock timeout causes and pending fake-operation isolation limitation remain unproved; persistent deny/mocked child retained, no newly established actual OS escape.",
+    "Closed:false/fatal/half-frame/foreign-receipt and genuine-channel-aftercandidate coverage must be described by actual existing assertions, not labels/counts; reporting EPIPE is distinct.",
+    "Raw control segments not saved; no fabricated transcript/digest/PID/exit/no-impact assertion."
+  ],
+  "all_reviewer_business_runtime": "NOT_RUN",
+  "no_runtime_grant": true,
+  "not_accepted": [
+    "kernel",
+    "N1N2",
+    "R6",
+    "R7",
+    "R8",
+    "original17",
+    "ISO18",
+    "newfreeze",
+    "NEXT",
+    "V1"
+  ]
+}

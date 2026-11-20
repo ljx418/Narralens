@@ -1,0 +1,24 @@
+{
+  "at": "2026-11-12T10:08:14.706833+00:00",
+  "capture": "n1n2-claude-resume-094-gate-component",
+  "result": {
+    "exit": 1,
+    "source_changed": [],
+    "source_added": [],
+    "log_sha256": "0034b2b1340cd53039ae363237ec73350242ff53758ab602fa45bf4dce2df1c5",
+    "finished_at": "2026-11-12T10:07:21.819517+00:00"
+  },
+  "counts": {
+    "passed": 32,
+    "failed": 2,
+    "filtered": 17
+  },
+  "verified_all10_hashes": true,
+  "failures": [
+    "R02 expects error.code whereas actual Expected emits Error(message=exactreason)",
+    "F05 replaces lastdigestchar with0 but originalalreadyends0; invalid probabilistic mutation oracle"
+  ],
+  "cleanup_receipt": "PENDING",
+  "proof_gap": "PURE009_ASSERTION_SCOPE_REVIEW.json",
+  "limit": "not broadPASS; no legacy run"
+}

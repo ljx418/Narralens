@@ -1,0 +1,271 @@
+{
+  "id": "N1N2_037_UNIFIED_CORRECTION_SOURCE_RELEASE",
+  "at": "2026-11-13T07:14:39.039096+00:00",
+  "status": "RELEASED_TO_SINGLE_CLAUDE_WITH_BINDING_RULINGS",
+  "writer": "ctx_ae73a82c85e9",
+  "task": "task_5dcbe8192764",
+  "request": "msg_1b9c30a70457",
+  "cwd": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+  "baseline_head": "e2eff61b464d75d36598103d718cd2a75db5dfda",
+  "reviewed_plan_sha256": "a664f16e58d8c7576ab4e5e195c606b9e4815ccb113b38217136679f659dd815",
+  "cleanup_receipt_sha256": "9b3ad3456f2c392ecf8dfcc837e5f96ca9f721381ba9e8930d00258d1f2b3a31",
+  "cleanup_independent_observation": "2728937/2728944 absent;4747/4748 no listener now; historicaltmp preserved",
+  "allow_source_test_paths": [
+    "src/adapters/openfilm/openfilm-upstream.ts",
+    "src/host/agent-driven/created-native-workspace.ts",
+    "src/host/agent-driven/native-cache-witness.ts",
+    "src/host/agent-driven/created-native-source-reader.ts",
+    "src/host/agent-driven/retained-native-closure.ts",
+    "src/host/agent-driven/local-asset-registry.ts",
+    "src/host/agent-driven/created-source-impact-store.ts",
+    "src/host/agent-driven/created-source-change-service.ts",
+    "tests/agent-driven/integration/native-cache-witness.test.ts",
+    "tests/agent-driven/integration/created-native-source-reader.test.ts",
+    "tests/agent-driven/integration/helpers/native-source-fixture.ts",
+    "tests/agent-driven/integration/local-assets-host.test.ts",
+    "tests/agent-driven/integration/created-source-change.test.ts",
+    "tests/agent-driven/integration/created-source-adoption.test.ts",
+    "tests/agent-driven/integration/created-impact-atomic.test.ts",
+    "tests/architecture/m2.2-fitness.test.ts",
+    "tests/m2.1/openfilm-upstream-lock.test.ts",
+    "tests/m2.3/migration-real-export.test.ts"
+  ],
+  "allow_fixture_exact_sha256": {
+    "tests/fixtures/m2.1/snapshot-project/assets/generated/visual-10s.mp4": "0427d617584264ac2875243d6cf711dd985577566f71db6b9d5faf051575989c",
+    "tests/fixtures/m2.1/snapshot-project/assets/generated/visual-alt-10s.mp4": "40d825e66ee7e69ae53dfdc8d5195fbb9ffc3af7eb07452a5081c51e24115cff",
+    "tests/fixtures/m2.1/snapshot-project/assets/generated/narration-30s.wav": "e4276d5ec9199f11df067a98061508eaa11dbaf11ffac107775714b95962173d"
+  },
+  "prewrite_baseline_bytes": {
+    "src/host/agent-driven/native-cache-witness.ts": {
+      "exists": true,
+      "sha256": "85b1e804b3956165a6f8e171aa1fb8800cd8337290ad2d16ac05d3906ba2501a",
+      "bytes": 11561,
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/85b1e804b3956165a6f8e171aa1fb8800cd8337290ad2d16ac05d3906ba2501a.txt"
+    },
+    "src/host/agent-driven/created-native-workspace.ts": {
+      "exists": true,
+      "sha256": "32d5adae9d737b6799f20531e50956413a619e048a8f2f225fccb064205afbd2",
+      "bytes": 49130,
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/32d5adae9d737b6799f20531e50956413a619e048a8f2f225fccb064205afbd2.txt"
+    },
+    "src/host/agent-driven/committed-snapshot-authority.ts": {
+      "exists": true,
+      "sha256": "1c53360e3c618c603cfcbe61d0c2d57004c5bd33dc26a92c2fdec72a1844bd6d",
+      "bytes": 44087,
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/1c53360e3c618c603cfcbe61d0c2d57004c5bd33dc26a92c2fdec72a1844bd6d.txt"
+    },
+    "src/host/m5/openfilm-native-expected.ts": {
+      "exists": true,
+      "sha256": "19110e45a83b6d5b611b4260620ce873f923f1e5a5b907bc6176c4b734fbeed3",
+      "bytes": 47279,
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/19110e45a83b6d5b611b4260620ce873f923f1e5a5b907bc6176c4b734fbeed3.txt"
+    },
+    "src/adapters/openfilm/openfilm-upstream.ts": {
+      "exists": true,
+      "sha256": "29a0827a6130c2f382de93d1738b1be003c5ef15ded253d256585e6214d2aa69",
+      "bytes": 34962,
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/29a0827a6130c2f382de93d1738b1be003c5ef15ded253d256585e6214d2aa69.txt"
+    },
+    "tests/agent-driven/integration/helpers/native-source-fixture.ts": {
+      "exists": true,
+      "sha256": "7160a285930e61b7927d90bb517e7d9575f5f0888394d228b192baff80daf622",
+      "bytes": 22782,
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/7160a285930e61b7927d90bb517e7d9575f5f0888394d228b192baff80daf622.txt"
+    },
+    "tests/agent-driven/integration/helpers/created-draft-fixture.ts": {
+      "exists": true,
+      "sha256": "59788a8f9c08415a808b2418e86b4dac6bb7de65297ad5d1cb19b5f26eb22d27",
+      "bytes": 14589,
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/59788a8f9c08415a808b2418e86b4dac6bb7de65297ad5d1cb19b5f26eb22d27.txt"
+    },
+    "tests/agent-driven/integration/created-native-workspace.test.ts": {
+      "exists": true,
+      "sha256": "439d469032c9af2b83ceb826e0aead7cf5c2fe5c5693be7cbf18c8e67f0f615f",
+      "bytes": 12700,
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/439d469032c9af2b83ceb826e0aead7cf5c2fe5c5693be7cbf18c8e67f0f615f.txt"
+    },
+    "tests/agent-driven/integration/committed-snapshot-host.test.ts": {
+      "exists": true,
+      "sha256": "bfd0c6373b254050d32a6a99e7b6f8b9827dc24b6b2587515ab4c5aad2cd9037",
+      "bytes": 12061,
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/bfd0c6373b254050d32a6a99e7b6f8b9827dc24b6b2587515ab4c5aad2cd9037.txt"
+    },
+    "tests/agent-driven/integration/created-native-ack.test.ts": {
+      "exists": true,
+      "sha256": "5f50db85c7c07a2ecf4faefc20ec2ec6c7ad4910fafe549c2edc76bbad729c7c",
+      "bytes": 134160,
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/5f50db85c7c07a2ecf4faefc20ec2ec6c7ad4910fafe549c2edc76bbad729c7c.txt"
+    },
+    "src/host/agent-driven/retained-native-closure.ts": {
+      "exists": true,
+      "sha256": "776331d6397191ee7fc97a4859f8d3ff95031efaf2d4fe7a7ee875451d85eb30",
+      "bytes": 63073,
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/776331d6397191ee7fc97a4859f8d3ff95031efaf2d4fe7a7ee875451d85eb30.txt"
+    },
+    "src/host/agent-driven/created-native-source-reader.ts": {
+      "exists": true,
+      "sha256": "f00e02781c8531a74a1034a6a1c992c463f49ff1cbf9c49b203e8449d8360d7d",
+      "bytes": 76549,
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/f00e02781c8531a74a1034a6a1c992c463f49ff1cbf9c49b203e8449d8360d7d.txt"
+    },
+    "tests/agent-driven/integration/native-cache-witness.test.ts": {
+      "exists": true,
+      "sha256": "eb5c71c99b749509b304bc925ec47469099f1049746e63f145ae851c6281bcb1",
+      "bytes": 49170,
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/eb5c71c99b749509b304bc925ec47469099f1049746e63f145ae851c6281bcb1.txt"
+    },
+    "tests/agent-driven/integration/created-draft-processor.test.ts": {
+      "exists": true,
+      "sha256": "684df1c287890a13ecd8b08a4cd32d5053c2868e80494eca2fcc6412cdc4e0b6",
+      "bytes": 15025,
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/684df1c287890a13ecd8b08a4cd32d5053c2868e80494eca2fcc6412cdc4e0b6.txt"
+    },
+    "tests/agent-driven/integration/created-native-source-reader.test.ts": {
+      "exists": true,
+      "sha256": "f2e7cc847718b52e4937d55be8bc4adcf4372dee055ff170e1c1f49817b7be99",
+      "bytes": 162419,
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/f2e7cc847718b52e4937d55be8bc4adcf4372dee055ff170e1c1f49817b7be99.txt"
+    },
+    "package.json": {
+      "exists": true,
+      "sha256": "edace26fdfa5a9808f2706fe15ab3935d0512d08f765d4cffec268eb7e783263",
+      "bytes": 5661,
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/edace26fdfa5a9808f2706fe15ab3935d0512d08f765d4cffec268eb7e783263.txt"
+    },
+    "pnpm-lock.yaml": {
+      "exists": true,
+      "sha256": "66d38478d0b035777472a8cdb53954559a6c1a5f8803f7247caaffce1ac3584d",
+      "bytes": 91093,
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/66d38478d0b035777472a8cdb53954559a6c1a5f8803f7247caaffce1ac3584d.txt"
+    },
+    "tsconfig.json": {
+      "exists": true,
+      "sha256": "83fbe518b8002a19afcf522215bdd431b9addca24f88771732e123f689acb475",
+      "bytes": 507,
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/83fbe518b8002a19afcf522215bdd431b9addca24f88771732e123f689acb475.txt"
+    },
+    "vitest.config.ts": {
+      "exists": true,
+      "sha256": "b8cc675ba57ac95cc74b007db787a33b830fe628f7648f902a4dcf8235d787d4",
+      "bytes": 2146,
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/b8cc675ba57ac95cc74b007db787a33b830fe628f7648f902a4dcf8235d787d4.txt"
+    },
+    "vite.config.ts": {
+      "exists": true,
+      "sha256": "6dc4858d37a5ddfac9779371b63b4d3d129641dc485c642de05c17f29a746f2c",
+      "bytes": 252,
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/6dc4858d37a5ddfac9779371b63b4d3d129641dc485c642de05c17f29a746f2c.txt"
+    },
+    "vite.m5.config.ts": {
+      "exists": true,
+      "sha256": "777295eb5278d162ce549a5fa695618fd68cfb35769b30a9b8c52344a3220ff7",
+      "bytes": 1337,
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/777295eb5278d162ce549a5fa695618fd68cfb35769b30a9b8c52344a3220ff7.txt"
+    },
+    "contracts/openfilm-upstream-lock.json": {
+      "exists": true,
+      "sha256": "69c4da1decfb27fd6002a030228a2ccadd1a9fb4392e42320cf249ae311b301b",
+      "bytes": 11136,
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/69c4da1decfb27fd6002a030228a2ccadd1a9fb4392e42320cf249ae311b301b.txt"
+    },
+    "src/host/agent-driven/local-asset-registry.ts": {
+      "exists": true,
+      "sha256": "2d8e087ae0f57c72db418433ef7c6237e67d97d2e54cd4f2272d32e0eb141823",
+      "bytes": 38182,
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/2d8e087ae0f57c72db418433ef7c6237e67d97d2e54cd4f2272d32e0eb141823.txt"
+    },
+    "src/host/agent-driven/created-source-impact-store.ts": {
+      "exists": true,
+      "sha256": "219ea7870cb517e196ff03dd325b110dcbad73442f2c0e2699f2ee427dc16c3c",
+      "bytes": 23378,
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/219ea7870cb517e196ff03dd325b110dcbad73442f2c0e2699f2ee427dc16c3c.txt"
+    },
+    "src/host/agent-driven/created-source-change-service.ts": {
+      "exists": true,
+      "sha256": "65d123e91866ea1a6e3096a062daabf73bcfad778eec280e5689d25f7dd564fe",
+      "bytes": 11664,
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/65d123e91866ea1a6e3096a062daabf73bcfad778eec280e5689d25f7dd564fe.txt"
+    },
+    "tests/agent-driven/integration/local-assets-host.test.ts": {
+      "exists": true,
+      "sha256": "068a0051ac423f21d5d32cca29ccc521502b52884f74c0309935e697c7d71dee",
+      "bytes": 25612,
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/068a0051ac423f21d5d32cca29ccc521502b52884f74c0309935e697c7d71dee.txt"
+    },
+    "tests/agent-driven/integration/created-source-change.test.ts": {
+      "exists": true,
+      "sha256": "9d82c3c47b23a44ee27cf129ea51aa61c7e29259e94d6d14a27ed43fc6817860",
+      "bytes": 10686,
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/9d82c3c47b23a44ee27cf129ea51aa61c7e29259e94d6d14a27ed43fc6817860.txt"
+    },
+    "tests/agent-driven/integration/created-source-adoption.test.ts": {
+      "exists": true,
+      "sha256": "04eb25fa45efede7d101878d0c603d96b8947f377c49896dc3422a74ed644548",
+      "bytes": 62322,
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/04eb25fa45efede7d101878d0c603d96b8947f377c49896dc3422a74ed644548.txt"
+    },
+    "tests/agent-driven/integration/created-impact-atomic.test.ts": {
+      "exists": true,
+      "sha256": "847e2ec55edb9f3fe3548a01ff7b7c420d985f86ef63b32cb8bb52cf7a7e868b",
+      "bytes": 5440,
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/847e2ec55edb9f3fe3548a01ff7b7c420d985f86ef63b32cb8bb52cf7a7e868b.txt"
+    },
+    "tests/architecture/m2.2-fitness.test.ts": {
+      "exists": true,
+      "sha256": "58928cf9f84d19005f8054283e3baa03c027bc8e5558dbf03253bedf72e03c47",
+      "bytes": 13936,
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/58928cf9f84d19005f8054283e3baa03c027bc8e5558dbf03253bedf72e03c47.txt"
+    },
+    "tests/m2.1/openfilm-upstream-lock.test.ts": {
+      "exists": true,
+      "sha256": "20ca13343a7ad630378ae8347f8c8a343a09a788b3bb2270a8903abc2d76e17b",
+      "bytes": 10599,
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/20ca13343a7ad630378ae8347f8c8a343a09a788b3bb2270a8903abc2d76e17b.txt"
+    },
+    "tests/m2.3/migration-real-export.test.ts": {
+      "exists": true,
+      "sha256": "3184f1b1a4164e04879a32226309cc156bca76730ae3ff9c72c1d6af0c802f9d",
+      "bytes": 13366,
+      "backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/3184f1b1a4164e04879a32226309cc156bca76730ae3ff9c72c1d6af0c802f9d.txt"
+    },
+    "tests/fixtures/m2.1/snapshot-project/assets/generated/visual-10s.mp4": {
+      "exists": false
+    },
+    "tests/fixtures/m2.1/snapshot-project/assets/generated/visual-alt-10s.mp4": {
+      "exists": false
+    },
+    "tests/fixtures/m2.1/snapshot-project/assets/generated/narration-30s.wav": {
+      "exists": false
+    }
+  },
+  "mandatory_rulings": "UNIFIED_CORRECTIVE_RELEASE_037.md",
+  "protected": [
+    "AGENTS.md",
+    "src/host/m5/openfilm-native-expected.ts",
+    "src/host/agent-driven/committed-snapshot-authority.ts",
+    "src/host/projects/revision-store.ts",
+    "package.json",
+    "pnpm-lock.yaml",
+    "vitest.config.ts",
+    "contracts/",
+    "tools/",
+    "approved015 var artifact",
+    "all oldGate evidence and frozencontracts"
+  ],
+  "compile_only": {
+    "capture": "n1n2-claude-037-tsc-001",
+    "argv": [
+      "corepack",
+      "pnpm",
+      "exec",
+      "tsc",
+      "--noEmit"
+    ],
+    "recorder_sha256": "88cd47ec732a340f54cdd4bb05b05878887697eebb0ddc94b1ccd7d0e434fd10",
+    "rule": "After entire coherent source batch+fixture sourcehash inventory and byte backups. Once serial, source frozen through terminal+separate result read; nonzero stop for diagnosis; unique fresh capture/no overwrite. No business runtime granted."
+  },
+  "other_runtime": "NOT_GRANTED: tests,Host,media,browser,build,mutation andfull check require exact frozen-input MAIN grant",
+  "git": "No add/commit/reset/stash/checkout/push; MAIN owns index. MAIN will later explicitly stage 3 ignored tiny opaque fixtures to make clean-checkout reproduction possible. Copy-only ignored local prerequisites are not durable delivery.",
+  "claims": "N1..24 NOT_RUN until actual evidence; no absence-of-newtest old-red claim; original17 unchanged; next-wiring implementation prohibited",
+  "new429": "STOP immediately, no automatic retry/provider switch/Codex takeover"
+}

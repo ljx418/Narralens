@@ -1,0 +1,464 @@
+{
+  "at": "2026-11-14T00:00:00.000000+00:00",
+  "kind": "READ_ONLY_REPAIR_DESIGN_058",
+  "note": "只读方案分析。本波没有实现、没有运行、没有 git 写操作；唯一写入是本文件与同名 .md。所有 runtime 结论一律 NOT_RUN。",
+  "writer": {
+    "role": "Claude implementation child (原 N1/N2 实现者)",
+    "task_id": "task_031f802dca9a",
+    "dispatch_id": "ctx_cb50f012865b",
+    "terminal": "term_499fde1b-4bc4-40d0-a884-225e555d7b70"
+  },
+  "workspace": {
+    "root": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+    "branch": "agent-driven/main-a-integration",
+    "head": "1d348d419120f23f45d958112ea8c43df5a04675",
+    "head_moved": false,
+    "user_work_preserved": true,
+    "git_write_operations": [],
+    "files_modified": [
+      "docs/parallel/lane-product/A-R2-20261112/N1N2-native-source/n1n2-claude-058-repair-plan.md",
+      "docs/parallel/lane-product/A-R2-20261112/N1N2-native-source/n1n2-claude-058-repair-plan.json"
+    ]
+  },
+  "inputs_read_only": {
+    "spec": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/independent-frozen-review-057/CLAUDE_READONLY_REPAIR_DESIGN_058_SPEC.md",
+    "main_preliminary": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/independent-frozen-review-057/MAIN_PRELIMINARY_FINDINGS.json",
+    "review_a": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/independent-frozen-review-057/review-a/",
+    "review_b": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/independent-frozen-review-057/review-b/",
+    "original_requirements": "docs/evidence/N1N2/freeze-057/ORIGINAL_REQUIREMENTS.json",
+    "pinned_upstream": {
+      "path": "/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm",
+      "head_verified_read_only": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+      "files_read": [
+        "packages/openfilm/studio/server/pageframes.mjs",
+        "packages/openfilm/src/host.mjs"
+      ],
+      "modified": false
+    }
+  },
+  "constraints_honored": {
+    "no_source_or_test_edit": true,
+    "no_git_add_commit_reset_stash_checkout": true,
+    "no_tests_build_host_browser_media_tools_run": true,
+    "no_production_import_or_tsx_execution": true,
+    "no_network_install_payment": true,
+    "no_credentials_or_env_read": true,
+    "no_j_drive": true,
+    "no_vendor_pin_approved015_dist_edit": true,
+    "no_new_worker": true,
+    "no_acceptance_claim": true,
+    "no_next_stage_push": ["S01", "NativeAck", "Studio", "A-film", "V1"]
+  },
+  "findings": [
+    {
+      "id": "B01",
+      "severity": "MAJOR",
+      "review": "review-b",
+      "title": "vendor-path 静态门只遍历顶层 FunctionDeclaration / ExpressionStatement，类方法与箭头初始化器不进入枚举",
+      "locations": ["tests/m2.1/openfilm-upstream-lock.test.ts:358", "tests/m2.1/openfilm-upstream-lock.test.ts:324-369", "tests/m2.1/openfilm-upstream-lock.test.ts:713"],
+      "current_state": {
+        "buildScopes_scope": "仅顶层变量/函数声明 + 顶层表达式语句；类方法、构造器、类属性初始化器、顶层箭头/函数表达式、对象字面量方法全部不收集",
+        "callee_resolution_requires": "ts.isFunctionDeclaration（箭头/方法作为被调用者时其形参不会 tainted）",
+        "production_call_sites_total": 10,
+        "production_call_sites_enumerated_by_old_gate": 2,
+        "production_call_sites_missed": 8,
+        "missed_detail": [
+          "src/host/server.ts:529 createPinnedOpenFilmUpstream (constructor :412 -> 对象字面量属性 -> async 箭头)",
+          "src/host/projects/creation-source-verifier.ts:61 createPinnedOpenFilmUpstream (类方法)",
+          "src/host/m5/openfilm-studio-supervisor.ts:342 openFilmAvailability (私有类方法 #runProbe)",
+          "src/host/agent-driven/committed-snapshot-authority.ts:298 createPinnedOpenFilmUpstream (私有类方法 #loadAdapter)",
+          "src/host/agent-driven/committed-snapshot-authority.ts:366 createPinnedOpenFilmUpstream (类方法)",
+          "src/host/agent-driven/committed-snapshot-authority.ts:403 createPinnedOpenFilmUpstream (类方法)",
+          "src/host/agent-driven/created-native-workspace.ts:532 createPinnedOpenFilmServingOwner (类方法内 async IIFE)",
+          "src/host/agent-driven/created-native-workspace.ts:551 openFilmServingBridge (类方法内 async IIFE)"
+        ],
+        "enumerated_by_old_gate_detail": [
+          "src/host/render/upstream-pin.ts:112 openFilmAvailability (顶层函数)",
+          "src/host/engine/openfilm-composition.ts:103 createPinnedOpenFilmUpstream (顶层函数)"
+        ],
+        "not_claimed": "不声称当前 vendorRoot 可由 HTTP 控制；这是验收测试有效性缺口，不是运行时 BLOCKER"
+      },
+      "fix_dependencies": [],
+      "suggested_paths": [
+        {
+          "file": "tests/m2.1/openfilm-upstream-lock.test.ts",
+          "change": "buildScopes 改为全 AST 作用域栈遍历：functionLikeOf 覆盖 FunctionDeclaration/FunctionExpression/ArrowFunction/MethodDeclaration/Constructor/Get/SetAccessor；类体建 scope、属性初始化器与静态块各自建 scope；所有 CallExpression 在其所在 scope 记录",
+          "compatibility": "纯测试文件；既有 :700-711 的入口映射、:715、:718-825 的向量逐字保留"
+        },
+        {
+          "file": "tests/m2.1/openfilm-upstream-lock.test.ts",
+          "change": "resolveDeclaration 与污点的被调用者解析放宽为任意 function-like 声明；isRequestSource 的类型/名字规则不变",
+          "compatibility": "参数身份仍按声明节点绑定，同名不串"
+        }
+      ],
+      "assertions_that_go_red_on_old_implementation": [
+        "C1 类方法 tainted 形参调用 loader -> 期望 1 条违规（旧 0）",
+        "C2 构造器 tainted 形参 -> 期望 1（旧 0）",
+        "C3 顶层箭头常量 -> 期望 1（旧 0）",
+        "C4 顶层函数表达式 -> 期望 1（旧 0）",
+        "C5 类方法内的箭头 -> 期望 1（旧 0）",
+        "C6 对象字面量方法 -> 期望 1（旧 0）",
+        "C7 类属性初始化器箭头 -> 期望 1（旧 0）",
+        "C8 静态块 -> 期望 1（旧 0）",
+        "C9 跨形态 helper 传播（类方法 -> 顶层 helper -> loader）-> 期望 1（旧 0）",
+        "生产站点枚举断言：(file, exportName) 计数集合必须等于 10 条实际站点（旧只能枚举 2 条）"
+      ],
+      "negative_assertions_kept": [
+        "N1 类方法 string 形参 -> 0",
+        "N2 同名但类型为 string 的形参 -> 0",
+        "N3 无关文件的类方法 -> 0",
+        "N4 非 loader 入口的调用 -> 0",
+        "既有 :770-807 的 alias / namespace / renamed import / local helper / 同名 shadow 参数化族逐字保留"
+      ],
+      "test_partition": "P1",
+      "suggested_argv": ["pnpm vitest run --config vitest.config.ts tests/m2.1/openfilm-upstream-lock.test.ts"],
+      "runtime_required": false
+    },
+    {
+      "id": "A057-01",
+      "severity": "MAJOR",
+      "review": "review-a",
+      "title": "畸形请求目标使 new URL(req.url) 抛错，异常逃出 createServer 回调",
+      "locations": ["src/adapters/openfilm/openfilm-upstream.ts:654", "src/adapters/openfilm/openfilm-upstream.ts:943-962", "src/adapters/openfilm/openfilm-upstream.ts:641-653"],
+      "current_state": {
+        "guards_that_pass": "无冒号/反斜杠/NUL、无点段、无 .. 段的 //[ 通过 :643-653 的全部前置守卫",
+        "throwing_site": ":654 new URL(url,'http://127.0.0.1').searchParams —— 无 catch；WHATWG 解析器把 // 当 authority 引用，未闭合 IPv6 host 抛 ERR_INVALID_URL",
+        "escape_path": ":943-962 的 createServer 回调无 try/catch，:962 直接 folder.handle(req,res) -> 未捕获异常 -> 默认进程终止",
+        "reproduction_status": "NOT_RUN（本方案未运行任何解析器）；MAIN 已归档内置 URL 纯解析复现（MAIN-PRELIM-URL）",
+        "public_input": true,
+        "headers_policy": "refuse() 在 :595-597 已把策略头放在每个回答上（含拒绝），必须保持"
+      },
+      "fix_dependencies": [],
+      "suggested_paths": [
+        {
+          "file": "src/adapters/openfilm/openfilm-upstream.ts",
+          "change": ":654 之前加 origin-form 判定：目标必须以 / 开头且不以 // 开头，否则 400 bad address",
+          "compatibility": "新增一种 400；正常浏览器请求不受影响"
+        },
+        {
+          "file": "src/adapters/openfilm/openfilm-upstream.ts",
+          "change": ":654 的 query 改为从原始 query 串用 URLSearchParams 解析（不做 host 解释，永不抛）",
+          "compatibility": "query.get('of') 与传给上游的 query 语义等价（同样的 + 与百分号解码）"
+        },
+        {
+          "file": "src/adapters/openfilm/openfilm-upstream.ts",
+          "change": "解析段整体 try/catch -> 400；:962 调用点再包一层，异常不得逃出 request 监听器",
+          "compatibility": "Host/port 守卫、请求计数、lifecycle 事件、res finish 事件、drain 统计全部保持"
+        }
+      ],
+      "assertions_that_go_red_on_old_implementation": [
+        "handler 级：真实 folder.handle 收到 url='//[' -> 不抛异常且回答 400 且带策略头（旧：抛 ERR_INVALID_URL）",
+        "owned serving 子进程级：raw socket 手写 'GET //[ HTTP/1.1' + 正确 Host -> 400（旧：子进程非 0 退出）",
+        "同序列的合法请求 'GET /hello.txt' -> 200 且字节逐字相符（旧：进程已死）",
+        "子进程 exit=0、无未捕获异常栈、serving.pending()===0",
+        "既有拒绝面不回退：405/403/404/Range 206/越界拒绝"
+      ],
+      "test_partition": "P2",
+      "suggested_files": [
+        "tests/agent-driven/integration/openfilm-serving-url.test.ts (新)",
+        "tests/fixtures/openfilm-serving-url-child.mts (新, 经 tsx 载入 TS 源码)"
+      ],
+      "suggested_argv": ["pnpm vitest run --config vitest.config.ts tests/agent-driven/integration/openfilm-serving-url.test.ts"],
+      "runtime_required": true,
+      "runtime_notes": "必须用 node:net raw socket，不得用 fetch/http.request（可能先规范化目标）；隔离子进程，父进程必须回收",
+      "prohibitions": ["不新增 sleep 判定成功", "不吞异常", "不改 pin/vendor"]
+    },
+    {
+      "id": "A057-02",
+      "severity": "MAJOR",
+      "review": "review-a",
+      "title": "文本预算在首次数据读取之后才生效：retainFile 先 #hash 至 EOF",
+      "locations": ["src/host/agent-driven/retained-native-closure.ts:679", "src/host/agent-driven/retained-native-closure.ts:685", "src/host/agent-driven/retained-native-closure.ts:772-778", "src/host/agent-driven/retained-native-closure.ts:994-1006", "src/host/agent-driven/retained-native-closure.ts:1010-1025", "src/host/agent-driven/committed-snapshot-authority.ts:449-470", "src/host/agent-driven/created-native-source-reader.ts:711-724", "tests/agent-driven/integration/created-native-source-reader.test.ts:989-1010"],
+      "current_state": {
+        "order": "retainFile: open -> fstat(:679) -> 身份检查 -> #hash(:685) 读到 EOF -> 之后 readText 才判 maxTextBytes(:772) 与 maxTotalTextBytes(:775-778)",
+        "observation_gap": "onReadChunk 只在 #readAll(:1018) 调用；#hash/#hashSync 不通知 -> F06 的 '0 字节' 只证明没解码读，不证明没读",
+        "affected_paths": ["authority #streamDigest.read", "workspace reader 的 :711-724 先 retain 全部叶子", "workspace #produce 的 before/after 闭包"],
+        "requirement": "R07 budgets: Size checks precede bounded text read; ... no unbounded media read"
+      },
+      "fix_dependencies": ["与 A057-03 同一次改动（同一读原语）"],
+      "decision_points": ["D1 文本/媒体分类由谁给出"],
+      "suggested_paths": [
+        {
+          "file": "src/host/agent-driven/retained-native-closure.ts",
+          "change": "retainFile 在任何字节读取之前判定类别（推荐 D1-a：沿用 authority 的 ASSET_EXTENSIONS 规则并收进 closure，retainFile 签名不变）；文本类先判单文件与累计门限并抛 NATIVE_CLOSURE_BUDGET；媒体类不占文本预算",
+          "compatibility": "门限一律不放宽；readText 的 :772-778 判定保留作幂等兜底；UTF-8 严格解码与重编码校验不变；身份语义不变"
+        },
+        {
+          "file": "src/host/agent-driven/retained-native-closure.ts",
+          "change": "#textBytesByFile 的累计计账不重复（retainFile 前置判定只读当前值，不提前写入）",
+          "compatibility": "与 readText:794 的 Math.max(held, bytes.length) 记账一致"
+        },
+        {
+          "file": "src/host/agent-driven/committed-snapshot-authority.ts",
+          "change": "（D1-a）把 ASSET_EXTENSIONS(:126-130) 改为引用 closure 导出的同一集合，消除重复定义",
+          "compatibility": "authority 的既有判定结果不变"
+        }
+      ],
+      "assertions_that_go_red_on_old_implementation": [
+        "修正后的 F06：/proc/self/io 的 rchar 增量 < 1 MiB（被拒文件 9 MiB）；旧实现读满 9 MiB -> RED",
+        "F06 修正版：onReadChunk 计数仍为 0 且 rchar 增量同样受限（两条同时成立才排除漏通知的解释）",
+        "累计预算用例：跨线文件在读之前被拒，rchar 增量显著小于全读总量 -> 旧 RED",
+        "workspace reader 路径重复上述断言（reader 也先 retain 全部叶子）",
+        "正向对照：>8 MiB 的媒体仍可 retain/hash（旧新都绿，防止把媒体误拒）"
+      ],
+      "observation_rule": "观测必须独立于 closure 自报计数器（用内核 /proc/self/io 的 rchar；仓库已在用 /proc/<pid>/fd）",
+      "test_partition": "P3",
+      "suggested_argv": ["pnpm vitest run --config vitest.config.ts tests/agent-driven/integration/created-native-source-reader.test.ts tests/agent-driven/integration/native-cache-witness.test.ts"],
+      "runtime_required": true,
+      "risks": ["text-sized 媒体在 D1-a 下按文本计账可能触发 64 MiB 累计上限（更严，但可能新增拒绝）；用扩展名集合分流，未知扩展名二进制 fail-closed"]
+    },
+    {
+      "id": "A057-03",
+      "severity": "MAJOR",
+      "review": "review-a",
+      "title": "普通 retain/hash/verify 用 EOF 循环，没有捕获尺寸上界",
+      "locations": ["src/host/agent-driven/retained-native-closure.ts:994-1006", "src/host/agent-driven/retained-native-closure.ts:1094-1105", "src/host/agent-driven/retained-native-closure.ts:805", "src/host/agent-driven/retained-native-closure.ts:824", "src/host/agent-driven/retained-native-closure.ts:1066", "src/host/agent-driven/retained-native-closure.ts:886-900"],
+      "current_state": {
+        "existing_correct_primitive": "#hashBoundedSync(:886-900) 已按捕获尺寸读并做多一字节探针，但只有 verifyFileExact(:863) 在用",
+        "unbounded_paths": ["#hash -> retainFile(:685)", "#hash -> hashFile(:805)", "#hashSync -> verifyFile(:824)", "#hashSync -> verify(:1065)"],
+        "concurrency_window": "retainFile 的 fstat(:679) 与 hash 之间可被外部写者增长；#hash 一直读到当前 EOF，工作量与时长无上界，且是同步循环（阻塞事件循环）",
+        "p07_gap": "既有 P07 在 readText 之前增长，不覆盖 hash 窗口"
+      },
+      "fix_dependencies": ["与 A057-02 同一次改动"],
+      "suggested_paths": [
+        {
+          "file": "src/host/agent-driven/retained-native-closure.ts",
+          "change": "新增 #hashBounded(fd, expectedBytes, relativePath)：按捕获尺寸读恰好那么多；每块通知 onReadChunk（补齐 A057-02 的漏通知）；读完多读 1 字节，仍有 -> 增长，提前 EOF -> 截短，两种都明确拒绝 NATIVE_CLOSURE_MEMBERSHIP_MOVED，不截断不接受",
+          "compatibility": "内存仍 64 KiB 缓冲；实际来源语义不变"
+        },
+        {
+          "file": "src/host/agent-driven/retained-native-closure.ts",
+          "change": "retainFile(:685) 用 expectedBytes=info.size；hashFile(:805) 用 expectedBytes=record.membership.size",
+          "compatibility": "hashFile 的语义从『当前内容摘要』改为『保留时字节的摘要』（与 authority:462 的用法一致，须逐个复核调用点）"
+        },
+        {
+          "file": "src/host/agent-driven/retained-native-closure.ts",
+          "change": "verifyFile(:824) 与 verify(:1065) 改用既有的 #hashBoundedSync",
+          "compatibility": "verifyFileExact 行为不变"
+        },
+        {
+          "file": "src/host/agent-driven/retained-native-closure.ts",
+          "change": "hash 之后复查身份（dev/ino/size/mtime_ns/ctime_ns/nlink）",
+          "compatibility": "A057-03 minimal correction 明确要求"
+        }
+      ],
+      "assertions_that_go_red_on_old_implementation": [
+        "外部进程在 hash 期间持续追加：观察到的读取字节 <= 捕获尺寸 + 1；旧实现读到当前 EOF -> RED",
+        "结果必须明确拒绝（NATIVE_CLOSURE_MEMBERSHIP_MOVED），不是截断摘要、不是接受；旧实现 hashFile 会把增长后的内容当有效摘要返回 -> RED",
+        "外部截短：明确拒绝；旧实现接受短摘要 -> RED",
+        "retainFile 窗口内增长：拒绝；旧实现接受 -> RED",
+        "verifyFileExact 既有用例保持绿"
+      ],
+      "test_partition": "P3",
+      "suggested_argv": ["pnpm vitest run --config vitest.config.ts tests/agent-driven/integration/native-cache-witness.test.ts"],
+      "runtime_required": true,
+      "runtime_notes": "并发增长写者用真实子进程 + 有上限的追加循环；断言只区分『捕获尺寸+ε』与『捕获尺寸+增长量』；不得用固定 sleep 判定成功",
+      "open_item": "同步循环的时间上界/取消 yield 本轮不解决，登记为遗留项，不得写成已修"
+    },
+    {
+      "id": "A057-04",
+      "severity": "MAJOR",
+      "review": "review-a",
+      "title": "被拒绝的 pinned page-frame promise 不能证明 page/browser 工作已结算",
+      "locations": ["src/adapters/openfilm/openfilm-upstream.ts:402", "src/adapters/openfilm/openfilm-upstream.ts:412", "src/adapters/openfilm/openfilm-upstream.ts:1109", "src/host/agent-driven/created-native-workspace.ts:815", "src/host/agent-driven/created-native-workspace.ts:727"],
+      "upstream_facts": {
+        "source": "packages/openfilm/studio/server/pageframes.mjs @ e70d9d93 (只读复核)",
+        "withPage": ":268-292",
+        "job_timer": ":273-275 JOB_MS=45_000 -> void closeBrowser() 后 reject",
+        "raw_work_swallowed": ":276-278 work.catch(()=>{}) —— raw work 的失败被上游吞掉，不交出",
+        "race": ":279-283 Promise.race([work, late])，catch 里 forget() 后重抛",
+        "forget_fire_and_forget": ":294-300 void page?.then(p=>p.close(), ()=>{})",
+        "idle_timer": ":284-288 setTimeout(()=>void closeBrowser(), 60_000).unref()",
+        "close_not_a_barrier": ":176-189 closePageFrames -> closeBrowser：browser 已为 null 时立刻 resolve，不能 await 先前那次 b.close()",
+        "process_wide": ":42-48 模块级 browser/open/queue（一个浏览器、draw 串行）；JOB 超时路径的 closeBrowser 会关掉 peer 的浏览器",
+        "host_mjs": "src/host.mjs:294 FilmPage.open(waitMs=15_000/readyMs)、:338 goto timeout 60_000、:381-411 seek timeoutMs、:431 close->context.close()"
+      },
+      "settlement_capability_conclusion": {
+        "answer": "在固定 vendor 的现有公开 API（pageFrame / closePageFrames）下，Host 无法取得『真实 raw page/browser 结算』的正向证明。",
+        "provable_positive": "Promise.race 的 resolve 只可能来自 work -> wrapper resolve 蕴含 raw work 已完成（画面真画出、输出真写出）",
+        "not_provable": "wrapper reject 既可能是 work 自己失败（raw 已结算），也可能是 JOB 计时器先到（raw 仍在跑）；上游不暴露 work，两种在上游公开 API 下不可区分",
+        "why_close_page_frames_cannot_be_used": "上游超时路径已把模块级 browser 置 null 并开始（未 await 的）b.close()；此后 closePageFrames 立刻 resolve，不能证明那次 close 已结束",
+        "therefore": "只能 fail-closed 记账：未证明即记为未证明 —— 保留 draw 所有权、隔离 producer、隔离视图、保留不确定性；不得把 race rejection 或 fire-and-forget 的浏览器关闭当作释放证据"
+      },
+      "decision_points": ["D2 结算契约宽窄", "D3 adapter 的 Host 私有 seam", "D5 失败后行为收紧"],
+      "suggested_paths": [
+        {
+          "file": "src/adapters/openfilm/openfilm-upstream.ts",
+          "change": "owner.pageFrame(:399-407) 逐调用记账：启动前拒绝（:400 draining）不产生未结算事实；启动后 resolve=结算；启动后 reject=未结算（记入 unsettled 集合，抛出带 Host 私有 brand 的失败：class 或 WeakSet brand + isOpenFilmRawUnsettled 谓词，brand 不得是可伪造属性）；cacheProducerCalls 语义改为『已启动未结算』",
+          "compatibility": "K05-a(:655) 的启动前拒绝语义保留"
+        },
+        {
+          "file": "src/adapters/openfilm/openfilm-upstream.ts",
+          "change": "owner.close(:408-419)：等已结算调用；存在未结算调用时不调用 loaded.closePageFrames（peer 安全，泄漏记为不确定性）；有未结算调用则 close 不是干净结果，按 withCleanupFailures/genuineServingCleanupFailures 记 genuine settlement failure",
+          "compatibility": "『最后 owner 且无在飞才 closePageFrames』的既有规则保留并加强"
+        },
+        {
+          "file": "src/adapters/openfilm/openfilm-upstream.ts",
+          "change": "出现未结算调用后，该 owner 拒绝新的 draw（隔离），新 draw 不得与可能仍在跑的 raw work 混用",
+          "compatibility": "新增拒绝码建议 NATIVE_CACHE_PRODUCER_UNSETTLED"
+        },
+        {
+          "file": "src/adapters/openfilm/openfilm-upstream.ts",
+          "change": "OpenFilmServingOwner 增加 abandonDraw()/endDraw(abandoned)；facts 增加 abandoned 计数；serving 的 close(:1039-1076) 在有被放弃的 draw 时记一条 genuine failure（沿用措辞 the page origin still has N unsettled items），folder.drain() 仍先于关监听",
+          "compatibility": "公开形状变化 -> workspace 与 witness 测试同步改；同一时刻只有一个 writer"
+        },
+        {
+          "file": "src/host/agent-driven/created-native-workspace.ts",
+          "change": "#produce(:645-898)：draw 失败带 raw-unsettled brand 时计入 genuine(:828) -> this.#uncertain=true(:829)（sticky），witness 仍撤销；并作废该 view（this.#prepared.delete(projectId)（同 :277 手法）+ #invalidateRefsOf(:957)），使下次 prepare(:261-302) 复制新树",
+          "compatibility": "新 root 也绕开上游 30 s failures 缓存（pageframes.mjs:87 以 root\\0key\\0version 为键）"
+        },
+        {
+          "file": "src/adapters/openfilm/openfilm-upstream.ts",
+          "change": "（D3）Host 私有注入缝：observeOpenFilmProducer(hooks) + hooks.module(loaded)，在 pin/摘要校验之后替换模块对象；生产路径不设 hook",
+          "compatibility": "形态照 observeNativeFacts(committed-snapshot-authority.ts:191-256)；Host 私有注入，不是公共 HTTP 权限"
+        }
+      ],
+      "assertions_that_go_red_on_old_implementation": [
+        "S1 未结算事实可见：调用方失败带 Host 私有 brand（旧：无 brand）",
+        "S2 peer 安全：有未结算调用时 owner.close() 不调用 closePageFrames（注入模块计数，旧：会调用）",
+        "S3 close 不干净：有未结算调用时 close 报告 genuine failure（旧：干净返回）",
+        "S4 producer 隔离：未结算后新的 draw 被拒（旧：照常调用）",
+        "S5 draw 所有权：serving 的 accepted/abandoned 反映未结算；closeServing 报告未结算项（旧：endDraw 归零 -> close 谎称干净）",
+        "S6 service 闩住：workspace.uncertain===true、witness 查不到、下一次生产被拒 NATIVE_CACHE_PRODUCTION_UNCERTAIN（旧：不闩）",
+        "S7 树隔离：之后 prepare() 得到新树（旧：复用旧树，孤儿写入可能被接受）",
+        "S8 无 sleep：测试自己 resolve raw promise 之前 close 不得返回（旧：立即返回）",
+        "S9 启动前拒绝不产生未结算事实：K05-a(:655) 逐字保留并仍绿"
+      ],
+      "test_partition": "P4",
+      "suggested_argv": ["pnpm vitest run --config vitest.config.ts tests/agent-driven/integration/native-cache-witness.test.ts"],
+      "runtime_required": true,
+      "heavy_optional": {
+        "name": "真实 JOB 超时确认（opt-in, 默认 fullcheck 不跑）",
+        "how": "让被画页面永不 load（film.html 内联永不结束的同步循环 -> load 不触发 -> host.mjs:338 goto 60s 超时，而 45s 的 JOB 计时器先到）",
+        "observe": ["wrapper 在 ~45s reject（消息形如 drawing ... took over 45 s）", "该时刻 raw work 仍在跑", "之后 closePageFrames 立刻返回（证明它不是屏障）", "缓存三元组没有被写出", "进程没有崩溃"],
+        "resource": "需要 MAIN 的资源预约（浏览器 + >=60s + 独占 loopback 端口），与默认门分离"
+      },
+      "residual_uncertainty": "JOB 超时后上游 raw page/browser 是否真的停了，Host 无法证明；新方案只能做到不再宣称结算、保留所有权、隔离 producer/视图、保留不确定性，并使『无迟到请求越过 serving』成为结构性事实",
+      "prohibitions": ["不改固定 vendor 或 pin", "不杀共享 peer browser", "不加固定 sleep", "不靠 catch 后重调 close", "不吞异常当成功", "不降范围、不放弃原 producer"]
+    },
+    {
+      "id": "A057-05",
+      "severity": "MAJOR",
+      "review": "review-a",
+      "title": "只保留 duration、没有 frame 三元组时，witness.dependencies 的身份从未被核对",
+      "locations": ["src/host/agent-driven/created-native-source-reader.ts:1226-1247", "src/host/agent-driven/created-native-source-reader.ts:1239", "src/host/agent-driven/created-native-source-reader.ts:1245", "src/host/agent-driven/created-native-source-reader.ts:1327-1331", "src/host/agent-driven/created-native-source-reader.ts:91-94"],
+      "current_state": {
+        "duration_branch_checks": ["当前输出授权 cacheWitnessByOutput(:1239)", "输出身份 sameFileIdentity(:1242-1244)", "record.film === `${film.mtime_ms}:${film.bytes}`(:1245)"],
+        "missing_check": "witness.dependencies 从未在 duration 分支核对；依赖核对只在 #proveWitnessedCache(:1284-1333) 里做，而它只在三元组存在时被调用(:1256-1262)",
+        "counterexample": "真实 draw(film.html, ms=0, 不写 poster) -> 删三件三元组 -> film.html 原地改后还原字节与 mtime（ctime 变）-> 新读轮：源副本摘要相符、输出身份相符、film mtime:size 相符 -> 接受",
+        "why_fresh_closure_does_not_help": "新闭包只证明当前 epoch；witness 是历史的（记录 draw 时刻的 ctime_ns），二者不可互换"
+      },
+      "fix_dependencies": ["与 A057-06 同一次改动（同一 #classifyCache）"],
+      "suggested_paths": [
+        {
+          "file": "src/host/agent-driven/created-native-source-reader.ts",
+          "change": "抽出共享的 #proveWitnessDependencies(witness, files)（复用 :1327-1331 的逻辑），pageframe/film-poster 与 duration 两处共用",
+          "compatibility": "#proveWitnessedCache 行为不变（K04-b 保持强检查）"
+        },
+        {
+          "file": "src/host/agent-driven/created-native-source-reader.ts",
+          "change": "duration 分支新增调用：对 witness 的每条 dependency，路径必须在本工作副本被保留（缺 -> NATIVE_SOURCE_CACHE_UNPROVEN），身份必须逐字相符（不符 -> NATIVE_SOURCE_CACHE_STALE）；不要求无关的历史输出（三元组）仍在",
+          "compatibility": "『最新授权』语义（cacheWitnessByOutput / ledger #byOutput）不动；film-poster 的『最后一次 poster、非权威』语义不动；record.film 的 mtime_ms:bytes 比对保留但不再独自承担新鲜度判断"
+        }
+      ],
+      "assertions_that_go_red_on_old_implementation": [
+        "新反例：真实 draw -> 删三件三元组 -> film 原地改并还原字节+mtime -> 断言 ctime 真的变了 -> 新读轮拒绝 NATIVE_SOURCE_CACHE_STALE（旧：接受 -> RED）",
+        "正向对照：同样删三件但 film 未动 -> 新读轮仍必须接受（原规则下 duration 是关于 film 的条目，与三元组无关）",
+        "既有 K04-b(:874-906) 仍拒绝；Q03(:1707 两帧、:1750 最新授权不回退) 与 PF02(:1015) 仍绿",
+        "不得用『强制所有 cache 不存在』绕过：必须真的保留 duration 并走完整分类路径"
+      ],
+      "test_partition": "P5",
+      "suggested_argv": ["pnpm vitest run --config vitest.config.ts tests/agent-driven/integration/created-native-source-reader.test.ts"],
+      "runtime_required": true
+    },
+    {
+      "id": "A057-06",
+      "severity": "MINOR",
+      "review": "review-a",
+      "title": "posters/frames/waves 三个缓存族仍按文件名与 JSON 形状准入，无 producer 授权",
+      "locations": ["src/host/agent-driven/created-native-source-reader.ts:1205-1208", "src/host/agent-driven/created-native-source-reader.ts:1210-1215", "src/host/agent-driven/created-native-source-reader.ts:1217-1224", "src/host/agent-driven/created-native-source-reader.ts:764-765"],
+      "current_state": {
+        "posters": "只查 media key 在不在 -> return",
+        "frames": "查 key + 宽度合法 -> return",
+        "waves": "解析成 object -> return",
+        "producer_gap": "固定 producer 是 pageframes.mjs，只写 pageframes/<key>.{jpg,json,stamp}、film-duration.json、film-poster.jpg；上游的 posters/frames/waves 由 derived.mjs(:103/:115/:131) 用 ffmpeg 产出 -> 现有固定 producer 无法为其签发授权",
+        "pin_constraint": "真证明它们需另钉 derived.mjs 及其工具链 = 新 pin，本轮明确不做（REG existing_behavior: no artifact/pin change）"
+      },
+      "decision_points": ["D4 三族处置"],
+      "recommendation": "D4-a 明确拒绝（MAIN 指示：暂不支持的家族必须明确拒绝；不得把承诺的 producer 核验改成更弱合同后宣称 R04 通过）",
+      "suggested_paths": [
+        {
+          "file": "src/host/agent-driven/created-native-source-reader.ts",
+          "change": "三个分支改为明确拒绝，新而明确的失败码（建议 NATIVE_SOURCE_CACHE_FAMILY_UNSUPPORTED，码名待 MAIN 拍板；不复用 NATIVE_SOURCE_CACHE_UNKNOWN）",
+          "compatibility": "目录白名单 :764-765 不动（空目录无害，文件被拒）；已被真证明的族（probe :1178-1204、pageframe 三元组 :1256-1262、film-poster :1249-1254）逐字不动"
+        }
+      ],
+      "assertions_that_go_red_on_old_implementation": [
+        ".film/cache/posters/<正确key>.jpg（随意字节）-> 明确拒绝（旧：接受）",
+        ".film/cache/frames/<正确key>-0-32.jpg（随意字节）-> 明确拒绝（旧：接受）",
+        ".film/cache/waves/<正确key>.json（{}）-> 明确拒绝（旧：接受）",
+        "正向对照：probe / pageframe 三元组 / film-poster 的既有用例全部保持绿",
+        "反例必须用正确的 media key，不得用未知路径撞更早的边界"
+      ],
+      "cost": "由真实 Studio 写过（含这三族）的工作副本会被 Host 读轮拒绝 —— 这是真实代价，必须写进实现说明与下一阶段清单；下一阶段须单独落实『Host 准备的工作副本不带这三族』或『这三族被真证明』，不得偷删体验承诺",
+      "test_partition": "P6",
+      "suggested_argv": ["pnpm vitest run --config vitest.config.ts tests/agent-driven/integration/created-native-source-reader.test.ts"],
+      "runtime_required": true
+    }
+  ],
+  "test_partitions": [
+    {"id": "P1", "covers": ["B01"], "files": ["tests/m2.1/openfilm-upstream-lock.test.ts"], "argv": ["pnpm vitest run --config vitest.config.ts tests/m2.1/openfilm-upstream-lock.test.ts"], "runtime": "none"},
+    {"id": "P2", "covers": ["A057-01"], "files": ["tests/agent-driven/integration/openfilm-serving-url.test.ts (new)", "tests/fixtures/openfilm-serving-url-child.mts (new)"], "argv": ["pnpm vitest run --config vitest.config.ts tests/agent-driven/integration/openfilm-serving-url.test.ts"], "runtime": "pinned upstream + loopback + child process"},
+    {"id": "P3", "covers": ["A057-02", "A057-03"], "files": ["tests/agent-driven/integration/created-native-source-reader.test.ts", "tests/agent-driven/integration/native-cache-witness.test.ts"], "argv": ["pnpm vitest run --config vitest.config.ts tests/agent-driven/integration/created-native-source-reader.test.ts tests/agent-driven/integration/native-cache-witness.test.ts"], "runtime": "pinned upstream + concurrent writer child"},
+    {"id": "P4", "covers": ["A057-04"], "files": ["tests/agent-driven/integration/native-cache-witness.test.ts"], "argv": ["pnpm vitest run --config vitest.config.ts tests/agent-driven/integration/native-cache-witness.test.ts"], "runtime": "host-private seam (no browser needed) + optional real 45s timeout (MAIN grant)"},
+    {"id": "P5", "covers": ["A057-05"], "files": ["tests/agent-driven/integration/created-native-source-reader.test.ts"], "argv": ["pnpm vitest run --config vitest.config.ts tests/agent-driven/integration/created-native-source-reader.test.ts"], "runtime": "pinned upstream + real browser draw"},
+    {"id": "P6", "covers": ["A057-06"], "files": ["tests/agent-driven/integration/created-native-source-reader.test.ts"], "argv": ["pnpm vitest run --config vitest.config.ts tests/agent-driven/integration/created-native-source-reader.test.ts"], "runtime": "pinned upstream + real reader round"},
+    {"id": "FULL", "covers": ["regression"], "files": ["repository full gate"], "argv": ["pnpm check", "pnpm test:m2.1"], "runtime": "MAIN authorized"}
+  ],
+  "read_only_review_argv": [
+    "rg -n \"createPinnedOpenFilmUpstream\\(|openFilmAvailability\\(|createPinnedOpenFilmCacheProducer\\(|createPinnedOpenFilmFolderServer\\(|createPinnedOpenFilmServingOwner\\(|openFilmServingBridge\\(\" src/",
+    "rg -n \"ASSET_EXTENSIONS\" src/host/agent-driven/committed-snapshot-authority.ts",
+    "git -C /mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm rev-parse HEAD"
+  ],
+  "runtime_prerequisites": [
+    "固定上游检出 /mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm @ e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3（只读）",
+    "已安装 Playwright/Chromium（headless、静音；上游默认不变）",
+    "Node v22.22.1 / ICU 78.2 / locale en-US；仓库锁定依赖",
+    "ffprobe（probe 用例）",
+    "Approved015 五个文件按既有路径只读，不重建",
+    "不需要网络；不读凭据/配置/.env；不碰 J 盘"
+  ],
+  "resource_ownership": [
+    {"resource": "临时工程目录", "owner": "用例", "cleanup": "afterEach 删除（先关 serving）"},
+    {"resource": "OpenFilmServingOwner", "owner": "用例", "cleanup": "await owner.close()：先 drain 再关监听；未结算项须被报告不得吞掉"},
+    {"resource": "OpenFilmCacheProducerOwner", "owner": "用例", "cleanup": "await owner.close()：仅最后 owner 且无在飞（含未结算）才 closePageFrames"},
+    {"resource": "共享浏览器", "owner": "上游模块（进程级）", "cleanup": "Host 不单独拥有；上游 60s idle 计时器兜底；不得整体 kill"},
+    {"resource": "RetainedNativeClosure", "owner": "用例/服务", "cleanup": "release()/close()；失败保留 primary + 全部 genuine"},
+    {"resource": "A057-01 子进程", "owner": "用例", "cleanup": "父进程必须回收（等 exit；失败路径 kill 并等待退出）"},
+    {"resource": "raw socket", "owner": "用例", "cleanup": "读完 destroy；子进程内关服后 exit(0)"},
+    {"resource": "并发增长写者子进程", "owner": "用例", "cleanup": "有上限的追加循环，结束后 kill 并回收；不得用固定 sleep 判定成功"}
+  ],
+  "decisions_pending_main": [
+    {"id": "D1", "topic": "文本/媒体分类由谁给出", "recommended": "D1-a 规则收进 closure（沿用 authority 的 ASSET_EXTENSIONS），retainFile 签名不变", "alternative": "D1-b 调用方显式声明 kind（4 处调用点改动 + readText 需拒绝 kind 不符）"},
+    {"id": "D2", "topic": "未结算判定的宽窄", "recommended": "D2-a 任何『已启动后 reject』都记未结算（fail-closed，不解析上游消息）", "alternative": "D2-b 用上游导出的 PageFrameError 收窄（依赖上游错误形状；page.close 仍不可证明）"},
+    {"id": "D3", "topic": "adapter 的 Host 私有 seam", "recommended": "加 observeOpenFilmProducer(hooks)，只在 pin/摘要校验之后替换模块对象", "alternative": "不加 -> A057-04 只有真实 45s 重活用例，没有能打红旧实现的确定性断言"},
+    {"id": "D4", "topic": "posters/frames/waves 三族", "recommended": "明确拒绝（新码，名字待 MAIN 拍板）", "alternative": "收窄合同为 retained 非权威 —— 与 MAIN 指示冲突，不推荐"},
+    {"id": "D5", "topic": "A057-04 失败后的收紧", "recommended": "闩住 workspace 不确定性 + 隔离 producer + 重新准备视图", "alternative": "不闩住 —— 削弱 R07 cleanup_uncertainty，不推荐"},
+    {"id": "D6", "topic": "A057-01 新增 400 的可见性", "recommended": "接受（新增『非 origin-form 目标』这一种拒绝）", "alternative": "不接受 -> 只能靠 catch 兜底，与 MAIN 要求的 400 不符"}
+  ],
+  "not_run": [
+    "所有测试（vitest 未运行）",
+    "tsc --noEmit / vite build / 任何构建",
+    "Host 启动、HTTP 请求、浏览器绘制、ffprobe/ffmpeg",
+    "A057-01 的 ERR_INVALID_URL 运行时复现（仅引用 MAIN 已归档事实）",
+    "A057-04 的真实 45s JOB 超时复现",
+    "A057-02/03 的 rchar 观测与并发增长复现",
+    "A057-05/06 的真实读轮反例"
+  ],
+  "preserved": {
+    "original_17_requirements": "docs/evidence/N1N2/freeze-057/ORIGINAL_REQUIREMENTS.json 原样保留",
+    "gates": "7 条 gate 与全部失败证据保留；历史失败仍是历史",
+    "acceptance_claims": "无；本方案不宣称任何 requirement PASS，也不推进 S01/NativeAck/Studio/A 影片/V1"
+  },
+  "next": "等待 MAIN 的唯一 writer 与运行授权；实施后需冻结新 SHA、只重跑受影响门、并由未参与实现者独立复核。"
+}

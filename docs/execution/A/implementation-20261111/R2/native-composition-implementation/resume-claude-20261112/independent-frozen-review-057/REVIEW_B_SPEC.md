@@ -1,0 +1,16 @@
+你是未参与实现的独立Codex审查者。用户要求MAIN设计/审核/验收、Claude实现；当前仅独立审查，不能直接修代码或自称实现者外审。
+
+真实冻结仓库 W=/mnt/c/workspace/videoworkline/Narralens-agents/main-integration，branch agent-driven/main-a-integration，冻结commit 1d348d419120f23f45d958112ea8c43df5a04675，parent e2eff61b464d75d36598103d718cd2a75db5dfda，cached origin/main 304c89134fdf9f834f7d69e3f4d5c89a68044c60，未push/merge。工作树仅用户AGENTS改动和无关lane-media未跟踪记录留存；不要覆盖，不要求伪造clean。
+
+先gitshow读取冻结commit的docs/evidence/N1N2/freeze-057/README.md、SOURCE_SCOPE.json、ORIGINAL_REQUIREMENTS.json、TRACEABILITY.json、GATES.json、APPROVED015_RECHECK.json、SECURITY_SCAN_SCOPE.json；candidate包括28条source/test/tinyopaque fixturepaths和大量明确历史失败证据。MAIN已证明fullcapture626inputs与实际Git tree rawbytes完全一致，3个opaque为17/17/18字节而非真实媒体。实际fullcheck188files/2592PASS/1SKIP、Python8、两vite全绿；独立pnpm build包括validator--check也0；Expected85（原84保留+1）、两语义反事实baseline0/mutant1/restored0，实际媒体有MP4与manifest，不用数目代替覆盖。
+
+只读W与固定上游V=/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm；upstream e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3。Approved015在W/var/native-hydration-r2/managed-native-expected/dist，5个byteshash受保护不重建。可以读取公开源码/测试/contract/gitobjects和上述项目证据，不能读取用户配置/credentials/.env/全量env或联网。可用python/read/rg/gitshow/hash做纯只读核对；禁止tsximport生产代码、测试/构建/Host/browser/ffprobe/ffmpeg/mutation等业务运行，若必须重现先ask MAIN精确argv/资源范围，不伪造未执行结果。禁止Git add/commit/reset/stash/checkout/push、创建新worktree、修改W任何文件。只允许写你下面指定的C审查目录，勿改MAIN或另一审查者输出。
+
+该验收是N1N2 source-reader/capability/cache/lifetime组件，不是A轮整体、NativeAck/Studio就绪或V1。两条60–180秒真实中文A影片仍NOT_RUN、下一接线尚未实施；不能以30秒诊断片替代。原17项的NEXT要求必须在N1N2接受之后完成计划，当前明确pending，你的N1N2技术结论不能伪称NEXT已完成。独立验收条目由你当前实际审查结论支持；不得将NEXT未来状态抹掉或据此自签全部goal完成。原“十文件”计划是历史，后续021..056明确release扩展到实际SOURCE_SCOPE，需按当前真实范围核对，不盲用旧快照。
+
+产物必须写绑定完整SHA的REVIEW.md、MATRIX.json（原17项逐项proven/partial/unproven/pending-after-acceptance，具体source/actualtest/assertion/capture evidence）、FINDINGS.json（severity BLOCKER/MAJOR/MINOR/NOTE，真实path:line/调用可达性/违反具体合同/触发前提/最小修法或建议重现，不只空泛警告），结论N1N2_IMPLEMENTATION_PASS或REQUEST_CHANGES/REVIEW_PENDING，并列未执行业务runtime。不要只找明显问题就PASS，应尝试具体反例；也不要把无法在当前系统可达的假设当BLOCKER。参与实现者未参与这次代码编辑；你只审查。最终用worker_done向MAIN交文件路径/sha/结论，遇到需决策使用ask后结束turn。Orca工作区已直接收纳videoWorkLine同级，禁止new-child或多层目录。
+
+你的独立责任B：测试有效性、证据真实性与可复现性、历史Gate兼容。输出只能放 /mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/independent-frozen-review-057/review-b/。
+重点核对SOURCE_SCOPE28路径与gitdiff、626captured inputs与实际Git blob、opaque fixture确实在Git、原84断言保留且85实际通过、原17每项实际生产fixture/精确assertion而非mock替代。原生loader静态门别名/namespace/local/helper/未知producer/source路径来源规则必须既有牙又不自我假绿。LF04真正两项目同DB/实际foreign对象和真实先触发错误码、双方authority不变；LF03/PF03两变异真语义红+exact恢复，不是语法/缺模块。
+核对所有受采信artifact实际bytes/hash/manifest/capture/source绑定与stage，多MP4同内容是有意诊断结果不是不同作品；053001/002错误证据保留必须明确拒绝，依据054validity-index不可glob目录全部PASS。054/055/056各自产物不可混同。子进程测试是否真实超时/输出上限/取消/reap、真实导出完整decode与音频事实，不以耗时替代；headless owned-entry保持原规格和30s预算，旧CLI隔离不伪造UX通过。
+检查cleancheckout前提：Approved015与固定vendor仍是明确外部环境前提，不能写无需环境直接运行。核实repo中实际delivery能否重建N1N2并满足目标，分别描述环境前提与真正漏交付。默认full有一条committed-render-phases的REAL_TOOLS opt-in skip，不可写PASS；判断对本N1N2规格是否产生真实证据缺口。安全扫描固定规则0不是普遍无secret，核实实际payload选取/排除userAGENTS与无关draft，不读取任何secret进行证伪。大量历史失败是历史不活跃，按当前gate索引判定，不把旧红当当前红或旧错工件当active。

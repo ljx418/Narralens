@@ -1,0 +1,203 @@
+import {createHash,randomUUID} from 'node:crypto';
+import {constants,lstatSync,openSync,fstatSync,closeSync,realpathSync} from 'node:fs';
+import {link,lstat,open,realpath,unlink} from 'node:fs/promises';
+import type {BigIntStats} from 'node:fs';
+import {resolve,join,sep} from 'node:path';
+import type {DatabaseSync} from 'node:sqlite';
+import type {AssetLicense,AssetSource} from '../../contracts/types.js';
+import type {RevisionStore} from '../projects/revision-store.js';
+import type {ProjectCreationStore} from '../projects/project-creation-store.js';
+import type {TrustedCallerContext} from '../creative/product-repository.js';
+import {isTrustedCallerContext,ProductError} from '../creative/trusted-context.js';
+import {canonicalDigest,canonicalJson} from '../creative/digest.js';
+import {OperationIdempotencyStore} from '../projects/operation-idempotency-store.js';
+import {matchesFrozenSchemaNamespace} from './agent-schema-definition.js';
+import {CreativeProjectAuthority} from './creative-project-authority.js';
+import {runtimeRoot} from './owned-runtime.js';
+import {assertSafeRelativePath} from '../render/snapshot-copy.js';
+import {probeLocalMedia,type LocalMediaFacts} from './local-media-probe.js';
+import {asHostResourceError} from '../api-error.js';
+export interface LocalAssetInput {
+ readonly project_id:string;
+ readonly idempotency_key:string;
+ readonly relative_path:string;
+ readonly expected_sha256:string;
+ readonly kind:'video'|'audio';
+ readonly source:AssetSource;
+ readonly license:AssetLicense;
+ readonly recording_origin:'human_recording'|'synthetic'|'unknown'|null;
+ readonly attestation_ref:string;
+}
+export interface LocalAsset {
+ readonly project_id:string;
+ readonly asset_id:string;
+ readonly sha256:string;
+ readonly bytes:number;
+ readonly media:LocalMediaFacts;
+ readonly source:AssetSource;
+ readonly license:AssetLicense;
+ readonly rights_ref:string;
+ readonly registration_digest:string;
+ readonly attestation:{readonly operator_id:string;readonly session_ref:string;readonly source_message_ref:string;readonly recording_origin:LocalAssetInput['recording_origin'];readonly recorded_at:string};
+}
+export interface LocalAssetRegistryOptions {
+ readonly sourceRoot:string;
+ readonly storageRoot:string;
+ readonly projectsRoot:string;
+ readonly snapshotsRoot:string;
+ readonly boundary?:(point:'before_insert'|'after_insert'|'after_receipt'|'after_event')=>void;
+}
+const DDL=`CREATE TABLE IF NOT EXISTS created_local_asset(
+ project_id TEXT NOT NULL REFERENCES project_state(project_id),asset_id TEXT NOT NULL,
+ registration_digest TEXT NOT NULL CHECK(length(registration_digest)=64),
+ blob_token TEXT NOT NULL,fact_json TEXT NOT NULL CHECK(json_valid(fact_json)),fact_sha256 TEXT NOT NULL CHECK(length(fact_sha256)=64),
+ PRIMARY KEY(project_id,asset_id),UNIQUE(project_id,registration_digest));
+ CREATE TRIGGER IF NOT EXISTS created_local_asset_no_update BEFORE UPDATE ON created_local_asset BEGIN SELECT RAISE(ABORT,'IMMUTABLE_LOCAL_ASSET'); END;
+ CREATE TRIGGER IF NOT EXISTS created_local_asset_no_delete BEFORE DELETE ON created_local_asset BEGIN SELECT RAISE(ABORT,'IMMUTABLE_LOCAL_ASSET'); END;`;
+const ID=/^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$/;
+const SHA=/^[a-f0-9]{64}$/;
+const OP='agent.v1:local-asset.import';
+const MAX_BYTES=2*1024*1024*1024;
+const invalid=()=>new ProductError('INVALID_REQUEST','Invalid local asset input');
+const conflict=()=>new ProductError('REVISION_CONFLICT','Local asset facts or bytes changed');
+function keys(value:unknown,expected:string):boolean{return !!value&&typeof value==='object'&&!Array.isArray(value)&&Object.keys(value).sort().join(',')===expected;}
+function fingerprint(info:BigIntStats):string{return [info.dev,info.ino,info.size,info.mtimeNs,info.ctimeNs].join(':');}
+function core(asset:LocalAsset){return {project_id:asset.project_id,sha256:asset.sha256,bytes:asset.bytes,media:asset.media,source:asset.source,license:asset.license,recording_origin:asset.attestation.recording_origin,attestation_ref:asset.attestation.source_message_ref,operator_id:asset.attestation.operator_id};}
+/** Created-project input catalog, one shared database and the original command ledger.
+ * Host-only configuration fixes the readable directory. No public DTO can supply a root.
+ * Registrations prepare immutable inputs, never write author source or increment revision.
+ */
+export class LocalAssetRegistry {
+ readonly #db:DatabaseSync;
+ readonly #commands:OperationIdempotencyStore;
+ readonly #owner:CreativeProjectAuthority;
+ readonly #root:string;
+ readonly #objects:string;
+ readonly #staging:string;
+ readonly #sourceRoot:string;
+ readonly #sourceIdentity:string;
+ readonly #boundary:LocalAssetRegistryOptions['boundary'];
+ #schemaVersion=0;
+ constructor(private readonly revisions:RevisionStore,private readonly creation:ProjectCreationStore,private readonly options:LocalAssetRegistryOptions){
+  const storage=resolve(options.storageRoot),source=resolve(options.sourceRoot);
+  const overlaps=(a:string,b:string)=>a===b||a.startsWith(b+sep)||b.startsWith(a+sep);
+  if([options.projectsRoot,options.snapshotsRoot,source].some(root=>overlaps(storage,resolve(root))))throw new ProductError('CAPABILITY_UNAVAILABLE','Local asset storage overlaps a protected source or snapshot domain');
+  const sourceStat=lstatSync(source,{bigint:true});
+  if(!sourceStat.isDirectory()||sourceStat.isSymbolicLink()||realpathSync(source)!==source)throw new ProductError('CAPABILITY_UNAVAILABLE','The configured local input root is unavailable');
+  this.#sourceRoot=source;this.#sourceIdentity=[sourceStat.dev,sourceStat.ino].join(':');this.#boundary=options.boundary;
+  this.#root=runtimeRoot(storage);this.#objects=runtimeRoot(join(storage,'objects'));this.#staging=runtimeRoot(join(storage,'staging'));
+  this.#owner=new CreativeProjectAuthority(creation);this.#db=revisions.compose(db=>db);this.#commands=new OperationIdempotencyStore(this.#db);
+  if(this.#db.prepare("SELECT 1 FROM sqlite_schema WHERE name GLOB 'created_local_asset*' LIMIT 1").get()){
+   if(!matchesFrozenSchemaNamespace(this.#db,DDL,'created_local_asset'))throw conflict();
+  }else revisions.atomic(()=>{this.#db.exec(DDL);if(!matchesFrozenSchemaNamespace(this.#db,DDL,'created_local_asset'))throw conflict();});
+  this.#schemaVersion=Number(this.#db.prepare('PRAGMA schema_version').get()?.schema_version);
+ }
+ #assertSourceRoot(){
+  const st=lstatSync(this.#sourceRoot,{bigint:true});
+  if(!st.isDirectory()||st.isSymbolicLink()||realpathSync(this.#sourceRoot)!==this.#sourceRoot||[st.dev,st.ino].join(':')!==this.#sourceIdentity)throw conflict();
+ }
+ #schema(){const version=Number(this.#db.prepare('PRAGMA schema_version').get()?.schema_version);if(version!==this.#schemaVersion){if(!matchesFrozenSchemaNamespace(this.#db,DDL,'created_local_asset'))throw conflict();this.#schemaVersion=version;}}
+ #access(project:string,caller:TrustedCallerContext,write=false){
+  if(!isTrustedCallerContext(caller)||caller.channel==='native_bridge')throw new ProductError('UNAUTHORIZED','An authenticated owner is required');
+  if(write&&(caller.channel!=='trusted_ui'||caller.source!=='trusted_ui'))throw new ProductError('ORIGIN_REJECTED','Local rights registration needs a trusted user session');
+  this.#owner.assertOwner(project,caller.principal_id);this.#schema();
+ }
+ #validate(input:LocalAssetInput){
+  if(!keys(input,'attestation_ref,expected_sha256,idempotency_key,kind,license,project_id,recording_origin,relative_path,source')||!ID.test(input.project_id)||!ID.test(input.idempotency_key)||!ID.test(input.attestation_ref)||!SHA.test(input.expected_sha256)||!['audio','video'].includes(input.kind))throw invalid();
+  try{assertSafeRelativePath(input.relative_path);}catch{throw invalid();}
+  if(!keys(input.license,'commercial_use,label,status')||!['cleared','restricted','unknown'].includes(input.license.status)||typeof input.license.commercial_use!=='boolean'||typeof input.license.label!=='string'||input.license.label.length<1||input.license.label.length>2000)throw invalid();
+  const source=input.source;
+  if(!source||!['owned','generated','licensed','derived'].includes(source.kind)||typeof source.label!=='string'||!source.label||source.label.length>2000)throw invalid();
+  if(source.kind==='derived'){
+   if(!keys(source,'kind,label,lineage')||!Array.isArray(source.lineage)||source.lineage.length<1||source.lineage.some(id=>!ID.test(id)))throw invalid();
+   for(const id of source.lineage)if(!this.#db.prepare('SELECT 1 FROM created_local_asset WHERE project_id=? AND asset_id=?').get(input.project_id,id))throw invalid();
+  }else if(!keys(source,'kind,label')&&!keys(source,'kind,label,uri')||('uri' in source&&typeof source.uri!=='string'))throw invalid();
+  if(input.kind==='video'?input.recording_origin!==null:!['human_recording','synthetic','unknown'].includes(String(input.recording_origin)))throw invalid();
+ }
+ #row(project:string,assetId:string):{asset:LocalAsset;token:string}|null {
+  this.#schema();const row=this.#db.prepare('SELECT * FROM created_local_asset WHERE project_id=? AND asset_id=?').get(project,assetId);if(!row)return null;
+  const asset=JSON.parse(String(row.fact_json)) as LocalAsset;
+  if(!keys(asset,'asset_id,attestation,bytes,license,media,project_id,registration_digest,rights_ref,sha256,source')||canonicalDigest(asset)!==row.fact_sha256||asset.project_id!==project||asset.asset_id!==assetId||canonicalDigest(core(asset))!==row.registration_digest||asset.registration_digest!==row.registration_digest||asset.asset_id!=='asset_'+asset.registration_digest.slice(0,56)||asset.rights_ref!=='rights_'+asset.registration_digest.slice(0,56))throw conflict();
+  const token=String(row.blob_token);if(token!==asset.sha256+'.'+asset.media.extension||!/^([a-f0-9]{64})\.(mp4|wav|m4a|mp3|flac|ogg)$/.test(token))throw conflict();
+  return {asset,token};
+ }
+ list(project:string,caller:TrustedCallerContext):LocalAsset[]{this.#access(project,caller);return this.#db.prepare('SELECT asset_id FROM created_local_asset WHERE project_id=? ORDER BY asset_id').all(project).map(row=>this.#row(project,String(row.asset_id))!.asset);}
+ #replay(input:LocalAssetInput,digest:string):LocalAsset|null {
+  const found=this.#commands.recall(input.project_id,OP,input.idempotency_key);if(!found)return null;
+  if(found.request_digest!==digest)throw new ProductError('IDEMPOTENCY_CONFLICT','The local asset key belongs to different input');
+  const response=JSON.parse(found.response_json) as LocalAsset;const stored=this.#row(input.project_id,response.asset_id);
+  if(!stored||canonicalDigest(stored.asset)!==canonicalDigest(response))throw conflict();return stored.asset;
+ }
+ async import(input:LocalAssetInput,caller:TrustedCallerContext,signal?:AbortSignal):Promise<LocalAsset>{
+  try{
+   if(!isTrustedCallerContext(caller))throw new ProductError('UNAUTHORIZED','An authenticated owner is required');
+   return await this.#import(JSON.parse(canonicalJson(input)) as LocalAssetInput,Object.freeze({...caller}),signal);
+  }catch(error){
+   if(error instanceof ProductError)throw error;
+   if(asHostResourceError(error))throw new ProductError('HOST_RESOURCE_EXHAUSTED','Local asset import could not complete');
+   throw new ProductError('CAPABILITY_UNAVAILABLE','Local asset import is unavailable');
+  }
+ }
+ async #import(input:LocalAssetInput,caller:TrustedCallerContext,signal?:AbortSignal):Promise<LocalAsset>{
+  this.#access(input.project_id,caller,true);this.#validate(input);signal?.throwIfAborted();
+  const digest=canonicalDigest({input,principal_id:caller.principal_id}),prior=this.#replay(input,digest);if(prior)return prior;
+  this.#assertSourceRoot();const path=resolve(this.#sourceRoot,input.relative_path);
+  if(!path.startsWith(this.#sourceRoot+sep)||await realpath(path)!==path)throw invalid();
+  const source=await open(path,constants.O_RDONLY|constants.O_NOFOLLOW|constants.O_NONBLOCK),staging=join(this.#staging,randomUUID()+'.input');
+  try{
+   const before=await source.stat({bigint:true});if(!before.isFile()||before.size<1||before.size>BigInt(MAX_BYTES))throw invalid();
+   const target=await open(staging,'wx',0o600),hash=createHash('sha256');let bytes=0;
+   try{
+    const buffer=Buffer.alloc(1024*1024);while(true){signal?.throwIfAborted();const part=await source.read(buffer,0,buffer.length,null);if(!part.bytesRead)break;bytes+=part.bytesRead;if(bytes>MAX_BYTES)throw invalid();hash.update(buffer.subarray(0,part.bytesRead));await target.writeFile(buffer.subarray(0,part.bytesRead));}await target.sync();
+   }finally{await target.close();}
+   if(hash.digest('hex')!==input.expected_sha256||fingerprint(before)!==fingerprint(await source.stat({bigint:true}))||await realpath(path)!==path)throw conflict();
+   this.#assertSourceRoot();
+   const current=this.revisions.activeCommit(input.project_id);if(!current)throw conflict();
+   const fact=this.creation.sourceFact(input.project_id,current.snapshot_id);if(!fact)throw conflict();
+   const media=await probeLocalMedia(staging,input.kind,input.expected_sha256,fact.fps,signal);
+   // The decoder was given a private regular file, not the external input path.
+   const proven=await this.#hashFile(staging,input.expected_sha256);if(proven.size!==BigInt(bytes))throw conflict();
+   const base={project_id:input.project_id,sha256:input.expected_sha256,bytes,media,source:input.source,license:input.license,recording_origin:input.recording_origin,attestation_ref:input.attestation_ref,operator_id:caller.principal_id};
+   const registration_digest=canonicalDigest(base),asset_id='asset_'+registration_digest.slice(0,56),rights_ref='rights_'+registration_digest.slice(0,56);
+   const asset:LocalAsset={project_id:input.project_id,asset_id,sha256:input.expected_sha256,bytes,media,source:input.source,license:input.license,rights_ref,registration_digest,attestation:{operator_id:caller.principal_id,session_ref:caller.session_ref,source_message_ref:input.attestation_ref,recording_origin:input.recording_origin,recorded_at:new Date().toISOString()}};
+   const token=input.expected_sha256+'.'+media.extension,destination=join(this.#objects,token);
+   try{await link(staging,destination);}catch(error){if(!(error&&typeof error==='object'&&'code' in error&&error.code==='EEXIST'))throw error;}
+   const blobProof=await this.#hashFile(destination,input.expected_sha256,true);
+   await this.#syncDirectory(this.#objects);await this.#syncDirectory(this.#root);
+   return this.revisions.atomic(()=>{
+    signal?.throwIfAborted();this.#access(input.project_id,caller,true);const replay=this.#replay(input,digest);if(replay)return replay;
+    this.#boundary?.('before_insert');
+    const existing=this.#row(input.project_id,asset_id);
+    if(existing&&canonicalDigest(core(existing.asset))!==registration_digest)throw conflict();
+    const response=existing?.asset??asset;
+    if(!existing)this.#db.prepare('INSERT INTO created_local_asset VALUES(?,?,?,?,?,?)').run(input.project_id,asset_id,registration_digest,token,canonicalJson(asset),canonicalDigest(asset));
+    this.#boundary?.('after_insert');
+    this.#commands.record({projectId:input.project_id,operationKind:OP,idempotencyKey:input.idempotency_key,requestDigest:digest,response});this.#boundary?.('after_receipt');
+    if(!existing)this.revisions.enqueueOutbox('asset.local.registered',input.project_id,canonicalJson({asset_id,registration_digest,kind:media.kind,rights_ref,recording_origin:input.recording_origin}));
+    this.#boundary?.('after_event');
+    this.#assertBlob(destination,blobProof);this.#assertSourceRoot();this.#access(input.project_id,caller,true);signal?.throwIfAborted();return response;
+   });
+  }finally{await source.close();await unlink(staging).catch(()=>undefined);}
+ }
+ async #syncDirectory(path:string){
+  if(await realpath(path)!==path)throw conflict();
+  const handle=await open(path,constants.O_RDONLY|constants.O_DIRECTORY|constants.O_NOFOLLOW|constants.O_NONBLOCK);
+  try{if(!(await handle.stat()).isDirectory())throw conflict();await handle.sync();}finally{await handle.close();}
+ }
+ async #hashFile(path:string,expected:string,synchronize=false):Promise<BigIntStats>{
+  if(await realpath(path)!==path)throw conflict();const handle=await open(path,constants.O_RDONLY|constants.O_NOFOLLOW|constants.O_NONBLOCK);
+  try{
+   const before=await handle.stat({bigint:true});if(!before.isFile()||before.size<1||before.size>BigInt(MAX_BYTES))throw conflict();
+   const hash=createHash('sha256'),buffer=Buffer.alloc(1024*1024);while(true){const part=await handle.read(buffer,0,buffer.length,null);if(!part.bytesRead)break;hash.update(buffer.subarray(0,part.bytesRead));}
+   if(hash.digest('hex')!==expected||fingerprint(before)!==fingerprint(await handle.stat({bigint:true}))||await realpath(path)!==path)throw conflict();if(synchronize)await handle.sync();return before;
+  }finally{await handle.close();}
+ }
+ #assertBlob(path:string,proof:BigIntStats){
+  if(realpathSync(path)!==path||lstatSync(path).isSymbolicLink())throw conflict();const fd=openSync(path,constants.O_RDONLY|constants.O_NOFOLLOW|constants.O_NONBLOCK);
+  try{const current=fstatSync(fd,{bigint:true});if(!current.isFile()||fingerprint(current)!==fingerprint(proof))throw conflict();}finally{closeSync(fd);}
+ }
+ async resolve(project:string,assetId:string,caller:TrustedCallerContext):Promise<{asset:LocalAsset;absolute_path:string}>{
+  this.#access(project,caller);const row=this.#row(project,assetId);if(!row)throw new ProductError('NOT_FOUND','Local asset not found');
+  const path=join(this.#objects,row.token);await this.#hashFile(path,row.asset.sha256);this.#access(project,caller);return {asset:row.asset,absolute_path:path};
+ }
+}

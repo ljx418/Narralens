@@ -1,0 +1,426 @@
+{
+  "verdict": "REQUEST_CHANGES",
+  "review_kind": "independent static source review only",
+  "base_head": "1d348d419120f23f45d958112ea8c43df5a04675",
+  "binding": "repair-060p1r-review/INPUT_SNAPSHOT.json current uncommitted bytes; not new frozen commit",
+  "findings": [
+    {
+      "id": "P1R-C01",
+      "severity": "BLOCKER",
+      "title": "Three independent startup defects prevent every normal rev3 handshake",
+      "path": "src/adapters/openfilm/cache-process-custodian.py",
+      "line": 465,
+      "related_locations": [
+        "src/adapters/openfilm/cache-process-custodian.py:368-395",
+        "src/adapters/openfilm/cache-process-custodian.py:517",
+        "src/adapters/openfilm/cache-process-supervisor.ts:825-828",
+        "src/adapters/openfilm/cache-process-supervisor.ts:982-988"
+      ],
+      "concrete_trigger": "Any normal draw on the required Linux baseline: prctl.argtypes declares argument2 c_ulong but GET passes ctypes.byref(value); after correcting that, first _send increments absent self.sequence; after both fixes, Host spawn omits detached:true and Python never setsid itself, while handshake insists C.pgid=C.sid=C.pid.",
+      "production_reachability": "factory.pageFrame -> supervisor.start/#run -> Python Custodian.run -> enable_subreaper -> _send(C_HELLO). These are mandatory ordinary paths, not synthetic producer behavior.",
+      "impact": "GET conversion raises ctypes.ArgumentError before the kernel GET call; self.sequence is never initialized and would raise AttributeError before HELLO; C inherits Host group/session and is rejected by its own parent even if HELLO is emitted. No normal positive draw is available.",
+      "violated_contract": "ADR rev3 sections1/2: SET/GET before fork, independent C session/group, verified C_HELLO; ISO01/09/18.",
+      "minimal_fix": "Correct ctypes GET pointer conversion/signature and storage type; initialize sequence explicitly; make C actually obtain its independent SID/PGID before HELLO with an explicit single selected approach and preserve Host/N separation. Do not weaken the identity checks.",
+      "counterfactual_test_to_run_only_after_authorization": "First pure structural checks, then exact no-browser authorized C startup: actual GET=1, seq1 HELLO, child.pid=HELLO.pid, ppid=Host, sid=pgid=C.pid; assert no N fork before GO-for-fork. Each current defect must fail its own control, not merely a broad rejection.",
+      "prior_findings": [
+        "P1-F01",
+        "P1-F05"
+      ],
+      "review_runtime": "NOT_RUN; source reasoning only"
+    },
+    {
+      "id": "P1R-C02",
+      "severity": "BLOCKER",
+      "title": "Exec-status pipe blocks the custodian forever and erases exec failures",
+      "path": "src/adapters/openfilm/cache-process-custodian.py",
+      "line": 726,
+      "related_locations": [
+        "src/adapters/openfilm/cache-process-custodian.py:624-628",
+        "src/adapters/openfilm/cache-process-custodian.py:648-653",
+        "src/adapters/openfilm/cache-process-custodian.py:668-685",
+        "src/adapters/openfilm/cache-process-custodian.py:687-707",
+        "src/adapters/openfilm/cache-process-custodian.py:929"
+      ],
+      "concrete_trigger": "After fixing C01, first AUTHORIZE_FORK reaches _read_exec_status. Parent C still owns exec_write returned from _spawn_worker and never closes it. N closes every fd>3 before exec, including exec_write, so later _exec_fail cannot report an execve error.",
+      "production_reachability": "C control selector directly calls synchronous _authorize_fork; os.read(exec_read,64) is blocking before FORKED and outside the selector/deadline loop.",
+      "impact": "On successful exec the read cannot get EOF because C holds its own write end. C cannot consume CANCEL/Host EOF or enter its cleanup loop; its TERM handler only sets a flag while the read is restarted. Host eventually KILLs its reaper and can strand N. On exec failure an empty status is also treated as success and OSError is converted to empty bytes.",
+      "violated_contract": "Private contract B exec-status CLOEXEC and EOF responsibility; rev3 F06/preHELLO cleanup.",
+      "minimal_fix": "C closes its exec_write immediately after fork; N preserves that descriptor through setup and only CLOEXEC closes it on successful exec; failure writes errno then exits. Consume exec status nonblocking in the same cancel/deadline selector, retain known/unknown errors and actual child wait ownership.",
+      "counterfactual_test_to_run_only_after_authorization": "Authorized non-browser normal exec, missing worker entry, pre-exec setsid failure, child stalled before exec, Host EOF while waiting: verify exact status and C remains able to clean/reap. Test must fail current retained-writer deadlock and cannot pass on a READY timeout alone.",
+      "prior_findings": [
+        "P1-F05",
+        "P1-F06"
+      ],
+      "review_runtime": "NOT_RUN; source reasoning only"
+    },
+    {
+      "id": "P1R-C03",
+      "severity": "MAJOR",
+      "title": "Custodian puts itself in the target gone proof, so a successful receipt is impossible",
+      "path": "src/adapters/openfilm/cache-process-custodian.py",
+      "line": 905,
+      "related_locations": [
+        "src/adapters/openfilm/cache-process-custodian.py:375",
+        "src/adapters/openfilm/cache-process-custodian.py:601-610",
+        "src/adapters/openfilm/cache-process-custodian.py:841-850",
+        "src/adapters/openfilm/cache-process-custodian.py:878-890"
+      ],
+      "concrete_trigger": "Every C run records C identity at905; _known_identities_gone later iterates that same identity map while C is alive and building its final receipt.",
+      "production_reachability": "Normal finalize -> _settle_domain -> _known_identities_gone. Current startup issues mask but do not remove this mandatory contradiction.",
+      "impact": "known_ids_gone is always false for C itself; even a fully reaped N tree produces outcome unknown/exit4. C must be outside the target execution domain; Host observes C exit afterwards. The map also never records live Chrome/adopted identities before reaping them.",
+      "violated_contract": "ADR ordered proof: target identities gone then C receipt and C close; separate C/N roles.",
+      "minimal_fix": "Separate custodian identity from target resource identities and gather/check target/adopted identities under bounded records. C may certify only the N domain; Host independently waits C. Do not drop genuine target records to make the counter zero.",
+      "counterfactual_test_to_run_only_after_authorization": "Authorized normal helper with no descendants and then one adopted descendant: expect target gone receipt while C is still alive, followed by actual C close; no self-identity in target gone predicate.",
+      "prior_findings": [
+        "P1-F02"
+      ],
+      "review_runtime": "NOT_RUN; source reasoning only"
+    },
+    {
+      "id": "P1R-C04",
+      "severity": "MAJOR",
+      "title": "Leader exit suppresses KILL for live TERM-ignoring descendants; reaper exits early",
+      "path": "src/adapters/openfilm/cache-process-custodian.py",
+      "line": 865,
+      "related_locations": [
+        "src/adapters/openfilm/cache-process-custodian.py:770-821",
+        "src/adapters/openfilm/cache-process-custodian.py:826-839",
+        "src/adapters/openfilm/cache-process-custodian.py:872-886",
+        "src/adapters/openfilm/cache-process-custodian.py:976-978",
+        "src/adapters/openfilm/cache-process-custodian.py:939-942"
+      ],
+      "concrete_trigger": "N exits on TERM or already died, while an actual child in N group ignores TERM. _wait_for_worker_exit returns true, so KILL is skipped even though that child lives. _final_reap reaps N immediately after one adopted sweep.",
+      "production_reachability": "Normal cancel/finalize of the real process topology; mandatory ISO09 orphan variant. It does not require malicious native escape.",
+      "impact": "C releases the anchor before all target members are terminal, checks ECHILD only once, and returns4/exits with the child still alive or newly-zombie. Adoption races can similarly produce unknown rather than another wait/reap cycle. The surviving reaper that was meant to close normal ISO09 is voluntarily destroyed.",
+      "violated_contract": "ADR1 TERM/KILL target domain, adopted children first, leader last, all waits/ECHILD, ordinary TERM-ignore must close.",
+      "minimal_fix": "Drive TERM/KILL by the entire verified target group/owned adopted-child state, not only N exit. Retain N WNOWAIT anchor until every other execution/reap is complete; continue collection/reaping through adoption races, reap N last and verify ECHILD repeatedly. C must not exit while owned work is live; genuine inability keeps it as responsible owner.",
+      "counterfactual_test_to_run_only_after_authorization": "Actual N exits TERM plus real grandchild ignores TERM; actual N ignores TERM plus child; N spontaneously exits before finalization; delayed adoption. Require KILL of remaining owned work, waitpid of every adopted identity before N final wait, then C close and zero residual including Z.",
+      "prior_findings": [
+        "P1-F02",
+        "P1-F05",
+        "P1-F06"
+      ],
+      "review_runtime": "NOT_RUN; source reasoning only"
+    },
+    {
+      "id": "P1R-C05",
+      "severity": "MAJOR",
+      "title": "Group signal chooses unverified current pgrp and can signal custodian/Host group",
+      "path": "src/adapters/openfilm/cache-process-custodian.py",
+      "line": 858,
+      "related_locations": [
+        "src/adapters/openfilm/cache-process-custodian.py:638-641",
+        "src/adapters/openfilm/cache-process-custodian.py:709-730",
+        "src/adapters/openfilm/cache-process-custodian.py:754-760",
+        "src/adapters/openfilm/cache-process-custodian.py:863-868",
+        "src/adapters/openfilm/cache-process-custodian.py:221-248"
+      ],
+      "concrete_trigger": "N fails setsid or stops before it, so it still belongs to C group (and with current non-detached C to Host group). Cleanup reads this pgrp and immediately signals it. Unknown identity likewise falls back to a bare worker_pid group without proving a valid target session/anchor.",
+      "production_reachability": "PreHELLO/setsid failure is an explicit rev3/P2a failure boundary. Cleanup calls happen even when N handshake was never accepted; current startup defects mask the branch until individually fixed.",
+      "impact": "TERM may hit C or Host/peer group instead of just N; signal results are discarded and no complete PID/startticks/SID/PGID + retained-parent authority gate is checked for each signal. group_exists converts miscellaneous OSError to false and direct_children read errors to empty, contrary to conservative unknown rules.",
+      "violated_contract": "ADR2 pre-setsid direct-child-only handling, F05 no foreign group signals, F02 unknown is not gone.",
+      "minimal_fix": "Commit a target group only after actual setsid/session verification under the unreaped child authority. Before that, terminate/reap only the exact unreaped direct child. Every group signal must verify the recorded full target epoch and retained anchor; preserve errors/unknown instead of guessing gone.",
+      "counterfactual_test_to_run_only_after_authorization": "Authorized controlled bootstrap setsid failure/stall and untrusted HELLO: capture signal targets and assert C/Host/peer receive none; actual direct child is reaped. Inject proc EACCES/EIO and killpg non-ESRCH errors; no success receipt or foreign signal.",
+      "prior_findings": [
+        "P1-F02",
+        "P1-F05"
+      ],
+      "review_runtime": "NOT_RUN; source reasoning only"
+    },
+    {
+      "id": "P1R-C06",
+      "severity": "MAJOR",
+      "title": "Execution can settle without any valid reaping receipt or preHELLO target proof",
+      "path": "src/adapters/openfilm/cache-process-supervisor.ts",
+      "line": 1223,
+      "related_locations": [
+        "src/adapters/openfilm/cache-process-supervisor.ts:698-742",
+        "src/adapters/openfilm/cache-process-supervisor.ts:1180-1185",
+        "src/adapters/openfilm/cache-process-supervisor.ts:1230-1253",
+        "src/adapters/openfilm/cache-process-supervisor.ts:910-914",
+        "src/adapters/openfilm/cache-process-supervisor.ts:1290-1303"
+      ],
+      "concrete_trigger": "After a candidate C sends DOMAIN_REAPED outcome unknown/false ECHILD/diagnostics_lost and exits4 while the observed group happens to be gone; parent only checks kind and fresh group. Or C is killed during FORKED wait before facts.worker is set, and a real preHELLO fault child has closed its inherited draw endpoint but remains alive (so C close is observable despite live N).",
+      "production_reachability": "Normal return and held reconcile both reuse incomplete proof; #terminate itself can KILL C. In the preHELLO case facts.worker=null skips every target check.",
+      "impact": "facts.receipt is stored but never validated by #proveDomainGone or reconcile: no protocol/draw/C/N identity/seq/event digest/outcome/ECHILD/exit status checks. With worker=null, C close alone makes true even if C already forked N. PRE/scope can be released without a live reaper or complete execution proof.",
+      "violated_contract": "ADR F02/F03/F05/F09 and private contract A/C: matching complete receipt + actual C close + fresh target evidence; C death is failclosed.",
+      "minimal_fix": "One shared strict execution-proof function must validate bound final receipt/event chain, actual C exit/close, all target identities and known/unknown status. Maintain fork-authority facts before N HELLO; missing receipt or unexpected C death holds responsibility, not child-only success. Avoid automatically KILLing C before owned tree is reaped.",
+      "counterfactual_test_to_run_only_after_authorization": "Actual C dies after fork before N HELLO; refused/foreign/truncated/unknown receipt; receipt seq/digest mismatch; nonzero C exit; known escaped identity; held reconcile. All must keep PRE/scope until full legitimate proof, even if one sampled group is empty.",
+      "prior_findings": [
+        "P1-F02",
+        "P1-F03",
+        "P1-F05",
+        "P1-F09"
+      ],
+      "review_runtime": "NOT_RUN; source reasoning only"
+    },
+    {
+      "id": "P1R-C07",
+      "severity": "MAJOR",
+      "title": "Budget enforcement is bypassed by decoded-frame queues and flood-drain loops",
+      "path": "src/adapters/openfilm/cache-process-supervisor.ts",
+      "line": 874,
+      "related_locations": [
+        "src/adapters/openfilm/cache-process-supervisor.ts:869-885",
+        "src/adapters/openfilm/cache-process-supervisor.ts:851-859",
+        "src/adapters/openfilm/cache-process-supervisor.ts:1134",
+        "src/adapters/openfilm/openfilm-cache-worker.mjs:135-173",
+        "src/adapters/openfilm/cache-process-custodian.py:575-597",
+        "src/adapters/openfilm/cache-process-custodian.py:377",
+        "src/adapters/openfilm/cache-process-custodian.py:964-965"
+      ],
+      "concrete_trigger": "A real fault worker continuously emits valid small frames while the current stage has no consumer, or emits stdout continuously and ignores TERM. Decoders empty bytes into unbounded controlFrames/drawFrames; C loops reading stdout until EAGAIN and appends one signal string per excess chunk.",
+      "production_reachability": "ISO08 is an explicit private fault boundary, not a public network exploit. The production listeners receive every chunk from their actual worker.",
+      "impact": "Overall queued frames/bytes are unbounded even though decoder tail is bounded. Host stdout overflow only sets flooded and is checked once after JPEG; later/pre-result floods do not immediately clean. C stream loop can starve selectors/CANCEL and never escalate KILL, while signals/waits grow and final receipt is unsegmented. Worker receiving no waiter likewise has no aggregate bound.",
+      "violated_contract": "Private contract C total-buffer/stage/frame/queue limits, immediate all-phase flood failure and 512 bounded identities/events; F07.",
+      "minimal_fix": "Bound both decoded queues and partial buffers by phase/count/bytes; active failure/cancel latch on every diagnostic/decoder event. Limit per-loop reads to allow timers/wait processing; flood enters one monotonic termination state and escalates to KILL. Use bounded segmented event receipts with digest, not unbounded arrays.",
+      "counterfactual_test_to_run_only_after_authorization": "Actual valid-frame flood without waiter, metadata+max JPEG positive control, pre-result and post-candidate stdout/stderr flood, TERM-ignore flood. Assert bounded peak queues and actual C/N reaping, not just rejection or log tail.",
+      "prior_findings": [
+        "P1-F06",
+        "P1-F07"
+      ],
+      "review_runtime": "NOT_RUN; source reasoning only"
+    },
+    {
+      "id": "P1R-C08",
+      "severity": "MAJOR",
+      "title": "Nonblocking control writer drops partial-frame tails and final receipts",
+      "path": "src/adapters/openfilm/cache-process-custodian.py",
+      "line": 504,
+      "related_locations": [
+        "src/adapters/openfilm/cache-process-custodian.py:511-515",
+        "src/adapters/openfilm/cache-process-custodian.py:487-490",
+        "src/adapters/openfilm/cache-process-custodian.py:976-978",
+        "src/adapters/openfilm/cache-process-custodian.py:668-685"
+      ],
+      "concrete_trigger": "Under real control-channel backpressure os.write returns 0<sent<len(body). _flush_control removes the entire frame and subtracts its full length. On EAGAIN at final receipt it immediately returns from run and exits instead of draining the reserved final output. C also retains its draw fd3 copy after fork.",
+      "production_reachability": "All control HELLO/FORKED/final receipts use this writer. Backpressure/Host EOF are required P2a cases; not an arbitrary external writer.",
+      "impact": "Host sees corrupted length framing or misses the final proof; C staying on Node draw socket prevents true N EOF. Reserved bytes do not reserve a frame slot, so a full16-frame queue can drop terminal receipt. Claims of single-owner EOF and bounded final receipt are not implemented.",
+      "violated_contract": "Private contract B EOF and descriptor ownership; C terminal reserve/backpressure/sequence evidence.",
+      "minimal_fix": "Track per-frame offset and decrement actual bytes only; retain unsent suffix, watch writable events without blocking wait/kill, and finish bounded receipt transmission or explicitly report non-success EOF. Reserve terminal frame capacity separately. C closes fd3 immediately after passing it to N; no stale socket duplicates.",
+      "counterfactual_test_to_run_only_after_authorization": "Pause Host control reads and force short writes/EAGAIN with real pipes, then resume: exact seq/frame/digest transcript must survive. Exit N while C lives: Host sees real draw EOF. Disconnect Host: C still reaps before non-success exit.",
+      "prior_findings": [
+        "P1-F06",
+        "P1-F07"
+      ],
+      "review_runtime": "NOT_RUN; source reasoning only"
+    },
+    {
+      "id": "P1R-C09",
+      "severity": "MAJOR",
+      "title": "Candidate freezes failure latch and cleanup holding can loop forever on its own array",
+      "path": "src/adapters/openfilm/cache-process-supervisor.ts",
+      "line": 763,
+      "related_locations": [
+        "src/adapters/openfilm/cache-process-supervisor.ts:765",
+        "src/adapters/openfilm/cache-process-supervisor.ts:781",
+        "src/adapters/openfilm/cache-process-supervisor.ts:797-798",
+        "src/adapters/openfilm/cache-process-supervisor.ts:910-914",
+        "src/adapters/openfilm/cache-process-supervisor.ts:1139-1156",
+        "src/adapters/openfilm/cache-process-supervisor.ts:1168-1172"
+      ],
+      "concrete_trigger": "After valid JPEG sets latched.kind=candidate, a later timeout/protocol/cleanup failure calls #latchFailure, which returns without recording it. If #proveDomainGone pushes a failure, #holdForCleanup(facts,facts.cleanup) iterates that same array while pushing into it.",
+      "production_reachability": "Post-candidate finalization and real unknown-cleanup branches of factory production; not just diagnostic methods.",
+      "impact": "Later known failure is ignored instead of overriding an unadopted candidate; exit observations are only strings and never decide success. With any cleanup failure the self-extending for-of does not terminate and can synchronously exhaust Host memory, preventing the promised pending barrier or cleanup inspection.",
+      "violated_contract": "ADR F04/F06/F09: candidate is not irrevocable success, first actual failure/cancel wins, unknown must retain a usable responsibility.",
+      "minimal_fix": "Permit transition candidate->failure until final delivery; latch exit/protocol/cancel/budget failures at observation. Copy/deduplicate cleanup causes rather than append while iterating the same live array; keep genuine objects and bounded diagnostics.",
+      "counterfactual_test_to_run_only_after_authorization": "Valid JPEG followed by fatal/late flood/timeout/pre-finalize abnormal exit must produce zero picture/witness. Actual cleanup-unknown with one genuine failure must return an inspectable held state promptly, preserve failure once and later reconcile to original failure.",
+      "prior_findings": [
+        "P1-F04",
+        "P1-F06",
+        "P1-F09"
+      ],
+      "review_runtime": "NOT_RUN; source reasoning only"
+    },
+    {
+      "id": "P1R-C10",
+      "severity": "MAJOR",
+      "title": "Per-draw private HOME/XDG run root and safe cleanup are absent",
+      "path": "src/adapters/openfilm/cache-process-supervisor.ts",
+      "line": 805,
+      "related_locations": [
+        "src/adapters/openfilm/cache-process-custodian.py:349-357",
+        "src/adapters/openfilm/openfilm-cache-worker.mjs:390",
+        "src/adapters/openfilm/openfilm-upstream.ts:526-533"
+      ],
+      "concrete_trigger": "Every draw copies Host HOME/TMP/XDG values into C, which copies them into N unchanged. No per-draw owned directory is constructed or passed; worker only sets NARRALENS_OPENFILM_ROOT.",
+      "production_reachability": "Ordinary child environment construction before all fixed module/browser activity.",
+      "impact": "Children use shared/user namespace instead of the private contract run root; no owned directory record or settled-vs-UNKNOWN retention/deletion path exists. I did not read actual environment/user configuration and do not claim an observed secret leak.",
+      "violated_contract": "Private contract D explicit owned child HOME/XDG/user-data run root, no user config reads and cleanup only after real settlement.",
+      "minimal_fix": "Create an owned private run directory before launch, pass only approved child env rooted there (without mutating Host env), record responsibility and clean only after full execution/parent settlement; retain on unknown. Cover child profile/temp/runtime namespaces actually used by fixed dependencies.",
+      "counterfactual_test_to_run_only_after_authorization": "Authorized environment-inspection helper reports only safe owned path metadata, not env dump: two draws have independent child roots; normal/error cleanup removes only own path after actual close; unknown preserves it; user home untouched.",
+      "prior_findings": [
+        "P1-F02",
+        "P1-F06"
+      ],
+      "review_runtime": "NOT_RUN; source reasoning only"
+    },
+    {
+      "id": "P1R-C11",
+      "severity": "MAJOR",
+      "title": "Written P2a pilots neither prove reaping nor guarantee failure cleanup",
+      "path": "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts",
+      "line": 65,
+      "related_locations": [
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts:53-79",
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts:85-115",
+        "tests/agent-driven/integration/helpers/cache-worker-fixture.mjs:150-220",
+        "tests/agent-driven/integration/helpers/cache-probe-fixture.mjs:82-95",
+        "tests/agent-driven/integration/cache-frame-duration-lifetime.test.ts:68-93"
+      ],
+      "concrete_trigger": "Lifecycle normal test starts nativeSourceFixture (which calls real ffmpeg through preparedDraftFixture) but actually runs FIXTURE_PATH and expects any rejection, not a positive real worker. Helper result uses go.ticket_digest though GO contains ticket; foreign-hello scenario never changes HELLO; half-jpeg sends a complete shorter frame. Probe live modes unref their only timer and await an unresolved top-level promise, so they need not stay alive as claimed.",
+      "production_reachability": "These are exactly the report-suggested initial non-browser P2a commands; current normal startup failures can satisfy broad rejects without reaching any desired fault boundary.",
+      "impact": "No successful baseline, no actual adopted grandchild in ignore-term, no waitid/waitpid/domain receipt assertions. Test assertion/timeouts can skip cleanup because kills are after expects rather than in finally; afterEach deletes directories despite unknown/live processes. Probe tests do not record parent error/exit/close/callback kernel order and omit live signal-error/real ffprobe cases. Running proposed suite as-is is not safe or decisive pilot evidence.",
+      "violated_contract": "ADR P2a ownership-safe unconditional cleanup, authentic non-browser fault controls, ISO09 Z/adoption and Q2 event proof; no counts/rejects substitute coverage.",
+      "minimal_fix": "Prepare an explicit no-media positive helper baseline using the real C protocol and correct digest; make fault mode observable before intended boundary; keep helpers genuinely alive; use real child+grandchild TERM-ignore, event/identity receipts and peer controls. Register owners immediately, use finally cleanup with precise identities and actual close/reap, preserve unknown dirs. Split fixture-only P2a from Host/media/Chrome lanes.",
+      "counterfactual_test_to_run_only_after_authorization": "Before grant, static-check helper mode/ticket wiring and cleanup paths. Then tightly authorized positive baseline followed by each deliberate fault with exact expected primary and complete C/N/adopted wait receipts; prove current broad-rejection tests would not pass a never-forked worker. Probe test must survive failed assertion without leaving helper.",
+      "prior_findings": [
+        "P1-F05",
+        "P1-F06",
+        "P1-F07",
+        "P1-F09"
+      ],
+      "review_runtime": "NOT_RUN; source reasoning only"
+    }
+  ],
+  "prior_F01_F11_recheck": [
+    {
+      "id": "P1-F01",
+      "assessment": "Basic PID/state bug visibly changed in TS/Node/Python; not whole runtime acceptance. New mandatory C startup defects C01/C02 prevent success; exact decimal startticks still converted through JS Number."
+    },
+    {
+      "id": "P1-F02",
+      "assessment": "TS gone/known/unknown and actual custodianClosed boolean added; full proof still unsafe (C03/C04/C05/C06), Python errno handling remains lossy."
+    },
+    {
+      "id": "P1-F03",
+      "assessment": "Issuer/held/run-handover checks added; reconcile still skips receipt and complete domain facts (C06)."
+    },
+    {
+      "id": "P1-F04",
+      "assessment": "Responsibility/handle wiring exists, but post-candidate failure latch and cleanup-held infinite append not closed (C09); no operational lifecycle demonstrated."
+    },
+    {
+      "id": "P1-F05",
+      "assessment": "Two-tier normal field comparison added but C group never established; C cleanup can target unverified pgrp and preHELLO proof is incomplete (C01/C02/C05/C06)."
+    },
+    {
+      "id": "P1-F06",
+      "assessment": "JPEG wait now uses outer deadline; READY restarted independently three times, blocking C exec-status bypasses all timers; cleanup hold loop can hang Host (C02/C09). No actual timeout loop closed."
+    },
+    {
+      "id": "P1-F07",
+      "assessment": "Bounded decoder tail exists; total decoded queues, worker receiver, all-phase flood handling and partial writes remain broken (C07/C08)."
+    },
+    {
+      "id": "P1-F08",
+      "assessment": "Synchronous responsibility registration and queued abort/draining recheck visibly added; full owner lifecycle still blocked by execution findings; not accepted by this focused static review."
+    },
+    {
+      "id": "P1-F09",
+      "assessment": "Not repaired: candidate prevents later failure latch; C/N exit/protocol/final receipt not validated (C06/C09)."
+    },
+    {
+      "id": "P1-F10",
+      "assessment": "Source error no longer settles close promise, error/destroy failures retained; actual source/probe/drain runtime still NOT_RUN and custom source error-to-destroy behavior needs affected review."
+    },
+    {
+      "id": "P1-F11",
+      "assessment": "Pilot now reads actual self.identity.pgid; change present, actual detached/C group proof absent. New pilot quality defects C11 remain."
+    }
+  ],
+  "business_runtime": "ALL_NOT_RUN",
+  "original17": "retained; not reaccepted",
+  "ISO01_18": [
+    {
+      "id": "ISO-01",
+      "runtime": "NOT_RUN",
+      "claim": "No kernel/FD/reaping/Chrome/full gate acceptance"
+    },
+    {
+      "id": "ISO-02",
+      "runtime": "NOT_RUN",
+      "claim": "No kernel/FD/reaping/Chrome/full gate acceptance"
+    },
+    {
+      "id": "ISO-03",
+      "runtime": "NOT_RUN",
+      "claim": "No kernel/FD/reaping/Chrome/full gate acceptance"
+    },
+    {
+      "id": "ISO-04",
+      "runtime": "NOT_RUN",
+      "claim": "No kernel/FD/reaping/Chrome/full gate acceptance"
+    },
+    {
+      "id": "ISO-05",
+      "runtime": "NOT_RUN",
+      "claim": "No kernel/FD/reaping/Chrome/full gate acceptance"
+    },
+    {
+      "id": "ISO-06",
+      "runtime": "NOT_RUN",
+      "claim": "No kernel/FD/reaping/Chrome/full gate acceptance"
+    },
+    {
+      "id": "ISO-07",
+      "runtime": "NOT_RUN",
+      "claim": "No kernel/FD/reaping/Chrome/full gate acceptance"
+    },
+    {
+      "id": "ISO-08",
+      "runtime": "NOT_RUN",
+      "claim": "No kernel/FD/reaping/Chrome/full gate acceptance"
+    },
+    {
+      "id": "ISO-09",
+      "runtime": "NOT_RUN",
+      "claim": "No kernel/FD/reaping/Chrome/full gate acceptance"
+    },
+    {
+      "id": "ISO-10",
+      "runtime": "NOT_RUN",
+      "claim": "No kernel/FD/reaping/Chrome/full gate acceptance"
+    },
+    {
+      "id": "ISO-11",
+      "runtime": "NOT_RUN",
+      "claim": "No kernel/FD/reaping/Chrome/full gate acceptance"
+    },
+    {
+      "id": "ISO-12",
+      "runtime": "NOT_RUN",
+      "claim": "No kernel/FD/reaping/Chrome/full gate acceptance"
+    },
+    {
+      "id": "ISO-13",
+      "runtime": "NOT_RUN",
+      "claim": "No kernel/FD/reaping/Chrome/full gate acceptance"
+    },
+    {
+      "id": "ISO-14",
+      "runtime": "NOT_RUN",
+      "claim": "No kernel/FD/reaping/Chrome/full gate acceptance"
+    },
+    {
+      "id": "ISO-15",
+      "runtime": "NOT_RUN",
+      "claim": "No kernel/FD/reaping/Chrome/full gate acceptance"
+    },
+    {
+      "id": "ISO-16",
+      "runtime": "NOT_RUN",
+      "claim": "No kernel/FD/reaping/Chrome/full gate acceptance"
+    },
+    {
+      "id": "ISO-17",
+      "runtime": "NOT_RUN",
+      "claim": "No kernel/FD/reaping/Chrome/full gate acceptance"
+    },
+    {
+      "id": "ISO-18",
+      "runtime": "NOT_RUN",
+      "claim": "No kernel/FD/reaping/Chrome/full gate acceptance"
+    }
+  ]
+}

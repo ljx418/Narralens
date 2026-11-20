@@ -1,0 +1,31 @@
+{
+  "upstream_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+  "patch_sha256": "71135c54f97672d698e9d24741b67f7e98fca4900757b7484ec9d324a06c867a",
+  "files": [
+    {
+      "path": "packages/openfilm/studio/ui/src/lib/host.ts",
+      "pre_sha256": "84b6b549a80a695d68a0915681b865f0a22c7e49b8533fc5d8d889ef8a966053",
+      "post_sha256": "39860da114016dfee4dec65bcce28a94d4f35dececfd86cdb7a2f0d78a1abf4b"
+    },
+    {
+      "path": "packages/openfilm/studio/ui/src/editor/use-film.ts",
+      "pre_sha256": "8e88ca064e0a3e5292523952fff567101da0170418641d6e02400772c974dc26",
+      "post_sha256": "b68d40c3630c41ffa2339bdcc70ec0e478fc4e06d62ef1109ebee814d0f0fc95"
+    },
+    {
+      "path": "packages/openfilm/studio/ui/src/components/ProjectView.tsx",
+      "pre_sha256": "1dd6e2e7330924897299e082e7a0a962319da16238d8063b72b9ccd2276dc405",
+      "post_sha256": "0344b39cbad1356651b31a8ac72d881cfbf2e92ecbd4fce8a8057f5747a92d70"
+    },
+    {
+      "path": "packages/openfilm/studio/ui/src/lib/media-queue.ts",
+      "pre_sha256": "104eaa8d1b260ca64b38557c59524dbd847f5fb98c0a089b13f515bc2f724724",
+      "post_sha256": "669b2add59d9cdbe2e53a438fd0de47f717f35ef6d7879bd13bb2c36ad474d25"
+    }
+  ],
+  "status": "CANDIDATE_UI_TYPES_AND_BUILD_EXIT_0",
+  "build": "EXIT_0",
+  "browser": "NOT_RUN",
+  "typecheck": "EXIT_0",
+  "independent_review": "PENDING"
+}

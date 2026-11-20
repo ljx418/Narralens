@@ -1,0 +1,104 @@
+{
+  "verdict": "ACCEPT",
+  "scope": "BOUNDED recovery-family ownership filters and ADR regression evolution only",
+  "candidate": "e2eff61b464d75d36598103d718cd2a75db5dfda",
+  "blocking_findings": [],
+  "independence": "Reviewer authored earlier architectural advice, did not implement current five-file candidate",
+  "tests": {
+    "pure": "55 PASS (family32+scheduler23)",
+    "typecheck": "full tsc exit0",
+    "host": "2 PASS/33 filtered, actual graceful Host close/reopen on adversarial persisted rows, not SIGKILL"
+  },
+  "capture_results": {
+    "commands": [
+      {
+        "argv": [
+          "corepack",
+          "pnpm",
+          "exec",
+          "vitest",
+          "run",
+          "--config",
+          "vitest.config.ts",
+          "tests/agent-driven/integration/controlled-recovery-families.test.ts",
+          "tests/agent-driven/integration/controlled-recovery-scheduler.test.ts"
+        ],
+        "cwd": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+        "start": 1794458131.765273,
+        "pid": 515981,
+        "pgid": 515981,
+        "exit": 0,
+        "end": 1794458157.1453247,
+        "stdout_sha256": "e40dcd54a6da1077f6b9a2ae2be216b4d01ae3dad7546f4dfe91758ef2c0375c",
+        "stderr_sha256": "6dff167d9ddb7aebb5f2cd84d98a118f1b82b0ccb9a49b29efb71f95de21d9be",
+        "remaining_process_group_pids": []
+      },
+      {
+        "argv": [
+          "corepack",
+          "pnpm",
+          "exec",
+          "tsc",
+          "--noEmit"
+        ],
+        "cwd": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+        "start": 1794458157.1540976,
+        "pid": 516747,
+        "pgid": 516747,
+        "exit": 0,
+        "end": 1794458181.4647138,
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "remaining_process_group_pids": []
+      },
+      {
+        "argv": [
+          "corepack",
+          "pnpm",
+          "exec",
+          "vitest",
+          "run",
+          "--config",
+          "vitest.config.ts",
+          "tests/wave2/m4b/adoption-route.test.ts",
+          "-t",
+          "owned adoption marker|unparseable unknown request"
+        ],
+        "cwd": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+        "start": 1794458181.4720547,
+        "pid": 517579,
+        "pgid": 517579,
+        "exit": 0,
+        "end": 1794458206.5938494,
+        "stdout_sha256": "eac6826b5b25d852ba000ffd458d3cccace9096dc578b4389b241269cd21286e",
+        "stderr_sha256": "9385b4334ab5de2bfa84171caabe255d9a2e654366341bc9b054a5474b77f1da",
+        "remaining_process_group_pids": []
+      }
+    ],
+    "unchanged": true
+  },
+  "preservation": {
+    "tracked_input_files": 648,
+    "historical_evidence_files": 57,
+    "head_index_agents_and_inputs_unchanged": true,
+    "source_edits": false,
+    "index_edits": false
+  },
+  "resource": "R2-RECOVERY-OWNERSHIP-INDEPENDENT-REAL-001 returned; all own commands terminal and process groups empty",
+  "not_run": [
+    "whole Host composition/scheduler wiring",
+    "NativeSourcePort and actual selection integration",
+    "SIGKILL",
+    "full adoption route suite",
+    "D10/PRODUCT full reruns",
+    "films/export/A/human acceptance"
+  ],
+  "log_manifest": {
+    "host-003.stderr": "9385b4334ab5de2bfa84171caabe255d9a2e654366341bc9b054a5474b77f1da",
+    "host-003.stdout": "eac6826b5b25d852ba000ffd458d3cccace9096dc578b4389b241269cd21286e",
+    "pure-001.stderr": "6dff167d9ddb7aebb5f2cd84d98a118f1b82b0ccb9a49b29efb71f95de21d9be",
+    "pure-001.stdout": "e40dcd54a6da1077f6b9a2ae2be216b4d01ae3dad7546f4dfe91758ef2c0375c",
+    "type-002.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "type-002.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

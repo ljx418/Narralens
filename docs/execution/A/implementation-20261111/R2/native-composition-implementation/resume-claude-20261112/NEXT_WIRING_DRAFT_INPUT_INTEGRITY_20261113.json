@@ -1,0 +1,105 @@
+{
+  "at": "2026-11-13T01:53:02.833437+00:00",
+  "purpose": "Draft integrity only, not business acceptance or release",
+  "checks": [
+    {
+      "class": "input",
+      "path": "docs/execution/A/implementation-20261111/R2/shared-selection-authority-design/CONTRACT.md",
+      "matches": true
+    },
+    {
+      "class": "input",
+      "path": "docs/execution/A/implementation-20261111/R2/shared-selection-authority-design/ACCEPTANCE_AND_RELEASE.json",
+      "matches": true
+    },
+    {
+      "class": "input",
+      "path": "docs/execution/A/implementation-20261111/R2/native-source-composition-design/CONTRACTS_AND_OWNERSHIP.md",
+      "matches": true
+    },
+    {
+      "class": "input",
+      "path": "docs/execution/A/implementation-20261111/R2/native-source-composition-design/DEVELOPMENT_AND_ACCEPTANCE.md",
+      "matches": true
+    },
+    {
+      "class": "input",
+      "path": "docs/execution/A/implementation-20261111/R2/host-recovery-composition-review/ACCEPTANCE_CASES.md",
+      "matches": true
+    },
+    {
+      "class": "input",
+      "path": "docs/execution/A/implementation-20261111/R2/host-recovery-composition-review/RELEASE_RECOMMENDATION.json",
+      "matches": true
+    },
+    {
+      "class": "input",
+      "path": "docs/execution/A/implementation-20261111/R2/native-source-composition-design/DESIGN.md",
+      "matches": true
+    },
+    {
+      "class": "input",
+      "path": "docs/execution/A/implementation-20261111/R2/native-composition-implementation/MAIN_DECISIONS.md",
+      "matches": true
+    },
+    {
+      "class": "input",
+      "path": "docs/execution/A/implementation-20261111/R2/native-composition-implementation/S01_MAIN_REVIEW_CHECKPOINTS.md",
+      "matches": true
+    },
+    {
+      "class": "input",
+      "path": "docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/G01_G07_MAIN_DESIGN_CONSTRAINTS.md",
+      "matches": true
+    },
+    {
+      "class": "input",
+      "path": "docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/G01_G07_CONSOLIDATED_014_RELEASE.md",
+      "matches": true
+    },
+    {
+      "class": "input",
+      "path": "docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/G01_G07_CONSOLIDATED_014_RELEASE.json",
+      "matches": true
+    },
+    {
+      "class": "package",
+      "path": "00_READ_FIRST.md",
+      "matches": true
+    },
+    {
+      "class": "package",
+      "path": "01_CONTRACT.md",
+      "matches": true
+    },
+    {
+      "class": "package",
+      "path": "02_DEVELOPMENT_AND_ACCEPTANCE.md",
+      "matches": true
+    },
+    {
+      "class": "package",
+      "path": "03_CLAUDE_HANDOFF.md",
+      "matches": true
+    },
+    {
+      "class": "package",
+      "path": "04_PATHS_PORTS_AND_PRODUCERS.md",
+      "matches": true
+    },
+    {
+      "class": "package",
+      "path": "05_LIFECYCLE_AND_NATIVE_CACHE_ROUTES.md",
+      "matches": true
+    },
+    {
+      "class": "package",
+      "path": "06_REVIEW_PUBLICATION_SCHEMA_PROPOSAL.md",
+      "matches": true
+    }
+  ],
+  "mismatches": [],
+  "release": false,
+  "accepted_native_commit": null,
+  "reanchor_note": "NEXT_WIRING_REANCHOR_REQUIREMENTS_20261113.md"
+}

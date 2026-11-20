@@ -1,0 +1,36 @@
+{
+  "contract": {
+    "path": "docs/process/01_DELIVERY_SPEC.md",
+    "sha256": "0d81c568da5ada4633a2e463552b6ff3f554c0a5e85daee71aa1e50799c65345"
+  },
+  "source": [
+    {
+      "path": "tools/check-delivery-spec.py",
+      "sha256": "fe467996d6509cc299088c9beaf63b730c9dfaf38a42e63f1adac5364d027a85"
+    }
+  ],
+  "required_cases": [
+    "C06-BIND",
+    "C06-ONESHOT",
+    "C06-ORDER",
+    "C06-WAIT",
+    "C06-EPOCH",
+    "C06-PARENT",
+    "C06-BOUND",
+    "C06-EXEC",
+    "C07-LATE",
+    "C07-EOF",
+    "C07-EIO",
+    "C07-CHANNEL",
+    "C08-OVERFLOW",
+    "C08-END",
+    "C08-HOLD",
+    "C08-LATEWAIT",
+    "C08-FORGE",
+    "R5-REG"
+  ],
+  "format": "narralens.delivery-release@1",
+  "purpose": "Authoritative metadata inventory, not product implementation permission",
+  "source_write_release": false,
+  "runtime_release": false
+}

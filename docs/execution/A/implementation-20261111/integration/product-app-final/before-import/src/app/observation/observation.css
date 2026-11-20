@@ -1,0 +1,420 @@
+/*
+ * The PRODUCT observation surfaces: the R4 workflow bar, the task detail dialog, the
+ * creative review panel and the content views.
+ *
+ * The palette and the type scale are the approved R4 prototype's, so the new components
+ * sit next to the existing editor without looking like a second application:
+ *
+ *   --nl-bg      #f5f4f1    --nl-surface #fffaf3   --nl-ink   #241b12
+ *   --nl-muted   #605448    --nl-border #b6a894   --nl-accent #0f6b67
+ *   --nl-soft    #e9f2ef
+ *
+ * Every interactive element keeps a visible focus ring (the R4 prototype's 3px #9b4f00),
+ * the text keeps its contrast against the surface, and the layout stays usable at 390px
+ * where only the review is expected to work.
+ */
+
+.nl-topbar,
+.nl-review {
+  --nl-bg: #f5f4f1;
+  --nl-surface: #fffaf3;
+  --nl-ink: #241b12;
+  --nl-muted: #605448;
+  --nl-border: #b6a894;
+  --nl-accent: #0f6b67;
+  --nl-soft: #e9f2ef;
+  --nl-focus: #9b4f00;
+  color: var(--nl-ink);
+  background: var(--nl-surface);
+  font: 14px/1.55 system-ui, "Microsoft YaHei UI", sans-serif;
+}
+
+.nl-topbar {
+  border-bottom: 1px solid var(--nl-border);
+}
+
+.nl-topbar-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px;
+  min-height: 60px;
+}
+
+.nl-topbar-summary {
+  flex: 1;
+  min-width: 0;
+}
+
+.nl-topbar-summary strong,
+.nl-topbar-summary span {
+  display: block;
+}
+
+.nl-topbar-summary strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nl-topbar-summary span {
+  font-size: 12px;
+  color: var(--nl-muted);
+}
+
+.nl-stage-rail {
+  display: flex;
+  list-style: none;
+  gap: 24px;
+  overflow-x: auto;
+  margin: 0;
+  padding: 10px 16px 4px;
+}
+
+.nl-stage-rail li {
+  white-space: nowrap;
+}
+
+.nl-stage {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 6px 2px;
+  background: transparent;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  color: var(--nl-ink);
+  cursor: pointer;
+  font: inherit;
+}
+
+.nl-stage-name {
+  font-weight: 600;
+}
+
+.nl-stage-state {
+  font-size: 12px;
+  color: var(--nl-muted);
+}
+
+.nl-stage[aria-current="step"] {
+  border-bottom-color: var(--nl-accent);
+}
+
+.nl-stage[aria-current="step"] .nl-stage-name {
+  color: var(--nl-accent);
+}
+
+.nl-stage-succeeded .nl-stage-name {
+  color: #326347;
+}
+
+.nl-stage-failed .nl-stage-name,
+.nl-stage-stale .nl-stage-name {
+  color: #8c2f1f;
+}
+
+.nl-stage:hover {
+  background: var(--nl-soft);
+}
+
+.nl-stage-hint {
+  margin: 0;
+  padding: 0 16px 10px;
+  font-size: 12px;
+  color: var(--nl-muted);
+}
+
+/* The task detail dialog. */
+
+.nl-dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgb(36 27 18 / 45%);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 48px 16px;
+  z-index: 40;
+}
+
+.nl-dialog {
+  width: min(560px, 100%);
+  max-height: 80vh;
+  overflow: auto;
+  padding: 16px 18px;
+  background: var(--nl-surface);
+  border: 1px solid var(--nl-border);
+  border-radius: 6px;
+}
+
+.nl-dialog-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.nl-dialog-head h2 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.nl-task-facts {
+  display: grid;
+  grid-template-columns: 84px 1fr;
+  gap: 8px 12px;
+  margin: 16px 0;
+  font-size: 13px;
+}
+
+.nl-task-facts dt {
+  color: var(--nl-muted);
+}
+
+.nl-task-facts dd {
+  margin: 0;
+  word-break: break-word;
+}
+
+.nl-dialog-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border-top: 1px solid var(--nl-border);
+  padding-top: 12px;
+}
+
+.nl-muted {
+  color: var(--nl-muted);
+  font-size: 12px;
+  margin: 0;
+}
+
+/* The review panel. */
+
+.nl-review {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  border-left: 1px solid var(--nl-border);
+}
+
+.nl-review-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 14px 16px 10px;
+  border-bottom: 1px solid var(--nl-border);
+}
+
+.nl-review-head h2 {
+  margin: 2px 0 4px;
+  font-size: 18px;
+}
+
+.nl-result-label {
+  color: var(--nl-accent);
+  font-size: 12px;
+}
+
+.nl-review-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 14px 16px;
+}
+
+.nl-parts {
+  list-style: none;
+  margin: 8px 0 12px;
+  padding: 0;
+}
+
+.nl-part {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 8px 0;
+  border-bottom: 1px solid #d5cbbf;
+}
+
+.nl-part-kind {
+  min-width: 72px;
+  font-weight: 600;
+}
+
+.nl-review-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 12px 16px;
+  border-top: 1px solid var(--nl-border);
+  background: var(--nl-bg);
+}
+
+.nl-review-actions .nl-muted {
+  flex-basis: 100%;
+}
+
+/* The content views. */
+
+.nl-content-view {
+  margin-bottom: 18px;
+}
+
+.nl-content-view h3 {
+  margin: 0 0 8px;
+  font-size: 16px;
+}
+
+.nl-facts {
+  display: grid;
+  grid-template-columns: 76px 1fr;
+  gap: 6px 12px;
+  margin: 0;
+  font-size: 13px;
+}
+
+.nl-facts dt {
+  color: var(--nl-muted);
+}
+
+.nl-facts dd {
+  margin: 0;
+}
+
+.nl-paragraphs,
+.nl-shots {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.nl-paragraphs li,
+.nl-shots li {
+  margin-bottom: 10px;
+}
+
+.nl-paragraphs p,
+.nl-shots p {
+  margin: 2px 0;
+}
+
+.nl-native-sync {
+  font-size: 12px;
+  color: var(--nl-muted);
+  margin: 6px 0 0;
+}
+
+.nl-native-sync-loaded {
+  color: #326347;
+}
+
+.nl-native-sync-pending {
+  color: var(--nl-muted);
+}
+
+.nl-native-sync-unknown {
+  color: #8c2f1f;
+}
+
+/* Controls. */
+
+.nl-topbar button,
+.nl-review button,
+.nl-system-panel button {
+  background: transparent;
+  border: 1px solid var(--nl-border);
+  border-radius: 5px;
+  padding: 7px 10px;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.nl-topbar button:hover:not(:disabled),
+.nl-review button:hover:not(:disabled),
+.nl-system-panel button:hover:not(:disabled) {
+  background: var(--nl-soft);
+}
+
+.nl-topbar button:disabled,
+.nl-review button:disabled,
+.nl-system-panel button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.nl-primary {
+  background: var(--nl-accent);
+  border-color: var(--nl-accent);
+  color: #fff;
+}
+
+.nl-primary:hover:not(:disabled) {
+  background: #09534f;
+}
+
+.nl-topbar button:focus-visible,
+.nl-review button:focus-visible,
+.nl-review a:focus-visible,
+.nl-system-panel button:focus-visible,
+.nl-dialog h2:focus-visible {
+  outline: 3px solid var(--nl-focus);
+  outline-offset: 3px;
+}
+
+/* 390px: only the review has to work, and it has to work readably. */
+
+@media (max-width: 700px) {
+  .nl-topbar-head {
+    flex-wrap: wrap;
+  }
+
+  .nl-topbar-summary {
+    flex-basis: 100%;
+  }
+
+  .nl-stage-rail {
+    gap: 18px;
+  }
+
+  .nl-dialog-backdrop {
+    padding: 16px 12px;
+    align-items: flex-start;
+  }
+
+  .nl-task-facts {
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+
+  .nl-task-facts dt {
+    margin-top: 8px;
+  }
+
+  .nl-review-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .nl-review-actions button {
+    min-height: 42px;
+  }
+
+  .nl-parts .nl-part {
+    flex-direction: column;
+    gap: 2px;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .nl-stage {
+    transition: border-color 120ms ease-out;
+  }
+}

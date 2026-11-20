@@ -1,0 +1,355 @@
+{
+  "id": "N1N2_021_CONDITIONAL_RUNTIME_022",
+  "at": "2026-11-13T00:58:51.046953+00:00",
+  "request": "msg_e096c77df5f0",
+  "dispatch": "ctx_297f7b8da2e1",
+  "cwd": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+  "baseline": "e2eff61b464d75d36598103d718cd2a75db5dfda",
+  "status": "GRANTED_SERIAL_CONDITIONAL_STOP_ON_FIRST_FAILURE",
+  "compile": {
+    "capture": "n1n2-claude-021-tsc-007",
+    "actual": {
+      "exit": 0,
+      "source_changed": [],
+      "source_added": [],
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "finished_at": "2026-11-13T00:56:36.011932+00:00"
+    }
+  },
+  "source_byte_backups": {
+    "src/host/agent-driven/retained-native-closure.ts": {
+      "sha256": "210b4653c98985e062bebe17fec185bf7ada8fada60538c87863ec4ce8010471",
+      "bytes": 62256,
+      "path": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/210b4653c98985e062bebe17fec185bf7ada8fada60538c87863ec4ce8010471.txt"
+    },
+    "src/host/agent-driven/native-cache-witness.ts": {
+      "sha256": "85b1e804b3956165a6f8e171aa1fb8800cd8337290ad2d16ac05d3906ba2501a",
+      "bytes": 11561,
+      "path": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/85b1e804b3956165a6f8e171aa1fb8800cd8337290ad2d16ac05d3906ba2501a.txt"
+    },
+    "src/host/agent-driven/created-native-workspace.ts": {
+      "sha256": "32d5adae9d737b6799f20531e50956413a619e048a8f2f225fccb064205afbd2",
+      "bytes": 49130,
+      "path": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/32d5adae9d737b6799f20531e50956413a619e048a8f2f225fccb064205afbd2.txt"
+    },
+    "src/host/agent-driven/created-native-source-reader.ts": {
+      "sha256": "919648425c0a9a461efa56007e31d4a247d4ef198d2fef21f0122711af81f781",
+      "bytes": 75519,
+      "path": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/919648425c0a9a461efa56007e31d4a247d4ef198d2fef21f0122711af81f781.txt"
+    },
+    "src/host/agent-driven/committed-snapshot-authority.ts": {
+      "sha256": "1c53360e3c618c603cfcbe61d0c2d57004c5bd33dc26a92c2fdec72a1844bd6d",
+      "bytes": 44087,
+      "path": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/1c53360e3c618c603cfcbe61d0c2d57004c5bd33dc26a92c2fdec72a1844bd6d.txt"
+    },
+    "src/host/m5/openfilm-native-expected.ts": {
+      "sha256": "19110e45a83b6d5b611b4260620ce873f923f1e5a5b907bc6176c4b734fbeed3",
+      "bytes": 47279,
+      "path": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/19110e45a83b6d5b611b4260620ce873f923f1e5a5b907bc6176c4b734fbeed3.txt"
+    },
+    "src/adapters/openfilm/openfilm-upstream.ts": {
+      "sha256": "850234a5c29a0dd742f51d7a8d591abe4ba01e68a0b3755838099f94b1bf9b16",
+      "bytes": 20696,
+      "path": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/850234a5c29a0dd742f51d7a8d591abe4ba01e68a0b3755838099f94b1bf9b16.txt"
+    },
+    "tests/agent-driven/integration/native-cache-witness.test.ts": {
+      "sha256": "f5012264004edef4d20e6bb60adabaf091c7a8f55fadf5f389f77b82eac71760",
+      "bytes": 41172,
+      "path": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/f5012264004edef4d20e6bb60adabaf091c7a8f55fadf5f389f77b82eac71760.txt"
+    },
+    "tests/agent-driven/integration/created-native-source-reader.test.ts": {
+      "sha256": "7c604257365582b23ee3663e04e71cf6e648586994b2ad0d5d08b80bc664c784",
+      "bytes": 150381,
+      "path": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/7c604257365582b23ee3663e04e71cf6e648586994b2ad0d5d08b80bc664c784.txt"
+    },
+    "tests/agent-driven/integration/helpers/native-source-fixture.ts": {
+      "sha256": "a1bab66fa52fe6f54bd3a42427cad6a0a979ff6be1b81668ba04df7cb98f9a1e",
+      "bytes": 21985,
+      "path": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/a1bab66fa52fe6f54bd3a42427cad6a0a979ff6be1b81668ba04df7cb98f9a1e.txt"
+    },
+    "tests/agent-driven/integration/helpers/created-draft-fixture.ts": {
+      "sha256": "d006ef9679d095b5b8f50d45ec99a35c549064a6bd7c6cb4c224559d58bb4fa1",
+      "bytes": 13766,
+      "path": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/d006ef9679d095b5b8f50d45ec99a35c549064a6bd7c6cb4c224559d58bb4fa1.txt"
+    },
+    "tests/agent-driven/integration/created-native-workspace.test.ts": {
+      "sha256": "439d469032c9af2b83ceb826e0aead7cf5c2fe5c5693be7cbf18c8e67f0f615f",
+      "bytes": 12700,
+      "path": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/439d469032c9af2b83ceb826e0aead7cf5c2fe5c5693be7cbf18c8e67f0f615f.txt"
+    },
+    "tests/agent-driven/integration/committed-snapshot-host.test.ts": {
+      "sha256": "bfd0c6373b254050d32a6a99e7b6f8b9827dc24b6b2587515ab4c5aad2cd9037",
+      "bytes": 12061,
+      "path": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/bfd0c6373b254050d32a6a99e7b6f8b9827dc24b6b2587515ab4c5aad2cd9037.txt"
+    },
+    "tests/agent-driven/integration/created-native-ack.test.ts": {
+      "sha256": "5f50db85c7c07a2ecf4faefc20ec2ec6c7ad4910fafe549c2edc76bbad729c7c",
+      "bytes": 134160,
+      "path": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/source-captures/5f50db85c7c07a2ecf4faefc20ec2ec6c7ad4910fafe549c2edc76bbad729c7c.txt"
+    }
+  },
+  "source_sha256": {
+    "src/host/agent-driven/retained-native-closure.ts": "210b4653c98985e062bebe17fec185bf7ada8fada60538c87863ec4ce8010471",
+    "src/host/agent-driven/native-cache-witness.ts": "85b1e804b3956165a6f8e171aa1fb8800cd8337290ad2d16ac05d3906ba2501a",
+    "src/host/agent-driven/created-native-workspace.ts": "32d5adae9d737b6799f20531e50956413a619e048a8f2f225fccb064205afbd2",
+    "src/host/agent-driven/created-native-source-reader.ts": "919648425c0a9a461efa56007e31d4a247d4ef198d2fef21f0122711af81f781",
+    "src/host/agent-driven/committed-snapshot-authority.ts": "1c53360e3c618c603cfcbe61d0c2d57004c5bd33dc26a92c2fdec72a1844bd6d",
+    "src/host/m5/openfilm-native-expected.ts": "19110e45a83b6d5b611b4260620ce873f923f1e5a5b907bc6176c4b734fbeed3",
+    "src/adapters/openfilm/openfilm-upstream.ts": "850234a5c29a0dd742f51d7a8d591abe4ba01e68a0b3755838099f94b1bf9b16",
+    "tests/agent-driven/integration/native-cache-witness.test.ts": "f5012264004edef4d20e6bb60adabaf091c7a8f55fadf5f389f77b82eac71760",
+    "tests/agent-driven/integration/created-native-source-reader.test.ts": "7c604257365582b23ee3663e04e71cf6e648586994b2ad0d5d08b80bc664c784",
+    "tests/agent-driven/integration/helpers/native-source-fixture.ts": "a1bab66fa52fe6f54bd3a42427cad6a0a979ff6be1b81668ba04df7cb98f9a1e",
+    "tests/agent-driven/integration/helpers/created-draft-fixture.ts": "d006ef9679d095b5b8f50d45ec99a35c549064a6bd7c6cb4c224559d58bb4fa1",
+    "tests/agent-driven/integration/created-native-workspace.test.ts": "439d469032c9af2b83ceb826e0aead7cf5c2fe5c5693be7cbf18c8e67f0f615f",
+    "tests/agent-driven/integration/committed-snapshot-host.test.ts": "bfd0c6373b254050d32a6a99e7b6f8b9827dc24b6b2587515ab4c5aad2cd9037",
+    "tests/agent-driven/integration/created-native-ack.test.ts": "5f50db85c7c07a2ecf4faefc20ec2ec6c7ad4910fafe549c2edc76bbad729c7c"
+  },
+  "historical_child_INDEX_drift": {
+    "tests/agent-driven/integration/native-cache-witness.test.ts": {
+      "historical_index": "3dbd6229d273f4f30adcbe80fcf6140cc84ed58e18cf2e51b9154a4bf4d16dfa",
+      "actual007_and_request": "f5012264004edef4d20e6bb60adabaf091c7a8f55fadf5f389f77b82eac71760"
+    },
+    "tests/agent-driven/integration/created-native-source-reader.test.ts": {
+      "historical_index": "41bc3696af99072861d872957b055065308c399dde50cba39ecf1047921ede21",
+      "actual007_and_request": "7c604257365582b23ee3663e04e71cf6e648586994b2ad0d5d08b80bc664c784"
+    }
+  },
+  "authority": "Actual current bytes independently equal007 compile and updated request; original childINDEX not silently treated as new. All current blobs exist verified.",
+  "steps": [
+    {
+      "id": "A1",
+      "capture": "n1n2-claude-021-run-A1",
+      "argv": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "vitest",
+        "run",
+        "--config",
+        "vitest.config.ts",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts",
+        "-t",
+        "K02-a|K02-b|K02-c|K06-a|K06-b|K06-c|K06-d|K06-e"
+      ],
+      "kind": "HEAVY",
+      "expected_cases_if_reported": 8,
+      "requires": "All prior commands exit0, no drift, own cleanup certain; otherwise STOP remainder"
+    },
+    {
+      "id": "A2",
+      "capture": "n1n2-claude-021-run-A2",
+      "argv": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "vitest",
+        "run",
+        "--config",
+        "vitest.config.ts",
+        "tests/agent-driven/integration/native-cache-witness.test.ts",
+        "-t",
+        "K01-a|K01-b|K01-c|K01-d|K03-a|K03-b|K05-a|B0-3|B0-5"
+      ],
+      "kind": "HEAVY",
+      "expected_cases_if_reported": 9,
+      "requires": "All prior commands exit0, no drift, own cleanup certain; otherwise STOP remainder"
+    },
+    {
+      "id": "A3",
+      "capture": "n1n2-claude-021-run-A3",
+      "argv": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "vitest",
+        "run",
+        "--config",
+        "vitest.config.ts",
+        "tests/agent-driven/integration/native-cache-witness.test.ts",
+        "-t",
+        "B0-1|B0-2|B0-4|K04-a|K04-b|K05-b"
+      ],
+      "kind": "HEADLESS_BROWSER",
+      "expected_cases_if_reported": 6,
+      "requires": "All prior commands exit0, no drift, own cleanup certain; otherwise STOP remainder"
+    },
+    {
+      "id": "B1",
+      "capture": "n1n2-claude-021-run-B1",
+      "argv": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "vitest",
+        "run",
+        "--config",
+        "vitest.config.ts",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts"
+      ],
+      "kind": "HEAVY",
+      "expected_cases_if_reported": 88,
+      "requires": "All prior commands exit0, no drift, own cleanup certain; otherwise STOP remainder"
+    },
+    {
+      "id": "B2",
+      "capture": "n1n2-claude-021-run-B2",
+      "argv": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "vitest",
+        "run",
+        "--config",
+        "vitest.config.ts",
+        "tests/agent-driven/integration/native-cache-witness.test.ts"
+      ],
+      "kind": "HEADLESS_BROWSER",
+      "expected_cases_if_reported": 15,
+      "requires": "All prior commands exit0, no drift, own cleanup certain; otherwise STOP remainder"
+    },
+    {
+      "id": "C1",
+      "capture": "n1n2-claude-021-run-C1",
+      "argv": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "vitest",
+        "run",
+        "--config",
+        "vitest.config.ts",
+        "tests/agent-driven/integration/created-native-workspace.test.ts"
+      ],
+      "kind": "HEAVY",
+      "expected_cases_if_reported": null,
+      "requires": "All prior commands exit0, no drift, own cleanup certain; otherwise STOP remainder"
+    },
+    {
+      "id": "C2",
+      "capture": "n1n2-claude-021-run-C2",
+      "argv": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "vitest",
+        "run",
+        "--config",
+        "vitest.config.ts",
+        "tests/agent-driven/integration/committed-snapshot-host.test.ts"
+      ],
+      "kind": "HEAVY",
+      "expected_cases_if_reported": null,
+      "requires": "All prior commands exit0, no drift, own cleanup certain; otherwise STOP remainder"
+    },
+    {
+      "id": "C3",
+      "capture": "n1n2-claude-021-run-C3",
+      "argv": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "vitest",
+        "run",
+        "--config",
+        "vitest.config.ts",
+        "tests/agent-driven/integration/created-native-ack.test.ts"
+      ],
+      "kind": "HEAVY",
+      "expected_cases_if_reported": null,
+      "requires": "All prior commands exit0, no drift, own cleanup certain; otherwise STOP remainder"
+    },
+    {
+      "id": "D1",
+      "capture": "n1n2-claude-021-run-D1",
+      "argv": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "vitest",
+        "run",
+        "--config",
+        "vitest.config.ts",
+        "tests/agent-driven/integration/created-draft-processor.test.ts"
+      ],
+      "kind": "HEAVY",
+      "expected_cases_if_reported": null,
+      "requires": "All prior commands exit0, no drift, own cleanup certain; otherwise STOP remainder"
+    },
+    {
+      "id": "D2",
+      "capture": "n1n2-claude-021-run-D2",
+      "argv": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "vitest",
+        "run",
+        "--config",
+        "vitest.config.ts",
+        "tests/agent-driven/integration/created-run-authority.test.ts"
+      ],
+      "kind": "HEAVY",
+      "expected_cases_if_reported": null,
+      "requires": "All prior commands exit0, no drift, own cleanup certain; otherwise STOP remainder"
+    },
+    {
+      "id": "D3",
+      "capture": "n1n2-claude-021-run-D3",
+      "argv": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "vitest",
+        "run",
+        "--config",
+        "vitest.config.ts",
+        "tests/agent-driven/integration/created-source-adoption.test.ts"
+      ],
+      "kind": "HEAVY",
+      "expected_cases_if_reported": null,
+      "requires": "All prior commands exit0, no drift, own cleanup certain; otherwise STOP remainder"
+    },
+    {
+      "id": "D4",
+      "capture": "n1n2-claude-021-run-D4",
+      "argv": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "vitest",
+        "run",
+        "--config",
+        "vitest.config.ts",
+        "tests/agent-driven/integration/created-source-recovery.test.ts"
+      ],
+      "kind": "HEAVY",
+      "expected_cases_if_reported": null,
+      "requires": "All prior commands exit0, no drift, own cleanup certain; otherwise STOP remainder"
+    },
+    {
+      "id": "D5",
+      "capture": "n1n2-claude-021-run-D5",
+      "argv": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "vitest",
+        "run",
+        "--config",
+        "vitest.config.ts",
+        "tests/agent-driven/media/preview-prepared-source.test.ts"
+      ],
+      "kind": "HEAVY",
+      "expected_cases_if_reported": null,
+      "requires": "All prior commands exit0, no drift, own cleanup certain; otherwise STOP remainder"
+    }
+  ],
+  "freeze": "All source/tests/tools/config/index immutable while commands run; no second writer/test. Failure: stop remainder, preserve, actual owned command/children settle and own cleanup before edits.",
+  "browser": "Pinned installed headless/mute only, existingruntime+loopback synthetic fixture+CSP, no install/network/paid/provider/J/headed. Existing test/producer timeouts apply; no invented hard budget.",
+  "cleanup": "Only owned PIDs/resources/allocations; no broad prefix removal/process killing. Record raw settlement, browser lastowner release, temps and limitations.",
+  "claim_limit": "Internal tests only; original17/frozencommit independent acceptance still required",
+  "stop": [
+    "Any nonzero/unhandled/inputdrift/uncertaincleanup STOP remaining steps and report",
+    "New429 STOP implementation immediately; no retries/provider switch/takeover"
+  ]
+}

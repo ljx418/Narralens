@@ -1,0 +1,107 @@
+{
+  "grant_id": "N1N2-RESUME-DEDUPE-012",
+  "at": "2026-11-12T13:17:48.313932+00:00",
+  "request": "msg_6a6b02f20fd1",
+  "holder": "ctx_b4086093cd96",
+  "cwd": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+  "frozen_sha256": {
+    "src/host/agent-driven/committed-snapshot-authority.ts": "f8470afddb8e8732edb112379902c3e28f51892a0104d6182f13207d473906c9",
+    "src/host/agent-driven/created-native-workspace.ts": "b57bed5df0ea600a2aa1a5b2dc3df2873f794389ee5274f32efb52a6f3d653ad",
+    "src/host/m5/openfilm-native-expected.ts": "19110e45a83b6d5b611b4260620ce873f923f1e5a5b907bc6176c4b734fbeed3",
+    "src/host/agent-driven/retained-native-closure.ts": "ab6697759a85c4a0b787ad00ce57b2a25680c5fb9630cf6a7797a10aa775a48e",
+    "src/host/agent-driven/created-native-source-reader.ts": "b386615cb4036f0ce3d2bc65a5d9aa99ee8bc9c191f3468eb15baf65b2a33aa1",
+    "tests/agent-driven/integration/created-native-workspace.test.ts": "439d469032c9af2b83ceb826e0aead7cf5c2fe5c5693be7cbf18c8e67f0f615f",
+    "tests/agent-driven/integration/committed-snapshot-host.test.ts": "bfd0c6373b254050d32a6a99e7b6f8b9827dc24b6b2587515ab4c5aad2cd9037",
+    "tests/agent-driven/integration/created-native-ack.test.ts": "5f50db85c7c07a2ecf4faefc20ec2ec6c7ad4910fafe549c2edc76bbad729c7c",
+    "tests/agent-driven/integration/created-native-source-reader.test.ts": "bf1a7e3394142a07aa08ea3799fbe9ed3e2e9276ecbc0f6786e945ea40f72b6b",
+    "tests/agent-driven/integration/helpers/native-source-fixture.ts": "19cb73cb9d69394e550699d3363128a4ea60e96a3f28f22e1ea4fce01c6dda0a"
+  },
+  "commands": [
+    {
+      "capture": "n1n2-claude-resume-100-gate-pure",
+      "argv": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "vitest",
+        "run",
+        "--config",
+        "vitest.config.ts",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts",
+        "-t",
+        "P0|F01|F10 lists|F10 keeps"
+      ],
+      "expected_cases": 18,
+      "filtered": 34,
+      "condition": "compile099exit0,noinputdrift,all10predictedSHAverified"
+    },
+    {
+      "capture": "n1n2-claude-resume-101-gate-component-focused",
+      "argv": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "vitest",
+        "run",
+        "--config",
+        "vitest.config.ts",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts",
+        "-t",
+        "R02 invalidates the old proof|F05 binds the probe evidence"
+      ],
+      "expected_cases": 2,
+      "filtered": 50,
+      "condition": "100pureexit0 and noinputdrift"
+    }
+  ],
+  "selected_assertions": [
+    "R02 invalidates the old proof when the working copy changes under it",
+    "F01 keeps a temporary release failure and reports it once at the final release",
+    "F10 lists the media as the pinned consumer lists it",
+    "F10 keeps the caption directory in the platform order",
+    "P07 refuses a grown file, the cumulative text, the deep tree and the descriptor budget",
+    "P07 keeps the primary error when an open fails and releases everything else",
+    "P07 keeps the primary cause of an EMFILE, an ENOMEM and an EACCES",
+    "P06 normalises a missing and a picture duration as no duration",
+    "F05 binds the probe evidence to the concrete tool, argv, input and result",
+    "P06 resolves a clip without a place as the native does and refuses a disagreement",
+    "P06 places a clip without a place where the pinned consumer places it",
+    "P07 refuses a symbolic link, a same-bytes replacement and a restored change time",
+    "P07 refuses a text file above the budget and bounds the total",
+    "P07 refuses to release while work is in flight and releases every allocation once",
+    "P07 refuses a reentrant release from inside an accepted read",
+    "P07 keeps the failure of the walk release with the failure that stopped it",
+    "P07 keeps the named primary and every cleanup cause of the real unpack path",
+    "P07 proves an empty directory and sees the file that appears in it",
+    "P06 reproduces the five pinned native revision vectors",
+    "P06 lists the media in the numeric order of the host"
+  ],
+  "scope": "oneexactattachCauses identity-dedupe edit then recordedcompile; ifgreen+predictedhashes match thenpure18; ifgreen thenfocused2. Nootheredits/full/legacy",
+  "effects": "localFS, temporary Host/sqlite, fixed localffmpeg/ffprobe diagnostic fixtures; silentheadless/loopback; no externalnetwork/provider/browser/J/config/index/build",
+  "execution": "unchangedrecorder once; freezeallsrc/tests/tools/config/index untilactualterminal andcleanup; new429STOP",
+  "recorder_sha256": "88cd47ec732a340f54cdd4bb05b05878887697eebb0ddc94b1ccd7d0e434fd10",
+  "head": "e2eff61b464d75d36598103d718cd2a75db5dfda",
+  "compile_result": {
+    "exit": 0,
+    "source_changed": [],
+    "source_added": [],
+    "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "finished_at": "2026-11-12T13:12:33.264909+00:00"
+  },
+  "compile_command": {
+    "capture": "n1n2-claude-resume-099-tsc-dedupe",
+    "argv": [
+      "corepack",
+      "pnpm",
+      "exec",
+      "tsc",
+      "--noEmit"
+    ]
+  },
+  "exact_edit": {
+    "path": "src/host/agent-driven/retained-native-closure.ts",
+    "from": "const merged=Array.isArray(existing)?[...existing,...causes]:[...causes];",
+    "to": "const merged=Array.isArray(existing)?[...existing,...causes.filter(cause=>!existing.includes(cause))]:[...causes];",
+    "predicted_sha256": "ab6697759a85c4a0b787ad00ce57b2a25680c5fb9630cf6a7797a10aa775a48e"
+  }
+}

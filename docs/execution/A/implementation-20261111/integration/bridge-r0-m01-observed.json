@@ -1,0 +1,37 @@
+{
+  "observed_at": "2026-11-11T14:36:11.220817+00:00",
+  "scope": "MAIN source/log review of R0-M01, not full A or full production capability admission",
+  "evidence": "docs/parallel/lane-bridge/A-R1-20261111/evidence/r1-bridge-lifecycle-001.json",
+  "input_files": [
+    {
+      "path": "src/host/agent-driven/created-task-store.ts",
+      "sha256_current": "a86de44dd0a9ff1a1715e7ff845db18c7791cdda90efc57806bc322ad6fc3244"
+    },
+    {
+      "path": "src/host/agent-driven/created-task-worker.ts",
+      "sha256_current": "79f141851e449a6e5dfc2139c78a511f62c0f99a6843eb58649c86627d91692f"
+    },
+    {
+      "path": "src/host/agent-driven/created-task-application.ts",
+      "sha256_current": "4203e55493c330ea537b11601cd48eb736a6bd29915565a9c4f5cae046288493"
+    },
+    {
+      "path": "tests/agent-driven/integration/host-close-lifecycle.test.ts",
+      "sha256_current": "145568f5c8b860288e60d0604ec76d362777fa603fd6556297dfa114f0d13ad7"
+    }
+  ],
+  "verified": [
+    "raw evidence/log SHA matches",
+    "Node PID813097 absent",
+    "store release exact live owner/lease/attempt and synchronous transaction hook",
+    "application binds workflow checkpoint update via same-DB joinTaskTransaction",
+    "worker awaits processor cleanup before graceful release; user cancel follows original settlement",
+    "actual test closes/reopens same DB and resumes same original Job, no author/revision change"
+  ],
+  "limitations": [
+    "TestAdoptionAuthority and explicit workflow capability facts are fixture dependencies; not production capability registration proof",
+    "Source is current uncommitted lane candidate; require immutable input binding before integration",
+    "Final A human recording/footage and UX gates not covered"
+  ],
+  "result": "R0-M01 focused evidence supported; immutable integration pending"
+}

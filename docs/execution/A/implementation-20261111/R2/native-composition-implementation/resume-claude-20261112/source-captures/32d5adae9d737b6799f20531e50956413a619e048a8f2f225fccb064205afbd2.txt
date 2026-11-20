@@ -1,0 +1,769 @@
+import {randomUUID,createHash} from 'node:crypto';
+import {constants,lstatSync,realpathSync,fstatSync} from 'node:fs';
+import {open,mkdir,rm,realpath,lstat} from 'node:fs/promises';
+import type {FileHandle} from 'node:fs/promises';
+import {dirname,resolve,relative,sep,join} from 'node:path';
+import type {RevisionStore} from '../projects/revision-store.js';
+import type {ProjectCreationStore} from '../projects/project-creation-store.js';
+import type {TrustedCallerContext} from '../creative/product-repository.js';
+import {isTrustedCallerContext,ProductError} from '../creative/trusted-context.js';
+import type {SnapshotEntry} from '../render/ports.js';
+import {assertSafeRelativePath} from '../render/snapshot-copy.js';
+import {absoluteServerPath} from '../engine/isolated-root.js';
+import type {AbsoluteServerPath} from '../engine/engine-port.js';
+import {asHostResourceError} from '../api-error.js';
+import {runtimeRoot} from './owned-runtime.js';
+import type {CommittedSnapshotAuthority} from './committed-snapshot-authority.js';
+import {isIssuedOpenFilmCacheProducer} from '../../adapters/openfilm/openfilm-upstream.js';
+import {
+ NativeCacheWitnessLedger,isIssuedNativeCacheWitness,issueNativeCacheWitness,
+ upstreamCacheTweaks,nativeCacheKey,nativeCacheStamp,NativeCacheWitnessError,
+} from './native-cache-witness.js';
+import type {NativeCacheWitness,NativeCacheProducer,NativeCacheFileIdentity} from './native-cache-witness.js';
+import {
+ RetainedNativeClosure,RetainedDescriptorBudget,RETAINED_NATIVE_BUDGET,
+ mergeRetainedCleanupCauses,retainedCleanupFailures,markRetainedCleanupFailures,
+} from './retained-native-closure.js';
+import type {RetainedDescriptorPool,RetainedNativeFile,RetainedNativeDescriptorOps} from './retained-native-closure.js';
+interface Binding {project_id:string;principal_id:string;transaction_id:string;snapshot_id:string;source_digest:string;revision:number}
+export interface PreparedNativeWorkspace {
+ readonly project_id:string;readonly snapshot_id:string;readonly source_digest:string;readonly revision:number;
+ readonly source_root:AbsoluteServerPath;readonly film_sha256:string;
+}
+/** The complete binding an issued workspace ref carries.
+ *
+ * Every field is part of the capability: the verified owner, the project, the committed
+ * transaction, the snapshot, the revision, the source digest, the native project id and
+ * the generation of the working copy. A ref is a name; this is what it stands for. */
+export interface NativeWorkspaceBinding {
+ readonly project_id:string;
+ readonly principal_id:string;
+ readonly transaction_id:string;
+ readonly snapshot_id:string;
+ readonly source_digest:string;
+ readonly revision:number;
+ readonly native_project_id:string|null;
+ readonly generation:number;
+}
+/** What a caller states about the binding it expects to acquire. Every field it states
+ *  is compared with the registered binding; a difference is a refusal. */
+export interface NativeWorkspaceExpectation {
+ readonly project_id:string;
+ readonly snapshot_id:string;
+ readonly source_digest:string;
+ readonly revision:number;
+ readonly native_project_id:string|null;
+}
+/** The opaque lease of one issued workspace view.
+ *
+ * It is not a path and not a string: the descriptors and the authority stay inside this
+ * service, and a copy of this object is not a lease. */
+export interface NativeWorkspaceLease {
+ readonly workspace_ref:string;
+ readonly project_id:string;
+ readonly principal_id:string;
+ readonly transaction_id:string;
+ readonly snapshot_id:string;
+ readonly source_digest:string;
+ readonly revision:number;
+ readonly native_project_id:string|null;
+ readonly generation:number;
+ readonly root:string;
+ /** The synchronous guard of the lease: the view is still the issued one and still current. */
+ assertCurrent():boolean;
+ /** Release the lease. The working copy itself stays until the native has stopped. */
+ release():void;
+}
+interface HeldWorkspace {binding:Binding;name:string;directory:FileHandle;files:readonly SnapshotEntry[];view:PreparedNativeWorkspace;generation:number}
+/** A registered ref is the *view* it stands for. It is invalidated when the view is
+ *  replaced or the service closes — never when one of its leases is released. */
+interface RegisteredRef {record:HeldWorkspace;binding:NativeWorkspaceBinding;invalidated:boolean}
+/** One acquisition. Releasing it invalidates this lease and nothing else: the ref and
+ *  every other lease of it stay usable, so a later stable round can prove again. */
+interface LeaseFacts {registration:RegisteredRef;released:boolean}
+
+/** The opaque production lease of one issued view.
+ *
+ * It is the authority to produce inside that view - and it is NOT a string, a path
+ * or a shape: the facts behind it live in this module's private table, and only the
+ * real service method registers one there. A copy, a JSON object or a lease of
+ * another service is not in that table, and it is refused before any producer runs. */
+export interface NativeCacheProductionLease{
+ readonly workspace_ref:string;
+ readonly generation:number;
+ readonly root:string;
+}
+/** What the private table knows about one production lease. */
+interface ProductionLeaseFacts{
+ readonly workspace_ref:string;
+ readonly generation:number;
+ readonly root:string;
+ /** The REAL workspace lease this production belongs to. */
+ readonly lease:NativeWorkspaceLease;
+ /** The descriptor pool that belongs to the owner of this lease. */
+ readonly pool:RetainedDescriptorPool;
+ /** The service instance that issued this lease. */
+ readonly service:CreatedNativeWorkspaceService;
+}
+/** The production leases of this Host, by their exact object.
+ *
+ * It is private to this module: a copy of a lease is a different object and is not
+ * in here, and nothing outside this module can write into it. */
+const productionLeases=new WeakMap<object,ProductionLeaseFacts>();
+/** The witness -> the production lease it was produced under.
+ *
+ * It is private to this module and it is never handed out: the service that owns
+ * the witness uses its own private tables to recognise it, and a witness that this
+ * service did not produce is not in here at all. */
+const witnessLeases=new WeakMap<object,object>();
+/** The failure of the native cache production. */
+const refuseCache:(code:string,message:string)=>never=(code,message)=>{throw new NativeCacheWitnessError(code,message);};
+/** The identity of a path, as the platform reports it. It is never a whole file. */
+interface PathIdentity{readonly dev:string;readonly ino:string;readonly size:string;readonly mtime_ns:string;readonly ctime_ns:string;readonly nlink:string;}
+const pathIdentity=(path:string):PathIdentity|null=>{
+ try{
+  const info=lstatSync(path,{bigint:true});
+  if(info.isSymbolicLink())return null;
+  return {dev:info.dev.toString(),ino:info.ino.toString(),size:info.size.toString(),
+   mtime_ns:info.mtimeNs.toString(),ctime_ns:info.ctimeNs.toString(),nlink:info.nlink.toString()};
+ }catch{return null;}
+};
+/** Whether two identities are the very same file. */
+const sameIdentity=(left:PathIdentity,right:PathIdentity):boolean=>
+ left.dev===right.dev&&left.ino===right.ino&&left.size===right.size
+ &&left.mtime_ns===right.mtime_ns&&left.ctime_ns===right.ctime_ns&&left.nlink===right.nlink;
+/** The identity of a retained file, as the closure holds it. */
+const identityOf=(file:RetainedNativeFile,path:string):NativeCacheFileIdentity=>({
+ path,sha256:file.sha256,bytes:file.bytes,mtime_ms:file.mtime_ms,mtime_ns:file.mtime_ns,
+ ctime_ns:file.ctime_ns,dev:file.dev,ino:file.ino,nlink:file.nlink,
+});
+/** Whether a path under a root is a regular file (a link is not). */
+const isRegularFileWithin=(root:string,relative:string):boolean=>{
+ try{return lstatSync(join(root,relative)).isFile();}catch{return false;}
+};
+const conflict=()=>new ProductError('REVISION_CONFLICT','The committed native workspace facts changed');
+const unavailable=()=>new ProductError('CAPABILITY_UNAVAILABLE','The owned native workspace is unavailable');
+const fdPath=(handle:FileHandle)=>'/proc/'+process.pid+'/fd/'+handle.fd;
+const directoryFlags=constants.O_RDONLY|constants.O_DIRECTORY|constants.O_NOFOLLOW;
+const same=(a:Binding,b:Binding)=>Object.keys(a).every(key=>a[key as keyof Binding]===b[key as keyof Binding]);
+function canonicalProspective(path:string):string{
+ const full=resolve(path);let ancestor=full;
+ while(true){try{lstatSync(ancestor);break;}catch(error){if((error as {code?:unknown}).code!=='ENOENT')throw error;ancestor=dirname(ancestor);}}
+ return resolve(realpathSync(ancestor),relative(ancestor,full));
+}
+const overlaps=(a:string,b:string)=>a===b||a.startsWith(b+sep)||b.startsWith(a+sep);
+/** Derived, disposable native working copy, never an author source or a second timeline.
+ * Upstream may write .film metadata only here. All content still comes from one committed
+ * SnapshotReadPort; edits/adoption remain Coordinator operations, not cache mutations.
+ */
+export class CreatedNativeWorkspaceService {
+ readonly #prepared=new Map<string,HeldWorkspace>();
+ readonly #held=new Set<HeldWorkspace>();
+ /** The workspace refs this instance issued, and what each of them stands for. */
+ readonly #refs=new Map<string,RegisteredRef>();
+ /** The leases this instance issued. A lease of another instance is not in this map, so
+  *  a copy of one and a lease of a foreign service are both unrecognised here. */
+ readonly #leases=new WeakMap<object,LeaseFacts>();
+ /** The generation of the working copy of each project: it moves on every preparation. */
+ readonly #generations=new Map<string,number>();
+ /** The native cache witnesses of this instance. They live and die with it, and only
+  *  a witness this service produced under its own production lease is ever held. */
+ readonly #witnesses=new NativeCacheWitnessLedger();
+ /** The descriptor budget of this instance.
+  *
+  * It belongs to the service, and the production of a cache entry draws from it: a
+  * caller may not hand the production another pool, and a pool that does not belong
+  * to the owner of the lease is refused. */
+ readonly #descriptorPool:RetainedDescriptorPool;
+ /** Whether this service can still say what it holds: a failed release latches it. */
+ #uncertain=false;
+ readonly #operations=new Set<Promise<unknown>>();
+ readonly #flights=new Map<string,Promise<PreparedNativeWorkspace>>();
+ readonly #abort=new AbortController();
+ #root:FileHandle|undefined;
+ #rootPromise:Promise<FileHandle>|undefined;
+ #closing=false;
+ #stop:Promise<void>|undefined;
+ #dispose:Promise<void>|undefined;
+ readonly #path:string;
+ readonly #boundary:((phase:'after_cache_verify',state:{project_id:string;snapshot_id:string;revision:number})=>Promise<void>)|undefined;
+ /** The Host-private descriptor operations of the PRODUCTION's own closures.
+  *
+  * They exist so that a release of the production's tree can be made to fail for
+  * real: only the close and the read observation can be replaced, and neither can
+  * make a fact true that is not. */
+ readonly #descriptorOps:RetainedNativeDescriptorOps|undefined;
+ constructor(private readonly revisions:RevisionStore,private readonly creation:ProjectCreationStore,
+  private readonly snapshots:CommittedSnapshotAuthority,options:{root:string;protectedRoots:readonly string[];boundary?:(phase:'after_cache_verify',state:{project_id:string;snapshot_id:string;revision:number})=>Promise<void>;descriptorPool?:RetainedDescriptorPool;descriptorOps?:RetainedNativeDescriptorOps}){
+  this.#path=resolve(options.root);this.#boundary=options.boundary;
+  this.#descriptorPool=options.descriptorPool??new RetainedDescriptorBudget(RETAINED_NATIVE_BUDGET.maxDescriptors);
+  this.#descriptorOps=options.descriptorOps;
+  // Before any mkdir, include aliases of not-yet-existing paths in overlap checks.
+  const destination=canonicalProspective(this.#path);
+  for(const protectedRoot of options.protectedRoots)if(overlaps(destination,canonicalProspective(protectedRoot)))throw unavailable();
+ }
+ /** The descriptor budget of this instance. It belongs to the service: the production
+  *  of a cache entry draws from it, and a caller may not inject another one. */
+ get descriptorPool():RetainedDescriptorPool{return this.#descriptorPool;}
+ #bind(projectId:string,principalId:string):Binding{
+  if(typeof projectId!=='string'||!/^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$/.test(projectId)||typeof principalId!=='string'||!this.creation.ownsProject(projectId,principalId))throw new ProductError('NOT_FOUND','No owned created project');
+  if(this.creation.origin(projectId)?.origin!=='created')throw conflict();
+  const commit=this.revisions.activeCommit(projectId);
+  if(!commit||this.revisions.recoveryGate(projectId,0))throw conflict();
+  const state=this.revisions.compose(db=>db.prepare('SELECT revision,source_digest FROM project_state WHERE project_id=?').get(projectId));
+  if(Number(state?.revision)!==commit.revision||state?.source_digest!==commit.source_digest)throw conflict();
+  return {project_id:projectId,principal_id:principalId,transaction_id:commit.transaction_id,snapshot_id:commit.snapshot_id,source_digest:commit.source_digest,revision:commit.revision};
+ }
+ #check(binding:Binding){if(this.#closing||this.#abort.signal.aborted)throw unavailable();if(!same(binding,this.#bind(binding.project_id,binding.principal_id)))throw conflict();}
+ async #rootHandle():Promise<FileHandle>{
+  return this.#rootPromise??=(async()=>{
+   const path=runtimeRoot(this.#path),handle=await open(path,directoryFlags);
+   this.#root=handle;return handle;
+  })().catch(error=>{this.#rootPromise=undefined;throw error;});
+ }
+ async #assertRoot(){
+  const handle=await this.#rootHandle(),[held,current]=await Promise.all([handle.stat(),lstat(this.#path)]);
+  if(!current.isDirectory()||current.isSymbolicLink()||await realpath(this.#path)!==this.#path||held.dev!==current.dev||held.ino!==current.ino)throw conflict();
+  return handle;
+ }
+ #admit<T>(operation:()=>Promise<T>):Promise<T>{
+  if(this.#closing)return Promise.reject(unavailable());
+  const promise=operation().catch(error=>{
+   if(error instanceof ProductError)throw error;
+   if(asHostResourceError(error))throw new ProductError('HOST_RESOURCE_EXHAUSTED','Native workspace I/O could not complete');
+   throw unavailable();
+  });this.#operations.add(promise);
+  void promise.then(()=>this.#operations.delete(promise),()=>this.#operations.delete(promise));return promise;
+ }
+ prepare(projectId:string,caller:TrustedCallerContext):Promise<PreparedNativeWorkspace>{
+  if(this.#closing)return Promise.reject(unavailable());
+  if(!isTrustedCallerContext(caller)||caller.channel==='native_bridge')return Promise.reject(new ProductError('UNAUTHORIZED','A verified owner is required'));
+  let binding:Binding;try{binding=this.#bind(projectId,caller.principal_id);}catch(error){return Promise.reject(error);}
+  const key=binding.project_id+':'+binding.transaction_id+':'+binding.principal_id;
+  const existing=this.#flights.get(key);if(existing)return existing;
+  const work=this.#admit(async()=>{
+   this.#check(binding);
+   const cached=this.#prepared.get(projectId);
+   if(cached&&same(cached.binding,binding)){
+    try{await this.#verify(cached);await this.#boundary?.('after_cache_verify',{project_id:projectId,snapshot_id:binding.snapshot_id,revision:binding.revision});this.#check(binding);return cached.view;}
+    catch(error){
+     const code=(error as {code?:unknown}).code;
+     if(code!=='REVISION_CONFLICT'&&!['ENOENT','ENOTDIR','ELOOP'].includes(String(code)))throw error;
+     // A corrupt disposable copy can be rebuilt; the immutable snapshot must still
+     // prove itself. Keep old copies held until native consumers have stopped.
+     await this.#assertRoot();this.#check(binding);this.#prepared.delete(projectId);
+    }
+   }
+   const closure=await this.snapshots.readerForTransaction(projectId,binding.transaction_id,caller.principal_id).readSnapshot({project_id:projectId,snapshot_id:binding.snapshot_id,source_digest:binding.source_digest});
+   this.#check(binding);
+   const root=await this.#assertRoot(),name='workspace-'+randomUUID();
+   await mkdir(fdPath(root)+'/'+name,{mode:0o700});
+   let directory:FileHandle|undefined,source:FileHandle|undefined,retained=false;
+   try{
+    directory=await open(fdPath(root)+'/'+name,directoryFlags);
+    source=await open(closure.native_root,directoryFlags);
+    for(const entry of closure.entries){this.#check(binding);await this.#copy(entry,source,directory);}
+    this.#check(binding);await this.#assertRoot();
+    const film=closure.entries.find(entry=>entry.relative_path===closure.native_entry);if(!film)throw conflict();
+    const view=Object.freeze({project_id:projectId,snapshot_id:binding.snapshot_id,source_digest:binding.source_digest,revision:binding.revision,source_root:Object.freeze(absoluteServerPath(this.#path+'/'+name)),film_sha256:film.sha256});
+    const record:HeldWorkspace={binding,name,directory,files:closure.entries,view,generation:(this.#generations.get(projectId)??0)+1};
+    this.#generations.set(projectId,record.generation);
+    await this.#verify(record);this.#check(binding);
+    // A replaced view invalidates the refs of the view it replaces: their proofs were
+    // made against a working copy that is no longer the current one.
+    const previous=this.#prepared.get(projectId);
+    if(previous!==undefined&&previous!==record)this.#invalidateRefsOf(previous);
+    this.#prepared.set(projectId,record);this.#held.add(record);retained=true;return view;
+   }finally{
+    await source?.close();if(!retained){await directory?.close();await rm(fdPath(root)+'/'+name,{recursive:true,force:true});}
+   }
+  });
+  this.#flights.set(key,work);void work.then(()=>this.#flights.delete(key),()=>this.#flights.delete(key));return work;
+ }
+ /** Host-only delegate lease check: the exact issued object and directory identities,
+  * not a client-supplied root or a fresh per-request copy of every large media asset. */
+ isPrepared(view:PreparedNativeWorkspace):boolean {
+  try{
+   const record=this.#prepared.get(view.project_id);if(!record||record.view!==view||!this.#root)return false;
+   this.#check(record.binding);
+   const root=fstatSync(this.#root.fd),named=lstatSync(this.#path);
+   if(!named.isDirectory()||named.isSymbolicLink()||named.dev!==root.dev||named.ino!==root.ino||realpathSync(this.#path)!==this.#path)return false;
+   const held=fstatSync(record.directory.fd),path=fdPath(this.#root)+'/'+record.name,current=lstatSync(path);
+   return current.isDirectory()&&!current.isSymbolicLink()&&held.dev===current.dev&&held.ino===current.ino&&realpathSync(path)===view.source_root.value;
+  }catch{return false;}
+ }
+ /** Host-only lookup; an arbitrary URL/query cannot open an unprepared or stale project. */
+ rootFor(projectId:string):Promise<AbsoluteServerPath>{
+  return this.#admit(async()=>{const record=this.#prepared.get(projectId);if(!record)throw unavailable();this.#check(record.binding);await this.#verify(record);this.#check(record.binding);return record.view.source_root;});
+ }
+ /** Register the Host's own workspace ref for an issued view.
+  *
+  * The ref is a name the Host generated; this service is what gives it meaning, and only
+  * for the exact view it issued. The complete binding is snapshotted here, privately:
+  * the verified owner, the project, the committed transaction, the snapshot, the
+  * revision, the source digest, the native project id and the generation of this copy.
+  *
+  * The generation is the *service's* fact: it comes from the exact issued view, and a
+  * caller cannot state it, guess it or prime it. A ref is issued once and is never
+  * rebound. */
+ registerWorkspaceRef(view:PreparedNativeWorkspace,ref:string,registration:Omit<NativeWorkspaceBinding,'generation'>):NativeWorkspaceBinding{
+  if(typeof ref!=='string'||!/^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$/.test(ref))throw conflict();
+  if(this.#closing)throw unavailable();
+  const record=this.#prepared.get(view.project_id);
+  if(!record||record.view!==view)throw conflict();
+  if(this.#refs.has(ref))throw conflict();
+  const binding=record.binding;
+  if(registration.project_id!==binding.project_id||registration.principal_id!==binding.principal_id
+   ||registration.transaction_id!==binding.transaction_id||registration.snapshot_id!==binding.snapshot_id
+   ||registration.source_digest!==binding.source_digest||registration.revision!==binding.revision)throw conflict();
+  if(registration.native_project_id!==null&&(typeof registration.native_project_id!=='string'||registration.native_project_id.length===0))throw conflict();
+  const snapshot=Object.freeze({project_id:registration.project_id,principal_id:registration.principal_id,
+   transaction_id:registration.transaction_id,snapshot_id:registration.snapshot_id,source_digest:registration.source_digest,
+   revision:registration.revision,native_project_id:registration.native_project_id,generation:record.generation});
+  this.#refs.set(ref,{record,binding:snapshot,invalidated:false});
+  return snapshot;
+ }
+ /** Record a native cache witness for an issued view.
+  *
+  * The brand alone is NOT authority: a hand-branded witness, a witness of another
+  * service and a witness of another instance are all refused here. What makes a
+  * witness real is the private binding of this service: the witness must be one
+  * THIS service produced under a production lease THIS service issued, and that
+  * lease must still be current.
+  *
+  * A recorded witness is STAGED, not available: it is not visible to a lookup or
+  * to the reader until every resource of the production that made it has settled.
+  * The witness is lost with this instance - it is never a persistent authority. */
+ record(witness:NativeCacheWitness):boolean{
+  if(!isIssuedNativeCacheWitness(witness))return false;
+  // The private association: the witness and the production lease of this service.
+  const lease=witnessLeases.get(witness);
+  if(lease===undefined)return false;
+  const facts=productionLeases.get(lease);
+  if(facts===undefined||facts.service!==this)return false;
+  // The lease must still be current: the owner, the base, the control and the
+  // generation of the view it was issued against.
+  if(facts.lease.assertCurrent()!==true)return false;
+  const registration=this.#refs.get(witness.workspace_ref);
+  if(registration===undefined||registration.invalidated)return false;
+  if(registration.binding.generation!==witness.generation)return false;
+  // The witness must speak about the ISSUED root of that very view: a witness about
+  // another tree is refused, however it was made.
+  if(witness.root!==registration.record.view.source_root.value)return false;
+  try{this.#check(registration.record.binding);}catch{return false;}
+  return this.#witnesses.stage(witness);
+ }
+ /** The witness of this view's key, or null when there is none.
+  *
+  * A ref that was never issued, an invalidated ref and a generation that is not the
+  * issued one have no witness at all. A staged witness - one whose resources have
+  * not settled - is not a witness yet, and a revoked one never becomes one. */
+ lookup(ref:string,generation:number,key:string):NativeCacheWitness|null{
+  const registration=this.#refs.get(ref);
+  if(registration===undefined||registration.invalidated)return null;
+  if(registration.binding.generation!==generation)return null;
+  const witness=this.#witnesses.lookup(ref,generation,key);
+  if(witness===null)return null;
+  // Only a witness THIS service produced under its own production lease is
+  // visible here: the brand alone decides nothing.
+  const lease=witnessLeases.get(witness);
+  if(lease===undefined)return null;
+  const facts=productionLeases.get(lease);
+  if(facts===undefined||facts.service!==this)return null;
+  return witness;
+ }
+ /** The witness of this view's key, or null when there is none. */
+ cacheWitness(ref:string,generation:number,key:string):NativeCacheWitness|null{
+  return this.lookup(ref,generation,key);
+ }
+ /** Acquire the production lease of an issued view.
+  *
+  * It is the authority to produce inside that view, and it is issued HERE and
+  * nowhere else: the ref must be registered and still current, the expectation
+  * must name the very binding the ref was registered with, the owner, the base and
+  * the control must still be the ones of the committed source, and the view must
+  * still be the issued one.
+  *
+  * The lease is registered in this module's private table: a copy of it, a JSON
+  * object and a lease of another service are not in that table at all, and they
+  * are refused before any producer runs. */
+ acquireCacheProductionLease(ref:string,expectation:NativeWorkspaceExpectation):NativeCacheProductionLease{
+  const registration=this.#refs.get(ref);
+  if(!registration||registration.invalidated)throw unavailable();
+  const binding=registration.binding;
+  if(expectation.project_id!==binding.project_id||expectation.snapshot_id!==binding.snapshot_id
+   ||expectation.source_digest!==binding.source_digest||expectation.revision!==binding.revision
+   ||expectation.native_project_id!==binding.native_project_id)throw conflict();
+  // The owner, the base and the control of the committed source.
+  this.#check(registration.record.binding);
+  // The view must still be the issued one.
+  if(this.#prepared.get(binding.project_id)!==registration.record)throw conflict();
+  if(!this.isPrepared(registration.record.view))throw conflict();
+  const lease=this.acquireExpectedLease(ref,expectation);
+  const production=Object.freeze({workspace_ref:ref,generation:binding.generation,root:registration.record.view.source_root.value});
+  productionLeases.set(production,{workspace_ref:ref,generation:binding.generation,root:registration.record.view.source_root.value,
+   lease,pool:this.#descriptorPool,service:this});
+  return production;
+ }
+ /** Produce ONE native cache entry with the FIXED producer, and witness it.
+  *
+  * The order is fixed and it is the whole point of the witness:
+  *  1. the production lease must be THIS service's, and it must be real: an
+  *     unknown object, a copy and a lease of another service are refused BEFORE
+  *     the producer is called, so a capability that is not ours never has a side
+  *     effect;
+  *  2. the lease must still be current: the owner, the base, the control and the
+  *     generation of the view it was issued against;
+  *  3. the producer must be the one the Host's own factory issued - a lookalike
+  *     that merely has the right shape is refused;
+  *  4. the request must be the exact request of its family: the film poster is
+  *     the paired output of the film page at -1 and 480, and a page frame that
+  *     would write that poster is the poster request, not a page frame;
+  *  5. the key of the request is computed with the upstream's own formula and the
+  *     upstream's own overrides predicate;
+  *  6. a pre-existing, unwitnessed member of that key - and the poster this call
+  *     would overwrite - are REFUSED: a cache hit is not proof that the producer
+  *     drew the picture, and the old bytes stay exactly where they are;
+  *  7. the tree is RETAINED before the producer runs, so the state of the page it
+  *     draws from is known before the draw;
+  *  8. the fixed producer is invoked, once, awaited;
+  *  9. the tree is retained again afterwards, and every file the producer really
+  *     read is read back through a retained descriptor and compared with the very
+  *     identity it had before the draw;
+  *  10. the final synchronous fence: the held dependencies, the written files and
+  *     the chain above the root are compared by their EXACT identity;
+  *  11. the witness is STAGED - it is not visible to anybody yet;
+  *  12. every resource of this call is settled, and a failure of that settlement
+  *      revokes the witness and latches this service;
+  *  13. after the settlement the real path identities and the chain are re-checked
+  *      against the identity the closure held, the lease is re-checked against the
+  *      real authority, the LAST identity observation follows that check, and only
+  *      then - with no await and no external callback - the witness is activated.
+  *
+  * The witness is a fact about THIS call. It is never an author source, never an
+  * independent expected fact, and it is lost with the workspace instance that holds
+  * it. */
+ async produceNativeCacheEntry(production:NativeCacheProductionLease,request:{
+  readonly producer:NativeCacheProducer;
+  readonly base:string;readonly rel:string;readonly ms:number;readonly width:number;
+  readonly overrides:unknown[]|null;readonly kind:'pageframe'|'film-poster';
+ }):Promise<NativeCacheWitness>{
+  // The whole production is ONE admitted operation of this service. A close of the
+  // service waits for it: the producer, the retained trees and their settlement
+  // are never cut in half by a shutdown, and the working copy is never disposed
+  // while a producer is still drawing inside it.
+  const work=this.#produce(production,request);
+  this.#operations.add(work);
+  void work.then(()=>this.#operations.delete(work),()=>this.#operations.delete(work));
+  return work;
+ }
+ /** Whether this service can still say what it holds. A failed release latches it. */
+ get uncertain():boolean{return this.#uncertain;}
+ async #produce(production:NativeCacheProductionLease,request:{
+  readonly producer:NativeCacheProducer;
+  readonly base:string;readonly rel:string;readonly ms:number;readonly width:number;
+  readonly overrides:unknown[]|null;readonly kind:'pageframe'|'film-poster';
+ }):Promise<NativeCacheWitness>{
+  // 1) The lease is THIS service's, and it is real.
+  const facts=productionLeases.get(production as unknown as object);
+  if(facts===undefined)refuseCache('NATIVE_CACHE_PRODUCTION_FOREIGN','The production lease is not one this service issued');
+  if(facts.service!==this)refuseCache('NATIVE_CACHE_PRODUCTION_FOREIGN','The production lease belongs to another workspace service');
+  // 2) The view is still the issued one.
+  if(facts.lease.assertCurrent()!==true)refuseCache('NATIVE_CACHE_PRODUCTION_STALE','The issued view is no longer current');
+  // 3) The producer is the FIXED one.
+  if(!isIssuedOpenFilmCacheProducer(request.producer))refuseCache('NATIVE_CACHE_PRODUCER_FOREIGN','The cache producer is not the fixed one this Host issued');
+  // A service whose own settlement failed can no longer say what it holds.
+  if(this.#uncertain)refuseCache('NATIVE_CACHE_PRODUCTION_UNCERTAIN','This workspace service cannot say what it holds');
+  const root=facts.root;
+  // 4) and 5) The exact request of the family, and the upstream's own key.
+  const width=Math.max(32,Math.min(960,Math.round(request.width/2)*2||160));
+  const overridesJson=upstreamCacheTweaks(request.overrides);
+  const writesPoster=request.rel==='film.html'&&request.ms<0&&width===480;
+  if(request.kind==='film-poster'){
+   if(request.rel!=='film.html'||request.ms!==-1||width!==480)
+    refuseCache('NATIVE_CACHE_REQUEST_FOREIGN','The film poster is the paired output of the film page at -1 and 480');
+  }else if(writesPoster){
+   refuseCache('NATIVE_CACHE_REQUEST_FOREIGN','That request writes the film poster: it is the poster request, not a page frame');
+  }
+  const frameKey=nativeCacheKey({rel:request.rel,ms:request.ms,width,overrides_json:overridesJson});
+  const key=request.kind==='film-poster'?'film-poster':frameKey;
+  const jpegPath=`.film/cache/pageframes/${frameKey}.jpg`;
+  const depsPath=`.film/cache/pageframes/${frameKey}.json`;
+  const stampPath=`.film/cache/pageframes/${frameKey}.stamp`;
+  const posterPath='.film/cache/film-poster.jpg';
+  // 6) An unwitnessed member of that key, and the poster this call would
+  //    overwrite, are refused - and their bytes stay where they are.
+  for(const member of [jpegPath,depsPath,stampPath])
+   if(isRegularFileWithin(root,member))refuseCache('NATIVE_CACHE_PREEXISTING','The native cache entry is already there and was not produced by this call');
+  if(request.kind==='film-poster'&&isRegularFileWithin(root,posterPath))
+   refuseCache('NATIVE_CACHE_PREEXISTING','The film poster is already there and this call would overwrite it');
+  let before:RetainedNativeClosure|undefined;
+  let after:RetainedNativeClosure|undefined;
+  let primary:unknown;
+  let witness:NativeCacheWitness|undefined;
+  let chain:readonly {readonly path:string;readonly dev:string;readonly ino:string}[]=[];
+  try{
+   // 7) The tree is retained BEFORE the draw.
+   before=await RetainedNativeClosure.open(root,{},this.#descriptorOps,facts.pool);
+   const beforeFacts=new Map<string,NativeCacheFileIdentity>();
+   for(const path of before.fileMembership()){
+    const file=await before.retainFile(path);
+    beforeFacts.set(path,identityOf(file,path));
+   }
+   if(!beforeFacts.has(request.rel))refuseCache('NATIVE_CACHE_REQUEST_FOREIGN','The page the request names is not a member of the issued tree');
+   // 8) The fixed producer really runs, once, awaited.
+   const produced=await request.producer.pageFrame({root,base:request.base,rel:request.rel,ms:request.ms,width,overrides:request.overrides});
+   // 9) The tree is retained again AFTER the draw.
+   after=await RetainedNativeClosure.open(root,{},this.#descriptorOps,facts.pool);
+   const depsFile=await after.retainFile(depsPath);
+   const depsText=await after.readText(depsFile);
+   let parsed:unknown;
+   try{parsed=JSON.parse(depsText);}catch{refuseCache('NATIVE_CACHE_OUTPUT_MALFORMED','The dependency list of the cache entry is not JSON');}
+   const declared=(parsed as {files?:unknown}).files;
+   if(!Array.isArray(declared)||declared.length===0||declared.some(file=>typeof file!=='string'))
+    refuseCache('NATIVE_CACHE_OUTPUT_MALFORMED','The dependency list of the cache entry names no file');
+   const dependencies:NativeCacheFileIdentity[]=[];
+   for(const dependency of declared as string[]){
+    const file=await after.retainFile(dependency);
+    const identity=identityOf(file,dependency);
+    const known=beforeFacts.get(dependency);
+    if(known===undefined)refuseCache('NATIVE_CACHE_DEPENDENCY_UNRELATED','The producer read a file that was not part of the issued tree');
+    // The EXACT identity: the same device, the same inode, the same bytes, the
+    // same nanosecond change times and the same number of names. A file that was
+    // replaced by an equal copy is refused here.
+    if(known.dev!==identity.dev||known.ino!==identity.ino||known.sha256!==identity.sha256
+     ||known.bytes!==identity.bytes||known.mtime_ns!==identity.mtime_ns||known.ctime_ns!==identity.ctime_ns
+     ||known.nlink!==identity.nlink)
+     refuseCache('NATIVE_CACHE_SOURCE_RACED','A file the producer read changed while it was drawing');
+    dependencies.push(identity);
+   }
+   if(!dependencies.some(entry=>entry.path===request.rel))refuseCache('NATIVE_CACHE_DEPENDENCY_UNRELATED','The producer did not read the page the request names');
+   const stampFile=await after.retainFile(stampPath);
+   const stamp=await after.readText(stampFile);
+   if(nativeCacheStamp(dependencies)!==stamp)refuseCache('NATIVE_CACHE_SOURCE_RACED','A file the producer read changed while it was drawing');
+   const picture=await after.retainFile(jpegPath);
+   const producedDigest=createHash('sha256').update(produced).digest('hex');
+   if(producedDigest!==picture.sha256)
+    refuseCache('NATIVE_CACHE_OUTPUT_MISMATCH','The picture the producer returned is not the file that was written');
+   const written:NativeCacheFileIdentity[]=[identityOf(picture,jpegPath),identityOf(depsFile,depsPath),identityOf(stampFile,stampPath)];
+   const retained=new Map<string,RetainedNativeFile>([[jpegPath,picture],[depsPath,depsFile],[stampPath,stampFile]]);
+   let posterSha:string|null=null;
+   if(request.kind==='film-poster'){
+    if(!isRegularFileWithin(root,posterPath))refuseCache('NATIVE_CACHE_OUTPUT_MISSING','The producer did not write the poster it must write');
+    const poster=await after.retainFile(posterPath);
+    // The poster is the paired output of THIS draw: it is the very picture this
+    // call returned, and nothing else.
+    if(poster.sha256!==producedDigest)
+     refuseCache('NATIVE_CACHE_OUTPUT_MISMATCH','The poster is not the picture of this call');
+    posterSha=poster.sha256;
+    written.push(identityOf(poster,posterPath));
+    retained.set(posterPath,poster);
+   }
+   // 10) The final synchronous fence, with the closures still held: the exact
+   //     identity of every file the producer read and wrote, and the chain above
+   //     the root. No await and no callback happen inside it.
+   for(const [path,file] of retained)if(!after.verifyFileExact(file))refuseCache('NATIVE_CACHE_OUTPUT_MOVED','The cache entry changed while it was produced');
+   for(const dependency of dependencies){
+    const file=await after.retainFile(dependency.path);
+    if(!after.verifyFileExact(file))refuseCache('NATIVE_CACHE_SOURCE_RACED','A file the producer read changed while it was drawing');
+   }
+   if(!after.verifyRootChain())refuseCache('NATIVE_CACHE_ROOT_MOVED','The issued root moved while the producer was drawing');
+   if(!after.verifyDirectoryChain())refuseCache('NATIVE_CACHE_ROOT_MOVED','The parent chain of the cache entry moved while the producer was drawing');
+   chain=after.chainIdentities();
+   // 11) The witness is STAGED: it is not visible to a lookup or to the reader.
+   const candidate:NativeCacheWitness=issueNativeCacheWitness({
+    kind:request.kind,workspace_ref:facts.workspace_ref,generation:facts.generation,root,
+    rel:request.rel,ms:request.ms,width,overrides_json:overridesJson,key,frame_key:frameKey,
+    jpeg_sha256:picture.sha256,deps_sha256:depsFile.sha256,stamp_sha256:stampFile.sha256,poster_sha256:posterSha,
+    dependencies,outputs:written,issued_at:new Date().toISOString()});
+   witness=candidate;
+   witnessLeases.set(candidate,production);
+   if(!this.record(candidate))refuseCache('NATIVE_CACHE_WITNESS_REFUSED','The workspace instance refused the witness');
+  }catch(error){primary=error;}
+  // 12) Every resource of this call is settled, and every failure is kept.
+  const cleanupFailures:unknown[]=[];
+  if(after)try{await after.release();}catch(error){cleanupFailures.push(error);}
+  if(before)try{await before.release();}catch(error){cleanupFailures.push(error);}
+  if(primary!==undefined){
+   // The primary keeps its place and the cleanup failures are merged into it.
+   if(witness!==undefined)this.#witnesses.revoke(witness);
+   // A release that did not finish latches this service, WHETHER the producer
+   // itself failed or not: the failure of the producer says nothing about
+   // whether the resources are gone. The genuine release failures the failure
+   // already carries are counted too - they are the failures of the OPEN of the
+   // retained tree itself.
+   const genuine=[...cleanupFailures,...retainedCleanupFailures(primary)];
+   if(genuine.length>0)this.#uncertain=true;
+   if(cleanupFailures.length>0)mergeRetainedCleanupCauses(primary,cleanupFailures);
+   throw primary;
+  }
+  if(cleanupFailures.length>0){
+   // The production happened, but its resources did not settle: nothing is
+   // delivered, the staged witness is revoked, and this service can no longer say
+   // what it holds.
+   if(witness!==undefined)this.#witnesses.revoke(witness);
+   this.#uncertain=true;
+   const failure=mergeRetainedCleanupCauses(new NativeCacheWitnessError('NATIVE_CACHE_CLEANUP_FAILED','The native cache production could not release everything'),cleanupFailures);
+   throw failure;
+  }
+  if(witness===undefined)refuseCache('NATIVE_CACHE_WITNESS_REFUSED','The production produced no witness');
+  // 13) The settlement is done and the witness is still PENDING. The real path
+  //     identities of the outputs AND of the dependencies, and the whole parent
+  //     chain, are re-checked against the identity the closure held; the lease is
+  //     re-checked against the real authority; the LAST identity observation
+  //     follows that check; and only then - with no await and no external
+  //     callback - the witness is activated.
+  const checkFiles=(identities:readonly NativeCacheFileIdentity[],code:string,message:string):void=>{
+   for(const identity of identities){
+    const current=pathIdentity(join(root,identity.path));
+    if(current===null)refuseCache(code,message);
+    if(!sameIdentity(current,{dev:identity.dev,ino:identity.ino,size:String(identity.bytes),
+     mtime_ns:identity.mtime_ns,ctime_ns:identity.ctime_ns,nlink:identity.nlink}))
+     refuseCache(code,message);
+   }
+  };
+  const checkOutputs=():void=>checkFiles(witness!.outputs,'NATIVE_CACHE_OUTPUT_MOVED','The cache entry changed while it was produced');
+  const checkDependencies=():void=>checkFiles(witness!.dependencies,'NATIVE_CACHE_SOURCE_RACED','A file the producer read changed while it was produced');
+  const checkChain=():void=>{
+   for(const entry of chain){
+    let info;
+    try{info=lstatSync(entry.path,{bigint:true});}catch{refuseCache('NATIVE_CACHE_ROOT_MOVED','The chain above the issued root moved');}
+    if(!info.isDirectory()||info.isSymbolicLink()||info.dev.toString()!==entry.dev||info.ino.toString()!==entry.ino)
+     refuseCache('NATIVE_CACHE_ROOT_MOVED','The chain above the issued root moved');
+   }
+  };
+  try{
+   checkChain();
+   checkOutputs();
+   checkDependencies();
+   // The lease is re-checked against the REAL authority: the owner, the base, the
+   // control and the generation of the view.
+   if(facts.lease.assertCurrent()!==true)refuseCache('NATIVE_CACHE_PRODUCTION_STALE','The issued view is no longer current');
+   // The LAST synchronous identity observation, after the last possible callback.
+   checkChain();
+   checkOutputs();
+   checkDependencies();
+   if(!this.#witnesses.activate(witness))refuseCache('NATIVE_CACHE_WITNESS_REFUSED','The workspace instance refused the witness');
+  }catch(error){
+   // The witness never became available: it is revoked, and a revoked witness is
+   // never revived.
+   this.#witnesses.revoke(witness);
+   throw error;
+  }
+  return witness;
+ }
+ /** The ISSUED root of this view and generation, or null when there is none.
+  *
+  * It is the root the Host handed out for that view: a producer may not be run
+  * anywhere else, and a witness may never speak about another tree. */
+ issuedRoot(ref:string,generation:number):string|null{
+  return this.#issuedRootOf(ref,generation);
+ }
+ /** The root of an issued view, or null when there is none. */
+ #issuedRootOf(ref:string,generation:number):string|null{
+  const registration=this.#refs.get(ref);
+  if(registration===undefined||registration.invalidated)return null;
+  if(registration.binding.generation!==generation)return null;
+  return registration.record.view.source_root.value;
+ }
+ /** Acquire the lease of an issued workspace ref.
+  *
+  * The caller states the binding it expects; every field it states must be the one the
+  * ref was registered with. A ref of another instance, an unknown ref, an invalidated
+  * ref and a ref whose view was replaced are all refusals.
+  *
+  * Every acquisition is its own lease. Releasing one lease releases *that* lease and
+  * nothing else: the ref and the other leases of it stay usable, so a proof can be
+  * released and a later stable round can prove again on the same view. */
+ acquireExpectedLease(ref:string,expectation:NativeWorkspaceExpectation):NativeWorkspaceLease{
+  const registration=this.#refs.get(ref);
+  if(!registration||registration.invalidated)throw unavailable();
+  const binding=registration.binding;
+  if(expectation.project_id!==binding.project_id||expectation.snapshot_id!==binding.snapshot_id
+   ||expectation.source_digest!==binding.source_digest||expectation.revision!==binding.revision
+   ||expectation.native_project_id!==binding.native_project_id)throw conflict();
+  const facts:LeaseFacts={registration,released:false};
+  const lease=Object.freeze({workspace_ref:ref,project_id:binding.project_id,principal_id:binding.principal_id,
+   transaction_id:binding.transaction_id,snapshot_id:binding.snapshot_id,source_digest:binding.source_digest,
+   revision:binding.revision,native_project_id:binding.native_project_id,generation:binding.generation,
+   root:registration.record.view.source_root.value,
+   assertCurrent:()=>this.#assertLeaseCurrent(facts),
+   release:()=>{facts.released=true;}});
+  this.#leases.set(lease,facts);
+  return lease;
+ }
+ /** Whether this instance issued the lease. A copy of a lease and a lease of another
+  *  service are both unrecognised here: the brand is not global. */
+ isLease(value:unknown):value is NativeWorkspaceLease{
+  return !!value&&typeof value==='object'&&this.#leases.has(value);
+ }
+ #assertLeaseCurrent(facts:LeaseFacts):boolean{
+  try{
+   if(facts.released)return false;
+   const registration=facts.registration;
+   if(registration.invalidated)return false;
+   const record=registration.record;
+   if(this.#prepared.get(record.binding.project_id)!==record)return false;
+   this.#check(record.binding);
+   return this.isPrepared(record.view);
+  }catch{return false;}
+ }
+ /** Invalidate every ref of a replaced view. The old view's proofs must not survive
+  *  the view they were made against. */
+ #invalidateRefsOf(record:HeldWorkspace):void{
+  for(const registration of this.#refs.values())if(registration.record===record)registration.invalidated=true;
+ }
+ async #leaf(root:FileHandle,path:string,create:boolean):Promise<{file:FileHandle;parents:FileHandle[]}>{
+  const parts=assertSafeRelativePath(path).split('/'),parents:FileHandle[]=[];let parent=root;
+  try{
+   for(const name of parts.slice(0,-1)){
+    if(create)await mkdir(fdPath(parent)+'/'+name,{mode:0o700}).catch(error=>{if((error as {code?:unknown}).code!=='EEXIST')throw error;});
+    parent=await open(fdPath(parent)+'/'+name,directoryFlags);parents.push(parent);
+   }
+   const flags=create?constants.O_WRONLY|constants.O_CREAT|constants.O_EXCL|constants.O_NOFOLLOW:constants.O_RDONLY|constants.O_NONBLOCK|constants.O_NOFOLLOW;
+   const file=await open(fdPath(parent)+'/'+parts[parts.length-1],flags,0o600);return {file,parents};
+  }catch(error){await Promise.all(parents.map(handle=>handle.close()));throw error;}
+ }
+ async #read(entry:SnapshotEntry,root:FileHandle,write?:FileHandle){
+  const {file,parents}=await this.#leaf(root,entry.relative_path,false);
+  try{
+   const before=await file.stat({bigint:true});if(!before.isFile()||before.size!==BigInt(entry.bytes))throw conflict();
+   const hash=createHash('sha256'),buffer=Buffer.allocUnsafe(65536);let offset=0;
+   while(offset<entry.bytes){
+    if(this.#abort.signal.aborted)throw unavailable();
+    const {bytesRead}=await file.read(buffer,0,Math.min(buffer.length,entry.bytes-offset),offset);if(!bytesRead)throw conflict();
+    hash.update(buffer.subarray(0,bytesRead));
+    if(write){let done=0;while(done<bytesRead){const result=await write.write(buffer,done,bytesRead-done,offset+done);if(!result.bytesWritten)throw unavailable();done+=result.bytesWritten;}}
+    offset+=bytesRead;
+   }
+   const after=await file.stat({bigint:true});
+   if(before.dev!==after.dev||before.ino!==after.ino||before.size!==after.size||before.mtimeNs!==after.mtimeNs||before.ctimeNs!==after.ctimeNs||hash.digest('hex')!==entry.sha256)throw conflict();
+  }finally{await file.close();await Promise.all(parents.map(handle=>handle.close()));}
+ }
+ async #copy(entry:SnapshotEntry,source:FileHandle,destination:FileHandle){
+  const {file,parents}=await this.#leaf(destination,entry.relative_path,true);
+  try{await this.#read(entry,source,file);await file.sync();}
+  finally{await file.close();await Promise.all(parents.map(handle=>handle.close()));}
+ }
+ async #verify(record:HeldWorkspace){
+  const root=await this.#assertRoot(),path=fdPath(root)+'/'+record.name,stats=await lstat(path),held=await record.directory.stat();
+  if(!stats.isDirectory()||stats.isSymbolicLink()||held.dev!==stats.dev||held.ino!==stats.ino||await realpath(path)!==this.#path+'/'+record.name)throw conflict();
+  for(const entry of record.files)await this.#read(entry,record.directory);
+ }
+ /** Phase one stops cache I/O; native may still be using a previous view until shutdown.
+  *  Every ref is invalidated with it: no proof of this service survives its close. */
+ close(){this.#closing=true;this.#abort.abort();for(const registration of this.#refs.values())registration.invalidated=true;return this.#stop??=Promise.allSettled([...this.#operations]).then(()=>undefined);}
+ /** Called only AFTER native Studio/Gateway have stopped. Never delete a live native root. */
+ disposeAfterNative(){return this.#dispose??=(async()=>{await this.close();const root=this.#root;if(!root)return;
+  for(const record of this.#held){await record.directory.close();await rm(fdPath(root)+'/'+record.name,{recursive:true,force:true});}
+  this.#held.clear();this.#prepared.clear();this.#refs.clear();this.#generations.clear();await root.close();this.#root=undefined;
+ })();}
+}
+
+/** Whether the service issued the lease.
+ *
+ * The brand is not global: a copy of a lease and a lease of another service are both
+ * unrecognised, because only the issuing instance holds the lease's facts. */
+export function isNativeWorkspaceLease(service:CreatedNativeWorkspaceService,value:unknown):value is NativeWorkspaceLease{
+ return service.isLease(value);
+}

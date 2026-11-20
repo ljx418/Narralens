@@ -1,0 +1,35 @@
+{
+  "format": "narralens.next-wiring-draft-gap-review@1",
+  "status": "DRAFT_GAP_REVIEW_NOT_FINAL_RELEASE_PASS",
+  "reviewed_revision": 2,
+  "scope": "targeted readonly recheck of NW-D01..NW-D07 and rev2 contradictions",
+  "original_findings": [
+    {"id":"NW-D01","severity":"MAJOR","disposition":"addressed_at_proposal_level"},
+    {"id":"NW-D02","severity":"MAJOR","disposition":"addressed_at_proposal_level"},
+    {"id":"NW-D03","severity":"MAJOR","disposition":"addressed_at_proposal_level"},
+    {"id":"NW-D04","severity":"MAJOR","disposition":"addressed_at_proposal_level"},
+    {"id":"NW-D05","severity":"MAJOR","disposition":"addressed_at_proposal_level"},
+    {"id":"NW-D06","severity":"MAJOR","disposition":"addressed_at_proposal_level"},
+    {"id":"NW-D07","severity":"MINOR","disposition":"addressed_at_proposal_level"}
+  ],
+  "new_findings": [],
+  "verification": {
+    "manifest_source_hashes_checked": 12,
+    "manifest_draft_hashes_checked": 6,
+    "hash_mismatches": 0,
+    "s01_case_rows_rev1": 28,
+    "s01_case_rows_rev2": 28,
+    "s01_case_rows_identical": true,
+    "s01_cases_promoted": 0,
+    "source_or_runtime_tests_run": false
+  },
+  "open_gates": [
+    "accepted014 commit and independent acceptance",
+    "actual014 interface and resource-ownership re-anchor",
+    "literal private receipt SQL and independent schema fingerprint review",
+    "exact next-stage ReleaseAssignment and path/protection comparison",
+    "controlled GET/background route implementation review before unlock",
+    "all new business acceptance remains NOT_RUN"
+  ],
+  "claim_limit": "proposal-level document recheck only; no implementation release, business PASS, human acceptance, or Studio/A/V1 claim"
+}

@@ -1,0 +1,15 @@
+{
+  "at": "2026-11-12T03:13:16.390920+00:00",
+  "capture": "d10-business-repairedfull-009",
+  "result": {
+    "exit": 0,
+    "source_changed": [],
+    "source_added": [],
+    "log_sha256": "e94a5977b69a9bf3111a299513aa96704571ca6fb005c8c08bd019bf42d0630b",
+    "finished_at": "2026-11-12T03:11:57.422640+00:00"
+  },
+  "count": "24PASS",
+  "specific_process_check": "PID312021 and descendants now missing after recorded command exit0; not global process absence",
+  "scope_note": "includes3MAINreadonlyfinding repairs and honestly labelled synthetic pointer corruption; actual legal successor commit replay remains NOT_RUN",
+  "limit": "Old50 adoption final capture, full tsc/freeze/writerhandoff and independent review still pending. No Host production startup wiring/realSIGKILL/A acceptance."
+}

@@ -1,0 +1,15 @@
+# R5A：返回原N正向链，先修两个确定性缺陷
+
+MAIN已真实验收nofork identity与expected assertion failure，两case各649输入匹配、实际C退出/close/gone。仅这两个小门通过；原14生产finding/原17/ISO18/完整N1N2均未通过。读/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/pilot-060p2a-nofork/ACCEPTANCE.md、MAIN_COMBINED_VERDICT.json及本RELEASE.json、REMAINING_EXECUTION_PLAN.md。原Claude唯一源码实施，MAIN不接手；新429立即停、不自动重试/换provider/接手。
+
+权威旧finding在C/repair-060p1r3a/independent-review/custodian-review/FINDINGS.json（C=/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112），本票仅R3-C01 BLOCKER和R3-C03 MAJOR。其余问题顺序推进见剩余计划，不作已关闭。W=/mnt/c/workspace/videoworkline/Narralens-agents/main-integration。
+
+1. CacheReceiptAccumulator.state当前对live Hash digest()，第一次proof/inspection后第二次eligibility再调用会抛，早期inspection还破坏后续update。state必须无破坏、可重复、不关闭更新。用当前Hash的非破坏snapshot（如copy().digest）或等价真实流设计，不能缓存第一次不完整digest、不能重置累积器丢数据、不能删除第二次检查。counterfactual须使用actual class：空/部分state连续读取多次；读取后再accept下一segment/update；final state多次读取完全一致；再实际shared validator/domain proof与success eligibility连读同一accumulator，不throw且digest/count/seq正确；乱序/篡改仍拒。不能只测Hash.copy库本身或做第二份oracle。
+
+2. Custodian._wait_writable实际读不存在self._control_write，EAGAIN才触发AttributeError；旧单元把此方法替掉掩盖。修实际由Custodian持有并传给ControlWriter的同一descriptor来源，让wait用真实控制端，不要挑一个碰巧存在的fd、不要吞AttributeError当可写。扩充既有Python unit，mock底层select/write/clock，不mock _wait_writable：驱动actual _queue_segment/_flush_receipt→EAGAIN→actual _wait_writable→后续writable→按offset原字节完整flush；验证selector收到的fd与writer实际fd同一，错fd/EBADF明确失败、deadlinefailclosed、断开清理语义不退化。所有目标syscall/fork/prctl/signal/wait边界mock，无真实C/N。可用测试自有本地FD仅纯writer验证，但不进内核目标process语义。
+
+仅JSON五既有路径可写：supervisor.ts、custodian.py、integrity生成JSON、identity纯test、custodian-unit.py；其余生产workspace/upstream/scope/工具/53mock/25保护中未授权文件/AGENTS及所有旧证据不动。没有新源码/脚本/config/contract/路由/EnginePort/事务/预算改变。旧已过UNKNOWN无限持责、owner/noCkill、no-fork工具安全与完整receipt字段不退化。新增helper确需路径先具名askMAIN，不能自行越白名单。
+
+五命令形式（allowed_runtime）全部firsttrial recorder，freshprefix n1n2-claude-060p5a-*，cwd=W：corepack pnpm exec tsc --noEmit；corepack pnpm exec vitest run --config vitest.config.ts tests/agent-driven/integration/cache-process-identity.test.ts；/usr/bin/python3.12 -I -S -B tests/agent-driven/integration/helpers/cache-custodian-unit.py；node tools/openfilm-cache-worker-integrity.mjs --generate（独立许可generation仅改该JSON，首个实际变更捕获）；node tools/openfilm-cache-worker-integrity.mjs --check。统一在argv前加python3 docs/execution/A/implementation-20261111/integration/e1-main-takeover/run-recorded.py NAME。不能recorder外预跑，失败用新名保留；运行期间源冻结，默认并发/timeout不改。真实C/N/fork/内核信号/wait/正常Npilot/Host/媒体/浏览器/probe/fullcheck/build均未授权。
+
+OWN新n1n2-claude-060p5a-report.md明确授权（JSON allow_new=[]针对源路径非明确报告），逐两finding生产行号/actualbranchmock/旧实现为何会红（不要回退旧源执行变异，本票不准）/实际capturelog/输入sha/全部失败/NOT_RUN，并列出其余12finding及原17/ISO18仍OPEN。nofork两实际结果仍固定旧Csha的历史证明，不冒充新源全验收；未来N正向真实门需要新完整基线hash。无Git add/commit/reset/stash/checkout/push、网络/下载/付费/J盘/用户配置env凭据/用户窗口。完成worker_done交还writer，MAIN定点读代码复核，接着R5B启动失败+normal N完整owner，不因这两个小修签全部生产通过。

@@ -1,0 +1,96 @@
+{
+  "at": "2026-11-15T16:04:34.689113+00:00",
+  "recorder_pid": 1287743,
+  "samples": 500,
+  "roles": [
+    {
+      "pid": 1287743,
+      "ppid": 1287709,
+      "pgid": 1287709,
+      "sid": 1287709,
+      "start_ticks": 5083324,
+      "state": "R",
+      "role": "pipeline",
+      "first_seen_at": "2026-11-15T16:04:28.384186+00:00",
+      "cmdline_sha256": "7d56ea91e47817d29af45c63b1b0b3433ffe5614ea2ad32e9a15799b1f459a5e"
+    },
+    {
+      "pid": 1287773,
+      "ppid": 1287743,
+      "pgid": 1287709,
+      "sid": 1287709,
+      "start_ticks": 5083570,
+      "state": "D",
+      "role": "pipeline",
+      "first_seen_at": "2026-11-15T16:04:30.840747+00:00",
+      "cmdline_sha256": "d74c8fb8359ca5fa45da7dc9d7beff92f2e55a1ac5b8a85fe648a268245657a0"
+    },
+    {
+      "pid": 1287774,
+      "ppid": 1287743,
+      "pgid": 1287709,
+      "sid": 1287709,
+      "start_ticks": 5083576,
+      "state": "R",
+      "role": "pipeline",
+      "first_seen_at": "2026-11-15T16:04:30.904106+00:00",
+      "cmdline_sha256": "46e46a084ad0ae87e54d457c619f3aa4429367c385f5ab2fd597baa19d8c3c50"
+    },
+    {
+      "pid": 1287786,
+      "ppid": 1287774,
+      "pgid": 1287709,
+      "sid": 1287709,
+      "start_ticks": 5083593,
+      "state": "D",
+      "role": "pipeline",
+      "first_seen_at": "2026-11-15T16:04:31.084910+00:00",
+      "cmdline_sha256": "c2153e899b86ad8ed87175f289be5acd67735815a0efbd4b938af4d8f63f69f8"
+    },
+    {
+      "pid": 1287802,
+      "ppid": 1287786,
+      "pgid": 1287709,
+      "sid": 1287709,
+      "start_ticks": 5083616,
+      "state": "R",
+      "role": "pipeline",
+      "first_seen_at": "2026-11-15T16:04:31.312905+00:00",
+      "cmdline_sha256": "5ee73b8c6a906d691a9ba22134b39bccca147dc23bdf2276e9bae7b5c8b9c335"
+    },
+    {
+      "pid": 1287831,
+      "ppid": 1287802,
+      "pgid": 1287709,
+      "sid": 1287709,
+      "start_ticks": 5083714,
+      "state": "R",
+      "role": "pipeline",
+      "first_seen_at": "2026-11-15T16:04:32.290950+00:00",
+      "cmdline_sha256": "d53d3b606da5c02a8bcdc1552e47bdec80c8ab695995fc14f9e2b93b9c182a55"
+    },
+    {
+      "pid": 1287847,
+      "ppid": 1287802,
+      "pgid": 1287847,
+      "sid": 1287847,
+      "start_ticks": 5083730,
+      "state": "D",
+      "role": "C",
+      "first_seen_at": "2026-11-15T16:04:32.440889+00:00",
+      "cmdline_sha256": "9affabcd4dcb649539dc3cbfd99c2a740c3160e84e3d0f962e9db7f26f2fb49a"
+    },
+    {
+      "pid": 1287850,
+      "ppid": 1287847,
+      "pgid": 1287850,
+      "sid": 1287850,
+      "start_ticks": 5083735,
+      "state": "R",
+      "role": "N",
+      "first_seen_at": "2026-11-15T16:04:32.491300+00:00",
+      "cmdline_sha256": "8b00779e47aa3a1c6614e7ac3874054cb83fcbc6ea620d23912c4e143fd0203f"
+    }
+  ],
+  "events_truncated": false
+}

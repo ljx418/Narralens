@@ -1,0 +1,104 @@
+{
+  "release_id": "MAIN_R5C_IMMUTABLE_AUTHORITY_AND_TERMINAL_OWNER",
+  "at": "2026-11-15T03:26:46.207440+00:00",
+  "cwd": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+  "base_head": "1d348d419120f23f45d958112ea8c43df5a04675",
+  "allow_existing": [
+    "src/adapters/openfilm/cache-process-supervisor.ts",
+    "src/adapters/openfilm/cache-process-custodian.py",
+    "src/adapters/openfilm/cache-worker-integrity.json",
+    "tests/agent-driven/integration/cache-process-identity.test.ts",
+    "tests/agent-driven/integration/helpers/cache-custodian-unit.py",
+    "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts",
+    "tools/native-cache-normal-pilot.ts",
+    "tests/agent-driven/integration/native-cache-normal-pilot.test.ts"
+  ],
+  "allow_new": [],
+  "start_sha256": {
+    "src/adapters/openfilm/cache-process-supervisor.ts": "9429ec959cc45715fc2837117bef9cc5b218e1260793cc92d21d97025679481f",
+    "src/adapters/openfilm/cache-process-custodian.py": "01a3636b890ae4b4c929cd4653ab3af0ec8b96c0d2af1242f298bf209967ae12",
+    "src/adapters/openfilm/cache-worker-integrity.json": "b59ebb17805c83929a183f8918040474146284e27bb50ba84f4848141931170e",
+    "tests/agent-driven/integration/cache-process-identity.test.ts": "6c50dca3681c48a8769daae3adae923a461124adcafc4251a450be48b591a7b2",
+    "tests/agent-driven/integration/helpers/cache-custodian-unit.py": "436eb6a854117ccf5540e03a2d0759501a0f982cdac0a87f61ac92cab0ca8789",
+    "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts": "2ee89a2cdb157aefcf4b5cb6bbe21df404ec72f69250e367dca85fbd78b0250c",
+    "tools/native-cache-normal-pilot.ts": "30b01a0eafe295e6d048c88c0c0adcce96ac4b342edcdcf72167dd3ed5282539",
+    "tests/agent-driven/integration/native-cache-normal-pilot.test.ts": "d7ab14329aae848b5a3c3aeae253bf989a5accad10c603c5199b55975145ff40"
+  },
+  "protected_exact_sha256": {
+    "tools/native-cache-nofork-pilot.mjs": "73fed24c66ec310ccd811fdd7e4dfb51be6d22875ce81a50e1a86a47072fe00d",
+    "tests/agent-driven/integration/helpers/native-cache-nofork-pilot.test.mjs": "feb9786b4f38044382ab6ac2ca8435f3bdf89ae83c0882b47177573136deb5ce",
+    "tests/agent-driven/integration/helpers/cache-worker-fixture.mjs": "e3f4ccb1c4016a54356ce04be344b4ffff23f2f88698efe191570ad8407d03ab",
+    "src/host/agent-driven/retained-native-closure.ts": "fd896104149d6cd2663b63a59d50beabbeee546f3e3f46a5d6bf07fbe662ede9",
+    "src/host/agent-driven/created-native-workspace.ts": "d83edbdac8cd6dd7db6b5d18f1d0f5d3beb028279297a822f59f97f6504d562c",
+    "src/adapters/openfilm/openfilm-upstream.ts": "17fe1138e50bc30df5c26b74e1e0ff9393140c070e1233676d2811485890a2b6",
+    "AGENTS.md": "37300463a72a612ae16e0a5fcfb496502c57c722b83781e0e2e8c9480594542b"
+  },
+  "recorder": "docs/execution/A/implementation-20261111/integration/e1-main-takeover/run-recorded.py",
+  "recorder_sha256": "88cd47ec732a340f54cdd4bb05b05878887697eebb0ddc94b1ccd7d0e434fd10",
+  "capture_prefix": "n1n2-claude-060p5c-",
+  "allowed_runtime": [
+    [
+      "corepack",
+      "pnpm",
+      "exec",
+      "tsc",
+      "--noEmit"
+    ],
+    [
+      "corepack",
+      "pnpm",
+      "exec",
+      "vitest",
+      "run",
+      "--config",
+      "vitest.config.ts",
+      "tests/agent-driven/integration/cache-process-identity.test.ts"
+    ],
+    [
+      "/usr/bin/python3.12",
+      "-I",
+      "-S",
+      "-B",
+      "tests/agent-driven/integration/helpers/cache-custodian-unit.py"
+    ],
+    [
+      "corepack",
+      "pnpm",
+      "exec",
+      "vitest",
+      "run",
+      "--config",
+      "vitest.config.ts",
+      "tests/agent-driven/integration/native-cache-normal-pilot.test.ts"
+    ],
+    [
+      "node",
+      "tools/openfilm-cache-worker-integrity.mjs",
+      "--generate"
+    ],
+    [
+      "node",
+      "tools/openfilm-cache-worker-integrity.mjs",
+      "--check"
+    ]
+  ],
+  "generation_writable_only": "src/adapters/openfilm/cache-worker-integrity.json",
+  "scope_findings": [
+    "R5B-S01..S06",
+    "R5B-O01..O06"
+  ],
+  "explicit_internal_surface_additions": [
+    "CacheProcessSupervisor.requestCancel(issuedHandle,originalError) Host-private, no publicroute/MCP/EnginePort",
+    "CacheProcessSupervisor.diagnosticSnapshot(issuedHandle) boundedreadonly facts, no rawticket or mutablecapability",
+    "readonly diagnosticSnapshot draw_id/ticket_digest and exactcancel provenance, never rawticket; no publicsurface"
+  ],
+  "runtime_limit": "Six recordedtype/pure/generation only; no actualC/N/fork/exec/signal/prctl/media/Host/browser/pilot or mixedlifecycle file execution",
+  "source_writer": "existingClaude only",
+  "new429": "STOP_NO_RETRY_TAKEOVER",
+  "next": "Sourcehandback+targetedindependentstartup/positiveownerreview; then exactnormal N+expectedassertfail runtime separately; otherR6/R7 findings remainOPEN",
+  "prior_safety_reviews": [
+    "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p5b-startup-and-owner/independent-review/startup-reaper-review/FINDINGS.json",
+    "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p5b-startup-and-owner/independent-review/positive-owner-review/FINDINGS.json"
+  ],
+  "spec_sha256": "a058905b9c2d141445b5d500a0594a9ecd1c13d8bd4be296511b019d6fe22365"
+}

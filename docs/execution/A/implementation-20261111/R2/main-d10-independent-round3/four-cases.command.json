@@ -1,0 +1,15 @@
+{
+  "cwd": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+  "argv": [
+    "corepack",
+    "pnpm",
+    "exec",
+    "vitest",
+    "run",
+    "--config",
+    "vitest.config.ts",
+    "tests/agent-driven/integration/created-source-recovery.test.ts",
+    "-t",
+    "MAIN full execution|MAIN authorization still permits|commits the original published transaction exactly once"
+  ]
+}

@@ -1,0 +1,32 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:62109) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/agent-driven/media/native-draft-real-render.test.ts (2 tests | 2 failed) 35256ms
+   × registers real media and visibly burns native captions: 'Chinese full-stop normalization' 17710ms
+     → expected 0 to be greater than 40
+   × registers real media and visibly burns native captions: 'fractional final audio frame' 17545ms
+     → expected 0 to be greater than 40
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/media/native-draft-real-render.test.ts > registers real media and visibly burns native captions: 'Chinese full-stop normalization'
+ FAIL  tests/agent-driven/media/native-draft-real-render.test.ts > registers real media and visibly burns native captions: 'fractional final audio frame'
+AssertionError: expected 0 to be greater than 40
+ ❯ tests/agent-driven/media/native-draft-real-render.test.ts:60:28
+     58|   // Sparse glyphs occupy a small part of this flat-background crop; r…
+     59|   // foreground pixels rather than diluting them across all unchanged …
+     60|   expect(foregroundPixels).toBeGreaterThan(40);expect(products[0]!.sha…
+       |                            ^
+     61|   const negatives: string[]=[];
+     62|   for(const mode of ['missing-vtt','malformed-style']){
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed (2)
+   Start at  09:14:41
+   Duration  41.56s (transform 2.27s, setup 0ms, collect 4.59s, tests 35.26s, environment 0ms, prepare 1.13s)
+

@@ -1,0 +1,56 @@
+{
+  "format": "narralens.next-wiring-plan@draft1",
+  "status": "DRAFT_PENDING_N1N2_ACCEPTANCE",
+  "created_at": "2026-11-12T13:51:25.160156+00:00",
+  "accepted_native_commit": null,
+  "historical_design_base": "e2eff61b464d75d36598103d718cd2a75db5dfda",
+  "implementation_release": false,
+  "business_acceptance": "NOT_RUN",
+  "source_inputs": {
+    "docs/execution/A/implementation-20261111/R2/shared-selection-authority-design/CONTRACT.md": "82dbf646710a807c7e38796e0e0216a5d2890134a00d6b6b306656715742855d",
+    "docs/execution/A/implementation-20261111/R2/shared-selection-authority-design/ACCEPTANCE_AND_RELEASE.json": "716b34b81f7b15d73522965b8f9721e0cd9a36c87601d98e4135bde49dbd8325",
+    "docs/execution/A/implementation-20261111/R2/native-source-composition-design/CONTRACTS_AND_OWNERSHIP.md": "6f0ab26b819dbd9b2be1a91f434b9b0b877b105662b7bbfd687e048806a13beb",
+    "docs/execution/A/implementation-20261111/R2/native-source-composition-design/DEVELOPMENT_AND_ACCEPTANCE.md": "3bf0925a2dc4b46ba21856a0156361994ee04c2eb8f428b6f4dfe417db9fc508",
+    "docs/execution/A/implementation-20261111/R2/host-recovery-composition-review/ACCEPTANCE_CASES.md": "8420bd50a0bd0beab85cca13c5abf3c4687e48117433e3c2a7615fe0932b2595",
+    "docs/execution/A/implementation-20261111/R2/host-recovery-composition-review/RELEASE_RECOMMENDATION.json": "d34dd7ac4b6a8587f25928b118d78c68211205fb5b07c712bcca334df96febde",
+    "docs/execution/A/implementation-20261111/R2/native-source-composition-design/DESIGN.md": "c13c2ea3006309e724fabd2ad22b4c8426127c25007b89f0b78dd63fd67a99ac",
+    "docs/execution/A/implementation-20261111/R2/native-composition-implementation/MAIN_DECISIONS.md": "1bf9e7c0f2ec68c399591d233a9a5c17f0815baea0c5b2fc324f77d1cd2d2143",
+    "docs/execution/A/implementation-20261111/R2/native-composition-implementation/S01_MAIN_REVIEW_CHECKPOINTS.md": "429a80a3c94c9116805b30c2f56003df0ac8df799517aa525f870027d2c8e2f3",
+    "docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/G01_G07_MAIN_DESIGN_CONSTRAINTS.md": "154c525418a345b0cf1651383bd98d6eb8ede9df1f476b74ca70a31dbb80339d",
+    "docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/G01_G07_CONSOLIDATED_014_RELEASE.md": "2c2b0225ea951bb3b5df33b4368da528aeae6156621305e6c02ef67cfb3a500a",
+    "docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/G01_G07_CONSOLIDATED_014_RELEASE.json": "38faf27bd3340ccdccfc8fc960ff17f4d649f39c99832214a75e5a199748b084"
+  },
+  "files": {
+    "00_READ_FIRST.md": "6074de454ec0a474cc71e1d43a97e8ebbb48befe7b0458f502eecaf49be1ccbe",
+    "01_CONTRACT.md": "580f024a64afaa1e3939189c817038d13e705d128c53ab14bd6f48ab792fd813",
+    "02_DEVELOPMENT_AND_ACCEPTANCE.md": "8d094d8b45f13baad44faf2390f23ef96bebd0eea5c7edc1d3fde4e26672dfd2",
+    "03_CLAUDE_HANDOFF.md": "c8dedb0cf373ac3aa9c26f29bbdb66e6a8e822451eb9ad6c3e400f92bf513fc3",
+    "04_PATHS_PORTS_AND_PRODUCERS.md": "f7c3b784701c4feef729caba24eb18f1c28f7bead3a42408f1c3ad9053954110",
+    "05_LIFECYCLE_AND_NATIVE_CACHE_ROUTES.md": "b496d5e0b4f14febbad824fdc58c9578d4c5dd72dfcf544a995dbbe3a606c938",
+    "06_REVIEW_PUBLICATION_SCHEMA_PROPOSAL.md": "474b62a0d6e558416b6178cd82a62a231d728aecfda3c37f40655b265d3f8043"
+  },
+  "s01_case_count": 28,
+  "unresolved_before_finalization": [
+    "014 alloriginalrequirements realproof+frozencommit independentreview",
+    "reconcile actual014 interfaces/resourceownership/cacheproducercontract",
+    "exactnext-stagepaths and protectedsurface comparison",
+    "independentplanreview and casecrossreference check",
+    "proposedreviewpublication privateDDL literalSQL+fingerprint independentreview",
+    "validateproposedprivateports againstaccepted014",
+    "reviewcontrolledGET/background route implementationbeforeunlock"
+  ],
+  "claim_limit": "planning draft only;notreadyforimplementation,nohumanpass",
+  "revision": 3,
+  "revised_at": "2026-11-12T14:28:09.605908+00:00",
+  "input_authority_classes": {
+    "S01_and_Native_HC_original_docs": "historical_design_contracts baselinee2;caseIDs preserved",
+    "MAIN_DECISIONS_and_S01_checkpoints": "current architectural rulings boundatmanifesttime",
+    "014release_and_constraints": "currentauthorizations/design;implementationunaccepted,actualsignatureslater"
+  },
+  "implementation_cwd": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+  "canonical_docs_root": "/mnt/c/workspace/videoworkline/Narralens/docs",
+  "planned_evidence_root": "docs/execution/A/implementation-20261111/integration/next-wiring/",
+  "review": "rev2 proposal-gap recheck completed; new receipt schema annex independently UNREVIEWED; not final release PASS",
+  "receipt_ddl_proposal_sha256": "be75d5683a25861ab2cbe14d0a12c4bbde050a342288e2f254f577a2a6623e56",
+  "receipt_schema_review": "PENDING"
+}

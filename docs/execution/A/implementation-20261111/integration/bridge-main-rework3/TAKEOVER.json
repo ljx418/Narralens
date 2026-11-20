@@ -1,0 +1,202 @@
+{
+  "status": "MAIN_EXCLUSIVE_IMPLEMENTATION_IN_MAIN_CHECKOUT",
+  "reason": "formal BRIDGE same-substage rework3, parent+child stopped msg39a93/msg9eeaf",
+  "candidate": "5274a8aceb71c3c27d4617b597d6c88e428e8e6e",
+  "files": [
+    {
+      "path": "contracts/agent-local-assets-v1.registry.json",
+      "sha256": "053914b00b4b409eea06dc863be7abd97fac6f0a21756388e8ecf891081510b7",
+      "origin": "5274a8aceb71c3c27d4617b597d6c88e428e8e6e"
+    },
+    {
+      "path": "contracts/agent-local-assets-v1.schema.json",
+      "sha256": "80dfa4918118bf7b57c65e52142dc95ebed69b6fb5951dead2f8a18f01ec0d6a",
+      "origin": "5274a8aceb71c3c27d4617b597d6c88e428e8e6e"
+    },
+    {
+      "path": "contracts/agent-workbench-ui-v1.registry.json",
+      "sha256": "80cb3303d94729733fc82f901d4a620528e59f21361d92dbf5a0de9cd5fc1c30",
+      "origin": "5274a8aceb71c3c27d4617b597d6c88e428e8e6e"
+    },
+    {
+      "path": "skills/narralens/SKILL.md",
+      "sha256": "14f41996c3d81c2e61b3861892218b8d0e72a08cec57d23cdb2a0bc4e1a55ddb",
+      "origin": "5274a8aceb71c3c27d4617b597d6c88e428e8e6e"
+    },
+    {
+      "path": "src/contracts/agent-local-assets-types.ts",
+      "sha256": "9bf605c786e2b6d1a797ab7ec8c450810a91ece87039eb28b7880a1d46f54076",
+      "origin": "5274a8aceb71c3c27d4617b597d6c88e428e8e6e"
+    },
+    {
+      "path": "src/contracts/agent-local-assets-validator.ts",
+      "sha256": "73d24cbed71989fb26f14a5464c06da615e835991938fa0c8ac512c32708d7a0",
+      "origin": "5274a8aceb71c3c27d4617b597d6c88e428e8e6e"
+    },
+    {
+      "path": "src/host/agent-driven/asset-inventory.ts",
+      "sha256": "7be972da9ec263b22a6f74bd5d25466d404f8d3d9227db343a3b1c95b86297ec",
+      "origin": "5274a8aceb71c3c27d4617b597d6c88e428e8e6e"
+    },
+    {
+      "path": "src/host/agent-driven/created-run-authority.ts",
+      "sha256": "571da409fd742705d1293cab81312a24766410679e223c354590724f98fa749a",
+      "origin": "5274a8aceb71c3c27d4617b597d6c88e428e8e6e"
+    },
+    {
+      "path": "src/host/agent-driven/created-run-facts.ts",
+      "sha256": "f466f813049b82c39f90de70713464a5115ba1f4245d45ab8e3e50622aa2f65d",
+      "origin": "5274a8aceb71c3c27d4617b597d6c88e428e8e6e"
+    },
+    {
+      "path": "src/host/agent-driven/created-task-application.ts",
+      "sha256": "4203e55493c330ea537b11601cd48eb736a6bd29915565a9c4f5cae046288493",
+      "origin": "5274a8aceb71c3c27d4617b597d6c88e428e8e6e"
+    },
+    {
+      "path": "src/host/agent-driven/created-task-store.ts",
+      "sha256": "dca19ab5d29b44a6608808bf77c4892a2b2ea2fff89d290b64b7ce57f59dd902",
+      "origin": "5274a8aceb71c3c27d4617b597d6c88e428e8e6e"
+    },
+    {
+      "path": "src/host/agent-driven/created-task-worker.ts",
+      "sha256": "79f141851e449a6e5dfc2139c78a511f62c0f99a6843eb58649c86627d91692f",
+      "origin": "5274a8aceb71c3c27d4617b597d6c88e428e8e6e"
+    },
+    {
+      "path": "src/host/agent-driven/creation-application.ts",
+      "sha256": "5d686086aa05900f3dd6b27d0ec575c202ec6c1cd3bfc76de0e4af512ca53354",
+      "origin": "explicit stopped dirty"
+    },
+    {
+      "path": "src/host/agent-driven/local-asset-http.ts",
+      "sha256": "aabca8fb0ac8faae592f9c2a9824fe14f6423ccde3d7cdea46ecb7331d82f7b7",
+      "origin": "5274a8aceb71c3c27d4617b597d6c88e428e8e6e"
+    },
+    {
+      "path": "src/host/agent-driven/local-asset-registry.ts",
+      "sha256": "2d8e087ae0f57c72db418433ef7c6237e67d97d2e54cd4f2272d32e0eb141823",
+      "origin": "5274a8aceb71c3c27d4617b597d6c88e428e8e6e"
+    },
+    {
+      "path": "src/host/agent-driven/project-context-service.ts",
+      "sha256": "dca2b1d266c536328a064466e037367159df0e4b541b6dd96ef511196b90b154",
+      "origin": "explicit stopped dirty"
+    },
+    {
+      "path": "src/host/agent-driven/review-media-http.ts",
+      "sha256": "6e9551c8e37ff29d225030efd84810d5f52b2400cc492823316829d72c4241e6",
+      "origin": "5274a8aceb71c3c27d4617b597d6c88e428e8e6e"
+    },
+    {
+      "path": "src/host/projects/project-creation-store.ts",
+      "sha256": "ee87d38d6f2ac79e5ec0ed3ee5ea074d035c388de43ff1a5365eb0732d43f682",
+      "origin": "5274a8aceb71c3c27d4617b597d6c88e428e8e6e"
+    },
+    {
+      "path": "src/mcp/asset-inventory-resource.ts",
+      "sha256": "20dbf98190b75b1c2600979780aa7986c5c82062b65565f6da113c1384b483ca",
+      "origin": "5274a8aceb71c3c27d4617b597d6c88e428e8e6e"
+    },
+    {
+      "path": "src/mcp/host-application-ports.ts",
+      "sha256": "5c59a20ff312f4760b1b6f6a58611e6358effc37280a2ce626c18da56f81a2a4",
+      "origin": "5274a8aceb71c3c27d4617b597d6c88e428e8e6e"
+    },
+    {
+      "path": "src/mcp/mcp-server.ts",
+      "sha256": "daa0119d8669f55d880a8223e60a2b9a7b0aa61106b090a0da54ef0eb3d16718",
+      "origin": "5274a8aceb71c3c27d4617b597d6c88e428e8e6e"
+    },
+    {
+      "path": "src/mcp/stdio-main.ts",
+      "sha256": "1fa0f5665c774ce18be9695ea163a25d654af7742c6ad3cc2884a04103ffb173",
+      "origin": "5274a8aceb71c3c27d4617b597d6c88e428e8e6e"
+    },
+    {
+      "path": "tests/agent-driven/bridge/mcp-registry.test.ts",
+      "sha256": "029280bdcc6dda25a1d07e7980e988f4014f15cbae3d070d4b3c873fe8b45532",
+      "origin": "5274a8aceb71c3c27d4617b597d6c88e428e8e6e"
+    },
+    {
+      "path": "tests/agent-driven/bridge/mcp-stdio-client.test.ts",
+      "sha256": "9718420623653bc65edadcfb3d61992d6713dc5007bfc69f4f41c57b233e5e0f",
+      "origin": "5274a8aceb71c3c27d4617b597d6c88e428e8e6e"
+    },
+    {
+      "path": "tests/agent-driven/integration/created-run-authority.test.ts",
+      "sha256": "31d3fdc0df8a08a01a65148396a11837afdc55600a012be9d7bbe0a2c698f008",
+      "origin": "5274a8aceb71c3c27d4617b597d6c88e428e8e6e"
+    },
+    {
+      "path": "tests/agent-driven/integration/created-task-store.test.ts",
+      "sha256": "e769bcc9d52c103a8385d9013ef791ec45388504a18aba7adaf118cf1f123099",
+      "origin": "5274a8aceb71c3c27d4617b597d6c88e428e8e6e"
+    },
+    {
+      "path": "tests/agent-driven/integration/created-task-worker.test.ts",
+      "sha256": "bec228de63f3a38f2a64cec2c9263f304dd4fea73d4d3a0f3abb894ae9b9f599",
+      "origin": "5274a8aceb71c3c27d4617b597d6c88e428e8e6e"
+    },
+    {
+      "path": "tests/agent-driven/integration/host-close-lifecycle.test.ts",
+      "sha256": "145568f5c8b860288e60d0604ec76d362777fa603fd6556297dfa114f0d13ad7",
+      "origin": "5274a8aceb71c3c27d4617b597d6c88e428e8e6e"
+    },
+    {
+      "path": "tests/agent-driven/integration/local-assets-transport.test.ts",
+      "sha256": "7a8396a2f8ca3dea8237fb2c51beb6deceba3d299355b708de8b00ab160027a2",
+      "origin": "5274a8aceb71c3c27d4617b597d6c88e428e8e6e"
+    },
+    {
+      "path": "tests/agent-driven/integration/review-media-transport.test.ts",
+      "sha256": "3da1d6dd3e78e680ecac495a1c0e576bba3bb09868dce40070eab66048bed85f",
+      "origin": "5274a8aceb71c3c27d4617b597d6c88e428e8e6e"
+    }
+  ],
+  "source_checkout": "/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE",
+  "snapshot_only": "MAIN active media tests remain unchanged; no source integrated yet",
+  "known_failure": "00323/24; actual genericJob context409vs503",
+  "limits": "dirty attempted receipt resolver changes preserved, not accepted as verified",
+  "imported_paths": [
+    "contracts/agent-local-assets-v1.registry.json",
+    "contracts/agent-local-assets-v1.schema.json",
+    "contracts/agent-workbench-ui-v1.registry.json",
+    "skills/narralens/SKILL.md",
+    "src/contracts/agent-local-assets-types.ts",
+    "src/contracts/agent-local-assets-validator.ts",
+    "src/host/agent-driven/asset-inventory.ts",
+    "src/host/agent-driven/created-run-authority.ts",
+    "src/host/agent-driven/created-run-facts.ts",
+    "src/host/agent-driven/created-task-application.ts",
+    "src/host/agent-driven/created-task-store.ts",
+    "src/host/agent-driven/created-task-worker.ts",
+    "src/host/agent-driven/creation-application.ts",
+    "src/host/agent-driven/local-asset-http.ts",
+    "src/host/agent-driven/local-asset-registry.ts",
+    "src/host/agent-driven/project-context-service.ts",
+    "src/host/agent-driven/review-media-http.ts",
+    "src/host/projects/project-creation-store.ts",
+    "src/mcp/asset-inventory-resource.ts",
+    "src/mcp/host-application-ports.ts",
+    "src/mcp/mcp-server.ts",
+    "src/mcp/stdio-main.ts",
+    "tests/agent-driven/bridge/mcp-registry.test.ts",
+    "tests/agent-driven/bridge/mcp-stdio-client.test.ts",
+    "tests/agent-driven/integration/created-run-authority.test.ts",
+    "tests/agent-driven/integration/created-task-store.test.ts",
+    "tests/agent-driven/integration/created-task-worker.test.ts",
+    "tests/agent-driven/integration/host-close-lifecycle.test.ts",
+    "tests/agent-driven/integration/local-assets-transport.test.ts",
+    "tests/agent-driven/integration/review-media-transport.test.ts"
+  ],
+  "main_base": "34118e71cf9582d20a715b441e3fe4ea8e98412f",
+  "scope_limit": "snapshot imported as unverified candidate; receipt root-cause/closedquery corrections and actualHost tests pending",
+  "main_corrections": [
+    "one shared owner/project/actualJob receipt resolver for Context andjob.read",
+    "allow reserved bootstrap receipt visibility; committed creative authority retained separately",
+    "unknown producer503, foreign/missingJob404, no fake revision conflict",
+    "strict emptyobject native.reopen; closedproject/limit/cursor query, unknownfields rejected"
+  ],
+  "validation": "Host4suites+new actualUIGateway/pagination test running session86571; code NOT accepted yet"
+}

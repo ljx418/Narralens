@@ -1,0 +1,29 @@
+{
+  "at": "2026-11-15T18:59:53.501610+00:00",
+  "read_only": true,
+  "matched_processes": [
+    {
+      "identity": {
+        "pid": 1596765,
+        "ppid": 1596763,
+        "pgid": 1596765,
+        "sid": 1596763,
+        "start_ticks": 5939726,
+        "state": "S"
+      },
+      "kind": "recorded-R6",
+      "argv": [
+        "python3",
+        "docs/execution/A/implementation-20261111/integration/e1-main-takeover/run-recorded.py",
+        "n1n2-claude-060p6-complete-python-003",
+        "/usr/bin/python3.12",
+        "-I",
+        "-S",
+        "-B",
+        "tests/agent-driven/integration/helpers/cache-custodian-unit.py"
+      ]
+    }
+  ],
+  "no_destructive_signals_sent": true,
+  "limit": "No matching known recorder/C/N/Vitest proves only this scan, not that Claude shell registry is empty or no other unidentifiable child exists"
+}

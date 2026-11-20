@@ -1,0 +1,515 @@
+{
+  "format": "narralens.independent-frozen-review.matrix@1",
+  "candidate_commit": "1d348d419120f23f45d958112ea8c43df5a04675",
+  "parent_commit": "e2eff61b464d75d36598103d718cd2a75db5dfda",
+  "cached_origin_main": "304c89134fdf9f834f7d69e3f4d5c89a68044c60",
+  "upstream_commit": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+  "reviewer": "Independent Codex reviewer A; no implementation edits; dispatched task_d4071ac7b4d1 / ctx_e657630bbb6b",
+  "conclusion": "REQUEST_CHANGES",
+  "business_runtime_executed": false,
+  "status_semantics": "proven means reviewed component source + actual assertions + frozen capture support the scoped requirement; it never means independently rerun or overall release approval. partial records concrete gaps; pending-after-acceptance preserves NEXT.",
+  "requirements": [
+    {
+      "group": "R01",
+      "requirement": "producer_chain",
+      "proof_required": "Actual bootstrap, SOURCE_ONLY draft and controlled adoption produce committed rich source; actual workspace/reader consumes it; preserve producer/rights/consumer identities.",
+      "linked_findings": [],
+      "candidate_evidence": [],
+      "status": "proven",
+      "review_status": "proven",
+      "source_evidence": [
+        "src/host/agent-driven/committed-snapshot-authority.ts:312",
+        "src/host/agent-driven/committed-snapshot-authority.ts:555",
+        "src/host/agent-driven/created-native-workspace.ts:280",
+        "src/host/agent-driven/created-native-source-reader.ts:569"
+      ],
+      "actual_test_assertion_evidence": [
+        "tests/agent-driven/integration/helpers/native-source-fixture.ts:107-291",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:109-184"
+      ],
+      "assessment": "Fixture starts the real SOURCE_ONLY worker, publishes through CreatedSourcePublisher, commits through commitPreparedCreatedSource, prepares a separate workspace and reads via the actual authority/reader; smoke checks binding and all four hydrated parts. Accepted human review/session policy is explicitly fixture data; component producer chain is proven, next production session wiring is not.",
+      "capture_evidence": [
+        "docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-056-final-check-001.txt"
+      ],
+      "finding_ids": [],
+      "reviewer_runtime": "NOT_RUN: only frozen assertion/code/log inspection",
+      "original_status": "PENDING_CANDIDATE_VERIFICATION"
+    },
+    {
+      "group": "R01",
+      "requirement": "independent_trees",
+      "proof_required": "Committed source and workspace retain independent physical trees; equal relative paths never collapse resource ownership; nested and empty directories are separate evidence.",
+      "linked_findings": [],
+      "candidate_evidence": [],
+      "status": "proven",
+      "review_status": "proven",
+      "source_evidence": [
+        "src/host/agent-driven/created-native-source-reader.ts:708-769",
+        "src/host/agent-driven/retained-native-closure.ts:609-650"
+      ],
+      "actual_test_assertion_evidence": [
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:824-862",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:2746-2821"
+      ],
+      "assessment": "Actual filesystem subdirectory sets and dev/ino are compared one by one, including empty probe directory; a second read increases live descriptor counts for every directory of both roots. Same relative paths do not collapse owners; aliases are refused.",
+      "capture_evidence": [
+        "docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-056-final-check-001.txt"
+      ],
+      "finding_ids": [],
+      "reviewer_runtime": "NOT_RUN: only frozen assertion/code/log inspection",
+      "original_status": "PENDING_CANDIDATE_VERIFICATION"
+    },
+    {
+      "group": "R02",
+      "requirement": "tamper_and_authority",
+      "proof_required": "Same bytes/new inode, parent/root replacement, same-size/restored mtime, symlink, copied/foreign/released capability and stale base/control/owner/generation are refused before authoritative use.",
+      "linked_findings": [
+        "K04",
+        "K06"
+      ],
+      "candidate_evidence": [],
+      "status": "partial",
+      "review_status": "partial",
+      "source_evidence": [
+        "src/host/agent-driven/retained-native-closure.ts:841-875",
+        "src/host/agent-driven/committed-snapshot-authority.ts:530-664",
+        "src/host/agent-driven/created-native-workspace.ts:922-953"
+      ],
+      "actual_test_assertion_evidence": [
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:206-280",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:424-489",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:3175-3315",
+        "tests/agent-driven/integration/native-cache-witness.test.ts:824-917"
+      ],
+      "assessment": "Read complete replacement/restore and owner/base/control/ref/generation assertions: real SQL rows are changed and intended errors asserted; current leases are distinct from copied/foreign leases. Duration-only historical dependency fence remains bypassable.",
+      "capture_evidence": [
+        "docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-056-final-check-001.txt"
+      ],
+      "finding_ids": [
+        "A057-05",
+        "A057-01"
+      ],
+      "reviewer_runtime": "NOT_RUN: only frozen assertion/code/log inspection",
+      "original_status": "PENDING_CANDIDATE_VERIFICATION"
+    },
+    {
+      "group": "R03",
+      "requirement": "complete_dependencies",
+      "proof_required": "Positive/negative style/settings/markers/subtitle/translation dependencies, added empty directory and actual listing changes invalidate stale proofs.",
+      "linked_findings": [
+        "K06"
+      ],
+      "candidate_evidence": [],
+      "status": "proven",
+      "review_status": "proven",
+      "source_evidence": [
+        "src/host/agent-driven/created-native-source-reader.ts:783-795",
+        "src/host/agent-driven/created-native-source-reader.ts:906-948",
+        "src/host/agent-driven/created-native-source-reader.ts:1039-1119",
+        "src/host/agent-driven/retained-native-closure.ts:1033-1091"
+      ],
+      "actual_test_assertion_evidence": [
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:285-301",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:969-1008",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:2443-2462",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:2463-2515",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:3175-3196"
+      ],
+      "assessment": "Settings/markers/style/captions use retained text and explicit absence; sidecar consumed/negative/listing/media dependencies are checked against ledgers; heard video has actual audio and no transcript, native consumer reports untranscribed, later transcript birth invalidates proof. Full-membership checks also reject added empty directories.",
+      "capture_evidence": [
+        "docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-056-final-check-001.txt"
+      ],
+      "finding_ids": [],
+      "reviewer_runtime": "NOT_RUN: only frozen assertion/code/log inspection",
+      "original_status": "PENDING_CANDIDATE_VERIFICATION"
+    },
+    {
+      "group": "R04",
+      "requirement": "native_cache",
+      "proof_required": "Unknown/forged native metadata or cache refused; concrete approved producer derivation invalidates old round, then stable proven native derivation can be read; no broad cache whitelist.",
+      "linked_findings": [
+        "K01",
+        "K03",
+        "K04",
+        "K05"
+      ],
+      "candidate_evidence": [],
+      "status": "partial",
+      "review_status": "partial",
+      "source_evidence": [
+        "src/host/agent-driven/created-native-workspace.ts:645-897",
+        "src/host/agent-driven/native-cache-witness.ts:146-242",
+        "src/host/agent-driven/created-native-source-reader.ts:1173-1334"
+      ],
+      "actual_test_assertion_evidence": [
+        "tests/agent-driven/integration/native-cache-witness.test.ts:138-203",
+        "tests/agent-driven/integration/native-cache-witness.test.ts:824-917",
+        "tests/agent-driven/integration/native-cache-witness.test.ts:1015-1050",
+        "tests/agent-driven/integration/native-cache-witness.test.ts:1639-1770"
+      ],
+      "assessment": "Real pageframe/poster producer output, same-bytes/new-inode and restored-mtime negatives, non-film duration exclusion, two lawful frames and newest-output/no-fallback assertions are concrete. The no-fallback test is a pure ledger test; two-frame case is real producer/reader. Duration-only and media cache admission remain deficient.",
+      "capture_evidence": [
+        "docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-056-final-check-001.txt"
+      ],
+      "finding_ids": [
+        "A057-05",
+        "A057-06"
+      ],
+      "reviewer_runtime": "NOT_RUN: only frozen assertion/code/log inspection",
+      "original_status": "PENDING_CANDIDATE_VERIFICATION"
+    },
+    {
+      "group": "R05",
+      "requirement": "actual_probe",
+      "proof_required": "Fixed local ffprobe uses same held parent-PID FD; normalized duration/first-video/fps/rotation/audio/dimensions and provenance match pinned upstream; no injected facts.",
+      "linked_findings": [],
+      "candidate_evidence": [],
+      "status": "proven",
+      "review_status": "proven",
+      "source_evidence": [
+        "src/host/agent-driven/created-native-source-reader.ts:113-138",
+        "src/host/agent-driven/created-native-source-reader.ts:428-516",
+        "src/host/agent-driven/retained-native-closure.ts:986-992"
+      ],
+      "actual_test_assertion_evidence": [
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:384-398",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:1043-1082",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:1560-1616"
+      ],
+      "assessment": "Normal source-reader probes use /proc/<parent-pid>/fd/<held-file> and fixed argv, hash tool version/input/result provenance; actual generated rotated/two-stream media assertions check coded and shown dimensions, fps and first stream. This proof concerns source-reader media probes, not all public folder frame-duration route lifetime.",
+      "capture_evidence": [
+        "docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-056-final-check-001.txt"
+      ],
+      "finding_ids": [],
+      "reviewer_runtime": "NOT_RUN: only frozen assertion/code/log inspection",
+      "original_status": "PENDING_CANDIDATE_VERIFICATION"
+    },
+    {
+      "group": "R05",
+      "requirement": "child_lifetime",
+      "proof_required": "Timeout/cancel/abrupt child: actual child exit and reap precede input release; limits refuse rather than truncate; diagnostic media never represents Chinese A films.",
+      "linked_findings": [],
+      "candidate_evidence": [],
+      "status": "partial",
+      "review_status": "partial",
+      "source_evidence": [
+        "src/host/agent-driven/created-native-source-reader.ts:348-419",
+        "src/host/agent-driven/created-native-source-reader.ts:428-474",
+        "src/adapters/openfilm/openfilm-upstream.ts:399-419",
+        "src/adapters/openfilm/openfilm-upstream.ts:1101-1112"
+      ],
+      "actual_test_assertion_evidence": [
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:591-643",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:2303-2434",
+        "tests/agent-driven/integration/native-cache-witness.test.ts:213-245",
+        "tests/agent-driven/integration/native-cache-witness.test.ts:1560-1628"
+      ],
+      "assessment": "Reader uses child close, waits before release, preserves held input until close and enforces stdout/stderr limits. Failure tests run real child processes through an explicitly injected transport (not fake successful media facts). Native producer timeout cleanup is not a settled underlying page.",
+      "capture_evidence": [
+        "docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-056-final-check-001.txt"
+      ],
+      "finding_ids": [
+        "A057-04"
+      ],
+      "reviewer_runtime": "NOT_RUN: only frozen assertion/code/log inspection",
+      "original_status": "PENDING_CANDIDATE_VERIFICATION"
+    },
+    {
+      "group": "R06",
+      "requirement": "native_bytes_and_order",
+      "proof_required": "Exact UTF8/BOM/CRLF/native_rev vectors; numeric localeCompare video ordering vs separate actual caption readdir order; Node/ICU/locale recorded.",
+      "linked_findings": [],
+      "candidate_evidence": [],
+      "status": "proven",
+      "review_status": "proven",
+      "source_evidence": [
+        "src/host/agent-driven/retained-native-closure.ts:756-795",
+        "src/host/agent-driven/created-native-source-reader.ts:157-180",
+        "src/host/agent-driven/created-native-source-reader.ts:1066-1119"
+      ],
+      "actual_test_assertion_evidence": [
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:1043-1131",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:2463-2508",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:2964-3017"
+      ],
+      "assessment": "Five literal UTF8/BOM/CRLF/native_rev vectors compare exact bytes; pinned listFiles compares scrambled input against actual consumer ordering; caption supplied language order zh,en versus en,zh is observed by actual consumer. Fullcheck log10-11 records node v22.22.1 / ICU78.2 / en-US.",
+      "capture_evidence": [
+        "docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-056-final-check-001.txt"
+      ],
+      "finding_ids": [],
+      "reviewer_runtime": "NOT_RUN: only frozen assertion/code/log inspection",
+      "original_status": "PENDING_CANDIDATE_VERIFICATION"
+    },
+    {
+      "group": "R07",
+      "requirement": "budgets",
+      "proof_required": "Size checks precede bounded text read; growth, total bytes, path/depth/FD/output/time bounds have explicit rejection; no unbounded media read.",
+      "linked_findings": [
+        "K02",
+        "K05"
+      ],
+      "candidate_evidence": [],
+      "status": "partial",
+      "review_status": "partial",
+      "source_evidence": [
+        "src/host/agent-driven/retained-native-closure.ts:20",
+        "src/host/agent-driven/retained-native-closure.ts:657-698",
+        "src/host/agent-driven/retained-native-closure.ts:756-805",
+        "src/host/agent-driven/retained-native-closure.ts:994-1005",
+        "src/host/agent-driven/retained-native-closure.ts:1094-1104"
+      ],
+      "actual_test_assertion_evidence": [
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:989-1008",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:1204-1316",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:1317-1411",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:2303-2434"
+      ],
+      "assessment": "Path/depth/FD quotas and decoded text per-file/aggregate limits have explicit refusal assertions; real process output/time limits covered. F06 zero-byte assertion omits initial hashes, and normal hashes lack captured-size growth limits.",
+      "capture_evidence": [
+        "docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-056-final-check-001.txt"
+      ],
+      "finding_ids": [
+        "A057-02",
+        "A057-03"
+      ],
+      "reviewer_runtime": "NOT_RUN: only frozen assertion/code/log inspection",
+      "original_status": "PENDING_CANDIDATE_VERIFICATION"
+    },
+    {
+      "group": "R07",
+      "requirement": "per_allocation_fd_lifetime",
+      "proof_required": "Descriptor allocation generations own closes; recycled integer after temporary directory walk still closes newly retained allocation exactly once; no raw numeric retry.",
+      "linked_findings": [
+        "K05"
+      ],
+      "candidate_evidence": [],
+      "status": "proven",
+      "review_status": "proven",
+      "source_evidence": [
+        "src/host/agent-driven/retained-native-closure.ts:246-265",
+        "src/host/agent-driven/retained-native-closure.ts:1174-1202",
+        "src/host/agent-driven/retained-native-closure.ts:1245-1263"
+      ],
+      "actual_test_assertion_evidence": [
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:1874-1944",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:2837-2936",
+        "tests/agent-driven/integration/native-cache-witness.test.ts:1069-1165"
+      ],
+      "assessment": "Recycled numeric FD is actually observed and new retained allocation still closes; PRE/POST namespace+monotonic-id coverage compares every allocation exactly once. No raw-number retry is used by retained closure ownership.",
+      "capture_evidence": [
+        "docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-056-final-check-001.txt"
+      ],
+      "finding_ids": [],
+      "reviewer_runtime": "NOT_RUN: only frozen assertion/code/log inspection",
+      "original_status": "PENDING_CANDIDATE_VERIFICATION"
+    },
+    {
+      "group": "R07",
+      "requirement": "cleanup_uncertainty",
+      "proof_required": "Nth open/stat/verify/close/reentry failures preserve primary and all cleanup errors; every outstanding resource attempted; sticky uncertainty prevents new proof.",
+      "linked_findings": [
+        "K02",
+        "K05"
+      ],
+      "candidate_evidence": [],
+      "status": "partial",
+      "review_status": "partial",
+      "source_evidence": [
+        "src/host/agent-driven/retained-native-closure.ts:127-137",
+        "src/host/agent-driven/retained-native-closure.ts:1187-1263",
+        "src/host/agent-driven/created-native-source-reader.ts:385-401",
+        "src/host/agent-driven/created-native-workspace.ts:816-840"
+      ],
+      "actual_test_assertion_evidence": [
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:2837-2936",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:3051-3174",
+        "tests/agent-driven/integration/native-cache-witness.test.ts:1069-1165"
+      ],
+      "assessment": "Read genuine injected cleanup object identity assertions: primary and both PRE/POST causes kept once, all allocations attempted, uncertainty sticky; successful/failed private parse copy cleanup branches tested. This does not prove timeout page/context settlement absent from adapter ledger.",
+      "capture_evidence": [
+        "docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-056-final-check-001.txt"
+      ],
+      "finding_ids": [
+        "A057-04"
+      ],
+      "reviewer_runtime": "NOT_RUN: only frozen assertion/code/log inspection",
+      "original_status": "PENDING_CANDIDATE_VERIFICATION"
+    },
+    {
+      "group": "R07",
+      "requirement": "drain_and_delivery",
+      "proof_required": "Close drains accepted reads and probes; success transfers source/workspace plus directory/negative guards; reader close cannot destroy delivered resources.",
+      "linked_findings": [
+        "K05"
+      ],
+      "candidate_evidence": [],
+      "status": "partial",
+      "review_status": "partial",
+      "source_evidence": [
+        "src/host/agent-driven/created-native-source-reader.ts:348-419",
+        "src/host/agent-driven/created-native-source-reader.ts:584-689",
+        "src/host/agent-driven/retained-native-closure.ts:533-555",
+        "src/adapters/openfilm/openfilm-upstream.ts:1039-1075"
+      ],
+      "actual_test_assertion_evidence": [
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:495-507",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:591-677",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:1639-1655",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:1874-1944",
+        "tests/agent-driven/integration/native-cache-witness.test.ts:1176-1213",
+        "tests/agent-driven/integration/native-cache-witness.test.ts:1560-1628"
+      ],
+      "assessment": "Delivered handles retain source/workspace/directory/negative guards until last close, and reader.close does not destroy delivered proof. Real successful draw remains admitted across idle HTTP gap and close; pinned timeout teardown is a missing lifetime boundary.",
+      "capture_evidence": [
+        "docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-056-final-check-001.txt"
+      ],
+      "finding_ids": [
+        "A057-04",
+        "A057-03"
+      ],
+      "reviewer_runtime": "NOT_RUN: only frozen assertion/code/log inspection",
+      "original_status": "PENDING_CANDIDATE_VERIFICATION"
+    },
+    {
+      "group": "R01/R02",
+      "requirement": "lease_isolation",
+      "proof_required": "Releasing one acquired lease does not revoke ref or another lease; repeated proof works; issuing instance checked and replaced generation invalidates prior proof.",
+      "linked_findings": [
+        "K01",
+        "K06"
+      ],
+      "candidate_evidence": [],
+      "status": "proven",
+      "review_status": "proven",
+      "source_evidence": [
+        "src/host/agent-driven/created-native-workspace.ts:332-347",
+        "src/host/agent-driven/created-native-workspace.ts:922-958",
+        "src/host/agent-driven/committed-snapshot-authority.ts:637-664"
+      ],
+      "actual_test_assertion_evidence": [
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:424-489",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:2548-2589",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:3283-3315"
+      ],
+      "assessment": "Release of one lease leaves another and ref usable; issuing service/authority WeakMaps reject copies/foreign objects; actual workspace re-prepare increments generation and invalidates original view; repeated proof acquisition works.",
+      "capture_evidence": [
+        "docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-056-final-check-001.txt"
+      ],
+      "finding_ids": [],
+      "reviewer_runtime": "NOT_RUN: only frozen assertion/code/log inspection",
+      "original_status": "PENDING_CANDIDATE_VERIFICATION"
+    },
+    {
+      "group": "REG",
+      "requirement": "existing_behavior",
+      "proof_required": "Original render SnapshotReadPort, legacy refusal and accepted Expected lifecycle/84 assertions preserved; loader only approved015 minimal exports, no artifact/pin change.",
+      "linked_findings": [],
+      "candidate_evidence": [],
+      "status": "proven",
+      "review_status": "proven",
+      "source_evidence": [
+        "src/host/m5/openfilm-native-expected.ts:576-638",
+        "src/host/agent-driven/committed-snapshot-authority.ts:267-278",
+        "src/host/agent-driven/committed-snapshot-authority.ts:682-722"
+      ],
+      "actual_test_assertion_evidence": [
+        "tests/agent-driven/integration/created-native-ack.test.ts:664-689",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts:193-205"
+      ],
+      "assessment": "Parent-to-candidate diff preserves original Expected84 assertion bodies, adds only required parser stub exports plus one rejection test; frozen regression capture contains85 passed. Loader only adds approved settings/markers exports; independent byte hashing confirms all5 approved015 files unchanged. Fullcheck capture supports existing render regression, but is not this reviewer running render.",
+      "capture_evidence": [
+        "docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-056-final-check-001.txt"
+      ],
+      "finding_ids": [],
+      "reviewer_runtime": "NOT_RUN: only frozen assertion/code/log inspection",
+      "original_status": "PENDING_CANDIDATE_VERIFICATION"
+    },
+    {
+      "group": "EVIDENCE",
+      "requirement": "frozen_capture",
+      "proof_required": "Exact ten-file diff and protected hashes checked; unique captures retain all failures, source/index immutable during commands, actual exits and source/artifact SHA256 verified.",
+      "linked_findings": [],
+      "candidate_evidence": [],
+      "status": "proven",
+      "review_status": "proven",
+      "source_evidence": [
+        "docs/evidence/N1N2/freeze-057/SOURCE_SCOPE.json",
+        "docs/evidence/N1N2/freeze-057/GATES.json"
+      ],
+      "actual_test_assertion_evidence": [
+        "docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-056-final-check-001.txt",
+        "docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-055-lf03-mutant-001.txt",
+        "docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-055-pf03-mutant-001.txt"
+      ],
+      "assessment": "Independently SHA256 compared28 scope blobs and626 captured inputs against frozen Git raw bytes:0 mismatches; seven indexed gate log hashes match; five approved015 working artifact hashes match. Read0/1/0 counterfactual result records and intended semantic assertion failures. Exact-ten wording is historical and current authoritative scope is28. Security scan receipt is limited to its stated ruleset and selected payloads.",
+      "capture_evidence": [
+        "docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-056-final-check-001.txt"
+      ],
+      "finding_ids": [],
+      "reviewer_runtime": "NOT_RUN: only frozen assertion/code/log inspection",
+      "original_status": "PENDING_CANDIDATE_VERIFICATION"
+    },
+    {
+      "group": "REVIEW",
+      "requirement": "independent_acceptance",
+      "proof_required": "Freeze actual candidate and obtain independent review bound to it; fix then reverify affected gates. No self-signed external pass.",
+      "linked_findings": [],
+      "candidate_evidence": [],
+      "status": "partial",
+      "review_status": "partial",
+      "source_evidence": [
+        "docs/evidence/N1N2/freeze-057/README.md"
+      ],
+      "actual_test_assertion_evidence": [
+        "review-a/REVIEW.md",
+        "review-a/FINDINGS.json"
+      ],
+      "assessment": "This actual independent review is bound to the full frozen SHA and returns REQUEST_CHANGES; no implementation edits or self-signed acceptance. Required repair, new freeze and affected verification have not occurred.",
+      "capture_evidence": [],
+      "finding_ids": [
+        "A057-01",
+        "A057-02",
+        "A057-03",
+        "A057-04",
+        "A057-05"
+      ],
+      "reviewer_runtime": "NOT_RUN: only frozen assertion/code/log inspection",
+      "original_status": "PENDING_CANDIDATE_VERIFICATION"
+    },
+    {
+      "group": "NEXT",
+      "requirement": "next_integration_plan",
+      "proof_required": "After N1N2 acceptance freeze compatible next-stage contract and exact implementation/acceptance plan; no premature S01/NativeAck/Studio/film/A readiness claim.",
+      "linked_findings": [],
+      "candidate_evidence": [],
+      "status": "pending-after-acceptance",
+      "review_status": "pending-after-acceptance",
+      "source_evidence": [],
+      "actual_test_assertion_evidence": [],
+      "assessment": "Explicitly pending after N1N2 acceptance. No compatible next-stage contract/implementation/acceptance package is claimed complete; no new integration release, NativeAck, Studio-ready, film or A/V1 conclusion.",
+      "capture_evidence": [],
+      "finding_ids": [],
+      "reviewer_runtime": "NOT_RUN: only frozen assertion/code/log inspection",
+      "original_status": "PENDING_CANDIDATE_VERIFICATION"
+    }
+  ],
+  "integrity": {
+    "source_scope_paths": 28,
+    "source_scope_mismatches": 0,
+    "captured_inputs": 626,
+    "captured_input_raw_byte_mismatches": 0,
+    "approved015_files": 5,
+    "approved015_mismatches": 0,
+    "indexed_gate_log_hashes_checked": 7,
+    "dirty_user_state": "AGENTS.md modified;8 unrelated untracked lane-media evidence directories; preserved"
+  },
+  "runtime_not_run": [
+    "tests/build/validator rerun",
+    "Host/server/browser launch",
+    "network/HTTP reproduction",
+    "ffprobe/ffmpeg execution",
+    "new mutations or filesystem tamper scenarios",
+    "two real Chinese voiced60-180second A films",
+    "next-stage integration/NativeAck/Studio/human acceptance"
+  ]
+}

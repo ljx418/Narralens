@@ -1,0 +1,112 @@
+{
+  "verdict": "REQUEST_CHANGES",
+  "scope": "R6 private contract/development plan only; no implementation or runtime acceptance",
+  "counts": {
+    "BLOCKER": 0,
+    "MAJOR": 2,
+    "MINOR": 1
+  },
+  "findings": [
+    {
+      "id": "R6-DOC-01",
+      "severity": "MAJOR",
+      "title": "Startup variants remain contradictory/underspecified at mandatory wait, group and stream gates",
+      "locations": [
+        "MAIN_PRIVATE_CONTRACT_DRAFT.md:13",
+        "MAIN_PRIVATE_CONTRACT_DRAFT.md:18",
+        "MAIN_PRIVATE_CONTRACT_DRAFT.md:22",
+        "MAIN_PRIVATE_CONTRACT_DRAFT.md:26",
+        "MAIN_PRIVATE_CONTRACT_DRAFT.md:27",
+        "MAIN_PRIVATE_CONTRACT_DRAFT.md:28",
+        "MAIN_PRIVATE_CONTRACT_DRAFT.md:39",
+        "MAIN_DEVELOPMENT_ACCEPTANCE_DRAFT.md:21"
+      ],
+      "actual_source": [
+        "src/adapters/openfilm/cache-process-supervisor.ts:2936",
+        "src/adapters/openfilm/cache-process-supervisor.ts:2958",
+        "src/adapters/openfilm/cache-process-supervisor.ts:3033",
+        "src/adapters/openfilm/cache-process-custodian.py:1558",
+        "src/adapters/openfilm/cache-process-custodian.py:2250",
+        "src/adapters/openfilm/cache-process-custodian.py:455",
+        "src/adapters/openfilm/cache-process-custodian.py:1064"
+      ],
+      "trigger": "(a) Node asynchronous spawn error then actual close without C birth; (b) born C cancelled before AUTHORIZE_FORK, thus C never learns draw/ticket and owns no N pipe; (c) accepted AUTHORIZE with actual fork failure before N exists; (d) real setsid failure versus execve failure, same errno and no accepted N_HELLO. These are actual reachable startup failure branches, not malicious native/cgroup scenarios.",
+      "conflict": "Section2 conflates no-worker/failed-exec and demands original forked_pid terminal wait. Failed-terminal permits worker_wait:null for no-fork but still requires post_worker_echild after N wait. complete-v2 unconditionally requires N-last; all streams require observed EOF or read-failed closure but a never-opened pipe cannot honestly report either. Non-established original group is requested but has no exact wire branch. No-fork may have zero receipt items whereas count positive/nonempty segments is universal. Current Host no-birth/no-authorize path intentionally proves actual close/fresh facts without C receipt; imposing wire receipt/fake EOF makes ordinary setup failure permanent-held or invites fabricated facts.",
+      "impact": "An automatic implementation must choose incompatible interpretations at critical failure convergence gates, risking no-birth/failed-exec regression despite the stated preservation requirement.",
+      "minimal_combined_revision": "Add one explicit discriminated startup table to contract and C06-EXEC cases. Preserve Host-only no-C/no-authorize close/fresh proof outside wire receipt when it was actually never authorized; never require forged C/ticket/epoch. For received authorize but fork-known-failed/no child, require bound no-fork certificate with fork-status discriminant, nullable forked_pid/N epoch/worker_wait/post-worker ordinal and actual C no-children proof; group-disposition='not-established' only with real setup evidence, never inherited Host group probe. For fork-born failed setup/exec require actual N wait and original errno, nullable unavailable epoch, explicit group-established vs not-established vs unknown; unknown remains held. Define stream ownership='not-opened' only if no FD was acquired, otherwise actual ledger/close evidence. Specify zero-item/no-segment handling for the no-fork variant or an actual required nonempty event, and table exact mandatory keys/nulls/types. Current exec-status pipe only errno cannot distinguish same-errno setsid/dup/exec failure: lock child setup-stage evidence or explicit unknown behavior using same Python file.",
+      "decisive_test_design": "Actual Host returned-child error+close/no-exit; C before-authorize cancellation; actual C authorize with mocked fork raising/no child; setsid failure/execve failure same errno with epoch-null cases. Feed actual receipt writer/Host parser/validator and assert original error settles once, no picture, no fake wait/group probe/EOF. Positive actual fork normal remains complete-v2. NOT_RUN.",
+      "case_mapping": [
+        "C06-EXEC",
+        "C08-END",
+        "C08-HOLD",
+        "C07-EIO",
+        "R5-REG"
+      ]
+    },
+    {
+      "id": "R6-DOC-02",
+      "severity": "MAJOR",
+      "title": "Root certificate and stream termination need explicit monotonic producer gates, not mutually dependent assertions",
+      "locations": [
+        "MAIN_PRIVATE_CONTRACT_DRAFT.md:25",
+        "MAIN_PRIVATE_CONTRACT_DRAFT.md:31",
+        "MAIN_PRIVATE_CONTRACT_DRAFT.md:32",
+        "MAIN_PRIVATE_CONTRACT_DRAFT.md:39",
+        "MAIN_DEVELOPMENT_ACCEPTANCE_DRAFT.md:27",
+        "MAIN_DEVELOPMENT_ACCEPTANCE_DRAFT.md:28"
+      ],
+      "actual_source": [
+        "src/adapters/openfilm/cache-process-custodian.py:1558",
+        "src/adapters/openfilm/cache-process-custodian.py:1565",
+        "src/adapters/openfilm/cache-process-custodian.py:2304",
+        "src/adapters/openfilm/cache-process-custodian.py:2321",
+        "src/adapters/openfilm/cache-process-custodian.py:2025",
+        "src/adapters/openfilm/cache-process-supervisor.ts:3033"
+      ],
+      "trigger": "Actual private control interpreter sees duplicate AUTHORIZE_FORK, or a single decoded batch containing CANCEL then AUTHORIZE_FORK. Current loop checks _terminated only at outer loop, still handles the later authorize, and _authorize_fork overwrites draw/root worker PID and pipe fields. Separately all child tree resources end but a stream reader has permanent EIO while final resource_proof_complete itself requires stream disposition.",
+      "conflict": "Failed-terminal relies on one original root/no-new-fork and actual resource_proof_complete, but draft does not fix the C-side one-shot authorize/binding/fork gate or require its direct negative test. It says root-violation remains held, which is correct, yet the current mutation can already lose original root fields before that decision. 'All resources independently ended then close EIO reader' is ambiguous because the still-open owned reader is itself part of resource completion; Host C-close/receipt cannot serve as the local precondition for C to send that receipt.",
+      "impact": "A certificate implemented as copied true fields rather than producer-recorded monotonic state can overclaim root scope or lose an original owner. A circular EIO finish gate can keep an otherwise fully reaped failed draw permanently pending. Normal compliant Host currently sends authorize once: this is a private protocol/fault seam requirement, not a claim that public JSON can send raw commands.",
+      "minimal_combined_revision": "Specify C monotonic authorization/fork state and sealing: first valid authorization binds immutable tuple/executable inputs and reserves one fork attempt before syscall; second authorization and any authorize after termination latch protocol failure without rebinding/allocating/overwriting original PID/FDs, drain remaining decoded frames safely, never retry birth. Derive certificate one-root/no-new-fork/subreaper/sole-wait facts from that same actual registry. Preserve original N terminal slot/ordinal and post-N catch-up wait totals across recovery; ECHILD is fresh after last actual wait, not a cached boolean. Explicitly split local raw_tree_terminal proof (C alive, N wait/no-fork branch, post-wait ECHILD, original group and retained epochs) from stream finishing; consume that local proof to finish/close EIO reader exactly once with eof=false, then assemble final resource proof/send receipt, then Host validates actual C close/fresh group. Unknown raw tree forbids forced reader closure as proof; no responsibility expiry or signal authority expansion.",
+      "decisive_test_design": "Drive actual C _read_control/_run_loop/_authorize_fork with [AUTH,AUTH] and [CANCEL,AUTH] same decoded batch; guard raw fork count, immutable first binding/PID/pipe ownership and original cleanup. Ordinary AUTH,CANCEL sequence owns its one N. Drive actual raw settle->EIO reader close->receipt->Host close with unresolved-close and raw-tree-unknown controls; assert same original promise settles exactly once only after actual evidence. NOT_RUN.",
+      "case_mapping": [
+        "C06-BIND",
+        "C06-ORDER",
+        "C08-END",
+        "C08-HOLD",
+        "C08-LATEWAIT",
+        "C07-EIO"
+      ]
+    },
+    {
+      "id": "R6-DOC-03",
+      "severity": "MINOR",
+      "title": "C08-FORGE negative case names required falsecreative value ambiguously",
+      "locations": [
+        "MAIN_DEVELOPMENT_ACCEPTANCE_DRAFT.md:30",
+        "MAIN_PRIVATE_CONTRACT_DRAFT.md:24"
+      ],
+      "trigger": "Author turns 'falsecreative' listed among invalid inputs into a test that rejects creative_eligible:false.",
+      "impact": "That would reject the required valid failed-terminal value; wording ambiguity can invert its positive/negative assertion.",
+      "minimal_combined_revision": "Replace falsecreative with explicit 'creative_eligible:true / missing / wrong-type must reject; false is the required positive failed-terminal control'. Distinguish false values of other required true proof booleans.",
+      "decisive_test_design": "One legitimate failed-terminal false control; true/missing/string false rejects. NOT_RUN.",
+      "case_mapping": [
+        "C08-FORGE",
+        "C08-END"
+      ]
+    }
+  ],
+  "accepted_directions": [
+    "complete-v2 vs failed-terminal-v1/domain-vs-creative separation is sound; old receipt fallback forbidden",
+    "Dedicated verified subreaper original-root lineage plus actual N wait then ECHILD, original-group gone, retained epochs gone can justify bounded failed resource terminal under declared root assumptions; ECHILD alone cannot, no cgroup/adversarial escape guarantee claimed",
+    "parent-reaped-observed-gone honestly asserts only disappearance of known owned epoch, not C wait or observed parent wait",
+    "First budget cause/secondary preservation, full lifetime stream accounting at unchanged budgets, real late channel callbacks and private publication mapper are in scope",
+    "Same8 is sufficient for the proposed contract revisions/source/test changes; no protected fixture or public interface change required; C09 remains OPEN"
+  ],
+  "input_binding": "draft source651 independently hash-read matches; contract/plan/gap review digests match actual inputs; final equality recorded in INPUTS",
+  "runtime": "ALL_NOT_RUN",
+  "authority": "Document REQUEST_CHANGES only, no Claude instruction/release and no N1N2/R6/R7/R8/original17ISO18/frozencommit/NEXT/V1 acceptance",
+  "roots": {
+    "W": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+    "documents": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p6-protocol-and-settlement"
+  }
+}

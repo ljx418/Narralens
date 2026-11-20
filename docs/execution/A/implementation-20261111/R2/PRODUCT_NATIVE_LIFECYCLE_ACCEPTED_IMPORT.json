@@ -1,0 +1,30 @@
+{
+  "at": "2026-11-12T02:50:51.348246+00:00",
+  "candidate": "dd32f156ee576e65c5e0ed8e7f9dc228827a97fe",
+  "files": {
+    "src/host/m5/openfilm-native-expected.ts": {
+      "sha256": "0d59ee891c9a1d3bf491e479639c67d61e35271f5af6b0e4bd708c34eece0795",
+      "git_blob": "37ae6ad83c9b0c07fb1b8d22cd22302c848c90b8"
+    },
+    "tests/agent-driven/integration/created-native-ack.test.ts": {
+      "sha256": "8f21cb81d38281364f0e654a128175de24dac96ffec89e77dbb44b21634dd510",
+      "git_blob": "242c6af3606edfbccd8aff6c1b538d3d5917720c"
+    }
+  },
+  "independent_report": "docs/execution/A/implementation-20261111/R2/product-native-independent-review/ROUND2_REVIEW.md",
+  "report_sha256": "8e7b1d4d2b28fdb098d5e99cf2aa84543170903dd39909f8ba5076490b23d0d8",
+  "review_message": "msg_0f14ecb467e1",
+  "review_dispatch": "ctx_61566b1b4d03",
+  "decision": "ACCEPT_TWO_FILE_LIFECYCLE_BOUNDARY_ONLY",
+  "integration_status": "IMPORTED_EXACT_BLOBS_MAIN_84PASS_FULL_TSC0",
+  "next": "After D10 sole writer releases source/index and all captures terminal, import exact two Git blobs without cherry-picking user/procedure files; run affected NativeExpected/observation and full tsc in MAIN, then continue real SourcePort/NativeAck integration",
+  "not_proven": [
+    "native source reader",
+    "NativeAck production composition",
+    "Studio hydration",
+    "film",
+    "A human acceptance"
+  ],
+  "main_import_commit": "4f2bb06be6d26dab240e1faeed0163f3edb7c920",
+  "integration_evidence": "docs/execution/A/implementation-20261111/integration/e1-main-takeover/PRODUCT_LIFECYCLE_MAIN_IMPORT_VERIFICATION.json"
+}

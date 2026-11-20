@@ -1,0 +1,25 @@
+{
+  "at": "2026-11-15T16:08:58.604835+00:00",
+  "actual_normal_case": "n1n2-main-060p5h-real-normal-001",
+  "evidence": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/pilot-060p5h-real-n/normal-001/FAILED_ACCEPTANCE.json",
+  "actual_cli_exit": 1,
+  "expected_exit": 0,
+  "outcome": "failed CHANNEL_ERROR control read ECONNRESET, no image",
+  "physical_cleanup": "Independent born tuples observed; both originalprocesses now absent; both originalgroups ESRCH; no destructive signals from MAIN",
+  "source651_unchanged": true,
+  "root_cause_status": "READONLY_INFERENCE_TO_VALIDATE_NOT_PROVEN",
+  "inferred_chain": [
+    "helper events scenario/go/answered but nofinalized",
+    "Host sends FINALIZE on control after complete candidate",
+    "C accepts FINALIZE and settles group",
+    "draw EOF handler unconditionally sends CANCEL even finalizeAfterOk already true",
+    "extra control command during C shutdown may cause ECONNRESET and correctly invalidatecandidate"
+  ],
+  "do_not_do": [
+    "Do not swallow/control-reset/EPIPE or latefailure",
+    "Do not change helper/protected7",
+    "Do not rerun unchanged actualnormal or release fault",
+    "Do not claim old5s/20s rootcause solved"
+  ],
+  "carry_quality": "R5H-O01 fix actual nullabletest tuple key; countfinal27/total54; no source behavior change for thisminor"
+}

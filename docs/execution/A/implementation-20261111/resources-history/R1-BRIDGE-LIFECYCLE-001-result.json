@@ -1,0 +1,40 @@
+{
+  "grant": {
+    "format": "narralens.dev-resource-ledger@1",
+    "status": "HELD",
+    "holder": "BRIDGE Claude ctx_b8584d6549f3 via BRIDGE Codex",
+    "queue": [
+      {
+        "lane": "MEDIA",
+        "request": "msg_86b86d3a378c",
+        "candidate": "e65d012bdb3980021029dd59faf23d373b2c68e4"
+      },
+      {
+        "lane": "MAIN",
+        "purpose": "PRODUCT transport root-cause regression after explicit takeover",
+        "cwd": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+        "command": "corepack pnpm test tests/agent-driven/integration/created-native-ui-transport.test.ts --maxWorkers=1 --minWorkers=1",
+        "scope": "stub Studio Gateway real HTTP28 tests; not actual business acceptance"
+      }
+    ],
+    "policy": "MAIN grants single heavy slot for Host/media/ffmpeg/Chromium/build/full gate; pure typecheck/unit permitted isolated",
+    "last_main_heavy": "R0 affected checks exit0, no owned heavy check running",
+    "evidence_limit": "operational coordination ledger, not proof of unrelated OS process absence",
+    "no_budget_ceiling": true,
+    "grant_id": "R1-BRIDGE-LIFECYCLE-001",
+    "granted_at": "2026-11-11T14:27:27.238142+00:00",
+    "exact_command": "corepack pnpm exec vitest run tests/agent-driven/integration/host-close-lifecycle.test.ts --maxWorkers=1 --minWorkers=1",
+    "cwd": "/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE",
+    "scope": "R0-M01 real Host/ffmpeg/processor same-DB close/reopen/resume regression",
+    "request_message": "msg_3e3f9df4dc68",
+    "source_fence": "do not edit tested source/test/contract inputs while command runs; MAIN will not change PRODUCT worktree"
+  },
+  "reported_terminal_exit": 0,
+  "test_count": 3,
+  "start": "2026-11-11T14:31:13Z",
+  "end": "2026-11-11T14:31:29Z",
+  "log_sha256": "488fab8d88b5d3b337f52910052de927b98d95db60585e40c3251ef6fe367072",
+  "evidence_sha256": "51f7d22b6d30ced5ceca49c7ff48158120516359f1a7d2a95429a46f61167dce",
+  "scope": "real processor/SQLite/ffmpeg sameDB lifecycle self-validation; not independent A PASS",
+  "pid813097_observed_absent": true
+}

@@ -1,0 +1,12 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+ ✓ tests/wave2/m4b/adoption-route.test.ts (35 tests | 33 skipped) 4835ms
+   ✓ M4B production adoption route > latches an owned adoption marker whose payload violates its contract  2843ms
+   ✓ M4B production adoption route > keeps an unparseable unknown request under generic recovery after Host restart  1991ms
+
+ Test Files  1 passed (1)
+      Tests  2 passed | 33 skipped (35)
+   Start at  12:36:24
+   Duration  19.74s (transform 2.98s, setup 0ms, collect 5.97s, tests 4.83s, environment 0ms, prepare 5.25s)
+

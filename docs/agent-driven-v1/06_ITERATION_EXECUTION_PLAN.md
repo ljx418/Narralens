@@ -1,4 +1,15 @@
+> 2026-11-20当前流程：以`../process/README.md`及`../process/01_DELIVERY_SPEC.md`为执行权威，剩余计划见`../process/02_REMAINING_PLAN.md`。下文原规格/编号/历史保留；旧“当前”快照不授予新运行。
+
 # Agent 驱动 V1：后续迭代执行计划
+
+## 2026-11-15 剩余交付组织调整
+
+用户已批准流程优化，现行增量见[开发流程调整与剩余交付批次](12_DELIVERY_OPTIMIZATION.md)。保留A/B/C和原验收编号，后续按底层执行闭环、A完整短片链、B/C扩展与V1终审组织；先真实小链再扩故障矩阵，修复做影响复验，批次/阶段做适用全量与独立冻结审查。当前R5C任务范围不变，实际状态读取docs/AGENT_MEMORY.md与resources.json，不采用下文历史“暂停/尚未启动/PLANNED”作为当前状态。旧工时估计不是当前交期承诺；下一接线仍按原goal停在开工门。
+
+ClaudeCode新429立即停止并保全，不自动重试或Codex接手；用户明确恢复与明确接手分别记录，旧自动接手条款无效。此增量不释放新源码或实际运行范围，不覆盖PRD、安全门、独立审查和人工验收。
+
+> **2026-11-11 最新执行流程**：用户批准“主Codex → BRIDGE/PRODUCT/MEDIA领域Codex → 各自ClaudeCode（MiniMax）”三级分工。组织、任务释放、合同与验收责任以[11_AGENT_DELIVERY_PROCESS.md](11_AGENT_DELIVERY_PROCESS.md)为准；旧授权状态为历史快照，A实际授权与当前暂停分开判断。本次仅文档更新，不启动实现。
+
 
 > 当前权威：R4体验已批准，见V1_FRONTEND_EXIT_GATE.md；详细实施设计/22实体/35族场景/里程碑与回退见implementation-design/00_READ_FIRST.md。原工作台增量，顶部横向WorkflowTopBar、独立非模态SystemControlPanel；新项目bootstrap/初始commit属MAIN，生产注册属MAIN。旧正文与批准状态见history归档；当前仅文档，CP/生产NOT_RELEASED。
 

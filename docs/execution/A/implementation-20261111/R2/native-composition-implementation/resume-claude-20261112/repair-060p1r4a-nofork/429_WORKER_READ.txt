@@ -1,0 +1,366 @@
+Source: transcript (provider=claude)
+Worker: ready
+Archived: false
+Terminal liveness: live
+Agent liveness: live
+Source exact: true
+Content complete: false
+Clipping: message_limit_or_scan_window, transcript_payload
+Continuation cursor (opaque; pass unchanged to --cursor): owr1_eyJ2IjoxLCJkIjoiY3R4XzIzNzQ0NDBhMTA4ZCIsInMiOiJ0cmFuc2NyaXB0IiwiaSI6ImRzd09ReEZlcWh1LW95ZU9UVDZSX0I3amQ2NXh3OGpSIiwicCI6MTE2NDQzNTUsImMiOiJyS21fUzlTOUd4SkVOQlR5TnUzc1hRaWZFYXE0SEl4VSJ9
+Warning: Oversized tool input was clipped.
+Warning: Oversized transcript text was clipped.
+
+[reasoning] The counting is unreliable. Let me just apply the fix with a regex-based replacement that matches any variant of that line, and apply all the other fixes too (the earlier script's replacements were lost since it didn't write).
+
+Let me redo the whole script but with the proc-text replacement done via a regex, and make each replacement independent so one failure doesn't lose the others. Let me also print which ones applied.
+
+Let me write it carefully.
+
+[assistant] [tool Bash] {"command":"cd /mnt/c/workspace/videoworkline/Narralens-agents/main-integration\npython3 - <<'PYEOF'\nimport pathlib, re\np = pathlib.Path('tests/agent-driven/integration/helpers/native-cache-nofork-pilot.test.mjs')\ns = p.read_text()\napplied = []\n\ndef sub(name, pattern, replacement, count=1):\n    global s\n    new, n = re.subn(pattern, replacement, s, count=count)\n    if n == 0:\n        print(\"MISS:\", name)\n        return\n    applied.append(name)\n    s = new\n\n# 1) the fake child can raise an error of its own\nsub(\"pushError\", r\"  pushExit\\(code = 0, signal = null\\) \\{\",\n    \"  pushError(error) {\\n    this.emit(\\\"error\\\", error);\\n  }\\n\\n  pushExit(code = 0, signal = null) {\")\n\n# 2) the payload of a hello, without the length that frames it\nsub(\"payload\", r\"/\\*\\* One frame of the control channel, as the custodian writes it\\. \\*/\",\n    \"/** The PAYLOAD of a hello, without the length that frames it. */\\n\"\n    \"function helloPayload(overrides = {}) {\\n\"\n    \"  return Buffer.from(JSON.stringify({\\n\"\n    \"    kind: \\\"C_HELLO\\\",\\n\"\n    \"    protocol: CONTROL_PROTOCOL,\\n\"\n    \"    seq: 1,\\n\"\n    \"    pid: CUSTODIAN_PID,\\n\"\n    \"    ppid: TOOL_PID,\\n\"\n    \"    pgid: CUSTODIAN_PID,\\n\"\n    \"    sid: CUS… (truncated)","…":"truncated"}
+
+[tool] [tool result] applied: ['pushError', 'payload', 'proc text', 'frame too large', 'oversize', 'hello strictly', 'protocol', 'sequence', 'subreaper', 'kind', 'utf8', 'json', 'identity hello', 'pid reuse']
+
+[assistant] [tool Bash] {"command":"cd /mnt/c/workspace/videoworkline/Narralens-agents/main-integration\n/usr/bin/python3.12 docs/execution/A/implementation-20261111/integration/e1-main-takeover/run-recorded.py n1n2-claude-060p1r4-test-003 node --test tests/agent-driven/integration/helpers/native-cache-nofork-pilot.test.mjs; echo \"EXIT=$?\"\ntail -12 docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r4-test-003.txt\necho \"=== failures if any ===\"\ngrep -n \"not ok\" docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r4-test-003.txt | head","description":"Re-record the nofork test run"}
+
+[tool] [tool result] {"exit": 1, "source_changed": [], "source_added": [], "log_sha256": "944b385c09e584309163ea3d9924112fa12d5d0be7eb619eeebf063b966c3e94", "finished_at": "2026-11-14T14:59:00.330801+00:00"}
+EXIT=1
+  duration_ms: 0.117814
+  type: 'suite'
+  ...
+1..8
+# tests 38
+# suites 8
+# pass 37
+# fail 1
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 147.944695
+=== failures if any ===
+207:    not ok 11 - answers no-child-confirmed when the spawn failed and the close really came
+249:not ok 6 - the cleanup of a child
+
+[assistant] [tool Bash] {"command":"cd /mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover\npython3 - <<'EOF'\nimport re\ntext=open('n1n2-claude-060p1r4-test-003.txt').read()\ni=text.find(\"not ok 11 - answers no-child-confirmed\")\nprint(text[i:i+1500])\nEOF","description":"Inspect the remaining failure"}
+
+[tool] [tool result] not ok 11 - answers no-child-confirmed when the spawn failed and the close really came
+      ---
+      duration_ms: 0.618802
+      type: 'test'
+      location: '/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/helpers/native-cache-nofork-pilot.test.mjs:575:3'
+      failureType: 'testCodeFailure'
+      error: |-
+        Expected values to be strictly equal:
+        + actual - expected
+        
+        + 'closed'
+        - 'no-child-confirmed'
+        
+      code: 'ERR_ASSERTION'
+      name: 'AssertionError'
+      expected: 'no-child-confirmed'
+      actual: 'closed'
+      operator: 'strictEqual'
+      stack: |-
+        TestContext.<anonymous> (file:///mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/helpers/native-cache-nofork-pilot.test.mjs:585:12)
+        async Test.run (node:internal/test_runner/test:1054:7)
+        async Suite.processPendingSubtests (node:internal/test_runner/test:744:7)
+      ...
+    # Subtest: shares ONE promise on a repeated cleanup, and signals only once
+    ok 12 - shares ONE promise on a repeated cleanup, and signals only once
+      ---
+      duration_ms: 4.465571
+
+… (truncated)
+
+[reasoning] The result was "closed" instead of "no-child-confirmed".
+
+Why? The FakeChild was created with `{pid: undefined}` → `this.pid = undefined`. Then the ledger's `pid` computation:
+```js
+pid: child !== null && child !== undefined && typeof child.pid === "number" && child.pid > 0 ? child.pid : null,
+```
+→ `typeof undefined === "number"` is false → pid = null ✓.
+
+So the ledger's pid is null. Then in `cleanupChild`:
+```js
+if (ledger.closeSeen) return await finalizeClosed(ledger, deps, "closed");
+```
+The close was ALREADY seen (the test pushed the close before the cleanup) → it returns "closed" — never reaching the `ledger.pid === null` branch.
+
+Hmm. So the ORDER of the checks matters: the "close already seen" branch comes before the "no child" branch.
+
+Which is correct? The spec: "spawn异步失败无PID也要记录error和真实close，不能因为没有exit事件假挂或因为error直接算关。" — a spawn async failure with no PID must record the error and the real close; it must not hang for an exit event that will never come, and it must not count the error as closed.
+
+So the result for "no PID + error + real close" should be **no-child-confirmed** (there was no child to confirm), not "closed".
+
+So the cleanup must check `ledger.pid === null` 
+… (truncated)
+
+[assistant] The ordering of the cleanup branches is wrong for the no-child case. Let me fix the tool:
+
+[assistant] [tool Edit] {"replace_all":false,"file_path":"/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tools/native-cache-nofork-pilot.mjs","old_string":"    // A close that was already seen IS the end.\n    if (ledger.closeSeen) return await finalizeClosed(ledger, deps, \"closed\");\n    // There was never a child: the spawn failed. The error is recorded, and the\n    // REAL close is still waited for.\n    if (ledger.pid === null) {\n      const closed = await waitForClose(ledger, deps, limits.closeWithoutChildMs);\n      if (!closed) {\n        return { kind: \"unknown\", reason: \"the spawn failed and the child never closed\" };\n      }\n      return await finalizeClosed(ledger, deps, \"no-child-confirmed\");\n    }","new_string":"    // There was never a child: the spawn failed. The error is recorded, and\n    // the REAL close is still waited for. It is NOT the end of a child, and it\n    // is NOT the error alone.\n    if (ledger.pid === null) {\n      if (!ledger.errorSeen) {\n        return {\n          kind: \"unknown\",\n          reason: \"there was no child and no error: the start of it was not understood\",\n        };\n      }\n      if (!ledger.closeSeen) {\n        const closed = await waitForClose(ledger, deps, limits.closeW… (truncated)"}
+
+[tool] [tool result] The file /mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tools/native-cache-nofork-pilot.mjs has been updated successfully. (file state is current in your context — no need to Read it back)
+
+[assistant] [tool Bash] {"command":"cd /mnt/c/workspace/videoworkline/Narralens-agents/main-integration\n/usr/bin/python3.12 docs/execution/A/implementation-20261111/integration/e1-main-takeover/run-recorded.py n1n2-claude-060p1r4-test-004 node --test tests/agent-driven/integration/helpers/native-cache-nofork-pilot.test.mjs; echo \"EXIT=$?\"\ntail -12 docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r4-test-004.txt\ngrep -n \"not ok\" docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r4-test-004.txt | head","description":"Re-record the nofork test run"}
+
+[tool] [tool result] {"exit": 1, "source_changed": [], "source_added": [], "log_sha256": "c04bb651f5406159d0cf0c872f4c3d37ebbcaa9ba2984d366d897e256d93d77a", "finished_at": "2026-11-14T14:59:47.701573+00:00"}
+EXIT=1
+  duration_ms: 0.099956
+  type: 'suite'
+  ...
+1..8
+# tests 38
+# suites 8
+# pass 37
+# fail 1
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 112.625358
+207:    not ok 11 - answers no-child-confirmed when the spawn failed and the close really came
+249:not ok 6 - the cleanup of a child
+
+[assistant] [tool Bash] {"command":"cd /mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover\npython3 - <<'EOF'\nimport re\ntext=open('n1n2-claude-060p1r4-test-004.txt').read()\ni=text.find(\"not ok 11 - answers no-child-confirmed\")\nseg=text[i:i+1200]\nm=re.search(r\"error: (.*?)\\n      code:\", seg, re.S)\nprint(m.group(1)[:500] if m else seg[:600])\nEOF","description":"Check the remaining failure detail"}
+
+[tool] [tool result] |-
+        Expected values to be strictly equal:
+        + actual - expected
+        
+        + 'closed'
+        - 'no-child-confirmed'
+
+[reasoning] Still "closed". So the `ledger.pid === null` branch wasn't taken → the pid is NOT null.
+
+The FakeChild was created with `{pid: undefined}` → `this.pid = undefined`. Then the ledger:
+```js
+pid: child !== null && child !== undefined && typeof child.pid === "number" && child.pid > 0 ? child.pid : null,
+```
+`typeof undefined === "number"` → false → pid = null.
+
+Hmm, but the FakeChild's constructor: `constructor({ pid = CUSTODIAN_PID } = {})` — the DEFAULT parameter! `new FakeChild({pid: undefined})` → the destructuring default applies when the value is `undefined` → pid = CUSTODIAN_PID = 4242!
+
+So the fake child HAS a pid → the ledger's pid is 4242 → the cleanup takes the "closed" branch.
+
+FIX: in the test, set `child.pid = undefined` AFTER the construction, or construct with a different mechanism. Let me change the FakeChild's constructor to `constructor(options = {}) { this.pid = options.pid === undefined ? CUSTODIAN_PID : options.pid; ... }` — hmm, then `{pid: undefined}` → CUSTODIAN_PID again.
+
+Let me just do it in the test: `const child = new FakeChild(); child.pid = undefined;` ✓ Simple and explicit.
+
+Let me apply.
+
+[assistant] [tool Bash] {"command":"cd /mnt/c/workspace/videoworkline/Narralens-agents/main-integration\npython3 - <<'PYEOF'\nimport pathlib\np = pathlib.Path('tests/agent-driven/integration/helpers/native-cache-nofork-pilot.test.mjs')\ns = p.read_text()\nold = \"\"\"  it(\"answers no-child-confirmed when the spawn failed and the close really came\", async () => {\n    const child = new FakeChild({ pid: undefined });\"\"\"\nnew = \"\"\"  it(\"answers no-child-confirmed when the spawn failed and the close really came\", async () => {\n    const child = new FakeChild();\n    // The spawn failed: there was never a child, and there is no number.\n    child.pid = undefined;\"\"\"\nassert old in s\np.write_text(s.replace(old, new, 1))\nprint(\"ok\")\nPYEOF\n/usr/bin/python3.12 docs/execution/A/implementation-20261111/integration/e1-main-takeover/run-recorded.py n1n2-claude-060p1r4-test-005 node --test tests/agent-driven/integration/helpers/native-cache-nofork-pilot.test.mjs; echo \"EXIT=$?\"\ntail -12 docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r4-test-005.txt\ngrep -n \"not ok\" docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-060p1r4-test-005.txt | head","description":"Re-record the … (truncated)"}
+
+[tool] [tool result] ok
+{"exit": 0, "source_changed": [], "source_added": [], "log_sha256": "29615c1356e21e7b213123628b5259fb44112f7b74ccec287b17ff29982a2741", "finished_at": "2026-11-14T15:00:33.585087+00:00"}
+EXIT=0
+  duration_ms: 0.147168
+  type: 'suite'
+  ...
+1..8
+# tests 38
+# suites 8
+# pass 38
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 121.469959
+
+[reasoning] 38/38 pass, exit 0.
+
+Now the two `node --check` commands.
+
+Let me run both through the recorder.
+
+Then verify the 25 protected files are unchanged, and write the report.
+
+Let me run the checks.
+
+[assistant] All 38 pass. Now the two syntax checks:
+
+[assistant] [tool Bash] {"command":"cd /mnt/c/workspace/videoworkline/Narralens-agents/main-integration\nR=docs/execution/A/implementation-20261111/integration/e1-main-takeover/run-recorded.py\necho \"== tool check ==\"; /usr/bin/python3.12 $R n1n2-claude-060p1r4-check-tool-001 node --check tools/native-cache-nofork-pilot.mjs\necho \"== test check ==\"; /usr/bin/python3.12 $R n1n2-claude-060p1r4-check-test-001 node --check tests/agent-driven/integration/helpers/native-cache-nofork-pilot.test.mjs\necho \"=== captures ===\"\nls docs/execution/A/implementation-20261111/integration/e1-main-takeover/ | grep \"060p1r4\" | grep result.json | sort","description":"Record the two syntax checks"}
+
+[tool] [tool result] == tool check ==
+{"exit": 0, "source_changed": [], "source_added": [], "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855", "finished_at": "2026-11-14T15:00:55.424668+00:00"}
+== test check ==
+{"exit": 0, "source_changed": [], "source_added": [], "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855", "finished_at": "2026-11-14T15:00:59.179966+00:00"}
+=== captures ===
+n1n2-claude-060p1r4-check-test-001.result.json
+n1n2-claude-060p1r4-check-tool-001.result.json
+n1n2-claude-060p1r4-test-001.result.json
+n1n2-claude-060p1r4-test-002.result.json
+n1n2-claude-060p1r4-test-003.result.json
+n1n2-claude-060p1r4-test-004.result.json
+n1n2-claude-060p1r4-test-005.result.json
+
+[reasoning] All three command forms have been run. Now let me verify the 25 protected files are unchanged, and get the hashes of the two new files.
+
+Then write the report.
+
+Let me verify.
+
+[assistant] [tool Bash] {"command":"cd /mnt/c/workspace/videoworkline/Narralens-agents/main-integration\npython3 - <<'EOF'\nimport json,hashlib,pathlib\nbase='/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p1r4-nofork/'\nrel=json.load(open(base+'RELEASE.json'))\nprot=rel['protected_existing25_sha256']\nbad=[]\nfor p,info in prot.items():\n    fp=pathlib.Path(p)\n    if not fp.exists(): bad.append((p,'MISSING')); continue\n    d=hashlib.sha256(fp.read_bytes()).hexdigest()\n    b=fp.stat().st_size\n    if d!=info['sha256'] or b!=info['bytes']: bad.append((p,'CHANGED'))\nprint(\"protected files checked:\", len(prot))\nprint(\"CHANGED:\", bad if bad else \"NONE\")\nprint()\nfor p in [\"tools/native-cache-nofork-pilot.mjs\",\"tests/agent-driven/integration/helpers/native-cache-nofork-pilot.test.mjs\"]:\n    fp=pathlib.Path(p)\n    print(p, hashlib.sha256(fp.read_bytes()).hexdigest(), fp.stat().st_size, \"bytes\")\nprint()\nprint(\"AGENTS ok:\", hashlib.sha256(pathlib.Path('AGENTS.md').read_bytes()).hexdigest()==rel['protectedAGENTS_sha256'])\nEOF\necho \"=== index / HEAD ===\"; git diff --cached --stat | tail -1; git rev-parse HEAD\necho \"=== git sta… (truncated)","…":"truncated"}
+
+[tool] [tool result] protected files checked: 25
+CHANGED: NONE
+
+tools/native-cache-nofork-pilot.mjs bc8970400dcea1cfa33cc60dd6dbbc6a1129b250233bc53ed073f8d0b8d0a2ab 38042 bytes
+tests/agent-driven/integration/helpers/native-cache-nofork-pilot.test.mjs 33b46653410821fe8e876fd236bb50516f9ae13d90525625391d3f7cd6786134 28273 bytes
+
+AGENTS ok: True
+=== index / HEAD ===
+1d348d419120f23f45d958112ea8c43df5a04675
+=== git status of the two new files ===
+?? tests/agent-driven/integration/helpers/native-cache-nofork-pilot.test.mjs
+?? tools/native-cache-nofork-pilot.mjs
+
+[reasoning] All 25 protected files unchanged, AGENTS protected, the index empty, HEAD unchanged, and only the two new files are added.
+
+Now let me write the report: `docs/parallel/lane-product/A-R2-20261112/N1N2-native-source/n1n2-claude-060p1r4-report.md`.
+
+Required content:
+- The two new files' sha.
+- The three gates' raw captures (including all failures) — I have 7 captures: test-001..005, check-tool-001, check-test-001.
+- The 25 old files' unchanged shas.
+- The source defects continue OPEN.
+- The owner state / cleanup truth table.
+- The nofork invariant.
+- The exact next two CLI calls (normal / deliberate assertion failure).
+- NOT_RUN and risks.
+
+Let me also collect the capture details.
+
+Let me write the report.
+
+Let me get the capture summary first.
+
+[assistant] [tool Bash] {"command":"cd /mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover\npython3 - <<'EOF'\nimport json,pathlib\nfor p in sorted(pathlib.Path('.').glob('n1n2-claude-060p1r4-*.result.json')):\n    n=p.name[:-len('.result.json')]\n    r=json.loads(p.read_text()); c=json.loads(pathlib.Path(n+'.cmd.json').read_text())\n    print(f\"{n}\\n  exit={r['exit']} changed={r['source_changed']}\\n  log={r['log_sha256']}\\n  argv={' '.join(c['argv'])}\")\nEOF","description":"Collect the R4 capture details"}
+
+[tool] [tool result] n1n2-claude-060p1r4-check-test-001
+  exit=0 changed=[]
+  log=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+  argv=node --check tests/agent-driven/integration/helpers/native-cache-nofork-pilot.test.mjs
+n1n2-claude-060p1r4-check-tool-001
+  exit=0 changed=[]
+  log=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+  argv=node --check tools/native-cache-nofork-pilot.mjs
+n1n2-claude-060p1r4-test-001
+  exit=1 changed=[]
+  log=5fcaded8aa29152a2945466bb4e82df3fa48a936762fd1c3f5649b7513affd69
+  argv=node --test tests/agent-driven/integration/helpers/native-cache-nofork-pilot.test.mjs
+n1n2-claude-060p1r4-test-002
+  exit=1 changed=[]
+  log=e754ee96e48af39d5c012bbe7af26a37da00390e85bde753365b6fb217d70ff7
+  argv=node --test tests/agent-driven/integration/helpers/native-cache-nofork-pilot.test.mjs
+n1n2-claude-060p1r4-test-003
+  exit=1 changed=[]
+  log=944b385c09e584309163ea3d9924112fa12d5d0be7eb619eeebf063b966c3e94
+  argv=node --test tests/agent-driven/integration/helpers/native-cache-nofork-pilot.test.mjs
+n1n2-claude-060p1r4-test-004
+  exit=1 changed=[]
+  log=c04bb651f5406159d0cf0c872f4c3d37ebbcaa9ba2984d366d897e256d93d77a
+  argv=node --test tests/agent-driven/i
+… (truncated)
+
+[assistant] Now the R4 report:
+
+[assistant] [tool Write] {"file_path":"/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/parallel/lane-product/A-R2-20261112/N1N2-native-source/n1n2-claude-060p1r4-report.md","content":"# n1n2-claude-060p1r4 — 无 fork 身份 pilot 工具（仅实现与 mock 自验证）\n\n- release_id: `MAIN_RELEASE_060P1R4_NOFORK_HARNESS_ONLY`\n- task_id: `task_a2192997a179` / dispatch_id: `ctx_b2582e7da3d8`\n- 依据: `repair-060p1r4-nofork/RELEASE.json`、`repair-060p1r4-nofork/SPEC.md`、`repair-060p1r4-nofork/OPEN_PRODUCTION_FINDINGS.json`、`repair-060p1-review/ADR_060_REV3_CUSTODIAN_AND_REPAIR.md` rev3、`repair-060p1-review/060P1R_PRIVATE_CONTRACT.md`\n- 基线核对（写前）：**25 份 `protected_existing25_sha256` 全部逐项实测一致**（sha256 **与字节数** 都一致，**CHANGED: NONE**）；`AGENTS.md` sha256 `37300463…4542b` 与 release 一致；**git index 空**；HEAD 仍 `1d348d419120f23f45d958112ea8c43df5a04675`。\n- **只新增两个文件**（`allow_new` 全部）：`tools/native-cache-nofork-pilot.mjs`、`tests/agent-driven/integration/helpers/native-cache-nofork-pilot.test.mjs`。**没有改任何既有源码、测试、manifest 或配置；没有 git 变更操作。**\n- **本票不关闭任何生产缺陷**：`OPEN_PRODUCTION_FINDINGS.json` 的 **14 条**全部继续 OPEN。\n\n## 0. 结论\n\n这一票**不是**又一次生产链改写，而是一个**独立的小切片**：一个**独立于 Vitest 的**、\n**标准库 only 的**、**无 fork 的** pilot 工具，加上它的**纯 mock 门**。\n\n工具回答的是**一个很小的事实… (truncated)"}
+
+[tool] [tool result] File created successfully at: /mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/parallel/lane-product/A-R2-20261112/N1N2-native-source/n1n2-claude-060p1r4-report.md (file state is current in your context — no need to Read it back)
+
+[reasoning] Now let me do the final verification and send worker_done.
+
+Let me verify:
+1. The 25 protected files are still unchanged (the report is in the OWN dir, not protected).
+2. The index is empty, HEAD unchanged.
+3. The captures exist.
+
+Hmm — one thing: the report file I added is in `docs/parallel/lane-product/...` which is NOT in the 25 protected list (the protected list has the R3 reports but not the R4 report — the R4 report doesn't exist yet in the release's list). ✓
+
+Let me run the final verification.
+
+Also, I should double-check one potential issue in the tool: the `main()` awaits `outcome.ledger.closePromise` in the unknown case. And `runPilot`'s finally already ran the cleanup. ✓
+
+And a subtle issue: in `runPilot`, if `deps.spawnChild` throws (a synchronous spawn failure), the catch sets `primary` and the finally runs `cleanupChild(ledger, deps)` — but `ledger` is null (the spawn threw before the ledger was created) → `if (ledger !== null)` → the cleanup is skipped → `cleanup` stays null → the outcome's kind is "failed". Hmm, and there's no owner. But if the spawn threw, there was no child → nothing to own. ✓ OK.
+
+Hmm, but the spec says "spawn异步失败无PID也要记录error和真实close" — an ASYNC
+… (truncated)
+
+[assistant] [tool Bash] {"command":"cd /mnt/c/workspace/videoworkline/Narralens-agents/main-integration\npython3 - <<'EOF'\nimport json,hashlib,pathlib\nbase='/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/repair-060p1r4-nofork/'\nrel=json.load(open(base+'RELEASE.json'))\nbad=[p for p,i in rel['protected_existing25_sha256'].items()\n     if hashlib.sha256(pathlib.Path(p).read_bytes()).hexdigest()!=i['sha256']\n     or pathlib.Path(p).stat().st_size!=i['bytes']]\nprint(\"protected 25 changed:\", bad if bad else \"NONE\")\nprint(\"AGENTS ok:\", hashlib.sha256(pathlib.Path('AGENTS.md').read_bytes()).hexdigest()==rel['protectedAGENTS_sha256'])\nfor p in [\"tools/native-cache-nofork-pilot.mjs\",\"tests/agent-driven/integration/helpers/native-cache-nofork-pilot.test.mjs\"]:\n    print(p, hashlib.sha256(pathlib.Path(p).read_bytes()).hexdigest())\nEOF\necho \"=== index / HEAD ===\"; git diff --cached --stat | tail -1; git rev-parse HEAD\necho \"=== new files only ===\"; git status --porcelain | grep \"^??\" | grep -v \"docs/execution\" | grep -v \"docs/parallel/lane-media\"\necho \"=== captures complete (6 files each) ===\"\ncd docs/execution/A/implementation-20… (truncated)","…":"truncated"}
+
+[tool] [tool result] protected 25 changed: NONE
+AGENTS ok: True
+tools/native-cache-nofork-pilot.mjs bc8970400dcea1cfa33cc60dd6dbbc6a1129b250233bc53ed073f8d0b8d0a2ab
+tests/agent-driven/integration/helpers/native-cache-nofork-pilot.test.mjs 33b46653410821fe8e876fd236bb50516f9ae13d90525625391d3f7cd6786134
+=== index / HEAD ===
+1d348d419120f23f45d958112ea8c43df5a04675
+=== new files only ===
+?? docs/parallel/lane-product/A-R2-20261112/N1N2-native-source/n1n2-claude-058-repair-plan.json
+?? docs/parallel/lane-product/A-R2-20261112/N1N2-native-source/n1n2-claude-058-repair-plan.md
+?? docs/parallel/lane-product/A-R2-20261112/N1N2-native-source/n1n2-claude-059-ack.json
+?? docs/parallel/lane-product/A-R2-20261112/N1N2-native-source/n1n2-claude-059-self-review.json
+?? docs/parallel/lane-product/A-R2-20261112/N1N2-native-source/n1n2-claude-059-self-review.md
+?? docs/parallel/lane-product/A-R2-20261112/N1N2-native-source/n1n2-claude-060p0-capture-index.json
+?? docs/parallel/lane-product/A-R2-20261112/N1N2-native-source/n1n2-claude-060p0-self-review.json
+?? docs/parallel/lane-product/A-R2-20261112/N1N2-native-source/n1n2-claude-060p0-self-review.md
+?? docs/parallel/lane-product/A-R2-20261112/N1N2-native-source/n1n2-cl
+… (truncated)
+
+[reasoning] Everything verified:
+- The 25 protected files: NONE changed.
+- AGENTS unchanged.
+- The index empty, HEAD unchanged.
+- The only new files in this wave: `tools/native-cache-nofork-pilot.mjs`, `tests/agent-driven/integration/helpers/native-cache-nofork-pilot.test.mjs`, and the OWN report `n1n2-claude-060p1r4-report.md`. (The other `??` entries are the pre-existing untracked files from earlier waves.)
+- All 7 captures have the complete six files.
+
+Let me send worker_done.
+
+Body: three sentences.
+
+Let me write it.
+
+[assistant] [tool Bash] {"command":"cd /mnt/c/workspace/videoworkline/Narralens-agents/main-integration\norca-ide orchestration send --from term_be584d4a18dbf0c79733d38890be04af --type worker_done \\\n  --subject \"060P1R4 delivered: standalone nofork identity pilot with a truthful shared child/error/exit/close ledger; 38/38 mock gate green, all 25 protected files byte-identical\" \\\n  --body \"I added only the two permitted new files - tools/native-cache-nofork-pilot.mjs (sha bc8970400dcea1cfa33cc60dd6dbbc6a1129b250233bc53ed073f8d0b8d0a2ab) and tests/agent-driven/integration/helpers/native-cache-nofork-pilot.test.mjs (sha 33b46653410821fe8e876fd236bb50516f9ae13d90525625391d3f7cd6786134) - and touched no existing source, test, manifest or config: the 25 protected files are byte-identical by sha256 and size (CHANGED: NONE), AGENTS.md is unchanged, the git index is empty and HEAD is unmoved, and the pilot is a standalone standard-library runner with exactly two modes, no configurable executable/argv/signal/pid, a fixed interpreter and custodian digest checked before anything spawns, a private root registered before any later step, and a structurally read-only control channel so the never-fork invariant makes AUTHORIZE_… (truncated)","…":"truncated"}
+
+[tool] [tool result] messageId=msg_e323161521ee lifecycle=completed autoReleaseAt=2026-11-14T15:05:01Z
+Next: Recorded. End your turn.
+EXIT=0
+
+[assistant] The 060P1R4 nofork harness is complete and handed back via `worker_done` (msg `msg_e323161521ee`).
+
+## What was delivered
+
+**Exactly two new files**, nothing else touched — the 25 protected files are byte-identical by sha256 *and* size (`CHANGED: NONE`), `AGENTS.md` unchanged, git index empty, HEAD unmoved.
+
+- `tools/native-cache-nofork-pilot.mjs` (sha `bc897040…d0a2ab`)
+- `tests/agent-driven/integration/helpers/native-cache-nofork-pilot.test.mjs` (sha `33b46653…786134`)
+
+**The pilot** is a standalone standard-library runner with exactly two modes and *no* configurable executable/argv/signal/pid; the interpreter and custodian digests are checked before anything spawns; the private root is registered before any later step; and the control channel is **structurally read-only**, so `AUTHORIZE_FORK` is impossible — the never-fork invariant is mechanical, not a promise, and the cleanup *refuses to signal* if it is ever lost.
+
+**The ledger** is the core: child/error/exit/close and the three streams are registered synchronously before any await; the close is one shared persistent promise resolving an explicit object; cleanup answers a tagged result (`closed` / `no-child-confirmed` / `unkn
+… (truncated)
+
+[user] Please carry out this task from my Orca coordinator by following the brief I pasted below. You are working inside Orca, a multi-agent IDE. You are a dispatched worker.
+Your coordinator's terminal handle is: term_de470342-773c-497a-a654-1a16a159eaca
+Your task ID is: task_8671e8821f8d
+
+The coordinator cannot see this terminal. Reach it with the `orca-ide orchestration` commands
+below, and message it only to ask, report a blocker, or finish; it needs no progress updates
+unless the task asks.
+Do only this task, yourself: no subagents or helper workers unless the task asks.
+
+=== CLI COMMANDS ===
+
+```sh
+  # Ask the coordinator, then end your turn; Orca wakes you with the answer.
+  # Never use a local question prompt such as AskUserQuestion; the
+  # coordinator cannot see or answer it.
+  orca-ide orchestration ask --from term_9aa3298ded89d9f5bcb86879bd84556e --question "<your question>"
+
+  # Blocked, and the coordinator must act before you can continue:
+  orca-ide orchestration send --from term_9aa3298ded89d9f5bcb86879bd84556e --type escalation --subject "Blocked: <reason>" --body "<details>" --task-id task_8671e8821f8d --dispatch-id ctx_2374440a108d
+
+  # Finish: send exactly once. --body
+… (truncated)
+
+[assistant] API Error: Request rejected (429) · 已达到 Token Plan 用量上限：请升级 Token Plan 套餐或购买积分补充用量。 (2056)
+
+STDERR

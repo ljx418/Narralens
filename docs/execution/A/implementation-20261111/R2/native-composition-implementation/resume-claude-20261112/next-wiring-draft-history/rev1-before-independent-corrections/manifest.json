@@ -1,0 +1,31 @@
+{
+  "format": "narralens.next-wiring-plan@draft1",
+  "status": "DRAFT_PENDING_N1N2_ACCEPTANCE",
+  "created_at": "2026-11-12T13:51:25.160156+00:00",
+  "accepted_native_commit": null,
+  "historical_design_base": "e2eff61b464d75d36598103d718cd2a75db5dfda",
+  "implementation_release": false,
+  "business_acceptance": "NOT_RUN",
+  "source_inputs": {
+    "docs/execution/A/implementation-20261111/R2/shared-selection-authority-design/CONTRACT.md": "82dbf646710a807c7e38796e0e0216a5d2890134a00d6b6b306656715742855d",
+    "docs/execution/A/implementation-20261111/R2/shared-selection-authority-design/ACCEPTANCE_AND_RELEASE.json": "716b34b81f7b15d73522965b8f9721e0cd9a36c87601d98e4135bde49dbd8325",
+    "docs/execution/A/implementation-20261111/R2/native-source-composition-design/CONTRACTS_AND_OWNERSHIP.md": "6f0ab26b819dbd9b2be1a91f434b9b0b877b105662b7bbfd687e048806a13beb",
+    "docs/execution/A/implementation-20261111/R2/native-source-composition-design/DEVELOPMENT_AND_ACCEPTANCE.md": "3bf0925a2dc4b46ba21856a0156361994ee04c2eb8f428b6f4dfe417db9fc508",
+    "docs/execution/A/implementation-20261111/R2/host-recovery-composition-review/ACCEPTANCE_CASES.md": "8420bd50a0bd0beab85cca13c5abf3c4687e48117433e3c2a7615fe0932b2595",
+    "docs/execution/A/implementation-20261111/R2/host-recovery-composition-review/RELEASE_RECOMMENDATION.json": "d34dd7ac4b6a8587f25928b118d78c68211205fb5b07c712bcca334df96febde"
+  },
+  "files": {
+    "00_READ_FIRST.md": "b312a8932fcfceaaa83b06f5abe30d9723059bc96b8a12228394427e91ab1acd",
+    "01_CONTRACT.md": "044d4b8389d38ff0438a1529bf01b19148329156d2831bdb1ebf542d56c60fc4",
+    "02_DEVELOPMENT_AND_ACCEPTANCE.md": "df1aab8dfa94bf88d3e974f309382cea102e39259dce7f25ad2d991482fe6707",
+    "03_CLAUDE_HANDOFF.md": "ba4ad729c2bc8429c514ff921675583c7027db01c8f9bcc8fa88ce5c59ee852c"
+  },
+  "s01_case_count": 28,
+  "unresolved_before_finalization": [
+    "014 alloriginalrequirements realproof+frozencommit independentreview",
+    "reconcile actual014 interfaces/resourceownership/cacheproducercontract",
+    "exactnext-stagepaths and protectedsurface comparison",
+    "independentplanreview and casecrossreference check"
+  ],
+  "claim_limit": "planning draft only;notreadyforimplementation,nohumanpass"
+}
