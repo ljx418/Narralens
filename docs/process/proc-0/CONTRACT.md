@@ -1,13 +1,13 @@
-# PROC-0 执行预约与交还门合同 v1
+# PROC-0 执行预约与交还门合同 v3
 
 本包是流程工具工作包，简称PROC-0；不是PRD优先级P0或Gate V1-P0。用户新active goal明确恢复全A/N1N2主线，第一步先完成本工具门。原R6/R7/R8/17+ISO18/NEXT范围保持。本文先独立文档审查，未发实施release、未运行产品。
 
 ## 1. 当前事实与最小范围
-W=../Narralens-agents/main-integration，branch agent-driven/main-a-integration，观察HEAD fae74ae6c4c6b24134eded8ebc05290c4a4e9985，clean；旧Claude ctx_17cf94883a53经worker-show为stopped/liveness exited。只读/proc扫描未发现本项目run-recorded进程，不将该扫描声称全机/历史进程绝对不存在。
+W=../Narralens-agents/main-integration，branch agent-driven/main-a-integration，观察HEAD 9bde8c4584e3d13bcad474564caccfcbce2ced6f，clean；旧Claude ctx_17cf94883a53经worker-show为stopped/liveness exited。只读/proc扫描未发现本项目run-recorded进程，不将该扫描声称全机/历史进程绝对不存在。
 原run-recorded.py SHA88cd47ec732a340f54cdd4bb05b05878887697eebb0ddc94b1ccd7d0e434fd10保持不变。tools/check-delivery-spec.py已存在，但仅metadata admission，当前PARTIAL packet拒绝是正确行为。旧python003挂起与MAIN精确终止/source_changed原件保留；当前helper已改用tempfile与两轮drain，仅静态看到，不把它当真实pipe/backpressure验收。
 
 ## 2. 实体与工具边界
-新增tools/run-delivery.py，标准库实现薄执行包装；新增tests/process/test_delivery_admission.py和最小fixtures/admission_helper.py（工具自证，不是产品替身）。可按直接需要修tools/check-delivery-spec.py及补其direct tests；不改原recorder，不改src/、产品contracts、R6协议算法/fixture、包依赖或配置。工具状态和自证文件仅W/var/process-admission/；正式交还材料在本包指定OWN目录，原历史日志不动。源码分配仍唯一Claude，MAIN只写合同/验收包与实际验收，独立Codex审实现。
+新增tools/run-delivery.py，标准库实现薄执行包装；新增tests/process/test_delivery_admission.py和最小fixtures/admission_helper.py（工具自证，不是产品替身）。可按直接需要修tools/check-delivery-spec.py及补其direct tests；不改原recorder，不改src/、产品contracts、R6协议算法/fixture、包依赖或配置。工具状态、wrapper旁证与helper自有数据仅W/var/process-admission/；原recorded六件套按§2B唯一新basename例外；正式交还材料在本包指定OWN目录，原历史日志不动。源码分配仍唯一Claude，MAIN只写合同/验收包与实际验收，独立Codex审实现。
 
 CLI最小命令：status、begin-write、end-write、run、request-cancel、rebind。所有写状态入口都校验release路径+MAIN期望SHA（--expected-release-sha256必需）、project root、owner task ID、格式/必需类型。source pin含原recorder、允许工具与全部实际recorded输入、保护项；真实源码路径逐项核对，不只对影子目录算SHA。
 run只接受release的command_id枚举及唯一capture，不接受原始argv/--shell/任意cwd/未知flag。release中每条精确argv、runtime_class、expected exit、source inventory、recorder pin、capture prefix、state root都必需。命令值严查array of nonempty strings，不经shell拼接；原recorder通过绝对Python3.12 -I -S -B启动，cwd只能release绑定的W。禁止额外timeout包装；run同步等待原recorder结束，原日志.cmd/.inputs/.claim/.exit/.result由原recorder唯一生成。任何existing suffix即拒绝，不能覆盖或复用capture。
@@ -43,3 +43,40 @@ wrapper异常或死亡：STARTING已持久但recorder身份未存为UNKNOWN，�
 首阶段只准类型/语法与工具direct tests：mock实际Popen/持久状态/文件系统/identity接口，但断言调用真实runner入口，不能另写predicate；持续deny未声明的os.kill/killpg/fork/waitpid/prctl/产品spawn。工具的Popen边界测试用mock，不能偷跑R6 suites或实际C/N。
 独立源码审查后，MAIN另发精确自证票：只允许该工具自己的有限Python helper（pass/fail/owned-file barrier），正常返回与双客户争抢验证；临时根属于var/process-admission/selftest唯一root，helper不fork、无网络/声音/Host/模型。故障/超时只让helper真实退出失败，绝不拿计时器当进程消失；由原owner实际wait。取消/丢wrapper对照可先mock；如需实际wrapper死亡注入，另具名精确PID/epoch票，当前未释放。不得为metadata工具重建另一套C/subreaper架构。
 真实R6 C/N命令直到独立安全审+新pin+专用release仍禁止。整个PROC0通过也不签R6/N1N2/V1；原R6剩余内容必须继续。
+
+## 6. G1–G4修订后的精确约定（优先于上文简写）
+
+### 6.1 单一MAIN信任入口与case归属（G1）
+执行与最终交还使用同一份MAIN release；不是由packet选择信任源。runner与checker的真实CLI均要求外部传入 --release <MAIN文件> --expected-release-sha256 <MAIN给定摘要>；checker另收--packet。缺失信任参数（除纯--self-test）必须拒绝，不允许从packet.release取代。默认拒绝替换release与packet整套的攻击；攻击者同时改CLI信任值超出合作式工具边界，不声称OS安全。
+release固定format、release_id、phase、owner_task、generation、project_root、state_root、recorder={path,sha256}、recorded_source、protected_inputs、commands、required_cases、case_bindings、capture_allocations、contract。release.phase为BOOTSTRAP_CODE或TOOL_RUNTIME或FINAL_METADATA，各自范围明确，不互相升级；后续阶段使用MAIN新release，并保留前期源一致的证据绑定。
+commands按command_id固定精确argv/cwd/runtime_class/expected_inner_exit与允许阶段。case_bindings为每个required_case固定允许command_id列表、证据层D0/D1/TOOL_RUNTIME、预期内层退出及expected_failure_requirement；只能精确等于权威case集合。多个case可明确共用同一套件capture，不能把任意合法命令给任意case。
+capture_allocations绑定command_id、唯一ASCII basename、原recorder目录、阶段、可覆盖case集合及runtime run_id；不能临时换cwd/argv/capture。MAIN可一次预分配若干具名basename以容纳局部失败与最终捕获；用尽需补票，不让实现者生成无限执行许可。
+packet.source是release.recorded_source的相同路径/摘要列表，protected_inputs另比对；packet.release/contract必须与外部MAIN入口一致，所有case一一齐全。核原claim.name/argv/runner_version=3、cmd.argv/cwd/runner_version、capture真实绝对路径等于分配目录+basename，原.inputs键集合和值精确等于该运行批准的全部recorded_source（含额外键拒绝），原exit/result一致、source_changed/added空、loghash和实际wait旁证。
+wrapper旁证绑定release SHA、run_id、command_id、capture、source、protected pre/post、原recorder实际wait及状态。bootstrap由MAIN精确票授权原录制器直启：单列BOOTSTRAP旁证与actual recorder wait，由该直接调用的owner记录，不伪造wrapper已经执行；checker按release.phase和case层接受其明确来源，不能把bootstrap旁证用于TOOL_RUNTIME。
+expected nonzero凭据必须绑定case_id/capture basename及全套原件摘要、command_id/run_id、实际source/protected、具体断言触达/原原因与清理证据引用。自报case_passed只作必要字段，不是充分业务证明。错次运行/错断言即拒，MAIN/独立审查仍核语义。
+
+### 6.2 原capture位置与分层审查（G2）
+原recorder脚本目录W/docs/execution/A/implementation-20261111/integration/e1-main-takeover仅允许为本票分配的unique basename新增.claim.json/.inputs.json/.cmd.json/.txt/.exit/.result.json。这是var限制的具名例外，原recorder本身/旧日志不变。basename必须逐字符属于ASCII [A-Za-z0-9_-]且非空；禁止slash、dot、绝对路径、Unicode近似字符。六suffix任一已有即在Popen之前拒绝；wrapper sidecar仅var绑定目录，不能补写原六件套。
+层L1=BOOTSTRAP_CODE：Claude写工具/direct tests后冻结该次输入，由原recorder FIRST直接运行pure/mock tests；无需尚未审定工具给自己发租约。所有16项都必须有direct mock或静态设计映射，但PROC0-04/09/13的真实排他/取消在途/实际wait以及其他标注TOOL_RUNTIME者保持NOT_RUN。交还状态只能CODE_CANDIDATE_FOR_REVIEW；L1 metadata预检按该阶段精确case层验证，不允许READY_FOR_REVIEW总工具完成。
+层L2=独立源码审查：核L1同源全部材料、16项mock覆盖和未知风险，可给SAFE_FOR_SEPARATELY_PINNED_TOOL_RUNTIME，不给总PASS。无真实跨进程证据不阻碍这个明确有限的源码安全审查；未释放真实证据不冒充通过。
+层L3=MAIN另发TOOL_RUNTIME release：固定冻结源码、有限helper与两客户实际争抢、pass0/指定fail1、运行中request-cancel不假释放。原录制器所有真实六件套、不同请求ID、唯一实际Popen/claim、winner wait及资源状态都需记录。finite helper不fork/不联网/无产品，实际wrapper死亡或信号注入不在本层默认许可。DIRECT-only已有源一致材料可复用，不强制重跑。
+层L4=最终工具完整交还：合并L1/L3（每份精确phase/release/source均核），16项各层要求全满足，checker只可METADATA_READY_FOR_REVIEW，独立审查与MAIN仍签工具结论；不签R6/N1N2。若两层source不同，旧受影响证据重验，不能合并不同源凑齐。
+当前R6 PARTIAL packet保留原字节，使用新checker缺信任入口/陈旧源必须拒绝，不修它冒充本工具case通过。原17/ISO18及C09等全部继续。
+
+### 6.3 state单权威与短锁事务（G3）
+state.json是唯一准入权威；journal是审计投影，不能从一条journal猜state已提交。state包含monotonic sequence、run_id/generation、phase/admission、cancel_requested sticky、pending_audit与本条event_id。每次变更锁内重新读真实state，核owner/run_id/generation，合并已有cancel_requested=true，不能用旧内存快照覆盖。
+run事务：短锁内全部准入核对，原子提交STARTING+slot后释放短锁；只有创建该slot的唯一owner执行一次Popen，等待和读取不持短锁。Popen后身份读取/落盘均try/finally保同一Popen.wait责任；无论读取/proc失败还是持久写失败，不能丢掉已返回child，也不再启动一次。记录失败保存在owner实际结果和独立旁证；无法可靠持久化时后继按STARTING/缺证据UNKNOWN拒绝。
+每次状态落盘：锁内new unique tmp→flush/close→atomic replace state(pending_audit=true,event_id)→append journal(event_id)并flush/close→atomic replace state(pending_audit=false)。journal重复ID可核同内容，不据其生成第二执行；任何途中失败保持/报告BLOCKED，pending_audit未清不准新执行。替换前失败保旧权威state；替换后journal失败保新state+pending，不回滚成可运行。state最终写失败不能宣称已落盘TERMINAL，即使本地wait已结束；status将物理wait事实与未完成准入持久化分别显示。未持久化的state不能用空journal或时间回IDLE。损坏/未知锁/state须MAIN具体事实裁决，工具不自动删锁/回收。
+request-cancel拿短锁重读同run，单调置true并保留请求事件；终局拿锁重读合并该事实，若请求晚于terminal则如实ALREADY_TERMINAL而非撤回已完成。并发两种顺序均不丢事实。终局保存实际wait/内层元数据/资源观察/准入结果，不能先释放slot再核子资源。
+end-write用原release的owner/nonce/generation身份关闭租约，不要求允许改动的工具文件仍等于写前pin，否则合法写无法结束；必须核不允许改动项/protected，记录全部实际diff/新增及post hashes。成功关闭租约后admission BLOCKED_STALE_PIN，不能自动以自己修改后的源码更新授权。顺序只能begin-write→合法修改→end-write→MAIN新release rebind；WRITING尚未结束时rebind拒绝，不能用新release抹原owner。越权改动记录并阻塞，不能通过end-write洗白。
+
+### 6.4 内外退出码的定义域（G4）
+release expected_inner_exit指测试命令的subprocess.returncode；原.exit与.result.exit也为此域，必须严格同一整数，不从记录器外层结果反推。wrapper另保存recorder_wait_returncode，指原recorder这个Popen实际wait。
+在本票Linux/POSIX且原recorder完整正常结束时：内层为0..255或负信号整数（合法信号范围），记录器执行sys.exit(inner)的外层编码应为inner & 255，例如-15对应241；先核完整原件和唯一该capture再比较编码。241本身不能证明SIGTERM；expected -15也不代表授权发送信号。本票真实helper只0与指定1，-15/241只mock反例。
+若recorder_wait_returncode<0（记录器自身被信号结束），或缺result/exit/日志、无法核该capture，则metadata拒绝，保留实际outer wait，不编造inner。实际recorder已结束不等于后代清理完成；资源状态独立判。外层正常0/内层非0、外层241/原件inner1、预期1但原因不符等均不能通过。可知资源终局但metadata坏为TERMINAL/BLOCKED，未知实际资源为UNKNOWN/BLOCKED。
+
+### 6.5 最终票批准历史阶段与多份必需证据（R2-01）
+FINAL_METADATA以外部MAIN release路径+SHA为唯一根。其approved_stage_releases按别名明确列每份可用历史stage release的真实path、SHA、phase、recorded_source和protected_inputs。checker先验证该文件实际摘要/phase/授权字段与最终票一致，再检查其捕获；不能信任packet自行提供的新历史票，即使源相同也拒绝。历史release相同源精确集合是必要非充分条件；保护项如确因仅文档变更由MAIN显式逐项裁决，不可忽略。
+case_bindings每原case改为required_evidence数组：每个slot_id分别固定approved_stage_release别名、command_id、capture_basename、run_id、level、expected_inner_exit与expected_failure_requirement。全部slot必须恰一次满足，无隐式任选；alternatives为空默认无备选，只有MAIN显式给出同slot合格备选时才可择一。shared suite仍必须分别获准用于各case/slot。capture预留名不等于必交slot，未使用不要求伪造或执行。
+packet每case.evidence数组逐slot引用历史票、原六件套、wrapper或BOOTSTRAP旁证、失败凭据；最终checker同时核根票、获准阶段票、case-slot与精确运行、每次全部同源输入/受保护事实及实际inner/outer退出，不能只核某一条绿色。L1单阶段票也用同一required_evidence结构（每case一个或多个L1 slot），不保留第二套歧义字段；旧release/packet格式缺必需slot默认拒绝，不修旧R6 PARTIAL原件求绿。
+最小落盘样例见samples/：PROC0-13必须有L1_DIRECT+L3_SUCCESS(inner0)+L3_EXPECTED_FAILURE(inner1且指定原因/清理凭据)三份；分别漏任一份、用成功替失败、同源未获准历史票全部拒绝。示例无运行许可且SYNTHETIC_ONLY是非生产占位，不宣称仅此形状可被真实checker准入；direct tests需要填入完整真实临时元数据fixture后验证正反分支。完整16项及其L1/L3各层义务保持。

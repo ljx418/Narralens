@@ -1,0 +1,25 @@
+{
+  "decision": "REQUEST_CHANGES",
+  "findings": [
+    {
+      "id": "R2-01",
+      "scope": "G1/G2 最终交还格式",
+      "severity": "blocking",
+      "location": [
+        "CONTRACT.md §6.1、§6.2 L4",
+        "RELEASE_SHAPE.json case_bindings、capture_allocations",
+        "CASES.json PROC0-13"
+      ],
+      "issue": "同一 case 需要多条必备证据，但 case_binding 只有一个 level 和 expected_inner_exit；FINAL_METADATA 也未给出 MAIN 对前期 release 路径与摘要的授权绑定格式。",
+      "revision": "最终 MAIN 票列入获准历史 release 的路径、SHA、phase 和源；按原 case 枚举全部必需证据项，分别绑定阶段票、层次、命令/运行、capture、inner exit 及失败凭据要求。packet 逐项引用，checker 要求全部满足；只在权威票明示时允许等价备选或共享。",
+      "acceptance": "给出 PROC0-13 的静态 L4 正例：同源 L1 direct、L3 helper0、L3 指定失败1均在；逐一删项、用0替1、换未获准同源阶段票均拒绝。保留16个原ID。"
+    }
+  ],
+  "disposition": {
+    "G1": "单阶段已闭合；最终合并见 R2-01",
+    "G2": "路径和顺序已闭合；最终证据表达见 R2-01",
+    "G3": "CLOSED_DESIGN",
+    "G4": "CLOSED_DESIGN"
+  },
+  "runtime": "NOT_RUN"
+}

@@ -1,0 +1,10 @@
+# PROC0 L1首次红灯：同一合同修复
+
+MAIN已核原六件套摘要、inner/outer=1、零输入漂移、CLEAN且原组无成员；B2/B3未跑。bootstrap-001停止，旧capture/source备份保留。本票只WRITE，不授权测试。
+
+根因一：commands对象的command_id是字典key，不能从command.get取得。将真实已校验command_id显式传入sidecar/credential所有生产路径，绝不把None写进凭据。
+根因二：当前建议保留command OR capture fallback会把不同slot混用。凭据的case资格必须来自同case已授权的准确command_id+capture_basename+run_id及阶段绑定，不能只共享命令id就借首个slot断言；无准确匹配不得签case_passed或该case证据资格；物理resource_status及cleanup实际观测仍如实保留，不因授权缺失把真实CLEAN伪造为UNKNOWN。预留capture可按票执行，但没有获准证据slot不得冒充该case指定失败资格。
+同时，现有test_proc0_13更改了inner预期和argv，却把同case required_evidence保留在capture-a/run-a，再执行capture-b/run-b；它不是合法的第二次失败slot。修正其前置授权为真实run-b/capture-b，仍严格断言指定失败/command_id/完整sidecar与原件绑定。保留第一份旧fixture失败原件，不用改预期/移除断言求绿。
+增加同命令但不同run/capture的负控：不能借第一slot assertion；跨命令仅同basename也不允许混配。真实producer→checker direct链覆盖正确slot正控与错slot拒绝，不复制实现谓词。
+仅tools/run-delivery.py、tests/process/test_delivery_admission.py、tests/process/test_delivery_handoff.py和OWN报告可改；checker/helper/原recorder/产品不改。若同根因需要具体额外路径，先向MAIN一次提出。
+修复完成固定三文件新SHA，另外两文件必须保持本票起点摘要，ask MAIN新bootstrap-002；不自行跑B1/B2/B3或selftest，不使用旧票/旧basename。新票将重绑全部实际recorded输入与新capturenames，保留所有失败。新429仍立即停，不自动重试/接手。

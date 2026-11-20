@@ -1,4 +1,38 @@
+## 2026-11-20 04:45 UTC 最新检查点
+
+PROC0 L1三门与实际16case交还包004已核0/CLEAN/零漂移；工具候选W 9c2f6237f997c27e3f2d013fec48107a56f862ba已显式提交，656实际源逐Git blob同源证明。Claude task_d0bbeef5f54f已settled，源码writer=NONE。独立L2 Orca ctx_bf6e8d803270 / task_4103d51533cb / term_11a757f5-55ac-4dcd-8280-50bfd8bf95ac已启动，仅只读审查，回执docs/process/proc-0/l2-review/START_TRANSPORT.json。等待Orca交还，不轮询；未允许L3/helper/R6真实运行，PROC0/R6/N1N2均未完成。新429停工规则不变。
+
 <!-- CURRENT_N1N2_EXECUTION_CHECKPOINT_START -->
+
+### 合并候选bootstrap-003已放行，等真实三门
+repair-002统一7处str/Path并加self_test direct正控恢复；MAIN另发现inner argv[0]误作outer Python导致原R6 corepack/node无法运行，已给原Claude repair-003修fixed OUTER_INTERPRETER及corepack/node pure mock，未增加实际R6许可。ask msg_b728f2ebbbdb五新SHA已核、656实际源/保护项一致、无recorded在途，bootstrap-003票SHA5cd157511a0e4888383835b57563cf842e65427848386956c8632459a3e39a92按同observer原recorded FIRST串行B1/B2/B3，capture全003。当前W源码冻结，实际helper/newrunner/R6均未放行；任何非0或UNKNOWN停并ask，不自行改源重跑。L1全交还后MAIN收回writer显式路径提交真实工具候选，独立L2要绑定实际commit及raw capture.same-source（保留capture当时HEAD/dirty事实）；L2任务准备docs/process/proc-0/L2_REVIEW_TASK_DRAFT.md。PROC0/R6/N1N2等均未完成，新429仍停不接手。
+
+
+### bootstrap-002 B1/B2通过，B3夹具红灯；repair-002 WRITE_ONLY
+MAIN核三capture六件套与sidecar：B1/B2=23/23、inner/outer0、CLEAN；B3=1/1、CLEAN，全部零输入漂移。B3 self_test outer_mismatch因captures路径是str却.read_text抛AttributeError，是夹具未到目标断言，不当语义负例。MAIN逐7同类点诊断，原五源去重快照与原件摘要在bootstrap-002/MAIN_CAPTURE_VERIFICATION.json。ask msg_1d9fe5d084e4→reply msg_b9f1018c0a9d，repair-002/RELEASE SHA3b02dd0d0f6d03919b4768024804ab1f013b69e20f433d5fed7835dbaaf3ca10仅checker+handoff-test+OWN：统一I/O Path边界、JSON仍字符串、finally restore和每负例正控复原、B2加真实self_test调用。未准任何新测试，等新两SHA发bootstrap-003，旧002不得重用。
+R7 ctx_2d51b207e372已worker_done msg_63c5aabf3da1，四稿含35原ID全NOT_RUN。MAIN复核38摘要，37当前不变，仅实时00_STATE随MAIN进展变化，原INPUTS不覆盖；MAIN条件架构裁决和差异在docs/process/r7-design/MAIN_*。须R6真实接受commit后核私有parent disposition再冻结，R7未释放。原Claude唯一源码writer，新429立即停不接手。
+
+
+### PROC-0首轮B1真实红灯保全；R7文档并行
+B1 proc0-l1-admission-001实际21项20绿1红，inner/outer1、source_changed/added空、原组CLEAN，MAIN逐六摘要核实。旧五源备份bootstrap-001/failed-source，FAILED_CAPTURE_INDEX保存，B2/B3未执行。ask msg_d4ca6183ac3d→reply msg_2b968d932ec7，repair-001/RELEASE SHA518fa9402ff55cc1fe75c08741e9a7576d96dd2da75f0a3c8e74920dee6508ee只原Claude修runner/admission/handoff三文件与OWN，先修真实command_id与精确case/command/capture/run匹配，旧fixture也须合法run-b授权且保原断言，加错slot负控；物理CLEAN不因授权缺失伪UNKNOWN。无测试许可，新freeze后MAIN才重绑bootstrap-002。
+为避免等待，用户批准的领域Codex分工用于R7只读设计：ctx_2d51b207e372/task_770e8615d940/term_2a6d1e06-5ae9-49af-a866-dc188cb42b60，仅写docs/process/r7-design/candidate四稿，不改源/测试/Git/运行。R6通过前R7仍DRAFT_NOT_RELEASED。两任务都用run_399f9dd3ce5a，等待Orca消息，不重复启动。新429停原Claude不接手。
+
+
+### PROC-0修正后656输入冻结，L1 FIRST已具名释放
+ask msg_b7e06c09362a五SHA已核实际相同；保护项无变、无recorded在途，W HEAD9bde8c4不变。票docs/process/proc-0/implementation/bootstrap-001/RELEASE.json SHA0cc9e8ce8cc538ac33895be45e70e963124f016688c978c17356b732df465761。原Claude同ctx_8dca63a0061d/task_d0bbeef5f54f按B1(admission)/B2(handoff)/B3(checker self-test)串行原recorder FIRST；MAIN一次性observer仅保存原Popen wait/源与保护项prepost/六摘要及已观察组，不使用新runner或完整fork历史。源码全部冻结，不并发改W/Git。observer或命令非0/缺证/UNKNOWN停后续并ask MAIN，原件全留，新pin后才继续。实际helper/新runner CLI/R6/产品C/N/信号/Host/Chrome/media仍未放行，L2/L3/L4未通过。新429仍停不重试接手。
+
+
+### PROC-0首份冻结请求已合并回修，纯测试仍未释放
+原Claude ctx_8dca63a0061d/task_d0bbeef5f54f已写五文件，OWN_IMPLEMENTATION_REPORT，ask msg_978fc693dce0。MAIN只读保护652项无变化，未执行源码。合并裁决docs/process/proc-0/implementation/MAIN_PREBOOTSTRAP_DISPOSITION.md，reply msg_948c80116789：A1/A3/A6接受；L1/最终status和contract必需、全六件套失败凭据、protected pre/post、runner实际sidecar→checker闭环、未知组不CLEAN、after-Popen异常持wait、finite file barrier准备均为原rev3义务，五路径内原writer修正后重freeze。未发B1/B2/B3许可，无工具/产品测试。旧malformed已恢复，曾两自有/tmp编辑脚本已由worker报告清理，不能宣称全程零偏差。新429仍停。
+
+
+### PROC-0 rev3 PLAN_READY，原供应商Claude已派发WRITE_ONLY
+独立msg_124b5714aa1b/ctx_67a82eaaffab，11输入起止与MAIN当前摘要一致，R2-01关闭，G1–G4设计已闭合。精确assignment在docs/process/proc-0/implementation/RELEASE.json，SHA97960315d1918f067a6e7c679ba1e6a9503506d9f8ba6e36e6af6c699dac617a；W HEAD9bde8c4584e3d13bcad474564caccfcbce2ced6f，652初始recorded输入，旧Claude已stopped/exited，无recorded在途。唯一writer Claude task_d0bbeef5f54f/ctx_8dca63a0061d，Orca可见term_36fa2c01-86e8-4edf-87a5-deac16f83889，窗口ClaudeCode｜PROC-0工具实施。只五工具/test路径+OWN报告；WRITE_ONLY无测试/编译/helper/产品运行许可。Claude准备16项direct后ask MAIN冻结源，MAIN绑定FIRST bootstrap再回复运行；不要并发改W或Git。真实工具L3待独立源码审另票，R6等产品范围尚未释放。新429立即停不重试接手。
+
+
+### PROC-0 rev2独立复审在途
+官方run-use已恢复原Run绑定；首轮独立审msg_5f3c165d7b00为REQUEST_CHANGES，23项输入起止与MAIN当前逐hash一致。G1 case/命令信任、G2路径/分层、G3短锁/state/cancel、G4内外退出码已一次修订，原件history/contract-round1与review保留。followup ctx_6ff0a3562213因workspace trust readiness失败；已只回应已授权项目的原生信任菜单，未读写配置文件，随后复用同一已空闲终端并重试同一task（未新建替代task），正式ready ctx_149c486b3d4e/task_7ad4317813e9/term_2ebfc6de8db01e09308f3f7d57b044a3。新输出review-round2，等待Orca回报，不轮询mail。W源码及HEAD9bde8c4保持，无Claude实现/runtime release；完整R6/R7/R8/NEXT目标未完成。
+
 
 ### 当前维护收口与调度状态（2026-11-20）
 流程v2、剩余计划和安全清理已落盘；PROC-0独立审查启动实际返回consumer_fenced，未产生成功派发、未发实施release。不是429，不据此接手Claude源码。先恢复合法Orca协调绑定再独立审合同；不重试窗口绕过。所有源码检查点仍UNACCEPTED。清理详情见docs/process/07_REVISION_AND_CLEANUP_REPORT.md。

@@ -1,0 +1,12 @@
+# MAIN对R7预研的条件裁决
+
+本文件只裁定目标约束，不放行R7实施；须先完成PROC-0及R6实际验收，再绑定接受commit和具体私有接口。原35项完整保留，CASE_MAP均NOT_RUN。
+
+1. 业务结果、执行域终局、parent drain、树释放、scope交还及witness激活分别记事实。普通早拒绝按实际未开工分支notOwned；不能在没有资源的失败分支永久占槽，也不能用抛错反推parent已结束。
+2. 失败draw的parent disposition优先复用已有原draw opaque handle/私有事实。caller须在await前即能关联本draw责任；成功或拒绝后都向原producer读取parent真实终局，不修改原主因对象以凑布尔。若接受版R6/bridge不能表达，必须具名扩release到openfilm-upstream对应私有分支，给输入输出和direct反例；不新增EnginePort方法、公开DTO或笼统全Bridge重写。具体字段/调用签名仍待接受源码核实，当前不能称接口已冻结。
+3. allocation关闭失败后不自动重试原数字FD，不因重复release无异常推定已关；无同owner/原allocation新鲜且可独立验证的disposition就保持UNKNOWN与预算占用。真实close已完成、仅观察回调失败的分支必须在实际close返回边界由生产owner保存事实，不能只凭hook自报。未知实体的恢复不靠deadline、PID/FD存在或缺失、全局搜索强解锁；不能承诺本阶段给所有未知状态自动恢复能力。
+4. dispose按物理根分组，保留未知根定位/注册/必要FD；已独立证明无读者且身份吻合的其他根可逐项清理。每个有依赖的父FD最后关闭，当前资源未知不得删除路径。主因和全部genuine cleanup错误都保存；普通业务拒绝不污染cleanup ledger。观察器异常不短路其他独立项。
+5. 重复/并发close、reconcile共用原工作，at-most-once以allocation/原producer为边界。按既有API承诺核Promise身份，不为形式上的引用相等破坏对外async接口。已交付资源仍归交付owner，reader关闭不能抢先销毁。
+6. 真正验证分层：D1直接触发原caller和有界故障接缝；真实FD/stream/probe/Chrome另票记录实际终局。负例UNKNOWN可符合拒绝要求，但隔离测试自身资源必须获准保全或真的结束，不能以挂起测试宣布成功。
+
+此预研与当前Claude三条工具验证修复不冲突。领域草案已完成，源码writer仍只有原Claude，禁止把草案交付称R7开发完成或提前进入实现。

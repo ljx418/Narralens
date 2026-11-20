@@ -1,0 +1,290 @@
+{
+  "format": "narralens.r7-preparation@1",
+  "status": "DRAFT_STATIC_NOT_RELEASED",
+  "at": "2026-11-20T03:30:13.371999+00:00",
+  "source_plan": {
+    "path": "Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/N1N2_ACCEPTANCE_PLAN_CURRENT.json",
+    "sha256": "ea7d83bbd453569d5b0f511bd602d32ebcb282069ef524e96dbf972346475001"
+  },
+  "inspected_source": {
+    "src/host/agent-driven/created-native-workspace.ts": "d83edbdac8cd6dd7db6b5d18f1d0f5d3beb028279297a822f59f97f6504d562c",
+    "src/host/agent-driven/created-native-source-reader.ts": "0a52b8ff16652cf4bf439ef19812b05a4a417396a9139dd4ee4ce7df8505289e",
+    "src/host/agent-driven/retained-native-closure.ts": "fd896104149d6cd2663b63a59d50beabbeee546f3e3f46a5d6bf07fbe662ede9"
+  },
+  "items": [
+    {
+      "id": "independent_trees",
+      "original_group": "R01",
+      "proof_required": "Committed source and workspace retain independent physical trees; equal relative paths never collapse resource ownership; nested and empty directories are separate evidence.",
+      "tests_candidate_only": [
+        "tests/agent-driven/integration/retained-source-tree.test.ts",
+        "tests/agent-driven/integration/created-native-workspace.test.ts"
+      ],
+      "status": "NOT_RUN_NOT_RELEASED"
+    },
+    {
+      "id": "tamper_and_authority",
+      "original_group": "R02",
+      "proof_required": "Same bytes/new inode, parent/root replacement, same-size/restored mtime, symlink, copied/foreign/released capability and stale base/control/owner/generation are refused before authoritative use.",
+      "tests_candidate_only": [
+        "tests/agent-driven/integration/created-native-source-reader.test.ts",
+        "tests/agent-driven/integration/native-cache-witness.test.ts",
+        "tests/agent-driven/integration/source-digest-resource-boundary.test.ts"
+      ],
+      "status": "NOT_RUN_NOT_RELEASED"
+    },
+    {
+      "id": "complete_dependencies",
+      "original_group": "R03",
+      "proof_required": "Positive/negative style/settings/markers/subtitle/translation dependencies, added empty directory and actual listing changes invalidate stale proofs.",
+      "tests_candidate_only": [
+        "tests/agent-driven/integration/created-native-source-reader.test.ts",
+        "tests/agent-driven/integration/retained-source-tree.test.ts"
+      ],
+      "status": "NOT_RUN_NOT_RELEASED"
+    },
+    {
+      "id": "actual_probe",
+      "original_group": "R05",
+      "proof_required": "Fixed local ffprobe uses same held parent-PID FD; normalized duration/first-video/fps/rotation/audio/dimensions and provenance match pinned upstream; no injected facts.",
+      "tests_candidate_only": [
+        "tests/agent-driven/integration/cache-frame-duration-lifetime.test.ts",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts"
+      ],
+      "status": "NOT_RUN_NOT_RELEASED"
+    },
+    {
+      "id": "child_lifetime",
+      "original_group": "R05",
+      "proof_required": "Timeout/cancel/abrupt child: actual child exit and reap precede input release; limits refuse rather than truncate; diagnostic media never represents Chinese A films.",
+      "tests_candidate_only": [
+        "tests/agent-driven/integration/cache-process-settlement.test.ts",
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts",
+        "tests/agent-driven/integration/cache-frame-duration-lifetime.test.ts"
+      ],
+      "status": "NOT_RUN_NOT_RELEASED"
+    },
+    {
+      "id": "per_allocation_fd_lifetime",
+      "original_group": "R07",
+      "proof_required": "Descriptor allocation generations own closes; recycled integer after temporary directory walk still closes newly retained allocation exactly once; no raw numeric retry.",
+      "tests_candidate_only": [
+        "tests/agent-driven/integration/retained-source-tree.test.ts",
+        "tests/agent-driven/integration/retained-native-budget.test.ts"
+      ],
+      "status": "NOT_RUN_NOT_RELEASED"
+    },
+    {
+      "id": "cleanup_uncertainty",
+      "original_group": "R07",
+      "proof_required": "Nth open/stat/verify/close/reentry failures preserve primary and all cleanup errors; every outstanding resource attempted; sticky uncertainty prevents new proof.",
+      "tests_candidate_only": [
+        "tests/agent-driven/integration/cache-process-identity.test.ts",
+        "tests/agent-driven/integration/created-native-workspace.test.ts",
+        "tests/agent-driven/integration/retained-source-tree.test.ts"
+      ],
+      "status": "NOT_RUN_NOT_RELEASED"
+    },
+    {
+      "id": "drain_and_delivery",
+      "original_group": "R07",
+      "proof_required": "Close drains accepted reads and probes; success transfers source/workspace plus directory/negative guards; reader close cannot destroy delivered resources.",
+      "tests_candidate_only": [
+        "tests/agent-driven/integration/cache-serving-drain.test.ts",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts"
+      ],
+      "status": "NOT_RUN_NOT_RELEASED"
+    },
+    {
+      "id": "lease_isolation",
+      "original_group": "R01/R02",
+      "proof_required": "Releasing one acquired lease does not revoke ref or another lease; repeated proof works; issuing instance checked and replaced generation invalidates prior proof.",
+      "tests_candidate_only": [
+        "tests/agent-driven/integration/native-cache-witness.test.ts",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts"
+      ],
+      "status": "NOT_RUN_NOT_RELEASED"
+    },
+    {
+      "id": "ISO-01",
+      "original_group": null,
+      "proof_required": "真实连续两帧与poster可生成；缓存key/算法不变；跨draw进程隔离不破坏成功体验",
+      "tests_candidate_only": [
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts",
+        "tests/agent-driven/integration/native-cache-witness.test.ts"
+      ],
+      "status": "NOT_RUN_NOT_RELEASED"
+    },
+    {
+      "id": "ISO-02",
+      "original_group": null,
+      "proof_required": "真实seek15秒与JOB45秒原始错误可达，外层60秒不遮盖JOB；每项真正结束原生执行域",
+      "tests_candidate_only": [
+        "tests/agent-driven/integration/cache-process-settlement.test.ts",
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts"
+      ],
+      "status": "NOT_RUN_NOT_RELEASED"
+    },
+    {
+      "id": "ISO-03",
+      "original_group": null,
+      "proof_required": "capture30秒通过真实资源与明确标注transport barrier命中；不得声称自然卡顿",
+      "tests_candidate_only": [
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts"
+      ],
+      "status": "NOT_RUN_NOT_RELEASED"
+    },
+    {
+      "id": "ISO-04",
+      "original_group": null,
+      "proof_required": "late launch/newPage continuation在错误后也不能越过执行域清理；无旧work继续读PRE",
+      "tests_candidate_only": [
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts",
+        "tests/agent-driven/integration/created-native-workspace.test.ts"
+      ],
+      "status": "NOT_RUN_NOT_RELEASED"
+    },
+    {
+      "id": "ISO-05",
+      "original_group": null,
+      "proof_required": "不同物理根两个真实worker并行，清理A时B存活并成功；同根别名仍共享锁",
+      "tests_candidate_only": [
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts",
+        "tests/agent-driven/integration/cache-production-scope.test.ts"
+      ],
+      "status": "NOT_RUN_NOT_RELEASED"
+    },
+    {
+      "id": "ISO-06",
+      "original_group": null,
+      "proof_required": "完整同根锁覆盖preexisting-output/PRE/worker/drain/POST/两个tree释放/最终门/witness激活",
+      "tests_candidate_only": [
+        "tests/agent-driven/integration/cache-production-scope.test.ts",
+        "tests/agent-driven/integration/created-native-workspace.test.ts"
+      ],
+      "status": "NOT_RUN_NOT_RELEASED"
+    },
+    {
+      "id": "ISO-07",
+      "original_group": null,
+      "proof_required": "close/cancel/私有断管含GO前、GO后；重复close只结算释放一次；不交付晚到结果",
+      "tests_candidate_only": [
+        "tests/agent-driven/integration/cache-process-identity.test.ts",
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts"
+      ],
+      "status": "NOT_RUN_NOT_RELEASED"
+    },
+    {
+      "id": "ISO-08",
+      "original_group": null,
+      "proof_required": "真实协议、JPEG、stdout/stderr洪水有界拒绝并真正清理；无先反序列化巨对象",
+      "tests_candidate_only": [
+        "tests/agent-driven/integration/cache-process-settlement.test.ts",
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts"
+      ],
+      "status": "NOT_RUN_NOT_RELEASED"
+    },
+    {
+      "id": "ISO-09",
+      "original_group": null,
+      "proof_required": "TERM-ignore转KILL实际回收；child close+组ESRCH+已知后代消失含Z，信号成功不是结束",
+      "tests_candidate_only": [
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts"
+      ],
+      "status": "NOT_RUN_NOT_RELEASED"
+    },
+    {
+      "id": "ISO-10",
+      "original_group": null,
+      "proof_required": "leader意外退出、EPERM、未知归属不盲杀/伪settled；PRE、FD、scope、容量均不释放",
+      "tests_candidate_only": [
+        "tests/agent-driven/integration/cache-process-identity.test.ts",
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts"
+      ],
+      "status": "NOT_RUN_NOT_RELEASED"
+    },
+    {
+      "id": "ISO-11",
+      "original_group": null,
+      "proof_required": "真实私有handle reconcile以新鲜证明结算恰好一次；伪handle、旧JSON/PID不能签发成功",
+      "tests_candidate_only": [
+        "tests/agent-driven/integration/cache-process-identity.test.ts",
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts"
+      ],
+      "status": "NOT_RUN_NOT_RELEASED"
+    },
+    {
+      "id": "ISO-12",
+      "original_group": null,
+      "proof_required": "真实range源流在响应中止后曾存活且最终close；响应close不能替代源FD close",
+      "tests_candidate_only": [
+        "tests/agent-driven/integration/cache-serving-drain.test.ts"
+      ],
+      "status": "NOT_RUN_NOT_RELEASED"
+    },
+    {
+      "id": "ISO-13",
+      "original_group": null,
+      "proof_required": "真实父frameDuration probe跨worker结束仍被等待并reap；需明确原回调是否覆盖真实child close",
+      "tests_candidate_only": [
+        "tests/agent-driven/integration/cache-frame-duration-lifetime.test.ts"
+      ],
+      "status": "NOT_RUN_NOT_RELEASED"
+    },
+    {
+      "id": "ISO-14",
+      "original_group": null,
+      "proof_required": "执行域消失后同步封资源准入；冻结边界的新请求不访问源/创建probe；下一draw显式重开",
+      "tests_candidate_only": [
+        "tests/agent-driven/integration/cache-serving-drain.test.ts",
+        "tests/agent-driven/integration/created-native-workspace.test.ts"
+      ],
+      "status": "NOT_RUN_NOT_RELEASED"
+    },
+    {
+      "id": "ISO-15",
+      "original_group": null,
+      "proof_required": "完整候选→单调FINALIZE_AFTER_OK→授权终止→真实结算→最终源/witness门；不得倒填或由SIGKILL推成功",
+      "tests_candidate_only": [
+        "tests/agent-driven/integration/native-cache-witness.test.ts",
+        "tests/agent-driven/integration/created-native-workspace.test.ts",
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts"
+      ],
+      "status": "NOT_RUN_NOT_RELEASED"
+    },
+    {
+      "id": "ISO-16",
+      "original_group": null,
+      "proof_required": "两活跃scope、32全局/8同根排队、30秒队列截止；超额/取消在PRE前拒绝且不生child/泄漏FD",
+      "tests_candidate_only": [
+        "tests/agent-driven/integration/cache-production-scope.test.ts"
+      ],
+      "status": "NOT_RUN_NOT_RELEASED"
+    },
+    {
+      "id": "ISO-17",
+      "original_group": null,
+      "proof_required": "reader准入及最终交付同时查对应物理根；generic production lease不因自己的活跃scope自我失效",
+      "tests_candidate_only": [
+        "tests/agent-driven/integration/created-native-source-reader.test.ts",
+        "tests/agent-driven/integration/native-cache-witness.test.ts"
+      ],
+      "status": "NOT_RUN_NOT_RELEASED"
+    },
+    {
+      "id": "ISO-18",
+      "original_group": null,
+      "proof_required": "当前worker/policy原字节下真实Chrome/zygote/renderer/utility继承与整组退出；旧policy证据不复用",
+      "tests_candidate_only": [
+        "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts"
+      ],
+      "status": "NOT_RUN_NOT_RELEASED"
+    }
+  ],
+  "notes": [
+    "R6 must pass separately before implementation release",
+    "Candidate test paths are not proof of assertion coverage",
+    "ISO cases retained cross-phase, not duplicated or narrowed",
+    "Only source excerpts inspected; no runtime or full review claim"
+  ]
+}

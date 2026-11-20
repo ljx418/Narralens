@@ -1,0 +1,74 @@
+{
+  "format": "narralens.proc0-release@3",
+  "status": "STATIC_EXAMPLE_NOT_A_GRANT",
+  "implementation_release": false,
+  "runtime_release": false,
+  "project_root": "SYNTHETIC_ONLY",
+  "recorded_source": [
+    {
+      "path": "SYNTHETIC_ONLY/source.py",
+      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    }
+  ],
+  "protected_inputs": [],
+  "required_cases": [
+    "PROC0-13"
+  ],
+  "warning": "Single case static format example only; real final release requires all16 IDs and actual full source, pins and paths",
+  "release_id": "EXAMPLE_L3",
+  "phase": "TOOL_RUNTIME",
+  "commands": {
+    "helper0": {
+      "argv": [
+        "/usr/bin/python3.12",
+        "-I",
+        "-S",
+        "-B",
+        "tests/process/fixtures/admission_helper.py",
+        "pass"
+      ],
+      "cwd": "SYNTHETIC_ONLY",
+      "runtime_class": "FINITE_TOOL_HELPER",
+      "expected_inner_exit": 0
+    },
+    "helper1": {
+      "argv": [
+        "/usr/bin/python3.12",
+        "-I",
+        "-S",
+        "-B",
+        "tests/process/fixtures/admission_helper.py",
+        "specified-fail"
+      ],
+      "cwd": "SYNTHETIC_ONLY",
+      "runtime_class": "FINITE_TOOL_HELPER",
+      "expected_inner_exit": 1
+    }
+  },
+  "capture_allocations": [
+    {
+      "basename": "example-helper-pass-001",
+      "run_id": "example-run-pass",
+      "command_id": "helper0",
+      "case_ids": [
+        "PROC0-13"
+      ]
+    },
+    {
+      "basename": "example-helper-fail-001",
+      "run_id": "example-run-fail",
+      "command_id": "helper1",
+      "case_ids": [
+        "PROC0-13"
+      ]
+    },
+    {
+      "basename": "example-unused-reserve-002",
+      "run_id": "example-unused-reserve",
+      "command_id": "helper0",
+      "case_ids": [
+        "PROC0-13"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,87 @@
+{
+  "format": "narralens.proc0-release@3",
+  "status": "STATIC_EXAMPLE_NOT_A_GRANT",
+  "implementation_release": false,
+  "runtime_release": false,
+  "project_root": "SYNTHETIC_ONLY",
+  "recorded_source": [
+    {
+      "path": "SYNTHETIC_ONLY/source.py",
+      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    }
+  ],
+  "protected_inputs": [],
+  "required_cases": [
+    "PROC0-13"
+  ],
+  "warning": "Single case static format example only; real final release requires all16 IDs and actual full source, pins and paths",
+  "release_id": "EXAMPLE_FINAL",
+  "phase": "FINAL_METADATA",
+  "approved_stage_releases": {
+    "L1": {
+      "path": "docs/process/proc-0/samples/L1_STAGE.json",
+      "sha256": "dd1eed53e09b8b777780ce86d14c02e90aa33c0fb7f8d907a4874ada463a9097",
+      "phase": "BOOTSTRAP_CODE",
+      "recorded_source": [
+        {
+          "path": "SYNTHETIC_ONLY/source.py",
+          "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        }
+      ],
+      "protected_inputs": []
+    },
+    "L3": {
+      "path": "docs/process/proc-0/samples/L3_STAGE.json",
+      "sha256": "29df2550dd3410b287256f9bae9f958870155001f54401469e09d34843af2fdc",
+      "phase": "TOOL_RUNTIME",
+      "recorded_source": [
+        {
+          "path": "SYNTHETIC_ONLY/source.py",
+          "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        }
+      ],
+      "protected_inputs": []
+    }
+  },
+  "case_bindings": {
+    "PROC0-13": {
+      "required_evidence": [
+        {
+          "slot_id": "L1_DIRECT",
+          "approved_stage_release": "L1",
+          "command_id": "direct",
+          "capture_basename": "example-direct-001",
+          "run_id": "example-run-direct",
+          "level": "D1",
+          "expected_inner_exit": 0,
+          "expected_failure_requirement": null
+        },
+        {
+          "slot_id": "L3_SUCCESS",
+          "approved_stage_release": "L3",
+          "command_id": "helper0",
+          "capture_basename": "example-helper-pass-001",
+          "run_id": "example-run-pass",
+          "level": "TOOL_RUNTIME",
+          "expected_inner_exit": 0,
+          "expected_failure_requirement": null
+        },
+        {
+          "slot_id": "L3_EXPECTED_FAILURE",
+          "approved_stage_release": "L3",
+          "command_id": "helper1",
+          "capture_basename": "example-helper-fail-001",
+          "run_id": "example-run-fail",
+          "level": "TOOL_RUNTIME",
+          "expected_inner_exit": 1,
+          "expected_failure_requirement": {
+            "assertion": "TOOL_HELPER_EXPECTED_FAILURE",
+            "cleanup_required": true
+          }
+        }
+      ],
+      "alternatives": []
+    }
+  },
+  "capture_allocations_note": "Unused reserve is allowed, not mandatory evidence; required_evidence names exact selected run/capture per slot."
+}

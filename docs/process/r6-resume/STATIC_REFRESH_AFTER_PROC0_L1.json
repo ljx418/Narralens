@@ -1,0 +1,91 @@
+{
+  "format": "narralens.r6-resume-static-refresh@1",
+  "status": "DRAFT_NOT_A_RELEASE",
+  "at": "2026-11-20T04:47:28.697747+00:00",
+  "actual_head": "9c2f6237f997c27e3f2d013fec48107a56f862ba",
+  "actual_branch": "agent-driven/main-a-integration",
+  "source8": {
+    "src/adapters/openfilm/cache-process-supervisor.ts": "ba18b14069cb9f08563b65b99935a155f7f1b8bfd0c4b71a0f4da2095db70edc",
+    "src/adapters/openfilm/cache-process-custodian.py": "40947936b36f94ea53b00ecf4f851c528484cea457f1ed4fef7aa031bba896a9",
+    "src/adapters/openfilm/cache-worker-integrity.json": "dc68cb3d4417c065d83c0564e7bbf38e315be54d8afb32afd2b98eb6a268959f",
+    "tests/agent-driven/integration/cache-process-identity.test.ts": "40b04e9fdda53c03030e17affe332e4a00284c62968ced7382826ff05c0c8479",
+    "tests/agent-driven/integration/helpers/cache-custodian-unit.py": "9f2fd35dd8db63e53d4cc9965ecfa18465438cff593b9bebcbbeed018fe399dc",
+    "tests/agent-driven/integration/cache-custodian-lifecycle.test.ts": "02046365388e1977887511acbfb09e21dba352b79d2ed08c81053a8a0a02800d",
+    "tools/native-cache-normal-pilot.ts": "e4db3499f715d5b6b5634568677a6688cf80a897c9321c45e93cda98c6a19ebb",
+    "tests/agent-driven/integration/native-cache-normal-pilot.test.ts": "23c8decaa4fd766b7a6b5d56e452003f90aaa4b6e0bf177acf4b99c1105718ee"
+  },
+  "all8_same_as_preproc0_checkpoint": true,
+  "recorded_source_inventory_reference": {
+    "path": "/mnt/c/workspace/videoworkline/Narralens/docs/process/proc-0/implementation/bootstrap-003/RELEASE.json",
+    "sha256": "5cd157511a0e4888383835b57563cf842e65427848386956c8632459a3e39a92",
+    "count": 656,
+    "all_current_bytes_match": true
+  },
+  "python_actual_static_definitions": [
+    {
+      "name": "_read_control",
+      "line": 1641,
+      "end_line": 1654
+    },
+    {
+      "name": "_service_streams",
+      "line": 1656,
+      "end_line": 1666
+    },
+    {
+      "name": "_final_stream_drain",
+      "line": 1693,
+      "end_line": 1715
+    },
+    {
+      "name": "_drain_worker_streams",
+      "line": 1717,
+      "end_line": 1778
+    },
+    {
+      "name": "_authorize_fork",
+      "line": 1900,
+      "end_line": 1960
+    },
+    {
+      "name": "_raw_tree_terminal",
+      "line": 3067,
+      "end_line": 3087
+    },
+    {
+      "name": "_raw_tree_proves_the_end",
+      "line": 3089,
+      "end_line": 3113
+    },
+    {
+      "name": "_resource_proof_complete",
+      "line": 3115,
+      "end_line": 3123
+    },
+    {
+      "name": "_transcript_complete",
+      "line": 3125,
+      "end_line": 3143
+    },
+    {
+      "name": "_failed_terminal_certificate",
+      "line": 3145,
+      "end_line": 3196
+    }
+  ],
+  "historical_root_cause_note": "The old MAIN_CONTINUATION_SCOPE_AND_ROOT_CAUSES is a historical diagnosis, not proof all listed defects still exist in current WIP. Current Python already contains split raw-tree/resource/transcript and stream-service definitions; symbol presence proves neither correct semantics nor complete producer-consumer tests. Read current code and map every original C06..C08 key before deciding what remains. Do not rewrite an already-fixed branch only to repeat the old diagnosis.",
+  "manifest_generation": "Current manifest source drift remains observed, not repaired. Authorized generation is a recorded WRITE-phase source change; new runtime pin required; final generation must be idempotent. No actual command run in this preparation.",
+  "runtime_authorized": false,
+  "implementation_authorized": false,
+  "required_next_gates": [
+    "PROC0 L2",
+    "PROC0 L3 finite real helper",
+    "PROC0 L4 final complete16 metadata and independent disposition",
+    "exact new R6 source/write and command release"
+  ],
+  "limits": [
+    "All reads/hash/static AST only; no import of project modules",
+    "No C/N, kernel, helper, test, model, Host, browser or provider runtime",
+    "No implicit acceptance of historical root-cause closure from symbol presence"
+  ]
+}

@@ -1,0 +1,105 @@
+{
+  "format": "narralens.delivery-packet@2",
+  "status": "STATIC_EXAMPLE_NOT_METADATA_READY",
+  "release": {
+    "path": "docs/process/proc-0/samples/FINAL_STAGE.json",
+    "sha256": "328782d558382c45d2b32824ac81756b107e3b8638ec314ad73009e9ea96bb3d"
+  },
+  "source": [
+    {
+      "path": "SYNTHETIC_ONLY/source.py",
+      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    }
+  ],
+  "required_cases": [
+    "PROC0-13"
+  ],
+  "cases": [
+    {
+      "id": "PROC0-13",
+      "implementation": "COMPLETE_IN_SYNTHETIC_EXAMPLE_ONLY",
+      "production_entry": "tools/run-delivery.py::run",
+      "test_name": "synthetic example, not executed",
+      "evidence": [
+        {
+          "slot_id": "L1_DIRECT",
+          "approved_stage_release": "L1",
+          "command_id": "direct",
+          "capture_basename": "example-direct-001",
+          "run_id": "example-run-direct",
+          "level": "D1",
+          "expected_inner_exit": 0,
+          "expected_failure_requirement": null,
+          "stage_release": {
+            "path": "docs/process/proc-0/samples/L1_STAGE.json",
+            "sha256": "dd1eed53e09b8b777780ce86d14c02e90aa33c0fb7f8d907a4874ada463a9097",
+            "phase": "BOOTSTRAP_CODE",
+            "recorded_source": [
+              {
+                "path": "SYNTHETIC_ONLY/source.py",
+                "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+              }
+            ],
+            "protected_inputs": []
+          },
+          "command_capture": "SYNTHETIC_ONLY/recorder/example-direct-001",
+          "sidecar": "SYNTHETIC_ONLY/state/example-run-direct.json",
+          "expected_failure_artifact": null
+        },
+        {
+          "slot_id": "L3_SUCCESS",
+          "approved_stage_release": "L3",
+          "command_id": "helper0",
+          "capture_basename": "example-helper-pass-001",
+          "run_id": "example-run-pass",
+          "level": "TOOL_RUNTIME",
+          "expected_inner_exit": 0,
+          "expected_failure_requirement": null,
+          "stage_release": {
+            "path": "docs/process/proc-0/samples/L3_STAGE.json",
+            "sha256": "29df2550dd3410b287256f9bae9f958870155001f54401469e09d34843af2fdc",
+            "phase": "TOOL_RUNTIME",
+            "recorded_source": [
+              {
+                "path": "SYNTHETIC_ONLY/source.py",
+                "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+              }
+            ],
+            "protected_inputs": []
+          },
+          "command_capture": "SYNTHETIC_ONLY/recorder/example-helper-pass-001",
+          "sidecar": "SYNTHETIC_ONLY/state/example-run-pass.json",
+          "expected_failure_artifact": null
+        },
+        {
+          "slot_id": "L3_EXPECTED_FAILURE",
+          "approved_stage_release": "L3",
+          "command_id": "helper1",
+          "capture_basename": "example-helper-fail-001",
+          "run_id": "example-run-fail",
+          "level": "TOOL_RUNTIME",
+          "expected_inner_exit": 1,
+          "expected_failure_requirement": {
+            "assertion": "TOOL_HELPER_EXPECTED_FAILURE",
+            "cleanup_required": true
+          },
+          "stage_release": {
+            "path": "docs/process/proc-0/samples/L3_STAGE.json",
+            "sha256": "29df2550dd3410b287256f9bae9f958870155001f54401469e09d34843af2fdc",
+            "phase": "TOOL_RUNTIME",
+            "recorded_source": [
+              {
+                "path": "SYNTHETIC_ONLY/source.py",
+                "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+              }
+            ],
+            "protected_inputs": []
+          },
+          "command_capture": "SYNTHETIC_ONLY/recorder/example-helper-fail-001",
+          "sidecar": "SYNTHETIC_ONLY/state/example-run-fail.json",
+          "expected_failure_artifact": "SYNTHETIC_ONLY/fail-proof.json"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,68 @@
+{
+  "status": "L1_CAPTURES_VERIFIED_PENDING_METADATA_AND_L2",
+  "at": "2026-11-20T04:37:49.000609+00:00",
+  "source_count": 656,
+  "commands": [
+    {
+      "command_id": "B1",
+      "capture": "proc0-l1-admission-003",
+      "capture_digests": {
+        ".claim.json": "d5242abc93c70d0171b0a783df7e7995716f7c4abb10716bd4518dbc3152f122",
+        ".inputs.json": "d8ccfb2f1693b619a8f62bdf32fb9ade0b85d7debea71a7c7f14c92639b7be07",
+        ".cmd.json": "699e8841958c4ccb3551268f034ea902a358834d7bf175725a6d4430204ba2b0",
+        ".txt": "f3c5eebbbb813528cf308dbcebd3117d2639a165646b8fa0ae9ff6884e2e9ac6",
+        ".exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+        ".result.json": "4ed90b613c51086ae79c8846dabdeb1177861437dcf73e33f918ed0d894b9dbb"
+      },
+      "sidecar": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/var/process-admission/proc0-l1-20261120/bootstrap/proc0-l1-003-b1.json",
+      "sidecar_sha256": "f2b3ea0226d4256da9ec6101b1d08837ff0d2e99d597bef91ff575f6e6d0b458",
+      "inner": 0,
+      "outer": 0,
+      "resource_status": "CLEAN",
+      "input_drift": false,
+      "capture_git_head": "9bde8c4584e3d13bcad474564caccfcbce2ced6f"
+    },
+    {
+      "command_id": "B2",
+      "capture": "proc0-l1-handoff-003",
+      "capture_digests": {
+        ".claim.json": "1f5b418fdf94e37b368361fd1b7168c34f69cbf4c4f289ae48011f85d192f3ef",
+        ".inputs.json": "d8ccfb2f1693b619a8f62bdf32fb9ade0b85d7debea71a7c7f14c92639b7be07",
+        ".cmd.json": "2a4316dd83e3c7977f2066324fd33a6aff120081b00dbed83b003b1a0fa733aa",
+        ".txt": "a15bd16bea3e3c08899ecc08f08889be8f95b06d280c935abf625f1990461039",
+        ".exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+        ".result.json": "a4e68c9ac294e03f5e71a6ae604c46c355e19bfd28e939caff8422de471dd02d"
+      },
+      "sidecar": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/var/process-admission/proc0-l1-20261120/bootstrap/proc0-l1-003-b2.json",
+      "sidecar_sha256": "379a46cc938dc41b44c838c7f397e61dd0ea891fc94d20192e15b969cb0b350d",
+      "inner": 0,
+      "outer": 0,
+      "resource_status": "CLEAN",
+      "input_drift": false,
+      "capture_git_head": "9bde8c4584e3d13bcad474564caccfcbce2ced6f"
+    },
+    {
+      "command_id": "B3",
+      "capture": "proc0-l1-checkself-003",
+      "capture_digests": {
+        ".claim.json": "bd01b6bb7bd0324914e8ed96c979abd1177690403f223ba45cd0ee97ea5d0041",
+        ".inputs.json": "d8ccfb2f1693b619a8f62bdf32fb9ade0b85d7debea71a7c7f14c92639b7be07",
+        ".cmd.json": "b808b9e3074d3c10b6ccd22e3674f1b34ff12bab5901d5a9e917a46bfe62ab6a",
+        ".txt": "ca1d88d545086f47109863c0c61702cc9a1433984f8f91ba4cb612c2772bc3e8",
+        ".exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+        ".result.json": "5d06df34e1d49b71eb0a6d3cee529366568adc7919c119d18020022eda9e76cd"
+      },
+      "sidecar": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/var/process-admission/proc0-l1-20261120/bootstrap/proc0-l1-003-b3.json",
+      "sidecar_sha256": "118af575048d9bf57118722ccda2b03f7d321fb010dbb4cca7d94523ad145f3d",
+      "inner": 0,
+      "outer": 0,
+      "resource_status": "CLEAN",
+      "input_drift": false,
+      "capture_git_head": "9bde8c4584e3d13bcad474564caccfcbce2ced6f"
+    }
+  ],
+  "product_acceptance": false,
+  "L2": "NOT_RUN",
+  "L3": "NOT_RUN",
+  "L4": "NOT_RUN"
+}
