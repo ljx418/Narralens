@@ -1,0 +1,28 @@
+{
+  "path": "/mnt/c/workspace/videoworkline/Narralens-agents/product-workbench",
+  "slug": "product-workbench",
+  "head": "07399c230023591b84fa2872b45b2a8b58b286f4",
+  "branch": "agent-driven/lane-product",
+  "status_entries": 0,
+  "untracked": 0,
+  "runtime_entries": [
+    "node_modules",
+    "var"
+  ],
+  "archive_ref": "refs/heads/archive/20261120/product-workbench",
+  "dirty_files": [],
+  "local_full_backup": "/mnt/c/workspace/videoworkline/Narralens-migration-backups/workspace-cleanup-20261120/product-workbench.tar.gz",
+  "local_backup_sha256": "375c60f0f54ddcb05e3648c17e0a45e7486bda693bb44575db810f4df4158dbc",
+  "local_backup_bytes": 134371994,
+  "backup_regular_files_verified": 6181,
+  "excluded_reproducible": [
+    ".git",
+    ".pnpm-store",
+    ".pytest_cache",
+    "__pycache__",
+    "node_modules"
+  ],
+  "removed": true,
+  "restore": "git worktree add <flat-path> archive/20261120/product-workbench; apply tracked-changes.patch then copy files/; full ignored runtime recovery is local backup, not uploaded",
+  "remote_archive_verified": true
+}

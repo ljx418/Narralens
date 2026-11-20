@@ -1,0 +1,79 @@
+{
+  "date": "2026-11-20",
+  "removed_workspaces": [
+    {
+      "name": "Narralens-A-R1-BRIDGE",
+      "head": "664f178e4e34069de0da19140de1f6915efb0537",
+      "archive_ref": "refs/heads/archive/20261120/narralens-a-r1-bridge",
+      "verified_backup_files": 7305,
+      "local_backup_bytes": 128964369,
+      "remote_unique_files": 32
+    },
+    {
+      "name": "Narralens-A-R1-MEDIA",
+      "head": "ff2646f3ca59c8980b57a2a68710148f1c58e22e",
+      "archive_ref": "refs/heads/archive/20261120/narralens-a-r1-media",
+      "verified_backup_files": 7179,
+      "local_backup_bytes": 128782357,
+      "remote_unique_files": 32
+    },
+    {
+      "name": "Narralens-A-R1-PRODUCT",
+      "head": "dd32f156ee576e65c5e0ed8e7f9dc228827a97fe",
+      "archive_ref": "refs/heads/archive/20261120/narralens-a-r1-product",
+      "verified_backup_files": 8048,
+      "local_backup_bytes": 141259559,
+      "remote_unique_files": 42
+    },
+    {
+      "name": "bridge-observability",
+      "head": "50f4e19309d81ad0bf6ddc986494c2d34f32bea1",
+      "archive_ref": "refs/heads/archive/20261120/bridge-observability",
+      "verified_backup_files": 31395,
+      "local_backup_bytes": 984945386,
+      "remote_unique_files": 307
+    },
+    {
+      "name": "media-delivery",
+      "head": "480561a9c08cc82094e883e58c499b2892b87ca7",
+      "archive_ref": "refs/heads/archive/20261120/media-delivery",
+      "verified_backup_files": 11826,
+      "local_backup_bytes": 244121026,
+      "remote_unique_files": 0
+    },
+    {
+      "name": "product-workbench",
+      "head": "07399c230023591b84fa2872b45b2a8b58b286f4",
+      "archive_ref": "refs/heads/archive/20261120/product-workbench",
+      "verified_backup_files": 6181,
+      "local_backup_bytes": 134371994,
+      "remote_unique_files": 0
+    }
+  ],
+  "kept": [
+    {
+      "path": "C:\\workSpace\\videoWorkLine\\Narralens",
+      "name": "Narralens｜主控文档与验收"
+    },
+    {
+      "path": "C:\\workspace\\videoworkline\\Narralens-agents\\main-integration",
+      "name": "01 实施｜ClaudeCode N1-N2"
+    },
+    {
+      "path": "C:\\workspace\\videoworkline\\Narralens-openfilm-m1b",
+      "name": "93 基线｜固定 OpenFilm 隔离树"
+    }
+  ],
+  "workspaces_before": 9,
+  "workspaces_after": 3,
+  "original_failure_evidence": "retained at original signed paths",
+  "current_source": "UNACCEPTED_RECOVERY_CHECKPOINT fd2bd2b38a78cc667e598acb00bee6998df0a2c5",
+  "local_backup_total_bytes": 1762444691,
+  "local_backup_root": "../Narralens-migration-backups/workspace-cleanup-20261120",
+  "local_only_redundant_source_bundles": 3,
+  "local_only_redundant_source_bundle_bytes": 556134400,
+  "uploaded_unique_dirty_archive_files": 413,
+  "product_implementation_this_task": false,
+  "claude_restarted": false,
+  "product_acceptance": false
+}

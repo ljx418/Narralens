@@ -1,0 +1,28 @@
+{
+  "path": "/mnt/c/workspace/videoworkline/Narralens-agents/media-delivery",
+  "slug": "media-delivery",
+  "head": "480561a9c08cc82094e883e58c499b2892b87ca7",
+  "branch": "agent-driven/lane-media",
+  "status_entries": 0,
+  "untracked": 0,
+  "runtime_entries": [
+    "node_modules",
+    "var"
+  ],
+  "archive_ref": "refs/heads/archive/20261120/media-delivery",
+  "dirty_files": [],
+  "local_full_backup": "/mnt/c/workspace/videoworkline/Narralens-migration-backups/workspace-cleanup-20261120/media-delivery.tar.gz",
+  "local_backup_sha256": "fb7a5953b703d53d8914e5ec1bcf078125ec1832bf42a762426c94e14f73d0ef",
+  "local_backup_bytes": 244121026,
+  "backup_regular_files_verified": 11826,
+  "excluded_reproducible": [
+    ".git",
+    ".pnpm-store",
+    ".pytest_cache",
+    "__pycache__",
+    "node_modules"
+  ],
+  "removed": true,
+  "restore": "git worktree add <flat-path> archive/20261120/media-delivery; apply tracked-changes.patch then copy files/; full ignored runtime recovery is local backup, not uploaded",
+  "remote_archive_verified": true
+}
