@@ -1,5 +1,7 @@
 # 下一阶段 goal
 
-按docs/process/01_DELIVERY_SPEC.md恢复A/N1N2：核唯一writer与当前WIP字节，先完成P0命令预约/交还完整性门及反例，再由ClaudeCode按原合同小闭环补齐R6，Codex独立复核后递进真实验收，继续R7/R8并冻结；重锚NEXT开工包后停止。保留全部失败证据，新429立即停，不自动重试或接手。
+按docs/process/01_DELIVERY_SPEC.md恢复A/N1N2：核唯一writer与当前WIP字节，先完成PROC-0命令预约/交还完整性门及反例，再由ClaudeCode按原合同小闭环补齐R6，Codex独立复核后递进真实验收，继续R7/R8并冻结；重锚NEXT开工包后停止。保留全部失败证据，新429立即停，不自动重试或接手。
 
-此提示词是下一轮执行入口，不表示本维护轮已启动Claude或P0。实际release须重新绑定整理后的完整commit和受保护输入，旧绝对路径只用于历史定位。
+此提示词是下一轮执行入口，不表示本维护轮已启动Claude或PROC-0。实际release须重新绑定整理后的完整commit和受保护输入，旧绝对路径只用于历史定位。
+
+开工先核Orca协调身份；当前旧Run启动返回consumer_fenced，未成功创建审查窗口。不得以重复启动或修改身份配置绕过。完成合同独立审查后，再发绑定实际HEAD的Claude精确release。
