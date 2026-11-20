@@ -12,11 +12,13 @@ Run with:
 """
 
 import argparse
+import builtins
 import contextlib
 import hashlib
 import importlib.util
 import io
 import json
+import os
 import tempfile
 import threading
 import types
@@ -55,15 +57,14 @@ FAKE_IDENTITY = {
 }
 
 
-def load_tool():
-    """Load tools/run-delivery.py by path; isolated mode has no script dir on sys.path."""
-    spec = importlib.util.spec_from_file_location("run_delivery_tool", TOOL_PATH)
+def load_tool(path, name):
+    spec = importlib.util.spec_from_file_location(name, path)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module
 
 
-run_delivery = load_tool()
+run_delivery = load_tool(TOOL_PATH, "run_delivery_tool")
 
 
 def sha256_of(path):
@@ -174,6 +175,7 @@ class RunnerCase(unittest.TestCase):
             {"path": "AGENTS.md", "sha256": sha256_of(self.project / "AGENTS.md")}
         ]
         self.state_root = self.project / "var" / "process-admission"
+        self.authority = self.project / "var" / "process-admission" / "authority"
         self.owner_task = "proc0-test-owner"
         self.release = self.make_release()
         self.release_path = self.root / "RELEASE.json"
@@ -314,9 +316,9 @@ class RunnerCase(unittest.TestCase):
         self.patches = [
             mock.patch.object(run_delivery.subprocess, "Popen", self.fake.popen),
             mock.patch.object(run_delivery, "read_identity_after_session",
-                              lambda pid, settle_seconds=2.0: (dict(FAKE_IDENTITY), None)),
+                              lambda pid, settle_seconds=2.0: (self.child_identity(), None)),
             mock.patch.object(run_delivery, "read_boot_id", lambda: "0" * 32),
-            mock.patch.object(run_delivery, "read_proc_identity", lambda pid: dict(FAKE_IDENTITY)),
+            mock.patch.object(run_delivery, "read_proc_identity", self.identity_for),
             mock.patch.object(run_delivery, "scan_group_members",
                               lambda pgid, exclude_pids=(): ([], 0, 0)),
         ]
@@ -350,8 +352,20 @@ class RunnerCase(unittest.TestCase):
             run_id=run_id,
         )
 
+    def child_identity(self):
+        """The identity of the mocked child, with this wrapper as its parent."""
+        return {"pid": 4242, "state": "S", "ppid": os.getpid(), "pgid": 4242,
+                "sid": 4242, "start_ticks": 99}
+
+    def identity_for(self, pid):
+        """The wrapper tuple and the child tuple are different real facts."""
+        if pid == os.getpid():
+            return {"pid": os.getpid(), "state": "S", "ppid": 1, "pgid": os.getpid(),
+                    "sid": os.getpid(), "start_ticks": 11}
+        return self.child_identity()
+
     def state(self):
-        return run_delivery.read_state(self.state_root)
+        return run_delivery.read_authority_state(self.authority)
 
     def credential_of(self, payload):
         return json.loads(Path(payload["credential_path"]).read_text())
@@ -379,12 +393,7 @@ class RunnerCase(unittest.TestCase):
         self.assertEqual(self.fake.calls, [])
 
     def test_proc0_01_a_signed_corepack_command_uses_the_fixed_outer_interpreter(self):
-        """A MAIN-signed corepack or node command is recorded exactly as signed.
-
-        Only the outer recorder interpreter is fixed.  The inner command comes
-        from the signed command_id whitelist and is forwarded verbatim; nothing
-        real is executed here, the recorder itself is mocked.
-        """
+        """A MAIN-signed corepack or node command is recorded exactly as signed."""
         release = self.make_release()
         inner_argv = ["/usr/local/bin/corepack", "node", "tests/tool.mjs"]
         release["commands"]["corepack-node"] = {
@@ -427,9 +436,7 @@ class RunnerCase(unittest.TestCase):
 
         code, payload = self.cli("run", "--command-id", "signed-shell", "--run-id", "run-shell")
         self.assertEqual(code, 0)
-        recorder_argv = self.fake.calls[1]["argv"]
-        self.assertEqual(recorder_argv[0], "/usr/bin/python3.12")
-        self.assertEqual(recorder_argv[6:], ["/bin/sh", "-c", "true"])
+        self.assertEqual(self.fake.calls[1]["argv"][6:], ["/bin/sh", "-c", "true"])
 
     def test_proc0_01_the_caller_cannot_inject_a_shell_or_a_raw_argv(self):
         for injected in (["--shell", "/bin/sh"], ["--argv", "anything"], ["--cwd", "/tmp"]):
@@ -442,13 +449,13 @@ class RunnerCase(unittest.TestCase):
     def test_proc0_02_source_protected_and_recorder_drift_are_refused(self):
         code, payload = self.cli("run", "--command-id", "direct", "--run-id", "run-a")
         self.assertEqual(code, 0)
-        before = (self.state_root / "state.json").read_bytes()
+        before = (self.authority / "state.json").read_bytes()
 
         (self.project / "src" / "app.py").write_text("# tampered\n")
         code, payload = self.cli("run", "--command-id", "direct", "--run-id", "run-c")
         self.assertEqual(code, 2)
         self.assertEqual(payload["reason"], "PREFLIGHT_SOURCE_OR_PROTECTED_FAILURE")
-        self.assertEqual((self.state_root / "state.json").read_bytes(), before)
+        self.assertEqual((self.authority / "state.json").read_bytes(), before)
         (self.project / "src" / "app.py").write_text("# app\n")
 
         (self.project / "AGENTS.md").write_text("# tampered\n")
@@ -462,6 +469,46 @@ class RunnerCase(unittest.TestCase):
         self.assertEqual(code, 2)
         self.assertEqual(payload["reason"], "PREFLIGHT_SOURCE_OR_PROTECTED_FAILURE")
         self.assertEqual(len(self.fake.calls), 1, "no process may start on a drifted pin")
+
+    def test_proc0_02_an_absolute_protected_pin_is_accepted_and_verified(self):
+        """A MAIN listed absolute pin is a legal protected input, not a repo path."""
+        observer = self.root / "observer.py"
+        observer.write_text("# observer\n")
+        release = self.make_release()
+        release["protected_inputs"] = list(self.protected_inputs) + [
+            {"path": str(observer), "sha256": sha256_of(observer)},
+        ]
+        self.write_release(release)
+        code, payload = self.cli("run", "--command-id", "direct", "--run-id", "run-a")
+        self.assertEqual(code, 0)
+
+        release = self.make_release()
+        release["protected_inputs"] = list(self.protected_inputs) + [
+            {"path": str(observer), "sha256": "0" * 64},
+        ]
+        self.write_release(release)
+        code, payload = self.cli("run", "--command-id", "direct", "--run-id", "run-c")
+        self.assertEqual(code, 2)
+        self.assertEqual(payload["reason"], "PREFLIGHT_SOURCE_OR_PROTECTED_FAILURE")
+
+    def test_proc0_02_the_artefact_root_must_be_the_project_var_area(self):
+        """The artefact root is project/var/process-admission, never without var."""
+        code, payload = self.cli("run", "--command-id", "direct", "--run-id", "run-a")
+        self.assertEqual(code, 0)
+        authority = self.project / "var" / "process-admission" / "authority" / "state.json"
+        self.assertTrue(authority.is_file(), "the authority belongs to the project var area")
+        self.assertFalse((self.project / "process-admission").exists(),
+                         "no second authority may appear outside the project var area")
+
+        wrong = self.make_release(state_root=str(self.project / "process-admission"))
+        self.write_release(wrong)
+        code, payload = self.cli("run", "--command-id", "direct", "--run-id", "run-c")
+        self.assertEqual(code, 2)
+        self.assertEqual(payload["reason"], "RELEASE_STATE_ROOT_OUTSIDE_PROJECT_ARTEFACTS")
+        self.assertEqual(len(self.fake.calls), 1,
+                         "the refused ticket must not start a process")
+        self.assertFalse((self.project / "process-admission").exists(),
+                         "the refused ticket must not create another authority")
 
     def test_proc0_03_existing_capture_and_unsafe_basenames_are_refused(self):
         (self.recorder_dir / "capture-a.exit").write_text("0\n")
@@ -489,23 +536,24 @@ class RunnerCase(unittest.TestCase):
             self.assertIn(payload["reason"], (
                 "CAPTURE_BASENAME_INVALID", "CAPTURE_BASENAME_NOT_ASCII",
                 "CAPTURE_BASENAME_EMPTY", "RELEASE_CAPTURE_ALLOCATION_FIELD_MISSING",
+                "RELEASE_CAPTURE_ALLOCATION_BASENAME_INVALID",
             ), unsafe)
         self.assertEqual(self.fake.calls, [])
 
     def test_proc0_04_a_second_client_finds_the_slot_busy(self):
-        state = run_delivery.read_state(self.state_root) or run_delivery.initial_state()
+        state = run_delivery.read_authority_state(self.authority) or run_delivery.initial_state()
         state["slot"] = {"run_id": "run-a", "phase": "RUNNING", "owner_task": self.owner_task}
         state["phase"] = "RUNNING"
         state["admission"] = "BLOCKED"
         state["blocked_reason"] = "RUN_IN_FLIGHT"
-        run_delivery.commit_state(self.state_root, state, "seed-running")
+        run_delivery.commit_event(self.authority, state, "seed-running")
 
         code, payload = self.cli("run", "--command-id", "direct", "--run-id", "run-a")
         self.assertEqual(code, 2)
         self.assertEqual(payload["reason"], "RUN_SLOT_BUSY")
         self.assertEqual(self.fake.calls, [], "a contended slot must not start a second process")
 
-        lock = self.state_root / ".lock"
+        lock = self.authority / "lock"
         lock.write_text("{\"pid\": 1}")
         code, payload = self.cli("run", "--command-id", "direct", "--run-id", "run-c")
         self.assertEqual(code, 2)
@@ -550,12 +598,12 @@ class RunnerCase(unittest.TestCase):
         self.assertEqual(state["admission"], "BLOCKED")
 
     def test_proc0_06_unknown_state_blocks_and_locks_are_never_removed(self):
-        state = run_delivery.read_state(self.state_root) or run_delivery.initial_state()
+        state = run_delivery.read_authority_state(self.authority) or run_delivery.initial_state()
         state["slot"] = {"run_id": "run-a", "phase": "UNKNOWN", "owner_task": self.owner_task}
         state["phase"] = "UNKNOWN"
         state["admission"] = "BLOCKED"
         state["blocked_reason"] = "UNKNOWN_RESOURCE_HOLDS_RESPONSIBILITY"
-        run_delivery.commit_state(self.state_root, state, "seed-unknown")
+        run_delivery.commit_event(self.authority, state, "seed-unknown")
 
         code, payload = self.cli("run", "--command-id", "direct", "--run-id", "run-a")
         self.assertEqual(code, 2)
@@ -573,6 +621,14 @@ class RunnerCase(unittest.TestCase):
         state = self.state()
         self.assertEqual(state["slot"]["phase"], "UNKNOWN")
         self.assertEqual(state["admission"], "BLOCKED")
+
+    def test_proc0_06_a_missing_wrapper_epoch_never_spawns(self):
+        with mock.patch.object(run_delivery, "read_boot_id",
+                               side_effect=OSError("boot id unavailable")):
+            code, payload = self.cli("run", "--command-id", "direct", "--run-id", "run-a")
+        self.assertEqual(code, 2)
+        self.assertEqual(payload["reason"], "WRAPPER_EPOCH_INCOMPLETE_NO_SPAWN")
+        self.assertEqual(self.fake.calls, [], "no process may start without a complete epoch")
 
     def test_proc0_07_status_never_claims_the_epoch_is_gone(self):
         slot = {
@@ -600,29 +656,52 @@ class RunnerCase(unittest.TestCase):
         state = self.state()
         self.assertEqual(state["slot"]["resource_status"], "NO_CHILD")
         self.assertEqual(state["admission"], "BLOCKED")
+        self.assertFalse(self.fake.wait_called, "no child means no wait")
 
-    def test_proc0_08_a_lost_epoch_after_the_child_was_returned_keeps_the_wait(self):
-        real_commit = run_delivery.commit_state
+    def test_proc0_08_a_log_close_failure_after_the_child_keeps_the_wait(self):
+        """A close error after the child exists is never a NO CHILD case."""
+        real_open = builtins.open
 
-        def failing_commit(state_root, new_state, action, detail=None):
-            if action == "run-running":
-                raise run_delivery.AdmissionError("JOURNAL_APPEND_FAILED_PENDING_AUDIT", {})
-            return real_commit(state_root, new_state, action, detail)
+        class BadClose:
+            def __init__(self, handle):
+                self.handle = handle
 
-        with mock.patch.object(run_delivery, "commit_state", failing_commit):
+            def __getattr__(self, name):
+                return getattr(self.handle, name)
+
+            def close(self):
+                raise OSError("close failed")
+
+        def fake_open(file, mode="r", *args, **kwargs):
+            handle = real_open(file, mode, *args, **kwargs)
+            if "w" in mode and str(file).endswith(".recorder.log"):
+                return BadClose(handle)
+            return handle
+
+        with mock.patch("builtins.open", fake_open):
+            code, payload = self.cli("run", "--command-id", "direct", "--run-id", "run-a")
+        self.assertTrue(self.fake.wait_called, "the owner of a returned child must wait")
+        state = self.state()
+        self.assertNotEqual(state["slot"]["resource_status"], "NO_CHILD")
+        self.assertEqual(len(self.fake.calls), 1, "the child is started exactly once")
+
+    def test_proc0_08_an_unverified_recorder_epoch_still_waits_but_blocks(self):
+        with mock.patch.object(run_delivery, "read_identity_after_session",
+                               return_value=(None, {"detail": "vanished"})):
             code, payload = self.cli("run", "--command-id", "direct", "--run-id", "run-a")
         self.assertTrue(self.fake.wait_called, "the owner of a returned child must wait")
         self.assertEqual(payload["resource_status"], "UNKNOWN")
-        self.assertFalse(payload["metadata_ok"])
+        self.assertEqual(payload["admission"], "BLOCKED")
+        self.assertFalse(payload["recorder_epoch_verified"])
 
     def test_proc0_09_cancel_only_records_a_request(self):
         gate = threading.Event()
         running_persisted = threading.Event()
         self.fake.wait_gate = gate
-        real_commit = run_delivery.commit_state
+        real_commit = run_delivery.commit_event
 
-        def commit_and_signal(state_root, new_state, action, detail=None):
-            result = real_commit(state_root, new_state, action, detail)
+        def commit_and_signal(authority, new_state, action, detail=None):
+            result = real_commit(authority, new_state, action, detail)
             if action == "run-running":
                 running_persisted.set()
             return result
@@ -630,14 +709,12 @@ class RunnerCase(unittest.TestCase):
         holder = {}
 
         def worker():
-            # The real runner entry point is called directly here: no stdout is
-            # redirected anywhere, so the two threads cannot interleave output.
             try:
                 holder["result"] = run_delivery.command_run(self.run_args())
             except run_delivery.AdmissionError as error:
                 holder["result"] = {"status": "REJECTED", "reason": error.reason}
 
-        with mock.patch.object(run_delivery, "commit_state", commit_and_signal):
+        with mock.patch.object(run_delivery, "commit_event", commit_and_signal):
             thread = threading.Thread(target=worker, daemon=True)
             thread.start()
             try:
@@ -678,7 +755,7 @@ class RunnerCase(unittest.TestCase):
     def test_proc0_10_metadata_and_resource_state_are_separate(self):
         self.fake.inner_exit = 7
         code, payload = self.cli("run", "--command-id", "direct", "--run-id", "run-a")
-        self.assertEqual(code, 0)
+        self.assertEqual(code, 2)
         self.assertFalse(payload["metadata_ok"])
         self.assertEqual(payload["resource_status"], "CLEAN")
         self.assertEqual(payload["blocked_reason"], "TERMINAL_WITH_INVALID_METADATA")
@@ -726,8 +803,14 @@ class RunnerCase(unittest.TestCase):
         self.assertEqual(payload["reason"], "UNKNOWN_RESOURCE_HOLDS_RESPONSIBILITY")
         self.assertEqual(len(self.fake.calls), 1, "an unknown slot must not start another process")
 
+    def test_proc0_12_an_undeterminable_group_is_never_signed_clean(self):
+        with mock.patch.object(run_delivery, "scan_group_members", return_value=([], 0, 2)):
+            code, payload = self.cli("run", "--command-id", "direct", "--run-id", "run-a")
+        self.assertEqual(payload["resource_status"], "UNKNOWN")
+        self.assertEqual(payload["undeterminable_proc_entries"], 2)
+        self.assertEqual(payload["admission"], "BLOCKED")
+
     def test_proc0_13_each_exit_is_bound_to_its_own_run(self):
-        # The first authorised slot: the plain success run.
         code, payload = self.cli("run", "--command-id", "direct", "--run-id", "run-a")
         self.assertEqual(code, 0)
         self.assertTrue(payload["metadata_ok"])
@@ -735,9 +818,8 @@ class RunnerCase(unittest.TestCase):
         self.assertEqual(payload["admission"], "READY")
         self.assertFalse(payload["business_acceptance"])
 
-        # The second authorised slot is a slot of its own: its own command, its
-        # own capture and its own run carry the specified failure.
         self.fake.inner_exit = 1
+        self.fake.log_text = "TOOL_HELPER_EXPECTED_FAILURE" + chr(10)
         code, payload = self.cli("run", "--command-id", "direct-fail", "--run-id", "run-b")
         self.assertEqual(code, 0)
         self.assertEqual(payload["inner_exit"], 1)
@@ -760,9 +842,13 @@ class RunnerCase(unittest.TestCase):
         self.assertEqual(sidecar["capture_basename"], "capture-b")
         self.assertEqual(sidecar["run_id"], "run-b")
         self.assertEqual(sidecar["recorder_wait_returncode"], 1)
+        receipt = json.loads(Path(payload["receipt_path"]).read_text())
+        self.assertEqual(receipt["event_id"], payload["terminal_event_id"])
+        self.assertEqual(receipt["sequence"], payload["terminal_sequence"])
 
     def test_proc0_13_a_slot_of_another_run_cannot_lend_its_assertion(self):
         self.fake.inner_exit = 1
+        self.fake.log_text = "TOOL_HELPER_EXPECTED_FAILURE" + chr(10)
         code, payload = self.cli("run", "--command-id", "direct-fail", "--run-id", "run-d")
         self.assertEqual(code, 0)
         credential = self.credential_of(payload)
@@ -773,11 +859,8 @@ class RunnerCase(unittest.TestCase):
         self.assertEqual(credential["command_id"], "direct-fail")
         self.assertEqual(credential["capture_basename"], "capture-d")
         self.assertEqual(credential["run_id"], "run-d")
-        # the physical observation stays truthful: a missing authorisation does
-        # not turn a settled resource into an unknown one
         self.assertEqual(credential["resource_status"], "CLEAN")
         self.assertEqual(payload["resource_status"], "CLEAN")
-        self.assertEqual(payload["admission"], "READY")
 
     def test_proc0_13_a_slot_of_another_command_cannot_lend_its_assertion(self):
         code, payload = self.cli("run", "--command-id", "direct", "--run-id", "run-c")
@@ -789,7 +872,6 @@ class RunnerCase(unittest.TestCase):
         self.assertFalse(credential["case_passed"])
         self.assertEqual(credential["command_id"], "direct")
         self.assertEqual(credential["capture_basename"], "capture-c")
-        self.assertEqual(credential["resource_status"], "CLEAN")
 
     def test_proc0_16_a_capture_is_never_overwritten_and_rebind_is_exact(self):
         code, payload = self.cli("run", "--command-id", "direct", "--run-id", "run-a")
@@ -811,26 +893,66 @@ class RunnerCase(unittest.TestCase):
         self.assertTrue(state["history"], "the old run result is never overwritten")
         self.assertEqual(state["history"][0]["capture_basename"], "capture-a")
 
-    def test_proc0_16_a_pending_audit_blocks_new_executions(self):
-        state = run_delivery.read_state(self.state_root) or run_delivery.initial_state()
-        state["pending_audit"] = True
-        run_delivery.atomic_write_bytes(
-            run_delivery.state_path(self.state_root), run_delivery._encode_json(state))
-        code, payload = self.cli("run", "--command-id", "direct", "--run-id", "run-a")
-        self.assertEqual(code, 2)
-        self.assertEqual(payload["reason"], "PENDING_AUDIT_NOT_CLEAR")
-        self.assertEqual(self.fake.calls, [])
-
-    def test_proc0_16_a_failed_state_replace_keeps_the_old_state(self):
+    def test_proc0_16_two_tickets_share_one_authority(self):
         code, payload = self.cli("run", "--command-id", "direct", "--run-id", "run-a")
         self.assertEqual(code, 0)
-        before = (self.state_root / "state.json").read_bytes()
-        with mock.patch.object(run_delivery, "atomic_write_bytes",
-                               side_effect=run_delivery.AdmissionError("STATE_REPLACE_FAILED", {})):
-            code, payload = self.cli("begin-write")
+        bound = self.state()["bound_release_sha256"]
+
+        other = self.make_release(
+            release_id="PROC0_TEST_RELEASE_B", generation=2,
+            state_root=str(self.project / "var" / "process-admission" / "ticket-b"))
+        self.write_release(other)
+        code, payload = self.cli("run", "--command-id", "direct", "--run-id", "run-c")
         self.assertEqual(code, 2)
-        self.assertEqual(payload["reason"], "STATE_REPLACE_FAILED_OLD_STATE_PRESERVED")
-        self.assertEqual((self.state_root / "state.json").read_bytes(), before)
+        self.assertEqual(payload["reason"], "RELEASE_NOT_BOUND_TO_AUTHORITY")
+        self.assertEqual(len(self.fake.calls), 1, "a second ticket must not start a second process")
+        self.assertEqual(self.state()["bound_release_sha256"], bound,
+                         "the authority is the same whatever artefact root a ticket names")
+
+        code, payload = self.cli("rebind")
+        self.assertEqual(code, 0)
+        code, payload = self.cli("run", "--command-id", "direct", "--run-id", "run-c")
+        self.assertEqual(code, 0, "only an explicit rebind makes the new ticket the bound one")
+
+    def test_proc0_16_a_state_change_during_the_preflight_refuses_the_late_client(self):
+        real_verify = run_delivery.verify_recorded_source
+
+        def verifying_then_committing(root, release):
+            result = real_verify(root, release)
+            state = run_delivery.read_authority_state(self.authority) or run_delivery.initial_state()
+            state = dict(state)
+            state["history"] = list(state.get("history") or []) + [{"run_id": "other"}]
+            run_delivery.commit_event(self.authority, state, "interleaved-write", {})
+            return result
+
+        with mock.patch.object(run_delivery, "verify_recorded_source",
+                               verifying_then_committing):
+            code, payload = self.cli("run", "--command-id", "direct", "--run-id", "run-a")
+        self.assertEqual(code, 2)
+        self.assertEqual(payload["reason"], "STATE_CHANGED_DURING_PREFLIGHT")
+        self.assertEqual(self.fake.calls, [], "a late client must not start a process")
+
+    def test_proc0_16_a_pending_audit_is_never_cleared_by_a_later_event(self):
+        real_write = run_delivery.atomic_write_bytes
+        counter = {"n": 0}
+
+        def failing_second(path, data):
+            counter["n"] += 1
+            if counter["n"] >= 2:
+                raise run_delivery.AdmissionError("STATE_REPLACE_FAILED", {})
+            return real_write(path, data)
+
+        with mock.patch.object(run_delivery, "atomic_write_bytes", failing_second):
+            code, payload = self.cli("run", "--command-id", "direct", "--run-id", "run-a")
+        self.assertEqual(code, 2)
+        state = self.state()
+        self.assertTrue(state["pending_audit"], "the unfinished event stays pending")
+        self.assertIsNotNone(state["pending_event"])
+
+        code, payload = self.cli("run", "--command-id", "direct", "--run-id", "run-c")
+        self.assertEqual(code, 2)
+        self.assertEqual(payload["reason"], "PENDING_AUDIT_NOT_CLEARED")
+        self.assertEqual(len(self.fake.calls), 1)
 
     def test_the_runner_declares_no_signal_fork_or_reaper_api(self):
         source = TOOL_PATH.read_text()

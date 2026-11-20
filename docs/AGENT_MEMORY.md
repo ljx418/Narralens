@@ -1,3 +1,9 @@
+## 2026-11-20 最新429停工（覆盖旧恢复/实施许可）
+
+ClaudeCode本次新429 Token Plan用量上限，窗口原自动重试attempt8/10。MAIN已立即worker-stop精确ctx_ab2f1ac4c732，回执closed_agent_terminal/ptyKilled=true，worker-show确认stopped/liveness exited。Task task_1e803fda402b原记录保留，不自动retry/restart/provider变更或Codex接写。
+停在PROC0 l2-repair-002（局部var根修正与反例），正在更新OWN报告，尚无freeze006；源为未验收WIP。最后实际B1/005 inner1/outer1/observer2 CLEAN零漂移，B2/B3未跑，新root修正与新反例未跑。完整checkpoint见docs/process/proc-0/implementation/l2-repair-002/NEW_429_STOP/STOP_CHECKPOINT.json与interrupted-source；OWN可能未完成/旧摘要，不当交还。
+只有此新429之后用户再次明确恢复/接手才能继续；自动goal续轮与旧额度恢复批准无效。当前仅保全与必要安全清理，不做后续文档开发/代码/测试。目标未完成，不把停工称通过。R7条件设计已DOC_CONDITIONAL_READY但实施仍未放行；完整goal依旧PROC0→R6→真实验收→R7/R8冻结→NEXT重锚后停。
+
 <!-- CURRENT_N1N2_EXECUTION_CHECKPOINT_START -->
 
 ### 当前维护收口与调度状态（2026-11-20）

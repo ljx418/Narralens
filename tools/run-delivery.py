@@ -2,15 +2,16 @@
 """PROC-0 delivery admission runner (Python standard library only).
 
 Cooperative admission gate for the delivery pipeline.  It enforces the
-MAIN-issued release pins, keeps exactly one authoritative state file, uses one
-short transaction lock and gives every started recorder exactly one owner.
+MAIN-issued release pins, keeps exactly one authoritative state file per
+project, uses one short transaction lock and gives every started recorder
+exactly one owner.
 
 This tool is NOT an OS isolation boundary.  It does not police arbitrary shell
 usage by a same-user agent, it never sends signals to product or recorder
 processes, it never reaps processes it did not start and it never claims a
 complete fork history.
 
-Contract: docs/process/proc-0/CONTRACT.md (v3) in the canonical MAIN package.
+Contract: docs/process/proc-0/CONTRACT.md (rev4) in the canonical MAIN package.
 """
 
 import argparse
@@ -27,31 +28,52 @@ from pathlib import Path
 
 RELEASE_FORMAT = "narralens.proc0-release@3"
 STATE_FORMAT = "narralens.proc0-state@1"
-STATE_ROOT_RELATIVE = ("var", "process-admission")
-RELEASE_PHASES = ("BOOTSTRAP_CODE", "TOOL_RUNTIME", "FINAL_METADATA")
+SIDECAR_FORMAT = "narralens.proc0-run-sidecar@1"
+CREDENTIAL_FORMAT = "narralens.proc0-failure-credential@1"
+RECEIPT_FORMAT = "narralens.proc0-terminal-receipt@1"
+
+# The outer recorder interpreter is fixed here and, where the release pins it,
+# by the protected binary digest.  It is never derived from the inner command.
+OUTER_INTERPRETER = "/usr/bin/python3.12"
+
+# One admission authority per real project.  The ticket state_root is only the
+# artefact root of that ticket; it can never become a second authority.
+PROJECT_ARTEFACT_DIRNAME = ("var", "process-admission")
+AUTHORITY_DIRNAME = "authority"
+STATE_FILENAME = "state.json"
+JOURNAL_FILENAME = "journal.jsonl"
+LOCK_FILENAME = "lock"
+BOOTSTRAP_DIRNAME = "bootstrap"
+SIDECARS_DIRNAME = "sidecars"
+CREDENTIALS_DIRNAME = "credentials"
+RECEIPTS_DIRNAME = "receipts"
+LOGS_DIRNAME = "logs"
+
 CAPTURE_SUFFIXES = (".inputs.json", ".cmd.json", ".txt", ".exit", ".result.json", ".claim.json")
 BASENAME_RE = re.compile(r"^[A-Za-z0-9_-]+$")
 RECORDER_RUNNER_VERSION = 3
 HISTORY_LIMIT = 50
 SESSION_SETTLE_SECONDS = 2.0
 
-# The original recorder scans exactly these prefixes/suffixes (run-recorded.py).
-RECORDER_SCOPE_PREFIXES = (
-    "src",
-    "contracts",
-    "tests",
-    "tools",
-    "docs/parallel/lane-bridge/A-R2-20261112",
-)
-RECORDER_SCOPE_SUFFIXES = {
-    ".ts", ".tsx", ".js", ".mjs", ".cjs", ".json",
-    ".py", ".html", ".css", ".sql", ".sh",
+STATE_PHASES = ("IDLE", "WRITING", "STARTING", "RUNNING", "TERMINAL", "UNKNOWN")
+STATE_ADMISSIONS = ("READY", "BLOCKED")
+REQUIRED_STATE_FIELDS = {
+    "format": str,
+    "sequence": int,
+    "event_id": (str, type(None)),
+    "generation": int,
+    "bound_release_sha256": (str, type(None)),
+    "bound_owner_task": (str, type(None)),
+    "phase": str,
+    "admission": str,
+    "blocked_reason": (str, type(None)),
+    "cancel_requested": bool,
+    "pending_audit": bool,
+    "pending_event": (dict, type(None)),
+    "write_lease": (dict, type(None)),
+    "slot": (dict, type(None)),
+    "history": list,
 }
-RECORDER_SCOPE_EXTRA = ("package.json", "pnpm-lock.yaml", "tsconfig.json", "vitest.config.ts")
-
-# The outer recorder interpreter is fixed here and, where the release pins it,
-# by the protected binary digest.  It is never derived from the inner command.
-OUTER_INTERPRETER = "/usr/bin/python3.12"
 
 EXIT_OK = 0
 EXIT_REJECTED = 2
@@ -92,12 +114,344 @@ def read_json_file(path, what):
         raise AdmissionError(what + "_UNPARSABLE", {"path": str(path), "detail": str(error)})
 
 
+def _require(condition, reason, detail=None):
+    if not condition:
+        raise AdmissionError(reason, detail)
+
+
+def is_repo_relative(name):
+    return (
+        isinstance(name, str)
+        and name != ""
+        and not Path(name).is_absolute()
+        and ".." not in Path(name).parts
+    )
+
+
+def is_safe_basename(name):
+    return (
+        isinstance(name, str)
+        and name != ""
+        and all(ord(ch) < 128 for ch in name)
+        and BASENAME_RE.match(name) is not None
+    )
+
+
+def canonical_within(base, candidate):
+    """True when candidate really stays inside base (a symlink escape fails)."""
+    try:
+        base_real = Path(base).resolve()
+        candidate_real = Path(candidate).resolve()
+    except OSError:
+        return False
+    try:
+        candidate_real.relative_to(base_real)
+    except ValueError:
+        return False
+    return True
+
+
 # ---------------------------------------------------------------------------
-# durable state primitives
+# release handling
 # ---------------------------------------------------------------------------
 
+def load_release(release_path, expected_sha256):
+    """Load the MAIN release.  The external path + digest is the only trust root."""
+    _require(expected_sha256, "EXPECTED_RELEASE_SHA256_REQUIRED")
+    path = Path(release_path)
+    _require(path.is_file(), "RELEASE_FILE_MISSING", {"path": str(path)})
+    actual = sha256_file(path)
+    _require(
+        actual == expected_sha256,
+        "RELEASE_SHA256_MISMATCH",
+        {"expected": expected_sha256, "actual": actual, "path": str(path)},
+    )
+    release = read_json_file(path, "RELEASE")
+    _require(isinstance(release, dict), "RELEASE_NOT_OBJECT")
+    return release, actual
+
+
+def validate_release(release):
+    _require(release.get("format") == RELEASE_FORMAT, "RELEASE_FORMAT_UNSUPPORTED",
+             {"format": release.get("format")})
+    phase = release.get("phase")
+    _require(phase in ("BOOTSTRAP_CODE", "TOOL_RUNTIME", "FINAL_METADATA"),
+             "RELEASE_PHASE_UNKNOWN", {"phase": phase})
+    _require(isinstance(release.get("release_id"), str) and release["release_id"],
+             "RELEASE_ID_MISSING")
+    _require(isinstance(release.get("owner_task"), str) and release["owner_task"],
+             "RELEASE_OWNER_TASK_MISSING")
+    generation = release.get("generation")
+    _require(isinstance(generation, int) and not isinstance(generation, bool) and generation >= 0,
+             "RELEASE_GENERATION_INVALID", {"generation": generation})
+    project_root = release.get("project_root")
+    _require(isinstance(project_root, str) and os.path.isabs(project_root),
+             "RELEASE_PROJECT_ROOT_INVALID")
+    root = Path(project_root)
+    _require(root.is_dir(), "RELEASE_PROJECT_ROOT_MISSING", {"project_root": project_root})
+    artefact_root = release.get("state_root")
+    _require(isinstance(artefact_root, str) and os.path.isabs(artefact_root),
+             "RELEASE_STATE_ROOT_INVALID")
+    expected_prefix = root.joinpath(*PROJECT_ARTEFACT_DIRNAME)
+    _require(canonical_within(expected_prefix, artefact_root),
+             "RELEASE_STATE_ROOT_OUTSIDE_PROJECT_ARTEFACTS",
+             {"state_root": artefact_root, "allowed_prefix": str(expected_prefix)})
+    recorder = release.get("recorder")
+    _require(isinstance(recorder, dict), "RELEASE_RECORDER_MISSING")
+    _require(is_repo_relative(recorder.get("path")), "RELEASE_RECORDER_PATH_INVALID")
+    _require(isinstance(recorder.get("sha256"), str) and len(recorder["sha256"]) == 64,
+             "RELEASE_RECORDER_SHA_INVALID")
+
+    # recorded_source stays inside the repository; protected_inputs may also be
+    # the exact absolute pins MAIN lists (the fixed Python, the MAIN observer).
+    recorded = release.get("recorded_source")
+    _require(isinstance(recorded, list), "RELEASE_RECORDED_SOURCE_MISSING")
+    _seen = set()
+    for row in recorded:
+        _require(isinstance(row, dict), "RELEASE_RECORDED_SOURCE_ROW_INVALID")
+        _require(is_repo_relative(row.get("path")), "RELEASE_RECORDED_SOURCE_PATH_INVALID",
+                 {"path": row.get("path")})
+        _require(isinstance(row.get("sha256"), str) and len(row["sha256"]) == 64,
+                 "RELEASE_RECORDED_SOURCE_SHA_INVALID")
+        _require(row["path"] not in _seen, "RELEASE_RECORDED_SOURCE_DUPLICATE",
+                 {"path": row["path"]})
+        _seen.add(row["path"])
+    protected = release.get("protected_inputs")
+    _require(isinstance(protected, list), "RELEASE_PROTECTED_INPUTS_MISSING")
+    _seen = set()
+    for row in protected:
+        _require(isinstance(row, dict), "RELEASE_PROTECTED_INPUT_ROW_INVALID")
+        path = row.get("path")
+        _require(isinstance(path, str) and path != "", "RELEASE_PROTECTED_INPUT_PATH_INVALID")
+        _require(is_repo_relative(path) or os.path.isabs(path),
+                 "RELEASE_PROTECTED_INPUT_PATH_INVALID", {"path": path})
+        _require(isinstance(row.get("sha256"), str) and len(row["sha256"]) == 64,
+                 "RELEASE_PROTECTED_INPUT_SHA_INVALID")
+        _require(path not in _seen, "RELEASE_PROTECTED_INPUT_DUPLICATE", {"path": path})
+        _seen.add(path)
+
+    commands = release.get("commands")
+    _require(isinstance(commands, dict) and commands, "RELEASE_COMMANDS_MISSING")
+    for command_id, command in commands.items():
+        _require(isinstance(command, dict), "RELEASE_COMMAND_INVALID", {"command_id": command_id})
+        argv = command.get("argv")
+        _require(isinstance(argv, list) and argv, "RELEASE_COMMAND_ARGV_INVALID",
+                 {"command_id": command_id})
+        for part in argv:
+            _require(isinstance(part, str) and part != "", "RELEASE_COMMAND_ARGV_INVALID",
+                     {"command_id": command_id})
+        _require(isinstance(command.get("cwd"), str) and command["cwd"],
+                 "RELEASE_COMMAND_CWD_INVALID", {"command_id": command_id})
+        _require(isinstance(command.get("runtime_class"), str) and command["runtime_class"],
+                 "RELEASE_COMMAND_RUNTIME_CLASS_INVALID", {"command_id": command_id})
+        exit_code = command.get("expected_inner_exit")
+        _require(isinstance(exit_code, int) and not isinstance(exit_code, bool),
+                 "RELEASE_COMMAND_EXPECTED_EXIT_INVALID", {"command_id": command_id})
+        phases = command.get("allowed_phases")
+        if phases is not None:
+            _require(isinstance(phases, list) and phases, "RELEASE_COMMAND_PHASES_INVALID",
+                     {"command_id": command_id})
+
+    required = release.get("required_cases")
+    _require(isinstance(required, list) and required, "RELEASE_REQUIRED_CASES_MISSING")
+    _require(len(set(required)) == len(required), "RELEASE_REQUIRED_CASES_DUPLICATE")
+    bindings = release.get("case_bindings")
+    _require(isinstance(bindings, dict), "RELEASE_CASE_BINDINGS_MISSING")
+    for case_id in required:
+        _require(case_id in bindings, "RELEASE_CASE_BINDING_MISSING", {"case_id": case_id})
+        binding = bindings[case_id]
+        _require(isinstance(binding, dict), "RELEASE_CASE_BINDING_INVALID", {"case_id": case_id})
+        slots = binding.get("required_evidence")
+        _require(isinstance(slots, list) and slots, "RELEASE_CASE_SLOTS_MISSING",
+                 {"case_id": case_id})
+        slot_ids = set()
+        for slot in slots:
+            _require(isinstance(slot, dict), "RELEASE_CASE_SLOT_INVALID", {"case_id": case_id})
+            for field in ("slot_id", "command_id", "capture_basename", "run_id", "level"):
+                _require(isinstance(slot.get(field), str) and slot[field],
+                         "RELEASE_CASE_SLOT_FIELD_MISSING",
+                         {"case_id": case_id, "field": field})
+            _require(slot["slot_id"] not in slot_ids, "RELEASE_CASE_SLOT_DUPLICATE",
+                     {"case_id": case_id, "slot_id": slot["slot_id"]})
+            slot_ids.add(slot["slot_id"])
+            exit_code = slot.get("expected_inner_exit")
+            _require(isinstance(exit_code, int) and not isinstance(exit_code, bool),
+                     "RELEASE_CASE_SLOT_EXIT_INVALID",
+                     {"case_id": case_id, "slot_id": slot["slot_id"]})
+        alternatives = binding.get("alternatives", [])
+        _require(isinstance(alternatives, list), "RELEASE_CASE_ALTERNATIVES_INVALID",
+                 {"case_id": case_id})
+
+    allocations = release.get("capture_allocations")
+    _require(isinstance(allocations, list), "RELEASE_CAPTURE_ALLOCATIONS_MISSING")
+    basenames = set()
+    run_ids = set()
+    for allocation in allocations:
+        _require(isinstance(allocation, dict), "RELEASE_CAPTURE_ALLOCATION_INVALID")
+        for field in ("basename", "command_id", "run_id"):
+            _require(isinstance(allocation.get(field), str) and allocation[field],
+                     "RELEASE_CAPTURE_ALLOCATION_FIELD_MISSING", {"field": field})
+        _require(is_safe_basename(allocation["basename"]),
+                 "RELEASE_CAPTURE_ALLOCATION_BASENAME_INVALID",
+                 {"basename": allocation["basename"]})
+        _require(is_safe_basename(allocation["run_id"]),
+                 "RELEASE_CAPTURE_ALLOCATION_RUN_ID_INVALID",
+                 {"run_id": allocation["run_id"]})
+        _require(allocation["basename"] not in basenames,
+                 "RELEASE_CAPTURE_ALLOCATION_BASENAME_DUPLICATE",
+                 {"basename": allocation["basename"]})
+        _require(allocation["run_id"] not in run_ids,
+                 "RELEASE_CAPTURE_ALLOCATION_RUN_ID_DUPLICATE",
+                 {"run_id": allocation["run_id"]})
+        basenames.add(allocation["basename"])
+        run_ids.add(allocation["run_id"])
+        case_ids = allocation.get("case_ids")
+        _require(isinstance(case_ids, list) and case_ids, "RELEASE_CAPTURE_ALLOCATION_CASES_MISSING",
+                 {"basename": allocation["basename"]})
+    contract = release.get("contract")
+    _require(isinstance(contract, dict), "RELEASE_CONTRACT_MISSING")
+    _require(isinstance(contract.get("sha256"), str) and len(contract["sha256"]) == 64,
+             "RELEASE_CONTRACT_SHA_INVALID")
+    if release.get("phase") == "FINAL_METADATA":
+        approved = release.get("approved_stage_releases")
+        _require(isinstance(approved, dict) and approved,
+                 "RELEASE_APPROVED_STAGE_RELEASES_MISSING")
+        for alias, entry in approved.items():
+            _require(isinstance(entry, dict), "RELEASE_APPROVED_STAGE_INVALID", {"alias": alias})
+            for field in ("path", "sha256", "phase"):
+                _require(isinstance(entry.get(field), str) and entry[field],
+                         "RELEASE_APPROVED_STAGE_FIELD_MISSING", {"alias": alias, "field": field})
+    return release
+
+
+def project_artefact_root(project_root):
+    return Path(project_root).joinpath(*PROJECT_ARTEFACT_DIRNAME)
+
+
+def authority_root(project_root):
+    """The one admission authority of this project, fixed by the project root."""
+    return project_artefact_root(project_root) / AUTHORITY_DIRNAME
+
+
+# ---------------------------------------------------------------------------
+# authority state
+# ---------------------------------------------------------------------------
+
+def validate_state(state):
+    """The authority state schema.  A damaged state is never silently reset."""
+    problems = []
+    if not isinstance(state, dict):
+        return ["state is not an object"]
+    for field, kind in REQUIRED_STATE_FIELDS.items():
+        if field not in state:
+            problems.append("missing field: " + field)
+            continue
+        value = state[field]
+        if kind is int:
+            if not isinstance(value, int) or isinstance(value, bool):
+                problems.append("bad type: " + field)
+        elif not isinstance(value, kind):
+            problems.append("bad type: " + field)
+    if isinstance(state.get("phase"), str) and state["phase"] not in STATE_PHASES:
+        problems.append("unknown phase")
+    if isinstance(state.get("admission"), str) and state["admission"] not in STATE_ADMISSIONS:
+        problems.append("unknown admission")
+    return problems
+
+
+def initial_state():
+    return {
+        "format": STATE_FORMAT,
+        "sequence": 0,
+        "event_id": None,
+        "generation": 0,
+        "bound_release_sha256": None,
+        "bound_owner_task": None,
+        "phase": "IDLE",
+        "admission": "READY",
+        "blocked_reason": None,
+        "cancel_requested": False,
+        "pending_audit": False,
+        "pending_event": None,
+        "write_lease": None,
+        "slot": None,
+        "history": [],
+    }
+
+
+def read_authority_state(authority):
+    """Read the authority state; a damaged or incomplete state is refused."""
+    path = Path(authority) / STATE_FILENAME
+    if not path.exists():
+        return None
+    try:
+        raw = path.read_text(encoding="utf-8")
+    except OSError as error:
+        raise AdmissionError("STATE_UNREADABLE", {"path": str(path), "errno": error.errno})
+    if raw.strip() == "":
+        raise AdmissionError("STATE_EMPTY_REFUSED", {"path": str(path)})
+    try:
+        state = json.loads(raw)
+    except ValueError as error:
+        raise AdmissionError("STATE_UNPARSABLE", {"path": str(path), "detail": str(error)})
+    problems = validate_state(state)
+    if problems:
+        raise AdmissionError("STATE_SCHEMA_INVALID", {"path": str(path), "problems": problems})
+    return state
+
+
+def read_state_sequence(authority):
+    """A cheap read of the current sequence for the preflight race check."""
+    path = Path(authority) / STATE_FILENAME
+    if not path.exists():
+        return None
+    try:
+        state = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+    if not isinstance(state, dict):
+        return None
+    sequence = state.get("sequence")
+    return sequence if isinstance(sequence, int) and not isinstance(sequence, bool) else None
+
+
+class AuthorityLock:
+    """The short transaction lock of the one authority.  Never held across a wait."""
+
+    def __init__(self, authority):
+        self.path = Path(authority) / LOCK_FILENAME
+        self.fd = None
+
+    def __enter__(self):
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+        try:
+            self.fd = os.open(str(self.path), os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
+        except FileExistsError:
+            raise AdmissionError("LOCK_HELD_UNRECOGNISED", {"lock": str(self.path)})
+        except OSError as error:
+            raise AdmissionError("LOCK_UNAVAILABLE", {"lock": str(self.path), "errno": error.errno})
+        try:
+            os.write(self.fd, json.dumps({"pid": os.getpid(), "at": now_iso()}).encode("utf-8"))
+            os.fsync(self.fd)
+        except OSError:
+            pass
+        return self
+
+    def __exit__(self, exc_type, exc, tb):
+        if self.fd is not None:
+            try:
+                os.close(self.fd)
+            except OSError:
+                pass
+            self.fd = None
+        try:
+            os.unlink(str(self.path))
+        except OSError:
+            pass
+        return False
+
+
 def _fsync_dir(path):
-    """Best effort directory fsync; drvfs/WSL may refuse it, atomicity still holds."""
     try:
         fd = os.open(str(path), os.O_RDONLY)
     except OSError:
@@ -134,91 +488,29 @@ def _encode_json(payload):
     return json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True).encode("utf-8")
 
 
-class ShortLock:
-    """Short transaction lock.
+def commit_event(authority, new_state, action, detail=None):
+    """One authority transaction.
 
-    The lock is an O_EXCL file.  A lock that already exists is never removed by
-    this tool: an unknown or stale lock needs an explicit MAIN ruling.
+    The schema, the slot identity and an outstanding pending_audit are checked
+    first; an old pending event is never cleared by a new one.  The write order
+    is state(pending_audit=true) -> journal -> state(pending_audit=false).
     """
-
-    def __init__(self, state_root):
-        self.path = Path(state_root) / ".lock"
-        self.fd = None
-
-    def __enter__(self):
-        self.path.parent.mkdir(parents=True, exist_ok=True)
-        try:
-            self.fd = os.open(str(self.path), os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
-        except FileExistsError:
-            raise AdmissionError("LOCK_HELD_UNRECOGNISED", {"lock": str(self.path)})
-        except OSError as error:
-            raise AdmissionError("LOCK_UNAVAILABLE", {"lock": str(self.path), "errno": error.errno})
-        try:
-            os.write(self.fd, json.dumps({"pid": os.getpid(), "at": now_iso()}).encode("utf-8"))
-            os.fsync(self.fd)
-        except OSError:
-            pass
-        return self
-
-    def __exit__(self, exc_type, exc, tb):
-        if self.fd is not None:
-            try:
-                os.close(self.fd)
-            except OSError:
-                pass
-            self.fd = None
-        try:
-            os.unlink(str(self.path))
-        except OSError:
-            pass
-        return False
-
-
-def state_path(state_root):
-    return Path(state_root) / "state.json"
-
-
-def journal_path(state_root):
-    return Path(state_root) / "journal.jsonl"
-
-
-def read_state(state_root):
-    path = state_path(state_root)
-    if not path.exists():
-        return None
-    return read_json_file(path, "STATE")
-
-
-def initial_state():
-    return {
-        "format": STATE_FORMAT,
-        "sequence": 0,
-        "event_id": None,
-        "updated_at": now_iso(),
-        "generation": 0,
-        "release_sha256": None,
-        "release_id": None,
-        "phase": "IDLE",
-        "admission": "READY",
-        "blocked_reason": None,
-        "cancel_requested": False,
-        "pending_audit": False,
-        "write_lease": None,
-        "slot": None,
-        "history": [],
-    }
-
-
-def commit_state(state_root, new_state, action, detail=None):
-    """Persist one state transition.
-
-    Order (contract G3): state(pending_audit=true) -> journal append ->
-    state(pending_audit=false).  A failure before the replace keeps the old
-    authoritative state; a failure after it keeps the new state with
-    pending_audit set, which blocks any new execution.
-    """
-    state_root = Path(state_root)
-    state_root.mkdir(parents=True, exist_ok=True)
+    authority = Path(authority)
+    authority.mkdir(parents=True, exist_ok=True)
+    existing = read_authority_state(authority)
+    if existing is not None:
+        if existing.get("pending_audit"):
+            raise AdmissionError("PENDING_AUDIT_NOT_CLEARED", {
+                "event_id": existing.get("event_id"),
+                "pending_event": existing.get("pending_event"),
+            })
+        if existing.get("slot") is not None and new_state.get("slot") is not None:
+            if (existing["slot"].get("run_id") != new_state["slot"].get("run_id")
+                    or existing["slot"].get("generation") != new_state["slot"].get("generation")):
+                raise AdmissionError("SLOT_IDENTITY_MISMATCH", {
+                    "authoritative_run_id": existing["slot"].get("run_id"),
+                    "given_run_id": new_state["slot"].get("run_id"),
+                })
     base = dict(new_state)
     sequence = int(base.get("sequence") or 0) + 1
     event_id = "evt-" + secrets.token_hex(8)
@@ -226,16 +518,18 @@ def commit_state(state_root, new_state, action, detail=None):
     base["sequence"] = sequence
     base["event_id"] = event_id
     base["updated_at"] = now_iso()
+    problems = validate_state(base)
+    if problems:
+        raise AdmissionError("STATE_SCHEMA_INVALID", {"problems": problems})
 
     staged = dict(base)
     staged["pending_audit"] = True
+    staged["pending_event"] = {"event_id": event_id, "action": action, "at": base["updated_at"]}
     try:
-        atomic_write_bytes(state_path(state_root), _encode_json(staged))
+        atomic_write_bytes(Path(authority) / STATE_FILENAME, _encode_json(staged))
     except AdmissionError as error:
-        raise AdmissionError(
-            "STATE_REPLACE_FAILED_OLD_STATE_PRESERVED",
-            {"action": action, "cause": error.detail},
-        )
+        raise AdmissionError("STATE_REPLACE_FAILED_OLD_STATE_PRESERVED",
+                             {"action": action, "cause": error.detail})
 
     record = {
         "event_id": event_id,
@@ -245,26 +539,63 @@ def commit_state(state_root, new_state, action, detail=None):
         "detail": detail if isinstance(detail, dict) else {},
     }
     try:
-        with open(journal_path(state_root), "a", encoding="utf-8") as handle:
+        with open(Path(authority) / JOURNAL_FILENAME, "a", encoding="utf-8") as handle:
             handle.write(json.dumps(record, ensure_ascii=False, sort_keys=True) + "\n")
             handle.flush()
             os.fsync(handle.fileno())
     except OSError as error:
-        raise AdmissionError(
-            "JOURNAL_APPEND_FAILED_PENDING_AUDIT",
-            {"action": action, "errno": error.errno, "event_id": event_id},
-        )
+        raise AdmissionError("JOURNAL_APPEND_FAILED_PENDING_AUDIT",
+                             {"action": action, "errno": error.errno, "event_id": event_id})
 
     final = dict(base)
     final["pending_audit"] = False
+    final["pending_event"] = None
     try:
-        atomic_write_bytes(state_path(state_root), _encode_json(final))
+        atomic_write_bytes(Path(authority) / STATE_FILENAME, _encode_json(final))
     except AdmissionError as error:
-        raise AdmissionError(
-            "STATE_FINALIZE_FAILED_PENDING_AUDIT",
-            {"action": action, "cause": error.detail, "event_id": event_id},
-        )
-    return final
+        raise AdmissionError("STATE_FINALIZE_FAILED_PENDING_AUDIT",
+                             {"action": action, "cause": error.detail, "event_id": event_id})
+    return final, event_id, sequence
+
+
+def read_journal(authority):
+    """The authority journal, read as a list of committed events."""
+    path = Path(authority) / JOURNAL_FILENAME
+    if not path.exists():
+        return []
+    events = []
+    try:
+        for line in path.read_text(encoding="utf-8").splitlines():
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                events.append(json.loads(line))
+            except ValueError:
+                continue
+    except OSError:
+        return events
+    return events
+
+
+def require_binding(state, release, release_sha256, allow_initial=False):
+    """A normal entry must match the release this authority is bound to."""
+    bound = state.get("bound_release_sha256")
+    if bound is None:
+        if not allow_initial:
+            raise AdmissionError("RELEASE_NOT_BOUND_TO_AUTHORITY", {})
+        return
+    if bound != release_sha256:
+        raise AdmissionError("RELEASE_NOT_BOUND_TO_AUTHORITY",
+                             {"bound": bound, "given": release_sha256})
+    if state.get("bound_owner_task") != release["owner_task"]:
+        raise AdmissionError("OWNER_TASK_MISMATCH",
+                             {"bound": state.get("bound_owner_task"),
+                              "given": release["owner_task"]})
+    if state.get("generation") != release["generation"]:
+        raise AdmissionError("GENERATION_MISMATCH",
+                             {"bound": state.get("generation"),
+                              "given": release["generation"]})
 
 
 def slot_is_active(state):
@@ -278,172 +609,6 @@ def slot_is_unknown(state):
 
 
 # ---------------------------------------------------------------------------
-# release handling
-# ---------------------------------------------------------------------------
-
-def _require(condition, reason, detail=None):
-    if not condition:
-        raise AdmissionError(reason, detail)
-
-
-def _is_repo_relative(name):
-    return (
-        isinstance(name, str)
-        and name != ""
-        and not Path(name).is_absolute()
-        and ".." not in Path(name).parts
-    )
-
-
-def load_release(release_path, expected_sha256):
-    """Load the MAIN release.  The external path + digest is the only trust root."""
-    _require(expected_sha256, "EXPECTED_RELEASE_SHA256_REQUIRED")
-    path = Path(release_path)
-    _require(path.is_file(), "RELEASE_FILE_MISSING", {"path": str(path)})
-    actual = sha256_file(path)
-    _require(
-        actual == expected_sha256,
-        "RELEASE_SHA256_MISMATCH",
-        {"expected": expected_sha256, "actual": actual, "path": str(path)},
-    )
-    release = read_json_file(path, "RELEASE")
-    _require(isinstance(release, dict), "RELEASE_NOT_OBJECT")
-    return release, actual
-
-
-def validate_release(release, release_sha256):
-    _require(release.get("format") == RELEASE_FORMAT, "RELEASE_FORMAT_UNSUPPORTED",
-             {"format": release.get("format")})
-    phase = release.get("phase")
-    _require(phase in RELEASE_PHASES, "RELEASE_PHASE_UNKNOWN", {"phase": phase})
-    _require(isinstance(release.get("release_id"), str) and release["release_id"],
-             "RELEASE_ID_MISSING")
-    _require(isinstance(release.get("owner_task"), str) and release["owner_task"],
-             "RELEASE_OWNER_TASK_MISSING")
-    generation = release.get("generation")
-    _require(isinstance(generation, int) and not isinstance(generation, bool) and generation >= 0,
-             "RELEASE_GENERATION_INVALID", {"generation": generation})
-    project_root = release.get("project_root")
-    _require(isinstance(project_root, str) and os.path.isabs(project_root),
-             "RELEASE_PROJECT_ROOT_INVALID")
-    _require(Path(project_root).is_dir(), "RELEASE_PROJECT_ROOT_MISSING",
-             {"project_root": project_root})
-    state_root = release.get("state_root")
-    _require(isinstance(state_root, str) and os.path.isabs(state_root),
-             "RELEASE_STATE_ROOT_INVALID")
-    root = Path(project_root).resolve()
-    state = Path(state_root).resolve()
-    try:
-        state.relative_to(root)
-    except ValueError:
-        raise AdmissionError("RELEASE_STATE_ROOT_OUTSIDE_PROJECT", {"state_root": str(state)})
-    expected_prefix = root.joinpath(*STATE_ROOT_RELATIVE)
-    try:
-        state.relative_to(expected_prefix)
-    except ValueError:
-        raise AdmissionError(
-            "RELEASE_STATE_ROOT_OUTSIDE_ALLOWED_AREA",
-            {"state_root": str(state), "allowed_prefix": str(expected_prefix)},
-        )
-    recorder = release.get("recorder")
-    _require(isinstance(recorder, dict), "RELEASE_RECORDER_MISSING")
-    _require(_is_repo_relative(recorder.get("path")), "RELEASE_RECORDER_PATH_INVALID")
-    _require(isinstance(recorder.get("sha256"), str) and len(recorder["sha256"]) == 64,
-             "RELEASE_RECORDER_SHA_INVALID")
-    for key in ("recorded_source", "protected_inputs"):
-        rows = release.get(key)
-        _require(isinstance(rows, list), "RELEASE_%s_MISSING" % key.upper())
-        seen = set()
-        for row in rows:
-            _require(isinstance(row, dict), "RELEASE_%s_ROW_INVALID" % key.upper())
-            _require(_is_repo_relative(row.get("path")), "RELEASE_%s_PATH_INVALID" % key.upper(),
-                     {"path": row.get("path")})
-            _require(isinstance(row.get("sha256"), str) and len(row["sha256"]) == 64,
-                     "RELEASE_%s_SHA_INVALID" % key.upper())
-            _require(row["path"] not in seen, "RELEASE_%s_DUPLICATE_PATH" % key.upper(),
-                     {"path": row["path"]})
-            seen.add(row["path"])
-    commands = release.get("commands")
-    _require(isinstance(commands, dict) and commands, "RELEASE_COMMANDS_MISSING")
-    for command_id, command in commands.items():
-        _require(isinstance(command, dict), "RELEASE_COMMAND_INVALID", {"command_id": command_id})
-        argv = command.get("argv")
-        _require(isinstance(argv, list) and argv, "RELEASE_COMMAND_ARGV_INVALID",
-                 {"command_id": command_id})
-        for part in argv:
-            _require(isinstance(part, str) and part != "", "RELEASE_COMMAND_ARGV_INVALID",
-                     {"command_id": command_id})
-        _require(isinstance(command.get("cwd"), str) and command["cwd"],
-                 "RELEASE_COMMAND_CWD_INVALID", {"command_id": command_id})
-        _require(isinstance(command.get("runtime_class"), str) and command["runtime_class"],
-                 "RELEASE_COMMAND_RUNTIME_CLASS_INVALID", {"command_id": command_id})
-        expected_exit = command.get("expected_inner_exit")
-        _require(isinstance(expected_exit, int) and not isinstance(expected_exit, bool),
-                 "RELEASE_COMMAND_EXPECTED_EXIT_INVALID", {"command_id": command_id})
-    required = release.get("required_cases")
-    _require(isinstance(required, list) and required, "RELEASE_REQUIRED_CASES_MISSING")
-    _require(len(set(required)) == len(required), "RELEASE_REQUIRED_CASES_DUPLICATE")
-    bindings = release.get("case_bindings")
-    _require(isinstance(bindings, dict), "RELEASE_CASE_BINDINGS_MISSING")
-    for case_id in required:
-        _require(case_id in bindings, "RELEASE_CASE_BINDING_MISSING", {"case_id": case_id})
-        binding = bindings[case_id]
-        _require(isinstance(binding, dict), "RELEASE_CASE_BINDING_INVALID", {"case_id": case_id})
-        slots = binding.get("required_evidence")
-        _require(isinstance(slots, list) and slots, "RELEASE_CASE_SLOTS_MISSING",
-                 {"case_id": case_id})
-        slot_ids = set()
-        for slot in slots:
-            _require(isinstance(slot, dict), "RELEASE_CASE_SLOT_INVALID", {"case_id": case_id})
-            for field in ("slot_id", "command_id", "capture_basename", "run_id", "level"):
-                _require(isinstance(slot.get(field), str) and slot[field],
-                         "RELEASE_CASE_SLOT_FIELD_MISSING",
-                         {"case_id": case_id, "field": field})
-            _require(slot["slot_id"] not in slot_ids, "RELEASE_CASE_SLOT_DUPLICATE",
-                     {"case_id": case_id, "slot_id": slot["slot_id"]})
-            slot_ids.add(slot["slot_id"])
-            exit_code = slot.get("expected_inner_exit")
-            _require(isinstance(exit_code, int) and not isinstance(exit_code, bool),
-                     "RELEASE_CASE_SLOT_EXIT_INVALID",
-                     {"case_id": case_id, "slot_id": slot["slot_id"]})
-        alternatives = binding.get("alternatives", [])
-        _require(isinstance(alternatives, list), "RELEASE_CASE_ALTERNATIVES_INVALID",
-                 {"case_id": case_id})
-    allocations = release.get("capture_allocations")
-    _require(isinstance(allocations, list), "RELEASE_CAPTURE_ALLOCATIONS_MISSING")
-    for allocation in allocations:
-        _require(isinstance(allocation, dict), "RELEASE_CAPTURE_ALLOCATION_INVALID")
-        for field in ("basename", "command_id", "run_id"):
-            _require(isinstance(allocation.get(field), str) and allocation[field],
-                     "RELEASE_CAPTURE_ALLOCATION_FIELD_MISSING", {"field": field})
-        validate_basename(allocation["basename"])
-    contract = release.get("contract")
-    _require(isinstance(contract, dict), "RELEASE_CONTRACT_MISSING")
-    _require(isinstance(contract.get("sha256"), str) and len(contract["sha256"]) == 64,
-             "RELEASE_CONTRACT_SHA_INVALID")
-    if release.get("phase") == "FINAL_METADATA":
-        approved = release.get("approved_stage_releases")
-        _require(isinstance(approved, dict) and approved,
-                 "RELEASE_APPROVED_STAGE_RELEASES_MISSING")
-        for alias, entry in approved.items():
-            _require(isinstance(entry, dict), "RELEASE_APPROVED_STAGE_INVALID", {"alias": alias})
-            for field in ("path", "sha256", "phase"):
-                _require(isinstance(entry.get(field), str) and entry[field],
-                         "RELEASE_APPROVED_STAGE_FIELD_MISSING", {"alias": alias, "field": field})
-    return release
-
-
-def validate_basename(name):
-    """Only non-empty ASCII [A-Za-z0-9_-] basenames are acceptable."""
-    _require(isinstance(name, str) and name != "", "CAPTURE_BASENAME_EMPTY")
-    _require(all(ord(ch) < 128 for ch in name), "CAPTURE_BASENAME_NOT_ASCII", {"basename": name})
-    _require(BASENAME_RE.match(name) is not None, "CAPTURE_BASENAME_INVALID", {"basename": name})
-    _require("/" not in name and "\\" not in name, "CAPTURE_BASENAME_INVALID",
-             {"basename": name})
-    return name
-
-
-# ---------------------------------------------------------------------------
 # source / protected verification
 # ---------------------------------------------------------------------------
 
@@ -451,14 +616,18 @@ def discover_recorded_source(root, recorder_rel):
     """Reproduce the original recorder discovery scope exactly."""
     root = Path(root)
     found = set()
-    for prefix in RECORDER_SCOPE_PREFIXES:
+    for prefix in ("src", "contracts", "tests", "tools",
+                   "docs/parallel/lane-bridge/A-R2-20261112"):
         base = root / prefix
         if not base.is_dir():
             continue
         for candidate in base.rglob("*"):
-            if candidate.is_file() and candidate.suffix in RECORDER_SCOPE_SUFFIXES:
+            if candidate.is_file() and candidate.suffix in {
+                ".ts", ".tsx", ".js", ".mjs", ".cjs", ".json",
+                ".py", ".html", ".css", ".sql", ".sh",
+            }:
                 found.add(str(candidate.relative_to(root)))
-    for name in RECORDER_SCOPE_EXTRA:
+    for name in ("package.json", "pnpm-lock.yaml", "tsconfig.json", "vitest.config.ts"):
         if (root / name).is_file():
             found.add(name)
     found.add(recorder_rel)
@@ -466,7 +635,6 @@ def discover_recorded_source(root, recorder_rel):
 
 
 def verify_recorded_source(root, release):
-    """Every recorded source path must exist with the pinned digest."""
     problems = []
     root = Path(root)
     for row in release["recorded_source"]:
@@ -482,25 +650,32 @@ def verify_recorded_source(root, release):
 
 
 def verify_source_scope(root, release):
-    """The discovered recorder scope must equal the pinned recorded_source set."""
     root = Path(root)
     discovered = set(discover_recorded_source(root, release["recorder"]["path"]))
     pinned = {row["path"] for row in release["recorded_source"]}
-    missing = sorted(pinned - discovered)
-    extra = sorted(discovered - pinned)
     problems = []
-    if missing:
-        problems.append({"problem": "pinned_source_not_discovered", "paths": missing})
-    if extra:
-        problems.append({"problem": "unpinned_source_discovered", "paths": extra})
+    if pinned - discovered:
+        problems.append({"problem": "pinned_source_not_discovered",
+                         "paths": sorted(pinned - discovered)})
+    if discovered - pinned:
+        problems.append({"problem": "unpinned_source_discovered",
+                         "paths": sorted(discovered - pinned)})
     return problems
+
+
+def resolve_protected_path(root, declared):
+    """A protected input may be repository relative or an exact absolute pin."""
+    candidate = Path(declared)
+    if not candidate.is_absolute():
+        candidate = Path(root) / candidate
+    return candidate
 
 
 def verify_protected(root, release):
     problems = []
     root = Path(root)
     for row in release.get("protected_inputs", []):
-        target = root / row["path"]
+        target = resolve_protected_path(root, row["path"])
         if not target.is_file():
             problems.append({"path": row["path"], "problem": "missing"})
             continue
@@ -522,16 +697,16 @@ def verify_recorder(root, release):
     return []
 
 
-def digest_rows(root, rows):
-    """The actual digests of a pinned set, for the post observation."""
+def digest_rows(root, release, key):
+    """The actual digests of a pinned set, for the pre/post observation."""
     root = Path(root)
     observed = []
-    for row in rows or []:
-        target = root / row["path"]
-        if target.is_file():
-            observed.append({"path": row["path"], "sha256": sha256_file(target)})
-        else:
-            observed.append({"path": row["path"], "sha256": None})
+    for row in release.get(key, []):
+        target = resolve_protected_path(root, row["path"])
+        observed.append({
+            "path": row["path"],
+            "sha256": sha256_file(target) if target.is_file() else None,
+        })
     return observed
 
 
@@ -561,13 +736,46 @@ def read_boot_id():
     return Path("/proc/sys/kernel/random/boot_id").read_text().strip()
 
 
-def read_identity_after_session(pid, settle_seconds=SESSION_SETTLE_SECONDS):
-    """Read the identity of a child that was started in its own session.
+def read_wrapper_epoch():
+    """The wrapper's own complete identity.  Without it nothing may be scheduled."""
+    epoch = {
+        "pid": os.getpid(),
+        "start_ticks": None,
+        "boot_id": None,
+        "ppid": None,
+        "session": None,
+        "group": None,
+    }
+    missing = []
+    try:
+        boot = read_boot_id()
+    except (OSError, ValueError):
+        boot = None
+    if not isinstance(boot, str) or not boot.strip():
+        missing.append("boot_id")
+    else:
+        epoch["boot_id"] = boot
+    try:
+        identity = read_proc_identity(os.getpid())
+    except (OSError, ValueError):
+        identity = None
+    if not isinstance(identity, dict) or identity.get("pid") != os.getpid():
+        missing.append("identity")
+    else:
+        epoch["start_ticks"] = identity.get("start_ticks")
+        epoch["ppid"] = identity.get("ppid")
+        epoch["session"] = identity.get("sid")
+        epoch["group"] = identity.get("pgid")
+        for field in ("start_ticks", "ppid", "session", "group"):
+            if not isinstance(epoch[field], int):
+                missing.append(field)
+    epoch["missing"] = missing
+    epoch["complete"] = not missing
+    return epoch, missing
 
-    A child only owns its session after setsid() ran, so the pre-exec window
-    can still show the parent's group.  This waits for the session to settle;
-    it is an identity observation, never a timeout on the command itself.
-    """
+
+def read_identity_after_session(pid, settle_seconds=SESSION_SETTLE_SECONDS):
+    """Read the identity of a child that was started in its own session."""
     deadline = time.monotonic() + settle_seconds
     identity = None
     error = None
@@ -585,17 +793,60 @@ def read_identity_after_session(pid, settle_seconds=SESSION_SETTLE_SECONDS):
         time.sleep(0.02)
 
 
+def read_recorder_epoch(pid, wrapper_epoch):
+    """The recorder epoch, verified against the chain this tool created.
+
+    The identity is recorded separately from the verification: a child whose
+    epoch cannot be confirmed is still waited for, but it never yields CLEAN.
+    The return contract is (epoch, verified, problems).
+    """
+    epoch = {"pid": int(pid), "start_ticks": None, "boot_id": None, "ppid": None,
+             "session": None, "group": None, "identity_verified": False, "missing": []}
+    problems = []
+    identity, error = read_identity_after_session(pid)
+    if not isinstance(identity, dict) or identity.get("pid") != int(pid):
+        epoch["missing"].append("identity")
+        epoch["identity_error"] = error
+        problems.append({"problem": "identity_is_not_the_started_child", "detail": error})
+        return epoch, False, problems
+    epoch["start_ticks"] = identity.get("start_ticks")
+    epoch["ppid"] = identity.get("ppid")
+    epoch["session"] = identity.get("sid")
+    epoch["group"] = identity.get("pgid")
+    try:
+        boot = read_boot_id()
+    except (OSError, ValueError):
+        boot = None
+    if isinstance(boot, str) and boot.strip():
+        epoch["boot_id"] = boot
+    else:
+        epoch["missing"].append("boot_id")
+        problems.append({"problem": "boot_id_unavailable"})
+    wrapper_pid = (wrapper_epoch or {}).get("pid")
+    if wrapper_pid is not None and identity.get("ppid") != wrapper_pid:
+        epoch["missing"].append("ppid_mismatch")
+        problems.append({"problem": "ppid_is_not_the_wrapper"})
+    if identity.get("sid") != int(pid) or identity.get("pgid") != int(pid):
+        epoch["missing"].append("session_mismatch")
+        problems.append({"problem": "session_or_group_is_not_its_own"})
+    wrapper_boot = (wrapper_epoch or {}).get("boot_id")
+    if wrapper_boot and epoch.get("boot_id") != wrapper_boot:
+        epoch["missing"].append("boot_mismatch")
+        problems.append({"problem": "boot_id_differs_from_the_wrapper"})
+    for field in ("start_ticks", "ppid", "session", "group"):
+        if not isinstance(epoch.get(field), int):
+            epoch["missing"].append(field)
+            problems.append({"problem": "incomplete_epoch_field", "field": field})
+    epoch["identity_verified"] = not epoch["missing"]
+    return epoch, epoch["identity_verified"], problems
+
 def scan_group_members(pgid, exclude_pids=()):
     """Observe the members of the group this runner created.
 
     Returns (members, vanished_entries, undeterminable_entries).  An entry that
-    simply disappeared (ENOENT/ESRCH) is an observation limit only.  An entry
-    that could not be read for any other reason (EACCES/EPERM/parse failure)
-    means the group membership cannot be determined, and the caller must stay
-    UNKNOWN instead of signing a clean resource state.
-
-    This is a sample of what is observable through /proc right now; it is not a
-    complete fork transcript and it never expands the tool's authority.
+    disappeared (ENOENT/ESRCH) is an observation limit only.  An entry that
+    could not be read for any other reason means the group membership cannot be
+    determined and the caller must stay UNKNOWN.
     """
     members = []
     vanished = 0
@@ -635,7 +886,6 @@ def observe_epoch(slot):
         "conclusion": "no recorded epoch",
     }
     if not slot or slot.get("recorder_pid") is None:
-        observation["conclusion"] = "no recorded epoch"
         return observation
     pid = slot["recorder_pid"]
     try:
@@ -680,15 +930,11 @@ def find_allocation(release, command_id, run_id):
         if allocation["command_id"] == command_id and allocation["run_id"] == run_id
     ]
     if not matches:
-        raise AdmissionError(
-            "CAPTURE_ALLOCATION_NOT_FOUND",
-            {"command_id": command_id, "run_id": run_id},
-        )
+        raise AdmissionError("CAPTURE_ALLOCATION_NOT_FOUND",
+                             {"command_id": command_id, "run_id": run_id})
     if len(matches) > 1:
-        raise AdmissionError(
-            "CAPTURE_ALLOCATION_AMBIGUOUS",
-            {"command_id": command_id, "run_id": run_id},
-        )
+        raise AdmissionError("CAPTURE_ALLOCATION_AMBIGUOUS",
+                             {"command_id": command_id, "run_id": run_id})
     return matches[0]
 
 
@@ -701,11 +947,9 @@ def recorder_directory_for(release, allocation, project_root):
         if not declared_path.is_absolute():
             declared_path = Path(project_root) / declared_path
         if declared_path.resolve() != recorder_dir:
-            raise AdmissionError(
-                "CAPTURE_DIRECTORY_NOT_RECORDER_DIRECTORY",
-                {"declared": str(declared_path.resolve()),
-                 "recorder_directory": str(recorder_dir)},
-            )
+            raise AdmissionError("CAPTURE_DIRECTORY_NOT_RECORDER_DIRECTORY",
+                                 {"declared": str(declared_path.resolve()),
+                                  "recorder_directory": str(recorder_dir)})
     return recorder_dir
 
 
@@ -713,10 +957,9 @@ def assert_capture_absent(directory, basename):
     paths = capture_paths(directory, basename)
     existing = sorted(suffix for suffix, path in paths.items() if path.exists())
     if existing:
-        raise AdmissionError(
-            "CAPTURE_ALREADY_EXISTS",
-            {"basename": basename, "directory": str(directory), "existing_suffixes": existing},
-        )
+        raise AdmissionError("CAPTURE_ALREADY_EXISTS",
+                             {"basename": basename, "directory": str(directory),
+                              "existing_suffixes": existing})
     return paths
 
 
@@ -742,21 +985,30 @@ def evaluate_capture(directory, basename, release, command, expected_inner_exit)
         problems.append({"problem": "capture_exit_unreadable"})
         exit_code = None
 
-    if claim.get("runner_version") != RECORDER_RUNNER_VERSION:
+    if not isinstance(claim, dict):
+        problems.append({"problem": "capture_claim_not_object"})
+    elif claim.get("runner_version") != RECORDER_RUNNER_VERSION:
         problems.append({"problem": "claim_runner_version_mismatch"})
-    if claim.get("name") != basename:
-        problems.append({"problem": "claim_name_mismatch"})
-    if claim.get("argv") != list(command["argv"]):
-        problems.append({"problem": "claim_argv_mismatch"})
-    if command_record.get("runner_version") != RECORDER_RUNNER_VERSION:
-        problems.append({"problem": "cmd_runner_version_mismatch"})
-    if command_record.get("argv") != list(command["argv"]):
-        problems.append({"problem": "cmd_argv_mismatch"})
-    if command_record.get("cwd") != command["cwd"]:
-        problems.append({"problem": "cmd_cwd_mismatch"})
+    if isinstance(claim, dict):
+        if claim.get("name") != basename:
+            problems.append({"problem": "claim_name_mismatch"})
+        if claim.get("argv") != list(command["argv"]):
+            problems.append({"problem": "claim_argv_mismatch"})
+    if not isinstance(command_record, dict):
+        problems.append({"problem": "capture_cmd_not_object"})
+    else:
+        if command_record.get("runner_version") != RECORDER_RUNNER_VERSION:
+            problems.append({"problem": "cmd_runner_version_mismatch"})
+        if command_record.get("argv") != list(command["argv"]):
+            problems.append({"problem": "cmd_argv_mismatch"})
+        if command_record.get("cwd") != command["cwd"]:
+            problems.append({"problem": "cmd_cwd_mismatch"})
     if not isinstance(inputs, dict):
         problems.append({"problem": "inputs_not_object"})
         inputs = {}
+    if not isinstance(result, dict):
+        problems.append({"problem": "result_not_object"})
+        result = {}
     pinned = {row["path"]: row["sha256"] for row in release["recorded_source"]}
     input_keys = set(inputs)
     if input_keys != set(pinned):
@@ -788,7 +1040,8 @@ def evaluate_capture(directory, basename, release, command, expected_inner_exit)
     details = {
         "inner_exit": exit_code,
         "log_sha256": actual_log_sha,
-        "claim_name": claim.get("name"),
+        "log_text": paths[".txt"].read_text(encoding="utf-8", errors="replace"),
+        "claim_name": claim.get("name") if isinstance(claim, dict) else None,
     }
     return (not problems), problems, details
 
@@ -807,9 +1060,8 @@ def qualify_slots(release, allocation, command_id):
 
     A slot qualifies only when the same case, the same command, the same
     capture and the same run agree, and the slot belongs to a stage this
-    release approves.  A slot of another case, another command, another
-    capture or another run can never lend its assertion, and there is no
-    "command OR capture" fallback.
+    release approves.  A slot of another case, command, capture or run can
+    never lend its assertion, and there is no "command OR capture" fallback.
     """
     qualified = []
     for case_id in allocation.get("case_ids") or []:
@@ -844,58 +1096,63 @@ def _require_release_identity(release, owner_task):
              {"release_owner_task": release["owner_task"], "cli_owner_task": owner_task})
 
 
-def _state_for_write(state_root, release, release_sha256):
-    state = read_state(state_root)
-    if state is None:
-        state = initial_state()
-    if state.get("pending_audit"):
-        raise AdmissionError("PENDING_AUDIT_NOT_CLEAR", {"event_id": state.get("event_id")})
-    return state
+class OwnedChild:
+    """A started child with exactly one wait, owned by whoever started it."""
 
+    def __init__(self, child):
+        self.child = child
+        self.waited = False
+        self.returncode = None
 
-def _apply_release_pin(state, release, release_sha256):
-    state["release_sha256"] = release_sha256
-    state["release_id"] = release["release_id"]
-    state["generation"] = release["generation"]
-    return state
+    def wait(self):
+        if not self.waited:
+            self.waited = True
+            self.returncode = self.child.wait()
+        return self.returncode
 
 
 def command_status(args):
     """Read-only status: the saved epoch plus the live /proc observation."""
     payload = {"command": "status"}
-    state_root = None
-    if args.release:
-        release, release_sha = load_release(args.release, args.expected_release_sha256)
-        validate_release(release, release_sha)
-        state_root = Path(release["state_root"])
-        payload["release"] = {
-            "path": str(args.release),
-            "sha256": release_sha,
-            "release_id": release["release_id"],
-            "phase": release["phase"],
-        }
-    elif args.state_root:
-        state_root = Path(args.state_root)
-    else:
-        raise AdmissionError("STATUS_NEEDS_RELEASE_OR_STATE_ROOT")
-    state = read_state(state_root)
+    if not args.release:
+        raise AdmissionError("STATUS_NEEDS_RELEASE")
+    release, release_sha = load_release(args.release, args.expected_release_sha256)
+    validate_release(release)
+    project_root = Path(release["project_root"])
+    authority = authority_root(project_root)
+    state = read_authority_state(authority)
+    payload["release"] = {
+        "path": str(args.release),
+        "sha256": release_sha,
+        "release_id": release["release_id"],
+        "phase": release["phase"],
+    }
+    payload["authority"] = str(authority)
     payload["state"] = state
     payload["observation"] = observe_epoch((state or {}).get("slot"))
     payload["admission"] = (state or {}).get("admission", "UNKNOWN")
+    payload["bound_release_sha256"] = (state or {}).get("bound_release_sha256")
     payload["business_acceptance"] = False
     payload["note"] = (
-        "status is read-only; PID presence or file existence is not sufficient evidence of exit"
+        "status is read-only; it never rebinds and never repairs a pending event"
     )
     return payload
 
 
 def command_begin_write(args):
     release, release_sha = load_release(args.release, args.expected_release_sha256)
-    validate_release(release, release_sha)
+    validate_release(release)
     _require_release_identity(release, args.owner_task)
-    state_root = Path(release["state_root"])
-    with ShortLock(state_root):
-        state = _state_for_write(state_root, release, release_sha)
+    project_root = Path(release["project_root"])
+    authority = authority_root(project_root)
+    with AuthorityLock(authority):
+        state = read_authority_state(authority)
+        if state is None:
+            state = initial_state()
+        require_binding(state, release, release_sha, allow_initial=True)
+        if state.get("pending_audit"):
+            raise AdmissionError("PENDING_AUDIT_NOT_CLEARED",
+                                 {"event_id": state.get("event_id")})
         if slot_is_unknown(state):
             raise AdmissionError("UNKNOWN_RESOURCE_HOLDS_RESPONSIBILITY", {"slot": state.get("slot")})
         if slot_is_active(state):
@@ -911,17 +1168,22 @@ def command_begin_write(args):
             "release_id": release["release_id"],
             "started_at": now_iso(),
         }
-        state = _apply_release_pin(state, release, release_sha)
+        state = dict(state)
+        state["bound_release_sha256"] = release_sha
+        state["bound_owner_task"] = release["owner_task"]
+        state["generation"] = release["generation"]
         state["write_lease"] = lease
         state["phase"] = "WRITING"
         state["admission"] = "BLOCKED"
         state["blocked_reason"] = "WRITE_LEASE_HELD"
-        state = commit_state(state_root, state, "begin-write", {"owner_task": args.owner_task})
+        state, _event_id, _sequence = commit_event(authority, state, "begin-write",
+                                                  {"owner_task": args.owner_task})
     return {
         "command": "begin-write",
         "write_lease": lease,
         "nonce": lease["nonce"],
         "generation": lease["generation"],
+        "authority": str(authority),
         "note": "logical write permission only; this is not an OS write barrier and not liveness proof",
     }
 
@@ -952,12 +1214,15 @@ def _diff_against_pin(project_root, release):
 
 def command_end_write(args):
     release, release_sha = load_release(args.release, args.expected_release_sha256)
-    validate_release(release, release_sha)
+    validate_release(release)
     _require_release_identity(release, args.owner_task)
-    state_root = Path(release["state_root"])
     project_root = Path(release["project_root"])
-    with ShortLock(state_root):
-        state = _state_for_write(state_root, release, release_sha)
+    authority = authority_root(project_root)
+    with AuthorityLock(authority):
+        state = read_authority_state(authority)
+        if state is None:
+            raise AdmissionError("NO_WRITE_LEASE", {})
+        require_binding(state, release, release_sha)
         lease = state.get("write_lease")
         if not lease:
             raise AdmissionError("NO_WRITE_LEASE", {})
@@ -969,14 +1234,26 @@ def command_end_write(args):
         if int(lease.get("generation")) != int(args.generation):
             raise AdmissionError("WRITE_LEASE_GENERATION_MISMATCH",
                                  {"lease_generation": lease.get("generation")})
+        if lease.get("release_sha256") != release_sha:
+            raise AdmissionError("WRITE_LEASE_RELEASE_MISMATCH",
+                                 {"lease_release": lease.get("release_sha256"),
+                                  "given": release_sha})
         protected_problems = verify_protected(project_root, release)
         if protected_problems:
+            state = dict(state)
             state["admission"] = "BLOCKED"
             state["blocked_reason"] = "PROTECTED_INPUT_VIOLATION"
-            state["write_lease"]["violation"] = protected_problems
-            commit_state(state_root, state, "end-write-violation", {"problems": protected_problems})
+            lease = dict(lease)
+            lease["violation"] = protected_problems
+            state["write_lease"] = lease
+            try:
+                commit_event(authority, state, "end-write-violation",
+                             {"problems": protected_problems})
+            except AdmissionError:
+                pass
             raise AdmissionError("PROTECTED_INPUT_VIOLATION", {"problems": protected_problems})
         changed, removed, added, post_hashes = _diff_against_pin(project_root, release)
+        state = dict(state)
         state["write_lease"] = None
         state["phase"] = "TERMINAL"
         state["admission"] = "BLOCKED"
@@ -987,8 +1264,9 @@ def command_end_write(args):
             "added": added,
             "post_hashes": post_hashes,
         }
-        state = commit_state(state_root, state, "end-write",
-                             {"changed": changed, "removed": removed, "added": added})
+        state, _event_id, _sequence = commit_event(authority, state, "end-write",
+                                                  {"changed": changed, "removed": removed,
+                                                   "added": added})
     return {
         "command": "end-write",
         "closed": True,
@@ -997,26 +1275,31 @@ def command_end_write(args):
         "added": added,
         "admission": "BLOCKED",
         "blocked_reason": "STALE_PIN_AFTER_AUTHORIZED_SOURCE_CHANGE",
-        "note": "the tool never re-approves the modified source; a new MAIN release must rebind it",
+        "note": "the tool never re-approves the modified source; only an explicit new release may rebind it",
     }
 
 
 def command_request_cancel(args):
     release, release_sha = load_release(args.release, args.expected_release_sha256)
-    validate_release(release, release_sha)
+    validate_release(release)
     _require_release_identity(release, args.owner_task)
-    state_root = Path(release["state_root"])
-    with ShortLock(state_root):
-        state = _state_for_write(state_root, release, release_sha)
+    project_root = Path(release["project_root"])
+    authority = authority_root(project_root)
+    with AuthorityLock(authority):
+        state = read_authority_state(authority)
+        if state is None:
+            raise AdmissionError("RUN_NOT_FOUND", {"run_id": args.run_id})
+        require_binding(state, release, release_sha)
         slot = state.get("slot")
         if not slot or slot.get("run_id") != args.run_id:
             raise AdmissionError("RUN_NOT_FOUND", {"run_id": args.run_id})
         if slot.get("owner_task") != args.owner_task:
             raise AdmissionError("RUN_OWNER_MISMATCH", {"run_id": args.run_id})
         if slot.get("phase") in ("TERMINAL", "UNKNOWN"):
+            state = dict(state)
             state["cancel_requested"] = True
-            state = commit_state(state_root, state, "request-cancel-already-terminal",
-                                 {"run_id": args.run_id})
+            state, _event_id, _sequence = commit_event(
+                authority, state, "request-cancel-already-terminal", {"run_id": args.run_id})
             return {
                 "command": "request-cancel",
                 "result": "ALREADY_TERMINAL",
@@ -1024,9 +1307,13 @@ def command_request_cancel(args):
                 "run_id": args.run_id,
                 "note": "a late request never retracts an observed terminal fact",
             }
+        state = dict(state)
         state["cancel_requested"] = True
+        slot = dict(slot)
         slot["cancel_requested"] = True
-        state = commit_state(state_root, state, "request-cancel", {"run_id": args.run_id})
+        state["slot"] = slot
+        state, _event_id, _sequence = commit_event(authority, state, "request-cancel",
+                                                  {"run_id": args.run_id})
     return {
         "command": "request-cancel",
         "result": "CANCEL_REQUESTED",
@@ -1038,12 +1325,17 @@ def command_request_cancel(args):
 
 def command_rebind(args):
     release, release_sha = load_release(args.release, args.expected_release_sha256)
-    validate_release(release, release_sha)
+    validate_release(release)
     _require_release_identity(release, args.owner_task)
-    state_root = Path(release["state_root"])
     project_root = Path(release["project_root"])
-    with ShortLock(state_root):
-        state = _state_for_write(state_root, release, release_sha)
+    authority = authority_root(project_root)
+    with AuthorityLock(authority):
+        state = read_authority_state(authority)
+        if state is None:
+            state = initial_state()
+        if state.get("pending_audit"):
+            raise AdmissionError("PENDING_AUDIT_NOT_CLEARED",
+                                 {"event_id": state.get("event_id")})
         if state.get("write_lease"):
             raise AdmissionError("WRITE_LEASE_OPEN_REBIND_REJECTED", {"lease": state["write_lease"]})
         if slot_is_unknown(state):
@@ -1051,16 +1343,28 @@ def command_rebind(args):
         if slot_is_active(state):
             raise AdmissionError("ACTIVE_RUN_BLOCKS_REBIND",
                                  {"slot_phase": state["slot"].get("phase")})
+        bound = state.get("bound_release_sha256")
+        if bound == release_sha:
+            raise AdmissionError("REBIND_NOT_A_NEW_RELEASE", {"release_sha256": release_sha})
+        if release["generation"] <= int(state.get("generation") or 0):
+            raise AdmissionError("REBIND_GENERATION_NOT_NEWER",
+                                 {"bound_generation": state.get("generation"),
+                                  "given": release["generation"]})
         previous = {
-            "release_sha256": state.get("release_sha256"),
+            "release_sha256": bound,
             "release_id": state.get("release_id"),
             "blocked_reason": state.get("blocked_reason"),
+            "generation": state.get("generation"),
         }
         problems = (verify_recorded_source(project_root, release)
                     + verify_source_scope(project_root, release)
                     + verify_protected(project_root, release)
                     + verify_recorder(project_root, release))
-        state = _apply_release_pin(state, release, release_sha)
+        state = dict(state)
+        state["bound_release_sha256"] = release_sha
+        state["bound_owner_task"] = release["owner_task"]
+        state["release_id"] = release["release_id"]
+        state["generation"] = release["generation"]
         state["rebind_history"] = (state.get("rebind_history") or [])[-9:] + [previous]
         if problems:
             state["admission"] = "BLOCKED"
@@ -1070,67 +1374,31 @@ def command_rebind(args):
             state["admission"] = "READY"
             state["blocked_reason"] = None
             state["rebind_problems"] = []
-        state = commit_state(state_root, state, "rebind",
-                             {"new_release_sha256": release_sha, "problems": problems})
+        state, _event_id, _sequence = commit_event(
+            authority, state, "rebind", {"new_release_sha256": release_sha, "problems": problems})
     return {
         "command": "rebind",
         "release_sha256": release_sha,
         "release_id": release["release_id"],
+        "generation": release["generation"],
         "admission": state["admission"],
         "blocked_reason": state.get("blocked_reason"),
         "problems": problems,
+        "authority": str(authority),
         "note": "old evidence is preserved; unknown resources are never cleared by a rebind",
     }
 
 
-def _persist_running(state_root, child, identity, identity_error, run_id):
-    """Best effort persistence of the recorder epoch.
-
-    A failure here must never lose the already returned child, so this helper
-    never raises: the caller keeps the wait responsibility either way.  Both
-    the tool's own refusal and a raw OS error are contained here.
-    """
-    try:
-        with ShortLock(state_root):
-            state = read_state(state_root) or initial_state()
-            slot = state.get("slot") or {}
-            slot["phase"] = "RUNNING"
-            slot["recorder_pid"] = child.pid
-            slot["identity_error"] = identity_error
-            if identity:
-                slot["recorder_start_ticks"] = identity["start_ticks"]
-                slot["recorder_ppid"] = identity["ppid"]
-                slot["recorder_pgid"] = identity["pgid"]
-                slot["recorder_sid"] = identity["sid"]
-            state["slot"] = slot
-            state["phase"] = "RUNNING"
-            state["admission"] = "BLOCKED"
-            state["blocked_reason"] = "RUN_IN_FLIGHT"
-            commit_state(state_root, state, "run-running",
-                         {"run_id": run_id, "recorder_pid": child.pid,
-                          "identity_error": identity_error})
-        return {"persisted": True}
-    except AdmissionError as error:
-        return {"persisted": False, "reason": error.reason, "detail": error.detail}
-    except (OSError, ValueError) as error:
-        return {"persisted": False, "reason": "RAW_" + type(error).__name__,
-                "detail": {"message": str(error)}}
-
-
-def _evidence_layer_for_phase(phase):
-    return "BOOTSTRAP" if phase == "BOOTSTRAP_CODE" else "TOOL_RUNTIME"
-
-
-def _write_sidecar(state_root, release, release_sha, command_id, slot, allocation,
+def _write_sidecar(artefact_root, release, release_sha, command_id, slot, allocation,
                    inner_exit, outer, digests, source_pre, source_post,
                    protected_pre, protected_post, resource_status, cleanup_source,
-                   metadata_ok, metadata_problems, epoch, identity_persist):
+                   metadata_ok, metadata_problems, wrapper_epoch, recorder_epoch):
     """The run sidecar: real pre/post values, real piece digests, real wait."""
-    directory = Path(state_root) / "sidecars"
+    directory = Path(artefact_root) / SIDECARS_DIRNAME
     directory.mkdir(parents=True, exist_ok=True)
     payload = {
-        "format": "narralens.proc0-run-sidecar@1",
-        "evidence_layer": _evidence_layer_for_phase(release.get("phase")),
+        "format": SIDECAR_FORMAT,
+        "evidence_layer": "BOOTSTRAP" if release.get("phase") == "BOOTSTRAP_CODE" else "TOOL_RUNTIME",
         "release_sha256": release_sha,
         "release_id": release.get("release_id"),
         "release_phase": release.get("phase"),
@@ -1152,8 +1420,8 @@ def _write_sidecar(state_root, release, release_sha, command_id, slot, allocatio
         "protected_post": protected_post,
         "resource_status": resource_status,
         "cleanup_source": cleanup_source,
-        "epoch": epoch,
-        "identity_persist": identity_persist,
+        "wrapper_epoch": wrapper_epoch,
+        "recorder_epoch": recorder_epoch,
         "metadata_ok": bool(metadata_ok),
         "metadata_problems": metadata_problems,
         "created_at": now_iso(),
@@ -1163,19 +1431,18 @@ def _write_sidecar(state_root, release, release_sha, command_id, slot, allocatio
     return path
 
 
-def _write_failure_credential(state_root, release, release_sha, command_id, slot, command,
-                               allocation, inner_exit, outer, problems, drift, live_members,
-                               resource_status, cleanup_source, sidecar_path,
-                               source_pre, source_post, protected_pre, protected_post,
-                               digests):
+def _write_credential(artefact_root, release, release_sha, command_id, slot, command,
+                       allocation, inner_exit, outer, problems, drift, live_members,
+                       resource_status, cleanup_source, sidecar_path, source_pre,
+                       source_post, protected_pre, protected_post, digests, log_text):
     """Bind an observed result to this exact run, capture, source set and cleanup.
 
     The case qualification comes from the authorised slot of this exact
-    command, capture and run.  Without that exact match the credential states
-    no case and signs no case_passed; the physical resource observation stays
-    exactly as it was observed.
+    command, capture and run, and the specified assertion must actually appear
+    in the recorded log.  Without that the credential states no case and signs
+    no case_passed; the physical observation stays exactly as observed.
     """
-    directory = Path(state_root) / "credentials"
+    directory = Path(artefact_root) / CREDENTIALS_DIRNAME
     directory.mkdir(parents=True, exist_ok=True)
     run_id = slot.get("run_id")
     case_ids = list(allocation.get("case_ids") or [])
@@ -1185,25 +1452,28 @@ def _write_failure_credential(state_root, release, release_sha, command_id, slot
         requirements.append(json.dumps(qualified_slot.get("expected_failure_requirement"),
                                        sort_keys=True))
     ambiguous = len(set(requirements)) > 1
-    slot_matched = bool(qualified) and not ambiguous
     expected_failure = None
     assertion = None
     qualified_cases = []
-    if slot_matched:
+    if qualified and not ambiguous:
         expected_failure = qualified[0][1].get("expected_failure_requirement")
         assertion = (expected_failure or {}).get("assertion")
         qualified_cases = [case_id for case_id, _slot in qualified]
+    assertion_reached = bool(assertion and assertion in (log_text or ""))
     sidecar_sha = None
     if sidecar_path is not None and Path(sidecar_path).is_file():
         sidecar_sha = sha256_file(sidecar_path)
     cleanup_verified = bool(resource_status == "CLEAN" and not live_members)
+    case_qualified = bool(qualified_cases and not ambiguous and cleanup_verified
+                          and not problems and not drift
+                          and (assertion is None or assertion_reached))
     credential = {
-        "format": "narralens.proc0-failure-credential@1",
+        "format": CREDENTIAL_FORMAT,
         "command_id": command_id,
         "capture_basename": allocation.get("basename"),
         "run_id": run_id,
         "case_ids": case_ids,
-        "case_qualified": slot_matched,
+        "case_qualified": case_qualified,
         "qualified_cases": qualified_cases,
         "inner_exit": inner_exit,
         "expected_inner_exit": command.get("expected_inner_exit"),
@@ -1215,6 +1485,7 @@ def _write_failure_credential(state_root, release, release_sha, command_id, slot
         "capture_digests": digests,
         "sidecar": str(sidecar_path) if sidecar_path else None,
         "sidecar_sha256": sidecar_sha,
+        "assertion_reached": assertion_reached,
         "cleanup": {
             "required": bool((expected_failure or {}).get("cleanup_required")),
             "verified": cleanup_verified,
@@ -1223,28 +1494,56 @@ def _write_failure_credential(state_root, release, release_sha, command_id, slot
         "resource_status": resource_status,
         "problems": problems,
         "source_drift": drift,
-        "case_passed": bool(slot_matched and cleanup_verified and not problems and not drift),
+        "case_passed": case_qualified,
         "created_at": now_iso(),
     }
-    if slot_matched:
+    if qualified_cases:
         credential["case_id"] = qualified_cases[0]
         credential["assertion"] = assertion
         credential["expected_failure_requirement"] = expected_failure
     path = directory / (str(run_id) + ".json")
-    try:
-        atomic_write_bytes(path, _encode_json(credential))
-    except AdmissionError:
-        return None
+    atomic_write_bytes(path, _encode_json(payload=credential))
+    return path
+
+
+def _write_receipt(artefact_root, run_id, command_id, capture_basename, event_id, sequence,
+                   release_sha, digests, sidecar_path, sidecar_sha, credential_path,
+                   credential_sha, inner_exit, outer, resource_status, recorder_epoch):
+    """The per run terminal receipt, bound to the committed authority event."""
+    directory = Path(artefact_root) / RECEIPTS_DIRNAME
+    directory.mkdir(parents=True, exist_ok=True)
+    payload = {
+        "format": RECEIPT_FORMAT,
+        "run_id": run_id,
+        "command_id": command_id,
+        "capture_basename": capture_basename,
+        "event_id": event_id,
+        "sequence": sequence,
+        "release_sha256": release_sha,
+        "capture_digests": digests,
+        "sidecar": str(sidecar_path) if sidecar_path else None,
+        "sidecar_sha256": sidecar_sha,
+        "credential": str(credential_path) if credential_path else None,
+        "credential_sha256": credential_sha,
+        "inner_exit": inner_exit,
+        "recorder_wait_returncode": outer,
+        "resource_status": resource_status,
+        "recorder_epoch": recorder_epoch,
+        "created_at": now_iso(),
+    }
+    path = directory / (str(run_id) + ".json")
+    atomic_write_bytes(path, _encode_json(payload))
     return path
 
 
 def command_run(args):
     """One admitted command, one recorder, one owner, one real wait."""
     release, release_sha = load_release(args.release, args.expected_release_sha256)
-    validate_release(release, release_sha)
+    validate_release(release)
     _require_release_identity(release, args.owner_task)
-    state_root = Path(release["state_root"])
     project_root = Path(release["project_root"])
+    artefact_root = Path(release["state_root"])
+    authority = authority_root(project_root)
     command_id = args.command_id
     _require(command_id in release["commands"], "UNKNOWN_COMMAND_ID", {"command_id": command_id})
     command = release["commands"][command_id]
@@ -1254,11 +1553,18 @@ def command_run(args):
                              {"command_id": command_id, "phase": release["phase"],
                               "allowed_phases": allowed_phases})
     allocation = find_allocation(release, command_id, args.run_id)
-    basename = validate_basename(allocation["basename"])
+    basename = allocation["basename"]
     recorder_dir = recorder_directory_for(release, allocation, project_root)
-    expected_inner_exit = command["expected_inner_exit"]
 
-    # Pre-flight admission checks, all before anything is created or spawned.
+    # The wrapper epoch must be complete before anything is scheduled.
+    wrapper_epoch, wrapper_missing = read_wrapper_epoch()
+    if wrapper_missing:
+        raise AdmissionError("WRAPPER_EPOCH_INCOMPLETE_NO_SPAWN",
+                             {"missing": wrapper_missing})
+
+    # The expensive hashing happens outside the lock; the sequence is checked
+    # again inside the authority transaction.
+    preflight_sequence = read_state_sequence(authority)
     source_problems = verify_recorded_source(project_root, release)
     scope_problems = verify_source_scope(project_root, release)
     protected_problems = verify_protected(project_root, release)
@@ -1270,12 +1576,7 @@ def command_run(args):
             "protected": protected_problems,
             "recorder": recorder_problems,
         })
-    assert_capture_absent(recorder_dir, basename)
 
-    # The inner command is MAIN-signed and used verbatim.  Only the outer
-    # recorder interpreter is fixed, so a signed corepack, node or shell
-    # command is recorded exactly as signed and the caller never chooses a
-    # binary, a path or an environment.
     argv = list(command["argv"])
     cwd = command["cwd"]
     if not os.path.isabs(cwd):
@@ -1283,26 +1584,22 @@ def command_run(args):
     if Path(cwd).resolve() != project_root.resolve():
         raise AdmissionError("COMMAND_CWD_NOT_PROJECT_ROOT",
                              {"cwd": cwd, "project_root": str(project_root)})
-
     recorder_abs = (project_root / release["recorder"]["path"]).resolve()
     recorder_argv = [OUTER_INTERPRETER, "-I", "-S", "-B", str(recorder_abs), basename] + argv
     run_id = allocation["run_id"]
-    wrapper_epoch = {
-        "wrapper_pid": os.getpid(),
-        "wrapper_start_ticks": None,
-        "boot_id": None,
-    }
-    try:
-        wrapper_epoch["boot_id"] = read_boot_id()
-        wrapper_epoch["wrapper_start_ticks"] = read_proc_identity(os.getpid())["start_ticks"]
-    except (OSError, ValueError):
-        pass
 
-    source_pre = [dict(row) for row in release["recorded_source"]]
-    protected_pre = [dict(row) for row in release.get("protected_inputs", [])]
-
-    with ShortLock(state_root):
-        state = _state_for_write(state_root, release, release_sha)
+    # The final validation and the unique STARTING reservation happen together
+    # in the one authority transaction.
+    with AuthorityLock(authority):
+        state = read_authority_state(authority)
+        if state is None:
+            state = initial_state()
+        require_binding(state, release, release_sha, allow_initial=True)
+        if state.get("pending_audit"):
+            raise AdmissionError("PENDING_AUDIT_NOT_CLEARED",
+                                 {"event_id": state.get("event_id")})
+        if state.get("admission") == "BLOCKED":
+            raise AdmissionError("ADMISSION_BLOCKED", {"reason": state.get("blocked_reason")})
         if slot_is_unknown(state):
             raise AdmissionError("UNKNOWN_RESOURCE_HOLDS_RESPONSIBILITY", {"slot": state.get("slot")})
         if slot_is_active(state):
@@ -1311,10 +1608,17 @@ def command_run(args):
                                   "run_id": state["slot"].get("run_id")})
         if state.get("write_lease"):
             raise AdmissionError("WRITE_LEASE_HOLDS_NO_RUN", {"lease": state["write_lease"]})
-        if state.get("admission") == "BLOCKED" and state.get("blocked_reason") not in (
-            None, "STALE_PIN_AFTER_AUTHORIZED_SOURCE_CHANGE",
-        ):
-            raise AdmissionError("ADMISSION_BLOCKED", {"reason": state.get("blocked_reason")})
+        current_sequence = state.get("sequence")
+        if preflight_sequence is not None and current_sequence != preflight_sequence:
+            raise AdmissionError("STATE_CHANGED_DURING_PREFLIGHT",
+                                 {"preflight_sequence": preflight_sequence,
+                                  "current_sequence": current_sequence})
+        if state.get("generation") != release["generation"]:
+            raise AdmissionError("GENERATION_MISMATCH",
+                                 {"bound": state.get("generation"),
+                                  "given": release["generation"]})
+        # The capture occupancy is checked again inside the transaction.
+        assert_capture_absent(recorder_dir, basename)
         slot = {
             "run_id": run_id,
             "command_id": command_id,
@@ -1326,7 +1630,7 @@ def command_run(args):
             "owner_task": args.owner_task,
             "generation": release["generation"],
             "release_sha256": release_sha,
-            "expected_inner_exit": expected_inner_exit,
+            "expected_inner_exit": command["expected_inner_exit"],
             "phase": "STARTING",
             "started_at": now_iso(),
             "cancel_requested": False,
@@ -1336,7 +1640,8 @@ def command_run(args):
             "recorder_ppid": None,
             "recorder_pgid": None,
             "recorder_sid": None,
-            "boot_id": wrapper_epoch["boot_id"],
+            "recorder_epoch_verified": False,
+            "boot_id": wrapper_epoch.get("boot_id"),
             "identity_error": None,
             "recorder_wait_returncode": None,
             "inner_exit": None,
@@ -1344,63 +1649,120 @@ def command_run(args):
             "metadata_ok": None,
             "terminal_at": None,
         }
-        state = _apply_release_pin(state, release, release_sha)
+        state = dict(state)
+        state["bound_release_sha256"] = release_sha
+        state["bound_owner_task"] = release["owner_task"]
+        state["generation"] = release["generation"]
         state["slot"] = slot
         state["phase"] = "STARTING"
         state["admission"] = "BLOCKED"
         state["blocked_reason"] = "RUN_IN_FLIGHT"
         state["cancel_requested"] = False
-        state = commit_state(state_root, state, "run-starting",
-                             {"run_id": run_id, "command_id": command_id, "basename": basename})
-        slot = state["slot"]
+        state, _event_id, _sequence = commit_event(
+            authority, state, "run-starting",
+            {"run_id": run_id, "command_id": command_id, "basename": basename})
 
-    # The short lock is released here: the wait below never holds it.
-    child = None
+    # The lock is released here: the wait below never holds it.
+    source_pre = [dict(row) for row in release["recorded_source"]]
+    protected_pre = [dict(row) for row in release.get("protected_inputs", [])]
+    owned = None
+    outer = None
+    startup_error = None
+    log_path = Path(artefact_root) / LOGS_DIRNAME / (run_id + ".recorder.log")
     try:
-        log_dir = state_root / "logs"
-        log_dir.mkdir(parents=True, exist_ok=True)
-        log_handle = open(log_dir / (run_id + ".recorder.log"), "wb")
+        log_path.parent.mkdir(parents=True, exist_ok=True)
+        log_handle = open(log_path, "wb")
         try:
-            child = subprocess.Popen(
-                recorder_argv,
-                cwd=cwd,
-                stdout=log_handle,
-                stderr=subprocess.STDOUT,
-                stdin=subprocess.DEVNULL,
-                start_new_session=True,
-            )
+            try:
+                child = subprocess.Popen(
+                    recorder_argv,
+                    cwd=cwd,
+                    stdout=log_handle,
+                    stderr=subprocess.STDOUT,
+                    stdin=subprocess.DEVNULL,
+                    start_new_session=True,
+                )
+            except OSError as error:
+                # The child was never created: this is the only NO CHILD case.
+                startup_error = AdmissionError("POPEN_FAILED_NO_CHILD", {"errno": error.errno})
+                child = None
+            if child is not None:
+                owned = OwnedChild(child)
         finally:
-            log_handle.close()
+            try:
+                log_handle.close()
+            except OSError as error:
+                if owned is None:
+                    startup_error = AdmissionError("LOG_CLOSE_FAILED_NO_CHILD", {"errno": error.errno})
+                # A close failure after the child exists must never skip the wait.
     except OSError as error:
-        with ShortLock(state_root):
-            state = read_state(state_root) or initial_state()
-            slot = state.get("slot") or {}
+        startup_error = AdmissionError("LOG_OPEN_FAILED_NO_CHILD", {"errno": error.errno})
+
+    if owned is None:
+        with AuthorityLock(authority):
+            state = read_authority_state(authority) or initial_state()
+            slot = dict(state.get("slot") or {})
             slot["phase"] = "TERMINAL"
             slot["terminal_at"] = now_iso()
             slot["resource_status"] = "NO_CHILD"
             slot["metadata_ok"] = False
-            slot["popen_error"] = {"errno": error.errno, "detail": type(error).__name__}
+            slot["startup_error"] = startup_error.reason if startup_error else "UNKNOWN"
             state["slot"] = slot
             state["phase"] = "TERMINAL"
             state["admission"] = "BLOCKED"
             state["blocked_reason"] = "POPEN_FAILED_NO_CHILD"
-            commit_state(state_root, state, "run-popen-failed", {"run_id": run_id})
-        raise AdmissionError("POPEN_FAILED_NO_CHILD", {"errno": error.errno})
+            try:
+                commit_event(authority, state, "run-no-child", {"run_id": run_id})
+            except AdmissionError:
+                pass
+        raise startup_error or AdmissionError("POPEN_FAILED_NO_CHILD", {})
 
-    # From here on the returned child belongs to this owner, forever.  A failed
-    # identity read must never drop that responsibility.
+    # From here on the returned child belongs to this owner, forever.
+    recorder_epoch = {"pid": owned.child.pid, "identity_verified": False, "missing": []}
+    identity_error = None
+    persist_error = None
+    outer = None
     try:
-        identity, identity_error = read_identity_after_session(child.pid)
-    except (OSError, ValueError) as error:
-        identity = None
-        identity_error = {"detail": type(error).__name__, "after_return": True}
-    identity_persist = _persist_running(state_root, child, identity, identity_error, run_id)
-
-    outer = child.wait()
+        try:
+            recorder_epoch, verified, identity_problems = read_recorder_epoch(
+                owned.child.pid, wrapper_epoch)
+        except OSError as error:
+            verified = False
+            identity_problems = [{"problem": "identity_read_failed",
+                                  "detail": type(error).__name__}]
+            recorder_epoch = {"pid": owned.child.pid, "identity_verified": False,
+                              "missing": ["identity"],
+                              "identity_error": {"detail": type(error).__name__}}
+        try:
+            with AuthorityLock(authority):
+                state = read_authority_state(authority) or initial_state()
+                slot = dict(state.get("slot") or {})
+                slot["phase"] = "RUNNING"
+                slot["recorder_pid"] = owned.child.pid
+                slot["recorder_epoch_verified"] = bool(verified)
+                slot["recorder_epoch"] = recorder_epoch
+                slot["identity_error"] = identity_error
+                if recorder_epoch.get("start_ticks") is not None:
+                    slot["recorder_start_ticks"] = recorder_epoch.get("start_ticks")
+                    slot["recorder_ppid"] = recorder_epoch.get("ppid")
+                    slot["recorder_pgid"] = recorder_epoch.get("group")
+                    slot["recorder_sid"] = recorder_epoch.get("session")
+                slot["boot_id"] = recorder_epoch.get("boot_id") or wrapper_epoch.get("boot_id")
+                state["slot"] = slot
+                state["phase"] = "RUNNING"
+                state["admission"] = "BLOCKED"
+                state["blocked_reason"] = "RUN_IN_FLIGHT"
+                commit_event(authority, state, "run-running",
+                             {"run_id": run_id, "recorder_pid": owned.child.pid,
+                              "identity_verified": bool(verified)})
+        except AdmissionError as error:
+            persist_error = {"reason": error.reason, "detail": error.detail}
+    finally:
+        # The same owner waits for this child exactly once, whatever happened.
+        outer = owned.wait()
 
     metadata_ok, metadata_problems, metadata_details = evaluate_capture(
-        recorder_dir, basename, release, command, expected_inner_exit
-    )
+        recorder_dir, basename, release, command, command["expected_inner_exit"])
     if outer is None or outer < 0:
         metadata_ok = False
         metadata_problems = metadata_problems + [{"problem": "recorder_terminated_by_signal",
@@ -1435,82 +1797,79 @@ def command_run(args):
     live_members = []
     vanished_entries = 0
     undeterminable_entries = 0
-    # The recorder was started in its own session, so its group id is the pid
-    # this tool created.  When the /proc read races with the exit we fall back
-    # to that constructed group id and say so in the record.
-    observed_pgid = identity["pgid"] if identity else child.pid
-    try:
-        live_members, vanished_entries, undeterminable_entries = scan_group_members(
-            observed_pgid, exclude_pids=(os.getpid(),))
-        if live_members:
-            resource_status = "DIRTY"
-        elif undeterminable_entries:
-            # The group membership could not be determined: never sign CLEAN.
+    observed_pgid = recorder_epoch.get("group") or owned.child.pid
+    if not recorder_epoch.get("identity_verified"):
+        # An unverified epoch never yields a clean resource state.
+        resource_status = "UNKNOWN"
+        metadata_problems = metadata_problems + [{
+            "problem": "recorder_epoch_not_verified",
+            "detail": recorder_epoch.get("missing") or recorder_epoch.get("identity_error"),
+        }]
+    else:
+        try:
+            live_members, vanished_entries, undeterminable_entries = scan_group_members(
+                observed_pgid, exclude_pids=(os.getpid(),))
+            if live_members:
+                resource_status = "DIRTY"
+            elif undeterminable_entries:
+                resource_status = "UNKNOWN"
+            else:
+                resource_status = "CLEAN"
+        except OSError:
             resource_status = "UNKNOWN"
-        else:
-            resource_status = "CLEAN"
-    except OSError:
-        resource_status = "UNKNOWN"
-    if not identity_persist.get("persisted"):
-        # The epoch of an already returned child could not be persisted.  The
-        # wait responsibility stays with this owner, but the successor has no
-        # reliable epoch and must treat the slot as unknown.
-        resource_status = "UNKNOWN"
-        metadata_problems = metadata_problems + [{"problem": "recorder_epoch_not_persisted",
-                                                  "detail": identity_persist}]
     if resource_status != "CLEAN":
         metadata_ok = False
         metadata_problems = metadata_problems + [{"problem": "resource_group_not_clean",
                                                   "resource_status": resource_status,
                                                   "live_group_members": live_members}]
 
-    source_post = digest_rows(project_root, release["recorded_source"])
-    protected_post = digest_rows(project_root, release.get("protected_inputs", []))
+    source_post = digest_rows(project_root, release, "recorded_source")
+    protected_post = digest_rows(project_root, release, "protected_inputs")
     digests = capture_digests(recorder_dir, basename)
-    epoch = {
-        "recorder_pid": child.pid,
-        "recorder_start_ticks": identity.get("start_ticks") if identity else None,
-        "recorder_ppid": identity.get("ppid") if identity else None,
-        "recorder_pgid": observed_pgid,
-        "recorder_sid": identity.get("sid") if identity else None,
-        "boot_id": wrapper_epoch["boot_id"],
-        "identity_inferred": identity is None,
-    }
     cleanup_source = {
         "kind": "owned_group_scan",
         "pgid": observed_pgid,
-        "boot_id": wrapper_epoch["boot_id"],
+        "boot_id": wrapper_epoch.get("boot_id"),
         "observed_members": live_members,
         "vanished_entries": vanished_entries,
         "undeterminable_entries": undeterminable_entries,
         "resource_status": resource_status,
         "waited_returncode": outer,
+        "identity_verified": bool(recorder_epoch.get("identity_verified")),
         "scanned_at": now_iso(),
     }
 
     sidecar_path = None
+    sidecar_error = None
     try:
         sidecar_path = _write_sidecar(
-            state_root, release, release_sha, command_id, slot, allocation,
+            artefact_root, release, release_sha, command_id, slot, allocation,
             metadata_details.get("inner_exit"), outer, digests, source_pre, source_post,
             protected_pre, protected_post, resource_status, cleanup_source,
-            metadata_ok, metadata_problems, epoch, identity_persist,
-        )
-    except (AdmissionError, OSError):
-        sidecar_path = None
+            metadata_ok, metadata_problems, wrapper_epoch, recorder_epoch)
+    except (AdmissionError, OSError) as error:
+        sidecar_error = {"reason": getattr(error, "reason", type(error).__name__),
+                         "detail": getattr(error, "detail", str(error))}
 
-    credential_path = _write_failure_credential(
-        state_root, release, release_sha, command_id, slot, command, allocation,
-        metadata_details.get("inner_exit"), outer, metadata_problems, drift, live_members,
-        resource_status, cleanup_source, sidecar_path,
-        source_pre, source_post, protected_pre, protected_post, digests,
-    )
+    credential_path = None
+    credential_error = None
+    try:
+        credential_path = _write_credential(
+            artefact_root, release, release_sha, command_id, slot, command, allocation,
+            metadata_details.get("inner_exit"), outer, metadata_problems, drift, live_members,
+            resource_status, cleanup_source, sidecar_path, source_pre, source_post,
+            protected_pre, protected_post, digests, metadata_details.get("log_text", ""))
+    except (AdmissionError, OSError) as error:
+        credential_error = {"reason": getattr(error, "reason", type(error).__name__),
+                             "detail": getattr(error, "detail", str(error))}
 
     terminal_error = None
+    event_id = None
+    sequence = None
     try:
-        with ShortLock(state_root):
-            state = read_state(state_root) or initial_state()
-            slot = state.get("slot") or {}
+        with AuthorityLock(authority):
+            state = read_authority_state(authority) or initial_state()
+            slot = dict(state.get("slot") or {})
             slot["phase"] = "TERMINAL" if resource_status == "CLEAN" else "UNKNOWN"
             slot["terminal_at"] = now_iso()
             slot["recorder_wait_returncode"] = outer
@@ -1522,15 +1881,15 @@ def command_run(args):
             slot["metadata_ok"] = bool(metadata_ok)
             slot["metadata_problems"] = metadata_problems
             slot["source_drift"] = drift
-            slot["identity_persist"] = identity_persist
             slot["capture_digests"] = digests
             slot["source_post"] = source_post
             slot["protected_post"] = protected_post
             slot["sidecar_path"] = str(sidecar_path) if sidecar_path else None
-            slot["cancel_requested"] = (bool(state.get("cancel_requested"))
-                                        or bool(slot.get("cancel_requested")))
             slot["credential_path"] = str(credential_path) if credential_path else None
+            slot["cancel_requested"] = bool(state.get("cancel_requested"))
             slot["case_ids"] = allocation.get("case_ids", [])
+            slot["identity_persist"] = persist_error
+            state["slot"] = slot
             history = list(state.get("history") or [])
             history.append({
                 "run_id": slot.get("run_id"),
@@ -1543,7 +1902,6 @@ def command_run(args):
                 "cancel_requested": slot.get("cancel_requested"),
                 "terminal_at": slot.get("terminal_at"),
             })
-            state["slot"] = slot
             state["history"] = history[-HISTORY_LIMIT:]
             state["phase"] = slot["phase"]
             if resource_status != "CLEAN":
@@ -1552,17 +1910,47 @@ def command_run(args):
             elif not metadata_ok:
                 state["admission"] = "BLOCKED"
                 state["blocked_reason"] = "TERMINAL_WITH_INVALID_METADATA"
+            elif sidecar_path is None or credential_error is not None:
+                state["admission"] = "BLOCKED"
+                state["blocked_reason"] = "EVIDENCE_ARTEFACT_NOT_PERSISTED"
             else:
                 state["admission"] = "READY"
                 state["blocked_reason"] = None
-            state = commit_state(state_root, state, "run-terminal",
-                                 {"run_id": slot.get("run_id"),
-                                  "inner_exit": slot.get("inner_exit"),
-                                  "outer": outer, "metadata_ok": bool(metadata_ok),
-                                  "resource_status": resource_status})
+            state, event_id, sequence = commit_event(
+                authority, state, "run-terminal",
+                {"run_id": slot.get("run_id"), "inner_exit": slot.get("inner_exit"),
+                 "outer": outer, "metadata_ok": bool(metadata_ok),
+                 "resource_status": resource_status,
+                 "capture_digests": digests,
+                 "sidecar": str(sidecar_path) if sidecar_path else None,
+                 "sidecar_sha256": sha256_file(sidecar_path) if sidecar_path else None,
+                 "credential": str(credential_path) if credential_path else None,
+                 "credential_sha256": sha256_file(credential_path) if credential_path else None})
     except AdmissionError as error:
         terminal_error = {"reason": error.reason, "detail": error.detail}
 
+    receipt_path = None
+    receipt_error = None
+    if event_id is not None:
+        try:
+            receipt_path = _write_receipt(
+                artefact_root, run_id, command_id, basename, event_id, sequence, release_sha,
+                digests, sidecar_path,
+                sha256_file(sidecar_path) if sidecar_path else None,
+                credential_path,
+                sha256_file(credential_path) if credential_path else None,
+                metadata_details.get("inner_exit"), outer, resource_status, recorder_epoch)
+        except (AdmissionError, OSError) as error:
+            receipt_error = {"reason": getattr(error, "reason", type(error).__name__),
+                             "detail": getattr(error, "detail", str(error))}
+
+    admitted = bool(
+        state.get("admission") == "READY"
+        and event_id is not None
+        and receipt_path is not None
+        and sidecar_path is not None
+        and terminal_error is None
+    )
     return {
         "command": "run",
         "run_id": run_id,
@@ -1574,19 +1962,28 @@ def command_run(args):
         "metadata_ok": bool(metadata_ok),
         "metadata_problems": metadata_problems,
         "resource_status": resource_status,
+        "recorder_epoch_verified": bool(recorder_epoch.get("identity_verified")),
         "live_group_members": live_members,
         "vanished_proc_entries": vanished_entries,
         "undeterminable_proc_entries": undeterminable_entries,
         "source_drift": drift,
         "capture_digests": digests,
         "sidecar_path": str(sidecar_path) if sidecar_path else None,
-        "cancel_requested": bool(state.get("slot", {}).get("cancel_requested"))
-        if terminal_error is None else None,
+        "sidecar_error": sidecar_error,
         "credential_path": str(credential_path) if credential_path else None,
-        "identity_persist": identity_persist,
+        "credential_error": credential_error,
+        "terminal_event_id": event_id,
+        "terminal_sequence": sequence,
         "terminal_persist_error": terminal_error,
+        "receipt_path": str(receipt_path) if receipt_path else None,
+        "receipt_error": receipt_error,
+        "identity_persist_error": persist_error,
+        "cancel_requested": bool((state.get("slot") or {}).get("cancel_requested")),
         "admission": state.get("admission"),
         "blocked_reason": state.get("blocked_reason"),
+        "admitted": admitted,
+        "authority": str(authority),
+        "artefact_root": str(artefact_root),
         "business_acceptance": False,
         "note": "a recorded exit code is a result, not a proof that the resources are settled",
     }
@@ -1610,10 +2007,7 @@ def build_parser():
         target.add_argument("--owner-task", required=True, help="owner task id of the calling lane")
 
     status = sub.add_parser("status", help="read-only status of the saved epoch")
-    status.add_argument("--release", required=False)
-    status.add_argument("--expected-release-sha256", required=False)
-    status.add_argument("--owner-task", required=False)
-    status.add_argument("--state-root", required=False)
+    common(status)
 
     begin = sub.add_parser("begin-write", help="take the logical write lease")
     common(begin)
@@ -1673,7 +2067,11 @@ def main(argv=None):
         print(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True))
         return EXIT_INTERNAL
     payload.setdefault("status", "OK")
+    if args.command == "run" and not payload.get("admitted", True):
+        payload["status"] = "NOT_ADMITTED"
     print(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True))
+    if args.command == "run" and not payload.get("admitted", True):
+        return EXIT_REJECTED
     return EXIT_OK
 
 

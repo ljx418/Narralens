@@ -1,0 +1,289 @@
+test_all_sixteen_cases_have_a_direct_mapping (__main__.RunnerCase.test_all_sixteen_cases_have_a_direct_mapping) ... ok
+test_proc0_01_a_signed_corepack_command_uses_the_fixed_outer_interpreter (__main__.RunnerCase.test_proc0_01_a_signed_corepack_command_uses_the_fixed_outer_interpreter)
+A MAIN-signed corepack or node command is recorded exactly as signed. ... FAIL
+test_proc0_01_the_caller_cannot_inject_a_shell_or_a_raw_argv (__main__.RunnerCase.test_proc0_01_the_caller_cannot_inject_a_shell_or_a_raw_argv) ... usage: run-delivery.py [-h]
+                       {status,begin-write,end-write,run,request-cancel,rebind}
+                       ...
+run-delivery.py: error: unrecognized arguments: --shell /bin/sh
+usage: run-delivery.py [-h]
+                       {status,begin-write,end-write,run,request-cancel,rebind}
+                       ...
+run-delivery.py: error: unrecognized arguments: --argv anything
+usage: run-delivery.py [-h]
+                       {status,begin-write,end-write,run,request-cancel,rebind}
+                       ...
+run-delivery.py: error: unrecognized arguments: --cwd /tmp
+ok
+test_proc0_01_unknown_command_and_bad_release_are_refused (__main__.RunnerCase.test_proc0_01_unknown_command_and_bad_release_are_refused) ... FAIL
+test_proc0_02_an_absolute_protected_pin_is_accepted_and_verified (__main__.RunnerCase.test_proc0_02_an_absolute_protected_pin_is_accepted_and_verified)
+A MAIN listed absolute pin is a legal protected input, not a repo path. ... FAIL
+test_proc0_02_source_protected_and_recorder_drift_are_refused (__main__.RunnerCase.test_proc0_02_source_protected_and_recorder_drift_are_refused) ... FAIL
+test_proc0_03_existing_capture_and_unsafe_basenames_are_refused (__main__.RunnerCase.test_proc0_03_existing_capture_and_unsafe_basenames_are_refused) ... FAIL
+test_proc0_04_a_second_client_finds_the_slot_busy (__main__.RunnerCase.test_proc0_04_a_second_client_finds_the_slot_busy) ... FAIL
+test_proc0_05_the_write_lease_identity_is_enforced (__main__.RunnerCase.test_proc0_05_the_write_lease_identity_is_enforced) ... FAIL
+test_proc0_06_a_missing_wrapper_epoch_never_spawns (__main__.RunnerCase.test_proc0_06_a_missing_wrapper_epoch_never_spawns) ... FAIL
+test_proc0_06_unknown_state_blocks_and_locks_are_never_removed (__main__.RunnerCase.test_proc0_06_unknown_state_blocks_and_locks_are_never_removed) ... FAIL
+test_proc0_07_status_never_claims_the_epoch_is_gone (__main__.RunnerCase.test_proc0_07_status_never_claims_the_epoch_is_gone) ... ok
+test_proc0_08_a_log_close_failure_after_the_child_keeps_the_wait (__main__.RunnerCase.test_proc0_08_a_log_close_failure_after_the_child_keeps_the_wait)
+A close error after the child exists is never a NO CHILD case. ... FAIL
+test_proc0_08_an_unverified_recorder_epoch_still_waits_but_blocks (__main__.RunnerCase.test_proc0_08_an_unverified_recorder_epoch_still_waits_but_blocks) ... FAIL
+test_proc0_08_popen_failure_has_no_child (__main__.RunnerCase.test_proc0_08_popen_failure_has_no_child) ... FAIL
+test_proc0_09_cancel_only_records_a_request (__main__.RunnerCase.test_proc0_09_cancel_only_records_a_request) ... FAIL
+test_proc0_10_a_recorder_killed_by_a_signal_is_never_decoded (__main__.RunnerCase.test_proc0_10_a_recorder_killed_by_a_signal_is_never_decoded) ... ERROR
+test_proc0_10_metadata_and_resource_state_are_separate (__main__.RunnerCase.test_proc0_10_metadata_and_resource_state_are_separate) ... ERROR
+test_proc0_10_the_inner_and_outer_exit_domains_stay_separate (__main__.RunnerCase.test_proc0_10_the_inner_and_outer_exit_domains_stay_separate) ... ERROR
+test_proc0_11_source_drift_during_the_run_is_saved (__main__.RunnerCase.test_proc0_11_source_drift_during_the_run_is_saved) ... ERROR
+test_proc0_12_a_live_group_member_keeps_the_slot_unknown (__main__.RunnerCase.test_proc0_12_a_live_group_member_keeps_the_slot_unknown) ... ERROR
+test_proc0_12_an_undeterminable_group_is_never_signed_clean (__main__.RunnerCase.test_proc0_12_an_undeterminable_group_is_never_signed_clean) ... ERROR
+test_proc0_13_a_slot_of_another_command_cannot_lend_its_assertion (__main__.RunnerCase.test_proc0_13_a_slot_of_another_command_cannot_lend_its_assertion) ... FAIL
+test_proc0_13_a_slot_of_another_run_cannot_lend_its_assertion (__main__.RunnerCase.test_proc0_13_a_slot_of_another_run_cannot_lend_its_assertion) ... FAIL
+test_proc0_13_each_exit_is_bound_to_its_own_run (__main__.RunnerCase.test_proc0_13_each_exit_is_bound_to_its_own_run) ... FAIL
+test_proc0_16_a_capture_is_never_overwritten_and_rebind_is_exact (__main__.RunnerCase.test_proc0_16_a_capture_is_never_overwritten_and_rebind_is_exact) ... FAIL
+test_proc0_16_a_pending_audit_is_never_cleared_by_a_later_event (__main__.RunnerCase.test_proc0_16_a_pending_audit_is_never_cleared_by_a_later_event) ... ERROR
+test_proc0_16_a_state_change_during_the_preflight_refuses_the_late_client (__main__.RunnerCase.test_proc0_16_a_state_change_during_the_preflight_refuses_the_late_client) ... FAIL
+test_proc0_16_two_tickets_share_one_authority (__main__.RunnerCase.test_proc0_16_two_tickets_share_one_authority) ... FAIL
+test_the_runner_declares_no_signal_fork_or_reaper_api (__main__.RunnerCase.test_the_runner_declares_no_signal_fork_or_reaper_api) ... ok
+
+======================================================================
+ERROR: test_proc0_10_a_recorder_killed_by_a_signal_is_never_decoded (__main__.RunnerCase.test_proc0_10_a_recorder_killed_by_a_signal_is_never_decoded)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/process/test_delivery_admission.py", line 760, in test_proc0_10_a_recorder_killed_by_a_signal_is_never_decoded
+    self.assertFalse(payload["metadata_ok"])
+                     ~~~~~~~^^^^^^^^^^^^^^^
+KeyError: 'metadata_ok'
+
+======================================================================
+ERROR: test_proc0_10_metadata_and_resource_state_are_separate (__main__.RunnerCase.test_proc0_10_metadata_and_resource_state_are_separate)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/process/test_delivery_admission.py", line 740, in test_proc0_10_metadata_and_resource_state_are_separate
+    self.assertFalse(payload["metadata_ok"])
+                     ~~~~~~~^^^^^^^^^^^^^^^
+KeyError: 'metadata_ok'
+
+======================================================================
+ERROR: test_proc0_10_the_inner_and_outer_exit_domains_stay_separate (__main__.RunnerCase.test_proc0_10_the_inner_and_outer_exit_domains_stay_separate)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/process/test_delivery_admission.py", line 752, in test_proc0_10_the_inner_and_outer_exit_domains_stay_separate
+    self.assertEqual(payload["inner_exit"], -15)
+                     ~~~~~~~^^^^^^^^^^^^^^
+KeyError: 'inner_exit'
+
+======================================================================
+ERROR: test_proc0_11_source_drift_during_the_run_is_saved (__main__.RunnerCase.test_proc0_11_source_drift_during_the_run_is_saved)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/process/test_delivery_admission.py", line 770, in test_proc0_11_source_drift_during_the_run_is_saved
+    self.assertFalse(payload["metadata_ok"])
+                     ~~~~~~~^^^^^^^^^^^^^^^
+KeyError: 'metadata_ok'
+
+======================================================================
+ERROR: test_proc0_12_a_live_group_member_keeps_the_slot_unknown (__main__.RunnerCase.test_proc0_12_a_live_group_member_keeps_the_slot_unknown)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/process/test_delivery_admission.py", line 778, in test_proc0_12_a_live_group_member_keeps_the_slot_unknown
+    self.assertEqual(payload["resource_status"], "DIRTY")
+                     ~~~~~~~^^^^^^^^^^^^^^^^^^^
+KeyError: 'resource_status'
+
+======================================================================
+ERROR: test_proc0_12_an_undeterminable_group_is_never_signed_clean (__main__.RunnerCase.test_proc0_12_an_undeterminable_group_is_never_signed_clean)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/process/test_delivery_admission.py", line 790, in test_proc0_12_an_undeterminable_group_is_never_signed_clean
+    self.assertEqual(payload["resource_status"], "UNKNOWN")
+                     ~~~~~~~^^^^^^^^^^^^^^^^^^^
+KeyError: 'resource_status'
+
+======================================================================
+ERROR: test_proc0_16_a_pending_audit_is_never_cleared_by_a_later_event (__main__.RunnerCase.test_proc0_16_a_pending_audit_is_never_cleared_by_a_later_event)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/process/test_delivery_admission.py", line 930, in test_proc0_16_a_pending_audit_is_never_cleared_by_a_later_event
+    self.assertTrue(state["pending_audit"], "the unfinished event stays pending")
+                    ~~~~~^^^^^^^^^^^^^^^^^
+TypeError: 'NoneType' object is not subscriptable
+
+======================================================================
+FAIL: test_proc0_01_a_signed_corepack_command_uses_the_fixed_outer_interpreter (__main__.RunnerCase.test_proc0_01_a_signed_corepack_command_uses_the_fixed_outer_interpreter)
+A MAIN-signed corepack or node command is recorded exactly as signed.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/process/test_delivery_admission.py", line 424, in test_proc0_01_a_signed_corepack_command_uses_the_fixed_outer_interpreter
+    self.assertEqual(code, 0)
+AssertionError: 2 != 0
+
+======================================================================
+FAIL: test_proc0_01_unknown_command_and_bad_release_are_refused (__main__.RunnerCase.test_proc0_01_unknown_command_and_bad_release_are_refused)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/process/test_delivery_admission.py", line 378, in test_proc0_01_unknown_command_and_bad_release_are_refused
+    self.assertEqual(payload["reason"], "UNKNOWN_COMMAND_ID")
+AssertionError: 'RELEASE_STATE_ROOT_OUTSIDE_PROJECT_ARTEFACTS' != 'UNKNOWN_COMMAND_ID'
+- RELEASE_STATE_ROOT_OUTSIDE_PROJECT_ARTEFACTS
++ UNKNOWN_COMMAND_ID
+
+
+======================================================================
+FAIL: test_proc0_02_an_absolute_protected_pin_is_accepted_and_verified (__main__.RunnerCase.test_proc0_02_an_absolute_protected_pin_is_accepted_and_verified)
+A MAIN listed absolute pin is a legal protected input, not a repo path.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/process/test_delivery_admission.py", line 483, in test_proc0_02_an_absolute_protected_pin_is_accepted_and_verified
+    self.assertEqual(code, 0)
+AssertionError: 2 != 0
+
+======================================================================
+FAIL: test_proc0_02_source_protected_and_recorder_drift_are_refused (__main__.RunnerCase.test_proc0_02_source_protected_and_recorder_drift_are_refused)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/process/test_delivery_admission.py", line 451, in test_proc0_02_source_protected_and_recorder_drift_are_refused
+    self.assertEqual(code, 0)
+AssertionError: 2 != 0
+
+======================================================================
+FAIL: test_proc0_03_existing_capture_and_unsafe_basenames_are_refused (__main__.RunnerCase.test_proc0_03_existing_capture_and_unsafe_basenames_are_refused)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/process/test_delivery_admission.py", line 498, in test_proc0_03_existing_capture_and_unsafe_basenames_are_refused
+    self.assertEqual(payload["reason"], "CAPTURE_ALREADY_EXISTS")
+AssertionError: 'RELEASE_STATE_ROOT_OUTSIDE_PROJECT_ARTEFACTS' != 'CAPTURE_ALREADY_EXISTS'
+- RELEASE_STATE_ROOT_OUTSIDE_PROJECT_ARTEFACTS
++ CAPTURE_ALREADY_EXISTS
+
+
+======================================================================
+FAIL: test_proc0_04_a_second_client_finds_the_slot_busy (__main__.RunnerCase.test_proc0_04_a_second_client_finds_the_slot_busy)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/process/test_delivery_admission.py", line 534, in test_proc0_04_a_second_client_finds_the_slot_busy
+    self.assertEqual(payload["reason"], "RUN_SLOT_BUSY")
+AssertionError: 'RELEASE_STATE_ROOT_OUTSIDE_PROJECT_ARTEFACTS' != 'RUN_SLOT_BUSY'
+- RELEASE_STATE_ROOT_OUTSIDE_PROJECT_ARTEFACTS
++ RUN_SLOT_BUSY
+
+
+======================================================================
+FAIL: test_proc0_05_the_write_lease_identity_is_enforced (__main__.RunnerCase.test_proc0_05_the_write_lease_identity_is_enforced)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/process/test_delivery_admission.py", line 546, in test_proc0_05_the_write_lease_identity_is_enforced
+    self.assertEqual(code, 0)
+AssertionError: 2 != 0
+
+======================================================================
+FAIL: test_proc0_06_a_missing_wrapper_epoch_never_spawns (__main__.RunnerCase.test_proc0_06_a_missing_wrapper_epoch_never_spawns)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/process/test_delivery_admission.py", line 611, in test_proc0_06_a_missing_wrapper_epoch_never_spawns
+    self.assertEqual(payload["reason"], "WRAPPER_EPOCH_INCOMPLETE_NO_SPAWN")
+AssertionError: 'RELEASE_STATE_ROOT_OUTSIDE_PROJECT_ARTEFACTS' != 'WRAPPER_EPOCH_INCOMPLETE_NO_SPAWN'
+- RELEASE_STATE_ROOT_OUTSIDE_PROJECT_ARTEFACTS
++ WRAPPER_EPOCH_INCOMPLETE_NO_SPAWN
+
+
+======================================================================
+FAIL: test_proc0_06_unknown_state_blocks_and_locks_are_never_removed (__main__.RunnerCase.test_proc0_06_unknown_state_blocks_and_locks_are_never_removed)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/process/test_delivery_admission.py", line 591, in test_proc0_06_unknown_state_blocks_and_locks_are_never_removed
+    self.assertEqual(payload["reason"], "UNKNOWN_RESOURCE_HOLDS_RESPONSIBILITY")
+AssertionError: 'RELEASE_STATE_ROOT_OUTSIDE_PROJECT_ARTEFACTS' != 'UNKNOWN_RESOURCE_HOLDS_RESPONSIBILITY'
+- RELEASE_STATE_ROOT_OUTSIDE_PROJECT_ARTEFACTS
++ UNKNOWN_RESOURCE_HOLDS_RESPONSIBILITY
+
+
+======================================================================
+FAIL: test_proc0_08_a_log_close_failure_after_the_child_keeps_the_wait (__main__.RunnerCase.test_proc0_08_a_log_close_failure_after_the_child_keeps_the_wait)
+A close error after the child exists is never a NO CHILD case.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/process/test_delivery_admission.py", line 664, in test_proc0_08_a_log_close_failure_after_the_child_keeps_the_wait
+    self.assertTrue(self.fake.wait_called, "the owner of a returned child must wait")
+AssertionError: False is not true : the owner of a returned child must wait
+
+======================================================================
+FAIL: test_proc0_08_an_unverified_recorder_epoch_still_waits_but_blocks (__main__.RunnerCase.test_proc0_08_an_unverified_recorder_epoch_still_waits_but_blocks)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/process/test_delivery_admission.py", line 673, in test_proc0_08_an_unverified_recorder_epoch_still_waits_but_blocks
+    self.assertTrue(self.fake.wait_called, "the owner of a returned child must wait")
+AssertionError: False is not true : the owner of a returned child must wait
+
+======================================================================
+FAIL: test_proc0_08_popen_failure_has_no_child (__main__.RunnerCase.test_proc0_08_popen_failure_has_no_child)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/process/test_delivery_admission.py", line 636, in test_proc0_08_popen_failure_has_no_child
+    self.assertEqual(payload["reason"], "POPEN_FAILED_NO_CHILD")
+AssertionError: 'RELEASE_STATE_ROOT_OUTSIDE_PROJECT_ARTEFACTS' != 'POPEN_FAILED_NO_CHILD'
+- RELEASE_STATE_ROOT_OUTSIDE_PROJECT_ARTEFACTS
++ POPEN_FAILED_NO_CHILD
+
+
+======================================================================
+FAIL: test_proc0_09_cancel_only_records_a_request (__main__.RunnerCase.test_proc0_09_cancel_only_records_a_request)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/process/test_delivery_admission.py", line 702, in test_proc0_09_cancel_only_records_a_request
+    self.assertTrue(running_persisted.wait(20),
+AssertionError: False is not true : the run must reach a persisted RUNNING state
+
+======================================================================
+FAIL: test_proc0_13_a_slot_of_another_command_cannot_lend_its_assertion (__main__.RunnerCase.test_proc0_13_a_slot_of_another_command_cannot_lend_its_assertion)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/process/test_delivery_admission.py", line 848, in test_proc0_13_a_slot_of_another_command_cannot_lend_its_assertion
+    self.assertEqual(code, 0)
+AssertionError: 2 != 0
+
+======================================================================
+FAIL: test_proc0_13_a_slot_of_another_run_cannot_lend_its_assertion (__main__.RunnerCase.test_proc0_13_a_slot_of_another_run_cannot_lend_its_assertion)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/process/test_delivery_admission.py", line 834, in test_proc0_13_a_slot_of_another_run_cannot_lend_its_assertion
+    self.assertEqual(code, 0)
+AssertionError: 2 != 0
+
+======================================================================
+FAIL: test_proc0_13_each_exit_is_bound_to_its_own_run (__main__.RunnerCase.test_proc0_13_each_exit_is_bound_to_its_own_run)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/process/test_delivery_admission.py", line 796, in test_proc0_13_each_exit_is_bound_to_its_own_run
+    self.assertEqual(code, 0)
+AssertionError: 2 != 0
+
+======================================================================
+FAIL: test_proc0_16_a_capture_is_never_overwritten_and_rebind_is_exact (__main__.RunnerCase.test_proc0_16_a_capture_is_never_overwritten_and_rebind_is_exact)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/process/test_delivery_admission.py", line 859, in test_proc0_16_a_capture_is_never_overwritten_and_rebind_is_exact
+    self.assertEqual(code, 0)
+AssertionError: 2 != 0
+
+======================================================================
+FAIL: test_proc0_16_a_state_change_during_the_preflight_refuses_the_late_client (__main__.RunnerCase.test_proc0_16_a_state_change_during_the_preflight_refuses_the_late_client)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/process/test_delivery_admission.py", line 913, in test_proc0_16_a_state_change_during_the_preflight_refuses_the_late_client
+    self.assertEqual(payload["reason"], "STATE_CHANGED_DURING_PREFLIGHT")
+AssertionError: 'RELEASE_STATE_ROOT_OUTSIDE_PROJECT_ARTEFACTS' != 'STATE_CHANGED_DURING_PREFLIGHT'
+- RELEASE_STATE_ROOT_OUTSIDE_PROJECT_ARTEFACTS
++ STATE_CHANGED_DURING_PREFLIGHT
+
+
+======================================================================
+FAIL: test_proc0_16_two_tickets_share_one_authority (__main__.RunnerCase.test_proc0_16_two_tickets_share_one_authority)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/process/test_delivery_admission.py", line 879, in test_proc0_16_two_tickets_share_one_authority
+    self.assertEqual(code, 0)
+AssertionError: 2 != 0
+
+----------------------------------------------------------------------
+Ran 30 tests in 20.199s
+
+FAILED (failures=19, errors=7)

@@ -1,4 +1,4 @@
-# PROC-0 执行预约与交还门合同 v3
+# PROC-0 执行预约与交还门合同 v4
 
 本包是流程工具工作包，简称PROC-0；不是PRD优先级P0或Gate V1-P0。用户新active goal明确恢复全A/N1N2主线，第一步先完成本工具门。原R6/R7/R8/17+ISO18/NEXT范围保持。本文先独立文档审查，未发实施release、未运行产品。
 
@@ -80,3 +80,16 @@ FINAL_METADATA以外部MAIN release路径+SHA为唯一根。其approved_stage_re
 case_bindings每原case改为required_evidence数组：每个slot_id分别固定approved_stage_release别名、command_id、capture_basename、run_id、level、expected_inner_exit与expected_failure_requirement。全部slot必须恰一次满足，无隐式任选；alternatives为空默认无备选，只有MAIN显式给出同slot合格备选时才可择一。shared suite仍必须分别获准用于各case/slot。capture预留名不等于必交slot，未使用不要求伪造或执行。
 packet每case.evidence数组逐slot引用历史票、原六件套、wrapper或BOOTSTRAP旁证、失败凭据；最终checker同时核根票、获准阶段票、case-slot与精确运行、每次全部同源输入/受保护事实及实际inner/outer退出，不能只核某一条绿色。L1单阶段票也用同一required_evidence结构（每case一个或多个L1 slot），不保留第二套歧义字段；旧release/packet格式缺必需slot默认拒绝，不修旧R6 PARTIAL原件求绿。
 最小落盘样例见samples/：PROC0-13必须有L1_DIRECT+L3_SUCCESS(inner0)+L3_EXPECTED_FAILURE(inner1且指定原因/清理凭据)三份；分别漏任一份、用成功替失败、同源未获准历史票全部拒绝。示例无运行许可且SYNTHETIC_ONLY是非生产占位，不宣称仅此形状可被真实checker准入；direct tests需要填入完整真实临时元数据fixture后验证正反分支。完整16项及其L1/L3各层义务保持。
+
+## 7. L2修订的实现约束（rev4；2026-11-20，MAIN裁决）
+本节闭环L2-01..09，不减少原16 case、不扩产品范围。v3保留于history/l2-candidate-9c2f6237及Git 9c2f6237；原003/004仅历史候选L1，修订后完整同源L1另录，不能混绿。
+
+1. 项目准入权威固定为真实project_root/var/process-admission/authority，只有该处state.json、lock、journal决定phase/admission/write lease；真实项目绑定不可经票面state_root变化重置。票面state_root仅为该项目var/process-admission之下的本票产物根（logs/sidecars/credentials/终局收据），不能再是独立准入权威。当前从未运行实际新runner，故无生产旧权威迁移许可；遇到真实既存矛盾状态先拒绝并交MAIN，不搜索删除或隐式合并旧根。损坏/空/字段不全state绝不initial READY。普通写状态入口必须匹配已绑定release SHA/owner/generation；改源end-write严格关闭原lease后保持STALE，只有显式新票rebind可更新pin。status只读不重绑。
+2. 先取得完整wrapper epoch/boot及自有身份才预约，未知即不spawn。Popen一旦返回，日志close/identity/持久化或其他错误都不能当NO_CHILD；贯穿的同owner finally负责对这个对象wait恰一次，不重启。recorder身份保存与identity_verified分别记；pid/start_ticks/boot/PPID/session/group不完整或不符原创建链，wait照做但UNKNOWN/BLOCKED，不以空group或inferred tuple代证。
+3. source完整preflight可在锁外；最终预约须在同一项目权威短事务核generation/sequence没被期间write/rebind改变，且再次核capture六suffix均不存在。不得在持有wait期间占事务锁，不得借NO_CHILD或stale例外重入。两种真实竞争分别有可控mock：预检后别的run已完整结束，或别的写租约已闭合；滞后请求都不能第二Popen/用旧pin启动。
+4. 所有状态事务先校验原state schema、slot/run身份和未完成pending_audit；存在旧pending不能以新事件清掉。实际wait事实与持久化/交还资格分离；sidecar、指定失败凭据或terminal提交任一必需落盘失败，CLI必须明确非成功、admission BLOCKED/UNKNOWN而非未提交内存READY。保留旧pending/event和真实child责任，不自动repair journal。
+5. TOOL_RUNTIME的终局需要可核的实际提交事实：正常路径先生成有精确SHA的sidecar/资格凭据，再在项目权威事务提交绑定run、原件摘要、inner/outer、资源事实与产物SHA的terminal事件，旧pending不得覆盖；提交成功后产生本票唯一不可覆盖的per-run terminal receipt，绑定该event_id/sequence和原产物SHA。checker须从外部阶段票导出终局收据/权威journal位置，核同事件实际存在及提交完成事实，不能只信sidecar.metadata_ok或一个自报persisted布尔。receipt写失败也不报准入成功；不可撤销的真实wait保留。receipt可在后续正常状态更新后被核，不要求current mutable state仍恰等于当时整个文件SHA。此为合作式工具证明，不声称防同用户任意改文件；不新增第二调度状态机/签名体系。
+6. 读任何packet产物前，从外部已批准stage及该allocation导出唯一原件目录与basename、state_root固定命名的sidecar/credential/terminal receipt；校验规范路径和每个实际后缀canonical目标，越界或不符立即停止该项，不能先读再累计错误。bootstrap旁证在获准state_root/bootstrap/<run_id>.json，runtime在state_root/sidecars与credentials；凭据只能引用同一已核sidecar。run_id与capture一样只允许非空ASCII[A-Za-z0-9_-]且各自唯一；不读真实敏感文件做反例，只在fixture用无害哨兵记录零内容读取。
+7. slot完整非空且逐stage alias、case、phase、command/capture/run/level/expected exit归属一致；指定成功或失败证据不能互换。原件inner、sidecar inner/outer、实际wait/cleanup与资格凭据必须同一事实链。非对象JSON明确错误；预留allocation不是必交slot。producer必须从实际日志核指定断言确已触发才签case_passed，否则只记真实CLEAN与exit，不签资格。
+8. recorded_source继续只能仓内安全相对路径。protected_inputs允许MAIN精确列出的仓内相对项及必要绝对pin（固定Python与MAIN observer等），两者均核实际pre/post，不能变成packet任意文件读取许可。精确票明确列完整path/SHA；以真实L3形状做TOOL_RUNTIME producer→checker pure/mock正反例，实际helper仍未放行。
+9. helper barrier只在当前项目真实var/process-admission/selftest下的新具名根，拒绝越界/链接逃逸/已有held或release、非有限或非正时长；标记独占创建，清理失败诚实失败。只用pure验证测试，不为修订跑实际helper。不得借此增加通用文件清理器或计时责任释放。

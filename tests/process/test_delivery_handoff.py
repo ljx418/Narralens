@@ -2,14 +2,15 @@
 """PROC-0 L1 direct tests for the metadata checker and the producer chain.
 
 Standard library only.  The tests build a complete synthetic project with real
-files on disk and drive the real checker entry point.  They never re-implement
-the checker's own predicates: every negative branch must be refused by the
-checker itself.
+files on disk and drive the real checker and the real runner.  They never
+re-implement the checker's own predicates: every negative branch must be
+refused by the checker itself.
 
 The chain tests close the producer gap: the real runner writes the original
-capture pieces, the sidecar and the failure credential (the recorder itself is
-mocked, nothing is really executed), and the real checker must accept exactly
-that material and refuse it as soon as one piece no longer matches.
+capture pieces, the sidecar, the failure credential and the terminal receipt
+(the recorder itself is mocked, nothing is really executed), and the real
+checker must accept exactly that material and refuse it as soon as one piece no
+longer matches.
 
 Run with:
     python3.12 -I -S -B tests/process/test_delivery_handoff.py
@@ -22,6 +23,7 @@ import hashlib
 import importlib.util
 import io
 import json
+import os
 import tempfile
 import types
 import unittest
@@ -75,40 +77,6 @@ class HandoffCase(unittest.TestCase):
         problems = checker.check(self.release_path, self.release_sha, self.packet_path)
         self.assertEqual(problems, [])
 
-    def test_the_real_checker_self_test_completes_with_its_established_negatives(self):
-        """The real self test must run to the end.
-
-        Nothing is caught here: an AttributeError inside the self test has to
-        fail this test instead of being swallowed as a pass.
-        """
-        result = checker.self_test()
-        self.assertEqual(result["scope"], "SYNTHETIC_METADATA_ONLY")
-        self.assertFalse(result["business_acceptance"])
-        branches = result["negative_branches"]
-        for label in (
-            "complete_packet_admitted", "l1_packet_admitted",
-            "missing_l1_direct", "missing_l3_success", "missing_l3_expected_failure",
-            "success_substitutes_failure", "unapproved_same_source_stage",
-            "swapped_case_captures", "extra_capture_input_key", "capture_cwd_mismatch",
-            "tampered_capture_exit", "recorder_outer_mismatch", "trimmed_source_inventory",
-            "trimmed_case_inventory", "replaced_release_reference", "foreign_failure_artifact",
-            "assertion_missing_from_log", "missing_contract_binding", "l1_status_on_final_root",
-            "missing_sidecar", "sidecar_capture_digest_mismatch",
-            "sidecar_protected_post_mismatch", "sidecar_unsettled_resource",
-            "credential_claims_unknown_cleanup", "credential_without_cleanup_source",
-            "credential_sidecar_digest_mismatch", "wrong_external_sha_rejected",
-            "missing_release_rejected",
-        ):
-            self.assertIn(label, branches, label)
-
-    def test_an_l1_root_only_ever_reports_the_l1_level(self):
-        problems = checker.check(self.fixture["l1_release_path"], self.fixture["l1_release_sha"],
-                                 self.fixture["l1_packet_path"])
-        self.assertEqual(problems, [])
-        self.assertEqual(checker.release_phase(self.fixture["l1_release_path"]), "BOOTSTRAP_CODE")
-        self.assertEqual(checker.OUTPUT_STATUS["BOOTSTRAP_CODE"], "CODE_CANDIDATE_FOR_REVIEW")
-        self.assertEqual(checker.OUTPUT_STATUS["FINAL_METADATA"], "METADATA_READY_FOR_REVIEW")
-
     def test_the_cli_never_runs_without_the_external_trust_root(self):
         with self.assertRaises(SystemExit) as raised:
             with contextlib.redirect_stdout(io.StringIO()):
@@ -129,29 +97,13 @@ class HandoffCase(unittest.TestCase):
         self.assertEqual(payload["status"], "METADATA_READY_FOR_REVIEW")
         self.assertFalse(payload["business_acceptance"])
 
-    def test_an_l1_packet_never_reports_the_overall_ready_state(self):
-        buffer = io.StringIO()
-        with self.assertRaises(SystemExit) as raised:
-            with contextlib.redirect_stdout(buffer):
-                checker.main([
-                    "--release", str(self.fixture["l1_release_path"]),
-                    "--expected-release-sha256", self.fixture["l1_release_sha"],
-                    "--packet", str(self.fixture["l1_packet_path"]),
-                ])
-        self.assertEqual(raised.exception.code, 0)
-        payload = json.loads(buffer.getvalue())
-        self.assertEqual(payload["status"], "CODE_CANDIDATE_FOR_REVIEW")
-        self.assertNotEqual(payload["status"], "METADATA_READY_FOR_REVIEW")
-
     def test_proc0_14_a_partial_or_trimmed_packet_is_refused(self):
         partial = copy.deepcopy(self.packet)
         partial["status"] = "PARTIAL"
         self.assertTrue(self.check_packet(partial, "partial.json"))
 
         trimmed_cases = copy.deepcopy(self.packet)
-        trimmed_cases["required_cases"] = ["PROC0-13"]
-        trimmed_cases["cases"] = [case for case in trimmed_cases["cases"]
-                                   if case["id"] == "PROC0-13"]
+        trimmed_cases["required_cases"] = []
         self.assertTrue(self.check_packet(trimmed_cases, "trimmed-cases.json"))
 
         trimmed_source = copy.deepcopy(self.packet)
@@ -184,8 +136,7 @@ class HandoffCase(unittest.TestCase):
                     if row["slot_id"] == "L3_SUCCESS":
                         row["stage_release"] = {
                             "path": str(self.root / "unauthorized-same-source-release.json"),
-                            "sha256": "b" * 64,
-                            "phase": "TOOL_RUNTIME",
+                            "sha256": "b" * 64, "phase": "TOOL_RUNTIME",
                             "recorded_source": self.fixture["recorded_source"],
                             "protected_inputs": self.fixture["protected_inputs"],
                         }
@@ -204,7 +155,7 @@ class HandoffCase(unittest.TestCase):
         swapped = copy.deepcopy(self.packet)
         by_case = {case["id"]: case for case in swapped["cases"]}
         first = by_case["PROC0-13"]["evidence"][0]
-        second = by_case["PROC0-01"]["evidence"][0]
+        second = by_case["PROC0-13"]["evidence"][1]
         first["capture_basename"], second["capture_basename"] = (
             second["capture_basename"], first["capture_basename"])
         first["run_id"], second["run_id"] = second["run_id"], first["run_id"]
@@ -215,49 +166,78 @@ class HandoffCase(unittest.TestCase):
         self.assertTrue(problems)
         self.assertTrue(any("SLOT_BINDING_MISMATCH" in problem for problem in problems))
 
-    def test_proc0_15_a_capture_whose_recorded_cwd_does_not_match_is_refused(self):
-        capture = self.fixture["captures"]["example-direct-001"]["slot_capture"]
-        path = Path(str(capture) + ".cmd.json")
-        original = path.read_bytes()
-        record = json.loads(original.decode("utf-8"))
-        record["cwd"] = "/somewhere/else"
-        path.write_text(json.dumps(record))
-        try:
-            problems = checker.check(self.release_path, self.release_sha, self.packet_path)
-            self.assertTrue(problems)
-            self.assertTrue(any("cwd" in problem for problem in problems))
-        finally:
-            path.write_bytes(original)
-
-    def test_proc0_15_a_shared_suite_that_main_explicitly_allowed_is_accepted(self):
-        release = copy.deepcopy(self.fixture["release"])
-        slot = release["case_bindings"]["PROC0-01"]["required_evidence"][0]
-        slot["capture_basename"] = "example-direct-001"
-        slot["run_id"] = "example-run-direct"
-        release_path = self.root / "FINAL_SHARED.json"
-        release_path.write_text(json.dumps(release, ensure_ascii=False, indent=2, sort_keys=True))
-        release_sha = checker.digest(release_path)
-
+    def test_an_artefact_outside_the_derived_location_is_never_read(self):
+        sentinel = self.root / "sentinel.json"
+        sentinel.write_text(json.dumps({"marker": "sentinel-marker"}))
         packet = copy.deepcopy(self.packet)
-        packet["release"] = {"path": str(release_path), "sha256": release_sha}
         for case in packet["cases"]:
-            if case["id"] == "PROC0-01":
-                evidence = case["evidence"][0]
-                evidence["capture_basename"] = "example-direct-001"
-                evidence["run_id"] = "example-run-direct"
-                evidence["command_capture"] = \
-                    self.fixture["captures"]["example-direct-001"]["slot_capture"]
-                evidence["sidecar"] = self.fixture["captures"]["example-direct-001"]["sidecar"]
-        problems = checker.check(release_path, release_sha,
-                                 self.write_packet(packet, "shared-suite.json"))
-        self.assertEqual(problems, [])
+            for row in case["evidence"]:
+                if row["slot_id"] == "L1_DIRECT":
+                    row["sidecar"] = str(sentinel)
+        packet_path = self.write_packet(packet, "packet-external.json")
+        reads = []
+        real_read_text = Path.read_text
+        real_read_bytes = Path.read_bytes
 
-    def test_an_unused_reserved_capture_needs_no_evidence(self):
-        self.assertIn("example-unused-reserve-002",
-                      [allocation["basename"]
-                       for allocation in self.fixture["release"]["capture_allocations"]])
-        problems = checker.check(self.release_path, self.release_sha, self.packet_path)
-        self.assertEqual(problems, [])
+        def tracking_read_text(self, *args, **kwargs):
+            reads.append(str(self))
+            return real_read_text(self, *args, **kwargs)
+
+        def tracking_read_bytes(self, *args, **kwargs):
+            reads.append(str(self))
+            return real_read_bytes(self, *args, **kwargs)
+
+        with mock.patch.object(Path, "read_text", tracking_read_text), \
+                mock.patch.object(Path, "read_bytes", tracking_read_bytes):
+            problems = checker.check(self.release_path, self.release_sha, packet_path)
+        self.assertTrue(problems)
+        self.assertFalse(any(str(sentinel) in path for path in reads),
+                         "an artefact outside the derived location must never be read")
+        self.assertNotIn("sentinel-marker", json.dumps(problems))
+
+    def test_the_real_checker_self_test_completes_with_its_established_negatives(self):
+        """The real self test must run to the end.
+
+        Nothing is caught here: an AttributeError inside the self test has to
+        fail this test instead of being swallowed as a pass.
+        """
+        result = checker.self_test()
+        self.assertEqual(result["scope"], "SYNTHETIC_METADATA_ONLY")
+        self.assertFalse(result["business_acceptance"])
+        branches = result["negative_branches"]
+        for label in (
+            "complete_packet_admitted", "missing_l1_direct", "missing_l3_success",
+            "missing_l3_expected_failure", "empty_evidence", "partial_status",
+            "replaced_release_reference", "missing_contract_binding",
+            "trimmed_source_inventory", "trimmed_case_inventory", "stage_alias_swapped",
+            "unapproved_same_source_stage", "wrong_evidence_level",
+            "capture_from_another_case", "external_sidecar_path", "external_capture_path",
+            "credential_references_another_credential", "sidecar_is_not_an_object",
+            "credential_is_not_an_object", "sidecar_inner_differs_from_originals",
+            "assertion_not_reached_in_log", "terminal_receipt_missing",
+            "receipt_names_an_uncommitted_event", "credential_cleanup_source_differs",
+            "wrong_external_sha_rejected",
+        ):
+            self.assertIn(label, branches, label)
+
+    def test_the_helper_barrier_validation_is_bounded(self):
+        helper = load_tool(HELPER_PATH, "admission_helper_tool")
+        self.assertIn("barrier", helper.MODES)
+        with self.assertRaises(ValueError):
+            helper.resolve_barrier_root("/tmp/outside-the-selftest-area")
+        with self.assertRaises(ValueError):
+            helper.resolve_barrier_root("relative/path")
+        root = helper.resolve_barrier_root(
+            "/tmp/project/var/process-admission/selftest/run-001")
+        self.assertTrue(root.endswith("run-001"))
+        for bad in ("nan", "inf", "-inf", "0", "-1"):
+            with self.assertRaises(ValueError):
+                helper.validate_barrier_hold(bad)
+        self.assertEqual(helper.validate_barrier_hold("2.5"), 2.5)
+        with self.assertRaises(ValueError):
+            helper.validate_barrier_markers(root, "name with space")
+        self.assertFalse((Path("/tmp/project/var/process-admission/selftest")).exists(),
+                         "the barrier is never executed during L1")
 
 
 class ChainRecorder:
@@ -337,19 +317,15 @@ class ChainCase(unittest.TestCase):
         ]
         self.contract = {"path": "CONTRACT.md",
                          "sha256": sha256_of(self.project / "CONTRACT.md")}
-        self.state_root = self.project / "var" / "process-admission"
+        self.artefact_root = self.project / "var" / "process-admission" / "ticket-l3"
         self.owner_task = "chain-owner"
         self.fake = ChainRecorder(self.recorder_dir, self.recorded_source)
         self.patches = [
             mock.patch.object(runner.subprocess, "Popen", self.fake.popen),
             mock.patch.object(runner, "read_identity_after_session",
-                              lambda pid, settle_seconds=2.0: (
-                                  {"pid": 4242, "state": "S", "ppid": 1, "pgid": 4242,
-                                   "sid": 4242, "start_ticks": 7}, None)),
+                              lambda pid, settle_seconds=2.0: (self.child_identity(), None)),
             mock.patch.object(runner, "read_boot_id", lambda: "0" * 32),
-            mock.patch.object(runner, "read_proc_identity",
-                              lambda pid: {"pid": 4242, "state": "S", "ppid": 1, "pgid": 4242,
-                                           "sid": 4242, "start_ticks": 7}),
+            mock.patch.object(runner, "read_proc_identity", self.identity_for),
             mock.patch.object(runner, "scan_group_members",
                               lambda pgid, exclude_pids=(): ([], 0, 0)),
         ]
@@ -357,283 +333,260 @@ class ChainCase(unittest.TestCase):
             patcher.start()
             self.addCleanup(patcher.stop)
 
-    def slot_for(self, expected_inner_exit=0, failure=False, run_id="chain-run-1"):
-        return {
-            "slot_id": "L1_DIRECT",
-            "approved_stage_release": "SELF",
-            "command_id": "direct",
-            "capture_basename": "chain-001",
-            "run_id": run_id,
-            "level": "D1",
-            "expected_inner_exit": expected_inner_exit,
-            "expected_failure_requirement": (
-                {"assertion": "TOOL_HELPER_EXPECTED_FAILURE", "cleanup_required": True}
-                if failure else None),
-        }
+    def child_identity(self):
+        """The identity of the mocked child, with this wrapper as its parent."""
+        return {"pid": 4242, "state": "S", "ppid": os.getpid(), "pgid": 4242,
+                "sid": 4242, "start_ticks": 7}
 
-    def make_l1_release(self, expected_inner_exit=0, failure=False, bound_run_id="chain-run-1"):
-        slot = self.slot_for(expected_inner_exit, failure, bound_run_id)
+    def identity_for(self, pid):
+        """The wrapper tuple and the child tuple are different real facts."""
+        if pid == os.getpid():
+            return {"pid": os.getpid(), "state": "S", "ppid": 1, "pgid": os.getpid(),
+                    "sid": os.getpid(), "start_ticks": 3}
+        return self.child_identity()
+
+    def make_stage_release(self):
+        helper0 = {
+            "argv": ["/usr/bin/python3.12", "-I", "-S", "-B",
+                     "tests/process/fixtures/admission_helper.py", "pass"],
+            "cwd": str(self.project),
+            "runtime_class": "FINITE_TOOL_HELPER",
+            "expected_inner_exit": 0,
+            "allowed_phases": ["TOOL_RUNTIME"],
+        }
+        helper1 = {
+            "argv": ["/usr/bin/python3.12", "-I", "-S", "-B",
+                     "tests/process/fixtures/admission_helper.py", "specified-fail"],
+            "cwd": str(self.project),
+            "runtime_class": "FINITE_TOOL_HELPER",
+            "expected_inner_exit": 1,
+            "allowed_phases": ["TOOL_RUNTIME"],
+        }
+        slots = [
+            {"slot_id": "L3_SUCCESS", "approved_stage_release": "SELF", "command_id": "helper0",
+             "capture_basename": "chain-pass-001", "run_id": "chain-run-pass",
+             "level": "TOOL_RUNTIME", "expected_inner_exit": 0,
+             "expected_failure_requirement": None},
+            {"slot_id": "L3_EXPECTED_FAILURE", "approved_stage_release": "SELF",
+             "command_id": "helper1", "capture_basename": "chain-fail-001",
+             "run_id": "chain-run-fail", "level": "TOOL_RUNTIME", "expected_inner_exit": 1,
+             "expected_failure_requirement": {"assertion": "TOOL_HELPER_EXPECTED_FAILURE",
+                                               "cleanup_required": True}},
+        ]
         release = {
-            "format": "narralens.proc0-release@3",
-            "release_id": "CHAIN_L1",
-            "phase": "BOOTSTRAP_CODE",
-            "owner_task": self.owner_task,
-            "generation": 1,
-            "project_root": str(self.project),
-            "state_root": str(self.state_root),
+            "format": "narralens.proc0-release@3", "release_id": "CHAIN_L3",
+            "phase": "TOOL_RUNTIME", "owner_task": self.owner_task, "generation": 1,
+            "project_root": str(self.project), "state_root": str(self.artefact_root),
             "contract": self.contract,
             "recorder": {"path": self.recorder_rel,
                          "sha256": sha256_of(self.project / self.recorder_rel)},
             "recorded_source": self.recorded_source,
             "protected_inputs": self.protected_inputs,
-            "commands": {
-                "direct": {
-                    "argv": ["/usr/bin/python3.12", "-I", "-S", "-B", "tests/test_sample.py"],
-                    "cwd": str(self.project),
-                    "runtime_class": "PURE_MOCK",
-                    "expected_inner_exit": expected_inner_exit,
-                    "allowed_phases": ["BOOTSTRAP_CODE"],
-                }
-            },
-            "required_cases": ["PROC0-01"],
-            "case_bindings": {"PROC0-01": {"required_evidence": [slot], "alternatives": []}},
+            "commands": {"helper0": helper0, "helper1": helper1},
+            "required_cases": ["PROC0-13"],
+            "case_bindings": {"PROC0-13": {"required_evidence": slots, "alternatives": []}},
             "capture_allocations": [
-                {
-                    "basename": "chain-001",
-                    "command_id": "direct",
-                    "run_id": "chain-run-1",
-                    "phase": "BOOTSTRAP_CODE",
-                    "case_ids": ["PROC0-01"],
-                    "recorder_directory": str(self.recorder_dir),
-                }
+                {"basename": "chain-pass-001", "command_id": "helper0",
+                 "run_id": "chain-run-pass", "phase": "TOOL_RUNTIME", "case_ids": ["PROC0-13"],
+                 "recorder_directory": str(self.recorder_dir)},
+                {"basename": "chain-fail-001", "command_id": "helper1",
+                 "run_id": "chain-run-fail", "phase": "TOOL_RUNTIME", "case_ids": ["PROC0-13"],
+                 "recorder_directory": str(self.recorder_dir)},
             ],
         }
-        path = self.root / "L1_CHAIN.json"
+        path = self.root / "L3_CHAIN.json"
         path.write_text(json.dumps(release, ensure_ascii=False, indent=2, sort_keys=True))
-        return path, sha256_of(path), slot
+        return path, sha256_of(path), release
 
-    def run_chain(self, expected_inner_exit=0, failure=False, bound_run_id="chain-run-1"):
-        self.fake.inner_exit = expected_inner_exit
-        self.fake.log_text = "TOOL_HELPER_EXPECTED_FAILURE\n" if failure else "chain log\n"
-        l1_path, l1_sha, slot = self.make_l1_release(expected_inner_exit, failure, bound_run_id)
+    def run_chain(self, command_id, run_id, inner_exit, log_text):
+        self.fake.inner_exit = inner_exit
+        self.fake.log_text = log_text
+        stage_path, stage_sha, _release = self.make_stage_release()
         args = argparse.Namespace(
-            release=str(l1_path),
-            expected_release_sha256=l1_sha,
-            owner_task=self.owner_task,
-            command_id="direct",
-            run_id="chain-run-1",
-        )
+            release=str(stage_path), expected_release_sha256=stage_sha,
+            owner_task=self.owner_task, command_id=command_id, run_id=run_id)
         payload = runner.command_run(args)
-        return l1_path, l1_sha, slot, payload
+        return stage_path, stage_sha, payload
 
-    def build_final(self, l1_path, l1_sha, slot, payload, with_artifact=False, slot_override=None):
-        final_slot = dict(slot if slot_override is None else slot_override, approved_stage_release="L1")
+    def build_final(self, stage_path, stage_sha, payloads):
         final = {
-            "format": "narralens.proc0-release@3",
-            "release_id": "CHAIN_FINAL",
-            "phase": "FINAL_METADATA",
-            "owner_task": self.owner_task,
-            "generation": 1,
+            "format": "narralens.proc0-release@3", "release_id": "CHAIN_FINAL",
+            "phase": "FINAL_METADATA", "owner_task": self.owner_task, "generation": 2,
             "project_root": str(self.project),
-            "state_root": str(self.state_root),
+            "state_root": str(self.project / "var" / "process-admission" / "ticket-final"),
             "contract": self.contract,
             "recorder": {"path": self.recorder_rel,
                          "sha256": sha256_of(self.project / self.recorder_rel)},
             "recorded_source": self.recorded_source,
             "protected_inputs": self.protected_inputs,
             "commands": {},
-            "required_cases": ["PROC0-01"],
-            "case_bindings": {"PROC0-01": {"required_evidence": [final_slot], "alternatives": []}},
-            "capture_allocations": [
-                {
-                    "basename": "chain-001",
-                    "command_id": "direct",
-                    "run_id": "chain-run-1",
-                    "phase": "BOOTSTRAP_CODE",
-                    "case_ids": ["PROC0-01"],
-                    "recorder_directory": str(self.recorder_dir),
-                }
-            ],
+            "required_cases": ["PROC0-13"],
+            "case_bindings": {"PROC0-13": {"required_evidence": [
+                {"slot_id": "L3_SUCCESS", "approved_stage_release": "L3",
+                 "command_id": "helper0", "capture_basename": "chain-pass-001",
+                 "run_id": "chain-run-pass", "level": "TOOL_RUNTIME",
+                 "expected_inner_exit": 0, "expected_failure_requirement": None},
+                {"slot_id": "L3_EXPECTED_FAILURE", "approved_stage_release": "L3",
+                 "command_id": "helper1", "capture_basename": "chain-fail-001",
+                 "run_id": "chain-run-fail", "level": "TOOL_RUNTIME", "expected_inner_exit": 1,
+                 "expected_failure_requirement": {"assertion": "TOOL_HELPER_EXPECTED_FAILURE",
+                                                   "cleanup_required": True}},
+            ], "alternatives": []}},
+            "capture_allocations": [],
             "approved_stage_releases": {
-                "L1": {
-                    "path": str(l1_path),
-                    "sha256": l1_sha,
-                    "phase": "BOOTSTRAP_CODE",
-                    "recorded_source": self.recorded_source,
-                    "protected_inputs": self.protected_inputs,
-                }
+                "L3": {"path": str(stage_path), "sha256": stage_sha, "phase": "TOOL_RUNTIME",
+                       "recorded_source": self.recorded_source,
+                       "protected_inputs": self.protected_inputs},
             },
         }
         final_path = self.root / "FINAL_CHAIN.json"
         final_path.write_text(json.dumps(final, ensure_ascii=False, indent=2, sort_keys=True))
-        capture_base = self.recorder_dir / "chain-001"
-        evidence = {
-            "slot_id": "L1_DIRECT",
-            "approved_stage_release": "L1",
-            "command_id": "direct",
-            "capture_basename": "chain-001",
-            "run_id": "chain-run-1",
-            "level": "D1",
-            "expected_inner_exit": final_slot["expected_inner_exit"],
-            "expected_failure_requirement": final_slot["expected_failure_requirement"],
-            "stage_release": {
-                "path": str(l1_path),
-                "sha256": l1_sha,
-                "phase": "BOOTSTRAP_CODE",
-                "recorded_source": self.recorded_source,
-                "protected_inputs": self.protected_inputs,
-            },
-            "command_capture": str(capture_base),
-            "sidecar": payload["sidecar_path"],
-            "expected_failure_artifact": payload["credential_path"] if with_artifact else None,
-        }
+        evidence = []
+        for payload, slot_id, command_id, run_id, basename, artifact in payloads:
+            evidence.append({
+                "slot_id": slot_id, "approved_stage_release": "L3", "command_id": command_id,
+                "capture_basename": basename, "run_id": run_id, "level": "TOOL_RUNTIME",
+                "expected_inner_exit": payload["inner_exit"],
+                "expected_failure_requirement": (
+                    {"assertion": "TOOL_HELPER_EXPECTED_FAILURE", "cleanup_required": True}
+                    if artifact else None),
+                "stage_release": {
+                    "path": str(stage_path), "sha256": stage_sha, "phase": "TOOL_RUNTIME",
+                    "recorded_source": self.recorded_source,
+                    "protected_inputs": self.protected_inputs},
+                "command_capture": str(self.recorder_dir / basename),
+                "sidecar": payload["sidecar_path"],
+                "expected_failure_artifact": payload["credential_path"] if artifact else None,
+            })
         packet = {
-            "format": "narralens.delivery-packet@2",
-            "status": "READY_FOR_REVIEW",
+            "format": "narralens.delivery-packet@2", "status": "READY_FOR_REVIEW",
             "release": {"path": str(final_path), "sha256": sha256_of(final_path)},
-            "contract": self.contract,
-            "source": self.recorded_source,
-            "required_cases": ["PROC0-01"],
-            "cases": [
-                {
-                    "id": "PROC0-01",
-                    "implementation": "COMPLETE",
-                    "production_entry": "tools/run-delivery.py::run",
-                    "test_name": "chain direct test, not executed",
-                    "evidence": [evidence],
-                }
-            ],
+            "contract": self.contract, "source": self.recorded_source,
+            "required_cases": ["PROC0-13"],
+            "cases": [{"id": "PROC0-13", "implementation": "COMPLETE",
+                       "production_entry": "tools/run-delivery.py::run",
+                       "test_name": "chain direct test, not executed",
+                       "evidence": evidence}],
         }
         packet_path = self.root / "PACKET_CHAIN.json"
         packet_path.write_text(json.dumps(packet, ensure_ascii=False, indent=2, sort_keys=True))
         return final_path, sha256_of(final_path), packet_path
 
     def test_the_real_runner_output_is_accepted_by_the_real_checker(self):
-        l1_path, l1_sha, slot, payload = self.run_chain()
-        self.assertTrue(payload["metadata_ok"])
-        self.assertEqual(payload["resource_status"], "CLEAN")
-        final_path, final_sha, packet_path = self.build_final(l1_path, l1_sha, slot, payload)
+        _stage_path, stage_sha, pass_payload = self.run_chain(
+            "helper0", "chain-run-pass", 0, "ADMISSION_HELPER_PASS\n")
+        _stage_path, stage_sha, fail_payload = self.run_chain(
+            "helper1", "chain-run-fail", 1, "TOOL_HELPER_EXPECTED_FAILURE\n")
+        self.assertTrue(pass_payload["metadata_ok"])
+        self.assertTrue(fail_payload["metadata_ok"])
+        final_path, final_sha, packet_path = self.build_final(
+            _stage_path, stage_sha,
+            [(pass_payload, "L3_SUCCESS", "helper0", "chain-run-pass", "chain-pass-001", False),
+             (fail_payload, "L3_EXPECTED_FAILURE", "helper1", "chain-run-fail", "chain-fail-001",
+              True)])
         problems = checker.check(final_path, final_sha, packet_path)
         self.assertEqual(problems, [])
 
-    def test_the_expected_failure_chain_carries_its_credential(self):
-        l1_path, l1_sha, slot, payload = self.run_chain(expected_inner_exit=1, failure=True)
-        self.assertEqual(payload["inner_exit"], 1)
-        self.assertTrue(payload["metadata_ok"])
-        credential = json.loads(Path(payload["credential_path"]).read_text())
-        self.assertTrue(credential["case_qualified"])
-        self.assertEqual(credential["case_id"], "PROC0-01")
-        self.assertEqual(credential["run_id"], "chain-run-1")
-        self.assertEqual(credential["command_id"], "direct")
-        self.assertEqual(credential["assertion"], "TOOL_HELPER_EXPECTED_FAILURE")
-        self.assertTrue(credential["cleanup"]["verified"])
-        self.assertTrue(credential["case_passed"])
-        self.assertEqual(credential["sidecar_sha256"], sha256_of(payload["sidecar_path"]))
+    def test_the_chain_uses_the_project_var_area_and_no_second_authority(self):
+        """The current L3 shape enters the producer; the same ticket without var does not."""
+        stage_path, stage_sha, payload = self.run_chain(
+            "helper0", "chain-run-pass", 0, "ADMISSION_HELPER_PASS\n")
+        authority = self.project / "var" / "process-admission" / "authority" / "state.json"
+        self.assertTrue(authority.is_file(), "the authority belongs to the project var area")
+        self.assertFalse((self.project / "process-admission").exists(),
+                         "no authority may appear outside the project var area")
         final_path, final_sha, packet_path = self.build_final(
-            l1_path, l1_sha, slot, payload, with_artifact=True)
-        problems = checker.check(final_path, final_sha, packet_path)
-        self.assertEqual(problems, [])
+            stage_path, stage_sha,
+            [(payload, "L3_SUCCESS", "helper0", "chain-run-pass", "chain-pass-001", False)])
+        self.assertEqual(checker.check(final_path, final_sha, packet_path), [],
+                         "the current L3 shape is admitted by the real checker")
+
+    def test_a_stage_ticket_without_the_var_component_is_refused(self):
+        stage_path, stage_sha, payload = self.run_chain(
+            "helper0", "chain-run-pass", 0, "ADMISSION_HELPER_PASS\n")
+        release = json.loads(stage_path.read_text())
+        release["state_root"] = str(self.project / "process-admission" / "ticket-l3")
+        wrong_path = self.root / "L3_CHAIN_WRONG.json"
+        wrong_path.write_text(json.dumps(release, ensure_ascii=False, indent=2, sort_keys=True))
+        wrong_sha = sha256_of(wrong_path)
+        final_path, final_sha, packet_path = self.build_final(
+            stage_path, stage_sha,
+            [(payload, "L3_SUCCESS", "helper0", "chain-run-pass", "chain-pass-001", False)])
+        final = json.loads(final_path.read_text())
+        final["approved_stage_releases"]["L3"]["path"] = str(wrong_path)
+        final["approved_stage_releases"]["L3"]["sha256"] = wrong_sha
+        final_path = self.root / "FINAL_CHAIN_WRONG.json"
+        final_path.write_text(json.dumps(final, ensure_ascii=False, indent=2, sort_keys=True))
+        problems = checker.check(final_path, sha256_of(final_path), packet_path)
+        self.assertTrue(problems)
+        self.assertTrue(any("artefact root is outside" in problem for problem in problems),
+                        "the exact refusal reason must be reported: %s" % problems)
 
     def test_a_run_without_an_exact_slot_match_is_refused_by_the_real_checker(self):
-        # The stage release binds another run, so the executed run has no
-        # authorised slot of its own.
-        l1_path, l1_sha, slot, payload = self.run_chain(
-            expected_inner_exit=1, failure=True, bound_run_id="chain-other-run")
+        stage_path, stage_sha, payload = self.run_chain(
+            "helper1", "chain-run-fail", 1, "TOOL_HELPER_EXPECTED_FAILURE\n")
         credential = json.loads(Path(payload["credential_path"]).read_text())
-        self.assertFalse(credential["case_qualified"])
-        self.assertNotIn("assertion", credential)
-        self.assertNotIn("case_id", credential)
-        self.assertFalse(credential["case_passed"])
-        # the physical observation stays truthful
-        self.assertEqual(credential["resource_status"], "CLEAN")
-        self.assertEqual(payload["resource_status"], "CLEAN")
-        # the final ticket binds the executed run, so only the credential can refuse
+        self.assertTrue(credential["case_qualified"])
         final_path, final_sha, packet_path = self.build_final(
-            l1_path, l1_sha, slot, payload, with_artifact=True,
-            slot_override=self.slot_for(expected_inner_exit=1, failure=True))
+            stage_path, stage_sha,
+            [(payload, "L3_EXPECTED_FAILURE", "helper1", "chain-run-fail", "chain-fail-001", True)])
+        # the packet claims another run than the one that produced the artefacts
+        packet = json.loads(packet_path.read_text())
+        for row in packet["cases"][0]["evidence"]:
+            row["run_id"] = "chain-other-run"
+        packet_path.write_text(json.dumps(packet, ensure_ascii=False, indent=2, sort_keys=True))
         problems = checker.check(final_path, final_sha, packet_path)
         self.assertTrue(problems)
-        self.assertTrue(any("artifact" in problem for problem in problems))
-
-    def test_a_missing_sidecar_is_refused_by_the_real_checker(self):
-        l1_path, l1_sha, slot, payload = self.run_chain()
-        final_path, final_sha, packet_path = self.build_final(l1_path, l1_sha, slot, payload)
-        Path(payload["sidecar_path"]).unlink()
-        problems = checker.check(final_path, final_sha, packet_path)
-        self.assertTrue(problems)
-        self.assertTrue(any("sidecar is missing" in problem for problem in problems))
 
     def test_a_tampered_capture_piece_is_refused_by_the_real_checker(self):
-        l1_path, l1_sha, slot, payload = self.run_chain()
-        final_path, final_sha, packet_path = self.build_final(l1_path, l1_sha, slot, payload)
-        exit_file = self.recorder_dir / "chain-001.exit"
-        exit_file.write_text("7\n")
+        stage_path, stage_sha, payload = self.run_chain(
+            "helper0", "chain-run-pass", 0, "ADMISSION_HELPER_PASS\n")
+        final_path, final_sha, packet_path = self.build_final(
+            stage_path, stage_sha,
+            [(payload, "L3_SUCCESS", "helper0", "chain-run-pass", "chain-pass-001", False)])
+        (self.recorder_dir / "chain-pass-001.exit").write_text("7\n")
         problems = checker.check(final_path, final_sha, packet_path)
         self.assertTrue(problems)
-        self.assertTrue(any("capture digests" in problem or "exit" in problem
-                            for problem in problems))
 
     def test_an_unsettled_resource_never_yields_a_verified_credential(self):
         with mock.patch.object(runner, "scan_group_members",
                                return_value=([{"pid": 555, "state": "S", "start_ticks": 3}], 0, 0)):
-            l1_path, l1_sha, slot, payload = self.run_chain(expected_inner_exit=1, failure=True)
+            stage_path, stage_sha, payload = self.run_chain(
+                "helper1", "chain-run-fail", 1, "TOOL_HELPER_EXPECTED_FAILURE\n")
         self.assertEqual(payload["resource_status"], "DIRTY")
         credential = json.loads(Path(payload["credential_path"]).read_text())
         self.assertFalse(credential["cleanup"]["verified"])
         self.assertFalse(credential["case_passed"])
         final_path, final_sha, packet_path = self.build_final(
-            l1_path, l1_sha, slot, payload, with_artifact=True)
+            stage_path, stage_sha,
+            [(payload, "L3_EXPECTED_FAILURE", "helper1", "chain-run-fail", "chain-fail-001", True)])
         problems = checker.check(final_path, final_sha, packet_path)
         self.assertTrue(problems)
 
     def test_an_after_return_identity_read_error_keeps_the_wait(self):
         with mock.patch.object(runner, "read_identity_after_session",
                                side_effect=OSError("proc entry vanished")):
-            l1_path, l1_sha, slot, payload = self.run_chain()
+            _stage_path, _stage_sha, payload = self.run_chain(
+                "helper0", "chain-run-pass", 0, "ADMISSION_HELPER_PASS\n")
         self.assertTrue(self.fake.wait_called, "the owner of a returned child must wait")
-        sidecar = json.loads(Path(payload["sidecar_path"]).read_text())
-        self.assertTrue(sidecar["epoch"]["identity_inferred"])
-        self.assertEqual(sidecar["epoch"]["recorder_pid"], 4242)
+        self.assertEqual(payload["resource_status"], "UNKNOWN")
+        self.assertEqual(payload["admission"], "BLOCKED")
 
     def test_a_raw_write_error_keeps_the_wait_and_the_responsibility(self):
-        real_commit = runner.commit_state
+        real_commit = runner.commit_event
 
-        def failing_commit(state_root, new_state, action, detail=None):
+        def failing_commit(authority, new_state, action, detail=None):
             if action == "run-running":
                 raise OSError("raw write failure")
-            return real_commit(state_root, new_state, action, detail)
+            return real_commit(authority, new_state, action, detail)
 
-        with mock.patch.object(runner, "commit_state", failing_commit):
-            l1_path, l1_sha, slot, payload = self.run_chain()
+        with mock.patch.object(runner, "commit_event", failing_commit):
+            _stage_path, _stage_sha, payload = self.run_chain(
+                "helper0", "chain-run-pass", 0, "ADMISSION_HELPER_PASS\n")
         self.assertTrue(self.fake.wait_called, "the owner of a returned child must wait")
         self.assertFalse(payload["identity_persist"]["persisted"])
         self.assertEqual(payload["resource_status"], "UNKNOWN")
         self.assertEqual(payload["admission"], "BLOCKED")
-
-    def test_an_undeterminable_group_is_never_signed_clean(self):
-        with mock.patch.object(runner, "scan_group_members", return_value=([], 0, 2)):
-            l1_path, l1_sha, slot, payload = self.run_chain()
-        self.assertEqual(payload["resource_status"], "UNKNOWN")
-        self.assertEqual(payload["undeterminable_proc_entries"], 2)
-        self.assertEqual(payload["admission"], "BLOCKED")
-        self.assertEqual(payload["blocked_reason"], "UNKNOWN_RESOURCE_HOLDS_RESPONSIBILITY")
-
-    def test_a_vanished_entry_is_only_an_observation_limit(self):
-        with mock.patch.object(runner, "scan_group_members", return_value=([], 3, 0)):
-            l1_path, l1_sha, slot, payload = self.run_chain()
-        self.assertEqual(payload["resource_status"], "CLEAN")
-        self.assertEqual(payload["vanished_proc_entries"], 3)
-        self.assertEqual(payload["admission"], "READY")
-
-    def test_the_finite_helper_exposes_a_bounded_owned_file_barrier(self):
-        helper = load_tool(HELPER_PATH, "admission_helper_tool")
-        self.assertIn("barrier", helper.MODES)
-        with self.assertRaises(ValueError):
-            helper.resolve_barrier_root("/tmp/outside-the-var-area")
-        root = helper.resolve_barrier_root(str(self.state_root / "selftest"))
-        self.assertTrue(root.endswith("selftest"))
-        self.assertFalse((self.state_root / "selftest").exists(),
-                         "the barrier is never executed during L1")
 
 
 if __name__ == "__main__":

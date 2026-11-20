@@ -1,0 +1,41 @@
+{
+  "format": "narralens.claude429-stop-checkpoint@1",
+  "at": "2026-11-20T05:41:54.540303+00:00",
+  "status": "STOPPED_NEW_429_UNACCEPTED",
+  "run": "run_399f9dd3ce5a",
+  "task": "task_1e803fda402b",
+  "dispatch": "ctx_ab2f1ac4c732",
+  "terminal": "term_8ce0fd38495e75583c94e69607edc5da",
+  "stop_confirmed": "Orca worker-stop closed owned PTY; worker-show state stopped, liveness exited",
+  "source_writer": "NONE after verified stop",
+  "source_worktree": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+  "source_head_before_preservation": "9c2f6237f997c27e3f2d013fec48107a56f862ba",
+  "interrupted_scope": "PROC0 L2 repair002, missing-var root local correction and direct regressions; reports unfinished, no new freeze request",
+  "source5": {
+    "tools/run-delivery.py": "b011e79d330e343d1e1f2a507ec37ab52ef6aa95a3abb68158876edf4503d732",
+    "tools/check-delivery-spec.py": "976ced9c92ec44c3531cff25721b4ae6a325a20e8427de984f82b26d7ab8c820",
+    "tests/process/test_delivery_admission.py": "114436bcdad75dfd318744e83c0107188440b4ca6cf5a4ba4ed4477403ba54c9",
+    "tests/process/test_delivery_handoff.py": "e40f779b3ab4b35ed77a9562f64cf990f938ab795de8de63456ffbcbc8b6f40b",
+    "tests/process/fixtures/admission_helper.py": "65dd48515b3ddee4bbc901ebc74aa544e5335fb75bcd9a1c09feb66c1eeaed3e"
+  },
+  "source5_two_reads_stable_during_preservation": true,
+  "protected_drift": [],
+  "known_exact_test_script_processes_at_snapshot": [],
+  "process_observation_limit": "Exact known scripts sampled only; not a full historical fork transcript or proof all possible unrelated processes exited",
+  "last_actual_validation": "B1/005 inner1 outer1 observer2 CLEAN no drift; B2/B3 NOT_RUN. Root patch and new regressions NOT_RUN.",
+  "next_bootstrap": "006 NOT_ISSUED, must revalidate current source and original owner stop after explicit user resume",
+  "reports_warning": "OWN reports were being updated at429 and may have old SHAs/labels; retained as interrupted work, not accepted handback",
+  "not_accepted": [
+    "PROC0",
+    "R6",
+    "C09",
+    "R7 implementation",
+    "R8",
+    "original17+ISO18",
+    "N1N2",
+    "NEXT reanchor",
+    "A-human",
+    "V1"
+  ],
+  "resume_policy": "Fresh explicit user instruction after this429 required; old goal continuations/quota recovery assumption do not authorize auto retry/restart/provider change/Codex implementation takeover. No new implementation or validation while stopped."
+}
