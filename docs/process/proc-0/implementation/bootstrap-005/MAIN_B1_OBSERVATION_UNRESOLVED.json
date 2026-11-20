@@ -1,0 +1,8 @@
+{
+  "at": "2026-11-20T05:32:23.043579+00:00",
+  "observation": "tool call emitted, no capture/observer sidecar yet, sampled no exact script process; no terminal execution conclusion",
+  "message": "MAIN只读核到：B1的Bash工具调用已发出，但当前尚无proc0-l1-admission-005 claim/result/observer sidecar；一次/proc精确脚本argv采样未见observer/recorder/test进程。这不是已退出或未执行的充分证据，请继续保有当前同一Bash调用，不重启/另跑或改源码。原调用含 ;echo OBSERVER_EXIT=$? 时Bash自身0不能当observer0；必须核真正observer码、全套原件和same Popen wait sidecar。若本次调用返回的是observer前置失败（例如cwd）或工具运输失败/缺件，请保留原Bash输出和调用信息，停B2/B3并ask MAIN，不自行复用005求绿。新429即时停。",
+  "exit": 0,
+  "stdout": "{\"ok\":true,\"result\":{\"messageId\":\"msg_5c6111357530\"}}\n",
+  "stderr": ""
+}

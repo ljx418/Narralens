@@ -1,0 +1,36 @@
+{
+  "status": "FAILED_CAPTURE_PRESERVED_RESOURCE_CLEAN",
+  "at": "2026-11-20T05:34:54.924827+00:00",
+  "question": "msg_b88a06ea3fe5",
+  "inner_exit": 1,
+  "recorder_wait_returncode": 1,
+  "observer_exit_reported_by_original_owner": 2,
+  "resource_status": "CLEAN",
+  "source_changed": [],
+  "source_added": [],
+  "counts": {
+    "run": 30,
+    "passed": 4,
+    "failures": 19,
+    "errors": 7
+  },
+  "command_B2": "NOT_RUN",
+  "command_B3": "NOT_RUN",
+  "original_digests": {
+    ".claim.json": "47bae45a1a26503265dae419c57ec5aee3c1de5f942bb408551bf0eb0a2a0e0b",
+    ".inputs.json": "bb87c63c192040d40a4388e65723d6c7bfd2af4df22b3bc84601bb346746aa9a",
+    ".cmd.json": "37191ddb7582919c62ac1437eba6f29dc3c1190f07239d51a42efd36564aeacf",
+    ".txt": "bc1db9cec18c8ec96b637fda38824b112afeba00a96f931f9be8f51ddc6cac2d",
+    ".exit": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+    ".result.json": "6f370e7bf4ab6e3b80d88754451f64cfd15c1e721755c7402707953c626054f2"
+  },
+  "actual_sidecar_sha256": "d9521e421bf73d9eef6ac0dc18e925db20b404088e3b0a107e5f5c0554876783",
+  "frozen_source5": {
+    "tools/run-delivery.py": "8cc37503961b7efe4be7d1146cbd4b6c3000d3325d5a43daaf3d3a62dc44079f",
+    "tools/check-delivery-spec.py": "6edd56ed818e8d9dbd1e85a65245cb8a59be862c15d5c938f90dadf47e2fd36e",
+    "tests/process/test_delivery_admission.py": "be739865027fae9c04e78e7ff5c49d635d5a460c42dfe1cbbbacaa4eaed31afe",
+    "tests/process/test_delivery_handoff.py": "42e5bea0b03732a738915095a716a4175f1a36cb5d126c832f5744d8a721f225",
+    "tests/process/fixtures/admission_helper.py": "65dd48515b3ddee4bbc901ebc74aa544e5335fb75bcd9a1c09feb66c1eeaed3e"
+  },
+  "root_cause": "Both production root helpers omitted var; fixtures match contract. Failures masked deeper branches so no claim those branches passed."
+}

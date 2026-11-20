@@ -1,3 +1,23 @@
+保全补记：实际WIP提交8f309a5d4e52a05b51c576b144426c7a307852b7已推送origin/agent-driven/main-a-integration，提交后W工作树clean；不代表测试/外审通过。源码停止状态以紧接本段的最新429章节为准。
+
+## 2026-11-20 最新429停工（覆盖旧恢复/实施许可）
+
+ClaudeCode本次新429 Token Plan用量上限，窗口原自动重试attempt8/10。MAIN已立即worker-stop精确ctx_ab2f1ac4c732，回执closed_agent_terminal/ptyKilled=true，worker-show确认stopped/liveness exited。Task task_1e803fda402b原记录保留，不自动retry/restart/provider变更或Codex接写。
+停在PROC0 l2-repair-002（局部var根修正与反例），正在更新OWN报告，尚无freeze006；源为未验收WIP。最后实际B1/005 inner1/outer1/observer2 CLEAN零漂移，B2/B3未跑，新root修正与新反例未跑。完整checkpoint见docs/process/proc-0/implementation/l2-repair-002/NEW_429_STOP/STOP_CHECKPOINT.json与interrupted-source；OWN可能未完成/旧摘要，不当交还。
+只有此新429之后用户再次明确恢复/接手才能继续；自动goal续轮与旧额度恢复批准无效。当前仅保全与必要安全清理，不做后续文档开发/代码/测试。目标未完成，不把停工称通过。R7条件设计已DOC_CONDITIONAL_READY但实施仍未放行；完整goal依旧PROC0→R6→真实验收→R7/R8冻结→NEXT重锚后停。
+
+## 2026-11-20 最新：005 B1真实失败，已发小范围WRITE002
+
+原Claude question msg_b88a06ea3fe5确认B1/005原调用已结束，MAIN独立核原六SHA与actual wait sidecar：inner1/outer1、observer自身2、CLEAN、无源漂移；30tests=4pass/19fail/7errors，B2/B3未跑无claim。19+7主要被同一入口拒绝遮蔽，不能声称其底层语义已验证。此前短暂无原件/无采样进程的观察已被完整终局事实更新，不再按未知在途处理。
+共同根因由MAIN与原实施者各自从代码核实：runner与checker的project_artefact_root及runner release expected_prefix漏var，错误拼project/process-admission；合同/fixture正确是project/var/process-admission。不能改fixture迁就错误实现。完整失败及source5、OWN-at-capture、sidecar在docs/process/proc-0/implementation/bootstrap-005/MAIN_FAILED_CAPTURE_VERIFICATION.json与failed-source保留，原recorder六件套不动。
+已正式reply msg_4c4bb88e9bad发同Task task_1e803fda402b / ctx_ab2f1ac4c732的WRITE_ONLY小修票implementation/l2-repair-002/RELEASE.json SHA8e91373e1d2d550f17ff857ba6b155b0a1edb9089ae229c9da0cac2ea8fad79f。只许两工具局部统一var根+两direct test对应回归；helper与其余652源/保护项不改、不重写全文件。当前source_frozen=false、唯一writer原Claude；无运行许可。完成后ask MAIN新freeze，才发全新006原FIRST三门，不复用005。新429即停、不自动重试/换供应商/Codex接写。R6/L3仍未放行，完整goal未完成。
+
+## 2026-11-20 最新：bootstrap005纯测试已精确释放
+
+Claude Task task_1e803fda402b / ctx_ab2f1ac4c732通过Orca question msg_aa861c7b1d46明确代码准备完成并停止写入，5源码摘要与实际匹配。MAIN静态核5AST、其余651源与保护项均未改、实际扫描656、未见本项目原recorder在途；新票docs/process/proc-0/implementation/bootstrap-005/RELEASE.json SHA75350607e4fd4ca44bed65524d9adb63d3e850bf21a19befd181ad213128c0cd，PRECHECK.json有事实。已正式reply msg_31c8456a4bba，原owner只准用既有MAIN observe-first.py串行B1/B2/B3（原recorder FIRST）。新basename proc0-l1-admission-005 / proc0-l1-handoff-005 / proc0-l1-checkself-005，run_id proc0-l1-005-b1/b2/b3。旧002等不覆盖，OWN文字里的旧bootstrap002标签不作授权。
+当前source_frozen=true，源码writer=NONE，Claude仅运行获准pure mock并在实际命令结束后更新OWN文字。任何非0/缺件/漂移/UNKNOWN立即停剩余，用ask报MAIN；未核真实结束不得改输入，红灯后也须新WRITE票。MAIN不运行冲突验证、不改W/Git，不假定三门已经执行。L3/helper/newrunner实际调用/R6/产品仍NOT_RELEASED；新429立即停，不自动重试接写。
+R7条件文档已DOC_CONDITIONAL_READY，记录见MAIN_CONDITIONAL_DOCUMENT_ACCEPTANCE.json，接受R6后再重锚，不提前实现。完整goal继续全链，未完成。
+
 ## 2026-11-20 R7条件文档已独立闭环
 
 独立ctx_781a69cf54d5已worker_done msg_8aec57846bd9 DOC_CONDITIONAL_READY：D03/D05闭合，D01/D02/D04复用rev2结论。MAIN已核rev3全部6输入实际SHA等于起止记录，原35ID/NOT_RUN保持，正式条件文档回执docs/process/r7-design/MAIN_CONDITIONAL_DOCUMENT_ACCEPTANCE.json。不再无差别重审已核不变部分；取得R6实际接受commit后只重锚责任引用/parent事实来源/受影响私有caller和验收票。R7没有实现/runtime票。后续不要把旧REQUEST_CHANGES当当前未修，不要把本结论当R7_PLAN_READY/产品PASS。

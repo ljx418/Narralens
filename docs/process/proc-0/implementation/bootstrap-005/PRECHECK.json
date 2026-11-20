@@ -1,0 +1,19 @@
+{
+  "status": "FROZEN_FOR_PURE_L1_ONLY",
+  "question": "msg_aa861c7b1d46",
+  "at": "2026-11-20T05:28:09.469457+00:00",
+  "source_count": 656,
+  "source5": {
+    "tools/run-delivery.py": "8cc37503961b7efe4be7d1146cbd4b6c3000d3325d5a43daaf3d3a62dc44079f",
+    "tools/check-delivery-spec.py": "6edd56ed818e8d9dbd1e85a65245cb8a59be862c15d5c938f90dadf47e2fd36e",
+    "tests/process/test_delivery_admission.py": "be739865027fae9c04e78e7ff5c49d635d5a460c42dfe1cbbbacaa4eaed31afe",
+    "tests/process/test_delivery_handoff.py": "42e5bea0b03732a738915095a716a4175f1a36cb5d126c832f5744d8a721f225",
+    "tests/process/fixtures/admission_helper.py": "65dd48515b3ddee4bbc901ebc74aa544e5335fb75bcd9a1c09feb66c1eeaed3e"
+  },
+  "all_protected_match": true,
+  "all5_static_ast_parse": true,
+  "actual_current_project_recorders": [],
+  "scope": "actual full source discovery; no module imports or tests",
+  "release_sha256": "75350607e4fd4ca44bed65524d9adb63d3e850bf21a19befd181ad213128c0cd",
+  "current_product_runtime_release": false
+}

@@ -190,5 +190,7 @@
     "Do not sign human/A/V1 acceptance from this scope",
     "Fresh429 immediately stop exact Claude task; no automatic retry/provider change/Codex implementation takeover"
   ],
-  "maintenance_rule": "Index references requirements only; actual completion requires reading authoritative current source/commands/artifacts one by one. Metadata presence and this index itself prove no implementation or acceptance."
+  "maintenance_rule": "Index references requirements only; actual completion requires reading authoritative current source/commands/artifacts one by one. Metadata presence and this index itself prove no implementation or acceptance.",
+  "execution_hold": "FRESH_CLAUDE429_REQUIRES_EXPLICIT_USER_RESUME",
+  "hold_checkpoint": "docs/process/proc-0/implementation/l2-repair-002/NEW_429_STOP/STOP_CHECKPOINT.json"
 }

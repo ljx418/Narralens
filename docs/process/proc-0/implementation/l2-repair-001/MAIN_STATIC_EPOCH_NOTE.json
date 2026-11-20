@@ -1,0 +1,8 @@
+{
+  "at": "2026-11-20T05:17:41.137582+00:00",
+  "scope": "in-progress readonly static preflight; not runtime or acceptance",
+  "body": "MAIN只读当前未交还源码的预检，供你在freeze前核对（不是新范围/正式外审，不改写你的文件）：1) tools/run-delivery.py 当前read_recorder_epoch所有return为(epoch, verified)两项，command_run约1707却读 recorder_epoch, verified, identity_problems = read_recorder_epoch(...) 三项；ValueError会被catch伪装成身份读取失败，正常producer也无法产生CLEAN。请统一内部返回契约/调用者并给正常正控，别将unexpected unpack异常当合法身份负例。2) read_wrapper_epoch 当前只按“没抛异常”签complete，空boot/缺失或错误类型tuple、返回identity.pid不等于调用pid仍未拒；read_recorder_epoch当前未核identity.pid==该Popen pid、ppid==原wrapper及其他完整tuple/boot的严格事实。L2-02/合同§7已有这些要求，不是新增规格。请确认实际创建链并让pure fixture分别给真实wrapper tuple和child tuple（不能一直ppid=1却放松生产检查）。已返回child缺证仍同owner wait，UNKNOWN/BLOCKED；wrapper缺证不spawn。仍WRITE_ONLY，没有测试执行许可；此观察可能正是你正在修的部分，完成前统一核即可。",
+  "exit": 0,
+  "stdout": "{\"ok\":true,\"result\":{\"messageId\":\"msg_c5cc99d917ef\"}}\n",
+  "stderr": ""
+}
