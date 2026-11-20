@@ -78,13 +78,3 @@ Host.#close当前先读取#m5Gateway、置null并close，之后才await m5Superv
 parent在await child.close之后仍依据数字PGID存在发SIGKILL，5s timer同样只看groupExists。此时Node当前ChildProcess onexit保护不再覆盖旧数字组；若旧组已gone并被复用，不能仅凭存在称其仍自有。原native-renderer的自然退出逻辑明确避免延迟signal可能复用的组。建议leader仍活时处理own group强杀；leader已exit后只观察/报告未收敛或基于已确认后代身份处理，避免盲信号。这里没有强制PID复用实测，不把未发生的误杀写成已复现P1。
 
 当前Workspace/Gateway delegate/native loaded ack仍未实现/放行；读metadata、隔离Studio ready或JPEG均不等于native ack、采用、assembly或正式Delivery完成。四项源码修补不能代签A05/A。
-
-## IS-R2后续关闭修正只读确认
-
-MAIN继续开发期间仅核对前述关闭修正，不运行测试/Studio。Supervisor.close现先#stop.abort，#openInStudio fetch绑定AbortSignal.any(stop,30s)，response读取沿相同fetch abort边界，故不再靠等无取消open自行settle才能进入Studio关闭。Host关闭顺序先quiesce Supervisor，再finally收#m5Gateway；onStudio callback在gateway.start/发布前检查#closePromise，catch收回gateway，避免晚callback发布被遗漏。
-
-信号代码也已改为leader仍活、start identity相同才向其组发送，leader exit之后只观察group，逾期GROUP_NOT_QUIESCENT，不再延迟杀可能复用的数字组。当前exited监听exit并额外等待group，而非把数字组存在当持续发信号权威；不据此夸大成任意原生setsid子代均已证明归属。
-
-因此原IS-R2两条关闭缺口及PGID注记可标**SOURCE_FIXED**；IS-R1/3/4先前源码修复结论保持。MAIN报告已有真实hung HTTP关闭等回归，但本审查者尚未独立重跑/绑定最终冻结，Host真实late callback完整case也不由纯源码确认冒充已验。整体仍REVIEW_PENDING，不签外审或整A。
-
-本追加只读closing片段；MAIN随后新增workspace/NativeEntry/delegate/ack生产者超出此追加范围，不能把整个server.ts摘要当作其全部新代码已审。读取字节摘要见closing-fix-hashes.json。

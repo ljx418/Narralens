@@ -60,9 +60,3 @@ cursor-key.json目前只创建/保留，本轮CreationApplication尚未装配eve
 | `docs/execution/A/logs/main-owned-runtime-r7/typecheck.exit` | `9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa` |
 | `docs/execution/A/logs/main-owned-runtime-r7/tests.txt` | `1a9a5a6496aac7ffde3e2355f46aaa1e3fede7d0578fd9cbc27a47353e80f89c` |
 | `docs/execution/A/logs/main-owned-runtime-r7/tests.exit` | `9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa` |
-
-## 冻结后独立复验终态：4eaa169（取代本报告先前两项P2开放状态）
-
-2026-11-10，获MAIN独占授权，在精确clean SHA `4eaa169d235e5f607feec8dd1e93701bc67815e3`真实执行指定owned-runtime.test.ts单worker7项，7/7、exit0、72.52秒；exec session15585，开始/结束HEAD一致且clean。FIFO与ready前wrapper取消两项均独立实测通过，RT-R1/RT-R2关闭。11源码+11 MAIN证据摘要22/22核对一致。
-
-**仅真实本机运行/MCP基础链的本次7项限定PASS**，不签A-COLD、IT-A01/02整包或A整体。完整证据与独立限制见[冻结复核报告](runtime-4eaa169/REVIEW.md)、input.json、tests.cmd、stdout/stderr/exit/completion与artifact-hashes.json。原预审发现/修前失败记录保留历史，不回写成从未失败。
