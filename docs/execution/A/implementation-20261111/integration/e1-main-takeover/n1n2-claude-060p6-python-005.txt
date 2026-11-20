@@ -1,0 +1,29 @@
+..............................E.F....................................
+======================================================================
+ERROR: test_a_refused_authorisation_keeps_the_original_binding (__main__.TheMonotonicAuthorisationOfADraw.test_a_refused_authorisation_keeps_the_original_binding)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/helpers/cache-custodian-unit.py", line 2262, in test_a_refused_authorisation_keeps_the_original_binding
+    instance._authorize_fork(self._authorisation("draw-original"))
+  File "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/src/adapters/openfilm/cache-process-custodian.py", line 1853, in _authorize_fork
+    os.set_blocking(self._worker_stdout_read, False)
+OSError: [Errno 9] Bad file descriptor
+
+======================================================================
+FAIL: test_two_authorisations_fork_at_most_once (__main__.TheMonotonicAuthorisationOfADraw.test_two_authorisations_fork_at_most_once)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/helpers/cache-custodian-unit.py", line 2234, in test_two_authorisations_fork_at_most_once
+    attempts = self._run_the_batch([self._authorisation(), self._authorisation()])
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/helpers/cache-custodian-unit.py", line 2219, in _run_the_batch
+    self.assertEqual(instance.authorization_state, "terminated")
+AssertionError: 'sealed' != 'terminated'
+- sealed
++ terminated
+
+
+----------------------------------------------------------------------
+Ran 69 tests in 0.073s
+
+FAILED (failures=1, errors=1)

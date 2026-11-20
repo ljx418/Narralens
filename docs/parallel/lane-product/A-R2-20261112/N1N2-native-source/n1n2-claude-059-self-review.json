@@ -1,0 +1,207 @@
+{
+  "kind": "CLAUDE_059_SELF_REVIEW",
+  "release": "MAIN_RELEASE_059_CLEAR_REPAIRS",
+  "task_id": "task_9b5c05ea4456",
+  "dispatch_id": "ctx_bdd7ae38429e",
+  "terminal": "term_499fde1b-4bc4-40d0-a884-225e555d7b70",
+  "head": "1d348d419120f23f45d958112ea8c43df5a04675",
+  "head_moved": false,
+  "report": "docs/parallel/lane-product/A-R2-20261112/N1N2-native-source/n1n2-claude-059-self-review.md",
+  "acceptance_claimed": false,
+  "note": "实现者自审：改了哪些字节、每条正式编号的状态、每条命令的真实 exit 与 hash、每个反事实、资源清理、未跑的门。A057-04 与重型用例保持 OPEN/NOT_RUN。ACK 文件里的 at 字段是手填占位，视为 unknown；本文件与报告里的时间只取自 recorder。",
+  "files": {
+    "modified": [
+      {"path": "src/adapters/openfilm/openfilm-upstream.ts", "sha256": "1583d4aba7f1a2fde487b1339745a039759d09b29fe81edc3268a76edb054e41", "bytes": 56803, "for": ["A057-01"]},
+      {"path": "src/host/agent-driven/retained-native-closure.ts", "sha256": "ef1f3db57ba42da36d216dc6e066b8662861a5f1b9cba2c3394e788da7f56e90", "bytes": 75089, "for": ["A057-02", "A057-03"]},
+      {"path": "src/host/agent-driven/committed-snapshot-authority.ts", "sha256": "e7277382b1b3819d1f6aaa8459dc4d2bf904169d31e614aa45ac6a7b3c610f8b", "bytes": 44152, "for": ["A057-02"], "change": "ASSET_EXTENSIONS 改为引用 closure 的同一个定义"},
+      {"path": "src/host/agent-driven/created-native-source-reader.ts", "sha256": "057015a54e9daee8d08f56eadbd7b2766622f2f915f29a0ebc330e0d4cc676b6", "bytes": 79025, "for": ["A057-05", "A057-06"]},
+      {"path": "tests/m2.1/openfilm-upstream-lock.test.ts", "sha256": "9b2cf8525c7e51da9a7c0d9eb579b65be56a679651fcbb5bfb5bd8e1424c175a", "bytes": 58158, "for": ["B01"]},
+      {"path": "tests/agent-driven/integration/created-native-source-reader.test.ts", "sha256": "4880dfea7600c53c0246d384c92b3a60f52522058a42be494f33164cf9920598", "bytes": 168963, "for": ["A057-05", "A057-06"], "note": "只新增 K04-c 与 F05-c 两条用例；它们 NOT_RUN"}
+    ],
+    "added": [
+      {"path": "tests/agent-driven/integration/retained-native-budget.test.ts", "sha256": "3241bdd2c8b7b958e9852db2f28bd831f5a6f70bd2c09d975c09295769e7cd9d", "bytes": 16277},
+      {"path": "tests/agent-driven/integration/openfilm-serving-url.test.ts", "sha256": "6c02e6d3cf56f60e33cbbb74a1b56bef3eaabbb20f10bba025e41e4f3de74e2b", "bytes": 4379},
+      {"path": "tests/agent-driven/integration/helpers/native-read-byte-observer.mjs", "sha256": "a249498702425a01cb3964ef87cfddbbd036b6998a2d03a8938a755d43b89169", "bytes": 2486},
+      {"path": "tests/agent-driven/integration/helpers/native-read-growth-child.mjs", "sha256": "2a31e13d30b98d161a69fcd4c33a125d2733762adb65dddb75fd1b79517f5c84", "bytes": 1708},
+      {"path": "tests/fixtures/openfilm-serving-url-child.mjs", "sha256": "db3caf37f9983bdebf69ea76795925c79a446e88a779e063235f3d402d085a41", "bytes": 2951},
+      {"path": "docs/parallel/lane-product/A-R2-20261112/N1N2-native-source/n1n2-claude-059-ack.json", "kind": "ACK"},
+      {"path": "docs/parallel/lane-product/A-R2-20261112/N1N2-native-source/n1n2-claude-059-self-review.md", "kind": "REPORT"},
+      {"path": "docs/parallel/lane-product/A-R2-20261112/N1N2-native-source/n1n2-claude-059-self-review.json", "kind": "REPORT_INDEX"}
+    ],
+    "not_modified_but_allowed": ["tests/agent-driven/integration/native-cache-witness.test.ts"],
+    "outside_the_release": "无（src/tests 的改动全在 allow_existing / allow_new 内）"
+  },
+  "diff_stat": "6 files changed, 705 insertions(+), 182 deletions(-)",
+  "findings": [
+    {
+      "id": "B01",
+      "severity": "MAJOR",
+      "status": "IMPLEMENTED_AND_VERIFIED_THIS_WAVE",
+      "code": [
+        "tests/m2.1/openfilm-upstream-lock.test.ts:140-149 parseSource 按后缀选 TS/TSX（旧代码把 .ts 当 TSX 解析，committed-snapshot-authority.ts 的整个类被吞进一个 JSX 元素：旧解析下该文件 0 个 ClassDeclaration、11 scope、55 call；改后 1 个类、70 scope、355 call）",
+        "buildScopes 改为全 AST 作用域栈：function-like 各开 scope、类体开 scope、默认参数值在函数自己的 scope 求值、成员计算名在类被书写的 scope 求值、类方法绑在类 scope",
+        "calleeDeclaration + callableOf：this.method(…) 在类边界内解析；变量持有的函数也算 helper",
+        "loaderCallSites：枚举 src/ 里 loader 入口的真实调用点并断言等于 10 条具体 (file, export) 集合"
+      ],
+      "tests": "16 个正例（类方法/构造器/顶层箭头/顶层函数表达式/方法内箭头/对象字面量方法/类属性初始化器/静态块(真实数据流)/跨形态 helper/箭头 helper/类方法里的 serving owner/类方法里的 bridge/参数默认值(函数与方法)/成员计算名/this.method）+ 8 个负例（字符串形参/同名非请求/遮蔽外层请求的形参/无请求静态块/无关类/无请求默认值/无请求计算名/this.method 传非请求）+ 生产调用点枚举；旧的正向负向参数化族逐字保留",
+      "official": {"capture": "n1n2-claude-059-lock-006", "exit": 0, "result": "60 passed (60)", "log_sha256": "525c4bf2337d184fb812dcd795f9dffd331994c0f9b38d33021a96c2e768fd3b"},
+      "counterfactual": {"capture": "n1n2-claude-059-cf-lock-003", "exit": 1, "result": "18 failed | 42 passed (60)", "how": "基线的 parseSource(TSX)+buildScopes+被调用者解析逐字拼进新测试文件", "red": "16 个新正例 expected +0 to be 1；1 个负例被旧遍历误报；枚举 expected [ …(2) ] to deeply equal [ …(10) ]", "log_sha256": "7f23dc0b55f4547db81516949ee22201c860876260920a1bd606908aa92ae519"},
+      "known_limits": ["obj.method(...) 的对象类型未知，不解析", "static 方法里的 this 不区分", "成员计算名只按外层 scope 求值一次"]
+    },
+    {
+      "id": "A057-01",
+      "severity": "MAJOR",
+      "status": "IMPLEMENTED_AND_VERIFIED_THIS_WAVE",
+      "code": [
+        "src/adapters/openfilm/openfilm-upstream.ts handle: 最小 origin-form 校验（必须以 / 开头且不得以 // 开头）-> 400 bad address，在任何解析之前",
+        "同一处: 原 new URL(url,'http://127.0.0.1').searchParams 保持原解析器原语义，只加窄 catch -> 400（未换成 URLSearchParams(raw query)）",
+        "handle 顶层: 意外异常 -> 500 unavailable（响应头已发则 end()）；不是 400，也不是成功",
+        "既有拒绝面逐条保留；refuse() 的策略头仍在每一个回答上；Host/port 守卫未改"
+      ],
+      "tests": "真实 raw socket（node:net 手写请求行，不用 fetch/http.request）打到原 owned listener：//[ -> 400 且带 CSP 策略头且 body 为 bad address（证明确实到达原 handler）；随后 GET /hello.txt -> 200 且字节逐字相符；Host 错 -> 403；越界路径 -> 403；不存在的文件 -> 404；子进程 exit 0 且无未捕获异常栈",
+      "official": {"capture": "n1n2-claude-059-http-003", "exit": 0, "result": "1 passed (1)", "log_sha256": "f3d7e95d3566e9819d5a3ca7866f97034f302741c3e7b76021df6cdf0d0ef588"},
+      "counterfactual": {"capture": "n1n2-claude-059-cf-http-001", "exit": 1, "how": "基线的 openfilm-upstream.ts 整份放回", "red": "子进程被 ERR_INVALID_URL 未捕获异常打死（栈 handle:654 -> Server.<anonymous>:962 -> Server.emit），expect(stderr).not.toMatch(/ERR_INVALID_URL|Uncaught/i) 红", "log_sha256": "1feda9fa4183038075a3f8c4687640db56f34e2603c0780e81a68013250147c9"}
+    },
+    {
+      "id": "A057-02",
+      "severity": "MAJOR",
+      "status": "IMPLEMENTED_AND_VERIFIED_THIS_WAVE",
+      "code": [
+        "RETAINED_NATIVE_ASSET_EXTENSIONS 收进 closure（与 authority 原集合逐字相同），authority 改为引用它；未知扩展名 = 文本（fail-closed）",
+        "retainFile: 文本预算（单文件 + 累计）在任何字节被读之前判定，并当场原子预占该文件的字节；一次文件计一次，重复 retain/读不重复计；retain 失败时把预占还回去",
+        "readText 保留自身门限（幂等兜底），media 标签不能绕过文本预算",
+        "所有门限未放宽：8 MiB / 64 MiB / paths / depth / descriptors 不动"
+      ],
+      "observation": "真实系统调用观测：vi.mock('node:fs') 只作用于本测试文件的模块图，真实 readSync/openSync 被调用且真实返回值原样返回，真实 fd -> 真实路径与真实读字节被记录；旧闭包（不通知 onReadChunk）也被同样观测到；/proc/self/io 的 rchar 只作辅助信号，不用于证明某文件零读",
+      "tests": "单文件超限零读；累计超限零读；known media 流式且不被文本门限误伤；未知扩展名按文本拒",
+      "official": {"capture": "n1n2-claude-059-budget-008", "exit": 0, "result": "11 passed (11)", "log_sha256": "96e0207ce22c7ddf2a5173ab06caeef3a9b899ed7d525cd5320e7617b86617a7"},
+      "counterfactual": {"capture": "n1n2-claude-059-cf-budget-003", "exit": 1, "result": "11 failed (11)", "how": "基线的 retained-native-closure.ts 整份放回", "red": "6 条 promise resolved instead of rejecting；2 条 expected 34603008 to be less than or equal to 33554433（真实读字节证明旧代码读过捕获尺寸）", "log_sha256": "436611d6b4897e08d5e53ef3a74cdc6fe66d753d145545802b4163c1dbaf5d28"}
+    },
+    {
+      "id": "A057-03",
+      "severity": "MAJOR",
+      "status": "IMPLEMENTED_AND_VERIFIED_THIS_WAVE",
+      "code": [
+        "新增 #hashBounded(fd, expectedBytes, relativePath)：按捕获尺寸读恰好那么多 + 多读 1 字节探针；增长/截短明确拒绝，不截断不接受",
+        "#hash 与 #hashSync（读到 EOF）已删除；hashFile / verifyFile / verify / verifyFileExact 全部走有界原语；同步 guard 的原签名与 bounded memory 保留",
+        "读后精确身份栅栏 #identityHolds：数据读取之后、返回事实/true 之前，核对 captured identity（dev/ino/size/mtimeNs/ctimeNs/nlink）与原路径链；同长度改复只有这里能抓住"
+      ],
+      "mutation": "确定性：native-read-growth-child.mjs 是一次性真实变异子进程（grow 追加 / truncate 截半 / rewrite 写回同一字节——长度内容摘要都不变、只有 inode 的 ctime 变）；父进程在第一次真实读时（wrapper 内部）spawnSync 它，捕获 stat 之后、第一块读之后、其余摘要之前，且在 wrapper 返回前已回收子进程；无 marker、无 sleep",
+      "tests": "hash 期间增长 / 截短 / 同长度改复；rehash 增长；文件 guard；整树 guard；retain 失败时预算归还；retain 失败且释放失败时保留 genuine failure 与 sticky uncertainty",
+      "official": {"capture": "n1n2-claude-059-budget-008", "exit": 0, "result": "11 passed (11)"},
+      "open_item": "字节上界已修；同步摘要的『时间』上界未修（同步循环仍阻塞事件循环），如实登记，未谎称已修"
+    },
+    {
+      "id": "A057-04",
+      "severity": "MAJOR",
+      "status": "OPEN_NOT_IMPLEMENTED_BY_DESIGN",
+      "code": [],
+      "read_only": "只读复核 C/repair-058/independent-settlement-design-b.md",
+      "note": "058 的 D2/D3/D5（永久隔离/假 module 永不 settle/改名记 uncertain）未实施（MAIN 不批准：永久 fail-closed 不是闭环）；producer 工厂、bridge 计数、close 语义、workspace、固定 vendor 一行未改"
+    },
+    {
+      "id": "A057-05",
+      "severity": "MAJOR",
+      "status": "CODE_CHANGED_RUNTIME_NOT_RUN",
+      "code": [
+        "src/host/agent-driven/created-native-source-reader.ts: 新增 #proveWitnessDependencies(witness, files) —— 共享的历史依赖身份核对（缺失 -> NATIVE_SOURCE_CACHE_UNPROVEN，不符 -> NATIVE_SOURCE_CACHE_STALE）",
+        "#proveWitnessCache（pageframe/film-poster）改为调用它，行为不变",
+        "duration 分支新增调用：依赖（film.html 等）必须仍成立；不要求无关的历史输出（三元组）仍在盘；当前 output 授权（cacheWitnessByOutput）与 film-poster 的最后一次 poster 非权威语义未改"
+      ],
+      "test_written_not_run": "tests/agent-driven/integration/created-native-source-reader.test.ts 的 K04-c：真实 fixed draw(ms=0) -> 稳定正例 -> 只删三件 triple -> duration-only 仍接受 -> film 改后还原字节+mtime 且 cime 真的变了 -> 新读轮必须拒绝 NATIVE_SOURCE_CACHE_STALE",
+      "not_run_reason": "需要真实 fixed draw（真实上游 + 真实浏览器），本票据未授权；该用例只过了 tsc",
+      "regression_gap": "reader/native-cache 整文件未跑，『旧语义未变』本波未被证明"
+    },
+    {
+      "id": "A057-06",
+      "severity": "MINOR",
+      "status": "CODE_CHANGED_RUNTIME_NOT_RUN",
+      "code": [
+        "src/host/agent-driven/created-native-source-reader.ts: posters/frames/waves 三个族改为明确拒绝，内部码 NATIVE_SOURCE_CACHE_FAMILY_UNSUPPORTED（未扩 public 合同/aliases）",
+        "空目录仍允许（目录白名单未动）；已证的 probe/pageframe/film-poster 一律未改",
+        "下一阶段原 Studio 必要 GET 的生产证明保留为后续接线义务；当前 reader 无法确认时不显示已加载"
+      ],
+      "test_written_not_run": "F05-c：用工作副本里真实媒体文件的正确 upstream key（sha1(path\\0bytes\\0round(mtimeMs)).slice(0,20)）造三个伪文件，期望以该码拒绝且不删任何东西",
+      "not_run_reason": "需要真实读轮与 fixture 完整链，本票据未授权"
+    }
+  ],
+  "official_runs": [
+    {"capture": "n1n2-claude-059-tsc-007", "argv": ["corepack", "pnpm", "exec", "tsc", "--noEmit"], "started_at": "2026-11-14T03:38:29.519225+00:00", "finished_at": "2026-11-14T03:38:52.327294+00:00", "exit": 0, "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855", "source_changed": [], "source_added": 0},
+    {"capture": "n1n2-claude-059-lock-006", "argv": ["corepack", "pnpm", "exec", "vitest", "run", "--config", "vitest.config.ts", "tests/m2.1/openfilm-upstream-lock.test.ts"], "started_at": "2026-11-14T03:38:53.876700+00:00", "finished_at": "2026-11-14T03:39:04.816341+00:00", "exit": 0, "log_sha256": "525c4bf2337d184fb812dcd795f9dffd331994c0f9b38d33021a96c2e768fd3b", "source_changed": [], "source_added": 0},
+    {"capture": "n1n2-claude-059-budget-008", "argv": ["corepack", "pnpm", "exec", "vitest", "run", "--config", "vitest.config.ts", "tests/agent-driven/integration/retained-native-budget.test.ts"], "started_at": "2026-11-14T03:39:13.071347+00:00", "finished_at": "2026-11-14T03:39:20.682696+00:00", "exit": 0, "log_sha256": "96e0207ce22c7ddf2a5173ab06caeef3a9b899ed7d525cd5320e7617b86617a7", "source_changed": [], "source_added": 0},
+    {"capture": "n1n2-claude-059-http-003", "argv": ["corepack", "pnpm", "exec", "vitest", "run", "--config", "vitest.config.ts", "tests/agent-driven/integration/openfilm-serving-url.test.ts"], "started_at": "2026-11-14T03:39:22.255069+00:00", "finished_at": "2026-11-14T03:39:31.980390+00:00", "exit": 0, "log_sha256": "f3d7e95d3566e9819d5a3ca7866f97034f302741c3e7b76021df6cdf0d0ef588", "source_changed": [], "source_added": 0}
+  ],
+  "counterfactuals": [
+    {"capture": "n1n2-claude-059-cf-lock-003", "target": "tests/m2.1/openfilm-upstream-lock.test.ts 的分析代码", "replacement": "基线的 parseSource(TSX) + buildScopes + 被调用者解析逐字拼入新测试文件", "exit": 1, "red": "18 failed | 42 passed (60)", "log_sha256": "7f23dc0b55f4547db81516949ee22201c860876260920a1bd606908aa92ae519"},
+    {"capture": "n1n2-claude-059-cf-budget-003", "target": "src/host/agent-driven/retained-native-closure.ts", "replacement": "git show 1d348d4:src/host/agent-driven/retained-native-closure.ts 整份放回", "exit": 1, "red": "11 failed (11)", "log_sha256": "436611d6b4897e08d5e53ef3a74cdc6fe66d753d145545802b4163c1dbaf5d28"},
+    {"capture": "n1n2-claude-059-cf-http-001", "target": "src/adapters/openfilm/openfilm-upstream.ts", "replacement": "git show 1d348d4:src/adapters/openfilm/openfilm-upstream.ts 整份放回", "exit": 1, "red": "子进程被 ERR_INVALID_URL 未捕获异常打死；expect(stderr).not.toMatch(/ERR_INVALID_URL|Uncaught/i) 红", "log_sha256": "1feda9fa4183038075a3f8c4687640db56f34e2603c0780e81a68013250147c9"}
+  ],
+  "counterfactual_procedure": {
+    "backups": ["n1n2-claude-059-cf-new-openfilm-upstream.ts", "n1n2-claude-059-cf-new-retained-native-closure.ts", "n1n2-claude-059-cf-new-openfilm-upstream-lock.test.ts"],
+    "diffs": ["n1n2-claude-059-cf-adapter-old-to-new.diff", "n1n2-claude-059-cf-closure-old-to-new.diff", "n1n2-claude-059-cf-locktest-old-to-new.diff"],
+    "restore_verified_by_sha256": true,
+    "git_restore_reset_stash_used": false,
+    "git_index_touched": false
+  },
+  "failed_or_void_captures_kept": [
+    {"capture": "n1n2-claude-059-tsc-001", "exit": 2, "note": "TS2345 walk(node.body) 可能 undefined"},
+    {"capture": "n1n2-claude-059-tsc-002", "exit": 0},
+    {"capture": "n1n2-claude-059-tsc-003", "exit": 2, "note": "TS7016 .mjs 无声明 / readSync position 类型 / ts.isThis 不存在"},
+    {"capture": "n1n2-claude-059-tsc-004", "exit": 2},
+    {"capture": "n1n2-claude-059-tsc-005", "exit": 2},
+    {"capture": "n1n2-claude-059-tsc-006", "exit": 0},
+    {"capture": "n1n2-claude-059-lock-001", "exit": 1, "note": "类成员用 forEachChild 走，丢了方法自己的 scope"},
+    {"capture": "n1n2-claude-059-lock-002", "exit": 0},
+    {"capture": "n1n2-claude-059-lock-003", "exit": 1, "note": "枚举 2 != 10；TSX 解析吞掉了 authority 的类"},
+    {"capture": "n1n2-claude-059-lock-004", "exit": 1},
+    {"capture": "n1n2-claude-059-lock-005", "exit": 0},
+    {"capture": "n1n2-claude-059-lock-diag-001", "exit": 1, "note": "诊断用临时用例（已删除）"},
+    {"capture": "n1n2-claude-059-lock-diag-002", "exit": 1, "note": "诊断用临时用例（已删除）"},
+    {"capture": "n1n2-claude-059-budget-001", "exit": 1, "note": "变异子进程用 r+ 覆盖写，文件没变大"},
+    {"capture": "n1n2-claude-059-budget-002", "exit": 0, "note": "第一版观测（已被 MAIN 审计否定并重做）"},
+    {"capture": "n1n2-claude-059-budget-003", "exit": 1, "note": "mock 工厂递归"},
+    {"capture": "n1n2-claude-059-budget-004", "exit": 1, "note": "字节断言用了累计值而非增量"},
+    {"capture": "n1n2-claude-059-budget-005", "exit": 1, "note": "作废：命令里误写了不存在的测试路径"},
+    {"capture": "n1n2-claude-059-budget-006", "exit": 0},
+    {"capture": "n1n2-claude-059-http-001", "exit": 1, "note": "body 断言没剥 chunked 框架"},
+    {"capture": "n1n2-claude-059-http-002", "exit": 0},
+    {"capture": "n1n2-claude-059-cf-lock-001", "exit": 1, "note": "拼接过宽（误删 vendorRegistryNames）；已重做"},
+    {"capture": "n1n2-claude-059-cf-lock-002", "exit": 1},
+    {"capture": "n1n2-claude-059-cf-budget-001", "exit": 1},
+    {"capture": "n1n2-claude-059-cf-budget-002", "exit": 1}
+  ],
+  "resources": {
+    "http_child": "自有子进程，自己关闭 owned serving 与 producer 后 exit 0；父进程等真实 exit",
+    "mutation_child": "spawnSync 同步等待真实退出，status 断言为 0",
+    "listener": "owned serving owner：先 drain 再关监听",
+    "browser": "本波没有画任何一帧，浏览器从未启动",
+    "temp_dirs": "afterEach 删除",
+    "descriptors": "release()/close()；失败的释放保留 genuine failure 并闩住不确定性",
+    "no_process_killed": "只回收自己 spawn 的子进程；未杀用户/未知/peer 进程",
+    "no_network_no_install_no_j_drive": true,
+    "no_credentials_or_env_read": true
+  },
+  "not_run": [
+    "tests/agent-driven/integration/created-native-source-reader.test.ts 整文件（含新增的 K04-c 与 F05-c）",
+    "tests/agent-driven/integration/native-cache-witness.test.ts 整文件",
+    "pnpm check 全门、vite build、validator --check、Python golden",
+    "任何真实 fixed draw、真实 Chrome、ffmpeg/ffprobe、真实 producer",
+    "A057-04 的真实 seek/JOB 超时与 browser/page/context 结算",
+    "下一阶段接线、S01、NativeAck、Studio、A 影片、V1"
+  ],
+  "risks_for_main": [
+    "旧重型语义回归未跑：读后身份栅栏与共享依赖核对会让某些曾经 true 的 guard 更严，旧用例若有此期待本波无法证明仍绿",
+    "A057-05/06 的运行证据缺失（代码已改、用例已写且过了 tsc，但未跑）",
+    "A057-04 仍 OPEN，需要 MAIN 的 seam/realm/子进程裁决",
+    "同步摘要的字节上界已修，时间上界未修（诚实登记）",
+    "require(ESM) 加载 .mjs 观察助手是本波为『mock 工厂与测试共享同一份状态』做的取舍（仓库没有 JavaScript 声明文件）",
+    "ACK 文件的 at 字段是手填占位，按 MAIN 指示视为 unknown；真实时间只取自 recorder"
+  ],
+  "handback": {
+    "writer_returned_to": "MAIN",
+    "git_commit_made": false,
+    "self_signed_external_review": false,
+    "claims_n1n2_a_v1_or_next_wiring": false,
+    "candidate_bytes_frozen_in": "本文件 files 段的 sha256"
+  }
+}

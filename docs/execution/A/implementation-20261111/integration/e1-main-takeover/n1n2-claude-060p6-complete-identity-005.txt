@@ -1,0 +1,150 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+ ❯ tests/agent-driven/integration/cache-process-identity.test.ts (97 tests | 2 failed) 2773ms
+   ✓ the identity of a process > reads the PID before the first parenthesis and the STATE as a state 1ms
+   ✓ the identity of a process > reads a command name that holds spaces 0ms
+   ✓ the identity of a process > reads a command name that holds parentheses 0ms
+   ✓ the identity of a process > reads the state S as a state and never as a number 0ms
+   ✓ the identity of a process > reads the state R as a state and never as a number 0ms
+   ✓ the identity of a process > reads the state Z as a state and never as a number 0ms
+   ✓ the identity of a process > reads the state T as a state and never as a number 0ms
+   ✓ the identity of a process > reads the state D as a state and never as a number 0ms
+   ✓ the identity of a process > reads the state I as a state and never as a number 0ms
+   ✓ the identity of a process > refuses an empty text instead of inventing an identity 0ms
+   ✓ the identity of a process > refuses a text without parentheses instead of inventing an identity 0ms
+   ✓ the identity of a process > refuses a text with too few fields instead of inventing an identity 0ms
+   ✓ the identity of a process > refuses a text whose PID is not a number instead of inventing an identity 0ms
+   ✓ the identity of a process > refuses a text whose fields are not numbers instead of inventing an identity 0ms
+   ✓ the identity of a process > reads the identity of THIS process from the kernel 0ms
+   ✓ the identity of a process > says that a process that is not there is gone 0ms
+   ✓ the identity of a process > tells the three states of a group apart 3ms
+   ✓ the handles of a draw > refuses a REAL handle of another supervisor 1ms
+   ✓ the handles of a draw > refuses an empty object as a handle 0ms
+   ✓ the handles of a draw > refuses a copy of the facts as a handle 0ms
+   ✓ the handles of a draw > refuses a number as a handle 0ms
+   ✓ the handles of a draw > refuses a string as a handle 0ms
+   ✓ the handles of a draw > refuses null as a handle 0ms
+   ✓ the handles of a draw > refuses undefined as a handle 0ms
+   ✓ the handles of a draw > starts a draw only once 18ms
+   ✓ the decoder of a private channel > takes the frames that are complete and keeps the rest 0ms
+   ✓ the decoder of a private channel > refuses a frame that claims more than the channel may hold 0ms
+   ✓ the decoder of a private channel > refuses the bytes that nobody reads when they grow past the limit 0ms
+   ✓ the decoder of a private channel > accepts a frame of exactly the limit 0ms
+   ✓ the queue of the decoded frames > may not grow without a limit, in frames and in bytes 0ms
+   ✓ the queue of the decoded frames > refuses a frame that does not fit in the bytes that are left 0ms
+   ✓ the segments of a receipt > takes the segments in order and adds them up 1ms
+   ✓ the segments of a receipt > refuses a segment whose order is not a NUMBER 0ms
+   ✓ the segments of a receipt > refuses a segment that arrives out of order, or twice 0ms
+   ✓ the segments of a receipt > refuses segments that disagree about their number 0ms
+   ✓ the segments of a receipt > refuses a segment whose items do not match its digest 0ms
+   ✓ the segments of a receipt > refuses the same identity twice 0ms
+   ✓ the segments of a receipt > refuses an item of an unknown kind 0ms
+   ✓ the segments of a receipt > reads its state again and again, and it never consumes the accumulator 0ms
+   ✓ the segments of a receipt > still refuses a segment that arrives out of order, or with a forged digest 0ms
+   ✓ the proof of the domain and the eligibility of a success > accepts a receipt that really proves the domain 0ms
+   ✓ the proof of the domain and the eligibility of a success > proves the domain and checks the eligibility on the SAME accumulator 0ms
+   ✓ the proof of the domain and the eligibility of a success > refuses a receipt that is not there 0ms
+   ✓ the proof of the domain and the eligibility of a success > refuses a receipt of another draw, another request or another protocol 0ms
+   ✓ the proof of the domain and the eligibility of a success > refuses a receipt that carries the wrong sequence number 0ms
+   ✓ the proof of the domain and the eligibility of a success > refuses a receipt that does not claim a reaped domain 1ms
+   ✓ the proof of the domain and the eligibility of a success > refuses a receipt whose chain of events was cut or changed 0ms
+   ✓ the proof of the domain and the eligibility of a success > refuses a receipt with NO wait at all 0ms
+   ✓ the proof of the domain and the eligibility of a success > refuses a receipt about another custodian, another worker or another epoch 0ms
+   ✓ the proof of the domain and the eligibility of a success > never delivers a receipt whose exec did not work 0ms
+   ✓ the proof of the domain and the eligibility of a success > keeps the proof of the domain and the eligibility of a success apart 0ms
+   ✓ the proof of the domain and the eligibility of a success > the receipt of the version 2 of this protocol > refuses a receipt that does not carry the version 0ms
+   ✓ the proof of the domain and the eligibility of a success > the receipt of the version 2 of this protocol > refuses a segment that does not carry the version 0ms
+   ✓ the proof of the domain and the eligibility of a success > the receipt of the version 2 of this protocol > refuses a receipt of another draw, another request or another protocol 0ms
+   ✓ the proof of the domain and the eligibility of a success > the receipt of the version 2 of this protocol > refuses a receipt that does not name a kind of proof 0ms
+   ✓ the proof of the domain and the eligibility of a success > the receipt of the version 2 of this protocol > refuses a complete receipt that does not claim the creative result 0ms
+   × the proof of the domain and the eligibility of a success > the receipt of the version 2 of this protocol > accepts the FAILED TERMINAL proof of the resources, and NEVER a result 2ms
+     → expected false to be true // Object.is equality
+   ✓ the proof of the domain and the eligibility of a success > the receipt of the version 2 of this protocol > refuses a failed terminal proof that is forged 1ms
+   ✓ the proof of the domain and the eligibility of a success > the receipt of the version 2 of this protocol > refuses a failed terminal proof whose wait never arrived 0ms
+   ✓ the interpretation of the messages of the channels > refuses a control message that arrived out of order 0ms
+   ✓ the interpretation of the messages of the channels > accumulates the segments and captures the receipt 0ms
+   ✓ the interpretation of the messages of the channels > refuses a segment after the summary, and a second summary 0ms
+   ✓ the interpretation of the messages of the channels > refuses a segment that was cut 0ms
+   ✓ the interpretation of the messages of the channels > reads a closed message that failed as a failure of the draw 0ms
+   ✓ the interpretation of the messages of the channels > reads the end of the draw channel as a failure only BEFORE the finalisation 0ms
+   ✓ the latch of the outcome > latches the first failure 0ms
+   ✓ the latch of the outcome > undoes a candidate that a later failure took away 0ms
+   ✓ the latch of the outcome > never replaces a failure that is already there 0ms
+   ✓ the cleanup causes of a held draw > does not grow while it is walked 0ms
+   ✓ the cleanup causes of a held draw > keeps the causes that are new, and says so when they did not fit 1ms
+   ✓ the deadline of the startup chain > is ONE budget that is never restarted 0ms
+   ✓ the startup of a draw that never came to life > ends as the ORIGINAL failure of the start, and it is NOT held 7ms
+   × a worker that never execed > may PROVE that the domain ended, and is NEVER a success 1ms
+     → expected false to be true // Object.is equality
+   ✓ a worker that never execed > is NOT a proof when the wait of the failed worker is missing 0ms
+   ✓ the owned cancel of a draw > refuses a handle of ANOTHER supervisor before any side effect 1ms
+   ✓ the owned cancel of a draw > makes a draw that was never started end as a failure of a child that was never born 0ms
+   ✓ the owned cancel of a draw > never replaces the FIRST error 0ms
+   ✓ the reconcile of a draw whose worker never stated its identity > is refused for the DOMAIN, and not for a missing worker 11ms
+   ✓ a startup that ends LATE > reconciles a draw that was NEVER BORN when its close arrives late 195ms
+   ✓ a startup that ends LATE > reconciles a draw whose custodian was NEVER ALLOWED to fork 244ms
+   ✓ a startup that ends LATE > keeps a draw HELD when the fresh epoch of the custodian is UNKNOWN 244ms
+   ✓ a startup that ends LATE > keeps a draw HELD when it was ALLOWED to fork and no worker was proved 274ms
+   ✓ the cancel of the owner of a draw > keeps the ORIGINAL error object of the owner 0ms
+   ✓ the cancel of the owner of a draw > exposes FROZEN summaries that do not change when the snapshot is read again 0ms
+   ✓ the cancel of the owner of a draw > does NOT replace an EARLIER failure with the cancel of the owner 12ms
+   ✓ the cancel of the owner of a draw > refuses a handle of ANOTHER supervisor 0ms
+   ✓ the idempotence of the cancel of the owner > keeps the FIRST accepted cancel when the SAME error is presented again 0ms
+   ✓ the idempotence of the cancel of the owner > keeps the FIRST accepted cancel when a DIFFERENT error is presented later 0ms
+   ✓ the idempotence of the cancel of the owner > does NOT write the CANCEL of the custodian twice 243ms
+   ✓ the guard of the raw edges > records the refusal of the raw signal, and it is never a delivery 265ms
+   ✓ the guard of the raw edges > refuses every other edge of child_process 1ms
+   ✓ a startup whose original epoch was NEVER bound > settles the original failure when the issued PID is really gone 245ms
+   ✓ a startup whose original epoch was NEVER bound > stays HELD when the issued PID is still there and no epoch was bound 245ms
+   ✓ a startup whose original epoch was NEVER bound > keeps a failure of the removal of the private run directory 7ms
+   ✓ a startup whose original epoch was NEVER bound > stays HELD when the issued PID cannot be read and no epoch was bound 244ms
+   ✓ a startup whose original epoch was NEVER bound > does NOT accept a known SAME epoch in Z as the end of the custodian 245ms
+   ✓ a startup whose original epoch was NEVER bound > exposes the ACTUAL terminal proof observations of the custodian 244ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/cache-process-identity.test.ts > the proof of the domain and the eligibility of a success > the receipt of the version 2 of this protocol > accepts the FAILED TERMINAL proof of the resources, and NEVER a result
+AssertionError: expected false to be true // Object.is equality
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- true[39m
+[31m+ false[39m
+
+ ❯ tests/agent-driven/integration/cache-process-identity.test.ts:1073:69
+    1071|     };
+    1072|     // The DOMAIN is really gone: the failed worker was really waited …
+    1073|     expect(validateCacheDomainReceipt(receipt, EXPECTED, state).ok).to…
+       |                                                                     ^
+    1074|     // And the draw is NEVER a success: a failed terminal proof delive…
+    1075|     // result, and it is not an expected fault either.
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tests/agent-driven/integration/cache-process-identity.test.ts > a worker that never execed > may PROVE that the domain ended, and is NEVER a success
+AssertionError: expected false to be true // Object.is equality
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- true[39m
+[31m+ false[39m
+
+ ❯ tests/agent-driven/integration/cache-process-identity.test.ts:1515:69
+    1513|     };
+    1514|     // The DOMAIN is really gone: the failed worker was really waited …
+    1515|     expect(validateCacheDomainReceipt(receipt, EXPECTED, state).ok).to…
+       |                                                                     ^
+    1516|     // And the draw is NEVER a success: the exec did not work.
+    1517|     expect(validateCacheExecutionReceipt(receipt, EXPECTED, state).ok)…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 95 passed (97)
+   Start at  02:27:44
+   Duration  4.81s (transform 190ms, setup 0ms, collect 292ms, tests 2.77s, environment 0ms, prepare 1.12s)
+

@@ -1,0 +1,26 @@
+tests/agent-driven/integration/native-cache-normal-pilot.test.ts(538,21): error TS2352: Conversion of type '{ reserve: () => never; calls: string[]; cancelErrors: unknown[]; handle: CacheDrawHandle; }' to type 'PositivePilotSupervisor' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Type '{ reserve: () => never; calls: string[]; cancelErrors: unknown[]; handle: CacheDrawHandle; }' is missing the following properties from type 'PositivePilotSupervisor': start, inspectCleanup, reconcileCleanup, requestCancel, diagnosticSnapshot
+tools/native-cache-normal-pilot.ts(421,17): error TS2379: Argument of type '{ stream: { readonly on?: (event: string, listener: (error: unknown) => void) => unknown; } | null | undefined; write: ((text: string, callback?: (error: unknown) => void) => void) | null | undefined; }' is not assignable to parameter of type 'ReviewedReportingOptions' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'stream' are incompatible.
+    Type '{ readonly on?: (event: string, listener: (error: unknown) => void) => unknown; } | null | undefined' is not assignable to type '{ readonly on?: (event: string, listener: (error: unknown) => void) => unknown; } | null'.
+      Type 'undefined' is not assignable to type '{ readonly on?: (event: string, listener: (error: unknown) => void) => unknown; } | null'.
+tools/native-cache-normal-pilot.ts(702,29): error TS2339: Property 'picture' does not exist on type 'never'.
+tools/native-cache-normal-pilot.ts(703,17): error TS2339: Property 'error' does not exist on type 'never'.
+tools/native-cache-normal-pilot.ts(703,41): error TS2339: Property 'error' does not exist on type 'never'.
+tools/native-cache-normal-pilot.ts(704,41): error TS2339: Property 'error' does not exist on type 'never'.
+tools/native-cache-normal-pilot.ts(706,51): error TS2339: Property 'error' does not exist on type 'never'.
+tools/native-cache-normal-pilot.ts(706,75): error TS2339: Property 'error' does not exist on type 'never'.
+tools/native-cache-normal-pilot.ts(707,39): error TS2339: Property 'error' does not exist on type 'never'.
+tools/native-cache-normal-pilot.ts(708,39): error TS2339: Property 'error' does not exist on type 'never'.
+tools/native-cache-normal-pilot.ts(715,30): error TS2339: Property 'picture' does not exist on type 'never'.
+tools/native-cache-normal-pilot.ts(716,32): error TS2339: Property 'picture' does not exist on type 'never'.
+tools/native-cache-normal-pilot.ts(716,64): error TS2339: Property 'picture' does not exist on type 'never'.
+tools/native-cache-normal-pilot.ts(717,24): error TS2339: Property 'error' does not exist on type 'never'.
+tools/native-cache-normal-pilot.ts(717,48): error TS2339: Property 'error' does not exist on type 'never'.
+tools/native-cache-normal-pilot.ts(717,96): error TS2339: Property 'error' does not exist on type 'never'.
+tools/native-cache-normal-pilot.ts(718,40): error TS2339: Property 'cleanup' does not exist on type 'never'.
+tools/native-cache-normal-pilot.ts(718,57): error TS2339: Property 'cleanup' does not exist on type 'never'.
+tools/native-cache-normal-pilot.ts(881,11): error TS2540: Cannot assign to 'root' because it is a read-only property.
+tools/native-cache-normal-pilot.ts(920,11): error TS2540: Cannot assign to 'supervisor' because it is a read-only property.
+tools/native-cache-normal-pilot.ts(926,11): error TS2540: Cannot assign to 'reservedHandle' because it is a read-only property.
+tools/native-cache-normal-pilot.ts(929,11): error TS2540: Cannot assign to 'startPromise' because it is a read-only property.

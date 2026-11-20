@@ -1,0 +1,129 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:873446) PromiseRejectionHandledWarning: Promise rejection was handled asynchronously (rejection id: 3)
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:873446) PromiseRejectionHandledWarning: Promise rejection was handled asynchronously (rejection id: 5)
+ ❯ tests/agent-driven/integration/native-cache-normal-pilot.test.ts (43 tests | 3 failed) 102ms
+   ✓ the arguments of the positive pilot > takes exactly a mode and two digests 1ms
+   ✓ the arguments of the positive pilot > does not run the pilot when its module is imported 0ms
+   ✓ the positive pilot > really succeeds, and the picture is EXACTLY the synthetic one 17ms
+   ✓ the positive pilot > is NOT a success when the picture is not the exact one 2ms
+   ✓ the positive pilot > refuses bytes that are not the reviewed ones, and starts nothing 2ms
+   ✓ the positive pilot > refuses a COPY of the helper that is not the reviewed one, and starts nothing 2ms
+   ✓ the positive pilot > injects the deliberate failure only after the worker was REALLY alive 2ms
+   ✓ the positive pilot > does NOT inject the deliberate failure when the worker was not observed 2ms
+   ✓ the positive pilot > does NOT inject the deliberate failure after a GO of another worker 2ms
+   ✓ the positive pilot > does NOT inject the deliberate failure after a GO of another draw 2ms
+   ✓ the positive pilot > does NOT inject the deliberate failure when the worker is a zombie 2ms
+   ✓ the positive pilot > does NOT inject the deliberate failure when the worker is another start time 1ms
+   ✓ the positive pilot > does NOT inject the deliberate failure when the worker is another parent 2ms
+   ✓ the positive pilot > does NOT inject the deliberate failure when the worker is another group 2ms
+   ✓ the positive pilot > does NOT accept an unrelated failure as the expected fault 2ms
+   ✓ the positive pilot > does NOT accept a transport failure as the expected fault 1ms
+   ✓ the positive pilot > keeps a failure of the evidence, and it is never a green case 2ms
+   ✓ the positive pilot > keeps the owner of a HELD draw and ends with the fresh proof 2ms
+   ✓ the positive pilot > keeps the owner when the ROOT could not be prepared, and it starts nothing 1ms
+   ✓ the positive pilot > keeps the owner when the RESERVE failed, and there is no phantom child 1ms
+   ✓ the positive pilot > reads the ORIGINAL result of a draw that was held and that ended LATE 2ms
+   ✓ the positive pilot > keeps the owner when the event reader failed after the start 1ms
+   ✓ the positive pilot > never kills anything: it asks, and it does nothing else 2ms
+   ✓ the positive pilot > does not lose the owner when the destination fails asynchronously 3ms
+   ✓ the real asynchronous order of the two modes > does NOT cancel a draw that is still making progress 2ms
+   ✓ the real asynchronous order of the two modes > waits for the accepted worker before it injects the deliberate failure 1ms
+   ✓ the real asynchronous order of the two modes > does NOT inject when the draw REALLY failed before the worker was accepted 2ms
+   ✓ the real asynchronous order of the two modes > does NOT inject when the GO of this draw never arrives 2ms
+   ✓ the raw cleanup of the draw > is NOT green when the raw settlement carries a cleanup failure 2ms
+   ✓ the raw cleanup of the draw > is NOT a fault when the raw settlement carries a cleanup failure 2ms
+   ✓ the raw cleanup of the draw > is NOT green when the FINAL diagnostic carries cleanup failures 2ms
+   ✓ the ownership of the runtime root > writes NO evidence at all when the root could not be allocated 2ms
+   ✓ the final qualification of a run > commits the final qualification AFTER the report callbacks 2ms
+   ✓ the final qualification of a run > revokes the final qualification when the report destination fails LATE 3ms
+   ✓ the final qualification of a run > is NOT green when the manifest of the artifacts could not be built 1ms
+   × the ORCHESTRATION over the ACTUAL supervisor > waits for the REAL asynchronous start of the normal mode, and cancels NOTHING 5ms
+     → deps.now is not a function
+   × the ORCHESTRATION over the ACTUAL supervisor > waits for the LATE worker of the fault mode before it injects 6ms
+     → deps.now is not a function
+   ✓ the reporting over a REAL destination > revokes the final qualification when the destination fails LATE 8ms
+   × the reporting over a REAL destination > does NOT lose the owner when the destination breaks while the settlement is PENDING 0ms
+     → EPIPE
+   ✓ the command of the positive pilot > answers 2 for arguments it does not take 2ms
+   ✓ the command of the positive pilot > answers 0 for a normal draw that really succeeded 2ms
+   ✓ the command of the positive pilot > answers 1 for the deliberate failure that was really observed 2ms
+   ✓ the digest of the synthetic picture > is the digest of exactly 1024 bytes of 0x4a 0ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/native-cache-normal-pilot.test.ts > the ORCHESTRATION over the ACTUAL supervisor > waits for the REAL asynchronous start of the normal mode, and cancels NOTHING
+ FAIL  tests/agent-driven/integration/native-cache-normal-pilot.test.ts > the ORCHESTRATION over the ACTUAL supervisor > waits for the LATE worker of the fault mode before it injects
+TypeError: deps.now is not a function
+ ❯ continueToTerminal tools/native-cache-normal-pilot.ts:756:30
+    754|     // phantom child.
+    755|     entry.state = "not-started";
+    756|     timeline.push({ at: deps.now(), what: "not-started", detail: null …
+       |                              ^
+    757|     return;
+    758|   }
+ ❯ Module.runPositivePilot tools/native-cache-normal-pilot.ts:1119:11
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  tests/agent-driven/integration/native-cache-normal-pilot.test.ts > the reporting over a REAL destination > does NOT lose the owner when the destination breaks while the settlement is PENDING
+Error: EPIPE
+ ❯ tests/agent-driven/integration/native-cache-normal-pilot.test.ts:1261:45
+    1259|     const promise = runPositivePilot(OPTIONS, deps);
+    1260|     // The destination breaks while the original settlement is still p…
+    1261|     destination.emit("error", Object.assign(new Error("EPIPE"), { code…
+       |                                             ^
+    1262|     await new Promise((resolveTick) => { setTimeout(resolveTick, 5); }…
+    1263|     // The owner is still waiting: the draw was NOT cancelled.
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+⎯⎯⎯⎯⎯⎯ Unhandled Errors ⎯⎯⎯⎯⎯⎯
+
+Vitest caught 2 unhandled errors during the test run.
+This might cause false positive tests. Resolve unhandled errors to make sure your tests are not affected.
+
+⎯⎯⎯⎯ Unhandled Rejection ⎯⎯⎯⎯⎯
+TypeError: deps.now is not a function
+ ❯ continueToTerminal tools/native-cache-normal-pilot.ts:756:30
+    754|     // phantom child.
+    755|     entry.state = "not-started";
+    756|     timeline.push({ at: deps.now(), what: "not-started", detail: null …
+       |                              ^
+    757|     return;
+    758|   }
+ ❯ Module.runPositivePilot tools/native-cache-normal-pilot.ts:1119:11
+ ❯ processTicksAndRejections node:internal/process/task_queues:103:5
+
+This error originated in "tests/agent-driven/integration/native-cache-normal-pilot.test.ts" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+The latest test that might've caused the error is "waits for the REAL asynchronous start of the normal mode, and cancels NOTHING". It might mean one of the following:
+- The error was thrown, while Vitest was running this test.
+- If the error occurred after the test had been completed, this was the last documented test before it was thrown.
+
+⎯⎯⎯⎯ Unhandled Rejection ⎯⎯⎯⎯⎯
+TypeError: deps.now is not a function
+ ❯ continueToTerminal tools/native-cache-normal-pilot.ts:756:30
+    754|     // phantom child.
+    755|     entry.state = "not-started";
+    756|     timeline.push({ at: deps.now(), what: "not-started", detail: null …
+       |                              ^
+    757|     return;
+    758|   }
+ ❯ Module.runPositivePilot tools/native-cache-normal-pilot.ts:1119:11
+ ❯ processTicksAndRejections node:internal/process/task_queues:103:5
+
+This error originated in "tests/agent-driven/integration/native-cache-normal-pilot.test.ts" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+The latest test that might've caused the error is "waits for the LATE worker of the fault mode before it injects". It might mean one of the following:
+- The error was thrown, while Vitest was running this test.
+- If the error occurred after the test had been completed, this was the last documented test before it was thrown.
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+
+
+ Test Files  1 failed (1)
+      Tests  3 failed | 40 passed (43)
+     Errors  2 errors
+   Start at  15:59:37
+   Duration  2.20s (transform 179ms, setup 0ms, collect 289ms, tests 102ms, environment 0ms, prepare 1.15s)
+

@@ -1,0 +1,22 @@
+.................................................................F...E......
+======================================================================
+ERROR: test_the_wait_item_carries_its_order_and_its_category (__main__.TheShapesOfTheReceipt.test_the_wait_item_carries_its_order_and_its_category)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/helpers/cache-custodian-unit.py", line 2467, in test_the_wait_item_carries_its_order_and_its_category
+    self.assertEqual(value["order"], 3)
+                     ~~~~~^^^^^^^^^
+KeyError: 'order'
+
+======================================================================
+FAIL: test_a_stream_that_wrote_too_much_keeps_its_budget_failure (__main__.TheShapesOfTheReceipt.test_a_stream_that_wrote_too_much_keeps_its_budget_failure)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/helpers/cache-custodian-unit.py", line 2569, in test_a_stream_that_wrote_too_much_keeps_its_budget_failure
+    self.assertEqual(instance.stdout_ledger.bytes, custodian.MAX_STREAM_BYTES + 1)
+AssertionError: 65536 != 65537
+
+----------------------------------------------------------------------
+Ran 76 tests in 0.062s
+
+FAILED (failures=1, errors=1)

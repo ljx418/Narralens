@@ -1,0 +1,94 @@
+............................E.EFEE................................E...
+======================================================================
+ERROR: test_a_cancel_before_the_authorisation_forks_nothing (__main__.TheMonotonicAuthorisationOfADraw.test_a_cancel_before_the_authorisation_forks_nothing)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/helpers/cache-custodian-unit.py", line 2240, in test_a_cancel_before_the_authorisation_forks_nothing
+    attempts = self._run_the_batch([
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/helpers/cache-custodian-unit.py", line 2216, in _run_the_batch
+    instance._run_loop(time.monotonic() + 1.0)
+  File "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/src/adapters/openfilm/cache-process-custodian.py", line 2644, in _run_loop
+    for key, _mask in self._selector.select(POLL_SECONDS):
+        ^^^^^^^^^^
+TypeError: cannot unpack non-iterable _Key object
+
+======================================================================
+ERROR: test_a_refused_authorisation_keeps_the_original_binding (__main__.TheMonotonicAuthorisationOfADraw.test_a_refused_authorisation_keeps_the_original_binding)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/src/adapters/openfilm/cache-process-custodian.py", line 1838, in _authorize_fork
+    worker = self._spawn_worker(self._node_path, self._worker_path, environment)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/src/adapters/openfilm/cache-process-custodian.py", line 1746, in _spawn_worker
+    pid = os.fork()
+          ^^^^^^^^^
+  File "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/helpers/cache-custodian-unit.py", line 140, in deny
+    raise PermissionError(
+PermissionError: [Errno 1] the raw edge 'fork' is denied in this suite: install an explicit implementation
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/helpers/cache-custodian-unit.py", line 2259, in test_a_refused_authorisation_keeps_the_original_binding
+    instance._authorize_fork(self._authorisation("draw-original"))
+  File "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/src/adapters/openfilm/cache-process-custodian.py", line 1844, in _authorize_fork
+    raise CustodianFailure(
+narralens_cache_custodian.CustodianFailure: the worker could not be forked: errno 1
+
+======================================================================
+ERROR: test_an_authorisation_before_the_cancel_forks_once (__main__.TheMonotonicAuthorisationOfADraw.test_an_authorisation_before_the_cancel_forks_once)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/helpers/cache-custodian-unit.py", line 2249, in test_an_authorisation_before_the_cancel_forks_once
+    attempts = self._run_the_batch([
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/helpers/cache-custodian-unit.py", line 2216, in _run_the_batch
+    instance._run_loop(time.monotonic() + 1.0)
+  File "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/src/adapters/openfilm/cache-process-custodian.py", line 2644, in _run_loop
+    for key, _mask in self._selector.select(POLL_SECONDS):
+        ^^^^^^^^^^
+TypeError: cannot unpack non-iterable _Key object
+
+======================================================================
+ERROR: test_two_authorisations_fork_at_most_once (__main__.TheMonotonicAuthorisationOfADraw.test_two_authorisations_fork_at_most_once)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/helpers/cache-custodian-unit.py", line 2234, in test_two_authorisations_fork_at_most_once
+    attempts = self._run_the_batch([self._authorisation(), self._authorisation()])
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/helpers/cache-custodian-unit.py", line 2216, in _run_the_batch
+    instance._run_loop(time.monotonic() + 1.0)
+  File "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/src/adapters/openfilm/cache-process-custodian.py", line 2644, in _run_loop
+    for key, _mask in self._selector.select(POLL_SECONDS):
+        ^^^^^^^^^^
+TypeError: cannot unpack non-iterable _Key object
+
+======================================================================
+ERROR: test_the_end_of_the_file_is_registered_once (__main__.TheStreamsOfTheWorker.test_the_end_of_the_file_is_registered_once)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/helpers/cache-custodian-unit.py", line 2315, in test_the_end_of_the_file_is_registered_once
+    self.assertEqual(instance.stdout_ledger.tail_bytes, 5)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'OwnedStreamLedger' object has no attribute 'tail_bytes'
+
+======================================================================
+FAIL: test_a_refused_authorisation_keeps_the_original_binding (__main__.TheMonotonicAuthorisationOfADraw.test_a_refused_authorisation_keeps_the_original_binding)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/helpers/cache-custodian-unit.py", line 213, in tearDown
+    self.assertEqual(
+AssertionError: Lists differ: ['fork'] != []
+
+First list contains 1 additional elements.
+First extra element 0:
+'fork'
+
+- ['fork']
++ [] : a raw edge of the operating system was refused in this case
+
+----------------------------------------------------------------------
+Ran 69 tests in 0.077s
+
+FAILED (failures=1, errors=5)

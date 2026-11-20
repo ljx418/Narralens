@@ -1,0 +1,107 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+ ❯ tests/m2.1/openfilm-upstream-lock.test.ts (60 tests | 8 failed) 3320ms
+   ✓ M-04 pinned OpenFilm checkout verification > pins every file the loader is about to execute, plus package, lock and licence 1ms
+   ✓ M-04 pinned OpenFilm checkout verification > keeps the production lock consistent with the M1B recorded upstream lock 0ms
+   ✓ M-04 pinned OpenFilm checkout verification > refuses a checkout with no git HEAD 5ms
+   ✓ M-04 pinned OpenFilm checkout verification > fails closed when git status cannot be executed 8ms
+   ✓ M-04 pinned OpenFilm checkout verification > fails closed when git status exits non-zero 7ms
+   ✓ M-04 pinned OpenFilm checkout verification > fails closed when git status times out 17ms
+   ✓ M-04 pinned OpenFilm checkout verification > uses a 30 second production default without weakening an explicit fail-closed budget 3ms
+   ✓ M-04 pinned OpenFilm checkout verification > rejects a tracked dirty checkout and records git_clean only after a successful check 15ms
+   ✓ M-04 pinned OpenFilm checkout verification > refuses when the seam module was tampered with 6ms
+   ✓ M-04 pinned OpenFilm checkout verification > refuses when any other loaded module, package, lock or licence changes 29ms
+   ✓ M-04 pinned OpenFilm checkout verification > reports a missing pinned file as missing rather than as a digest mismatch 4ms
+   ✓ M-04 pinned OpenFilm checkout verification > refuses to load rather than loading a module whose digest does not match 4ms
+   ✓ M-04 pinned OpenFilm checkout verification > refuses a caller-forged reusable verification verdict 4ms
+   ✓ M-04 pinned OpenFilm checkout verification > never lets a caller supply the vendor path through a request  1738ms
+   ✓ M-04 pinned OpenFilm checkout verification > derives the entry points of a module from its OWN capability flow 1ms
+   ✓ M-04 pinned OpenFilm checkout verification > follows an alias of the issued capability through the transparent wrappers 0ms
+   ✓ M-04 pinned OpenFilm checkout verification > the vendor-path rule detects a request header 8ms
+   ✓ M-04 pinned OpenFilm checkout verification > the vendor-path rule detects a request body 7ms
+   ✓ M-04 pinned OpenFilm checkout verification > the vendor-path rule detects an alias of a request 7ms
+   ✓ M-04 pinned OpenFilm checkout verification > the vendor-path rule detects a renamed request parameter 7ms
+   ✓ M-04 pinned OpenFilm checkout verification > the vendor-path rule detects a helper that was handed the request 7ms
+   ✓ M-04 pinned OpenFilm checkout verification > the vendor-path rule detects a helper that receives the value in its own parameter 8ms
+   ✓ M-04 pinned OpenFilm checkout verification > the vendor-path rule detects the same export under a renamed import 7ms
+   ✓ M-04 pinned OpenFilm checkout verification > the vendor-path rule detects the same export through a namespace import 6ms
+   ✓ M-04 pinned OpenFilm checkout verification > the vendor-path rule detects the producer position of the serving owner 7ms
+   ✓ M-04 pinned OpenFilm checkout verification > the vendor-path rule detects the producer position of the bridge 7ms
+   ✓ M-04 pinned OpenFilm checkout verification > the vendor-path rule detects a request wrapped in an assertion 7ms
+   ✓ M-04 pinned OpenFilm checkout verification > the vendor-path rule detects a request wrapped in parentheses 7ms
+   ✓ M-04 pinned OpenFilm checkout verification > the vendor-path rule accepts the composition-time value 7ms
+   ✓ M-04 pinned OpenFilm checkout verification > the vendor-path rule accepts a file that never reaches the loader 7ms
+   ✓ M-04 pinned OpenFilm checkout verification > the vendor-path rule accepts a same-named parameter that is trusted 8ms
+   ✓ M-04 pinned OpenFilm checkout verification > the vendor-path rule accepts a wrapped composition-time value 7ms
+   ✓ M-04 pinned OpenFilm checkout verification > the vendor-path rule accepts a wrapped same-named parameter that is trusted 8ms
+   ✓ M-04 pinned OpenFilm checkout verification > detects the loader module's own local call with a request-derived value 18ms
+   ✓ M-04 pinned OpenFilm checkout verification > does not mistake a same-named parameter for a vendor path 0ms
+   × M-04 pinned OpenFilm checkout verification > the vendor-path rule detects a request in a class method 17ms
+     → expected +0 to be 1 // Object.is equality
+   × M-04 pinned OpenFilm checkout verification > the vendor-path rule detects a request in a constructor 9ms
+     → expected +0 to be 1 // Object.is equality
+   ✓ M-04 pinned OpenFilm checkout verification > the vendor-path rule detects a request in a top level arrow 7ms
+   ✓ M-04 pinned OpenFilm checkout verification > the vendor-path rule detects a request in a top level function expression 8ms
+   ✓ M-04 pinned OpenFilm checkout verification > the vendor-path rule detects a request in an arrow inside a class method 7ms
+   ✓ M-04 pinned OpenFilm checkout verification > the vendor-path rule detects a request in an object literal method 9ms
+   ✓ M-04 pinned OpenFilm checkout verification > the vendor-path rule detects a request in a class property initializer 8ms
+   ✓ M-04 pinned OpenFilm checkout verification > the vendor-path rule detects a request in a static block that reads a request the module really holds 7ms
+   × M-04 pinned OpenFilm checkout verification > the vendor-path rule detects a request in a helper called from a class method 8ms
+     → expected +0 to be 1 // Object.is equality
+   × M-04 pinned OpenFilm checkout verification > the vendor-path rule detects a request in a helper that is an arrow 7ms
+     → expected +0 to be 1 // Object.is equality
+   × M-04 pinned OpenFilm checkout verification > the vendor-path rule detects a request in a serving owner built in a class method 7ms
+     → expected +0 to be 1 // Object.is equality
+   × M-04 pinned OpenFilm checkout verification > the vendor-path rule detects a request in a bridge drawn in a class method 8ms
+     → expected +0 to be 1 // Object.is equality
+   ✓ M-04 pinned OpenFilm checkout verification > the vendor-path rule detects a request in the default value of a parameter 6ms
+   × M-04 pinned OpenFilm checkout verification > the vendor-path rule detects a request in the default value of a parameter of a method 7ms
+     → expected +0 to be 1 // Object.is equality
+   ✓ M-04 pinned OpenFilm checkout verification > the vendor-path rule detects a request in a computed name of a member 7ms
+   × M-04 pinned OpenFilm checkout verification > the vendor-path rule detects a request in a method of this class, called through this 7ms
+     → expected +0 to be 1 // Object.is equality
+   ✓ M-04 pinned OpenFilm checkout verification > the vendor-path rule accepts a class method with a string parameter 7ms
+   ✓ M-04 pinned OpenFilm checkout verification > the vendor-path rule accepts a same named parameter that is not a request 9ms
+   ✓ M-04 pinned OpenFilm checkout verification > the vendor-path rule accepts a parameter that shadows a request of an outer scope 7ms
+   ✓ M-04 pinned OpenFilm checkout verification > the vendor-path rule accepts a static block with no request in it 6ms
+   ✓ M-04 pinned OpenFilm checkout verification > the vendor-path rule accepts an unrelated class 6ms
+   ✓ M-04 pinned OpenFilm checkout verification > the vendor-path rule accepts a default value that holds no request 6ms
+   ✓ M-04 pinned OpenFilm checkout verification > the vendor-path rule accepts a computed name in a scope that holds no request 7ms
+   ✓ M-04 pinned OpenFilm checkout verification > the vendor-path rule accepts a method of this class, called with a value that is not a request 7ms
+   ✓ M-04 pinned OpenFilm checkout verification > enumerates the loader call sites of the Host, one by one  1151ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 8 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/m2.1/openfilm-upstream-lock.test.ts > M-04 pinned OpenFilm checkout verification > the vendor-path rule detects a request in a class method
+ FAIL  tests/m2.1/openfilm-upstream-lock.test.ts > M-04 pinned OpenFilm checkout verification > the vendor-path rule detects a request in a constructor
+ FAIL  tests/m2.1/openfilm-upstream-lock.test.ts > M-04 pinned OpenFilm checkout verification > the vendor-path rule detects a request in a helper called from a class method
+ FAIL  tests/m2.1/openfilm-upstream-lock.test.ts > M-04 pinned OpenFilm checkout verification > the vendor-path rule detects a request in a helper that is an arrow
+ FAIL  tests/m2.1/openfilm-upstream-lock.test.ts > M-04 pinned OpenFilm checkout verification > the vendor-path rule detects a request in a serving owner built in a class method
+ FAIL  tests/m2.1/openfilm-upstream-lock.test.ts > M-04 pinned OpenFilm checkout verification > the vendor-path rule detects a request in a bridge drawn in a class method
+ FAIL  tests/m2.1/openfilm-upstream-lock.test.ts > M-04 pinned OpenFilm checkout verification > the vendor-path rule detects a request in the default value of a parameter of a method
+ FAIL  tests/m2.1/openfilm-upstream-lock.test.ts > M-04 pinned OpenFilm checkout verification > the vendor-path rule detects a request in a method of this class, called through this
+AssertionError: expected +0 to be 1 // Object.is equality
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 1[39m
+[31m+ 0[39m
+
+ ❯ tests/m2.1/openfilm-upstream-lock.test.ts:996:135
+    994|       body,
+    995|     ].join("\n");
+    996|     expect(vendorPathViolations([{ file: "synthetic.ts", text: source …
+       |                                                                                                                                       ^
+    997|   });
+    998| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/8]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  8 failed | 52 passed (60)
+   Start at  11:23:29
+   Duration  5.72s (transform 128ms, setup 0ms, collect 655ms, tests 3.32s, environment 0ms, prepare 1.13s)
+

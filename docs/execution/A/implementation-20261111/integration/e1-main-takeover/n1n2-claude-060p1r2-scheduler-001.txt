@@ -1,0 +1,39 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+ ❯ tests/agent-driven/integration/cache-production-scope.test.ts (13 tests | 1 failed) 26ms
+   ✓ the native cache production scheduler > holds one scope per physical root and refuses a second one while it is alive 2ms
+   ✓ the native cache production scheduler > shares one lock between two names of the same physical directory 1ms
+   ✓ the native cache production scheduler > runs two different roots at the same time and queues the third 1ms
+   ✓ the native cache production scheduler > refuses a reservation beyond the queue of thirty-two and beyond the queue of one root 2ms
+   ✓ the native cache production scheduler > refuses a reservation that waited longer than the queue deadline 2ms
+   ✓ the native cache production scheduler > takes a cancelled reservation out of the queue without starting anything 1ms
+   ✓ the native cache production scheduler > keeps the scope of a production whose cleanup could not be proven 1ms
+   ✓ the native cache production scheduler > gives the scope back through the COMPLETION of its production, and not through a bare clear 1ms
+   × the native cache production scheduler > refuses a phase lease of another owner, and a phase that was already leased 11ms
+     → expected null not to be null
+   ✓ the native cache production scheduler > refuses a completion of a scope whose owner is another one 1ms
+   ✓ the native cache production scheduler > carries the scope of a production into the steps inside it, and refuses a dead one 1ms
+   ✓ the native cache production scheduler > refuses a root that is not a directory, and does not take a place in the queue 1ms
+   ✓ the native cache production scheduler > does not let a lookalike be a scope 0ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/cache-production-scope.test.ts > the native cache production scheduler > refuses a phase lease of another owner, and a phase that was already leased
+AssertionError: expected null not to be null
+ ❯ tests/agent-driven/integration/cache-production-scope.test.ts:308:28
+    306|     openCacheProductionPhaseLease(direct, "parent_drain", OWNER)?.sett…
+    307|     const completion = mintCacheProductionCompletion(direct, "settled"…
+    308|     expect(completion).not.toBeNull();
+       |                            ^
+    309|     expect(completeCacheProductionScope(direct, completion)).toBe(true…
+    310|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 12 passed (13)
+   Start at  21:02:09
+   Duration  2.05s (transform 73ms, setup 0ms, collect 164ms, tests 26ms, environment 0ms, prepare 1.26s)
+

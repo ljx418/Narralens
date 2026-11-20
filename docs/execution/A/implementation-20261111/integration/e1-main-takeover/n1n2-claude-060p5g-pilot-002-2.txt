@@ -1,0 +1,166 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+ ❯ tests/agent-driven/integration/native-cache-normal-pilot.test.ts (69 tests | 4 failed) 563ms
+   ✓ the arguments of the positive pilot > takes exactly a mode and two digests 1ms
+   ✓ the arguments of the positive pilot > does not run the pilot when its module is imported 0ms
+   ✓ the positive pilot > really succeeds, and the picture is EXACTLY the synthetic one 22ms
+   ✓ the positive pilot > is NOT a success when the picture is not the exact one 2ms
+   ✓ the positive pilot > refuses bytes that are not the reviewed ones, and starts nothing 2ms
+   ✓ the positive pilot > refuses a COPY of the helper that is not the reviewed one, and starts nothing 2ms
+   ✓ the positive pilot > injects the deliberate failure only after the worker was REALLY alive 2ms
+   ✓ the positive pilot > does NOT inject the deliberate failure when the worker was not observed 1ms
+   ✓ the positive pilot > does NOT inject the deliberate failure after a GO of another worker 2ms
+   ✓ the positive pilot > does NOT inject the deliberate failure after a GO of another draw 1ms
+   ✓ the positive pilot > does NOT inject the deliberate failure when the worker is a zombie 2ms
+   ✓ the positive pilot > does NOT inject the deliberate failure when the worker is another start time 1ms
+   ✓ the positive pilot > does NOT inject the deliberate failure when the worker is another parent 1ms
+   ✓ the positive pilot > does NOT inject the deliberate failure when the worker is another group 1ms
+   ✓ the positive pilot > does NOT accept an unrelated failure as the expected fault 1ms
+   ✓ the positive pilot > does NOT accept a transport failure as the expected fault 2ms
+   ✓ the positive pilot > keeps a failure of the evidence, and it is never a green case 1ms
+   ✓ the positive pilot > keeps the owner of a HELD draw and ends with the fresh proof 1ms
+   ✓ the positive pilot > keeps the owner when the ROOT could not be prepared, and it starts nothing 1ms
+   ✓ the positive pilot > keeps the owner when the RESERVE failed, and there is no phantom child 1ms
+   ✓ the positive pilot > reads the ORIGINAL result of a draw that was held and that ended LATE 1ms
+   ✓ the positive pilot > keeps the owner when the event reader failed after the start 1ms
+   ✓ the positive pilot > never kills anything: it asks, and it does nothing else 1ms
+   ✓ the positive pilot > does not lose the owner when the destination fails asynchronously 3ms
+   ✓ the real asynchronous order of the two modes > does NOT cancel a draw that is still making progress 2ms
+   ✓ the real asynchronous order of the two modes > waits for the accepted worker before it injects the deliberate failure 1ms
+   ✓ the real asynchronous order of the two modes > does NOT inject when the draw REALLY failed before the worker was accepted 2ms
+   ✓ the real asynchronous order of the two modes > does NOT inject when the GO of this draw never arrives 1ms
+   ✓ the raw cleanup of the draw > is NOT green when the raw settlement carries a cleanup failure 1ms
+   ✓ the raw cleanup of the draw > is NOT a fault when the raw settlement carries a cleanup failure 1ms
+   ✓ the raw cleanup of the draw > is NOT green when the FINAL diagnostic carries cleanup failures 1ms
+   ✓ the ownership of the runtime root > writes NO evidence at all when the root could not be allocated 2ms
+   ✓ the final qualification of a run > commits the final qualification AFTER the report callbacks 2ms
+   ✓ the final qualification of a run > revokes the final qualification when the report destination fails LATE 3ms
+   ✓ the final qualification of a run > is NOT green when the manifest of the artifacts could not be built 1ms
+   ✓ the JOINT publication of a run > publishes the final into the root of the run, and the temporary file is gone 1ms
+   ✓ the JOINT publication of a run > revokes the qualification when the publication fails BEFORE the bytes are written 1ms
+   ✓ the JOINT publication of a run > revokes the qualification when the publication fails AFTER the complete write 2ms
+   ✓ the JOINT publication of a run > is NOT green when a REQUIRED artifact of the manifest carries an error 1ms
+   ✓ the JOINT publication of a run > is NOT green when a REQUIRED artifact is missing from the manifest 1ms
+   ✓ the JOINT publication of a run > is NOT green when the manifest does not name the digest of the candidate that is on the disk 1ms
+   ✓ the JOINT publication of a run > answers 3 when the publication of the run failed 1ms
+   ✓ the JOINT publication of a run > answers 2 for a refusal of the arguments, and 1 for a fault that was really observed 3ms
+   × the JOINT publication of a run > the REAL filesystem: the final is published in the root of the run 16ms
+     → expected 1 to be +0 // Object.is equality
+   ✓ the JOINT publication of a run > a CONSUMER that applies the joint judgement rejects a run whose publication failed 7ms
+   ✓ the JOINT publication of a run > the REAL filesystem: a required record that was not written is not a green case 7ms
+   × the JOINT checker of a published run > accepts a normal run that really succeeded 7ms
+     → expected [ Array(1) ] to deeply equal []
+   × the JOINT checker of a published run > accepts the deliberate fault that was really observed 7ms
+     → expected [ Array(1) ] to deeply equal []
+   ✓ the JOINT checker of a published run > does NOT accept an ordinary business failure 6ms
+   ✓ the JOINT checker of a published run > does NOT accept a fault that carries an extra failure 6ms
+   ✓ the JOINT checker of a published run > refuses when the final record cannot be read, and it keeps the evidence 5ms
+   ✓ the JOINT checker of a published run > refuses when the candidate cannot be read 6ms
+   ✓ the JOINT checker of a published run > refuses when the helper cannot be read 6ms
+   ✓ the JOINT checker of a published run > refuses when a third listed artifact cannot be read 13ms
+   ✓ the JOINT checker of a published run > refuses when a record is GONE from the root 11ms
+   ✓ the JOINT checker of a published run > refuses a record with a LEGITIMATE digest but another mode 9ms
+   ✓ the JOINT checker of a published run > refuses a record with a LEGITIMATE digest but another protocol 8ms
+   ✓ the JOINT checker of a published run > refuses a record with a LEGITIMATE digest but a broken link 8ms
+   ✓ the JOINT checker of a published run > refuses a record with a LEGITIMATE digest but another number of bytes 13ms
+   ✓ the JOINT checker of a published run > answers 3 from the COMMAND when the evidence cannot be read 8ms
+   ✓ the JOINT checker of a published run > the REAL mapper: a single EIO on a third artifact makes the run unreliable 8ms
+   ✓ the ORCHESTRATION over the ACTUAL supervisor > waits for the REAL asynchronous start of the normal mode, and cancels NOTHING 57ms
+   ✓ the ORCHESTRATION over the ACTUAL supervisor > waits for the LATE worker of the fault mode before it injects 105ms
+   ✓ the reporting over a REAL destination > revokes the final qualification when the destination fails LATE 2ms
+   ✓ the reporting over a REAL destination > does NOT lose the owner when the destination breaks while the settlement is PENDING 152ms
+   ✓ the command of the positive pilot > answers 2 for arguments it does not take 2ms
+   × the command of the positive pilot > answers 0 for a normal draw that really succeeded 2ms
+     → expected false to be true // Object.is equality
+   ✓ the command of the positive pilot > answers 1 for the deliberate failure that was really observed 2ms
+   ✓ the digest of the synthetic picture > is the digest of exactly 1024 bytes of 0x4a 0ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/native-cache-normal-pilot.test.ts > the JOINT publication of a run > the REAL filesystem: the final is published in the root of the run
+AssertionError: expected 1 to be +0 // Object.is equality
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 0[39m
+[31m+ 1[39m
+
+ ❯ tests/agent-driven/integration/native-cache-normal-pilot.test.ts:1481:20
+    1479|         "--expected-fixture-sha256", REVIEWED_FIXTURE_SHA256,
+    1480|       ], deps);
+    1481|       expect(code).toBe(PILOT_EXIT_OK);
+       |                    ^
+    1482|       // The final is really there, and the temporary file of the publ…
+    1483|       // is NOT: a publication that completed leaves a record and noth…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  tests/agent-driven/integration/native-cache-normal-pilot.test.ts > the JOINT checker of a published run > accepts a normal run that really succeeded
+AssertionError: expected [ Array(1) ] to deeply equal []
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- [][39m
+[31m+ [[39m
+[31m+   "the normal run did not really succeed",[39m
+[31m+ ][39m
+
+ ❯ tests/agent-driven/integration/native-cache-normal-pilot.test.ts:1614:31
+    1612|       const outcome = await runPositivePilot(reviewedOptions("normal")…
+    1613|       const verdict = verifyPublishedRun(outcome, root);
+    1614|       expect(verdict.reasons).toEqual([]);
+       |                               ^
+    1615|       expect(verdict.evidenceReliable).toBe(true);
+    1616|       expect(verdict.accepted).toBe(true);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  tests/agent-driven/integration/native-cache-normal-pilot.test.ts > the JOINT checker of a published run > accepts the deliberate fault that was really observed
+AssertionError: expected [ Array(1) ] to deeply equal []
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- [][39m
+[31m+ [[39m
+[31m+   "the deliberate failure was not really observed",[39m
+[31m+ ][39m
+
+ ❯ tests/agent-driven/integration/native-cache-normal-pilot.test.ts:1631:31
+    1629|       const outcome = await runPositivePilot(reviewedOptions("assertio…
+    1630|       const verdict = verifyPublishedRun(outcome, root);
+    1631|       expect(verdict.reasons).toEqual([]);
+       |                               ^
+    1632|       expect(verdict.accepted).toBe(true);
+    1633|       expect(verdict.exitCode).toBe(PILOT_EXIT_FAULT);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  tests/agent-driven/integration/native-cache-normal-pilot.test.ts > the command of the positive pilot > answers 0 for a normal draw that really succeeded
+AssertionError: expected false to be true // Object.is equality
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- true[39m
+[31m+ false[39m
+
+ ❯ tests/agent-driven/integration/native-cache-normal-pilot.test.ts:2419:30
+    2417|     const outcome = await runPositivePilot(OPTIONS, probeDeps);
+    2418|     const verdict = verifyPublishedRun(outcome, outcome.root ?? "", pr…
+    2419|     expect(verdict.accepted).toBe(true);
+       |                              ^
+    2420|     expect(verdict.reasons).toEqual([]);
+    2421|     const code = await main([
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  4 failed | 65 passed (69)
+   Start at  23:08:09
+   Duration  2.52s (transform 209ms, setup 0ms, collect 309ms, tests 563ms, environment 0ms, prepare 1.08s)
+

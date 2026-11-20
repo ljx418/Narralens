@@ -1,0 +1,13 @@
+..................F..........................................
+======================================================================
+FAIL: test_the_status_is_never_read_blocking (__main__.TheExecPipe.test_the_status_is_never_read_blocking)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/helpers/cache-custodian-unit.py", line 522, in test_the_status_is_never_read_blocking
+    self.assertEqual(len(finished), 1)
+AssertionError: 0 != 1
+
+----------------------------------------------------------------------
+Ran 61 tests in 0.053s
+
+FAILED (failures=1)

@@ -1,0 +1,21 @@
+.............................E........
+======================================================================
+ERROR: test_the_recovery_survives_the_end_of_the_control_channel (__main__.TheRecoveryOfAnUnknownDomain.test_the_recovery_survives_the_end_of_the_control_channel)
+The end of the control channel is not a proof and not authority to leave.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/helpers/cache-custodian-unit.py", line 1041, in test_the_recovery_survives_the_end_of_the_control_channel
+    result = self.instance._recover(settlement)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/src/adapters/openfilm/cache-process-custodian.py", line 1876, in _recover
+    answer = self._wait_for_recovery()
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/src/adapters/openfilm/cache-process-custodian.py", line 1928, in _wait_for_recovery
+    for key, _mask in events:
+        ^^^^^^^^^^
+TypeError: cannot unpack non-iterable _FakeEvent object
+
+----------------------------------------------------------------------
+Ran 38 tests in 0.101s
+
+FAILED (errors=1)

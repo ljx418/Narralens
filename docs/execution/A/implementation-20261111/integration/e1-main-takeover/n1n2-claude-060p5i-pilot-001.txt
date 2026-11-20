@@ -1,0 +1,14 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+stdout | tests/agent-driven/integration/native-cache-normal-pilot.test.ts > the ORDER of the terminal channels of a draw > DIAGNOSTIC: the control writes of the Host after the finalisation
+CONTROL_WRITES:[]
+OUTCOME:{"kind":"failed","exitCode":3,"error":{"code":"CUSTODIAN_NOT_REVIEWED","name":"PositivePilotFailure"},"picture":null}
+
+ ✓ tests/agent-driven/integration/native-cache-normal-pilot.test.ts (255 tests) 1805ms
+
+ Test Files  1 passed (1)
+      Tests  255 passed (255)
+   Start at  00:13:02
+   Duration  3.87s (transform 251ms, setup 0ms, collect 364ms, tests 1.80s, environment 0ms, prepare 1.13s)
+

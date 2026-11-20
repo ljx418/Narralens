@@ -1,0 +1,34 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/native-cache-normal-pilot.test.ts [ tests/agent-driven/integration/native-cache-normal-pilot.test.ts ]
+Error: Transform failed with 1 error:
+/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/native-cache-normal-pilot.test.ts:2745:39: ERROR: Expected ")" but found "StubSupervisor"
+  Plugin: vite:esbuild
+  File: /mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/native-cache-normal-pilot.test.ts:2745:39
+  
+  Expected ")" but found "StubSupervisor"
+  2743 |  describe("the run WITHOUT a root", () => {
+  2744 |    it("answers 3 and it writes NOTHING", async () => {
+  2745 |      const { deps } = realFsDeps(normal StubSupervisor({
+       |                                         ^
+  2746 |        picture: Buffer.alloc(PICTURE_BYTES, PICTURE_BYTE),
+  2747 |        error: null, held: false, worker: true, settlesAfterPolls: 0,
+  
+ ❯ failureErrorWithLog node_modules/.pnpm/esbuild@0.25.12/node_modules/esbuild/lib/main.js:1467:15
+ ❯ node_modules/.pnpm/esbuild@0.25.12/node_modules/esbuild/lib/main.js:736:50
+ ❯ responseCallbacks.<computed> node_modules/.pnpm/esbuild@0.25.12/node_modules/esbuild/lib/main.js:603:9
+ ❯ handleIncomingPacket node_modules/.pnpm/esbuild@0.25.12/node_modules/esbuild/lib/main.js:658:12
+ ❯ Socket.readFromStdout node_modules/.pnpm/esbuild@0.25.12/node_modules/esbuild/lib/main.js:581:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  no tests
+   Start at  23:47:02
+   Duration  1.79s (transform 13ms, setup 0ms, collect 0ms, tests 0ms, environment 0ms, prepare 1.17s)
+

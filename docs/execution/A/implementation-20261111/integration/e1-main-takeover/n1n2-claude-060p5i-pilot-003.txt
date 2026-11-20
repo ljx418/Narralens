@@ -1,0 +1,34 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/native-cache-normal-pilot.test.ts [ tests/agent-driven/integration/native-cache-normal-pilot.test.ts ]
+Error: Transform failed with 1 error:
+/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/native-cache-normal-pilot.test.ts:2082:0: ERROR: Unexpected "}"
+  Plugin: vite:esbuild
+  File: /mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/native-cache-normal-pilot.test.ts:2082:0
+  
+  Unexpected "}"
+  2080 |    });
+  2081 |  });
+  2082 |  });
+       |  ^
+  2083 |  
+  2084 |  /**
+  
+ ❯ failureErrorWithLog node_modules/.pnpm/esbuild@0.25.12/node_modules/esbuild/lib/main.js:1467:15
+ ❯ node_modules/.pnpm/esbuild@0.25.12/node_modules/esbuild/lib/main.js:736:50
+ ❯ responseCallbacks.<computed> node_modules/.pnpm/esbuild@0.25.12/node_modules/esbuild/lib/main.js:603:9
+ ❯ handleIncomingPacket node_modules/.pnpm/esbuild@0.25.12/node_modules/esbuild/lib/main.js:658:12
+ ❯ Socket.readFromStdout node_modules/.pnpm/esbuild@0.25.12/node_modules/esbuild/lib/main.js:581:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  no tests
+   Start at  00:17:28
+   Duration  1.93s (transform 15ms, setup 0ms, collect 0ms, tests 0ms, environment 0ms, prepare 1.33s)
+

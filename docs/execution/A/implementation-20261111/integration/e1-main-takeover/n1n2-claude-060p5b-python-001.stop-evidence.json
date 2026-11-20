@@ -1,0 +1,42 @@
+{
+  "kind": "narralens.orchestration_stop_evidence@1.0",
+  "at": "2026-11-15T03:04:00+00:00",
+  "capture": "n1n2-claude-060p5b-python-001",
+  "argv": [
+    "python3",
+    "docs/execution/A/implementation-20261111/integration/e1-main-takeover/run-recorded.py",
+    "n1n2-claude-060p5b-python-001",
+    "/usr/bin/python3.12",
+    "-I",
+    "-S",
+    "-B",
+    "tests/agent-driven/integration/helpers/cache-custodian-unit.py"
+  ],
+  "what_happened": "The pure unit HUNG inside the recovery loop: the persisted action deadline made every pass break without advancing the clock, so the loop spun instead of waiting. The harness moved the command to the background and the worker stopped that background task.",
+  "stopped": true,
+  "stop_mechanism": "the harness task ba0m4qsfk was stopped (TaskStop reported 'Successfully stopped task ba0m4qsfk')",
+  "exact_pid": "NOT RECORDED - the recorder writes the pid of the run only in its .cmd/.result files, and it was terminated before it could write them; the process is gone and the absence is recorded by the missing .exit and .result.json files",
+  "evidence_in_the_capture_directory": {
+    "present": [
+      "n1n2-claude-060p5b-python-001.claim.json",
+      "n1n2-claude-060p5b-python-001.cmd.json",
+      "n1n2-claude-060p5b-python-001.inputs.json",
+      "n1n2-claude-060p5b-python-001.txt"
+    ],
+    "absent": [
+      "n1n2-claude-060p5b-python-001.exit",
+      "n1n2-claude-060p5b-python-001.result.json"
+    ],
+    "log_bytes": 32,
+    "log_content": "32 dots: the run of the unit stopped in the middle of the suite, before the summary line"
+  },
+  "process_check_after_the_stop": {
+    "when": "2026-11-15T03:03:30+00:00",
+    "command": "ps -eo pid,ppid,etimes,stat,cmd | grep -E 'python3\\.12|cache-process-custodian|cache-custodian-unit|run-recorded|native-cache-normal-pilot|native-cache-nofork'",
+    "result": "NO MATCHING PROCESS",
+    "reading": "no interpreter of the custodian, no custodian, no recorder and no pilot of this lane is alive; the only python3 on the machine is an unrelated unattended-upgrades helper and the only other python3 is another agent's unrelated shell"
+  },
+  "owned_runtime_still_live": false,
+  "fix": "the settlement now sleeps on EVERY pass, so the clock always advances; the capture n1n2-claude-060p5b-python-002 and later are green (43/43, then 46/46)",
+  "source_frozen": true
+}

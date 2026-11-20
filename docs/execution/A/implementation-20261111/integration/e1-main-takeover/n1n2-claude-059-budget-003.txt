@@ -1,0 +1,67 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/retained-native-budget.test.ts [ tests/agent-driven/integration/retained-native-budget.test.ts ]
+Error: [vitest] There was an error when mocking a module. If you are using "vi.mock" factory, make sure there are no top level variables inside, since this call is hoisted to top of the file. Read more: https://vitest.dev/api/vi.html#vi-mock
+ ❯ tests/agent-driven/integration/retained-native-budget.test.ts:2:1
+      1| import {afterEach, beforeEach, describe, expect, it, vi} from "vitest";
+      2| import {mkdtempSync, rmSync, statSync, writeFileSync, closeSync} from …
+       | ^
+      3| import {tmpdir} from "node:os";
+      4| import {join} from "node:path";
+
+Caused by: TypeError: observer is not a function
+ ❯ tests/agent-driven/integration/retained-native-budget.test.ts:31:23
+ ❯ tests/agent-driven/integration/retained-native-budget.test.ts:2:1
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+⎯⎯⎯⎯⎯⎯ Unhandled Errors ⎯⎯⎯⎯⎯⎯
+
+Vitest caught 1 unhandled error during the test run.
+This might cause false positive tests. Resolve unhandled errors to make sure your tests are not affected.
+
+⎯⎯⎯⎯ Unhandled Rejection ⎯⎯⎯⎯⎯
+Error: [vitest] There was an error when mocking a module. If you are using "vi.mock" factory, make sure there are no top level variables inside, since this call is hoisted to top of the file. Read more: https://vitest.dev/api/vi.html#vi-mock
+ ❯ ManualMockedModule.resolve node_modules/.pnpm/@vitest+mocker@3.2.4_vite@7.1.7_@types+node@22.18.6_tsx@4.20.5_/node_modules/@vitest/mocker/dist/chunk-registry.js:160:24
+ ❯ processTicksAndRejections node:internal/process/task_queues:103:5
+ ❯ VitestMocker.callFunctionMock node_modules/.pnpm/vitest@3.2.4_@types+node@22.18.6_happy-dom@18.0.1_jsdom@27.0.0_tsx@4.20.5/node_modules/vitest/dist/chunks/execute.B7h3T_Hc.js:322:19
+ ❯ VitestMocker.requestWithMock node_modules/.pnpm/vitest@3.2.4_@types+node@22.18.6_happy-dom@18.0.1_jsdom@27.0.0_tsx@4.20.5/node_modules/vitest/dist/chunks/execute.B7h3T_Hc.js:433:11
+ ❯ VitestExecutor.dependencyRequest node_modules/.pnpm/vitest@3.2.4_@types+node@22.18.6_happy-dom@18.0.1_jsdom@27.0.0_tsx@4.20.5/node_modules/vitest/dist/chunks/execute.B7h3T_Hc.js:692:18
+ ❯ tests/agent-driven/integration/helpers/native-read-byte-observer.mjs:17:1
+     15|  * read.
+     16|  */
+     17| import { readFileSync } from "node:fs";
+       | ^
+     18| 
+     19| /** The descriptors the closure opened, and the path of each. */
+ ❯ VitestExecutor.runModule node_modules/.pnpm/vite-node@3.2.4_@types+node@22.18.6_tsx@4.20.5/node_modules/vite-node/dist/client.mjs:397:4
+ ❯ VitestExecutor.directRequest node_modules/.pnpm/vite-node@3.2.4_@types+node@22.18.6_tsx@4.20.5/node_modules/vite-node/dist/client.mjs:375:3
+ ❯ VitestExecutor.cachedRequest node_modules/.pnpm/vite-node@3.2.4_@types+node@22.18.6_tsx@4.20.5/node_modules/vite-node/dist/client.mjs:189:11
+ ❯ VitestExecutor.dependencyRequest node_modules/.pnpm/vite-node@3.2.4_@types+node@22.18.6_tsx@4.20.5/node_modules/vite-node/dist/client.mjs:239:10
+
+This error originated in "tests/agent-driven/integration/retained-native-budget.test.ts" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+Caused by: TypeError: observer is not a function
+ ❯ tests/agent-driven/integration/retained-native-budget.test.ts:31:23
+ ❯ processTicksAndRejections node:internal/process/task_queues:103:5
+ ❯ ManualMockedModule.resolve node_modules/.pnpm/@vitest+mocker@3.2.4_vite@7.1.7_@types+node@22.18.6_tsx@4.20.5_/node_modules/@vitest/mocker/dist/chunk-registry.js:158:14
+ ❯ VitestMocker.callFunctionMock node_modules/.pnpm/vitest@3.2.4_@types+node@22.18.6_happy-dom@18.0.1_jsdom@27.0.0_tsx@4.20.5/node_modules/vitest/dist/chunks/execute.B7h3T_Hc.js:322:19
+ ❯ VitestMocker.requestWithMock node_modules/.pnpm/vitest@3.2.4_@types+node@22.18.6_happy-dom@18.0.1_jsdom@27.0.0_tsx@4.20.5/node_modules/vitest/dist/chunks/execute.B7h3T_Hc.js:433:11
+ ❯ VitestExecutor.dependencyRequest node_modules/.pnpm/vitest@3.2.4_@types+node@22.18.6_happy-dom@18.0.1_jsdom@27.0.0_tsx@4.20.5/node_modules/vitest/dist/chunks/execute.B7h3T_Hc.js:692:18
+ ❯ tests/agent-driven/integration/helpers/native-read-byte-observer.mjs:17:1
+ ❯ VitestExecutor.runModule node_modules/.pnpm/vite-node@3.2.4_@types+node@22.18.6_tsx@4.20.5/node_modules/vite-node/dist/client.mjs:397:4
+ ❯ VitestExecutor.directRequest node_modules/.pnpm/vite-node@3.2.4_@types+node@22.18.6_tsx@4.20.5/node_modules/vite-node/dist/client.mjs:375:3
+ ❯ VitestExecutor.cachedRequest node_modules/.pnpm/vite-node@3.2.4_@types+node@22.18.6_tsx@4.20.5/node_modules/vite-node/dist/client.mjs:189:11
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+
+
+ Test Files  1 failed (1)
+      Tests  no tests
+     Errors  1 error
+   Start at  11:31:25
+   Duration  1.92s (transform 79ms, setup 0ms, collect 0ms, tests 0ms, environment 0ms, prepare 1.15s)
+

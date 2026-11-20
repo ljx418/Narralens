@@ -1,0 +1,76 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+ ❯ tests/agent-driven/integration/retained-native-budget.test.ts (9 tests | 4 failed) 416ms
+   ✓ the retained closure's text budget and its bounded digests > refuses a text above the per-file budget before a single byte of it is read 13ms
+   ✓ the retained closure's text budget and its bounded digests > refuses the text that crosses the total budget before its bytes are read 1ms
+   ✓ the retained closure's text budget and its bounded digests > streams a known media file and refuses an unknown extension as a text 16ms
+   ✓ the retained closure's text budget and its bounded digests > refuses a file that grew while it was hashed, and reads at most the captured size 64ms
+   ✓ the retained closure's text budget and its bounded digests > refuses a file that was truncated while it was hashed 52ms
+   × the retained closure's text budget and its bounded digests > refuses the re-hash of a file that grew, and bounds the bytes it reads 88ms
+     → expected 67108865 to be less than or equal to 33554433
+   × the retained closure's text budget and its bounded digests > bounds the file guard, and the bytes it reads are the real ones 78ms
+     → expected 67108865 to be less than or equal to 33554433
+   × the retained closure's text budget and its bounded digests > bounds the whole tree guard, and the bytes it reads are the real ones 75ms
+     → expected 67108865 to be less than or equal to 33554433
+   × the retained closure's text budget and its bounded digests > gives the text budget back when a retain fails, and keeps the uncertainty 29ms
+     → The retained closure cannot say what it holds
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/retained-native-budget.test.ts > the retained closure's text budget and its bounded digests > refuses the re-hash of a file that grew, and bounds the bytes it reads
+AssertionError: expected 67108865 to be less than or equal to 33554433
+ ❯ tests/agent-driven/integration/retained-native-budget.test.ts:192:38
+    190|       expect(mutations[0]!.status).toBe(0);
+    191|       expect(statSync(target).size).toBeGreaterThan(size);
+    192|       expect(bytesReadOf("big.mp4")).toBeLessThanOrEqual(size + 1);
+       |                                      ^
+    193|     } finally {
+    194|       await closure.release();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  tests/agent-driven/integration/retained-native-budget.test.ts > the retained closure's text budget and its bounded digests > bounds the file guard, and the bytes it reads are the real ones
+AssertionError: expected 67108865 to be less than or equal to 33554433
+ ❯ tests/agent-driven/integration/retained-native-budget.test.ts:214:38
+    212|       // The guard read the file for real, and it read at most the siz…
+    213|       expect(bytesReadOf("big.mp4")).toBeGreaterThan(0);
+    214|       expect(bytesReadOf("big.mp4")).toBeLessThanOrEqual(size + 1);
+       |                                      ^
+    215|       expect(guarded).toBe(false);
+    216|     } finally {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  tests/agent-driven/integration/retained-native-budget.test.ts > the retained closure's text budget and its bounded digests > bounds the whole tree guard, and the bytes it reads are the real ones
+AssertionError: expected 67108865 to be less than or equal to 33554433
+ ❯ tests/agent-driven/integration/retained-native-budget.test.ts:236:38
+    234|       expect(statSync(target).size).toBeGreaterThan(size);
+    235|       expect(bytesReadOf("big.mp4")).toBeGreaterThan(0);
+    236|       expect(bytesReadOf("big.mp4")).toBeLessThanOrEqual(size + 1);
+       |                                      ^
+    237|       expect(guarded).toBe(false);
+    238|     } finally {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  tests/agent-driven/integration/retained-native-budget.test.ts > the retained closure's text budget and its bounded digests > gives the text budget back when a retain fails, and keeps the uncertainty
+RetainedNativeError: The retained closure cannot say what it holds
+ ❯ RetainedNativeClosure.#admit src/host/agent-driven/retained-native-closure.ts:570:44
+    568|  #admit<T>(operation:()=>Promise<T>):Promise<T>{
+    569|   if(this.#closed)return Promise.reject(new RetainedNativeError('NATIV…
+    570|   if(this.#uncertain)return Promise.reject(new RetainedNativeError('NA…
+       |                                            ^
+    571|   // The accepted operation is registered BEFORE it is invoked.
+    572|   //
+ ❯ RetainedNativeClosure.retainFile src/host/agent-driven/retained-native-closure.ts:695:15
+ ❯ tests/agent-driven/integration/retained-native-budget.test.ts:268:35
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  4 failed | 5 passed (9)
+   Start at  11:31:54
+   Duration  2.69s (transform 111ms, setup 0ms, collect 220ms, tests 416ms, environment 0ms, prepare 1.22s)
+

@@ -1,0 +1,14 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+ ✓ tests/agent-driven/integration/retained-native-budget.test.ts (7 tests) 6420ms
+   ✓ the retained closure's text budget and its bounded digests > refuses a file that grew while it was hashed, and reads at most the captured size  1567ms
+   ✓ the retained closure's text budget and its bounded digests > refuses a file that was truncated while it was hashed  1608ms
+   ✓ the retained closure's text budget and its bounded digests > refuses the re-hash of a file that grew, and bounds the bytes it reads  1631ms
+   ✓ the retained closure's text budget and its bounded digests > bounds the synchronous guards too, and their reads are observed  1581ms
+
+ Test Files  1 passed (1)
+      Tests  7 passed (7)
+   Start at  11:20:35
+   Duration  8.68s (transform 118ms, setup 0ms, collect 241ms, tests 6.42s, environment 0ms, prepare 1.37s)
+

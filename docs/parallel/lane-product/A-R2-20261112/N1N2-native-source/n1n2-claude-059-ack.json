@@ -1,0 +1,68 @@
+{
+  "kind": "CLAUDE_059_ACK",
+  "at": "2026-11-14T00:00:00.000000+00:00",
+  "release": "MAIN_RELEASE_059_CLEAR_REPAIRS",
+  "task_id": "task_9b5c05ea4456",
+  "dispatch_id": "ctx_bdd7ae38429e",
+  "terminal": "term_499fde1b-4bc4-40d0-a884-225e555d7b70",
+  "writer_role": "唯一 Claude 实现者（同一实施树，未新建 writer/worktree）",
+  "baseline": {
+    "required": "1d348d419120f23f45d958112ea8c43df5a04675",
+    "observed_head": "1d348d419120f23f45d958112ea8c43df5a04675",
+    "matches": true,
+    "git_index_owned_by": "MAIN",
+    "git_operations_by_writer": []
+  },
+  "protected": {
+    "AGENTS_md_sha256_observed": "37300463a72a612ae16e0a5fcfb496502c57c722b83781e0e2e8c9480594542b",
+    "AGENTS_md_sha256_release": "37300463a72a612ae16e0a5fcfb496502c57c722b83781e0e2e8c9480594542b",
+    "AGENTS_md_matches": true,
+    "unrelated_dirty_preserved": true,
+    "no_reset_no_stash": true,
+    "vendor_pin_lockfiles_approved015_dist_untouched": true,
+    "no_credentials_config_env_read": true,
+    "no_network_no_install_no_payment_no_j_drive": true
+  },
+  "allow_existing_hash_check": {
+    "src/adapters/openfilm/openfilm-upstream.ts": "013f50ce87e04b3ff542e15f3c98d833ae43940fef9d85ccad79ff38e5bd200b",
+    "src/host/agent-driven/retained-native-closure.ts": "ab7ffead1c4b7b238f7e4f6097b1d17ad7792513e84591b623f67c95576ac6e7",
+    "src/host/agent-driven/committed-snapshot-authority.ts": "1c53360e3c618c603cfcbe61d0c2d57004c5bd33dc26a92c2fdec72a1844bd6d",
+    "src/host/agent-driven/created-native-source-reader.ts": "cde88435d61dba1a881bef403e6a013f1d4f2bb93db8e1ffa2b3c15b4c74f82b",
+    "tests/m2.1/openfilm-upstream-lock.test.ts": "a4f1d676e8a246cc79cf5de6547e7df23a0298941132c6ded34bea7155b400b2",
+    "tests/agent-driven/integration/created-native-source-reader.test.ts": "09ef2019ad95cbd3b3bb377e8f146b994c9462f48f4662db5e072b629383ea77",
+    "tests/agent-driven/integration/native-cache-witness.test.ts": "6ba76059a41c1820d580ea0a7ae684f62b7afcd445bdc431a1524b8c7647ccd4"
+  },
+  "allow_existing_hash_check_result": "全部 7 项与 RELEASE_059.json.existing_raw_sha256 逐字一致",
+  "adjudications_accepted": [
+    "1 B01：完整 function-like/类/initializer 词法 scope 遍历 + 真实生产调用点枚举；保留旧正反断言；拒绝 058 C8 的跨 scope 污染期待；只有真实数据流才 tainted",
+    "2 A057-01：最小 origin-form 校验 + 原 new URL 解析的窄 catch → 400；保留现有 query 语义；不采用 URLSearchParams(raw query) 替换；handler 顶层可有响应安全边界，但资源/媒体错误不误报 400、不吞异常当成功",
+    "3 A057-02/03：同次修复所有 hash 捕获 size 上界与文本首次数据读取前预算；ASSET_EXTENSIONS 收敛进 closure 且 authority 引用同一定义；未知扩展名不得放行大文本；known media 继续流式；readText 不得让 media 标签绕过文本预算；retainFile 首次数据读取时原子预占文本预算（不等 readText）；一次文件计一次、重复读不重复、失败/关闭按真实所有权释放；并行同路径 reservation 不超额不双计；所有 hash/verify 受捕获 size + 有限 extra-byte 探针；同步 guard 保留原签名与 bounded memory，诚实说明时间上界未解决；观察所有真实 read syscall，/proc/self/io 仅辅助",
+    "4 A057-05：共享历史 witness 依赖核对，duration-alone 也核每个依赖完整 identity，保留当前 output 授权",
+    "5 A057-06：posters/frames/waves 明确拒绝，内部码 NATIVE_SOURCE_CACHE_FAMILY_UNSUPPORTED（不扩 public 合同/aliases）；允许空目录；不改已证 probe/pageframe/film-poster；下一阶段 Studio GET 义务保留不删",
+    "6 A057-04：058 的 D2/D3/D5 不获实施批准；不改 producer 工厂/bridge 计数/close 语义/workspace/vendor；保持 OPEN，只读参考 independent-settlement-design-b.md"
+  ],
+  "not_implementing": [
+    "A057-04（任何 producer/bridge/workspace settlement 路线）",
+    "重型 reader/nativecache 完整文件运行、ffmpeg/ffprobe/Chrome、全量 check/build、opt-in 超时用例",
+    "任何 public 合同/aliases、pin、package/lock、Approved015/dist、workspace/factory/renderer 架构改动"
+  ],
+  "runtime_grant": {
+    "recorder": "docs/execution/A/implementation-20261111/integration/e1-main-takeover/run-recorded.py",
+    "capture_prefix": "n1n2-claude-059-",
+    "commands_allowed": 4,
+    "serial_only": true,
+    "cwd": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+    "new_helpers_extensions": [".json", ".ts", ".mjs"]
+  },
+  "constraints": {
+    "only_release_059_paths_writable": true,
+    "new_docs_prefix": "n1n2-claude-059- under docs/parallel/lane-product/A-R2-20261112/N1N2-native-source/",
+    "no_overwrite_of_058_plan": true,
+    "counterfactuals": "逐字备份 + 显式路径替换 + patch/旧/新/恢复摘要；禁用 git restore/reset/stash；正式门在恢复真实候选后运行",
+    "counterfactual_reds_must_be_real_assertion_reds": true,
+    "no_fabricated_reds": true,
+    "all_owned_children_sockets_fds_temps_ended_before_cleanup": true,
+    "no_killing_user_unknown_peer_processes": true,
+    "new_429": "立即停工保全并报告，不重试/不切 provider/不交给 Codex"
+  }
+}

@@ -1,0 +1,278 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+ ❯ tests/agent-driven/integration/retained-native-budget.test.ts (10 tests | 10 failed) 501ms
+   × the retained closure's text budget and its bounded digests > refuses a text above the per-file budget before a single byte of it is read 37ms
+     → promise resolved "{ relative_path: 'film.html', …(9) }" instead of rejecting
+   × the retained closure's text budget and its bounded digests > refuses the text that crosses the total budget before its bytes are read 2ms
+     → promise resolved "{ relative_path: 'b.json', …(9) }" instead of rejecting
+   × the retained closure's text budget and its bounded digests > streams a known media file and refuses an unknown extension as a text 22ms
+     → promise resolved "{ relative_path: 'blob.unknown', …(9) }" instead of rejecting
+   × the retained closure's text budget and its bounded digests > refuses a file that grew while it was hashed, and reads at most the captured size 67ms
+     → promise resolved "{ relative_path: 'big.mp4', …(9) }" instead of rejecting
+   × the retained closure's text budget and its bounded digests > refuses a file that was truncated while it was hashed 55ms
+     → promise resolved "{ relative_path: 'big.mp4', …(9) }" instead of rejecting
+   × the retained closure's text budget and its bounded digests > refuses the re-hash of a file that grew, and bounds the bytes it reads 83ms
+     → promise resolved "{ …(2) }" instead of rejecting
+   × the retained closure's text budget and its bounded digests > bounds the file guard, and the bytes it reads are the real ones 85ms
+     → expected 34603008 to be less than or equal to 33554433
+   × the retained closure's text budget and its bounded digests > bounds the whole tree guard, and the bytes it reads are the real ones 84ms
+     → expected 34603008 to be less than or equal to 33554433
+   × the retained closure's text budget and its bounded digests > gives the text budget back when a retain fails 33ms
+     → promise resolved "{ relative_path: 'film.html', …(9) }" instead of rejecting
+   × the retained closure's text budget and its bounded digests > keeps the genuine release failure and the uncertainty of a failed retain 33ms
+     → expected undefined to be defined
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 10 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/retained-native-budget.test.ts > the retained closure's text budget and its bounded digests > refuses a text above the per-file budget before a single byte of it is read
+AssertionError: promise resolved "{ relative_path: 'film.html', …(9) }" instead of rejecting
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- Error {[39m
+[32m-   "message": "rejected promise",[39m
+[31m+ {[39m
+[31m+   "bytes": 9437184,[39m
+[31m+   "ctime_ms": 1794627187727.8442,[39m
+[31m+   "ctime_ns": "1794627187727844320",[39m
+[31m+   "dev": "2112",[39m
+[31m+   "ino": "2604233",[39m
+[31m+   "mtime_ms": 1794627187727.8442,[39m
+[31m+   "mtime_ns": "1794627187727844320",[39m
+[31m+   "nlink": "1",[39m
+[31m+   "relative_path": "film.html",[39m
+[31m+   "sha256": "47a10d91750e6c27cef2d266a8234c21dae0144235a636c228821572d02584b7",[39m
+[2m  }[22m
+
+ ❯ tests/agent-driven/integration/retained-native-budget.test.ts:85:51
+     83|     const closure = await RetainedNativeClosure.open(dir, {});
+     84|     try {
+     85|       await expect(closure.retainFile("film.html")).rejects.toMatchObj…
+       |                                                   ^
+     86|       // The REAL reads of that file are zero: the refusal came BEFORE…
+     87|       // the observation does not depend on the closure saying so.
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/10]⎯
+
+ FAIL  tests/agent-driven/integration/retained-native-budget.test.ts > the retained closure's text budget and its bounded digests > refuses the text that crosses the total budget before its bytes are read
+AssertionError: promise resolved "{ relative_path: 'b.json', …(9) }" instead of rejecting
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- Error {[39m
+[32m-   "message": "rejected promise",[39m
+[31m+ {[39m
+[31m+   "bytes": 3072,[39m
+[31m+   "ctime_ms": 1794627187759.8442,[39m
+[31m+   "ctime_ns": "1794627187759844315",[39m
+[31m+   "dev": "2112",[39m
+[31m+   "ino": "2604234",[39m
+[31m+   "mtime_ms": 1794627187759.8442,[39m
+[31m+   "mtime_ns": "1794627187759844315",[39m
+[31m+   "nlink": "1",[39m
+[31m+   "relative_path": "b.json",[39m
+[31m+   "sha256": "c4121add6bb1d192560d11abf83b17909562bee9e1b1fd6654b1922967a6b46b",[39m
+[2m  }[22m
+
+ ❯ tests/agent-driven/integration/retained-native-budget.test.ts:106:48
+    104|       // The file that crosses the total is refused BEFORE it is read:…
+    105|       // spent by the files this closure really holds, not by the ones…
+    106|       await expect(closure.retainFile("b.json")).rejects.toMatchObject…
+       |                                                ^
+    107|       expect(bytesReadOf("b.json")).toBe(0);
+    108|     } finally {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/10]⎯
+
+ FAIL  tests/agent-driven/integration/retained-native-budget.test.ts > the retained closure's text budget and its bounded digests > streams a known media file and refuses an unknown extension as a text
+AssertionError: promise resolved "{ relative_path: 'blob.unknown', …(9) }" instead of rejecting
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- Error {[39m
+[32m-   "message": "rejected promise",[39m
+[31m+ {[39m
+[31m+   "bytes": 9437184,[39m
+[31m+   "ctime_ms": 1794627187767.8442,[39m
+[31m+   "ctime_ns": "1794627187767844314",[39m
+[31m+   "dev": "2112",[39m
+[31m+   "ino": "2604234",[39m
+[31m+   "mtime_ms": 1794627187767.8442,[39m
+[31m+   "mtime_ns": "1794627187767844314",[39m
+[31m+   "nlink": "1",[39m
+[31m+   "relative_path": "blob.unknown",[39m
+[31m+   "sha256": "9fd6f3a4c0cae0d1f9d79f7bc922306d10668aa48eba68020cd897effdd67ab6",[39m
+[2m  }[22m
+
+ ❯ tests/agent-driven/integration/retained-native-budget.test.ts:124:54
+    122|       expect(media.bytes).toBe(9 * 1024 * 1024);
+    123|       // An extension nobody knows is not a way past the text budget.
+    124|       await expect(closure.retainFile("blob.unknown")).rejects.toMatch…
+       |                                                      ^
+    125|       expect(bytesReadOf("blob.unknown")).toBe(0);
+    126|       // And a media label does not make a file readable as text eithe…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/10]⎯
+
+ FAIL  tests/agent-driven/integration/retained-native-budget.test.ts > the retained closure's text budget and its bounded digests > refuses a file that grew while it was hashed, and reads at most the captured size
+AssertionError: promise resolved "{ relative_path: 'big.mp4', …(9) }" instead of rejecting
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- Error {[39m
+[32m-   "message": "rejected promise",[39m
+[31m+ {[39m
+[31m+   "bytes": 34603008,[39m
+[31m+   "ctime_ms": 1794627187791.8442,[39m
+[31m+   "ctime_ns": "1794627187791844309",[39m
+[31m+   "dev": "2112",[39m
+[31m+   "ino": "2604233",[39m
+[31m+   "mtime_ms": 1794627187791.8442,[39m
+[31m+   "mtime_ns": "1794627187791844309",[39m
+[31m+   "nlink": "1",[39m
+[31m+   "relative_path": "big.mp4",[39m
+[31m+   "sha256": "f868102ba366910a5b387d7ebb2826c880f62a4a6bef475fc2b993aff7d1c5de",[39m
+[2m  }[22m
+
+ ❯ tests/agent-driven/integration/retained-native-budget.test.ts:144:49
+    142|     const closure = await RetainedNativeClosure.open(dir, {});
+    143|     try {
+    144|       await expect(closure.retainFile("big.mp4")).rejects.toMatchObjec…
+       |                                                 ^
+    145|       // The external change really happened, in a child that really e…
+    146|       expect(mutations.length).toBe(1);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/10]⎯
+
+ FAIL  tests/agent-driven/integration/retained-native-budget.test.ts > the retained closure's text budget and its bounded digests > refuses a file that was truncated while it was hashed
+AssertionError: promise resolved "{ relative_path: 'big.mp4', …(9) }" instead of rejecting
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- Error {[39m
+[32m-   "message": "rejected promise",[39m
+[31m+ {[39m
+[31m+   "bytes": 16777216,[39m
+[31m+   "ctime_ms": 1794627187855.8442,[39m
+[31m+   "ctime_ns": "1794627187855844299",[39m
+[31m+   "dev": "2112",[39m
+[31m+   "ino": "2604233",[39m
+[31m+   "mtime_ms": 1794627187855.8442,[39m
+[31m+   "mtime_ns": "1794627187855844299",[39m
+[31m+   "nlink": "1",[39m
+[31m+   "relative_path": "big.mp4",[39m
+[31m+   "sha256": "0eb5ff0fbf25bdfc5b715336ef839b991306ca5cd18b2dcb455db254d681a156",[39m
+[2m  }[22m
+
+ ❯ tests/agent-driven/integration/retained-native-budget.test.ts:167:49
+    165|     const closure = await RetainedNativeClosure.open(dir, {});
+    166|     try {
+    167|       await expect(closure.retainFile("big.mp4")).rejects.toMatchObjec…
+       |                                                 ^
+    168|       expect(mutations.length).toBe(1);
+    169|       expect(mutations[0]!.status).toBe(0);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/10]⎯
+
+ FAIL  tests/agent-driven/integration/retained-native-budget.test.ts > the retained closure's text budget and its bounded digests > refuses the re-hash of a file that grew, and bounds the bytes it reads
+AssertionError: promise resolved "{ …(2) }" instead of rejecting
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- Error {[39m
+[32m-   "message": "rejected promise",[39m
+[31m+ {[39m
+[31m+   "bytes": 34603008,[39m
+[31m+   "sha256": "118f35073ea7be21873bef7a8ae26e77854b92c4c4fd3546b0abb01a441e6e03",[39m
+[2m  }[22m
+
+ ❯ tests/agent-driven/integration/retained-native-budget.test.ts:189:42
+    187|       observer.armMutation("big.mp4", () => { mutations.push(mutate(ta…
+    188|       const before = bytesReadOf("big.mp4");
+    189|       await expect(closure.hashFile(file)).rejects.toMatchObject({code…
+       |                                          ^
+    190|       expect(mutations.length).toBe(1);
+    191|       expect(mutations[0]!.status).toBe(0);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/10]⎯
+
+ FAIL  tests/agent-driven/integration/retained-native-budget.test.ts > the retained closure's text budget and its bounded digests > bounds the file guard, and the bytes it reads are the real ones
+AssertionError: expected 34603008 to be less than or equal to 33554433
+ ❯ tests/agent-driven/integration/retained-native-budget.test.ts:216:47
+    214|       // The guard read the file for real, and it read at most the siz…
+    215|       expect(bytesReadOf("big.mp4") - before).toBeGreaterThan(0);
+    216|       expect(bytesReadOf("big.mp4") - before).toBeLessThanOrEqual(size…
+       |                                               ^
+    217|       expect(guarded).toBe(false);
+    218|     } finally {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/10]⎯
+
+ FAIL  tests/agent-driven/integration/retained-native-budget.test.ts > the retained closure's text budget and its bounded digests > bounds the whole tree guard, and the bytes it reads are the real ones
+AssertionError: expected 34603008 to be less than or equal to 33554433
+ ❯ tests/agent-driven/integration/retained-native-budget.test.ts:239:47
+    237|       expect(statSync(target).size).toBeGreaterThan(size);
+    238|       expect(bytesReadOf("big.mp4") - before).toBeGreaterThan(0);
+    239|       expect(bytesReadOf("big.mp4") - before).toBeLessThanOrEqual(size…
+       |                                               ^
+    240|       expect(guarded).toBe(false);
+    241|     } finally {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/10]⎯
+
+ FAIL  tests/agent-driven/integration/retained-native-budget.test.ts > the retained closure's text budget and its bounded digests > gives the text budget back when a retain fails
+AssertionError: promise resolved "{ relative_path: 'film.html', …(9) }" instead of rejecting
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- Error {[39m
+[32m-   "message": "rejected promise",[39m
+[31m+ {[39m
+[31m+   "bytes": 1049600,[39m
+[31m+   "ctime_ms": 1794627188155.8442,[39m
+[31m+   "ctime_ns": "1794627188155844247",[39m
+[31m+   "dev": "2112",[39m
+[31m+   "ino": "2604233",[39m
+[31m+   "mtime_ms": 1794627188155.8442,[39m
+[31m+   "mtime_ns": "1794627188155844247",[39m
+[31m+   "nlink": "1",[39m
+[31m+   "relative_path": "film.html",[39m
+[31m+   "sha256": "5b787b9bc636b5dbfea47af58a35dc94eb5935195a7545e609c343d2eae24a1a",[39m
+[2m  }[22m
+
+ ❯ tests/agent-driven/integration/retained-native-budget.test.ts:257:51
+    255|     try {
+    256|       // The retain fails: the file grew while it was hashed.
+    257|       await expect(closure.retainFile("film.html")).rejects.toMatchObj…
+       |                                                   ^
+    258|       expect(mutations.length).toBe(1);
+    259|       expect(mutations[0]!.status).toBe(0);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/10]⎯
+
+ FAIL  tests/agent-driven/integration/retained-native-budget.test.ts > the retained closure's text budget and its bounded digests > keeps the genuine release failure and the uncertainty of a failed retain
+AssertionError: expected undefined to be defined
+ ❯ tests/agent-driven/integration/retained-native-budget.test.ts:290:22
+    288|       let thrown: unknown;
+    289|       try { await closure.retainFile("film.html"); } catch (error) { t…
+    290|       expect(thrown).toBeDefined();
+       |                      ^
+    291|       expect((thrown as { code?: string }).code).toBe("NATIVE_CLOSURE_…
+    292|       expect((thrown as { cleanup_errors?: unknown[] }).cleanup_errors…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/10]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  10 failed (10)
+   Start at  11:33:05
+   Duration  2.70s (transform 126ms, setup 0ms, collect 236ms, tests 501ms, environment 0ms, prepare 1.34s)
+

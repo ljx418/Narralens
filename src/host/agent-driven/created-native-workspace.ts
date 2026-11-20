@@ -15,7 +15,9 @@ import {asHostResourceError} from '../api-error.js';
 import {runtimeRoot} from './owned-runtime.js';
 import type {CommittedSnapshotAuthority} from './committed-snapshot-authority.js';
 import {isIssuedOpenFilmCacheProducer,createPinnedOpenFilmServingOwner,openFilmServingBinding,openFilmServingBridge,genuineServingCleanupFailures} from '../../adapters/openfilm/openfilm-upstream.js';
-import type {OpenFilmServingOwner,OpenFilmServingBridge,OpenFilmServingLifecyclePoint} from '../../adapters/openfilm/openfilm-upstream.js';
+import type {OpenFilmServingOwner,OpenFilmServingBridge,OpenFilmServingLifecyclePoint,OpenFilmCleanupView} from '../../adapters/openfilm/openfilm-upstream.js';
+import {acquireCacheProductionScope,completeCacheProductionScope,isLiveCacheProductionScope,markCacheProductionCleanupRequired,mintCacheProductionCompletion,openCacheProductionPhaseLease,releaseCacheProductionScope,runWithCacheProductionScope} from '../../adapters/openfilm/cache-production-scope.js';
+import type {CacheProductionScope,CacheProductionPhaseLease} from '../../adapters/openfilm/cache-production-scope.js';
 /** The named observation of the serving's own lifecycle.
  *
  *  It grants nothing: every fact it fires at is re-read after the callback returns,
@@ -34,6 +36,46 @@ import {
 } from './retained-native-closure.js';
 import type {RetainedDescriptorPool,RetainedNativeFile,RetainedNativeDescriptorOps} from './retained-native-closure.js';
 interface Binding {project_id:string;principal_id:string;transaction_id:string;snapshot_id:string;source_digest:string;revision:number}
+/** The Host-private view of the cleanup of ONE production of this service.
+ *
+ *  It is a copy of facts and NOT a capability: the handle it names is the opaque
+ *  handle of a responsibility that THIS service issued, and it may only be used
+ *  to END that cleanup - never to restore the right to create, and never to
+ *  bring back an old proof. */
+/** A production of this service whose resources are not really ended. */
+interface PendingNativeProduction {
+ /** The scope of the production: it stays held until the resources ended. */
+ readonly scope:CacheProductionScope;
+ /** The state of the phases, so that the scope may be given back exactly once. */
+ readonly state:{
+  outcome:"settled"|"failed";
+  execution:CacheProductionPhaseLease|null;
+  parent_drain:CacheProductionPhaseLease|null;
+  tree_release:CacheProductionPhaseLease|null;
+  scopeFinalized:boolean;
+ };
+ /** The ORIGINAL failure of the production. It is returned when it ends. */
+ readonly primary:unknown;
+ /** The closures that were not released. */
+ readonly closures:readonly (RetainedNativeClosure|undefined)[];
+ /** The handle of this pending production. */
+ readonly handle:object;
+ /** The promise of the production: it is rejected with the original failure. */
+ readonly reject:(error:unknown)=>void;
+ /** The failures of the retries of the release. */
+ readonly failures:unknown[];
+}
+export interface NativeCacheCleanup {
+ readonly known:boolean;
+ /** The opaque handle of the cleanup, issued by THIS service. */
+ readonly handle:unknown;
+ readonly phase:string;
+ readonly cleanup_required:boolean;
+ readonly settled:boolean;
+ readonly latched:{readonly kind:string;readonly code:string|null;readonly message:string|null;readonly native_phase:string|null}|null;
+ readonly parent_phase:string;
+ readonly parent_drained:boolean;
+}
 export interface PreparedNativeWorkspace {
  readonly project_id:string;readonly snapshot_id:string;readonly source_digest:string;readonly revision:number;
  readonly source_root:AbsoluteServerPath;readonly film_sha256:string;
@@ -186,6 +228,20 @@ export class CreatedNativeWorkspaceService {
  readonly #servings=new Map<HeldWorkspace,{readonly owner:OpenFilmServingOwner;readonly bridge:OpenFilmServingBridge;readonly producer:NativeCacheProducer;readonly generation:number;readonly canonical_root:string;readonly dev:string;readonly ino:string}>();
  /** The serving owners this service created. They are closed with the service. */
  readonly #servingOwners=new Set<OpenFilmServingOwner>();
+ /** The cleanup handles THIS service issued, and the bridge each one belongs to.
+  *
+  *  A handle of another service is not in here, and a handle of a service that
+  *  never issued it is not in here either: the reconcile only ever works on the
+  *  real object of this instance. */
+ readonly #nativeCacheCleanupHandles=new WeakMap<object,{readonly bridge:OpenFilmServingBridge;readonly view:OpenFilmCleanupView}>();
+ /** The productions of THIS service whose resources are not really ended.
+  *
+  *  A production that took a resource and could not release it does NOT reject:
+  *  its original promise stays pending, its original closure is kept, and the
+  *  owner of this service may reconcile it. A rejection that arrives before the
+  *  resources ended would let a later dispose delete a root that is still in
+  *  use. */
+ readonly #pendingProductions=new Map<object,PendingNativeProduction>();
  /** The single flight per issued view: two legal concurrent requests for the SAME
   *  view share ONE construction and ONE owner. */
  readonly #servingFlights=new Map<HeldWorkspace,Promise<OpenFilmServingBridge>>();
@@ -445,6 +501,82 @@ export class CreatedNativeWorkspaceService {
    lease,pool:this.#descriptorPool,service:this});
   return production;
  }
+ /** The Host-private state of the productions of this service that may be held.
+  *
+  *  It is a READ-ONLY list of copies. It grants nothing: the handle it names is
+  *  the only thing that may be reconciled, and only by this service. */
+ inspectNativeCacheCleanup():readonly NativeCacheCleanup[]{
+  const views:NativeCacheCleanup[]=[];
+  // The productions of THIS service whose resources are not really ended. They
+  // are listed with their OWN handle: a held production may be reconciled
+  // through it, and it is not only the browser of a draw that may be held.
+  for(const pending of this.#pendingProductions.values()){
+   views.push(Object.freeze({
+    known:true,handle:pending.handle,phase:"cleanup_required",cleanup_required:true,
+    settled:false,
+    latched:{kind:"failure",code:"NATIVE_CACHE_CLEANUP_FAILED",message:"The native cache production could not release everything",native_phase:null},
+    parent_phase:"settled",parent_drained:true,
+   }));
+  }
+  for(const registered of this.#servings.values()){
+   // The bridge lists EVERY production of it that is not settled: one bridge
+   // that holds a stuck draw and starts another one must not let the second one
+   // hide the first.
+   for(const view of registered.bridge.inspectCleanup()){
+    if(!view.known)continue;
+    const handle=Object.freeze({});
+    this.#nativeCacheCleanupHandles.set(handle as unknown as object,{bridge:registered.bridge,view});
+    views.push(Object.freeze({
+     known:true,handle,phase:view.phase,cleanup_required:view.cleanup_required,
+     settled:view.settled,latched:view.latched,parent_phase:view.parent_phase,
+     parent_drained:view.parent_drained,
+    }));
+   }
+  }
+  return Object.freeze(views);
+ }
+ /** End ONE held production of this service, with the proof the bridge demands.
+  *
+  *  It settles the EXECUTION of the draw and nothing else: the parent drain of
+  *  the serving and the rest of the production go on in their own order. A
+  *  handle of another service, a copy of one and a bare number are all refused. */
+ async reconcileNativeCacheCleanup(handle:unknown):Promise<NativeCacheCleanup>{
+  if(handle===null||typeof handle!=='object')throw new ProductError('NOT_FOUND','The cleanup handle is not one this service issued');
+  const pending=this.#pendingProductions.get(handle as unknown as object);
+  if(pending!==undefined){
+   // The resources of THIS production are tried again: the closures that were
+   // not released are released NOW, and only when they really ended does the
+   // production end.
+   let released=true;
+   for(const closure of pending.closures){
+    if(!closure)continue;
+    try{await closure.release();}
+    catch(error){released=false;pending.failures.push(error);}
+   }
+   if(!released)throw new ProductError('HOST_RESOURCE_EXHAUSTED','The resources of this production did not really end');
+   // The phase really ended: its lease is settled, and the scope of the
+   // production is given back - once, and by the owner of it.
+   pending.state.tree_release?.settle();
+   this.#finalizeProductionScope(pending.scope,pending.state);
+   this.#pendingProductions.delete(handle as unknown as object);
+   // The production ends with its ORIGINAL failure: it never becomes a success,
+   // and the failure of the business is not replaced by the cleanup.
+   pending.reject(pending.primary);
+   return Object.freeze({
+    known:true,handle,phase:"failed",cleanup_required:false,settled:true,
+    latched:{kind:"failure",code:"NATIVE_CACHE_CLEANUP_FAILED",message:"The native cache production could not release everything",native_phase:null},
+    parent_phase:"settled",parent_drained:true,
+   });
+  }
+  const entry=this.#nativeCacheCleanupHandles.get(handle as unknown as object);
+  if(entry===undefined)throw new ProductError('NOT_FOUND','The cleanup handle is not one this service issued');
+  const view=await entry.bridge.reconcileCleanup(entry.view.handle);
+  return Object.freeze({
+   known:true,handle,phase:view.phase,cleanup_required:view.cleanup_required,
+   settled:view.settled,latched:view.latched,parent_phase:view.parent_phase,
+   parent_drained:view.parent_drained,
+  });
+ }
  /** The read-only facts of the serving this service registered for a view.
   *
   *  It is a COPY of facts and NOT a capability: the ORIGIN is deliberately not part
@@ -658,6 +790,124 @@ export class CreatedNativeWorkspaceService {
   // A service whose own settlement failed can no longer say what it holds.
   if(this.#uncertain)refuseCache('NATIVE_CACHE_PRODUCTION_UNCERTAIN','This workspace service cannot say what it holds');
   const root=facts.root;
+  // The scope of the WHOLE production.
+  //
+  // It is taken BEFORE the PRE capture of the working copy and it is given back
+  // only after the last identity gate and the activation of the witness: two
+  // productions of the same physical root may never overlap, not even between the
+  // POST capture and the activation, because they share the film's duration and
+  // the film's poster.
+  //
+  // The scope is taken from the ONE scheduler of this Host, so a production that
+  // comes through a direct call of the factory waits in the same queue and takes
+  // the same capacity. A production whose cleanup could not be proven keeps its
+  // scope: the root is not given to the next production.
+  const scope=await acquireCacheProductionScope(root,{mode:"workspace",owner:this,signal:this.#abort.signal});
+  // The state of the phases this service owns. It is what the COMPLETION of the
+  // production is minted from, and it is written by the production itself.
+  //
+  // The phases are LEASES: this service opens them, and the code that really
+  // ends a phase settles it. A receipt that a caller hands over is not a
+  // receipt, and a phase that was not really ended may not be claimed to be.
+  const state:{
+   outcome:"settled"|"failed";
+   execution:CacheProductionPhaseLease|null;
+   parent_drain:CacheProductionPhaseLease|null;
+   tree_release:CacheProductionPhaseLease|null;
+   /** The scope of this production was already given back. */
+   scopeFinalized:boolean;
+  }={
+   outcome:"failed",
+   execution:openCacheProductionPhaseLease(scope,"execution",this),
+   parent_drain:openCacheProductionPhaseLease(scope,"parent_drain",this),
+   tree_release:openCacheProductionPhaseLease(scope,"tree_release",this),
+   scopeFinalized:false,
+  };
+  try{
+   return await runWithCacheProductionScope(scope,()=>this.#produceWithinScope(scope,facts,production,request,state));
+  }finally{
+   this.#finalizeProductionScope(scope,state);
+  }
+ }
+ /** Keep a production whose resources are not really ended.
+  *
+  *  The original promise stays pending, the original closure is kept, and the
+  *  original failure is returned when the production really ends. The scope
+  *  stays held until then: the root it holds may still be in use. */
+ #holdProduction(
+  scope:CacheProductionScope,
+  state:{outcome:"settled"|"failed";execution:CacheProductionPhaseLease|null;parent_drain:CacheProductionPhaseLease|null;tree_release:CacheProductionPhaseLease|null;scopeFinalized:boolean},
+  primary:unknown,
+  closures:readonly (RetainedNativeClosure|undefined)[],
+ ):Promise<never>{
+  const handle=Object.freeze({});
+  return new Promise<never>((_resolve,rejectHeld)=>{
+   this.#pendingProductions.set(handle as unknown as object,{
+    scope,state,primary,closures,handle,reject:rejectHeld,failures:[],
+   });
+  });
+ }
+ /** Give the scope of a production back, ONCE, when every phase really ended.
+  *
+  *  It is the COMPLETION of the production: it is minted HERE, inside the
+  *  closure of the owner of the scope, and only when every phase this owner is
+  *  responsible for really ended. It is the only thing that may clear the held
+  *  marker of a scope whose cleanup could not be proven - the supervisor may
+  *  not, and a diagnostic may not.
+  *
+  *  A completion that could not be minted means that a phase of this production
+  *  did not really end. The scope is then NOT released: the root it holds may
+  *  still have a browser, a child or a file descriptor alive in it, and the next
+  *  production of that root may not start.
+  *
+  *  It is called from the outer finally AND from the reconcile of a production
+  *  whose resources were not really ended: the second call finds that the
+  *  scope was already given back and does nothing. */
+ #finalizeProductionScope(scope:CacheProductionScope,state:{
+  outcome:"settled"|"failed";
+  execution:CacheProductionPhaseLease|null;
+  parent_drain:CacheProductionPhaseLease|null;
+  tree_release:CacheProductionPhaseLease|null;
+  scopeFinalized:boolean;
+ }):boolean{
+  if(state.scopeFinalized)return true;
+  // The execution phase is OVER: it ran and settled, or the production refused
+  // before it started. A production whose execution is still running never
+  // reaches this point: it is waiting for the reconcile.
+  state.execution?.settle();
+  const completion=mintCacheProductionCompletion(scope,state.outcome);
+  // TWO STEPS, AND NO AWAIT BETWEEN THEM: the held marker of THIS
+  // responsibility is cleared, and then the scope is released ONCE. There is no
+  // callback, no new admission and no observation in between.
+  const consumed=completeCacheProductionScope(scope,completion);
+  state.scopeFinalized=consumed;
+  if(consumed)releaseCacheProductionScope(scope);
+  else markCacheProductionCleanupRequired(scope);
+  return consumed;
+ }
+ /** The production itself, under the scope it belongs to.
+  *
+  *  The scope is the one the outer method took; it is not taken again here, so a
+  *  production never locks its own root twice. */
+ async #produceWithinScope(scope:CacheProductionScope,facts:ProductionLeaseFacts,production:NativeCacheProductionLease,request:{
+  readonly producer:NativeCacheProducer;
+  readonly rel:string;readonly ms:number;readonly width:number;
+  readonly overrides:unknown[]|null;readonly kind:'pageframe'|'film-poster';
+ },state:{
+  outcome:"settled"|"failed";
+  execution:CacheProductionPhaseLease|null;
+  parent_drain:CacheProductionPhaseLease|null;
+  tree_release:CacheProductionPhaseLease|null;
+  scopeFinalized:boolean;
+ }):Promise<NativeCacheWitness>{
+  const root=facts.root;
+  // The scope was taken, so the facts of this production are checked AGAIN: the
+  // scope has to be the live scope of its root, and the owner, the base, the
+  // control and the generation of the view have to be the ones this production was
+  // admitted against. A production that waited in the queue may find a view that
+  // moved while it waited.
+  if(!isLiveCacheProductionScope(scope))refuseCache('NATIVE_CACHE_PRODUCTION_STALE','The production scope is no longer the live scope of its root');
+  if(facts.lease.assertCurrent()!==true)refuseCache('NATIVE_CACHE_PRODUCTION_STALE','The issued view is no longer current');
   // 4) The serving is the one THIS service registered for THIS issued view: the very
   //    object, still alive, still serving the very directory the service holds. The
   //    origin of the draw is read from that owner's own private facts - never from a
@@ -724,7 +974,20 @@ export class CreatedNativeWorkspaceService {
    // 9) The fixed producer really runs, once, awaited - through the PRIVATE BRIDGE
    //    of the serving THIS service registered. The origin and the root are that
    //    serving's own facts: a caller hands over neither.
-   const produced=await registered.bridge.draw({rel:request.rel,ms:request.ms,width,overrides:request.overrides});
+   let produced:Buffer;
+   let drawn:{readonly picture:Buffer;readonly parent_drained:boolean;readonly handle:unknown}|
+    {readonly picture:Buffer;readonly parent_drained:boolean;readonly handle:unknown}|null=null;
+   try{
+    drawn=await registered.bridge.draw({rel:request.rel,ms:request.ms,width,overrides:request.overrides});
+    produced=drawn.picture;
+   }finally{
+    // The EXECUTION of the draw really ended - with a picture or with a failure.
+    // The parent's own resources were drained by the bridge, and the bridge says
+    // so; a drain that did not really end keeps the whole responsibility: the
+    // lease of that phase is NOT settled, and the scope of this production stays
+    // held until the drain really ended.
+    if(drawn!==null&&drawn.parent_drained)state.parent_drain?.settle();
+   }
    // 10) The tree is retained again AFTER the draw - and it is a tree of its own:
    //     a different phase, a different namespace, its own allocations.
    after=await RetainedNativeClosure.open(root,{},phaseOps('POST'),facts.pool);
@@ -815,8 +1078,16 @@ export class CreatedNativeWorkspaceService {
   }catch(error){primary=error;}
   // 13) Every resource of this call is settled, and every failure is kept.
   const cleanupFailures:unknown[]=[];
-  if(after)try{await after.release();}catch(error){cleanupFailures.push(error);}
-  if(before)try{await before.release();}catch(error){cleanupFailures.push(error);}
+  // The trees this production really opened are really released. A production
+  // that failed before it opened the second tree owns only the first one, and
+  // that is what the receipt says.
+  let treesReleased=true;
+  if(after)try{await after.release();}catch(error){treesReleased=false;cleanupFailures.push(error);}
+  if(before)try{await before.release();}catch(error){treesReleased=false;cleanupFailures.push(error);}
+  // The lease of the tree phase is settled ONLY when both trees really ended:
+  // a release that did not finish keeps the whole responsibility, and the scope
+  // of this production stays held.
+  if(treesReleased)state.tree_release?.settle();
   if(primary!==undefined){
    // The primary keeps its place and the cleanup failures are merged into it.
    if(witness!==undefined)this.#witnesses.revoke(witness);
@@ -828,6 +1099,12 @@ export class CreatedNativeWorkspaceService {
    const genuine=[...cleanupFailures,...retainedCleanupFailures(primary)];
    if(genuine.length>0)this.#uncertain=true;
    if(cleanupFailures.length>0)mergeRetainedCleanupCauses(primary,cleanupFailures);
+   // A resource that is NOT really ended keeps the WHOLE production: the
+   // original promise stays PENDING, the original closure is kept, and the
+   // owner of this service may reconcile it. The operation is NOT rejected
+   // here: a rejection that arrives before the resources ended would let a
+   // later dispose delete a root that is still in use.
+   if(!treesReleased)return await this.#holdProduction(scope,state,primary,[after,before]);
    throw primary;
   }
   if(cleanupFailures.length>0){
@@ -840,6 +1117,7 @@ export class CreatedNativeWorkspaceService {
    throw failure;
   }
   if(witness===undefined)refuseCache('NATIVE_CACHE_WITNESS_REFUSED','The production produced no witness');
+  state.outcome='settled';
   // 14) The settlement is done and the witness is still PENDING. The real path
   //     identities of the outputs AND of the dependencies, and the whole parent
   //     chain, are re-checked against the identity the closure held; the lease is

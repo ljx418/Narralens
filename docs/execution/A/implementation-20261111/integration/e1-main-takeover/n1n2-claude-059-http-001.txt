@@ -1,0 +1,36 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+ ❯ tests/agent-driven/integration/openfilm-serving-url.test.ts (1 test | 1 failed) 2547ms
+   × the OpenFilm serving refuses a malformed request target > answers a bounded 400, stays alive, and still answers the next legal request 2546ms
+     → expected 'b\r\nbad address\r\n0' to be 'bad address' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/openfilm-serving-url.test.ts > the OpenFilm serving refuses a malformed request target > answers a bounded 400, stays alive, and still answers the next legal request
+AssertionError: expected 'b\r\nbad address\r\n0' to be 'bad address' // Object.is equality
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- bad address[39m
+[31m+ b[39m
+[31m+ bad address[7m[27m[39m
+[31m+ 0[39m
+
+ ❯ tests/agent-driven/integration/openfilm-serving-url.test.ts:69:44
+     67|     expect(statusOf(report.badTarget ?? "")).toBe("HTTP/1.1 400 Bad Re…
+     68|     expect(report.badTarget ?? "").toMatch(/content-security-policy:/u…
+     69|     expect(bodyOf(report.badTarget ?? "")).toBe("bad address");
+       |                                            ^
+     70|     // The same serving, right after: the legal asset is answered with…
+     71|     expect(statusOf(report.good ?? "")).toBe("HTTP/1.1 200 OK");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed (1)
+   Start at  11:20:57
+   Duration  6.48s (transform 49ms, setup 0ms, collect 145ms, tests 2.55s, environment 0ms, prepare 1.43s)
+

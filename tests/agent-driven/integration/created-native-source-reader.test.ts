@@ -1,5 +1,5 @@
 import {it,expect} from 'vitest';
-import {execFileSync,spawn} from 'node:child_process';
+import {execFileSync,spawn,spawnSync} from 'node:child_process';
 import type {ChildProcess} from 'node:child_process';
 import {chmodSync,closeSync,existsSync,fstatSync,linkSync,mkdirSync,mkdtempSync,openSync,readdirSync,readFileSync,readlinkSync,readSync,renameSync,rmSync,statSync,unlinkSync,utimesSync,writeFileSync} from 'node:fs';
 import {rm} from 'node:fs/promises';
@@ -18,6 +18,7 @@ import {CreatedNativeSourceReader,nativeVideoListingOrder} from '../../../src/ho
 import {nativeCacheKey} from '../../../src/host/agent-driven/native-cache-witness.js';
 import {CreatedNativeWorkspaceService} from '../../../src/host/agent-driven/created-native-workspace.js';
 import {CommittedSnapshotAuthority} from '../../../src/host/agent-driven/committed-snapshot-authority.js';
+import {createPinnedOpenFilmCacheProducer} from '../../../src/adapters/openfilm/openfilm-upstream.js';
 
 /**
  * The N1N2 component cases.
@@ -1346,13 +1347,15 @@ it('P07 refuses a grown file, the cumulative text, the deep tree and the descrip
   expect(limit).toBeLessThan(firstBytes+secondBytes);
   closure=await RetainedNativeClosure.open(total,{maxTotalTextBytes:limit});
   const first=await closure.retainFile('film.html');
-  const second=await closure.retainFile('.film/settings.json');
   // The first text is under the limit on its own and is read.
   expect(await closure.readText(first)).toBe(firstText);
   // Reading it again is still under the sum: it is not counted twice.
   expect(await closure.readText(first)).toBe(firstText);
-  // The second text is under the limit on its own, but the two together are not.
-  await expect(closure.readText(second)).rejects.toMatchObject({code:'NATIVE_CLOSURE_BUDGET'});
+  // The second text is under the limit ON ITS OWN, but the two together are not.
+  // The budget is decided BEFORE the first data read of that file - the closure
+  // spends the text budget of the files it really holds - so the refusal is the
+  // RETAIN of that file, and its bytes are never read.
+  await expect(closure.retainFile('.film/settings.json')).rejects.toMatchObject({code:'NATIVE_CLOSURE_BUDGET'});
  }finally{
   try{closure?.close();}catch{/* the closure reports its own failures */}
   rmSync(total,{recursive:true,force:true});
@@ -1804,10 +1807,20 @@ it('P07 refuses a symbolic link, a same-bytes replacement and a restored change 
   expect(closure.verifyFile(film)).toBe(true);
   // The same bytes, a different file.
   const copy=join(root,'film-copy.html');
-  writeFileSync(copy,readFileSync(join(root,'film.html')));
+  const originalBytes=readFileSync(join(root,'film.html'));
+  writeFileSync(copy,originalBytes);
   renameSync(copy,join(root,'film.html'));
   expect(closure.verify()).toBe(false);
-  expect(closure.verifyFile(film)).toBe(true);
+  // The DESCRIPTOR still holds the very file it took, with the very bytes it had:
+  // the replacement is at the PATH, not under the descriptor.
+  expect(readFileSync(closure.probePath(film)).equals(originalBytes)).toBe(true);
+  // And the path that names the file is another file now - another inode - so the
+  // guard that compares the NAMED path with the held descriptor refuses it: the
+  // file the closure holds is not the file the tree names any more.
+  const named=statSync(join(root,'film.html'),{bigint:true});
+  const held=statSync(closure.probePath(film),{bigint:true});
+  expect(named.ino).not.toBe(held.ino);
+  expect(closure.verifyFile(film)).toBe(false);
   // A same-size write whose change time was restored: the content changed and the
   // change time lies about it, so the closure must still see it.
   const restored=closureTree();
@@ -1844,20 +1857,34 @@ it('P07 refuses a text file above the budget and bounds the total',async()=>{
  const root=closureTree();
  let closure:RetainedNativeClosure|undefined;
  try{
-  // The total budget is checked against the bytes that are about to be read.
+  // The total budget is decided BEFORE the first data read: the retain of a text
+  // that does not fit is refused THERE, and the text is not read at all.
   closure=await RetainedNativeClosure.open(root,{maxTotalTextBytes:40});
-  const first=await closure.retainFile('film.html');
-  await expect(closure.readText(first)).rejects.toMatchObject({code:'NATIVE_CLOSURE_BUDGET'});
-  closure.close();
-  // A file that is larger than the budget is refused before it is read.
+  await expect(closure.retainFile('film.html')).rejects.toMatchObject({code:'NATIVE_CLOSURE_BUDGET'});
+  // A file that is larger than the budget is refused before it is read, too.
   const big=closureTree();
+  let bounded:RetainedNativeClosure|undefined;
   try{
    writeFileSync(join(big,'big.txt'),'x'.repeat(1024));
-   const bounded=await RetainedNativeClosure.open(big,{maxTextBytes:100});
-   const file=await bounded.retainFile('big.txt');
-   await expect(bounded.readText(file)).rejects.toMatchObject({code:'NATIVE_CLOSURE_BUDGET'});
-   bounded.close();
-  }finally{rmSync(big,{recursive:true,force:true});}
+   // A text that FITS the budget is still retained and read: the budget refuses
+   // what does not fit, it does not refuse everything.
+   // A text that is EXACTLY at the budget is legal: the budget refuses what does
+   // not fit, not what fits exactly.
+   writeFileSync(join(big,'small.txt'),'y'.repeat(100));
+   const moved=new Map<string,number>();
+   bounded=await RetainedNativeClosure.open(big,{maxTextBytes:100},{onReadChunk:(path,bytes)=>moved.set(path,(moved.get(path)??0)+bytes)});
+   const small=await bounded.retainFile('small.txt');
+   expect(await bounded.readText(small)).toBe('y'.repeat(100));
+   await expect(bounded.retainFile('big.txt')).rejects.toMatchObject({code:'NATIVE_CLOSURE_BUDGET'});
+   // The closure's OWN observation: not one byte of the refused text was moved.
+   // (The syscall-level evidence is the 059 budget case; this is the closure's own
+   // observation, and it is not presented as more than that.)
+   expect(moved.get('big.txt')??0).toBe(0);
+  }finally{
+   // Every closure is released, even when an assertion failed above.
+   try{bounded?.close();}catch{/* the closure reports its own failures */}
+   rmSync(big,{recursive:true,force:true});
+  }
  }finally{
   try{closure?.close();}catch{/* the closure reports its own failures */}
   rmSync(root,{recursive:true,force:true});
@@ -3313,3 +3340,154 @@ it('K06-e refuses the round when the issued view was replaced',async()=>{
   await expect(readOnce(f)).rejects.toMatchObject({code:'NATIVE_SOURCE_WORKSPACE_STALE'});
  });
 },300000);
+
+/**
+ * K04-c — the film duration of a draw whose triple is gone.
+ *
+ * The duration is the output of the draw of the film's own page, and the FILM is
+ * one of the files that draw read. When the film is changed and written back - the
+ * same bytes, the same change time of its content, another change time of its
+ * inode - the witness of that draw no longer describes the film that is there, and
+ * the duration must be refused.
+ *
+ * The triple of that draw may be gone: it is another cache family, and its absence
+ * says nothing about the duration. What must hold is the IDENTITY of the files the
+ * draw read.
+ *
+ * NOT_RUN in the 059 release: this case needs the real fixed draw (the pinned
+ * upstream in its real browser), and that runtime is not granted by this ticket.
+ */
+it('K04-c refuses a duration whose film was changed and written back',async()=>{
+ await withFixture(async f=>{
+  const producer=await createPinnedOpenFilmCacheProducer(vendorRoot);
+  try{
+   // The film's change time is set to a WHOLE SECOND before the draw, so that it
+   // can be restored to the very nanosecond afterwards: the content change time of
+   // the file must not be what refuses this case - the change time of its INODE
+   // is.
+   const film=join(f.workspaceRoot,'film.html');
+   const WHOLE_SECOND=1700000000;
+   utimesSync(film,WHOLE_SECOND,WHOLE_SECOND);
+   const filmBytes=readFileSync(film);
+   // The REAL fixed producer really draws the film's own page at ms 0: the draw
+   // writes the triple, and it writes the duration of that film.
+   const witness=await f.workspace.produceNativeCacheEntry(f.productionLease(),{
+    producer,rel:'film.html',ms:0,width:480,overrides:null,kind:'pageframe'});
+   // The triple of that draw is THREE files, named after the key of the draw.
+   const pageframes=join(f.workspaceRoot,'.film','cache','pageframes');
+   const triple=[`${witness.frame_key}.jpg`,`${witness.frame_key}.json`,`${witness.frame_key}.stamp`];
+   const duration=join(f.workspaceRoot,'.film','cache','film-duration.json');
+   for(const name of triple)expect(existsSync(join(pageframes,name)),name).toBe(true);
+   expect(existsSync(duration)).toBe(true);
+   // The stable round: the triple and the duration are both proved.
+   await expect(readOnce(f)).resolves.toBeDefined();
+   // ONLY the triple is removed - and the proof that only those three went is the
+   // listing of the folder itself.
+   const beforeRemoval=readdirSync(pageframes).sort();
+   for(const name of triple)rmSync(join(pageframes,name));
+   const afterRemoval=readdirSync(pageframes).sort();
+   expect(afterRemoval).toEqual(beforeRemoval.filter(name=>!triple.includes(name)));
+   // The duration alone is still a legitimate cache entry, and it is still proved -
+   // the absence of another family says nothing about this one.
+   await expect(readOnce(f)).resolves.toBeDefined();
+   // The identity of the duration itself, before the film is touched: it must not
+   // change, or the case would prove something else.
+   const durationBefore=statSync(duration,{bigint:true});
+   const durationBytes=readFileSync(duration);
+   const durationStamp=(JSON.parse(durationBytes.toString('utf8')) as {film?:unknown}).film;
+   // The film is changed in place and written back: the same bytes, the same change
+   // time of its content, and ANOTHER change time of its inode.
+   const drawn=statSync(film,{bigint:true});
+   const changed=Buffer.concat([filmBytes,Buffer.from('<!-- changed -->','utf8')]);
+   writeFileSync(film,changed);
+   writeFileSync(film,filmBytes);
+   // The change time of the INODE really moved: the clock of this file system may
+   // be coarse, so the write is repeated (in a real child process, so that the
+   // clock really advances) until the fact is there.
+   let moved=statSync(film,{bigint:true});
+   for(let attempt=0;attempt<10&&moved.ctimeNs===drawn.ctimeNs;attempt+=1){
+    const touched=spawnSync(process.execPath,[resolve('tests/agent-driven/integration/helpers/native-read-growth-child.mjs'),film,'rewrite'],{encoding:'utf8'});
+    expect(touched.status,touched.stderr).toBe(0);
+    moved=statSync(film,{bigint:true});
+   }
+   expect(moved.ctimeNs).not.toBe(drawn.ctimeNs);
+   // The change time of the CONTENT is restored to the very nanosecond it had.
+   utimesSync(film,WHOLE_SECOND,WHOLE_SECOND);
+   const restored=statSync(film,{bigint:true});
+   // The bytes are the same, the change time of the content is the same, and the
+   // change time of the INODE is another one. Nothing else changed.
+   expect(readFileSync(film).equals(filmBytes)).toBe(true);
+   expect(restored.mtimeNs).toBe(drawn.mtimeNs);
+   expect(restored.ctimeNs).not.toBe(drawn.ctimeNs);
+   // The duration is untouched: the same bytes, the same identity, and its own
+   // stamp about the film STILL MATCHES - so the refusal cannot be the stamp.
+   const durationAfter=statSync(duration,{bigint:true});
+   expect(durationAfter.ino).toBe(durationBefore.ino);
+   expect(durationAfter.size).toBe(durationBefore.size);
+   expect(durationAfter.mtimeNs).toBe(durationBefore.mtimeNs);
+   expect(durationAfter.ctimeNs).toBe(durationBefore.ctimeNs);
+   expect(readFileSync(duration).equals(durationBytes)).toBe(true);
+   // The stamp of the duration is the PLATFORM's own change time of the film and
+   // its size - the very pair the reader compares.
+   const filmNow=statSync(film);
+   expect(durationStamp).toBe(`${filmNow.mtimeMs}:${filmNow.size}`);
+   // The fresh reader finds a witness whose film is not the film that is there:
+   // the refusal is the DEPENDENCY of the historical witness, not the stamp.
+   await expect(readOnce(f)).rejects.toMatchObject({
+    code:'NATIVE_SOURCE_CACHE_STALE',
+    message:'A file the native cache entry depends on changed since it was produced',
+   });
+  }finally{await producer.close();}
+ });
+},600000);
+
+/**
+ * F05-c — the media cache families this Host cannot prove.
+ *
+ * The posters, the frames and the waves of the native's cache are written by the
+ * upstream's own media tool chain, which is not pinned here: the fixed producer
+ * this Host issues does not write them, and no witness speaks about them. A file
+ * of one of those families is therefore refused - with the RIGHT key of a real
+ * media file of the project, so the refusal is the family's, not an earlier
+ * boundary that happened to fire first.
+ *
+ * The families the fixed producer DOES write keep their proof: the probe (compared
+ * field by field with the reader's own probe), the page frame triple and the film
+ * poster.
+ *
+ * NOT_RUN in the 059 release: this case needs the real fixed draw and the real
+ * reader round, and that runtime is not granted by this ticket.
+ */
+it('F05-c refuses a media cache family this Host cannot prove',async()=>{
+ // A media file of the working copy, and the key the upstream computes for it.
+ const mediaOf=(root:string):{path:string;key:string}=>{
+  const found:string[]=[];
+  const walk=(dir:string,prefix:string):void=>{
+   for(const entry of readdirSync(dir,{withFileTypes:true})){
+    const path=prefix===''?entry.name:`${prefix}/${entry.name}`;
+    if(entry.isDirectory())walk(join(dir,entry.name),path);
+    else if(/\.(mp4|wav|mp3|m4a|webm)$/u.test(entry.name))found.push(path);
+   }
+  };
+  walk(root,'');
+  expect(found.length).toBeGreaterThan(0);
+  const path=found[0]!;
+  const info=statSync(join(root,path));
+  const key=createHash('sha1').update(`${path}\0${info.size}\0${Math.round(info.mtimeMs)}`).digest('hex').slice(0,20);
+  return {path,key};
+ };
+ for(const family of ['posters','frames','waves'] as const){
+  await withFixture(async f=>{
+   const media=mediaOf(f.workspaceRoot);
+   const cache=join(f.workspaceRoot,'.film','cache',family);
+   mkdirSync(cache,{recursive:true});
+   if(family==='posters')writeFileSync(join(cache,`${media.key}.jpg`),'not a jpeg');
+   else if(family==='frames')writeFileSync(join(cache,`${media.key}-0-32.jpg`),'not a jpeg');
+   else writeFileSync(join(cache,`${media.key}.json`),JSON.stringify({}));
+   // The refusal is the family's: the key is the right one, and the file is there.
+   await expect(readOnce(f)).rejects.toMatchObject({code:'NATIVE_SOURCE_CACHE_FAMILY_UNSUPPORTED'});
+   // Nothing was deleted: the pollution is still there for the native to own.
+   expect(readdirSync(cache).length).toBe(1);
+  });
+ }
+},600000);

@@ -1,0 +1,230 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+ ❯ tests/agent-driven/integration/cache-process-identity.test.ts (83 tests | 6 failed) 2354ms
+   ✓ the identity of a process > reads the PID before the first parenthesis and the STATE as a state 1ms
+   ✓ the identity of a process > reads a command name that holds spaces 0ms
+   ✓ the identity of a process > reads a command name that holds parentheses 0ms
+   ✓ the identity of a process > reads the state S as a state and never as a number 0ms
+   ✓ the identity of a process > reads the state R as a state and never as a number 0ms
+   ✓ the identity of a process > reads the state Z as a state and never as a number 0ms
+   ✓ the identity of a process > reads the state T as a state and never as a number 0ms
+   ✓ the identity of a process > reads the state D as a state and never as a number 0ms
+   ✓ the identity of a process > reads the state I as a state and never as a number 0ms
+   ✓ the identity of a process > refuses an empty text instead of inventing an identity 0ms
+   ✓ the identity of a process > refuses a text without parentheses instead of inventing an identity 0ms
+   ✓ the identity of a process > refuses a text with too few fields instead of inventing an identity 0ms
+   ✓ the identity of a process > refuses a text whose PID is not a number instead of inventing an identity 0ms
+   ✓ the identity of a process > refuses a text whose fields are not numbers instead of inventing an identity 0ms
+   ✓ the identity of a process > reads the identity of THIS process from the kernel 0ms
+   ✓ the identity of a process > says that a process that is not there is gone 0ms
+   ✓ the identity of a process > tells the three states of a group apart 4ms
+   ✓ the handles of a draw > refuses a REAL handle of another supervisor 1ms
+   ✓ the handles of a draw > refuses an empty object as a handle 0ms
+   ✓ the handles of a draw > refuses a copy of the facts as a handle 0ms
+   ✓ the handles of a draw > refuses a number as a handle 0ms
+   ✓ the handles of a draw > refuses a string as a handle 0ms
+   ✓ the handles of a draw > refuses null as a handle 0ms
+   ✓ the handles of a draw > refuses undefined as a handle 0ms
+   ✓ the handles of a draw > starts a draw only once 59ms
+   ✓ the decoder of a private channel > takes the frames that are complete and keeps the rest 0ms
+   ✓ the decoder of a private channel > refuses a frame that claims more than the channel may hold 0ms
+   ✓ the decoder of a private channel > refuses the bytes that nobody reads when they grow past the limit 0ms
+   ✓ the decoder of a private channel > accepts a frame of exactly the limit 0ms
+   ✓ the queue of the decoded frames > may not grow without a limit, in frames and in bytes 0ms
+   ✓ the queue of the decoded frames > refuses a frame that does not fit in the bytes that are left 0ms
+   ✓ the segments of a receipt > takes the segments in order and adds them up 1ms
+   ✓ the segments of a receipt > refuses a segment that arrives out of order, or twice 0ms
+   ✓ the segments of a receipt > refuses segments that disagree about their number 1ms
+   ✓ the segments of a receipt > refuses a segment whose items do not match its digest 0ms
+   ✓ the segments of a receipt > refuses the same identity twice 0ms
+   ✓ the segments of a receipt > refuses an item of an unknown kind 0ms
+   ✓ the segments of a receipt > reads its state again and again, and it never consumes the accumulator 0ms
+   ✓ the segments of a receipt > still refuses a segment that arrives out of order, or with a forged digest 0ms
+   ✓ the proof of the domain and the eligibility of a success > accepts a receipt that really proves the domain 0ms
+   ✓ the proof of the domain and the eligibility of a success > proves the domain and checks the eligibility on the SAME accumulator 0ms
+   ✓ the proof of the domain and the eligibility of a success > refuses a receipt that is not there 0ms
+   ✓ the proof of the domain and the eligibility of a success > refuses a receipt of another draw, another request or another protocol 0ms
+   ✓ the proof of the domain and the eligibility of a success > refuses a receipt that carries the wrong sequence number 0ms
+   ✓ the proof of the domain and the eligibility of a success > refuses a receipt that does not claim a reaped domain 0ms
+   ✓ the proof of the domain and the eligibility of a success > refuses a receipt whose chain of events was cut or changed 0ms
+   ✓ the proof of the domain and the eligibility of a success > refuses a receipt with NO wait at all 0ms
+   ✓ the proof of the domain and the eligibility of a success > refuses a receipt about another custodian, another worker or another epoch 0ms
+   ✓ the proof of the domain and the eligibility of a success > never delivers a receipt whose exec did not work 0ms
+   ✓ the proof of the domain and the eligibility of a success > keeps the proof of the domain and the eligibility of a success apart 0ms
+   ✓ the interpretation of the messages of the channels > refuses a control message that arrived out of order 0ms
+   ✓ the interpretation of the messages of the channels > accumulates the segments and captures the receipt 0ms
+   ✓ the interpretation of the messages of the channels > refuses a segment that was cut 0ms
+   ✓ the interpretation of the messages of the channels > reads a closed message that failed as a failure of the draw 0ms
+   ✓ the interpretation of the messages of the channels > reads the end of the draw channel as a failure only BEFORE the finalisation 0ms
+   ✓ the latch of the outcome > latches the first failure 0ms
+   ✓ the latch of the outcome > undoes a candidate that a later failure took away 0ms
+   ✓ the latch of the outcome > never replaces a failure that is already there 0ms
+   ✓ the cleanup causes of a held draw > does not grow while it is walked 0ms
+   ✓ the cleanup causes of a held draw > keeps the causes that are new, and says so when they did not fit 1ms
+   ✓ the deadline of the startup chain > is ONE budget that is never restarted 0ms
+   ✓ the startup of a draw that never came to life > ends as the ORIGINAL failure of the start, and it is NOT held 8ms
+   ✓ a worker that never execed > may PROVE that the domain ended, and is NEVER a success 0ms
+   ✓ a worker that never execed > is NOT a proof when the wait of the failed worker is missing 0ms
+   ✓ the owned cancel of a draw > refuses a handle of ANOTHER supervisor before any side effect 1ms
+   ✓ the owned cancel of a draw > makes a draw that was never started end as a failure of a child that was never born 0ms
+   ✓ the owned cancel of a draw > never replaces the FIRST error 0ms
+   ✓ the reconcile of a draw whose worker never stated its identity > is refused for the DOMAIN, and not for a missing worker 11ms
+   ✓ a startup that ends LATE > reconciles a draw that was NEVER BORN when its close arrives late 195ms
+   ✓ a startup that ends LATE > reconciles a draw whose custodian was NEVER ALLOWED to fork 255ms
+   ✓ a startup that ends LATE > keeps a draw HELD when the fresh epoch of the custodian is UNKNOWN 246ms
+   ✓ a startup that ends LATE > keeps a draw HELD when it was ALLOWED to fork and no worker was proved 266ms
+   ✓ the cancel of the owner of a draw > keeps the ORIGINAL error object of the owner 0ms
+   ✓ the cancel of the owner of a draw > does NOT replace an EARLIER failure with the cancel of the owner 11ms
+   ✓ the cancel of the owner of a draw > refuses a handle of ANOTHER supervisor 0ms
+   × the idempotence of the cancel of the owner > keeps the FIRST accepted cancel when the SAME error is presented again 2ms
+     → expected false to be true // Object.is equality
+   × the idempotence of the cancel of the owner > keeps the FIRST accepted cancel when a DIFFERENT error is presented later 1ms
+     → expected false to be true // Object.is equality
+   × the idempotence of the cancel of the owner > does NOT write the CANCEL of the custodian twice 247ms
+     → expected false to be true // Object.is equality
+   × a startup whose original epoch was NEVER bound > settles the original failure when the issued PID is really gone 246ms
+     → The process domain of the draw is still there
+   ✓ a startup whose original epoch was NEVER bound > stays HELD when the issued PID is still there and no epoch was bound 1ms
+   ✓ a startup whose original epoch was NEVER bound > stays HELD when the issued PID cannot be read and no epoch was bound 253ms
+   × a startup whose original epoch was NEVER bound > does NOT accept a known SAME epoch in Z as the end of the custodian 286ms
+     → promise resolved "{ known: true, phase: 'failed', …(15) }" instead of rejecting
+   × a startup whose original epoch was NEVER bound > exposes the ACTUAL terminal proof observations of the custodian 247ms
+     → expected undefined to be defined
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 6 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/cache-process-identity.test.ts > the idempotence of the cancel of the owner > keeps the FIRST accepted cancel when the SAME error is presented again
+AssertionError: expected false to be true // Object.is equality
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- true[39m
+[31m+ false[39m
+
+ ❯ tests/agent-driven/integration/cache-process-identity.test.ts:1249:59
+    1247|     instance.requestCancel(handle, deliberate);
+    1248|     const second = instance.diagnosticSnapshot(handle);
+    1249|     expect(second.cancel_provenance?.accepted_as_primary).toBe(true);
+       |                                                           ^
+    1250|     expect(second.cancel_provenance?.superseded_by_earlier_failure).to…
+    1251|     expect(second.latched_outcome.code).toBe("DRAW_CANCELLED");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/6]⎯
+
+ FAIL  tests/agent-driven/integration/cache-process-identity.test.ts > the idempotence of the cancel of the owner > keeps the FIRST accepted cancel when a DIFFERENT error is presented later
+AssertionError: expected false to be true // Object.is equality
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- true[39m
+[31m+ false[39m
+
+ ❯ tests/agent-driven/integration/cache-process-identity.test.ts:1265:61
+    1263|     instance.requestCancel(handle, new Error("a later and different fa…
+    1264|     const snapshot = instance.diagnosticSnapshot(handle);
+    1265|     expect(snapshot.cancel_provenance?.accepted_as_primary).toBe(true);
+       |                                                             ^
+    1266|     expect(snapshot.cancel_provenance?.superseded_by_earlier_failure).…
+    1267|     const settlement = await instance.start(handle);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/6]⎯
+
+ FAIL  tests/agent-driven/integration/cache-process-identity.test.ts > the idempotence of the cancel of the owner > does NOT write the CANCEL of the custodian twice
+AssertionError: expected false to be true // Object.is equality
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- true[39m
+[31m+ false[39m
+
+ ❯ tests/agent-driven/integration/cache-process-identity.test.ts:1288:61
+    1286|     expect(cancels.length).toBe(1);
+    1287|     const snapshot = instance.diagnosticSnapshot(handle);
+    1288|     expect(snapshot.cancel_provenance?.accepted_as_primary).toBe(true);
+       |                                                             ^
+    1289|   });
+    1290| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/6]⎯
+
+ FAIL  tests/agent-driven/integration/cache-process-identity.test.ts > a startup whose original epoch was NEVER bound > settles the original failure when the issued PID is really gone
+CacheCleanupRequiredError: The process domain of the draw is still there
+ ❯ CacheProcessSupervisor.reconcileCleanup src/adapters/openfilm/cache-process-supervisor.ts:1659:13
+    1657|     const proven = await this.#proveDomainGone(facts);
+    1658|     if (!proven) {
+    1659|       throw new CacheCleanupRequiredError(
+       |             ^
+    1660|         "The process domain of the draw is still there", facts.cleanup…
+    1661|     }
+ ❯ tests/agent-driven/integration/cache-process-identity.test.ts:1310:24
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/6]⎯
+
+ FAIL  tests/agent-driven/integration/cache-process-identity.test.ts > a startup whose original epoch was NEVER bound > does NOT accept a known SAME epoch in Z as the end of the custodian
+AssertionError: promise resolved "{ known: true, phase: 'failed', …(15) }" instead of rejecting
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- Error {[39m
+[32m-   "message": "rejected promise",[39m
+[31m+ {[39m
+[31m+   "cleanup_failures": 1,[39m
+[31m+   "cleanup_required": false,[39m
+[31m+   "custodian_pid": null,[39m
+[31m+   "finalize_after_ok": false,[39m
+[31m+   "group": null,[39m
+[31m+   "group_members": 0,[39m
+[31m+   "known": true,[39m
+[31m+   "latched_outcome": {[39m
+[31m+     "code": "CUSTODIAN_NOT_READY",[39m
+[31m+     "kind": "failure",[39m
+[31m+     "message": "The custodian did not state its identity in time",[39m
+[31m+     "native_phase": null,[39m
+[31m+   },[39m
+[31m+   "observed_signals": [[39m
+[31m+     "CANCEL:custodian:the draw is over",[39m
+[31m+     "exit:code 0",[39m
+[31m+   ],[39m
+[31m+   "phase": "failed",[39m
+[31m+   "receipt_valid": false,[39m
+[31m+   "run_directory": null,[39m
+[31m+   "session": null,[39m
+[31m+   "settled": true,[39m
+[31m+   "worker_pid": null,[39m
+[31m+   "worker_start_ticks": null,[39m
+[31m+   "zombies": 0,[39m
+[2m  }[22m
+
+ ❯ tests/agent-driven/integration/cache-process-identity.test.ts:1367:51
+    1365|     child.emit("exit", 0, null);
+    1366|     child.emit("close", 0, null);
+    1367|     await expect(instance.reconcileCleanup(handle)).rejects.toThrow(/s…
+       |                                                   ^
+    1368|     expect(instance.inspectCleanup(handle).cleanup_required).toBe(true…
+    1369|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/6]⎯
+
+ FAIL  tests/agent-driven/integration/cache-process-identity.test.ts > a startup whose original epoch was NEVER bound > exposes the ACTUAL terminal proof observations of the custodian
+AssertionError: expected undefined to be defined
+ ❯ tests/agent-driven/integration/cache-process-identity.test.ts:1401:23
+    1399|     const observations = snapshot.terminal_proof?.observations ?? [];
+    1400|     const custodian = observations.find(entry => entry.kind === "custo…
+    1401|     expect(custodian).toBeDefined();
+       |                       ^
+    1402|     expect(custodian?.presence).toBe("gone");
+    1403|     expect(typeof custodian?.at).toBe("number");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/6]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  6 failed | 77 passed (83)
+   Start at  15:43:11
+   Duration  5.58s (transform 249ms, setup 0ms, collect 947ms, tests 2.35s, environment 0ms, prepare 1.56s)
+

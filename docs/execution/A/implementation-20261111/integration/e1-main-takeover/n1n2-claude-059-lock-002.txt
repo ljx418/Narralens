@@ -1,0 +1,18 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+stdout | tests/m2.1/openfilm-upstream-lock.test.ts > DIAGNOSTIC lists the loader calls the traversal finds per file
+DIAG /mnt/c/workspace/videoworkline/Narralens-agents/main-integration/src/host/agent-driven/committed-snapshot-authority.ts calls: [33m355[39m scopes: [33m70[39m loaderCalls: ["createPinnedOpenFilmUpstream","createPinnedOpenFilmUpstream","createPinnedOpenFilmUpstream"]
+DIAG names: ["String","retainedCleanupFailures","changed","markRetainedCleanupFailures","defineProperty","isNativeFactsLease","slice","lastIndexOf","lastIndexOf","toLowerCase","slice","trim","includes","startsWith","test","changed","filter","split","includes","changed","join","lastIndexOf","slice","dirnameSlash","concat","split","split","pop","push","join","get","changed","isArray","deepFreeze","freeze","values","deepFreeze","freeze","keys","has"]
+DIAG members: [16]
+
+ ✓ tests/m2.1/openfilm-upstream-lock.test.ts (54 tests) 4416ms
+   ✓ M-04 pinned OpenFilm checkout verification > never lets a caller supply the vendor path through a request  1755ms
+   ✓ M-04 pinned OpenFilm checkout verification > enumerates the loader call sites of the Host, one by one  1142ms
+   ✓ DIAGNOSTIC lists the loader calls the traversal finds per file  1135ms
+
+ Test Files  1 passed (1)
+      Tests  54 passed (54)
+   Start at  11:19:18
+   Duration  10.08s (transform 152ms, setup 0ms, collect 749ms, tests 4.42s, environment 0ms, prepare 3.70s)
+

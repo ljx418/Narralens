@@ -1,0 +1,208 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+ ❯ tests/agent-driven/integration/native-cache-normal-pilot.test.ts (155 tests | 2 failed) 1077ms
+   ✓ the arguments of the positive pilot > takes exactly a mode and two digests 1ms
+   ✓ the arguments of the positive pilot > does not run the pilot when its module is imported 0ms
+   ✓ the positive pilot > really succeeds, and the picture is EXACTLY the synthetic one 20ms
+   ✓ the positive pilot > is NOT a success when the picture is not the exact one 2ms
+   ✓ the positive pilot > refuses bytes that are not the reviewed ones, and starts nothing 2ms
+   ✓ the positive pilot > refuses a COPY of the helper that is not the reviewed one, and starts nothing 2ms
+   ✓ the positive pilot > injects the deliberate failure only after the worker was REALLY alive 2ms
+   ✓ the positive pilot > does NOT inject the deliberate failure when the worker was not observed 2ms
+   ✓ the positive pilot > does NOT inject the deliberate failure after a GO of another worker 2ms
+   ✓ the positive pilot > does NOT inject the deliberate failure after a GO of another draw 1ms
+   ✓ the positive pilot > does NOT inject the deliberate failure when the worker is a zombie 2ms
+   ✓ the positive pilot > does NOT inject the deliberate failure when the worker is another start time 2ms
+   ✓ the positive pilot > does NOT inject the deliberate failure when the worker is another parent 2ms
+   ✓ the positive pilot > does NOT inject the deliberate failure when the worker is another group 1ms
+   ✓ the positive pilot > does NOT accept an unrelated failure as the expected fault 1ms
+   ✓ the positive pilot > does NOT accept a transport failure as the expected fault 1ms
+   ✓ the positive pilot > keeps a failure of the evidence, and it is never a green case 1ms
+   ✓ the positive pilot > keeps the owner of a HELD draw and ends with the fresh proof 1ms
+   ✓ the positive pilot > keeps the owner when the ROOT could not be prepared, and it starts nothing 1ms
+   ✓ the positive pilot > keeps the owner when the RESERVE failed, and there is no phantom child 1ms
+   ✓ the positive pilot > reads the ORIGINAL result of a draw that was held and that ended LATE 1ms
+   ✓ the positive pilot > keeps the owner when the event reader failed after the start 1ms
+   ✓ the positive pilot > never kills anything: it asks, and it does nothing else 1ms
+   ✓ the positive pilot > does not lose the owner when the destination fails asynchronously 3ms
+   ✓ the real asynchronous order of the two modes > does NOT cancel a draw that is still making progress 2ms
+   ✓ the real asynchronous order of the two modes > waits for the accepted worker before it injects the deliberate failure 1ms
+   ✓ the real asynchronous order of the two modes > does NOT inject when the draw REALLY failed before the worker was accepted 1ms
+   ✓ the real asynchronous order of the two modes > does NOT inject when the GO of this draw never arrives 1ms
+   ✓ the raw cleanup of the draw > is NOT green when the raw settlement carries a cleanup failure 1ms
+   ✓ the raw cleanup of the draw > is NOT a fault when the raw settlement carries a cleanup failure 4ms
+   ✓ the raw cleanup of the draw > is NOT green when the FINAL diagnostic carries cleanup failures 2ms
+   ✓ the ownership of the runtime root > writes NO evidence at all when the root could not be allocated 1ms
+   ✓ the final qualification of a run > commits the final qualification AFTER the report callbacks 2ms
+   ✓ the final qualification of a run > revokes the final qualification when the report destination fails LATE 3ms
+   ✓ the final qualification of a run > is NOT green when the manifest of the artifacts could not be built 1ms
+   ✓ the JOINT publication of a run > publishes the final into the root of the run, and the temporary file is gone 2ms
+   ✓ the JOINT publication of a run > revokes the qualification when the publication fails BEFORE the bytes are written 2ms
+   ✓ the JOINT publication of a run > revokes the qualification when the publication fails AFTER the complete write 2ms
+   ✓ the JOINT publication of a run > is NOT green when a REQUIRED artifact of the manifest carries an error 2ms
+   ✓ the JOINT publication of a run > is NOT green when a REQUIRED artifact is missing from the manifest 1ms
+   ✓ the JOINT publication of a run > is NOT green when the manifest does not name the digest of the candidate that is on the disk 1ms
+   ✓ the JOINT publication of a run > answers 3 when the publication of the run failed 1ms
+   ✓ the JOINT publication of a run > answers 2 for a refusal of the arguments, and 1 for a fault that was really observed 3ms
+   ✓ the JOINT publication of a run > the REAL filesystem: the final is published in the root of the run 7ms
+   ✓ the JOINT publication of a run > a CONSUMER that applies the joint judgement rejects a run whose publication failed 6ms
+   ✓ the JOINT publication of a run > the REAL filesystem: a required record that was not written is not a green case 7ms
+   ✓ the JOINT checker of a published run > accepts a normal run that really succeeded 7ms
+   ✓ the JOINT checker of a published run > accepts the deliberate fault that was really observed 6ms
+   ✓ the JOINT checker of a published run > does NOT accept an ordinary business failure 7ms
+   ✓ the JOINT checker of a published run > does NOT accept a fault that carries an extra failure 6ms
+   ✓ the JOINT checker of a published run > refuses when the final record cannot be read, and it keeps the evidence 6ms
+   ✓ the JOINT checker of a published run > refuses when the candidate cannot be read 5ms
+   ✓ the JOINT checker of a published run > refuses when the helper cannot be read 6ms
+   ✓ the JOINT checker of a published run > refuses when a third listed artifact cannot be read 6ms
+   ✓ the JOINT checker of a published run > refuses when a record is GONE from the root 6ms
+   ✓ the JOINT checker of a published run > refuses a record with a LEGITIMATE digest but another mode 6ms
+   ✓ the JOINT checker of a published run > refuses a record with a LEGITIMATE digest but another protocol 6ms
+   ✓ the JOINT checker of a published run > refuses a record with a LEGITIMATE digest but a broken link 6ms
+   ✓ the JOINT checker of a published run > refuses a record with a LEGITIMATE digest but another number of bytes 6ms
+   ✓ the JOINT checker of a published run > answers 3 from the COMMAND when the evidence cannot be read 6ms
+   ✓ the JOINT checker of a published run > the REAL mapper: a single EIO on a third artifact makes the run unreliable 6ms
+   ✓ the RESULT FACTS of a published run > refuses 'F01 final.kind_of_run deleted' 6ms
+   ✓ the RESULT FACTS of a published run > refuses 'F01 final.kind_of_run wrong type' 6ms
+   ✓ the RESULT FACTS of a published run > refuses 'F01 final.kind_of_run contradicted' 6ms
+   ✓ the RESULT FACTS of a published run > refuses 'F01 final.exit_code deleted' 5ms
+   ✓ the RESULT FACTS of a published run > refuses 'F01 final.exit_code wrong type' 8ms
+   ✓ the RESULT FACTS of a published run > refuses 'F01 final.exit_code contradicted' 6ms
+   ✓ the RESULT FACTS of a published run > refuses 'F01 final.fault_case_passed deleted' 6ms
+   ✓ the RESULT FACTS of a published run > refuses 'F01 final.fault_case_passed wrong type' 6ms
+   ✓ the RESULT FACTS of a published run > refuses 'F01 final.fault_case_passed contradic…' 6ms
+   ✓ the RESULT FACTS of a published run > refuses 'F01 candidate.authoritative deleted' 6ms
+   ✓ the RESULT FACTS of a published run > refuses 'F01 candidate.authoritative wrong type' 6ms
+   ✓ the RESULT FACTS of a published run > refuses 'F01 candidate.authoritative contradic…' 6ms
+   ✓ the RESULT FACTS of a published run > refuses 'F01 final.mode deleted' 6ms
+   ✓ the RESULT FACTS of a published run > refuses 'F01 final.mode wrong type' 5ms
+   ✓ the RESULT FACTS of a published run > refuses 'F01 final.mode contradicted' 6ms
+   ✓ the RESULT FACTS of a published run > refuses 'F02 candidate.original_failure deleted' 6ms
+   ✓ the RESULT FACTS of a published run > refuses 'F02 candidate.original_failure wrong …' 6ms
+   ✓ the RESULT FACTS of a published run > refuses 'F02 candidate.original_failure contra…' 7ms
+   ✓ the RESULT FACTS of a published run > refuses 'F02 final.original_failure deleted' 6ms
+   ✓ the RESULT FACTS of a published run > refuses 'F02 final.original_failure wrong type' 6ms
+   ✓ the RESULT FACTS of a published run > refuses 'F02 final.original_failure contradict…' 5ms
+   ✓ the RESULT FACTS of a published run > refuses 'F03 candidate.settlement_failure dele…' 6ms
+   ✓ the RESULT FACTS of a published run > refuses 'F03 candidate.settlement_failure wron…' 6ms
+   ✓ the RESULT FACTS of a published run > refuses 'F03 candidate.settlement_failure cont…' 7ms
+   ✓ the RESULT FACTS of a published run > refuses 'F03 final.settlement_failure deleted' 9ms
+   ✓ the RESULT FACTS of a published run > refuses 'F03 final.settlement_failure wrong ty…' 6ms
+   ✓ the RESULT FACTS of a published run > refuses 'F03 final.settlement_failure contradi…' 9ms
+   ✓ the RESULT FACTS of a published run > refuses 'F04 candidate.cleanup_facts deleted' 6ms
+   ✓ the RESULT FACTS of a published run > refuses 'F04 candidate.cleanup_facts wrong type' 9ms
+   ✓ the RESULT FACTS of a published run > refuses 'F04 candidate.cleanup_facts contradic…' 6ms
+   ✓ the RESULT FACTS of a published run > refuses 'F04 final.cleanup_facts deleted' 6ms
+   × the RESULT FACTS of a published run > refuses 'F04 final.cleanup_facts wrong type' 15ms
+     → expected true to be false // Object.is equality
+   ✓ the RESULT FACTS of a published run > refuses 'F04 final.cleanup_facts contradicted' 6ms
+   ✓ the RESULT FACTS of a published run > refuses 'F05 candidate.terminal_proof deleted' 7ms
+   ✓ the RESULT FACTS of a published run > refuses 'F05 candidate.terminal_proof wrong ty…' 5ms
+   ✓ the RESULT FACTS of a published run > refuses 'F05 candidate.terminal_proof contradi…' 6ms
+   ✓ the RESULT FACTS of a published run > refuses 'F05 final.terminal_proof deleted' 6ms
+   ✓ the RESULT FACTS of a published run > refuses 'F05 final.terminal_proof wrong type' 6ms
+   ✓ the RESULT FACTS of a published run > refuses 'F05 final.terminal_proof contradicted' 6ms
+   ✓ the RESULT FACTS of a published run > refuses 'F06 candidate.actual_image deleted' 6ms
+   ✓ the RESULT FACTS of a published run > refuses 'F06 candidate.actual_image wrong type' 5ms
+   ✓ the RESULT FACTS of a published run > refuses 'F06 candidate.actual_image contradict…' 7ms
+   ✓ the RESULT FACTS of a published run > refuses 'F06 final.picture_sha256 deleted' 5ms
+   ✓ the RESULT FACTS of a published run > refuses 'F06 final.picture_sha256 wrong type' 6ms
+   ✓ the RESULT FACTS of a published run > refuses 'F06 final.picture_sha256 contradicted' 6ms
+   ✓ the RESULT FACTS of a published run > refuses 'F06 final.picture_bytes deleted' 5ms
+   ✓ the RESULT FACTS of a published run > refuses 'F06 final.picture_bytes wrong type' 6ms
+   ✓ the RESULT FACTS of a published run > refuses 'F06 final.picture_bytes contradicted' 7ms
+   ✓ the RESULT FACTS of a published run > refuses 'F07 final.diagnostic_snapshot deleted' 6ms
+   ✓ the RESULT FACTS of a published run > refuses 'F07 final.diagnostic_snapshot wrong t…' 6ms
+   ✓ the RESULT FACTS of a published run > refuses 'F07 final.diagnostic_snapshot contrad…' 6ms
+   ✓ the RESULT FACTS of a published run > refuses 'F07 candidate.accumulator_summary del…' 6ms
+   ✓ the RESULT FACTS of a published run > refuses 'F07 candidate.accumulator_summary wro…' 8ms
+   ✓ the RESULT FACTS of a published run > refuses 'F07 candidate.accumulator_summary con…' 6ms
+   ✓ the RESULT FACTS of a published run > refuses 'F07 candidate.terminal_proof_observat…' 5ms
+   ✓ the RESULT FACTS of a published run > refuses 'F07 candidate.terminal_proof_observat…' 6ms
+   ✓ the RESULT FACTS of a published run > refuses 'F07 candidate.terminal_proof_observat…' 6ms
+   ✓ the RESULT FACTS of a published run > refuses 'F08 final.diagnostic_snapshot.cleanup…' 6ms
+   ✓ the RESULT FACTS of a published run > refuses 'F08 final.diagnostic_snapshot.cleanup…' 15ms
+   ✓ the RESULT FACTS of a published run > refuses 'F08 final.diagnostic_snapshot.cleanup…' 9ms
+   ✓ the RESULT FACTS of a published run > refuses 'F08 final.diagnostic_snapshot.transpo…' 6ms
+   ✓ the RESULT FACTS of a published run > refuses 'F08 final.diagnostic_snapshot.transpo…' 7ms
+   ✓ the RESULT FACTS of a published run > refuses 'F08 final.diagnostic_snapshot.transpo…' 6ms
+   ✓ the RESULT FACTS of a published run > refuses 'F08 final.diagnostic_snapshot.latched…' 6ms
+   ✓ the RESULT FACTS of a published run > refuses 'F08 final.diagnostic_snapshot.latched…' 6ms
+   ✓ the RESULT FACTS of a published run > refuses 'F08 final.diagnostic_snapshot.latched…' 5ms
+   ✓ the RESULT FACTS of a published run > refuses 'F09 final.diagnostic_snapshot.cancel_…' 6ms
+   ✓ the RESULT FACTS of a published run > refuses 'F09 final.diagnostic_snapshot.cancel_…' 6ms
+   ✓ the RESULT FACTS of a published run > refuses 'F09 final.diagnostic_snapshot.cancel_…' 5ms
+   ✓ the RESULT FACTS of a published run > refuses 'F09 final.diagnostic_snapshot.cancel_…' 7ms
+   ✓ the RESULT FACTS of a published run > refuses 'F09 final.diagnostic_snapshot.cancel_…' 5ms
+   ✓ the RESULT FACTS of a published run > refuses 'F09 final.diagnostic_snapshot.cancel_…' 6ms
+   ✓ the RESULT FACTS of a published run > refuses 'F09 final.diagnostic_snapshot.cancel_…' 6ms
+   ✓ the RESULT FACTS of a published run > refuses 'F09 final.diagnostic_snapshot.cancel_…' 7ms
+   ✓ the RESULT FACTS of a published run > refuses 'F09 final.diagnostic_snapshot.cancel_…' 6ms
+   ✓ the RESULT FACTS of a published run > refuses a candidate that carries a failure, a cleanup and a missing field at once 5ms
+   ✓ the RESULT FACTS of a published run > refuses a final whose diagnostic carries an extra failure 6ms
+   ✓ the RESULT FACTS of a published run > refuses an outcome whose own facts contradict the records 5ms
+   ✓ the RESULT FACTS of a published run > refuses an outcome whose kind, exit and fault flags contradict the records 5ms
+   ✓ the RESULT FACTS of a published run > refuses a fault whose settlement is an unrelated failure 8ms
+   × the RESULT FACTS of a published run > refuses a fault whose ACTUAL settlement is another object with the same text 6ms
+     → expected true to be false // Object.is equality
+   ✓ the RESULT FACTS of a published run > ACCEPTS a fault whose settlement is the WRAPPER of the original error 6ms
+   ✓ the RESULT FACTS of a published run > keeps an ordinary business failure reliable, not accepted, and at the exit code 1 5ms
+   ✓ the RESULT FACTS of a published run > keeps an ordinary failure of the FAULT mode reliable, not accepted, and at the exit code 1 7ms
+   ✓ the RESULT FACTS of a published run > answers 3 from the COMMAND when a result fact of the candidate is wrong 8ms
+   ✓ the RESULT FACTS of a published run > does NOT change when the snapshot is read again 7ms
+   ✓ the ORCHESTRATION over the ACTUAL supervisor > waits for the REAL asynchronous start of the normal mode, and cancels NOTHING 56ms
+   ✓ the ORCHESTRATION over the ACTUAL supervisor > waits for the LATE worker of the fault mode before it injects 106ms
+   ✓ the reporting over a REAL destination > revokes the final qualification when the destination fails LATE 3ms
+   ✓ the reporting over a REAL destination > does NOT lose the owner when the destination breaks while the settlement is PENDING 152ms
+   ✓ the command of the positive pilot > answers 2 for arguments it does not take 2ms
+   ✓ the command of the positive pilot > answers 0 for a normal draw that really succeeded 3ms
+   ✓ the command of the positive pilot > answers 1 for the deliberate failure that was really observed 2ms
+   ✓ the digest of the synthetic picture > is the digest of exactly 1024 bytes of 0x4a 0ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/native-cache-normal-pilot.test.ts > the RESULT FACTS of a published run > refuses 'F04 final.cleanup_facts wrong type'
+AssertionError: expected true to be false // Object.is equality
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- false[39m
+[31m+ true[39m
+
+ ❯ tests/agent-driven/integration/native-cache-normal-pilot.test.ts:2291:40
+    2289|       const verdict = verifyPublishedRun(outcome, root);
+    2290|       // The field is not reliable: the run is refused, and the exit c…
+    2291|       expect(verdict.evidenceReliable).toBe(false);
+       |                                        ^
+    2292|       expect(verdict.accepted).toBe(false);
+    2293|       expect(verdict.exitCode).toBe(PILOT_EXIT_UNRELIABLE);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tests/agent-driven/integration/native-cache-normal-pilot.test.ts > the RESULT FACTS of a published run > refuses a fault whose ACTUAL settlement is another object with the same text
+AssertionError: expected true to be false // Object.is equality
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- false[39m
+[31m+ true[39m
+
+ ❯ tests/agent-driven/integration/native-cache-normal-pilot.test.ts:2469:32
+    2467|       // The records claim the deliberate fault and the ACTUAL relatio…
+    2468|       // not hold: that is an unreliable evidence, and never a pass.
+    2469|       expect(verdict.accepted).toBe(false);
+       |                                ^
+    2470|       expect(verdict.exitCode).not.toBe(PILOT_EXIT_FAULT);
+    2471|     } finally {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 153 passed (155)
+   Start at  23:14:44
+   Duration  3.12s (transform 241ms, setup 0ms, collect 344ms, tests 1.08s, environment 0ms, prepare 1.09s)
+

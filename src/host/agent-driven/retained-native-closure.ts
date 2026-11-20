@@ -21,6 +21,31 @@ export const RETAINED_NATIVE_BUDGET:RetainedNativeBudget=Object.freeze({
  maxPaths:4096,maxTextBytes:8*1024*1024,maxTotalTextBytes:64*1024*1024,maxDepth:12,maxDescriptors:8192,
 });
 
+/** The extensions of the files that are MEDIA: a picture, a sound, a video.
+ *
+ * A media file is hashed in a bounded stream and is never read as text; every other
+ * file is TEXT for the budget. An extension nobody knows is therefore never let
+ * through as a large text: it is refused by the text budget like any other text.
+ *
+ * The set is the one the committed digest uses (the `source-digest-v1` set: a
+ * divergence would make the recomputed digest differ from the committed one), and
+ * the authority reads the set from HERE, so that the Host has ONE definition of
+ * "media" and the digest and the budget cannot drift apart. */
+export const RETAINED_NATIVE_ASSET_EXTENSIONS:ReadonlySet<string>=Object.freeze(new Set<string>([
+ 'wav','mp3','m4a','aac','ogg','oga','opus','flac','aif','aiff','weba',
+ 'mp4','m4v','mov','webm','mkv','avi','ogv',
+ 'png','jpg','jpeg','webp','gif',
+]));
+/** The extension of a path, as the digest's own rule names it. */
+const extensionOf=(path:string):string=>{
+ const base=path.slice(path.lastIndexOf('/')+1);
+ const dot=base.lastIndexOf('.');
+ return dot<=0?'':base.slice(dot+1).toLowerCase();
+};
+/** Whether this file is media: hashed in a bounded stream, never read as text. */
+export const isRetainedNativeAsset=(relativePath:string):boolean=>
+ RETAINED_NATIVE_ASSET_EXTENSIONS.has(extensionOf(relativePath));
+
 /** The descriptor budget of ONE Host instance.
  *
  * It counts every allocation that instance owns: the roots, the ancestries, the
@@ -313,8 +338,12 @@ export interface RetainedNativeDescriptorOps {
  /**
   * The number of bytes a read actually moved.
   *
-  * It is how a case proves that a text above the budget was refused *before* its
-  * bytes were read, rather than read and then refused.
+  * It observes EVERY read the closure makes: the text read, the digests (the first
+  * hash of a retained file, a re-hash, the hashes of the synchronous guards) and
+  * the extra byte that proves a file did not grow. It is how a case proves that a
+  * text above the budget was refused *before* its bytes were read, rather than read
+  * and then refused - and how it attributes those bytes to the very file they came
+  * from.
   */
  readonly onReadChunk?:(relativePath:string,bytes:number)=>void;
  /**
@@ -380,7 +409,13 @@ export class RetainedNativeClosure {
  readonly #membership=new Map<string,Membership>();
  readonly #ancestors:AncestorRecord[]=[];
  readonly #pending=new Set<Promise<unknown>>();
- /** The bytes each retained file contributed to the text budget, counted once each. */
+ /** The bytes each retained file took from the text budget, counted once each.
+  *
+  * The charge is taken when the file's first data is read - before that read - and
+  * it is taken ONCE: a file that is retained again, or read again, is never charged
+  * twice. A retain that did not keep the file gives its charge back; a closure that
+  * is closed keeps its record (an uncertain close latches the uncertainty, it does
+  * not pretend the closure holds nothing). */
  readonly #textBytesByFile=new Map<string,number>();
  #closed=false;
  #uncertain=false;
@@ -675,6 +710,16 @@ export class RetainedNativeClosure {
    }
    const fd=opened.fd;
    const descriptor:OwnedDescriptor={fd,allocation:opened.allocation,released:false};
+   // The text budget this file takes, when it is text. It is decided AND CHARGED
+   // before the first byte of this file is read: a text above the budget is never
+   // read at all, not read and then refused.
+   //
+   // The charge is taken ONCE for this file - a file that is retained again finds
+   // its record and never charges twice - and the whole operation is SYNCHRONOUS
+   // (there is no await between the charge and the record), so two retains of the
+   // same path can neither double-charge it nor over-commit the total.
+   let charged=0;
+   let previousCharge=0;
    try{
     const info=fstatSync(fd,{bigint:true});
     if(!info.isFile())fail('NATIVE_CLOSURE_NOT_REGULAR','The retained path is not a regular file');
@@ -682,11 +727,30 @@ export class RetainedNativeClosure {
     // a file of this tree, so it is refused here and never read.
     if(info.nlink>1n)fail('NATIVE_CLOSURE_ALIASED','The retained file is linked to another name');
     if(info.dev!==membership.dev||info.ino!==membership.ino||info.size!==membership.size)fail('NATIVE_CLOSURE_MEMBERSHIP_MOVED','The retained file is not the file the closure took');
-    const digest=this.#hash(fd);
+    const bytes=Number(info.size);
+    if(!isRetainedNativeAsset(relativePath)){
+     // The TEXT budget, decided before the first byte of this file is read.
+     if(bytes>this.#budget.maxTextBytes)fail('NATIVE_CLOSURE_BUDGET','The retained text is larger than the budget allows');
+     previousCharge=this.#textBytesByFile.get(membership.path)??0;
+     const total=[...this.#textBytesByFile.values()].reduce((sum,value)=>sum+value,0);
+     if(total-previousCharge+bytes>this.#budget.maxTotalTextBytes)fail('NATIVE_CLOSURE_BUDGET','The retained text is larger than the total budget allows');
+     this.#textBytesByFile.set(membership.path,Math.max(previousCharge,bytes));
+     charged=bytes;
+    }
+    // The digest is bounded by the CAPTURED size: the file may not be shorter than
+    // the closure took, and one byte more is a refusal, never a summary of a file
+    // that grew.
+    const digest=this.#hashBounded(fd,bytes,membership.path);
+    // The identity fence AFTER the read: the file that was read is the file that
+    // was taken, and the path still names it.
+    if(!this.#identityHolds(fd,membership.path,membership))fail('NATIVE_CLOSURE_MEMBERSHIP_MOVED','The retained file changed while it was read');
     const record:FileRecord={descriptor,membership,sha256:digest.sha256,bytes:digest.bytes};
     this.#files.set(relativePath,record);
     return this.#issuedFile(record);
    }catch(error){
+    // A retain that did not keep the file does not keep its text budget either:
+    // the capacity goes back to the closure that really holds it.
+    if(charged>0)this.#textBytesByFile.set(membership.path,previousCharge);
     // The primary error keeps its place and the cleanup failures are attached to it:
     // the causes are MERGED into it, so the ones that were already there are not
     // overwritten by a later cleanup.
@@ -802,14 +866,26 @@ export class RetainedNativeClosure {
    const record=this.#issuedFiles.get(file);
    if(record===undefined)fail('NATIVE_CLOSURE_CAPABILITY_INVALID','The retained file is not one this closure issued');
    if(record.descriptor.released)fail('NATIVE_CLOSURE_CAPABILITY_INVALID','The retained file was already released');
-   return this.#hash(record.descriptor.fd);
+   // The digest is bounded by the size the closure TOOK: a file that grew or was
+   // truncated is refused, never summarised as it is now.
+   const digest=this.#hashBounded(record.descriptor.fd,Number(record.membership.size),record.membership.path);
+   // And the identity fence after the read: the file that was read is the file
+   // that was taken.
+   if(!this.#identityHolds(record.descriptor.fd,record.membership.path,record.membership))
+    fail('NATIVE_CLOSURE_MEMBERSHIP_MOVED','The retained file changed while it was read');
+   return digest;
   });
  }
 
  /** The synchronous guard of one retained file.
   *
-  * It answers whether the descriptor still holds the file that was taken: the same
-  * device, the same inode, the same size and the same bytes. It never throws. */
+  * It answers whether the file that was taken is STILL the file the tree names:
+  * the descriptor holds the same device, the same inode, the same size and the same
+  * bytes - AND the path that names it is the very file the descriptor holds. A file
+  * that was replaced at its path by an equal copy is therefore refused, although
+  * the descriptor still holds the original bytes.
+  *
+  * It never throws. */
  verifyFile(file:RetainedNativeFile):boolean{
   try{
    const record=this.#issuedFiles.get(file);
@@ -821,7 +897,14 @@ export class RetainedNativeClosure {
    // stops verifying it, so the old proof does not survive an external hardlink.
    if(info.nlink>1n)return false;
    if(info.dev!==record.membership.dev||info.ino!==record.membership.ino||info.size!==record.membership.size)return false;
-   return this.#hashSync(record.descriptor.fd)===record.sha256;
+   // The guard hashes at most the size the closure TOOK: a file that grew is not
+   // read to its new end, and a file that was truncated is not read as it is now.
+   const digest=this.#hashBoundedSync(record.descriptor.fd,Number(record.membership.size),record.membership.path);
+   if(digest===null||digest!==record.sha256)return false;
+   // The identity fence after the read: a file that was changed and written back
+   // keeps its length, and the digest of its bytes may even be the same - its
+   // change time of its inode is not.
+   return this.#identityHolds(record.descriptor.fd,record.membership.path,record.membership);
   }catch{return false;}
  }
 
@@ -860,7 +943,7 @@ export class RetainedNativeClosure {
    // The bytes are read with the bounded streaming buffer, never as a whole file.
    // The work is bounded by the size the closure took, and a file that grew is
    // refused: an unbounded read would let a growing file hold the final fence.
-   const digest=this.#hashBoundedSync(record.descriptor.fd,Number(record.membership.size));
+   const digest=this.#hashBoundedSync(record.descriptor.fd,Number(record.membership.size),record.membership.path);
    if(digest===null||digest!==record.sha256)return false;
    // ... and the identity is compared once more AFTER the read.
    const after=fstatSync(record.descriptor.fd,{bigint:true});
@@ -882,8 +965,11 @@ export class RetainedNativeClosure {
   * refused: the extra byte is looked for and its absence is proved. The buffer is
   * the same 64KiB the other hashes use, but here the LIMIT is the retained size,
   * so a file that keeps growing cannot hold the guard open. It returns null when
-  * the file is shorter than it was or longer than it is now. */
- #hashBoundedSync(fd:number,expectedBytes:number):string|null{
+  * the file is shorter than it was or longer than it is now.
+  *
+  * Every read is reported to the observation, so the bytes a guard really moved are
+  * attributed to the very file they came from. */
+ #hashBoundedSync(fd:number,expectedBytes:number,relativePath:string):string|null{
   const hash=createHash('sha256');
   const buffer=Buffer.allocUnsafe(HASH_BUFFER);
   let position=0;
@@ -891,11 +977,14 @@ export class RetainedNativeClosure {
    const want=Math.min(buffer.length,expectedBytes-position);
    const bytesRead=readSync(fd,buffer,0,want,position);
    if(bytesRead===0)return null;
+   this.#onReadChunk?.(relativePath,bytesRead);
    hash.update(buffer.subarray(0,bytesRead));
    position+=bytesRead;
   }
   // One more byte must not be there: the file may not have grown.
-  if(readSync(fd,buffer,0,1,expectedBytes)!==0)return null;
+  const extra=readSync(fd,buffer,0,1,expectedBytes);
+  this.#onReadChunk?.(relativePath,extra);
+  if(extra!==0)return null;
   return hash.digest('hex');
  }
 
@@ -991,35 +1080,89 @@ export class RetainedNativeClosure {
   return '/proc/'+process.pid+'/fd/'+record.descriptor.fd;
  }
 
- #hash(fd:number):{sha256:string;bytes:number}{
+ /** The identity fence AFTER a read.
+  *
+  * The extra byte of the bounded digests proves the LENGTH of the file; it does
+  * not prove the file itself. A writer that changes the bytes of the file and
+  * writes them back - the same length, the same bytes count, another change time
+  * of the inode - is caught here and nowhere else.
+  *
+  * The whole identity is compared: the device, the inode, the size, the nanosecond
+  * change times and the number of names - of the descriptor AND of the path that
+  * names it. A file that was replaced at its path by another file, and a file that
+  * was changed in place, are both refused. */
+ #identityHolds(fd:number,relativePath:string,membership:Membership):boolean{
+  try{
+   const held=fstatSync(fd,{bigint:true});
+   if(!held.isFile())return false;
+   if(held.dev!==membership.dev||held.ino!==membership.ino||held.size!==membership.size)return false;
+   if(held.mtimeNs!==membership.mtimeNs||held.ctimeNs!==membership.ctimeNs)return false;
+   if(held.nlink!==membership.nlink)return false;
+   // The PATH must still name the very file the descriptor holds.
+   const named=lstatSync(this.#root+sep+relativePath,{bigint:true});
+   if(!named.isFile()||named.isSymbolicLink())return false;
+   if(named.dev!==held.dev||named.ino!==held.ino||named.size!==held.size)return false;
+   if(named.mtimeNs!==held.mtimeNs||named.ctimeNs!==held.ctimeNs)return false;
+   if(named.nlink!==held.nlink)return false;
+   return true;
+  }catch{return false;}
+ }
+
+ /** The bounded digest of exactly the bytes the closure TOOK.
+  *
+  * The work is bounded by the CAPTURED size: a file that grew is refused (the extra
+  * byte is looked for and its absence is proved) and a file that was truncated is
+  * refused (the read ends before the size the closure took). Neither is summarised
+  * as it is now: a refusal is a refusal.
+  *
+  * Every read is reported to the observation, so the bytes the closure really moved
+  * - the digest included - are attributed to the very file they came from. The
+  * memory stays bounded: the buffer is the same 64 KiB the other hashes use.
+  *
+  * HONESTLY STATED: this bounds the BYTES, not the time. A read that never ends
+  * still ends the operation never; the budget and the timeouts of the Host are
+  * unchanged by this. */
+ #hashBounded(fd:number,expectedBytes:number,relativePath:string):{sha256:string;bytes:number}{
   const hash=createHash('sha256');
   const buffer=Buffer.allocUnsafe(HASH_BUFFER);
   let position=0;
   let bytes=0;
-  for(;;){
-   const bytesRead=readSync(fd,buffer,0,buffer.length,position);
-   if(bytesRead===0)break;
+  while(position<expectedBytes){
+   const want=Math.min(buffer.length,expectedBytes-position);
+   const bytesRead=readSync(fd,buffer,0,want,position);
+   if(bytesRead===0)fail('NATIVE_CLOSURE_MEMBERSHIP_MOVED','The retained file was truncated while it was read');
+   this.#onReadChunk?.(relativePath,bytesRead);
    hash.update(buffer.subarray(0,bytesRead));
    position+=bytesRead;bytes+=bytesRead;
   }
+  // One more byte must not be there: the file may not have grown.
+  const extra=readSync(fd,buffer,0,1,expectedBytes);
+  this.#onReadChunk?.(relativePath,extra);
+  if(extra!==0)fail('NATIVE_CLOSURE_MEMBERSHIP_MOVED','The retained file grew while it was read');
   return {sha256:hash.digest('hex'),bytes};
  }
 
  /** Read a file whole, but only after the budget has cleared it, and only as many
-  *  bytes as the descriptor said it had. A file that grew is refused, not truncated. */
+  *  bytes as the descriptor said it had. A file that grew is refused, not truncated,
+  *  and a file that was truncated is refused too: the read stops at the size the
+  *  closure took and one more byte is looked for. */
  #readAll(fd:number,expected:number,relativePath:string):Buffer{
   const buffer=Buffer.allocUnsafe(HASH_BUFFER);
   const parts:Buffer[]=[];
   let position=0;
   let bytes=0;
-  for(;;){
-   const bytesRead=readSync(fd,buffer,0,buffer.length,position);
-   if(bytesRead===0)break;
+  while(position<expected){
+   const want=Math.min(buffer.length,expected-position);
+   const bytesRead=readSync(fd,buffer,0,want,position);
+   if(bytesRead===0)fail('NATIVE_CLOSURE_MEMBERSHIP_MOVED','The retained file was truncated while it was read');
    this.#onReadChunk?.(relativePath,bytesRead);
-   if(bytes+bytesRead>expected)fail('NATIVE_CLOSURE_MEMBERSHIP_MOVED','The retained file grew while it was read');
    parts.push(Buffer.from(buffer.subarray(0,bytesRead)));
    position+=bytesRead;bytes+=bytesRead;
   }
+  // One more byte must not be there: the file may not have grown.
+  const extra=readSync(fd,buffer,0,1,expected);
+  this.#onReadChunk?.(relativePath,extra);
+  if(extra!==0)fail('NATIVE_CLOSURE_MEMBERSHIP_MOVED','The retained file grew while it was read');
   if(bytes!==expected)fail('NATIVE_CLOSURE_MEMBERSHIP_MOVED','The retained file changed while it was read');
   return Buffer.concat(parts);
  }
@@ -1062,7 +1205,10 @@ export class RetainedNativeClosure {
     const held=fstatSync(record.descriptor.fd,{bigint:true});
     if(held.nlink>1n)return false;
     if(held.dev!==info.dev||held.ino!==info.ino||held.size!==record.membership.size)return false;
-    if(this.#hashSync(record.descriptor.fd)!==record.sha256)return false;
+    // The whole-tree guard hashes at most the size the closure TOOK, for every file.
+    const digest=this.#hashBoundedSync(record.descriptor.fd,Number(record.membership.size),record.membership.path);
+    if(digest===null||digest!==record.sha256)return false;
+    if(!this.#identityHolds(record.descriptor.fd,record.membership.path,record.membership))return false;
    }
    for(const record of this.#directories.values()){
     const path=this.#root+sep+record.membership.path;
@@ -1089,19 +1235,6 @@ export class RetainedNativeClosure {
    }
    return true;
   }catch{return false;}
- }
-
- #hashSync(fd:number):string{
-  const hash=createHash('sha256');
-  const buffer=Buffer.allocUnsafe(HASH_BUFFER);
-  let position=0;
-  for(;;){
-   const bytesRead=readSync(fd,buffer,0,buffer.length,position);
-   if(bytesRead===0)break;
-   hash.update(buffer.subarray(0,bytesRead));
-   position+=bytesRead;
-  }
-  return hash.digest('hex');
  }
 
  /** Re-walk the whole tree and compare it with the membership the closure took. */

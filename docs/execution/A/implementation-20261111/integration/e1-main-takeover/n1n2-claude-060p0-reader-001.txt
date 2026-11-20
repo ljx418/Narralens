@@ -1,0 +1,165 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:271766) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+stdout | tests/agent-driven/integration/created-native-source-reader.test.ts > F10 lists the media as the pinned consumer lists it
+N1N2_ENVIRONMENT_FINGERPRINT {"node":"v22.22.1","icu":"78.2","locale":"en-US"}
+
+ ❯ tests/agent-driven/integration/created-native-source-reader.test.ts (93 tests | 3 failed) 1249250ms
+   ✓ R00 smoke reaches the reader from the real committed created source  23866ms
+   ✓ R00 smoke commits a rich source with the native files and the media  21868ms
+   ✓ R01 refuses the legacy project that has no created producer  43829ms
+   ✓ R02 invalidates the old proof when the working copy changes under it  18671ms
+   ✓ R02 refuses a pending round when the working copy changes during the read  12686ms
+   ✓ R03 refuses a sidecar, an unknown item and a missing committed file  14110ms
+   ✓ R04 refuses a foreign native id, a forged probe cache and a file in flight  14759ms
+   ✓ PF02 refuses a film duration that no witnessed draw produced  23993ms
+   ✓ R04 accepts a legitimate cache in the next stable round  16990ms
+   ✓ R05 proves the media facts of the retained bytes  13496ms
+   ✓ R06 lists the media in the native numeric order  13655ms
+   ✓ R02 keeps parallel leases independent and refuses foreign and copied tokens  15301ms
+   ✓ R02 refuses a facts lease of another authority  21210ms
+   ✓ R02 releases the whole closure only after the last retained leaf  15279ms
+   ✓ R06 places every clip where the committed film places it  13928ms
+   ✓ R07 ends a read at a close and releases a late result exactly once 1ms
+   ✓ R07 lets the real media child exit before the reader closes  11313ms
+   ✓ R07 registers the read before a binding callback can close the reader 0ms
+   ✓ R07 refuses a later read after a delivered release failed  11941ms
+   ✓ F01 keeps a temporary release failure and reports it once at the final release 3ms
+   ✓ F03 refuses a source leaf and a source parent replaced during the acquisition  29474ms
+   ✓ F03 refuses a stale source identity and proves the next one  11844ms
+   ✓ F04 refuses a hardlink alias and an unknown directory in the working copy  30430ms
+   ✓ F04 refuses a working copy leaf that is hardlinked to an external file  15401ms
+   ✓ F05 refuses a page frame cache entry and an orphan film poster  34329ms
+   ✓ F07 reports a delivered release failure when the reader closes  18655ms
+   ✓ F08 refuses a lease whose producer lineage changed after the issue  18187ms
+   ✓ F08 refuses a lineage changed during the acquisition  12569ms
+   ✓ F02 accepts a proved absence and refuses its later birth  14008ms
+   ✓ F06 refuses a referenced text above the budget in the authority path  11873ms
+   ✓ F09 refuses every injected probe failure through the production runner  60034ms
+   ✓ F09 normalises a rotated video and the first of two video streams 282ms
+   ✓ F10 lists the media as the pinned consumer lists it  1209ms
+   ✓ F10 keeps the caption directory in the platform order 2ms
+   ✓ F10 shows that the pinned consumer refuses a clip without a number  12470ms
+   ✓ P09 refuses a tree with more paths than the budget allows and settles every allocation once 2ms
+   ✓ P09 keeps the platform error of a vanished path and settles every allocation once 1ms
+   × P07 refuses a grown file, the cumulative text, the deep tree and the descriptor budget 15ms
+     → The retained text is larger than the total budget allows
+   ✓ P07 keeps the primary error when an open fails and releases everything else 2ms
+   ✓ P07 keeps the primary cause of an EMFILE, an ENOMEM and an EACCES 2ms
+   ✓ P06 normalises a missing and a picture duration as no duration 0ms
+   ✓ F05 binds the probe evidence to the concrete tool, argv, input and result  13095ms
+   ✓ F03 refuses a pending round when the working copy changes during the probe  12746ms
+   ✓ R07 keeps the delivered resources until their owner releases them  24172ms
+   ✓ R03 refuses a translation beside the media that the committed source does not have  22137ms
+   ✓ P06 resolves a clip without a place as the native does and refuses a disagreement 0ms
+   ✓ P06 places a clip without a place where the pinned consumer places it 81ms
+   × P07 refuses a symbolic link, a same-bytes replacement and a restored change time 6ms
+     → expected false to be true // Object.is equality
+   × P07 refuses a text file above the budget and bounds the total 2ms
+     → The retained text is larger than the total budget allows
+   ✓ P07 refuses to release while work is in flight and releases every allocation once 2ms
+   ✓ P07 refuses a reentrant release from inside an accepted read 1ms
+   ✓ P07 keeps the failure of the walk release with the failure that stopped it 1ms
+   ✓ G01 adopts the genuine cleanup uncertainty of a rejected source acquisition  16618ms
+   ✓ G01 keeps the reader usable after an ordinary failure of the acquisition  19914ms
+   ✓ G01 adopts the genuine uncertainty of a raw rejection that arrives after the caller was cancelled 1ms
+   ✓ G02 refuses the round when the binding goes stale during the read  23044ms
+   ✓ G02 refuses the round when the reader is closed during the final verification  13793ms
+   ✓ G02 refuses the round when the working copy view is invalidated during the read  19523ms
+   ✓ G02 refuses the round when another delivered proof fails to release  14924ms
+   ✓ G03 refuses a film that is replaced between the bounded digest and the parse  11232ms
+   ✓ G04 refuses a page frame entry that no fixed producer witnessed  13303ms
+   ✓ G04 refuses a film poster that no fixed producer witnessed  12602ms
+   ✓ G05 refuses a real stdout overflow and a real stderr overflow  36527ms
+   ✓ G05 kills and reaps a real hung child and keeps the input held until it ends  14739ms
+   ✓ G05 proves the named media branch is the one that failed  19135ms
+   ✓ G05 proves a real child that dies by a signal and a real child that is cancelled  48710ms
+   ✓ G06 refuses a working copy whose settings file was deleted and sees it change under a proof  15204ms
+   ✓ P07 hands a non-lexical caption order to the actual consumer without changing it 4ms
+   ✓ G06 accepts an absent heard transcript and refuses its later birth  23328ms
+   ✓ G06 refuses an empty directory born alone under a held proof  14445ms
+   ✓ G06 refuses a stale generation at the reader  12237ms
+   ✓ G06 refuses a foreign facts lease consumed through the actual reader  17608ms
+   ✓ G06 refuses an isolated parent swap that leaves no extra file behind  17294ms
+   ✓ G07 refuses a workspace leaf hardlinked to an external file 1ms
+   ✓ G01 keeps the alias reason and the release failure of the same acquisition  11981ms
+   ✓ G07 invalidates an old proof when an external hardlink appears after it  16613ms
+   ✓ G07 holds both trees and a parallel proof under one descriptor pool  13779ms
+   ✓ G07 holds every nested and empty directory of both trees independently  13401ms
+   ✓ P07 keeps the named primary and every cleanup cause of the real unpack path 4ms
+   ✓ P07 proves an empty directory and sees the file that appears in it 2ms
+   ✓ P06 reproduces the five pinned native revision vectors 1ms
+   ✓ P06 lists the media in the numeric order of the host 1ms
+   ✓ G02 refuses the round when the last liveness callback closes the reader  9188ms
+   ✓ K02-a releases the private parse copy of a successful acquisition  10696ms
+   ✓ K02-b releases the private parse copy of a failed parse  13943ms
+   ✓ K02-c delivers nothing when the private parse copy could not be removed  14464ms
+   ✓ K06-a proves that the heard consumer really asked for the absent transcript  21352ms
+   ✓ K06-b refuses the round when the ownership authority moved during the read  15557ms
+   ✓ K06-c refuses the round when the committed base moved during the read  10978ms
+   ✓ K06-d refuses the round when the control revision moved during the read  10679ms
+   ✓ K06-e refuses the round when the issued view was replaced  14706ms
+   ✓ K04-c refuses a duration whose film was changed and written back  22017ms
+   ✓ F05-c refuses a media cache family this Host cannot prove  35758ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/created-native-source-reader.test.ts > P07 refuses a grown file, the cumulative text, the deep tree and the descriptor budget
+RetainedNativeError: The retained text is larger than the total budget allows
+ ❯ fail src/host/agent-driven/retained-native-closure.ts:121:14
+    119| 
+    120| function fail(code:string,message:string,causes?:readonly unknown[]):n…
+    121|  const error=new RetainedNativeError(code,message);
+       |              ^
+    122|  if(causes&&causes.length>0)attachCauses(error,causes);
+    123|  throw error;
+ ❯ src/host/agent-driven/retained-native-closure.ts:736:67
+ ❯ RetainedNativeClosure.#admit src/host/agent-driven/retained-native-closure.ts:582:14
+ ❯ RetainedNativeClosure.retainFile src/host/agent-driven/retained-native-closure.ts:695:15
+ ❯ tests/agent-driven/integration/created-native-source-reader.test.ts:1350:30
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  tests/agent-driven/integration/created-native-source-reader.test.ts > P07 refuses a symbolic link, a same-bytes replacement and a restored change time
+AssertionError: expected false to be true // Object.is equality
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- true[39m
+[31m+ false[39m
+
+ ❯ tests/agent-driven/integration/created-native-source-reader.test.ts:1811:36
+    1809|   renameSync(copy,join(root,'film.html'));
+    1810|   expect(closure.verify()).toBe(false);
+    1811|   expect(closure.verifyFile(film)).toBe(true);
+       |                                    ^
+    1812|   // A same-size write whose change time was restored: the content cha…
+    1813|   // change time lies about it, so the closure must still see it.
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  tests/agent-driven/integration/created-native-source-reader.test.ts > P07 refuses a text file above the budget and bounds the total
+RetainedNativeError: The retained text is larger than the total budget allows
+ ❯ fail src/host/agent-driven/retained-native-closure.ts:121:14
+    119| 
+    120| function fail(code:string,message:string,causes?:readonly unknown[]):n…
+    121|  const error=new RetainedNativeError(code,message);
+       |              ^
+    122|  if(causes&&causes.length>0)attachCauses(error,causes);
+    123|  throw error;
+ ❯ src/host/agent-driven/retained-native-closure.ts:736:67
+ ❯ RetainedNativeClosure.#admit src/host/agent-driven/retained-native-closure.ts:582:14
+ ❯ RetainedNativeClosure.retainFile src/host/agent-driven/retained-native-closure.ts:695:15
+ ❯ tests/agent-driven/integration/created-native-source-reader.test.ts:1850:29
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  3 failed | 90 passed (93)
+   Start at  11:52:30
+   Duration  1261.76s (transform 6.19s, setup 0ms, collect 9.74s, tests 1249.25s, environment 0ms, prepare 1.83s)
+

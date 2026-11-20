@@ -1,0 +1,31 @@
+{
+  "kind": "narralens.openfilm_cache_worker_integrity@1.0",
+  "host_modules": {
+    "src/adapters/openfilm/cache-process-custodian.py": "d7eee942d3fb2acf1db12bca4ce32568e3038a1ef03e3efebed222eda6dd55c4",
+    "src/adapters/openfilm/cache-process-supervisor.ts": "3396945546985a334bd99520c97d403eb853fdd0c4a01ff4359b4ac97d414eed",
+    "src/adapters/openfilm/cache-worker-policy.mjs": "0d2b2b38eea9922b0348ae2dbbbfbe1c2bc7715fc923879776696110015b1214",
+    "src/adapters/openfilm/openfilm-cache-worker.mjs": "579a484bea740d768f7b183b46de85775446a3b0f8ea62ab7927d7e026d5b089",
+    "src/host/render/media-process-policy.mjs": "3d448ff79c497ee5e123f6931c554a716bc033088e05e701e1de42e48ae995bc",
+    "src/host/render/openfilm-guard-rules.mjs": "8ff1f73170dc0fd8414fb8fc8015416ac9e8522d0d7d092b903782f657c90c0a",
+    "src/host/render/openfilm-offline-hooks.mjs": "1f73d6b61741062d8b2419323174743ea42ffc93ae282a08cab6f97fe1a7f1ee",
+    "src/host/render/openfilm-offline-wrapper.mjs": "3da8a0b3a817d80bc9fad8be3d92f022b638c6919e4c959b9a5d895b62a08d30"
+  },
+  "pinned_upstream": {
+    "packages/openfilm/src/film-doc.mjs": "feef7be8181e7ec63cf2b8760f3a32b7b7e22cd851d4e5a233c04f1768cf719d",
+    "packages/openfilm/src/host.mjs": "dfed0fd5b068823d06b5091fbc01821791f0f470bbf061741bf21a25dc0bb170",
+    "packages/openfilm/studio/server/atomic.mjs": "61374e50c67d76e03d70d73e05ed307378d866d579847c316c4203fbc9cde94f",
+    "packages/openfilm/studio/server/film.mjs": "eb0aab3a4770082a0b273f448b6bda3b0ca043aee791d5444148c459af855d85",
+    "packages/openfilm/studio/server/ops.mjs": "e44a93286d500391cd61b6f27cc426ecb6fd49f777f816593c17133f0bd15957",
+    "packages/openfilm/studio/server/pageframes.mjs": "87d82f73add17d699aab963a99e45b4406cf68ecf547389b61a24083658f2828"
+  },
+  "pinned_upstream_source": "contracts/openfilm-upstream-lock.json",
+  "fixed_runtime": {
+    "node_exec_path": "/usr/bin/node",
+    "python": {
+      "executable": "/usr/bin/python3.12",
+      "sha256": "e50d468e8b0adfb05733f5b87b3cff34829c4a8c1aea50c865aa8bdfe4bb150f",
+      "version": "3.12.3"
+    }
+  },
+  "generated_by": "tools/openfilm-cache-worker-integrity.mjs"
+}

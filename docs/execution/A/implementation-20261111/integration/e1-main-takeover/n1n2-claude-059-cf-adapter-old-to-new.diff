@@ -1,0 +1,151 @@
+619a620,698
+>   /**
+>    * Answer one request.
+>    *
+>    * Every failure of the serving is a BOUNDED answer: a bad address is a 400, a
+>    * resource that is not there is a 404, and an unexpected failure of the serving
+>    * itself is a 500 - never an exception that escapes into the HTTP listener and
+>    * ends the process, and never an answer that calls a failure a success.
+>    */
+>   const answer = (req: IncomingMessage, res: ServerResponse): void => {
+>     // A page is read, never written.
+>     if (req.method !== "GET" && req.method !== "HEAD") { refuse(res, 405, "method not allowed"); return; }
+>     // The root must still be the very directory this server was bound to.
+>     let rootInfo;
+>     try { rootInfo = statSync(realRoot); }
+>     catch { refuse(res, 503, "unavailable"); return; }
+>     if (!rootInfo.isDirectory() || rootInfo.dev !== rootIdentity.dev || rootInfo.ino !== rootIdentity.ino) {
+>       refuse(res, 503, "unavailable"); return;
+>     }
+>     const url = req.url ?? "/";
+>     // The request target must be an ORIGIN-FORM path: it starts with "/" and it is
+>     // not an authority reference. A target that starts with "//" is not a path here
+>     // - the URL parser reads it as ANOTHER origin, and an unterminated one is not a
+>     // URL at all - so it is refused before anything is parsed. Every other target
+>     // keeps the answer it always had.
+>     if (!url.startsWith("/") || url.startsWith("//")) { refuse(res, 400, "bad address"); return; }
+>     const rawPath = url.split("?")[0] ?? "/";
+>     let decoded: string;
+>     try { decoded = decodeURIComponent(rawPath); }
+>     catch { refuse(res, 400, "bad address"); return; }
+>     // An address speaks in `/`: a backslash in it, a NUL or a colon is never a name.
+>     if (decoded.includes("\\") || decoded.includes("\0") || decoded.includes(":")) { refuse(res, 400, "bad address"); return; }
+>     const relative = decoded.replace(/^\/+/, "");
+>     const segments = relative.split("/").filter(part => part !== "");
+>     // A dot file or a dot folder is never served: the native's own metadata and
+>     // the person's own files stay out of the page origin.
+>     if (segments.some(part => part.startsWith("."))) { refuse(res, 403, "forbidden"); return; }
+>     if (segments.some(part => part === "..")) { refuse(res, 403, "forbidden"); return; }
+>     // The query is the upstream's own query: the same parser, the same semantics.
+>     // It is only BOUNDED: a target the parser refuses is a bad address, not a
+>     // failure of the serving.
+>     let query: URLSearchParams;
+>     try { query = new URL(url, "http://127.0.0.1").searchParams; }
+>     catch { refuse(res, 400, "bad address"); return; }
+>     if (segments[0] === "__film") {
+>       // The virtual runtime is an exact set of routes, never a prefix.
+>       if (!OPENFILM_VIRTUAL_RUNTIME_ROUTES.has(relative)) { refuse(res, 403, "forbidden"); return; }
+>       if (relative === "__film/frame-duration") {
+>         // The address the probe is about is a file of the project: it is checked
+>         // here, with the same rules, so the virtual route is no way out of the
+>         // root - and the upstream's own file lookup, which allows a readable
+>         // link, never gets the chance to answer for it.
+>         const of = query.get("of");
+>         if (of === null) { refuse(res, 400, "bad address"); return; }
+>         let target: string;
+>         try { target = decodeURIComponent(of); }
+>         catch { refuse(res, 400, "bad address"); return; }
+>         if (target.includes("\\") || target.includes("\0") || target.includes(":")) { refuse(res, 400, "bad address"); return; }
+>         const asked = inside(target);
+>         if (asked === null) { refuse(res, 403, "forbidden"); return; }
+>         // The upstream's own probe of that file: the SAME promise its own route
+>         // uses (the upstream keeps one promise per file version), so what is
+>         // tracked here is the real probe and not a report about it.
+>         track(probes, frameDuration(asked));
+>       }
+>     } else {
+>       // A file of the project: it must be inside the ONE root this server is
+>       // bound to.
+>       if (inside(relative) === null) { refuse(res, 404, "not found"); return; }
+>     }
+>     // The request itself: the HTTP side is tracked, and a request that was
+>     // aborted is told apart from one that was answered.
+>     const settled = new Promise<void>(resolve => {
+>       let done = false;
+>       res.on("finish", () => { done = true; finished += 1; resolve(); });
+>       res.on("close", () => { if (!done) aborted += 1; resolve(); });
+>     });
+>     track(requests, settled);
+>     if (!serve(req, res, rawPath, query)) refuse(res, 403, "forbidden");
+>   };
+632,679c711,721
+<       // A page is read, never written.
+<       if (req.method !== "GET" && req.method !== "HEAD") { refuse(res, 405, "method not allowed"); return; }
+<       // The root must still be the very directory this server was bound to.
+<       let rootInfo;
+<       try { rootInfo = statSync(realRoot); }
+<       catch { refuse(res, 503, "unavailable"); return; }
+<       if (!rootInfo.isDirectory() || rootInfo.dev !== rootIdentity.dev || rootInfo.ino !== rootIdentity.ino) {
+<         refuse(res, 503, "unavailable"); return;
+<       }
+<       const url = req.url ?? "/";
+<       const rawPath = url.split("?")[0] ?? "/";
+<       let decoded: string;
+<       try { decoded = decodeURIComponent(rawPath); }
+<       catch { refuse(res, 400, "bad address"); return; }
+<       // An address speaks in `/`: a backslash in it, a NUL or a colon is never a name.
+<       if (decoded.includes("\\") || decoded.includes("\0") || decoded.includes(":")) { refuse(res, 400, "bad address"); return; }
+<       const relative = decoded.replace(/^\/+/, "");
+<       const segments = relative.split("/").filter(part => part !== "");
+<       // A dot file or a dot folder is never served: the native's own metadata and
+<       // the person's own files stay out of the page origin.
+<       if (segments.some(part => part.startsWith("."))) { refuse(res, 403, "forbidden"); return; }
+<       if (segments.some(part => part === "..")) { refuse(res, 403, "forbidden"); return; }
+<       const query = new URL(url, "http://127.0.0.1").searchParams;
+<       if (segments[0] === "__film") {
+<         // The virtual runtime is an exact set of routes, never a prefix.
+<         if (!OPENFILM_VIRTUAL_RUNTIME_ROUTES.has(relative)) { refuse(res, 403, "forbidden"); return; }
+<         if (relative === "__film/frame-duration") {
+<           // The address the probe is about is a file of the project: it is checked
+<           // here, with the same rules, so the virtual route is no way out of the
+<           // root - and the upstream's own file lookup, which allows a readable
+<           // link, never gets the chance to answer for it.
+<           const of = query.get("of");
+<           if (of === null) { refuse(res, 400, "bad address"); return; }
+<           let target: string;
+<           try { target = decodeURIComponent(of); }
+<           catch { refuse(res, 400, "bad address"); return; }
+<           if (target.includes("\\") || target.includes("\0") || target.includes(":")) { refuse(res, 400, "bad address"); return; }
+<           const asked = inside(target);
+<           if (asked === null) { refuse(res, 403, "forbidden"); return; }
+<           // The upstream's own probe of that file: the SAME promise its own route
+<           // uses (the upstream keeps one promise per file version), so what is
+<           // tracked here is the real probe and not a report about it.
+<           track(probes, frameDuration(asked));
+<         }
+<       } else {
+<         // A file of the project: it must be inside the ONE root this server is
+<         // bound to.
+<         if (inside(relative) === null) { refuse(res, 404, "not found"); return; }
+---
+>       try { answer(req, res); }
+>       catch {
+>         // An unexpected failure of the serving is a failure of the SERVING: it is
+>         // answered with a bounded 500 - never with a success, and never with an
+>         // exception that escapes into the HTTP listener and ends the process. A
+>         // resource or a media that is not there is NOT this: it keeps its own
+>         // refusal, and the answer that was already begun is only ended.
+>         try {
+>           if (res.headersSent) res.end();
+>           else res.writeHead(500, { ...headers, "content-type": "text/plain; charset=utf-8" }).end("unavailable");
+>         } catch { /* the response is already gone: there is nothing left to answer */ }
+681,689d722
+<       // The request itself: the HTTP side is tracked, and a request that was
+<       // aborted is told apart from one that was answered.
+<       const settled = new Promise<void>(resolve => {
+<         let done = false;
+<         res.on("finish", () => { done = true; finished += 1; resolve(); });
+<         res.on("close", () => { if (!done) aborted += 1; resolve(); });
+<       });
+<       track(requests, settled);
+<       if (!serve(req, res, rawPath, query)) refuse(res, 403, "forbidden");

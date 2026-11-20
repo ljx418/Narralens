@@ -1,0 +1,23 @@
+.........................................FF...........
+======================================================================
+FAIL: test_a_persistent_refusal_keeps_the_debt_and_the_history_bounded (__main__.TheRevokedAuthorityStillProvesTheDomain.test_a_persistent_refusal_keeps_the_debt_and_the_history_bounded)
+A raw refusal never consumes the debt, and the facts stay bounded.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/helpers/cache-custodian-unit.py", line 1814, in test_a_persistent_refusal_keeps_the_debt_and_the_history_bounded
+    self.assertLessEqual(len(self.instance.signals), 32)
+AssertionError: 40 not less than or equal to 32
+
+======================================================================
+FAIL: test_a_revoked_authority_still_proves_that_the_original_domain_ended (__main__.TheRevokedAuthorityStillProvesTheDomain.test_a_revoked_authority_still_proves_that_the_original_domain_ended)
+TERM ends N; N is really reaped; the group probe is unknown.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/helpers/cache-custodian-unit.py", line 1778, in test_a_revoked_authority_still_proves_that_the_original_domain_ended
+    self.assertFalse(second["anchor_held"])
+AssertionError: True is not false
+
+----------------------------------------------------------------------
+Ran 54 tests in 0.044s
+
+FAILED (failures=2)

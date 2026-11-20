@@ -1,0 +1,41 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:372157) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/native-cache-witness.test.ts (31 tests) 478837ms
+   ✓ B0-1 the fixed producer really draws and the witness binds the request, the key, the triple and the dependencies  15191ms
+   ✓ B0-2 one owner close never kills the peer work in flight, and the browser goes with the last owner  12014ms
+   ✓ B0-3 refuses a cache entry that was already there and keeps its old bytes  11659ms
+   ✓ B0-4 the fixed producer draws a page frame and the witness binds it  19561ms
+   ✓ B0-5 refuses a producer that the Host did not issue  10710ms
+   ✓ K01-a refuses an unknown, a copied and a shaped production lease before the producer runs  9810ms
+   ✓ K01-b refuses a production lease of another real service  11012ms
+   ✓ K01-c refuses a hand-branded witness and the reader refuses the entry it speaks about  12071ms
+   ✓ K01-d refuses the production lease of a view that was replaced  11911ms
+   ✓ K03-a refuses a partial triple of that key and keeps its bytes  11528ms
+   ✓ K03-b refuses a request that is not the exact request of its family  13403ms
+   ✓ K05-a keeps the primary of a failed producer and the genuine release failure  14250ms
+   ✓ K05-b delivers nothing when the release of the production did not finish  16763ms
+   ✓ K04-a refuses a witnessed picture that was replaced by an equal copy  27775ms
+   ✓ K04-b refuses a witnessed dependency that was changed and written back  21750ms
+   ✓ PF01 refuses a serving that this service did not register, before any page is asked for  19810ms
+   ✓ PF02 proves the film duration by the draw that wrote it, and refuses every other one  13955ms
+   ✓ K05-c keeps the primary of a real draw and the genuine release failure of each of the two trees  10710ms
+   ✓ Q01 a close during the construction waits for it, and the failed owner is closed at once  14084ms
+   ✓ Q01 a root that moved during the construction closes the owner at once and refuses the serving  21071ms
+   ✓ Q01 two concurrent requests for the same view share one construction and one owner  11151ms
+   ✓ Q01 a dispose during the construction waits for it and settles the owner at once  15652ms
+   ✓ Q01 the factory settles its own construction when the serving observation throws, and keeps the same primary  11926ms
+   ✓ Q01 the factory settles its own construction when the root check fails after the listener is up  12329ms
+   ✓ Q01 a factory failure with a genuine settlement failure keeps the primary, the genuine object and the sticky service  17067ms
+   ✓ Q01 a registration failure with a genuine settlement failure keeps the primary and latches the service  11802ms
+   ✓ Q02 a close during a real draw waits for the draw and keeps its origin alive  72355ms
+   ✓ Q03 a draw of another page never brands a duration it did not write  11828ms
+   ✓ Q03 two lawful different frames keep both triples consumable and the current duration belongs to the newest draw  15683ms
+
+ Test Files  1 passed (1)
+      Tests  31 passed (31)
+   Start at  12:35:32
+   Duration  491.07s (transform 5.72s, setup 0ms, collect 9.44s, tests 478.84s, environment 0ms, prepare 1.92s)
+

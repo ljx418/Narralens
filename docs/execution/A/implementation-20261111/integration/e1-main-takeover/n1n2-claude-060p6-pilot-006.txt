@@ -1,0 +1,621 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+stdout | tests/agent-driven/integration/native-cache-normal-pilot.test.ts > the ORCHESTRATION over the ACTUAL supervisor > waits for the REAL asynchronous start of the normal mode, and cancels NOTHING
+PILOT_RECEIPT_ERROR:{"original":null,"settlement":null,"problems":[],"evidenceErrors":[],"reportingFailure":null,"latched":{"kind":"candidate","code":null,"message":null,"native_phase":null},"transport":null,"cleanupFailures":0,"terminalProof":true,"picture":1024,"exact":true,"kind":"ok","exitCode":0,"authoritative":true,"published":true,"root":"/tmp/pilot-root"}
+
+ ❯ tests/agent-driven/integration/native-cache-normal-pilot.test.ts (264 tests | 41 failed) 2574ms
+   ✓ the arguments of the positive pilot > takes exactly a mode and two digests 1ms
+   ✓ the arguments of the positive pilot > does not run the pilot when its module is imported 0ms
+   ✓ the positive pilot > really succeeds, and the picture is EXACTLY the synthetic one 28ms
+   ✓ the positive pilot > is NOT a success when the picture is not the exact one 5ms
+   ✓ the positive pilot > refuses bytes that are not the reviewed ones, and starts nothing 4ms
+   ✓ the positive pilot > refuses a COPY of the helper that is not the reviewed one, and starts nothing 3ms
+   ✓ the positive pilot > injects the deliberate failure only after the worker was REALLY alive 4ms
+   ✓ the positive pilot > does NOT inject the deliberate failure when the worker was not observed 4ms
+   ✓ the positive pilot > does NOT inject the deliberate failure after a GO of another worker 4ms
+   ✓ the positive pilot > does NOT inject the deliberate failure after a GO of another draw 3ms
+   ✓ the positive pilot > does NOT inject the deliberate failure when the worker is a zombie 4ms
+   ✓ the positive pilot > does NOT inject the deliberate failure when the worker is another start time 3ms
+   ✓ the positive pilot > does NOT inject the deliberate failure when the worker is another parent 3ms
+   ✓ the positive pilot > does NOT inject the deliberate failure when the worker is another group 3ms
+   ✓ the positive pilot > does NOT accept an unrelated failure as the expected fault 3ms
+   ✓ the positive pilot > does NOT accept a transport failure as the expected fault 3ms
+   ✓ the positive pilot > keeps a failure of the evidence, and it is never a green case 4ms
+   ✓ the positive pilot > keeps the owner of a HELD draw and ends with the fresh proof 3ms
+   ✓ the positive pilot > keeps the owner when the ROOT could not be prepared, and it starts nothing 3ms
+   ✓ the positive pilot > keeps the owner when the RESERVE failed, and there is no phantom child 3ms
+   ✓ the positive pilot > reads the ORIGINAL result of a draw that was held and that ended LATE 3ms
+   ✓ the positive pilot > keeps the owner when the event reader failed after the start 3ms
+   ✓ the positive pilot > never kills anything: it asks, and it does nothing else 3ms
+   ✓ the positive pilot > does not lose the owner when the destination fails asynchronously 6ms
+   ✓ the real asynchronous order of the two modes > does NOT cancel a draw that is still making progress 3ms
+   ✓ the real asynchronous order of the two modes > waits for the accepted worker before it injects the deliberate failure 3ms
+   ✓ the real asynchronous order of the two modes > does NOT inject when the draw REALLY failed before the worker was accepted 3ms
+   ✓ the real asynchronous order of the two modes > does NOT inject when the GO of this draw never arrives 3ms
+   ✓ the raw cleanup of the draw > is NOT green when the raw settlement carries a cleanup failure 4ms
+   ✓ the raw cleanup of the draw > is NOT a fault when the raw settlement carries a cleanup failure 3ms
+   ✓ the raw cleanup of the draw > is NOT green when the FINAL diagnostic carries cleanup failures 3ms
+   ✓ the ownership of the runtime root > writes NO evidence at all when the root could not be allocated 3ms
+   ✓ the final qualification of a run > commits the final qualification AFTER the report callbacks 4ms
+   ✓ the final qualification of a run > revokes the final qualification when the report destination fails LATE 5ms
+   ✓ the final qualification of a run > is NOT green when the manifest of the artifacts could not be built 3ms
+   ✓ the JOINT publication of a run > publishes the final into the root of the run, and the temporary file is gone 3ms
+   ✓ the JOINT publication of a run > revokes the qualification when the publication fails BEFORE the bytes are written 3ms
+   ✓ the JOINT publication of a run > revokes the qualification when the publication fails AFTER the complete write 4ms
+   ✓ the JOINT publication of a run > is NOT green when a REQUIRED artifact of the manifest carries an error 4ms
+   ✓ the JOINT publication of a run > is NOT green when a REQUIRED artifact is missing from the manifest 4ms
+   ✓ the JOINT publication of a run > is NOT green when the manifest does not name the digest of the candidate that is on the disk 3ms
+   ✓ the JOINT publication of a run > answers 3 when the publication of the run failed 4ms
+   ✓ the JOINT publication of a run > answers 2 for a refusal of the arguments, and 1 for a fault that was really observed 7ms
+   × the JOINT publication of a run > the REAL filesystem: the final is published in the root of the run 30ms
+     → expected 3 to be +0 // Object.is equality
+   × the JOINT publication of a run > a CONSUMER that applies the joint judgement rejects a run whose publication failed 11ms
+     → expected 'failed' to be 'ok' // Object.is equality
+   ✓ the JOINT publication of a run > the REAL filesystem: a required record that was not written is not a green case 11ms
+   × the JOINT checker of a published run > accepts a normal run that really succeeded 11ms
+     → expected [ Array(1) ] to deeply equal []
+   × the JOINT checker of a published run > accepts the deliberate fault that was really observed 11ms
+     → expected [ Array(1) ] to deeply equal []
+   × the JOINT checker of a published run > does NOT accept an ordinary business failure 11ms
+     → expected false to be true // Object.is equality
+   × the JOINT checker of a published run > does NOT accept a fault that carries an extra failure 11ms
+     → expected false to be true // Object.is equality
+   ✓ the JOINT checker of a published run > refuses when the final record cannot be read, and it keeps the evidence 11ms
+   ✓ the JOINT checker of a published run > refuses when the candidate cannot be read 11ms
+   × the JOINT checker of a published run > refuses when the helper cannot be read 10ms
+     → expected false to be true // Object.is equality
+   ✓ the JOINT checker of a published run > refuses when a third listed artifact cannot be read 10ms
+   ✓ the JOINT checker of a published run > refuses when a record is GONE from the root 10ms
+   ✓ the JOINT checker of a published run > refuses a record with a LEGITIMATE digest but another mode 10ms
+   ✓ the JOINT checker of a published run > refuses a record with a LEGITIMATE digest but another protocol 10ms
+   ✓ the JOINT checker of a published run > refuses a record with a LEGITIMATE digest but a broken link 10ms
+   ✓ the JOINT checker of a published run > refuses a record with a LEGITIMATE digest but another number of bytes 10ms
+   ✓ the JOINT checker of a published run > answers 3 from the COMMAND when the evidence cannot be read 10ms
+   × the JOINT checker of a published run > the REAL mapper: a single EIO on a third artifact makes the run unreliable 10ms
+     → expected undefined to be defined
+   ✓ the RESULT FACTS of a published run > refuses 'F01 final.kind_of_run deleted' 9ms
+   ✓ the RESULT FACTS of a published run > refuses 'F01 final.kind_of_run wrong type' 10ms
+   ✓ the RESULT FACTS of a published run > refuses 'F01 final.kind_of_run contradicted' 10ms
+   ✓ the RESULT FACTS of a published run > refuses 'F01 final.exit_code deleted' 10ms
+   ✓ the RESULT FACTS of a published run > refuses 'F01 final.exit_code wrong type' 10ms
+   ✓ the RESULT FACTS of a published run > refuses 'F01 final.exit_code contradicted' 9ms
+   ✓ the RESULT FACTS of a published run > refuses 'F01 final.fault_case_passed deleted' 9ms
+   ✓ the RESULT FACTS of a published run > refuses 'F01 final.fault_case_passed wrong type' 9ms
+   ✓ the RESULT FACTS of a published run > refuses 'F01 final.fault_case_passed contradic…' 9ms
+   ✓ the RESULT FACTS of a published run > refuses 'F01 candidate.authoritative deleted' 10ms
+   ✓ the RESULT FACTS of a published run > refuses 'F01 candidate.authoritative wrong type' 10ms
+   ✓ the RESULT FACTS of a published run > refuses 'F01 candidate.authoritative contradic…' 10ms
+   ✓ the RESULT FACTS of a published run > refuses 'F01 final.mode deleted' 9ms
+   ✓ the RESULT FACTS of a published run > refuses 'F01 final.mode wrong type' 10ms
+   ✓ the RESULT FACTS of a published run > refuses 'F01 final.mode contradicted' 11ms
+   ✓ the RESULT FACTS of a published run > refuses 'F02 candidate.original_failure deleted' 10ms
+   ✓ the RESULT FACTS of a published run > refuses 'F02 candidate.original_failure wrong …' 10ms
+   ✓ the RESULT FACTS of a published run > refuses 'F02 candidate.original_failure contra…' 9ms
+   ✓ the RESULT FACTS of a published run > refuses 'F02 final.original_failure deleted' 9ms
+   ✓ the RESULT FACTS of a published run > refuses 'F02 final.original_failure wrong type' 9ms
+   ✓ the RESULT FACTS of a published run > refuses 'F02 final.original_failure contradict…' 9ms
+   ✓ the RESULT FACTS of a published run > refuses 'F03 candidate.settlement_failure dele…' 9ms
+   ✓ the RESULT FACTS of a published run > refuses 'F03 candidate.settlement_failure wron…' 9ms
+   ✓ the RESULT FACTS of a published run > refuses 'F03 candidate.settlement_failure cont…' 9ms
+   ✓ the RESULT FACTS of a published run > refuses 'F03 final.settlement_failure deleted' 9ms
+   ✓ the RESULT FACTS of a published run > refuses 'F03 final.settlement_failure wrong ty…' 9ms
+   ✓ the RESULT FACTS of a published run > refuses 'F03 final.settlement_failure contradi…' 9ms
+   ✓ the RESULT FACTS of a published run > refuses 'F04 candidate.cleanup_facts deleted' 9ms
+   ✓ the RESULT FACTS of a published run > refuses 'F04 candidate.cleanup_facts wrong type' 9ms
+   ✓ the RESULT FACTS of a published run > refuses 'F04 candidate.cleanup_facts contradic…' 8ms
+   ✓ the RESULT FACTS of a published run > refuses 'F04 final.cleanup_facts deleted' 8ms
+   ✓ the RESULT FACTS of a published run > refuses 'F04 final.cleanup_facts wrong type' 9ms
+   ✓ the RESULT FACTS of a published run > refuses 'F04 final.cleanup_facts contradicted' 9ms
+   ✓ the RESULT FACTS of a published run > refuses 'F05 candidate.terminal_proof deleted' 9ms
+   ✓ the RESULT FACTS of a published run > refuses 'F05 candidate.terminal_proof wrong ty…' 9ms
+   ✓ the RESULT FACTS of a published run > refuses 'F05 candidate.terminal_proof contradi…' 9ms
+   ✓ the RESULT FACTS of a published run > refuses 'F05 final.terminal_proof deleted' 9ms
+   ✓ the RESULT FACTS of a published run > refuses 'F05 final.terminal_proof wrong type' 9ms
+   ✓ the RESULT FACTS of a published run > refuses 'F05 final.terminal_proof contradicted' 9ms
+   ✓ the RESULT FACTS of a published run > refuses 'F06 candidate.actual_image deleted' 9ms
+   ✓ the RESULT FACTS of a published run > refuses 'F06 candidate.actual_image wrong type' 9ms
+   ✓ the RESULT FACTS of a published run > refuses 'F06 candidate.actual_image contradict…' 9ms
+   ✓ the RESULT FACTS of a published run > refuses 'F06 final.picture_sha256 deleted' 9ms
+   ✓ the RESULT FACTS of a published run > refuses 'F06 final.picture_sha256 wrong type' 9ms
+   ✓ the RESULT FACTS of a published run > refuses 'F06 final.picture_sha256 contradicted' 8ms
+   ✓ the RESULT FACTS of a published run > refuses 'F06 final.picture_bytes deleted' 9ms
+   ✓ the RESULT FACTS of a published run > refuses 'F06 final.picture_bytes wrong type' 8ms
+   ✓ the RESULT FACTS of a published run > refuses 'F06 final.picture_bytes contradicted' 8ms
+   ✓ the RESULT FACTS of a published run > refuses 'F07 final.diagnostic_snapshot deleted' 9ms
+   ✓ the RESULT FACTS of a published run > refuses 'F07 final.diagnostic_snapshot wrong t…' 9ms
+   ✓ the RESULT FACTS of a published run > refuses 'F07 final.diagnostic_snapshot contrad…' 9ms
+   ✓ the RESULT FACTS of a published run > refuses 'F07 candidate.accumulator_summary del…' 9ms
+   ✓ the RESULT FACTS of a published run > refuses 'F07 candidate.accumulator_summary wro…' 8ms
+   ✓ the RESULT FACTS of a published run > refuses 'F07 candidate.accumulator_summary con…' 9ms
+   ✓ the RESULT FACTS of a published run > refuses 'F07 candidate.terminal_proof_observat…' 9ms
+   ✓ the RESULT FACTS of a published run > refuses 'F07 candidate.terminal_proof_observat…' 9ms
+   ✓ the RESULT FACTS of a published run > refuses 'F07 candidate.terminal_proof_observat…' 9ms
+   × the RESULT FACTS of a published run > refuses 'F08 final.diagnostic_snapshot.cleanup…' 9ms
+     → expected false to be true // Object.is equality
+   × the RESULT FACTS of a published run > refuses 'F08 final.diagnostic_snapshot.cleanup…' 9ms
+     → expected false to be true // Object.is equality
+   × the RESULT FACTS of a published run > refuses 'F08 final.diagnostic_snapshot.cleanup…' 9ms
+     → expected false to be true // Object.is equality
+   × the RESULT FACTS of a published run > refuses 'F08 final.diagnostic_snapshot.transpo…' 9ms
+     → expected false to be true // Object.is equality
+   × the RESULT FACTS of a published run > refuses 'F08 final.diagnostic_snapshot.transpo…' 9ms
+     → expected false to be true // Object.is equality
+   × the RESULT FACTS of a published run > refuses 'F08 final.diagnostic_snapshot.transpo…' 8ms
+     → expected false to be true // Object.is equality
+   × the RESULT FACTS of a published run > refuses 'F08 final.diagnostic_snapshot.latched…' 9ms
+     → expected false to be true // Object.is equality
+   × the RESULT FACTS of a published run > refuses 'F08 final.diagnostic_snapshot.latched…' 9ms
+     → expected false to be true // Object.is equality
+   × the RESULT FACTS of a published run > refuses 'F08 final.diagnostic_snapshot.latched…' 9ms
+     → expected false to be true // Object.is equality
+   × the RESULT FACTS of a published run > refuses 'F09 final.diagnostic_snapshot.cancel_…' 9ms
+     → expected false to be true // Object.is equality
+   × the RESULT FACTS of a published run > refuses 'F09 final.diagnostic_snapshot.cancel_…' 9ms
+     → expected false to be true // Object.is equality
+   × the RESULT FACTS of a published run > refuses 'F09 final.diagnostic_snapshot.cancel_…' 10ms
+     → expected false to be true // Object.is equality
+   ✓ the RESULT FACTS of a published run > refuses 'F01 final.authoritative deleted' 9ms
+   ✓ the RESULT FACTS of a published run > refuses 'F01 final.authoritative wrong type' 9ms
+   ✓ the RESULT FACTS of a published run > refuses 'F01 final.authoritative contradicted' 9ms
+   ✓ the RESULT FACTS of a published run > refuses 'F01 final.publication_protocol deleted' 10ms
+   ✓ the RESULT FACTS of a published run > refuses 'F01 final.publication_protocol wrong …' 11ms
+   ✓ the RESULT FACTS of a published run > refuses 'F01 final.publication_protocol contra…' 10ms
+   ✓ the RESULT FACTS of a published run > refuses 'F01 final.root deleted' 10ms
+   ✓ the RESULT FACTS of a published run > refuses 'F01 final.root wrong type' 10ms
+   ✓ the RESULT FACTS of a published run > refuses 'F01 final.root contradicted' 10ms
+   × the RESULT FACTS of a published run > refuses 'F05 final.diagnostic_snapshot.termina…' 10ms
+     → expected false to be true // Object.is equality
+   × the RESULT FACTS of a published run > refuses 'F05 final.diagnostic_snapshot.termina…' 11ms
+     → expected false to be true // Object.is equality
+   × the RESULT FACTS of a published run > refuses 'F05 final.diagnostic_snapshot.termina…' 10ms
+     → expected false to be true // Object.is equality
+   ✓ the RESULT FACTS of a published run > refuses 'F06 candidate.expected_image deleted' 11ms
+   ✓ the RESULT FACTS of a published run > refuses 'F06 candidate.expected_image wrong ty…' 11ms
+   ✓ the RESULT FACTS of a published run > refuses 'F06 candidate.expected_image contradi…' 10ms
+   ✓ the RESULT FACTS of a published run > refuses 'F07 candidate.receipt_summary deleted' 9ms
+   ✓ the RESULT FACTS of a published run > refuses 'F07 candidate.receipt_summary wrong t…' 10ms
+   ✓ the RESULT FACTS of a published run > refuses 'F07 candidate.receipt_summary contrad…' 12ms
+   × the RESULT FACTS of a published run > refuses 'F08 final.diagnostic_snapshot.cleanup…' 10ms
+     → expected false to be true // Object.is equality
+   × the RESULT FACTS of a published run > refuses 'F08 final.diagnostic_snapshot.cleanup…' 10ms
+     → expected false to be true // Object.is equality
+   × the RESULT FACTS of a published run > refuses 'F08 final.diagnostic_snapshot.cleanup…' 10ms
+     → expected false to be true // Object.is equality
+   × the RESULT FACTS of a published run > refuses 'F09 final.diagnostic_snapshot.cancel_…' 10ms
+     → expected false to be true // Object.is equality
+   × the RESULT FACTS of a published run > refuses 'F09 final.diagnostic_snapshot.cancel_…' 9ms
+     → expected false to be true // Object.is equality
+   × the RESULT FACTS of a published run > refuses 'F09 final.diagnostic_snapshot.cancel_…' 10ms
+     → expected false to be true // Object.is equality
+   ✓ the RESULT FACTS of a published run > refuses 'F10 final.evidence_errors deleted' 9ms
+   ✓ the RESULT FACTS of a published run > refuses 'F10 final.evidence_errors wrong type' 9ms
+   ✓ the RESULT FACTS of a published run > refuses 'F10 final.evidence_errors contradicted' 9ms
+   ✓ the RESULT FACTS of a published run > refuses 'F10 final.reporting_failures deleted' 9ms
+   ✓ the RESULT FACTS of a published run > refuses 'F10 final.reporting_failures wrong ty…' 8ms
+   ✓ the RESULT FACTS of a published run > refuses 'F10 final.reporting_failures contradi…' 9ms
+   × the RESULT FACTS of a published run > refuses 'F09 final.diagnostic_snapshot.cancel_…' 9ms
+     → expected false to be true // Object.is equality
+   × the RESULT FACTS of a published run > refuses 'F09 final.diagnostic_snapshot.cancel_…' 9ms
+     → expected false to be true // Object.is equality
+   × the RESULT FACTS of a published run > refuses 'F09 final.diagnostic_snapshot.cancel_…' 9ms
+     → expected false to be true // Object.is equality
+   × the RESULT FACTS of a published run > refuses 'F09 final.diagnostic_snapshot.cancel_…' 9ms
+     → expected false to be true // Object.is equality
+   × the RESULT FACTS of a published run > refuses 'F09 final.diagnostic_snapshot.cancel_…' 9ms
+     → expected false to be true // Object.is equality
+   × the RESULT FACTS of a published run > refuses 'F09 final.diagnostic_snapshot.cancel_…' 9ms
+     → expected false to be true // Object.is equality
+   ✓ the RESULT FACTS of a published run > refuses a record that says NULL where the run really failed 9ms
+   ✓ the RESULT FACTS of a published run > refuses a candidate that carries a failure, a cleanup and a missing field at once 10ms
+   × the RESULT FACTS of a published run > refuses a final whose diagnostic carries an extra failure 13ms
+     → expected undefined to be null
+   ✓ the RESULT FACTS of a published run > refuses an outcome whose own facts contradict the records 9ms
+   ✓ the RESULT FACTS of a published run > refuses an outcome whose kind, exit and fault flags contradict the records 8ms
+   ✓ the RESULT FACTS of a published run > refuses a fault whose settlement is an unrelated failure 7ms
+   ✓ the RESULT FACTS of a published run > refuses a fault whose ACTUAL settlement is another object with the same text 7ms
+   × the RESULT FACTS of a published run > ACCEPTS a fault whose settlement is the WRAPPER of the original error 5ms
+     → expected [ Array(1) ] to deeply equal []
+   × the RESULT FACTS of a published run > keeps an ordinary business failure reliable, not accepted, and at the exit code 1 10ms
+     → expected false to be true // Object.is equality
+   × the RESULT FACTS of a published run > keeps an ordinary failure of the FAULT mode reliable, not accepted, and at the exit code 1 10ms
+     → expected false to be true // Object.is equality
+   ✓ the RESULT FACTS of a published run > answers 3 from the COMMAND when a result fact of the candidate is wrong 9ms
+   × the RESULT FACTS of a published run > does NOT change when the snapshot is read again 9ms
+     → expected null not to be null
+   ✓ the run WITHOUT a root > answers 3 and it writes NOTHING 4ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'candidate.kind' 8ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'candidate.authoritative' 9ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'candidate.mode' 9ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'candidate.root' 8ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'candidate.custodian_sha256' 9ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'candidate.fixture_sha256' 9ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'candidate.copied_fixture_sha256' 10ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'candidate.scenario' 9ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'candidate.expected_image' 9ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'candidate.actual_image' 9ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'candidate.original_failure' 9ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'candidate.settlement_failure' 9ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'candidate.cleanup_facts' 9ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'candidate.terminal_proof' 9ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'candidate.terminal_proof_observations' 8ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'candidate.receipt_summary' 8ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'candidate.accumulator_summary' 8ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'candidate.raw_segments_saved' 9ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'candidate.timeline' 8ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'manifest.kind' 8ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'manifest.authoritative' 8ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'manifest.root' 8ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'manifest.artifacts' 8ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'manifest.listing_error' 8ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'manifest.excluded' 8ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'manifest.exclusion_reason' 8ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'manifest.required_artifacts' 9ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'final.kind' 9ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'final.authoritative' 9ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'final.publication_protocol' 9ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'final.mode' 9ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'final.root' 9ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'final.exit_code' 9ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'final.kind_of_run' 9ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'final.fault_case_passed' 9ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'final.terminal_proof' 9ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'final.picture_sha256' 9ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'final.picture_bytes' 9ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'final.picture_is_the_exact_one' 8ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'final.original_failure' 8ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'final.settlement_failure' 8ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'final.cleanup_facts' 8ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'final.reporting_failure' 9ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'final.reporting_failures' 9ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'final.evidence_errors' 9ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'final.evidence_problems' 9ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'final.manifest_error' 8ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'final.required_artifacts' 11ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'final.candidate_sha256' 8ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'final.candidate_bytes' 8ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'final.manifest_sha256' 8ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'final.manifest_bytes' 8ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'final.terminal_proof_observations' 9ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'final.diagnostic_snapshot' 9ms
+   ✓ the PRESENCE of every published field > refuses a manifest whose artifact row does not carry its error 9ms
+   ✓ the PRESENCE of every published field > refuses a final.reporting_failure that carries a REAL failure 9ms
+   ✓ the PRESENCE of every published field > refuses a manifest.listing_error that carries a REAL failure 9ms
+   ✓ the PRESENCE of every published field > refuses an artifact row that carries a REAL failure 9ms
+   × the run WITHOUT a snapshot > keeps it reliable, not accepted, and at the exit code 1 10ms
+     → expected false to be true // Object.is equality
+   ✓ the run WITHOUT a snapshot > refuses the run without the snapshot when candidate.receipt_summary is missing 10ms
+   ✓ the run WITHOUT a snapshot > refuses the run without the snapshot when candidate.accumulator_summary is missing 9ms
+   ✓ the run WITHOUT a snapshot > refuses the run without the snapshot when candidate.terminal_proof_observations is missing 9ms
+   ✓ the run WITHOUT a snapshot > refuses the run without the snapshot when final.terminal_proof_observations is missing 9ms
+   ✓ the run WITHOUT a snapshot > refuses the run without the snapshot when candidate.receipt_summary is explicitly undefined 9ms
+   ✓ the run WITHOUT a snapshot > refuses the run without the snapshot when candidate.accumulator_summary is explicitly undefined 8ms
+   ✓ the run WITHOUT a snapshot > refuses the run without the snapshot when candidate.terminal_proof_observations is explicitly undefined 8ms
+   ✓ the run WITHOUT a snapshot > refuses the run without the snapshot when final.terminal_proof_observations is explicitly undefined 8ms
+   ✓ the run WITHOUT a snapshot > refuses the run without the snapshot when candidate.receipt_summary has the wrong type 9ms
+   ✓ the run WITHOUT a snapshot > refuses the run without the snapshot when candidate.accumulator_summary has the wrong type 10ms
+   ✓ the run WITHOUT a snapshot > refuses the run without the snapshot when candidate.terminal_proof_observations has the wrong type 8ms
+   ✓ the run WITHOUT a snapshot > refuses the run without the snapshot when final.terminal_proof_observations has the wrong type 9ms
+   ✓ the run WITHOUT a snapshot > refuses the run without the snapshot when candidate.receipt_summary carries a legal object 10ms
+   ✓ the run WITHOUT a snapshot > refuses the run without the snapshot when candidate.accumulator_summary carries a legal object 8ms
+   ✓ the run WITHOUT a snapshot > refuses the run without the snapshot when candidate.terminal_proof_observations carries a legal object 9ms
+   ✓ the run WITHOUT a snapshot > refuses the run without the snapshot when final.terminal_proof_observations carries a legal object 9ms
+   ✓ the ORCHESTRATION over the ACTUAL supervisor > waits for the REAL asynchronous start of the normal mode, and cancels NOTHING 59ms
+   ✓ the ORCHESTRATION over the ACTUAL supervisor > waits for the LATE worker of the fault mode before it injects 106ms
+   ✓ the ORDER of the terminal channels of a draw > does NOT send a CANCEL when the finalisation was already authorised 55ms
+   ✓ the ORDER of the terminal channels of a draw > sends the CANCEL and FAILS when the draw ended WITHOUT the finalisation 56ms
+   ✓ the reporting over a REAL destination > revokes the final qualification when the destination fails LATE 4ms
+   ✓ the reporting over a REAL destination > does NOT lose the owner when the destination breaks while the settlement is PENDING 155ms
+   ✓ the command of the positive pilot > answers 2 for arguments it does not take 3ms
+   ✓ the command of the positive pilot > answers 0 for a normal draw that really succeeded 6ms
+   ✓ the command of the positive pilot > answers 1 for the deliberate failure that was really observed 3ms
+   ✓ the digest of the synthetic picture > is the digest of exactly 1024 bytes of 0x4a 0ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 41 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/native-cache-normal-pilot.test.ts > the JOINT publication of a run > the REAL filesystem: the final is published in the root of the run
+AssertionError: expected 3 to be +0 // Object.is equality
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 0[39m
+[31m+ 3[39m
+
+ ❯ tests/agent-driven/integration/native-cache-normal-pilot.test.ts:1544:20
+    1542|         "--expected-fixture-sha256", REVIEWED_FIXTURE_SHA256,
+    1543|       ], deps);
+    1544|       expect(code).toBe(PILOT_EXIT_OK);
+       |                    ^
+    1545|       // The final is really there, and the temporary file of the publ…
+    1546|       // is NOT: a publication that completed leaves a record and noth…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/41]⎯
+
+ FAIL  tests/agent-driven/integration/native-cache-normal-pilot.test.ts > the JOINT publication of a run > a CONSUMER that applies the joint judgement rejects a run whose publication failed
+AssertionError: expected 'failed' to be 'ok' // Object.is equality
+
+Expected: [32m"ok"[39m
+Received: [31m"failed"[39m
+
+ ❯ tests/agent-driven/integration/native-cache-normal-pilot.test.ts:1597:33
+    1595|       const final = JSON.parse(readFileSync(join(root, "final.json"), …
+    1596|       expect(final.authoritative).toBe(true);
+    1597|       expect(final.kind_of_run).toBe("ok");
+       |                                 ^
+    1598|       // And the ACTUAL checker rejects it: the conjunction is not sat…
+    1599|       // This is the SAME function that the command and the legacy con…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/41]⎯
+
+ FAIL  tests/agent-driven/integration/native-cache-normal-pilot.test.ts > the JOINT checker of a published run > accepts a normal run that really succeeded
+AssertionError: expected [ Array(1) ] to deeply equal []
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- [][39m
+[31m+ [[39m
+[31m+   "the run did not return an authoritative qualification",[39m
+[31m+ ][39m
+
+ ❯ tests/agent-driven/integration/native-cache-normal-pilot.test.ts:1677:31
+    1675|       const outcome = await runPositivePilot(reviewedOptions("normal")…
+    1676|       const verdict = verifyPublishedRun(outcome, root);
+    1677|       expect(verdict.reasons).toEqual([]);
+       |                               ^
+    1678|       expect(verdict.evidenceReliable).toBe(true);
+    1679|       expect(verdict.accepted).toBe(true);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/41]⎯
+
+ FAIL  tests/agent-driven/integration/native-cache-normal-pilot.test.ts > the JOINT checker of a published run > accepts the deliberate fault that was really observed
+AssertionError: expected [ Array(1) ] to deeply equal []
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- [][39m
+[31m+ [[39m
+[31m+   "the run did not return an authoritative qualification",[39m
+[31m+ ][39m
+
+ ❯ tests/agent-driven/integration/native-cache-normal-pilot.test.ts:1694:31
+    1692|       const outcome = await runPositivePilot(reviewedOptions("assertio…
+    1693|       const verdict = verifyPublishedRun(outcome, root);
+    1694|       expect(verdict.reasons).toEqual([]);
+       |                               ^
+    1695|       expect(verdict.accepted).toBe(true);
+    1696|       expect(verdict.exitCode).toBe(PILOT_EXIT_FAULT);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/41]⎯
+
+ FAIL  tests/agent-driven/integration/native-cache-normal-pilot.test.ts > the JOINT checker of a published run > does NOT accept an ordinary business failure
+AssertionError: expected false to be true // Object.is equality
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- true[39m
+[31m+ false[39m
+
+ ❯ tests/agent-driven/integration/native-cache-normal-pilot.test.ts:1712:40
+    1710|       const outcome = await runPositivePilot(reviewedOptions("normal")…
+    1711|       const verdict = verifyPublishedRun(outcome, root);
+    1712|       expect(verdict.evidenceReliable).toBe(true);
+       |                                        ^
+    1713|       expect(verdict.accepted).toBe(false);
+    1714|       expect(verdict.exitCode).toBe(PILOT_EXIT_FAULT);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/41]⎯
+
+ FAIL  tests/agent-driven/integration/native-cache-normal-pilot.test.ts > the JOINT checker of a published run > does NOT accept a fault that carries an extra failure
+AssertionError: expected false to be true // Object.is equality
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- true[39m
+[31m+ false[39m
+
+ ❯ tests/agent-driven/integration/native-cache-normal-pilot.test.ts:1732:40
+    1730|       const outcome = await runPositivePilot(reviewedOptions("assertio…
+    1731|       const verdict = verifyPublishedRun(outcome, root);
+    1732|       expect(verdict.evidenceReliable).toBe(true);
+       |                                        ^
+    1733|       expect(verdict.accepted).toBe(false);
+    1734|       expect(verdict.exitCode).toBe(PILOT_EXIT_FAULT);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/41]⎯
+
+ FAIL  tests/agent-driven/integration/native-cache-normal-pilot.test.ts > the JOINT checker of a published run > refuses when the helper cannot be read
+AssertionError: expected false to be true // Object.is equality
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- true[39m
+[31m+ false[39m
+
+ ❯ tests/agent-driven/integration/native-cache-normal-pilot.test.ts:1784:66
+    1782|       expect(verdict.accepted).toBe(false);
+    1783|       expect(verdict.exitCode).toBe(PILOT_EXIT_UNRELIABLE);
+    1784|       expect(existsSync(join(root, "cache-worker-fixture.mjs"))).toBe(…
+       |                                                                  ^
+    1785|     } finally {
+    1786|       rmSync(root, { recursive: true, force: true });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/41]⎯
+
+ FAIL  tests/agent-driven/integration/native-cache-normal-pilot.test.ts > the JOINT checker of a published run > the REAL mapper: a single EIO on a third artifact makes the run unreliable
+AssertionError: expected undefined to be defined
+ ❯ tests/agent-driven/integration/native-cache-normal-pilot.test.ts:1964:19
+    1962|       expect(manifest.listing_error).toBeNull();
+    1963|       const row = manifest.artifacts.find(artifact => artifact.name ==…
+    1964|       expect(row).toBeDefined();
+       |                   ^
+    1965|       expect(row?.digest).toBeNull();
+    1966|       expect(row?.error).not.toBeNull();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/41]⎯
+
+ FAIL  tests/agent-driven/integration/native-cache-normal-pilot.test.ts > the RESULT FACTS of a published run > refuses 'F08 final.diagnostic_snapshot.cleanup…'
+ FAIL  tests/agent-driven/integration/native-cache-normal-pilot.test.ts > the RESULT FACTS of a published run > refuses 'F08 final.diagnostic_snapshot.cleanup…'
+ FAIL  tests/agent-driven/integration/native-cache-normal-pilot.test.ts > the RESULT FACTS of a published run > refuses 'F08 final.diagnostic_snapshot.cleanup…'
+ FAIL  tests/agent-driven/integration/native-cache-normal-pilot.test.ts > the RESULT FACTS of a published run > refuses 'F08 final.diagnostic_snapshot.transpo…'
+ FAIL  tests/agent-driven/integration/native-cache-normal-pilot.test.ts > the RESULT FACTS of a published run > refuses 'F08 final.diagnostic_snapshot.transpo…'
+ FAIL  tests/agent-driven/integration/native-cache-normal-pilot.test.ts > the RESULT FACTS of a published run > refuses 'F08 final.diagnostic_snapshot.transpo…'
+ FAIL  tests/agent-driven/integration/native-cache-normal-pilot.test.ts > the RESULT FACTS of a published run > refuses 'F08 final.diagnostic_snapshot.latched…'
+ FAIL  tests/agent-driven/integration/native-cache-normal-pilot.test.ts > the RESULT FACTS of a published run > refuses 'F08 final.diagnostic_snapshot.latched…'
+ FAIL  tests/agent-driven/integration/native-cache-normal-pilot.test.ts > the RESULT FACTS of a published run > refuses 'F08 final.diagnostic_snapshot.latched…'
+ FAIL  tests/agent-driven/integration/native-cache-normal-pilot.test.ts > the RESULT FACTS of a published run > refuses 'F09 final.diagnostic_snapshot.cancel_…'
+ FAIL  tests/agent-driven/integration/native-cache-normal-pilot.test.ts > the RESULT FACTS of a published run > refuses 'F09 final.diagnostic_snapshot.cancel_…'
+ FAIL  tests/agent-driven/integration/native-cache-normal-pilot.test.ts > the RESULT FACTS of a published run > refuses 'F09 final.diagnostic_snapshot.cancel_…'
+ FAIL  tests/agent-driven/integration/native-cache-normal-pilot.test.ts > the RESULT FACTS of a published run > refuses 'F05 final.diagnostic_snapshot.termina…'
+ FAIL  tests/agent-driven/integration/native-cache-normal-pilot.test.ts > the RESULT FACTS of a published run > refuses 'F05 final.diagnostic_snapshot.termina…'
+ FAIL  tests/agent-driven/integration/native-cache-normal-pilot.test.ts > the RESULT FACTS of a published run > refuses 'F05 final.diagnostic_snapshot.termina…'
+ FAIL  tests/agent-driven/integration/native-cache-normal-pilot.test.ts > the RESULT FACTS of a published run > refuses 'F08 final.diagnostic_snapshot.cleanup…'
+ FAIL  tests/agent-driven/integration/native-cache-normal-pilot.test.ts > the RESULT FACTS of a published run > refuses 'F08 final.diagnostic_snapshot.cleanup…'
+ FAIL  tests/agent-driven/integration/native-cache-normal-pilot.test.ts > the RESULT FACTS of a published run > refuses 'F08 final.diagnostic_snapshot.cleanup…'
+ FAIL  tests/agent-driven/integration/native-cache-normal-pilot.test.ts > the RESULT FACTS of a published run > refuses 'F09 final.diagnostic_snapshot.cancel_…'
+ FAIL  tests/agent-driven/integration/native-cache-normal-pilot.test.ts > the RESULT FACTS of a published run > refuses 'F09 final.diagnostic_snapshot.cancel_…'
+ FAIL  tests/agent-driven/integration/native-cache-normal-pilot.test.ts > the RESULT FACTS of a published run > refuses 'F09 final.diagnostic_snapshot.cancel_…'
+ FAIL  tests/agent-driven/integration/native-cache-normal-pilot.test.ts > the RESULT FACTS of a published run > refuses 'F09 final.diagnostic_snapshot.cancel_…'
+ FAIL  tests/agent-driven/integration/native-cache-normal-pilot.test.ts > the RESULT FACTS of a published run > refuses 'F09 final.diagnostic_snapshot.cancel_…'
+ FAIL  tests/agent-driven/integration/native-cache-normal-pilot.test.ts > the RESULT FACTS of a published run > refuses 'F09 final.diagnostic_snapshot.cancel_…'
+ FAIL  tests/agent-driven/integration/native-cache-normal-pilot.test.ts > the RESULT FACTS of a published run > refuses 'F09 final.diagnostic_snapshot.cancel_…'
+ FAIL  tests/agent-driven/integration/native-cache-normal-pilot.test.ts > the RESULT FACTS of a published run > refuses 'F09 final.diagnostic_snapshot.cancel_…'
+ FAIL  tests/agent-driven/integration/native-cache-normal-pilot.test.ts > the RESULT FACTS of a published run > refuses 'F09 final.diagnostic_snapshot.cancel_…'
+AssertionError: expected false to be true // Object.is equality
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- true[39m
+[31m+ false[39m
+
+ ❯ tests/agent-driven/integration/native-cache-normal-pilot.test.ts:2392:52
+    2390|       expect(verdict.reasons.join(" ")).not.toBe("");
+    2391|       // And the evidence is KEPT: a refused run never removes it.
+    2392|       expect(existsSync(join(root, "final.json"))).toBe(true);
+       |                                                    ^
+    2393|     } finally {
+    2394|       rmSync(root, { recursive: true, force: true });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/41]⎯
+
+ FAIL  tests/agent-driven/integration/native-cache-normal-pilot.test.ts > the RESULT FACTS of a published run > refuses a final whose diagnostic carries an extra failure
+AssertionError: expected undefined to be null
+
+[32m- Expected:[39m 
+null
+
+[31m+ Received:[39m 
+undefined
+
+ ❯ tests/agent-driven/integration/native-cache-normal-pilot.test.ts:2475:61
+    2473|       }, tampered);
+    2474|       // The ACTUAL baseline of the outcome is unchanged.
+    2475|       expect(outcome.diagnosticSnapshot?.transport_failure).toBeNull();
+       |                                                             ^
+    2476|       expect(outcome.diagnosticSnapshot?.latched_outcome.kind).not.toB…
+    2477|       const verdict = verifyPublishedRun(outcome, root);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/41]⎯
+
+ FAIL  tests/agent-driven/integration/native-cache-normal-pilot.test.ts > the RESULT FACTS of a published run > ACCEPTS a fault whose settlement is the WRAPPER of the original error
+AssertionError: expected [ Array(1) ] to deeply equal []
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- [][39m
+[31m+ [[39m
+[31m+   "the run did not return an authoritative qualification",[39m
+[31m+ ][39m
+
+ ❯ tests/agent-driven/integration/native-cache-normal-pilot.test.ts:2619:31
+    2617|       }, deps);
+    2618|       const verdict = verifyPublishedRun(outcome, root);
+    2619|       expect(verdict.reasons).toEqual([]);
+       |                               ^
+    2620|       expect(verdict.evidenceReliable).toBe(true);
+    2621|       expect(verdict.accepted).toBe(true);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/41]⎯
+
+ FAIL  tests/agent-driven/integration/native-cache-normal-pilot.test.ts > the RESULT FACTS of a published run > keeps an ordinary business failure reliable, not accepted, and at the exit code 1
+AssertionError: expected false to be true // Object.is equality
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- true[39m
+[31m+ false[39m
+
+ ❯ tests/agent-driven/integration/native-cache-normal-pilot.test.ts:2642:40
+    2640|       }, deps);
+    2641|       const verdict = verifyPublishedRun(outcome, root);
+    2642|       expect(verdict.evidenceReliable).toBe(true);
+       |                                        ^
+    2643|       expect(verdict.accepted).toBe(false);
+    2644|       expect(verdict.exitCode).toBe(PILOT_EXIT_FAULT);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/41]⎯
+
+ FAIL  tests/agent-driven/integration/native-cache-normal-pilot.test.ts > the RESULT FACTS of a published run > keeps an ordinary failure of the FAULT mode reliable, not accepted, and at the exit code 1
+AssertionError: expected false to be true // Object.is equality
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- true[39m
+[31m+ false[39m
+
+ ❯ tests/agent-driven/integration/native-cache-normal-pilot.test.ts:2669:40
+    2667|       }, deps);
+    2668|       const verdict = verifyPublishedRun(outcome, root);
+    2669|       expect(verdict.evidenceReliable).toBe(true);
+       |                                        ^
+    2670|       expect(verdict.accepted).toBe(false);
+    2671|       expect(verdict.exitCode).toBe(PILOT_EXIT_FAULT);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/41]⎯
+
+ FAIL  tests/agent-driven/integration/native-cache-normal-pilot.test.ts > the RESULT FACTS of a published run > does NOT change when the snapshot is read again
+AssertionError: expected null not to be null
+ ❯ tests/agent-driven/integration/native-cache-normal-pilot.test.ts:2725:25
+    2723|       }, deps);
+    2724|       const first = outcome.diagnosticSnapshot;
+    2725|       expect(first).not.toBeNull();
+       |                         ^
+    2726|       expect(outcome.diagnosticSnapshot).toBe(first);
+    2727|       expect(first?.terminal_proof?.proven).toBe(true);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[14/41]⎯
+
+ FAIL  tests/agent-driven/integration/native-cache-normal-pilot.test.ts > the run WITHOUT a snapshot > keeps it reliable, not accepted, and at the exit code 1
+AssertionError: expected false to be true // Object.is equality
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- true[39m
+[31m+ false[39m
+
+ ❯ tests/agent-driven/integration/native-cache-normal-pilot.test.ts:2972:40
+    2970|       expect(outcome.kind).toBe("failed");
+    2971|       const verdict = verifyPublishedRun(outcome, root);
+    2972|       expect(verdict.evidenceReliable).toBe(true);
+       |                                        ^
+    2973|       expect(verdict.accepted).toBe(false);
+    2974|       expect(verdict.exitCode).toBe(PILOT_EXIT_FAULT);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[15/41]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  41 failed | 223 passed (264)
+   Start at  01:41:25
+   Duration  6.82s (transform 410ms, setup 0ms, collect 657ms, tests 2.57s, environment 0ms, prepare 2.30s)
+

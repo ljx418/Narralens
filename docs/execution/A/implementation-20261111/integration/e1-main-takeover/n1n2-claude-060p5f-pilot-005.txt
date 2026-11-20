@@ -1,0 +1,13 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+stdout | tests/agent-driven/integration/native-cache-normal-pilot.test.ts > the command of the positive pilot > answers 0 for a normal draw that really succeeded
+VERDICT_REASONS:[]
+
+ ✓ tests/agent-driven/integration/native-cache-normal-pilot.test.ts (54 tests) 458ms
+
+ Test Files  1 passed (1)
+      Tests  54 passed (54)
+   Start at  22:16:23
+   Duration  2.69s (transform 218ms, setup 0ms, collect 332ms, tests 458ms, environment 0ms, prepare 1.26s)
+

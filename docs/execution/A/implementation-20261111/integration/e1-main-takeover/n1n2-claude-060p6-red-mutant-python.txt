@@ -1,0 +1,35 @@
+............................E...E....................................
+======================================================================
+ERROR: test_a_cancel_before_the_authorisation_forks_nothing (__main__.TheMonotonicAuthorisationOfADraw.test_a_cancel_before_the_authorisation_forks_nothing)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/helpers/cache-custodian-unit.py", line 2244, in test_a_cancel_before_the_authorisation_forks_nothing
+    instance, attempts = self._run_the_batch([
+                         ^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/helpers/cache-custodian-unit.py", line 2216, in _run_the_batch
+    instance._run_loop(time.monotonic() + 1.0)
+  File "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/src/adapters/openfilm/cache-process-custodian.py", line 2666, in _run_loop
+    self._authorize_fork(message)
+  File "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/src/adapters/openfilm/cache-process-custodian.py", line 1823, in _authorize_fork
+    raise CustodianFailure(
+narralens_cache_custodian.CustodianFailure: the draw was already authorised: the attempt is not given back
+
+======================================================================
+ERROR: test_two_authorisations_fork_at_most_once (__main__.TheMonotonicAuthorisationOfADraw.test_two_authorisations_fork_at_most_once)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/helpers/cache-custodian-unit.py", line 2233, in test_two_authorisations_fork_at_most_once
+    instance, attempts = self._run_the_batch([self._authorisation(), self._authorisation()])
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/helpers/cache-custodian-unit.py", line 2216, in _run_the_batch
+    instance._run_loop(time.monotonic() + 1.0)
+  File "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/src/adapters/openfilm/cache-process-custodian.py", line 2666, in _run_loop
+    self._authorize_fork(message)
+  File "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/src/adapters/openfilm/cache-process-custodian.py", line 1823, in _authorize_fork
+    raise CustodianFailure(
+narralens_cache_custodian.CustodianFailure: the draw was already authorised: the attempt is not given back
+
+----------------------------------------------------------------------
+Ran 69 tests in 0.073s
+
+FAILED (errors=2)

@@ -1,3 +1,12 @@
+## 2026-11-20 当前流程与维护授权（优先于以下历史快照）
+
+用户批准流程规范、剩余计划、目录归档和Git同步。必读docs/process/README.md、01_DELIVERY_SPEC.md、02_REMAINING_PLAN.md、03_TEAM_AND_OWNERSHIP.md、04_VALIDATION_AND_HANDOFF_SPEC.md；当前状态以00_CURRENT_STATE.json及真实原始记录为准。大批交付、内部小闭环、交还缺项拒绝、在途测试禁止改受测输入、具名命令预约、候选检查点和独立审查必须执行。元数据检查不等于产品验收。
+ClaudeCode继续负责实现，Codex设计/可执行验收样例/独立审查；未启用Codex接写核心可选路线。新429仍立即停，不自动重试/重启/切供应商或接手；额度恢复不豁免未来429。本维护轮不启动产品实现；下一goal重新核唯一writer与当前SHA后发精确票。禁止把上传WIP检查点称阶段通过或合main。
+
+## D10任务在WSL重启后的写入前检查点（2026-11-12）
+
+原Task task_e115789b4321保留当前四路径dirty候选继续，不得reset/stash/覆盖回de438基线。恢复后第一次源码写入之前，必须先读取MAIN裁决 `/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/D10_MAIN_RULING_REQUEST_AND_DURABLE_RECOVERY.md` 及同目录 `orca-restart-20261112/observed.json`（明确允许只读当前操作文档），并向当前监督者ACK已理解全部六条修订要求。该文件补充原冻结票据，优先于原候选中的错误测试预期。不得在ACK前写代码或启动重型测试。当前BRIDGE监督Dispatch是ctx_582d083346ef，MAIN协调仍run_399f9dd3ce5a；不得向丢失的旧terminal发送。AGENTS这段是MAIN新增保护文件，Claude不得修改。测试资源在重启后已暂停，必须等待新的明确grant。任何新429立即停工，Codex/MAIN不可自动接手。
+
 ## 最新用户规则：ClaudeCode 429 必须停下（2026-11-12）
 
 ClaudeCode 报 429 时，停止该实现任务，保留源码、未提交工作、日志和失败证据，向用户报告；未经用户对此次接手的明确授权，MAIN、领域 Codex 或其他 Agent 都不得代替它继续开发。旧 goal、旧 ReleaseAssignment 的“429 自动接手”、额度恢复、常规开发批准或“同阶段超过两次返工由 MAIN 接管”均不能代替这项明确授权。不得自动重试 Claude 请求、重启旧窗口、换供应商或更换凭据绕过。先停止继续派发，核对并记录原调用及所属子进程状态；仅观察超时不能认定进程已停，不得双写。只可进行保全现场、必要安全清理和只读诊断；不得将任务标为完成或 PASS。用户明确授权接手后，再确认原 writer 已停、保留全部工作并完成唯一写入者交接。此规则覆盖本文件下方及历史计划中冲突的 429 自动接手条款。

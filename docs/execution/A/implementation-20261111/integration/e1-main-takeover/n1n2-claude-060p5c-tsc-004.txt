@@ -1,0 +1,3 @@
+src/adapters/openfilm/cache-process-supervisor.ts(1437,5): error TS2322: Type '{ readyMs: number; outerMs: number; finalizeMs: number; termGraceMs: number; killConfirmMs: number; metadataBytes: number; requestBytes: number; jpegBytes: number; stdoutBytes: number; stderrBytes: number; ... 4 more ...; drawQueueBytes: number; }' is not assignable to type 'Readonly<{ readyMs: 30000; outerMs: 60000; finalizeMs: 3000; termGraceMs: 3000; killConfirmMs: 15000; metadataBytes: number; requestBytes: number; jpegBytes: number; stdoutBytes: number; stderrBytes: number; ... 4 more ...; drawQueueBytes: number; }>'.
+  Types of property 'readyMs' are incompatible.
+    Type 'number' is not assignable to type '30000'.

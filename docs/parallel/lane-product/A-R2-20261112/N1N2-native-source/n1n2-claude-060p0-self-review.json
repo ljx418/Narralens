@@ -1,0 +1,302 @@
+{
+ "kind": "CLAUDE_060P0_SELF_REVIEW",
+ "release": "MAIN_RELEASE_060P0_BASELINE_REAL_REGRESSION",
+ "task_id": "task_7b5b5d75392e",
+ "dispatch_id": "ctx_fb5e1de480f9",
+ "terminal": "term_499fde1b-4bc4-40d0-a884-225e555d7b70",
+ "head": "1d348d419120f23f45d958112ea8c43df5a04675",
+ "head_moved": false,
+ "report": "docs/parallel/lane-product/A-R2-20261112/N1N2-native-source/n1n2-claude-060p0-self-review.md",
+ "capture_index": "docs/parallel/lane-product/A-R2-20261112/N1N2-native-source/n1n2-claude-060p0-capture-index.json",
+ "acceptance_claimed": false,
+ "note": "实现者自审。命令数据由 recorder 的 capture 文件自动生成，未手填。测试 exit 0 不证明 A057-04 已修，也不证明 PRE 的风险闭环。",
+ "baseline_verified": {
+  "release_dirty_source_inputs": "11/11 逐字一致",
+  "head_matches_release": true,
+  "git_index_untouched": true,
+  "user_AGENTS_untouched": "37300463a72a612ae16e0a5fcfb496502c57c722b83781e0e2e8c9480594542b"
+ },
+ "changed_this_wave": [
+  {
+   "file": "tests/agent-driven/integration/created-native-source-reader.test.ts",
+   "sha256": "6325eab3e4411e77a0b000a084793fb57545d961437c572d0a990625a50d9784",
+   "bytes": 173839,
+   "what": [
+    "K04-c：triple 用真实 <key>.jpg/.json/.stamp；删除前后 listing 证明只删三件；draw 前把 film 时间设为固定整秒，draw 后用 bigint 记录 mtimeNs/ctimeNs；改复 bytes 后恢复同一 mtimeNs；逐字证明 bytes 与 mtimeNs 不变、ctimeNs 确变；duration 的 output identity 未变且旧 film stamp 仍匹配；断言精确 code + 精确 message 命中依赖身份边界；真实 ctime 用已有一次性变异子进程在有界重试内推动，不用 sleep 参与正确性",
+    "三处获批的 P07 旧断言修订（ruling 1/2/3）：累计预算改在 retainFile 边界断言；maxTotal/maxText 预算改在 retainFile 边界断言并补恰好等于预算的合法正向与 finally 释放；等字节路径替换后 verifyFile 改 false 并补 held 字节一致与命名 inode 已变的显式证明"
+   ]
+  },
+  {
+   "file": "src/host/agent-driven/retained-native-closure.ts",
+   "sha256": "fd896104149d6cd2663b63a59d50beabbeee546f3e3f46a5d6bf07fbe662ede9",
+   "bytes": 75335,
+   "what": [
+    "仅 verifyFile 的注释：澄清它现在也比对命名路径的身份（描述符字节 + 命名路径）；生产判定未放宽"
+   ]
+  }
+ ],
+ "unchanged_but_in_scope": [
+  {
+   "file": "src/adapters/openfilm/openfilm-upstream.ts",
+   "sha256": "1583d4aba7f1a2fde487b1339745a039759d09b29fe81edc3268a76edb054e41",
+   "bytes": 56803
+  },
+  {
+   "file": "src/host/agent-driven/committed-snapshot-authority.ts",
+   "sha256": "e7277382b1b3819d1f6aaa8459dc4d2bf904169d31e614aa45ac6a7b3c610f8b",
+   "bytes": 44152
+  },
+  {
+   "file": "src/host/agent-driven/created-native-source-reader.ts",
+   "sha256": "057015a54e9daee8d08f56eadbd7b2766622f2f915f29a0ebc330e0d4cc676b6",
+   "bytes": 79025
+  },
+  {
+   "file": "tests/m2.1/openfilm-upstream-lock.test.ts",
+   "sha256": "9b2cf8525c7e51da9a7c0d9eb579b65be56a679651fcbb5bfb5bd8e1424c175a",
+   "bytes": 58158
+  },
+  {
+   "file": "tests/agent-driven/integration/native-cache-witness.test.ts",
+   "sha256": "6ba76059a41c1820d580ea0a7ae684f62b7afcd445bdc431a1524b8c7647ccd4",
+   "bytes": 94440
+  },
+  {
+   "file": "tests/agent-driven/integration/retained-native-budget.test.ts",
+   "sha256": "3241bdd2c8b7b958e9852db2f28bd831f5a6f70bd2c09d975c09295769e7cd9d",
+   "bytes": 16277
+  },
+  {
+   "file": "tests/agent-driven/integration/openfilm-serving-url.test.ts",
+   "sha256": "6c02e6d3cf56f60e33cbbb74a1b56bef3eaabbb20f10bba025e41e4f3de74e2b",
+   "bytes": 4379
+  },
+  {
+   "file": "tests/agent-driven/integration/helpers/native-read-growth-child.mjs",
+   "sha256": "2a31e13d30b98d161a69fcd4c33a125d2733762adb65dddb75fd1b79517f5c84",
+   "bytes": 1708
+  },
+  {
+   "file": "tests/agent-driven/integration/helpers/native-read-byte-observer.mjs",
+   "sha256": "a249498702425a01cb3964ef87cfddbbd036b6998a2d03a8938a755d43b89169",
+   "bytes": 2486
+  },
+  {
+   "file": "tests/fixtures/openfilm-serving-url-child.mjs",
+   "sha256": "db3caf37f9983bdebf69ea76795925c79a446e88a779e063235f3d402d085a41",
+   "bytes": 2951
+  }
+ ],
+ "captures": [
+  {
+   "capture": "n1n2-claude-060p0-cache-001",
+   "argv": [
+    "corepack",
+    "pnpm",
+    "exec",
+    "vitest",
+    "run",
+    "--config",
+    "vitest.config.ts",
+    "tests/agent-driven/integration/native-cache-witness.test.ts"
+   ],
+   "cwd": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+   "git_head": "1d348d419120f23f45d958112ea8c43df5a04675",
+   "started_at": "2026-11-14T04:35:28.822528+00:00",
+   "finished_at": "2026-11-14T04:44:00.221679+00:00",
+   "exit": 0,
+   "log_sha256": "d6a96157a886626c14c27ab65e46ce20ffd03ad2edaba4fbffb5a92db3f1c5c9",
+   "source_changed_during_run": [],
+   "source_added_during_run": []
+  },
+  {
+   "capture": "n1n2-claude-060p0-p07-001",
+   "argv": [
+    "corepack",
+    "pnpm",
+    "exec",
+    "vitest",
+    "run",
+    "--config",
+    "vitest.config.ts",
+    "tests/agent-driven/integration/created-native-source-reader.test.ts",
+    "-t",
+    "P07 refuses a grown file|P07 refuses a symbolic link|P07 refuses a text file"
+   ],
+   "cwd": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+   "git_head": "1d348d419120f23f45d958112ea8c43df5a04675",
+   "started_at": "2026-11-14T04:17:15.511867+00:00",
+   "finished_at": "2026-11-14T04:17:36.159381+00:00",
+   "exit": 0,
+   "log_sha256": "e9507c162231e117d9ce73704d003028d76f60f5e244ab7fe0b9a114ca03ac79",
+   "source_changed_during_run": [],
+   "source_added_during_run": []
+  },
+  {
+   "capture": "n1n2-claude-060p0-reader-001",
+   "argv": [
+    "corepack",
+    "pnpm",
+    "exec",
+    "vitest",
+    "run",
+    "--config",
+    "vitest.config.ts",
+    "tests/agent-driven/integration/created-native-source-reader.test.ts"
+   ],
+   "cwd": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+   "git_head": "1d348d419120f23f45d958112ea8c43df5a04675",
+   "started_at": "2026-11-14T03:52:26.831727+00:00",
+   "finished_at": "2026-11-14T04:14:15.882119+00:00",
+   "exit": 1,
+   "log_sha256": "d8a0fd829330e7af2de63267e20638d81cdf5fd8ddd9c7f879aad3f2b78179aa",
+   "source_changed_during_run": [],
+   "source_added_during_run": []
+  },
+  {
+   "capture": "n1n2-claude-060p0-reader-002",
+   "argv": [
+    "corepack",
+    "pnpm",
+    "exec",
+    "vitest",
+    "run",
+    "--config",
+    "vitest.config.ts",
+    "tests/agent-driven/integration/created-native-source-reader.test.ts"
+   ],
+   "cwd": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+   "git_head": "1d348d419120f23f45d958112ea8c43df5a04675",
+   "started_at": "2026-11-14T04:17:44.648610+00:00",
+   "finished_at": "2026-11-14T04:34:32.459779+00:00",
+   "exit": 0,
+   "log_sha256": "546fd12f342f59cbe0043c9bfa7cc5598d3f36d451fe09412e587f306189a5c5",
+   "source_changed_during_run": [],
+   "source_added_during_run": []
+  },
+  {
+   "capture": "n1n2-claude-060p0-tsc-001",
+   "argv": [
+    "corepack",
+    "pnpm",
+    "exec",
+    "tsc",
+    "--noEmit"
+   ],
+   "cwd": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+   "git_head": "1d348d419120f23f45d958112ea8c43df5a04675",
+   "started_at": "2026-11-14T03:51:37.863163+00:00",
+   "finished_at": "2026-11-14T03:52:15.831228+00:00",
+   "exit": 0,
+   "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+   "source_changed_during_run": [],
+   "source_added_during_run": []
+  },
+  {
+   "capture": "n1n2-claude-060p0-tsc-002",
+   "argv": [
+    "corepack",
+    "pnpm",
+    "exec",
+    "tsc",
+    "--noEmit"
+   ],
+   "cwd": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+   "git_head": "1d348d419120f23f45d958112ea8c43df5a04675",
+   "started_at": "2026-11-14T04:16:35.669195+00:00",
+   "finished_at": "2026-11-14T04:17:02.814676+00:00",
+   "exit": 0,
+   "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+   "source_changed_during_run": [],
+   "source_added_during_run": []
+  }
+ ],
+ "results": {
+  "reader_002": {
+   "tests": "93 passed (93)",
+   "exit": 0,
+   "capture": "n1n2-claude-060p0-reader-002",
+   "duration_s": 974.32,
+   "includes": [
+    "K04-c（A057-05，真实 fixed draw，实际通过 15.4s）",
+    "F05-c（A057-06，正确 media key + 伪字节，实际通过 30.6s）",
+    "全部原 K/P/F/G/Q 历史用例"
+   ]
+  },
+  "cache_001": {
+   "tests": "31 passed (31)",
+   "exit": 0,
+   "capture": "n1n2-claude-060p0-cache-001",
+   "duration_s": 491.07,
+   "file_unchanged": true,
+   "sha256": "6ba76059a41c1820d580ea0a7ae684f62b7afcd445bdc431a1524b8c7647ccd4"
+  },
+  "p07_001": {
+   "tests": "3 passed / 90 skipped（skip 只因 filter，不计入验收）",
+   "exit": 0,
+   "capture": "n1n2-claude-060p0-p07-001"
+  },
+  "tsc_002": {
+   "exit": 0,
+   "capture": "n1n2-claude-060p0-tsc-002"
+  }
+ },
+ "reader_001_failures_classified": [
+  {
+   "case": "P07 refuses a grown file, the cumulative text, the deep tree and the descriptor budget",
+   "cause": "累计文本预算现在在 retain 拒绝（059 已审定的先判后读），旧断言在 readText 才拒",
+   "disposition": "按 060P0_P07_BOUNDARY_RULING 第 1 条修订：保留数值与全部子段，在 retainFile 边界断言 code",
+   "capture_kept": "n1n2-claude-060p0-reader-001",
+   "log_sha256": "d8a0fd829330e7af2de63267e20638d81cdf5fd8ddd9c7f879aad3f2b78179aa"
+  },
+  {
+   "case": "P07 refuses a symbolic link, a same-bytes replacement and a restored change time",
+   "cause": "verifyFile 现在含命名路径身份（059 的读后 held+named 栅栏）",
+   "disposition": "按 ruling 第 3 条改为 false，并补 held 字节一致与命名 inode 已变的显式证明；其余子段未删",
+   "capture_kept": "n1n2-claude-060p0-reader-001"
+  },
+  {
+   "case": "P07 refuses a text file above the budget and bounds the total",
+   "cause": "预算拒绝现在发生在 retainFile",
+   "disposition": "按 ruling 第 2 条在该边界断言准确 code；补恰好等于预算的合法正向；close() 移入 finally",
+   "capture_kept": "n1n2-claude-060p0-reader-001"
+  }
+ ],
+ "budget_zero_read_two_surfaces": {
+  "pure_closure_syscall_level": {
+   "case": "tests/agent-driven/integration/retained-native-budget.test.ts",
+   "status": "NOT_RUN_THIS_WAVE",
+   "evidence": "引用 059 的 n1n2-claude-059-budget-008；本波未跑，不冒充"
+  },
+  "real_authority_workspace_surface": {
+   "case": "reader 整文件的 F06 与 P07 用例",
+   "status": "PASSED_THIS_WAVE",
+   "evidence": "reader-002 93/93；但那里的零读证据是 closure 自身的 onReadChunk 观察，不是系统调用级计数"
+  }
+ },
+ "cleanup_evidence": {
+  "recorder_vitest_processes": "ps 实测无残留",
+  "chrome_playwright": "本波结束后无本波的残留；系统里的 playwright-mcp（PID 1825，早于本波）是用户自己的，未触碰、未 kill",
+  "ffmpeg_ffprobe": "ps 实测无残留",
+  "temp_trees": "060P0 窗口内无新增遗留；发现并删除了我自己 059 波的遗留 /tmp/n1n2-budget-08LIIs（33MB）",
+  "listeners_producers": "每个用例 finally 里 owner.close()/producer.close()；本波把一个 close() 移入 finally",
+  "no_process_killed": true,
+  "no_home_or_vendor_config_changed": true,
+  "no_network_install_payment_j_drive": true
+ },
+ "not_run": [
+  "pnpm check 全门、vite build、validator --check、Python golden",
+  "tests/agent-driven/integration/retained-native-budget.test.ts（纯 closure 系统调用级预算用例）",
+  "tests/m2.1/openfilm-upstream-lock.test.ts、openfilm-serving-url.test.ts",
+  "A057-04 的真实 seek/JOB 超时与 browser/page/context 结算（仍 OPEN，本波未动 producer 工厂/bridge/close 语义/workspace/vendor）",
+  "原 17 项的整体验收（不宣称任何 requirement PASS）",
+  "下一阶段接线、S01、NativeAck、Studio、A 影片、V1"
+ ],
+ "handback": {
+  "writer_returned_to": "MAIN",
+  "heavy_slot_returned": true,
+  "git_commit_made": false,
+  "self_signed_external_review": false,
+  "claims_a057_04_fixed_or_pre_closed": false
+ }
+}

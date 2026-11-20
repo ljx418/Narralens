@@ -1,0 +1,97 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+ ❯ tests/agent-driven/integration/native-cache-normal-pilot.test.ts (69 tests | 1 failed) 6060ms
+   ✓ the arguments of the positive pilot > takes exactly a mode and two digests 1ms
+   ✓ the arguments of the positive pilot > does not run the pilot when its module is imported 0ms
+   ✓ the positive pilot > really succeeds, and the picture is EXACTLY the synthetic one 41ms
+   ✓ the positive pilot > is NOT a success when the picture is not the exact one 7ms
+   ✓ the positive pilot > refuses bytes that are not the reviewed ones, and starts nothing 6ms
+   ✓ the positive pilot > refuses a COPY of the helper that is not the reviewed one, and starts nothing 6ms
+   ✓ the positive pilot > injects the deliberate failure only after the worker was REALLY alive 7ms
+   ✓ the positive pilot > does NOT inject the deliberate failure when the worker was not observed 6ms
+   ✓ the positive pilot > does NOT inject the deliberate failure after a GO of another worker 6ms
+   ✓ the positive pilot > does NOT inject the deliberate failure after a GO of another draw 6ms
+   ✓ the positive pilot > does NOT inject the deliberate failure when the worker is a zombie 6ms
+   ✓ the positive pilot > does NOT inject the deliberate failure when the worker is another start time 6ms
+   ✓ the positive pilot > does NOT inject the deliberate failure when the worker is another parent 6ms
+   ✓ the positive pilot > does NOT inject the deliberate failure when the worker is another group 6ms
+   ✓ the positive pilot > does NOT accept an unrelated failure as the expected fault 6ms
+   ✓ the positive pilot > does NOT accept a transport failure as the expected fault 6ms
+   ✓ the positive pilot > keeps a failure of the evidence, and it is never a green case 6ms
+   ✓ the positive pilot > keeps the owner of a HELD draw and ends with the fresh proof 6ms
+   ✓ the positive pilot > keeps the owner when the ROOT could not be prepared, and it starts nothing 6ms
+   ✓ the positive pilot > keeps the owner when the RESERVE failed, and there is no phantom child 6ms
+   ✓ the positive pilot > reads the ORIGINAL result of a draw that was held and that ended LATE 6ms
+   ✓ the positive pilot > keeps the owner when the event reader failed after the start 6ms
+   ✓ the positive pilot > never kills anything: it asks, and it does nothing else 6ms
+   ✓ the positive pilot > does not lose the owner when the destination fails asynchronously 7ms
+   ✓ the real asynchronous order of the two modes > does NOT cancel a draw that is still making progress 6ms
+   ✓ the real asynchronous order of the two modes > waits for the accepted worker before it injects the deliberate failure 6ms
+   ✓ the real asynchronous order of the two modes > does NOT inject when the draw REALLY failed before the worker was accepted 6ms
+   ✓ the real asynchronous order of the two modes > does NOT inject when the GO of this draw never arrives 6ms
+   ✓ the raw cleanup of the draw > is NOT green when the raw settlement carries a cleanup failure 6ms
+   ✓ the raw cleanup of the draw > is NOT a fault when the raw settlement carries a cleanup failure 6ms
+   ✓ the raw cleanup of the draw > is NOT green when the FINAL diagnostic carries cleanup failures 6ms
+   ✓ the ownership of the runtime root > writes NO evidence at all when the root could not be allocated 6ms
+   ✓ the final qualification of a run > commits the final qualification AFTER the report callbacks 6ms
+   ✓ the final qualification of a run > revokes the final qualification when the report destination fails LATE 8ms
+   ✓ the final qualification of a run > is NOT green when the manifest of the artifacts could not be built 6ms
+   ✓ the JOINT publication of a run > publishes the final into the root of the run, and the temporary file is gone 6ms
+   ✓ the JOINT publication of a run > revokes the qualification when the publication fails BEFORE the bytes are written 6ms
+   ✓ the JOINT publication of a run > revokes the qualification when the publication fails AFTER the complete write 6ms
+   ✓ the JOINT publication of a run > is NOT green when a REQUIRED artifact of the manifest carries an error 6ms
+   ✓ the JOINT publication of a run > is NOT green when a REQUIRED artifact is missing from the manifest 6ms
+   ✓ the JOINT publication of a run > is NOT green when the manifest does not name the digest of the candidate that is on the disk 6ms
+   ✓ the JOINT publication of a run > answers 3 when the publication of the run failed 6ms
+   ✓ the JOINT publication of a run > answers 2 for a refusal of the arguments, and 1 for a fault that was really observed 12ms
+   ✓ the JOINT publication of a run > the REAL filesystem: the final is published in the root of the run 28ms
+   ✓ the JOINT publication of a run > a CONSUMER that applies the joint judgement rejects a run whose publication failed 27ms
+   ✓ the JOINT publication of a run > the REAL filesystem: a required record that was not written is not a green case 26ms
+   ✓ the JOINT checker of a published run > accepts a normal run that really succeeded 27ms
+   ✓ the JOINT checker of a published run > accepts the deliberate fault that was really observed 26ms
+   ✓ the JOINT checker of a published run > does NOT accept an ordinary business failure 27ms
+   ✓ the JOINT checker of a published run > does NOT accept a fault that carries an extra failure 26ms
+   ✓ the JOINT checker of a published run > refuses when the final record cannot be read, and it keeps the evidence 26ms
+   ✓ the JOINT checker of a published run > refuses when the candidate cannot be read 27ms
+   ✓ the JOINT checker of a published run > refuses when the helper cannot be read 26ms
+   ✓ the JOINT checker of a published run > refuses when a third listed artifact cannot be read 26ms
+   ✓ the JOINT checker of a published run > refuses when a record is GONE from the root 26ms
+   ✓ the JOINT checker of a published run > refuses a record with a LEGITIMATE digest but another mode 27ms
+   ✓ the JOINT checker of a published run > refuses a record with a LEGITIMATE digest but another protocol 27ms
+   ✓ the JOINT checker of a published run > refuses a record with a LEGITIMATE digest but a broken link 27ms
+   ✓ the JOINT checker of a published run > refuses a record with a LEGITIMATE digest but another number of bytes 27ms
+   ✓ the JOINT checker of a published run > answers 3 from the COMMAND when the evidence cannot be read 29ms
+   ✓ the JOINT checker of a published run > the REAL mapper: a single EIO on a third artifact makes the run unreliable 26ms
+   × the ORCHESTRATION over the ACTUAL supervisor > waits for the REAL asynchronous start of the normal mode, and cancels NOTHING 5013ms
+     → Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+   ✓ the ORCHESTRATION over the ACTUAL supervisor > waits for the LATE worker of the fault mode before it injects 106ms
+   ✓ the reporting over a REAL destination > revokes the final qualification when the destination fails LATE 3ms
+   ✓ the reporting over a REAL destination > does NOT lose the owner when the destination breaks while the settlement is PENDING 152ms
+   ✓ the command of the positive pilot > answers 2 for arguments it does not take 3ms
+   ✓ the command of the positive pilot > answers 0 for a normal draw that really succeeded 3ms
+   ✓ the command of the positive pilot > answers 1 for the deliberate failure that was really observed 2ms
+   ✓ the digest of the synthetic picture > is the digest of exactly 1024 bytes of 0x4a 0ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/native-cache-normal-pilot.test.ts > the ORCHESTRATION over the ACTUAL supervisor > waits for the REAL asynchronous start of the normal mode, and cancels NOTHING
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ tests/agent-driven/integration/native-cache-normal-pilot.test.ts:2195:3
+    2193|   }
+    2194| 
+    2195|   it("waits for the REAL asynchronous start of the normal mode, and ca…
+       |   ^
+    2196|     // The supervisor is the REAL one, and the custodian is a fake tha…
+    2197|     // the REAL protocol. The draw really is PENDING while the runner …
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 68 passed (69)
+   Start at  22:29:53
+   Duration  8.27s (transform 307ms, setup 0ms, collect 477ms, tests 6.06s, environment 0ms, prepare 1.14s)
+

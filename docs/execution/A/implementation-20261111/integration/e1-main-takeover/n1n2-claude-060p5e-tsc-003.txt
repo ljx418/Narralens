@@ -1,0 +1,9 @@
+tests/agent-driven/integration/native-cache-normal-pilot.test.ts(503,20): error TS7006: Parameter 'path' implicitly has an 'any' type.
+tests/agent-driven/integration/native-cache-normal-pilot.test.ts(505,5): error TS2322: Type '() => { artifacts: { name: string; digest: string; error: null; }[]; error: null; }' is not assignable to type '(root: string) => PilotArtifactFacts'.
+  Call signature return types '{ artifacts: { name: string; digest: string; error: null; }[]; error: null; }' and 'PilotArtifactFacts' are incompatible.
+    The types of 'artifacts' are incompatible between these types.
+      Type '{ name: string; digest: string; error: null; }[]' is not assignable to type 'readonly PilotArtifact[]'.
+        Property 'bytes' is missing in type '{ name: string; digest: string; error: null; }' but required in type 'PilotArtifact'.
+tests/agent-driven/integration/native-cache-normal-pilot.test.ts(624,43): error TS2353: Object literal may only specify known properties, and 'sha256OfFile' does not exist in type 'Partial<PositivePilotDependencies>'.
+tests/agent-driven/integration/native-cache-normal-pilot.test.ts(638,7): error TS2353: Object literal may only specify known properties, and 'sha256OfFile' does not exist in type 'Partial<PositivePilotDependencies>'.
+tests/agent-driven/integration/native-cache-normal-pilot.test.ts(638,22): error TS7006: Parameter 'path' implicitly has an 'any' type.

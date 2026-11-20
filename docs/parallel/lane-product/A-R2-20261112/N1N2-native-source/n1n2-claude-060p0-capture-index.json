@@ -1,0 +1,147 @@
+{
+ "kind": "CLAUDE_060P0_RAW_CAPTURE_INDEX",
+ "note": "自动从 recorder 的 capture 文件生成（cmd.json / result.json / exit / inputs.json），未手填；exit_recorded 取自 .exit 文件，exit_result_json 取自 result.json。",
+ "evidence_dir": "docs/execution/A/implementation-20261111/integration/e1-main-takeover",
+ "captures": [
+  {
+   "capture": "n1n2-claude-060p0-cache-001",
+   "argv": [
+    "corepack",
+    "pnpm",
+    "exec",
+    "vitest",
+    "run",
+    "--config",
+    "vitest.config.ts",
+    "tests/agent-driven/integration/native-cache-witness.test.ts"
+   ],
+   "cwd": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+   "git_head": "1d348d419120f23f45d958112ea8c43df5a04675",
+   "started_at": "2026-11-14T04:35:28.822528+00:00",
+   "finished_at": "2026-11-14T04:44:00.221679+00:00",
+   "exit_recorded": 0,
+   "exit_result_json": 0,
+   "log_sha256": "d6a96157a886626c14c27ab65e46ce20ffd03ad2edaba4fbffb5a92db3f1c5c9",
+   "log_bytes": 3411,
+   "source_changed_during_run": [],
+   "source_added_during_run": [],
+   "inputs_sha256": "n1n2-claude-060p0-n1n2-claude-060p0-cache-001.inputs.json"
+  },
+  {
+   "capture": "n1n2-claude-060p0-p07-001",
+   "argv": [
+    "corepack",
+    "pnpm",
+    "exec",
+    "vitest",
+    "run",
+    "--config",
+    "vitest.config.ts",
+    "tests/agent-driven/integration/created-native-source-reader.test.ts",
+    "-t",
+    "P07 refuses a grown file|P07 refuses a symbolic link|P07 refuses a text file"
+   ],
+   "cwd": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+   "git_head": "1d348d419120f23f45d958112ea8c43df5a04675",
+   "started_at": "2026-11-14T04:17:15.511867+00:00",
+   "finished_at": "2026-11-14T04:17:36.159381+00:00",
+   "exit_recorded": 0,
+   "exit_result_json": 0,
+   "log_sha256": "e9507c162231e117d9ce73704d003028d76f60f5e244ab7fe0b9a114ca03ac79",
+   "log_bytes": 551,
+   "source_changed_during_run": [],
+   "source_added_during_run": [],
+   "inputs_sha256": "n1n2-claude-060p0-n1n2-claude-060p0-p07-001.inputs.json"
+  },
+  {
+   "capture": "n1n2-claude-060p0-reader-001",
+   "argv": [
+    "corepack",
+    "pnpm",
+    "exec",
+    "vitest",
+    "run",
+    "--config",
+    "vitest.config.ts",
+    "tests/agent-driven/integration/created-native-source-reader.test.ts"
+   ],
+   "cwd": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+   "git_head": "1d348d419120f23f45d958112ea8c43df5a04675",
+   "started_at": "2026-11-14T03:52:26.831727+00:00",
+   "finished_at": "2026-11-14T04:14:15.882119+00:00",
+   "exit_recorded": 1,
+   "exit_result_json": 1,
+   "log_sha256": "d8a0fd829330e7af2de63267e20638d81cdf5fd8ddd9c7f879aad3f2b78179aa",
+   "log_bytes": 11508,
+   "source_changed_during_run": [],
+   "source_added_during_run": [],
+   "inputs_sha256": "n1n2-claude-060p0-n1n2-claude-060p0-reader-001.inputs.json"
+  },
+  {
+   "capture": "n1n2-claude-060p0-reader-002",
+   "argv": [
+    "corepack",
+    "pnpm",
+    "exec",
+    "vitest",
+    "run",
+    "--config",
+    "vitest.config.ts",
+    "tests/agent-driven/integration/created-native-source-reader.test.ts"
+   ],
+   "cwd": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+   "git_head": "1d348d419120f23f45d958112ea8c43df5a04675",
+   "started_at": "2026-11-14T04:17:44.648610+00:00",
+   "finished_at": "2026-11-14T04:34:32.459779+00:00",
+   "exit_recorded": 0,
+   "exit_result_json": 0,
+   "log_sha256": "546fd12f342f59cbe0043c9bfa7cc5598d3f36d451fe09412e587f306189a5c5",
+   "log_bytes": 6363,
+   "source_changed_during_run": [],
+   "source_added_during_run": [],
+   "inputs_sha256": "n1n2-claude-060p0-n1n2-claude-060p0-reader-002.inputs.json"
+  },
+  {
+   "capture": "n1n2-claude-060p0-tsc-001",
+   "argv": [
+    "corepack",
+    "pnpm",
+    "exec",
+    "tsc",
+    "--noEmit"
+   ],
+   "cwd": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+   "git_head": "1d348d419120f23f45d958112ea8c43df5a04675",
+   "started_at": "2026-11-14T03:51:37.863163+00:00",
+   "finished_at": "2026-11-14T03:52:15.831228+00:00",
+   "exit_recorded": 0,
+   "exit_result_json": 0,
+   "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+   "log_bytes": 0,
+   "source_changed_during_run": [],
+   "source_added_during_run": [],
+   "inputs_sha256": "n1n2-claude-060p0-n1n2-claude-060p0-tsc-001.inputs.json"
+  },
+  {
+   "capture": "n1n2-claude-060p0-tsc-002",
+   "argv": [
+    "corepack",
+    "pnpm",
+    "exec",
+    "tsc",
+    "--noEmit"
+   ],
+   "cwd": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+   "git_head": "1d348d419120f23f45d958112ea8c43df5a04675",
+   "started_at": "2026-11-14T04:16:35.669195+00:00",
+   "finished_at": "2026-11-14T04:17:02.814676+00:00",
+   "exit_recorded": 0,
+   "exit_result_json": 0,
+   "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+   "log_bytes": 0,
+   "source_changed_during_run": [],
+   "source_added_during_run": [],
+   "inputs_sha256": "n1n2-claude-060p0-n1n2-claude-060p0-tsc-002.inputs.json"
+  }
+ ]
+}

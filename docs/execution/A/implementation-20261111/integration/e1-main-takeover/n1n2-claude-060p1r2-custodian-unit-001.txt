@@ -1,0 +1,13 @@
+.F..........................
+======================================================================
+FAIL: test_a_short_write_keeps_the_tail_of_the_frame (__main__.TheControlWriter.test_a_short_write_keeps_the_tail_of_the_frame)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/helpers/cache-custodian-unit.py", line 322, in test_a_short_write_keeps_the_tail_of_the_frame
+    self.assertEqual(channel.remaining, 3)
+AssertionError: 0 != 3
+
+----------------------------------------------------------------------
+Ran 28 tests in 0.010s
+
+FAILED (failures=1)

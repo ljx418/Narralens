@@ -1,0 +1,17 @@
+...............................................F...........
+======================================================================
+FAIL: test_the_original_group_is_proved_by_a_raw_probe_after_the_revoke (__main__.TheRevokedAuthorityStillProvesTheDomain.test_the_original_group_is_proved_by_a_raw_probe_after_the_revoke)
+The ORIGINAL group is proved by a RAW probe, even after the revoke.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/helpers/cache-custodian-unit.py", line 2042, in test_the_original_group_is_proved_by_a_raw_probe_after_the_revoke
+    self.assertEqual(self.instance.signal_authority, "revoked")
+AssertionError: 'bound' != 'revoked'
+- bound
++ revoked
+
+
+----------------------------------------------------------------------
+Ran 59 tests in 0.063s
+
+FAILED (failures=1)

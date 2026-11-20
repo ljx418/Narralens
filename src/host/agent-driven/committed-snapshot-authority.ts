@@ -22,7 +22,7 @@ import {CreatedSourceAdoptionStore} from './created-source-adoption-store.js';
 import {assertPreparedAdoptionPlan,preparedAdoptionPlanDigest,type PreparedAdoptionPlanV1} from './created-source-ports.js';
 import {preparedSourceConsumerGraph} from './created-source-publisher.js';
 import {validateCreatedSourceFact} from '../projects/project-creation-store.js';
-import {RetainedNativeClosure,RetainedNativeError,mergeRetainedCleanupCauses,retainedCleanupFailures,markRetainedCleanupFailures} from './retained-native-closure.js';
+import {RetainedNativeClosure,RetainedNativeError,mergeRetainedCleanupCauses,retainedCleanupFailures,markRetainedCleanupFailures,RETAINED_NATIVE_ASSET_EXTENSIONS} from './retained-native-closure.js';
 import type {RetainedNativeDescriptorOps,RetainedDescriptorPool} from './retained-native-closure.js';
 
 interface CommitBinding {
@@ -122,12 +122,10 @@ export function isVerifiedNativeFactsLease(authority:CommittedSnapshotAuthority,
 
 /** The extensions the digest treats as media: they are hashed, never parsed.
  *  The set is the pinned `source-digest-v1.ts` set, exactly: a divergence here would
- *  make the recomputed digest differ from the committed one. */
-const ASSET_EXTENSIONS=new Set([
- 'wav','mp3','m4a','aac','ogg','oga','opus','flac','aif','aiff','weba',
- 'mp4','m4v','mov','webm','mkv','avi','ogv',
- 'png','jpg','jpeg','webp','gif',
-]);
+ *  make the recomputed digest differ from the committed one. It is the SAME set the
+ *  retained closure uses for its text budget - one definition of "media" in the
+ *  Host, so the digest and the budget cannot drift apart. */
+const ASSET_EXTENSIONS=RETAINED_NATIVE_ASSET_EXTENSIONS;
 const ROLE_BY_EXTENSION=new Map<string,SourceFileRole>([
  ['html','html'],['htm','html'],['js','js'],['mjs','js'],['cjs','js'],
  ['css','css'],['vtt','subtitle'],['srt','subtitle'],['json','settings'],

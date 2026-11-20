@@ -1,0 +1,54 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+ ❯ tests/agent-driven/integration/native-cache-normal-pilot.test.ts (28 tests | 1 failed) 75ms
+   ✓ the arguments of the positive pilot > takes exactly a mode and two digests 2ms
+   ✓ the arguments of the positive pilot > does not run the pilot when its module is imported 0ms
+   ✓ the positive pilot > really succeeds, and the picture is EXACTLY the synthetic one 17ms
+   ✓ the positive pilot > is NOT a success when the picture is not the exact one 2ms
+   ✓ the positive pilot > refuses bytes that are not the reviewed ones, and starts nothing 2ms
+   ✓ the positive pilot > refuses a COPY of the helper that is not the reviewed one, and starts nothing 2ms
+   ✓ the positive pilot > injects the deliberate failure only after the worker was REALLY alive 2ms
+   ✓ the positive pilot > does NOT inject the deliberate failure when the worker was not observed 2ms
+   ✓ the positive pilot > does NOT inject the deliberate failure after a GO of another worker 2ms
+   ✓ the positive pilot > does NOT inject the deliberate failure after a GO of another draw 1ms
+   ✓ the positive pilot > does NOT inject the deliberate failure when the worker is a zombie 2ms
+   ✓ the positive pilot > does NOT inject the deliberate failure when the worker is another start time 2ms
+   ✓ the positive pilot > does NOT inject the deliberate failure when the worker is another parent 2ms
+   ✓ the positive pilot > does NOT inject the deliberate failure when the worker is another group 1ms
+   ✓ the positive pilot > does NOT accept an unrelated failure as the expected fault 1ms
+   ✓ the positive pilot > does NOT accept a transport failure as the expected fault 1ms
+   ✓ the positive pilot > keeps a failure of the evidence, and it is never a green case 2ms
+   × the positive pilot > keeps the owner of a HELD draw and ends with the fresh proof 17ms
+     → expected [ 'reserve', 'start', 'inspect', …(4) ] to include 'reconcile'
+   ✓ the positive pilot > keeps the owner when the ROOT could not be prepared, and it starts nothing 2ms
+   ✓ the positive pilot > keeps the owner when the RESERVE failed, and there is no phantom child 2ms
+   ✓ the positive pilot > reads the ORIGINAL result of a draw that was held and that ended LATE 2ms
+   ✓ the positive pilot > keeps the owner when the event reader failed after the start 2ms
+   ✓ the positive pilot > never kills anything: it asks, and it does nothing else 2ms
+   ✓ the positive pilot > does not lose the owner when the destination fails asynchronously 3ms
+   ✓ the command of the positive pilot > answers 2 for arguments it does not take 1ms
+   ✓ the command of the positive pilot > answers 0 for a normal draw that really succeeded 1ms
+   ✓ the command of the positive pilot > answers 1 for the deliberate failure that was really observed 2ms
+   ✓ the digest of the synthetic picture > is the digest of exactly 1024 bytes of 0x4a 0ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/native-cache-normal-pilot.test.ts > the positive pilot > keeps the owner of a HELD draw and ends with the fresh proof
+AssertionError: expected [ 'reserve', 'start', 'inspect', …(4) ] to include 'reconcile'
+ ❯ tests/agent-driven/integration/native-cache-normal-pilot.test.ts:516:30
+    514|     // The draw was held, and the pilot polled the supervisor for the …
+    515|     // proof instead of giving the draw up.
+    516|     expect(supervisor.calls).toContain("reconcile");
+       |                              ^
+    517|     expect(outcome.terminalProof).toBe(true);
+    518|     // The owner was KEPT: the registry still holds the root, the supe…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 27 passed (28)
+   Start at  15:07:56
+   Duration  2.34s (transform 170ms, setup 0ms, collect 272ms, tests 75ms, environment 0ms, prepare 1.32s)
+

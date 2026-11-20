@@ -1,0 +1,482 @@
+TAP version 13
+# Subtest: the arguments of the nofork pilot
+    # Subtest: takes exactly two modes and one digest
+    ok 1 - takes exactly two modes and one digest
+      ---
+      duration_ms: 0.52779
+      type: 'test'
+      ...
+    # Subtest: refuses anything that could name an executable, a script, a signal or a number
+    ok 2 - refuses anything that could name an executable, a script, a signal or a number
+      ---
+      duration_ms: 0.41486
+      type: 'test'
+      ...
+    1..2
+ok 1 - the arguments of the nofork pilot
+  ---
+  duration_ms: 1.463995
+  type: 'suite'
+  ...
+# Subtest: the reading of the epoch of a process
+    # Subtest: reads the fields after the last closing parenthesis
+    not ok 1 - reads the fields after the last closing parenthesis
+      ---
+      duration_ms: 0.676769
+      type: 'test'
+      location: '/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/helpers/native-cache-nofork-pilot.test.mjs:232:3'
+      failureType: 'testCodeFailure'
+      error: |-
+        Expected values to be strictly equal:
+        
+        '0' !== '12345'
+        
+      code: 'ERR_ASSERTION'
+      name: 'AssertionError'
+      expected: '12345'
+      actual: '0'
+      operator: 'strictEqual'
+      stack: |-
+        TestContext.<anonymous> (file:///mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/helpers/native-cache-nofork-pilot.test.mjs:240:12)
+        Test.runInAsyncScope (node:async_hooks:214:14)
+        Test.run (node:internal/test_runner/test:1047:25)
+        Test.start (node:internal/test_runner/test:944:17)
+        node:internal/test_runner/test:1440:71
+        node:internal/per_context/primordials:466:82
+        new Promise (<anonymous>)
+        new SafePromise (node:internal/per_context/primordials:435:3)
+        node:internal/per_context/primordials:466:9
+        Array.map (<anonymous>)
+      ...
+    # Subtest: refuses a text it cannot read
+    ok 2 - refuses a text it cannot read
+      ---
+      duration_ms: 0.092445
+      type: 'test'
+      ...
+    # Subtest: says gone ONLY for ENOENT and ESRCH
+    ok 3 - says gone ONLY for ENOENT and ESRCH
+      ---
+      duration_ms: 0.167064
+      type: 'test'
+      ...
+    # Subtest: does not call a number that was reused a gone original, and an unknown a proof
+    ok 4 - does not call a number that was reused a gone original, and an unknown a proof
+      ---
+      duration_ms: 0.076612
+      type: 'test'
+      ...
+    1..4
+not ok 2 - the reading of the epoch of a process
+  ---
+  duration_ms: 1.205094
+  type: 'suite'
+  location: '/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/helpers/native-cache-nofork-pilot.test.mjs:231:1'
+  failureType: 'subtestsFailed'
+  error: '1 subtest failed'
+  code: 'ERR_TEST_FAILURE'
+  ...
+# Subtest: the decoder of the control channel
+    # Subtest: takes a frame that arrives in two pieces
+    ok 1 - takes a frame that arrives in two pieces
+      ---
+      duration_ms: 0.833425
+      type: 'test'
+      ...
+    # Subtest: takes two frames that arrive together
+    ok 2 - takes two frames that arrive together
+      ---
+      duration_ms: 0.200185
+      type: 'test'
+      ...
+    # Subtest: refuses a frame that claims more than the limit
+    not ok 3 - refuses a frame that claims more than the limit
+      ---
+      duration_ms: 0.23121
+      type: 'test'
+      location: '/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/helpers/native-cache-nofork-pilot.test.mjs:279:3'
+      failureType: 'testCodeFailure'
+      error: |-
+        The input did not match the regular expression /CONTROL_FRAME_TOO_LARGE/u. Input:
+        
+        'PilotFailure: a frame of the control channel is too large'
+        
+      code: 'ERR_ASSERTION'
+      name: 'AssertionError'
+      expected:
+      actual:
+      error: 'a frame of the control channel is too large'
+      stack: |-
+        Object.feed (file:///mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tools/native-cache-nofork-pilot.mjs:180:17)
+        file:///mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/helpers/native-cache-nofork-pilot.test.mjs:283:33
+        getActual (node:assert:609:5)
+        Function.throws (node:assert:757:24)
+        TestContext.<anonymous> (file:///mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/helpers/native-cache-nofork-pilot.test.mjs:283:12)
+        Test.runInAsyncScope (node:async_hooks:214:14)
+        Test.run (node:internal/test_runner/test:1047:25)
+        Suite.processPendingSubtests (node:internal/test_runner/test:744:18)
+        Test.postRun (node:internal/test_runner/test:1173:19)
+        Test.run (node:internal/test_runner/test:1101:12)
+      operator: 'throws'
+      stack: |-
+        TestContext.<anonymous> (file:///mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/helpers/native-cache-nofork-pilot.test.mjs:283:12)
+        Test.runInAsyncScope (node:async_hooks:214:14)
+        Test.run (node:internal/test_runner/test:1047:25)
+        Suite.processPendingSubtests (node:internal/test_runner/test:744:18)
+        Test.postRun (node:internal/test_runner/test:1173:19)
+        Test.run (node:internal/test_runner/test:1101:12)
+        async Suite.processPendingSubtests (node:internal/test_runner/test:744:7)
+      ...
+    # Subtest: refuses a channel whose unconsumed bytes grow past the limit
+    not ok 4 - refuses a channel whose unconsumed bytes grow past the limit
+      ---
+      duration_ms: 0.247197
+      type: 'test'
+      location: '/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/helpers/native-cache-nofork-pilot.test.mjs:286:3'
+      failureType: 'testCodeFailure'
+      error: |-
+        The input did not match the regular expression /CONTROL_OVERSIZE/u. Input:
+        
+        'PilotFailure: the unconsumed bytes of the control channel exceed the limit'
+        
+      code: 'ERR_ASSERTION'
+      name: 'AssertionError'
+      expected:
+      actual:
+      error: 'the unconsumed bytes of the control channel exceed the limit'
+      stack: |-
+        Object.feed (file:///mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tools/native-cache-nofork-pilot.mjs:173:15)
+        file:///mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/helpers/native-cache-nofork-pilot.test.mjs:288:33
+        getActual (node:assert:609:5)
+        Function.throws (node:assert:757:24)
+        TestContext.<anonymous> (file:///mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/helpers/native-cache-nofork-pilot.test.mjs:288:12)
+        Test.runInAsyncScope (node:async_hooks:214:14)
+        Test.run (node:internal/test_runner/test:1047:25)
+        Suite.processPendingSubtests (node:internal/test_runner/test:744:18)
+        Test.postRun (node:internal/test_runner/test:1173:19)
+        Test.run (node:internal/test_runner/test:1101:12)
+      operator: 'throws'
+      stack: |-
+        TestContext.<anonymous> (file:///mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/helpers/native-cache-nofork-pilot.test.mjs:288:12)
+        Test.runInAsyncScope (node:async_hooks:214:14)
+        Test.run (node:internal/test_runner/test:1047:25)
+        Suite.processPendingSubtests (node:internal/test_runner/test:744:18)
+        Test.postRun (node:internal/test_runner/test:1173:19)
+        Test.run (node:internal/test_runner/test:1101:12)
+        async Suite.processPendingSubtests (node:internal/test_runner/test:744:7)
+      ...
+    # Subtest: reads a hello strictly
+    not ok 5 - reads a hello strictly
+      ---
+      duration_ms: 0.171186
+      type: 'test'
+      location: '/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/helpers/native-cache-nofork-pilot.test.mjs:291:3'
+      failureType: 'testCodeFailure'
+      error: 'a frame of the control channel is not valid UTF-8'
+      code: 'CONTROL_NOT_UTF8'
+      name: 'PilotFailure'
+      stack: |-
+        parseCustodianHello (file:///mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tools/native-cache-nofork-pilot.mjs:206:11)
+        TestContext.<anonymous> (file:///mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/helpers/native-cache-nofork-pilot.test.mjs:292:18)
+        Test.runInAsyncScope (node:async_hooks:214:14)
+        Test.run (node:internal/test_runner/test:1047:25)
+        Suite.processPendingSubtests (node:internal/test_runner/test:744:18)
+        Test.postRun (node:internal/test_runner/test:1173:19)
+        Test.run (node:internal/test_runner/test:1101:12)
+        async Suite.processPendingSubtests (node:internal/test_runner/test:744:7)
+      ...
+    1..5
+not ok 3 - the decoder of the control channel
+  ---
+  duration_ms: 1.917276
+  type: 'suite'
+  location: '/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/helpers/native-cache-nofork-pilot.test.mjs:265:1'
+  failureType: 'subtestsFailed'
+  error: '3 subtests failed'
+  code: 'ERR_TEST_FAILURE'
+  ...
+# Subtest: the identity of the custodian
+    # Subtest: checks every field against the kernel
+    not ok 1 - checks every field against the kernel
+      ---
+      duration_ms: 0.245513
+      type: 'test'
+      location: '/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/helpers/native-cache-nofork-pilot.test.mjs:303:3'
+      failureType: 'testCodeFailure'
+      error: 'a frame of the control channel is not valid UTF-8'
+      code: 'CONTROL_NOT_UTF8'
+      name: 'PilotFailure'
+      stack: |-
+        parseCustodianHello (file:///mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tools/native-cache-nofork-pilot.mjs:206:11)
+        TestContext.<anonymous> (file:///mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/helpers/native-cache-nofork-pilot.test.mjs:304:19)
+        Test.runInAsyncScope (node:async_hooks:214:14)
+        Test.run (node:internal/test_runner/test:1047:25)
+        Test.start (node:internal/test_runner/test:944:17)
+        node:internal/test_runner/test:1440:71
+        node:internal/per_context/primordials:466:82
+        new Promise (<anonymous>)
+        new SafePromise (node:internal/per_context/primordials:435:3)
+        node:internal/per_context/primordials:466:9
+      ...
+    1..1
+not ok 4 - the identity of the custodian
+  ---
+  duration_ms: 0.290742
+  type: 'suite'
+  location: '/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/helpers/native-cache-nofork-pilot.test.mjs:302:1'
+  failureType: 'subtestsFailed'
+  error: '1 subtest failed'
+  code: 'ERR_TEST_FAILURE'
+  ...
+# Subtest: the ledger of a child
+    # Subtest: registers the events before anything waits
+    ok 1 - registers the events before anything waits
+      ---
+      duration_ms: 0.37712
+      type: 'test'
+      ...
+    # Subtest: keeps an error apart from an exit and from a close
+    not ok 2 - keeps an error apart from an exit and from a close
+      ---
+      duration_ms: 0.103585
+      type: 'test'
+      location: '/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/helpers/native-cache-nofork-pilot.test.mjs:348:3'
+      failureType: 'testCodeFailure'
+      error: 'child.pushError is not a function'
+      code: 'ERR_TEST_FAILURE'
+      name: 'TypeError'
+      stack: |-
+        TestContext.<anonymous> (file:///mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/helpers/native-cache-nofork-pilot.test.mjs:351:11)
+        Test.runInAsyncScope (node:async_hooks:214:14)
+        Test.run (node:internal/test_runner/test:1047:25)
+        Suite.processPendingSubtests (node:internal/test_runner/test:744:18)
+        Test.postRun (node:internal/test_runner/test:1173:19)
+        Test.run (node:internal/test_runner/test:1101:12)
+        async Promise.all (index 0)
+        async Suite.run (node:internal/test_runner/test:1442:7)
+        async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+      ...
+    # Subtest: keeps the end of the control channel apart from the end of the process
+    ok 3 - keeps the end of the control channel apart from the end of the process
+      ---
+      duration_ms: 0.063115
+      type: 'test'
+      ...
+    # Subtest: records the streams apart from each other
+    ok 4 - records the streams apart from each other
+      ---
+      duration_ms: 0.097579
+      type: 'test'
+      ...
+    # Subtest: keeps the diagnostics bounded
+    ok 5 - keeps the diagnostics bounded
+      ---
+      duration_ms: 0.309892
+      type: 'test'
+      ...
+    # Subtest: never drops a frame that arrived while nobody was waiting
+    ok 6 - never drops a frame that arrived while nobody was waiting
+      ---
+      duration_ms: 0.214823
+      type: 'test'
+      ...
+    1..6
+not ok 5 - the ledger of a child
+  ---
+  duration_ms: 1.269773
+  type: 'suite'
+  location: '/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/helpers/native-cache-nofork-pilot.test.mjs:338:1'
+  failureType: 'subtestsFailed'
+  error: '1 subtest failed'
+  code: 'ERR_TEST_FAILURE'
+  ...
+# Subtest: the cleanup of a child
+    # Subtest: answers closed when the close was ALREADY seen before the cleanup
+    ok 1 - answers closed when the close was ALREADY seen before the cleanup
+      ---
+      duration_ms: 1.019548
+      type: 'test'
+      ...
+    # Subtest: does not signal a child whose exit was seen but whose streams are still open
+    ok 2 - does not signal a child whose exit was seen but whose streams are still open
+      ---
+      duration_ms: 17.807131
+      type: 'test'
+      ...
+    # Subtest: answers closed when the close really comes after the polite signal
+    ok 3 - answers closed when the close really comes after the polite signal
+      ---
+      duration_ms: 0.371888
+      type: 'test'
+      ...
+    # Subtest: answers closed when the close really comes after the hard signal
+    ok 4 - answers closed when the close really comes after the hard signal
+      ---
+      duration_ms: 0.675854
+      type: 'test'
+      ...
+    # Subtest: answers unknown when the child never closes, and keeps the owner
+    ok 5 - answers unknown when the child never closes, and keeps the owner
+      ---
+      duration_ms: 3.970681
+      type: 'test'
+      ...
+    # Subtest: answers unknown when the signal throws
+    ok 6 - answers unknown when the signal throws
+      ---
+      duration_ms: 0.331091
+      type: 'test'
+      ...
+    # Subtest: answers unknown when the signal is refused
+    ok 7 - answers unknown when the signal is refused
+      ---
+      duration_ms: 0.123339
+      type: 'test'
+      ...
+    # Subtest: does not signal a number that was reused by another process
+    not ok 8 - does not signal a number that was reused by another process
+      ---
+      duration_ms: 3.769881
+      type: 'test'
+      location: '/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/helpers/native-cache-nofork-pilot.test.mjs:489:3'
+      failureType: 'testCodeFailure'
+      error: |-
+        Expected values to be strictly deep-equal:
+        + actual - expected
+        
+        + [
+        +   'SIGTERM',
+        +   'SIGKILL'
+        + ]
+        - []
+        
+      code: 'ERR_ASSERTION'
+      name: 'AssertionError'
+      expected:
+      actual:
+        0: 'SIGTERM'
+        1: 'SIGKILL'
+      operator: 'deepStrictEqual'
+      stack: |-
+        TestContext.<anonymous> (file:///mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/helpers/native-cache-nofork-pilot.test.mjs:497:12)
+        async Test.run (node:internal/test_runner/test:1054:7)
+        async Suite.processPendingSubtests (node:internal/test_runner/test:744:7)
+      ...
+    # Subtest: does not signal when the epoch of the process could not be read
+    ok 9 - does not signal when the epoch of the process could not be read
+      ---
+      duration_ms: 0.266412
+      type: 'test'
+      ...
+    # Subtest: does not signal when the never-fork invariant was lost
+    ok 10 - does not signal when the never-fork invariant was lost
+      ---
+      duration_ms: 0.103286
+      type: 'test'
+      ...
+    # Subtest: answers no-child-confirmed when the spawn failed and the close really came
+    not ok 11 - answers no-child-confirmed when the spawn failed and the close really came
+      ---
+      duration_ms: 0.131085
+      type: 'test'
+      location: '/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/helpers/native-cache-nofork-pilot.test.mjs:523:3'
+      failureType: 'testCodeFailure'
+      error: 'child.pushError is not a function'
+      code: 'ERR_TEST_FAILURE'
+      name: 'TypeError'
+      stack: |-
+        TestContext.<anonymous> (file:///mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/helpers/native-cache-nofork-pilot.test.mjs:527:11)
+        Test.runInAsyncScope (node:async_hooks:214:14)
+        Test.run (node:internal/test_runner/test:1047:25)
+        Suite.processPendingSubtests (node:internal/test_runner/test:744:18)
+        Test.postRun (node:internal/test_runner/test:1173:19)
+        Test.run (node:internal/test_runner/test:1101:12)
+        async Suite.processPendingSubtests (node:internal/test_runner/test:744:7)
+      ...
+    # Subtest: shares ONE promise on a repeated cleanup, and signals only once
+    ok 12 - shares ONE promise on a repeated cleanup, and signals only once
+      ---
+      duration_ms: 3.300049
+      type: 'test'
+      ...
+    # Subtest: does not end the child when its process is still there
+    ok 13 - does not end the child when its process is still there
+      ---
+      duration_ms: 0.183383
+      type: 'test'
+      ...
+    # Subtest: refuses to own a child whose exit was already seen
+    ok 14 - refuses to own a child whose exit was already seen
+      ---
+      duration_ms: 0.097624
+      type: 'test'
+      ...
+    1..14
+not ok 6 - the cleanup of a child
+  ---
+  duration_ms: 32.516476
+  type: 'suite'
+  location: '/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/helpers/native-cache-nofork-pilot.test.mjs:397:1'
+  failureType: 'subtestsFailed'
+  error: '2 subtests failed'
+  code: 'ERR_TEST_FAILURE'
+  ...
+# Subtest: the orchestration of the pilot
+    # Subtest: refuses before it starts anything when the custodian is not the reviewed one
+    ok 1 - refuses before it starts anything when the custodian is not the reviewed one
+      ---
+      duration_ms: 0.308348
+      type: 'test'
+      ...
+    # Subtest: refuses before it starts anything when the interpreter is not the fixed one
+    ok 2 - refuses before it starts anything when the interpreter is not the fixed one
+      ---
+      duration_ms: 0.13515
+      type: 'test'
+      ...
+    # Subtest: checks the identity and cleans up, and never writes to the control channel
+    ok 3 - checks the identity and cleans up, and never writes to the control channel
+      ---
+      duration_ms: 1.35332
+      type: 'test'
+      ...
+    # Subtest: marks the deliberate failure only when it really happened and the child really closed
+    ok 4 - marks the deliberate failure only when it really happened and the child really closed
+      ---
+      duration_ms: 1.46494
+      type: 'test'
+      ...
+    # Subtest: does not mark the fault case when the child did not really close
+    ok 5 - does not mark the fault case when the child did not really close
+      ---
+      duration_ms: 3.223164
+      type: 'test'
+      ...
+    1..5
+ok 7 - the orchestration of the pilot
+  ---
+  duration_ms: 6.707628
+  type: 'suite'
+  ...
+# Subtest: the environment of the custodian
+    # Subtest: is a fixed allowlist that points at the private root
+    ok 1 - is a fixed allowlist that points at the private root
+      ---
+      duration_ms: 0.085528
+      type: 'test'
+      ...
+    1..1
+ok 8 - the environment of the custodian
+  ---
+  duration_ms: 0.138277
+  type: 'suite'
+  ...
+1..8
+# tests 38
+# suites 8
+# pass 30
+# fail 8
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 115.117196

@@ -1,0 +1,391 @@
+TAP version 13
+# Subtest: the arguments of the nofork pilot
+    # Subtest: takes exactly two modes and one digest
+    ok 1 - takes exactly two modes and one digest
+      ---
+      duration_ms: 0.450393
+      type: 'test'
+      ...
+    # Subtest: refuses anything that could name an executable, a script, a signal or a number
+    ok 2 - refuses anything that could name an executable, a script, a signal or a number
+      ---
+      duration_ms: 0.327478
+      type: 'test'
+      ...
+    1..2
+ok 1 - the arguments of the nofork pilot
+  ---
+  duration_ms: 1.193379
+  type: 'suite'
+  ...
+# Subtest: the reading of the epoch of a process
+    # Subtest: reads the fields after the last closing parenthesis
+    ok 1 - reads the fields after the last closing parenthesis
+      ---
+      duration_ms: 0.279472
+      type: 'test'
+      ...
+    # Subtest: refuses a text it cannot read
+    ok 2 - refuses a text it cannot read
+      ---
+      duration_ms: 0.063826
+      type: 'test'
+      ...
+    # Subtest: says gone ONLY for ENOENT and ESRCH
+    ok 3 - says gone ONLY for ENOENT and ESRCH
+      ---
+      duration_ms: 0.159959
+      type: 'test'
+      ...
+    # Subtest: does not call a number that was reused a gone original, and an unknown a proof
+    ok 4 - does not call a number that was reused a gone original, and an unknown a proof
+      ---
+      duration_ms: 0.071339
+      type: 'test'
+      ...
+    1..4
+ok 2 - the reading of the epoch of a process
+  ---
+  duration_ms: 0.717355
+  type: 'suite'
+  ...
+# Subtest: the decoder of the control channel
+    # Subtest: takes a frame that arrives in two pieces
+    ok 1 - takes a frame that arrives in two pieces
+      ---
+      duration_ms: 0.573817
+      type: 'test'
+      ...
+    # Subtest: takes two frames that arrive together
+    ok 2 - takes two frames that arrive together
+      ---
+      duration_ms: 0.163173
+      type: 'test'
+      ...
+    # Subtest: refuses a frame that claims more than the limit
+    ok 3 - refuses a frame that claims more than the limit
+      ---
+      duration_ms: 0.135143
+      type: 'test'
+      ...
+    # Subtest: refuses a channel whose unconsumed bytes grow past the limit
+    ok 4 - refuses a channel whose unconsumed bytes grow past the limit
+      ---
+      duration_ms: 0.154558
+      type: 'test'
+      ...
+    # Subtest: reads a hello strictly
+    ok 5 - reads a hello strictly
+      ---
+      duration_ms: 0.402465
+      type: 'test'
+      ...
+    1..5
+ok 3 - the decoder of the control channel
+  ---
+  duration_ms: 1.624655
+  type: 'suite'
+  ...
+# Subtest: the identity of the custodian
+    # Subtest: checks every field against the kernel
+    ok 1 - checks every field against the kernel
+      ---
+      duration_ms: 0.160825
+      type: 'test'
+      ...
+    1..1
+ok 4 - the identity of the custodian
+  ---
+  duration_ms: 0.195409
+  type: 'suite'
+  ...
+# Subtest: the ledger of a child
+    # Subtest: registers the events before anything waits
+    ok 1 - registers the events before anything waits
+      ---
+      duration_ms: 0.317858
+      type: 'test'
+      ...
+    # Subtest: keeps an error apart from an exit and from a close
+    ok 2 - keeps an error apart from an exit and from a close
+      ---
+      duration_ms: 0.165591
+      type: 'test'
+      ...
+    # Subtest: keeps the end of the control channel apart from the end of the process
+    ok 3 - keeps the end of the control channel apart from the end of the process
+      ---
+      duration_ms: 0.092979
+      type: 'test'
+      ...
+    # Subtest: records the streams apart from each other
+    ok 4 - records the streams apart from each other
+      ---
+      duration_ms: 0.190013
+      type: 'test'
+      ...
+    # Subtest: keeps the diagnostics bounded
+    ok 5 - keeps the diagnostics bounded
+      ---
+      duration_ms: 0.2041
+      type: 'test'
+      ...
+    # Subtest: never drops a frame that arrived while nobody was waiting
+    ok 6 - never drops a frame that arrived while nobody was waiting
+      ---
+      duration_ms: 0.365333
+      type: 'test'
+      ...
+    1..6
+ok 5 - the ledger of a child
+  ---
+  duration_ms: 1.974541
+  type: 'suite'
+  ...
+# Subtest: the cleanup of a child
+    # Subtest: answers closed when the close was ALREADY seen before the cleanup
+    ok 1 - answers closed when the close was ALREADY seen before the cleanup
+      ---
+      duration_ms: 0.496521
+      type: 'test'
+      ...
+    # Subtest: does not signal a child whose exit was seen but whose streams are still open
+    ok 2 - does not signal a child whose exit was seen but whose streams are still open
+      ---
+      duration_ms: 11.101157
+      type: 'test'
+      ...
+    # Subtest: answers closed when the close really comes after the polite signal
+    ok 3 - answers closed when the close really comes after the polite signal
+      ---
+      duration_ms: 0.385323
+      type: 'test'
+      ...
+    # Subtest: answers closed when the close really comes after the hard signal
+    ok 4 - answers closed when the close really comes after the hard signal
+      ---
+      duration_ms: 1.514851
+      type: 'test'
+      ...
+    # Subtest: answers unknown when the child never closes, and keeps the owner
+    ok 5 - answers unknown when the child never closes, and keeps the owner
+      ---
+      duration_ms: 3.224454
+      type: 'test'
+      ...
+    # Subtest: answers unknown when the signal throws
+    ok 6 - answers unknown when the signal throws
+      ---
+      duration_ms: 0.487325
+      type: 'test'
+      ...
+    # Subtest: answers unknown when the signal is refused
+    ok 7 - answers unknown when the signal is refused
+      ---
+      duration_ms: 0.134427
+      type: 'test'
+      ...
+    # Subtest: does not signal a number that was reused by another process
+    ok 8 - does not signal a number that was reused by another process
+      ---
+      duration_ms: 0.129742
+      type: 'test'
+      ...
+    # Subtest: does not signal when the epoch of the process could not be read
+    ok 9 - does not signal when the epoch of the process could not be read
+      ---
+      duration_ms: 0.235071
+      type: 'test'
+      ...
+    # Subtest: does not signal when the never-fork invariant was lost
+    ok 10 - does not signal when the never-fork invariant was lost
+      ---
+      duration_ms: 0.139287
+      type: 'test'
+      ...
+    # Subtest: answers no-child-confirmed when the spawn failed and the close really came
+    ok 11 - answers no-child-confirmed when the spawn failed and the close really came
+      ---
+      duration_ms: 0.177381
+      type: 'test'
+      ...
+    # Subtest: shares ONE promise on a repeated cleanup, and signals only once
+    ok 12 - shares ONE promise on a repeated cleanup, and signals only once
+      ---
+      duration_ms: 4.727989
+      type: 'test'
+      ...
+    # Subtest: does not end the child when its process is still there
+    ok 13 - does not end the child when its process is still there
+      ---
+      duration_ms: 0.193736
+      type: 'test'
+      ...
+    # Subtest: refuses to own a child whose exit was already seen
+    ok 14 - refuses to own a child whose exit was already seen
+      ---
+      duration_ms: 0.056226
+      type: 'test'
+      ...
+    1..14
+ok 6 - the cleanup of a child
+  ---
+  duration_ms: 23.355229
+  type: 'suite'
+  ...
+# Subtest: the orchestration of the pilot
+    # Subtest: refuses before it starts anything when the custodian is not the reviewed one
+    ok 1 - refuses before it starts anything when the custodian is not the reviewed one
+      ---
+      duration_ms: 0.512277
+      type: 'test'
+      ...
+    # Subtest: refuses before it starts anything when the interpreter is not the fixed one
+    ok 2 - refuses before it starts anything when the interpreter is not the fixed one
+      ---
+      duration_ms: 0.102528
+      type: 'test'
+      ...
+    # Subtest: checks the identity and cleans up, and never writes to the control channel
+    ok 3 - checks the identity and cleans up, and never writes to the control channel
+      ---
+      duration_ms: 0.917971
+      type: 'test'
+      ...
+    # Subtest: marks the deliberate failure only when it really happened and the child really closed
+    ok 4 - marks the deliberate failure only when it really happened and the child really closed
+      ---
+      duration_ms: 0.314452
+      type: 'test'
+      ...
+    # Subtest: does not mark the fault case when the child did not really close
+    ok 5 - does not mark the fault case when the child did not really close
+      ---
+      duration_ms: 4.764838
+      type: 'test'
+      ...
+    1..5
+ok 7 - the orchestration of the pilot
+  ---
+  duration_ms: 6.777425
+  type: 'suite'
+  ...
+# Subtest: the environment of the custodian
+    # Subtest: is a fixed allowlist that points at the private root
+    ok 1 - is a fixed allowlist that points at the private root
+      ---
+      duration_ms: 0.111095
+      type: 'test'
+      ...
+    1..1
+ok 8 - the environment of the custodian
+  ---
+  duration_ms: 0.148507
+  type: 'suite'
+  ...
+# Subtest: the owner of the nofork pilot
+    # Subtest: does not run the pilot when its module is imported
+    ok 1 - does not run the pilot when its module is imported
+      ---
+      duration_ms: 0.152147
+      type: 'test'
+      ...
+    # Subtest: keeps the owner when the outcome and the held evidence cannot be written
+    ok 2 - keeps the owner when the outcome and the held evidence cannot be written
+      ---
+      duration_ms: 8.084271
+      type: 'test'
+      ...
+    # Subtest: does not accept an identity whose standard output overflowed
+    ok 3 - does not accept an identity whose standard output overflowed
+      ---
+      duration_ms: 0.515291
+      type: 'test'
+      ...
+    # Subtest: does not mark the fault case when the control channel broke
+    ok 4 - does not mark the fault case when the control channel broke
+      ---
+      duration_ms: 0.410609
+      type: 'test'
+      ...
+    # Subtest: bounds the NUMBER of the complete frames that wait
+    ok 5 - bounds the NUMBER of the complete frames that wait
+      ---
+      duration_ms: 0.905579
+      type: 'test'
+      ...
+    # Subtest: bounds the BYTES of the complete frames that wait
+    ok 6 - bounds the BYTES of the complete frames that wait
+      ---
+      duration_ms: 0.687665
+      type: 'test'
+      ...
+    # Subtest: waits for the fresh proof when the close was seen but the process was not
+    ok 7 - waits for the fresh proof when the close was seen but the process was not
+      ---
+      duration_ms: 0.569569
+      type: 'test'
+      ...
+    # Subtest: keeps the original start failure when the child was never born
+    ok 8 - keeps the original start failure when the child was never born
+      ---
+      duration_ms: 0.285395
+      type: 'test'
+      ...
+    # Subtest: refuses an identity whose fresh epoch has another parent
+    ok 9 - refuses an identity whose fresh epoch has another parent
+      ---
+      duration_ms: 0.360647
+      type: 'test'
+      ...
+    # Subtest: separates the plain case from the deliberate failure
+    ok 10 - separates the plain case from the deliberate failure
+      ---
+      duration_ms: 0.39421
+      type: 'test'
+      ...
+    # Subtest: answers the complete proof with one fact at a time
+    ok 11 - answers the complete proof with one fact at a time
+      ---
+      duration_ms: 0.107342
+      type: 'test'
+      ...
+    # Subtest: keeps the live owner when the reporting destination breaks asynchronously
+    ok 12 - keeps the live owner when the reporting destination breaks asynchronously
+      ---
+      duration_ms: 5.411344
+      type: 'test'
+      ...
+    # Subtest: clears every pass marker when the evidence of the outcome cannot be written
+    ok 13 - clears every pass marker when the evidence of the outcome cannot be written
+      ---
+      duration_ms: 0.546037
+      type: 'test'
+      ...
+    # Subtest: keeps the decoder terminal after the first bad chunk
+    ok 14 - keeps the decoder terminal after the first bad chunk
+      ---
+      duration_ms: 1.933169
+      type: 'test'
+      ...
+    # Subtest: counts the bytes of the frames that wait, and forgets them when they are taken
+    ok 15 - counts the bytes of the frames that wait, and forgets them when they are taken
+      ---
+      duration_ms: 0.109622
+      type: 'test'
+      ...
+    1..15
+ok 9 - the owner of the nofork pilot
+  ---
+  duration_ms: 20.900542
+  type: 'suite'
+  ...
+1..9
+# tests 53
+# suites 9
+# pass 53
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 137.130839

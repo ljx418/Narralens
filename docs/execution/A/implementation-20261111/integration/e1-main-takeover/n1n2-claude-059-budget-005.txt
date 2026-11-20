@@ -1,0 +1,9 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+No test files found, exiting with code 1
+
+filter: tests/agent-driven/integration/re1-main-takeover
+include: tests/**/*.test.{ts,tsx}
+exclude:  vendor/**, node_modules/**
+

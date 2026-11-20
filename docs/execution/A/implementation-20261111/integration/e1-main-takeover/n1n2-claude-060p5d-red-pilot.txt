@@ -1,0 +1,319 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+ ❯ tests/agent-driven/integration/native-cache-normal-pilot.test.ts (39 tests | 12 failed) 98ms
+   ✓ the arguments of the positive pilot > takes exactly a mode and two digests 1ms
+   ✓ the arguments of the positive pilot > does not run the pilot when its module is imported 0ms
+   × the positive pilot > really succeeds, and the picture is EXACTLY the synthetic one 36ms
+     → expected [ 'summary.json', 'outcome.json' ] to include 'candidate.json'
+   ✓ the positive pilot > is NOT a success when the picture is not the exact one 2ms
+   ✓ the positive pilot > refuses bytes that are not the reviewed ones, and starts nothing 2ms
+   ✓ the positive pilot > refuses a COPY of the helper that is not the reviewed one, and starts nothing 2ms
+   ✓ the positive pilot > injects the deliberate failure only after the worker was REALLY alive 2ms
+   ✓ the positive pilot > does NOT inject the deliberate failure when the worker was not observed 2ms
+   ✓ the positive pilot > does NOT inject the deliberate failure after a GO of another worker 2ms
+   ✓ the positive pilot > does NOT inject the deliberate failure after a GO of another draw 1ms
+   ✓ the positive pilot > does NOT inject the deliberate failure when the worker is a zombie 2ms
+   ✓ the positive pilot > does NOT inject the deliberate failure when the worker is another start time 2ms
+   ✓ the positive pilot > does NOT inject the deliberate failure when the worker is another parent 1ms
+   ✓ the positive pilot > does NOT inject the deliberate failure when the worker is another group 1ms
+   ✓ the positive pilot > does NOT accept an unrelated failure as the expected fault 1ms
+   ✓ the positive pilot > does NOT accept a transport failure as the expected fault 2ms
+   ✓ the positive pilot > keeps a failure of the evidence, and it is never a green case 1ms
+   ✓ the positive pilot > keeps the owner of a HELD draw and ends with the fresh proof 2ms
+   ✓ the positive pilot > keeps the owner when the ROOT could not be prepared, and it starts nothing 2ms
+   ✓ the positive pilot > keeps the owner when the RESERVE failed, and there is no phantom child 1ms
+   ✓ the positive pilot > reads the ORIGINAL result of a draw that was held and that ended LATE 1ms
+   ✓ the positive pilot > keeps the owner when the event reader failed after the start 2ms
+   ✓ the positive pilot > never kills anything: it asks, and it does nothing else 2ms
+   × the positive pilot > does not lose the owner when the destination fails asynchronously 3ms
+     → expected [ 'summary.json', 'outcome.json' ] to include 'final.json'
+   × the real asynchronous order of the two modes > does NOT cancel a draw that is still making progress 4ms
+     → expected [ …(1) ] to deeply equal []
+   × the real asynchronous order of the two modes > waits for the accepted worker before it injects the deliberate failure 3ms
+     → expected 'WORKER_NOT_OBSERVED' to be 'EXPECTED_ASSERTION_FAILURE' // Object.is equality
+   × the real asynchronous order of the two modes > does NOT inject when the draw REALLY failed before the worker was accepted 2ms
+     → expected 'WORKER_NOT_OBSERVED' to be 'WORKER_FAILED' // Object.is equality
+   ✓ the real asynchronous order of the two modes > does NOT inject when the GO of this draw never arrives 1ms
+   × the raw cleanup of the draw > is NOT green when the raw settlement carries a cleanup failure 2ms
+     → expected 'ok' not to be 'ok' // Object.is equality
+   × the raw cleanup of the draw > is NOT a fault when the raw settlement carries a cleanup failure 1ms
+     → expected 'fault-observed' not to be 'fault-observed' // Object.is equality
+   × the raw cleanup of the draw > is NOT green when the FINAL diagnostic carries cleanup failures 1ms
+     → expected 'ok' not to be 'ok' // Object.is equality
+   × the ownership of the runtime root > writes NO evidence at all when the root could not be allocated 3ms
+     → expected [ Array(2) ] to deeply equal []
+   × the final qualification of a run > commits the final qualification AFTER the report callbacks 2ms
+     → expected undefined to be false // Object.is equality
+   × the final qualification of a run > revokes the final qualification when the report destination fails LATE 2ms
+     → expected undefined to be false // Object.is equality
+   × the final qualification of a run > is NOT green when the manifest of the artifacts could not be built 2ms
+     → expected 'ok' not to be 'ok' // Object.is equality
+   ✓ the command of the positive pilot > answers 2 for arguments it does not take 1ms
+   ✓ the command of the positive pilot > answers 0 for a normal draw that really succeeded 1ms
+   ✓ the command of the positive pilot > answers 1 for the deliberate failure that was really observed 1ms
+   ✓ the digest of the synthetic picture > is the digest of exactly 1024 bytes of 0x4a 0ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 12 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/native-cache-normal-pilot.test.ts > the positive pilot > really succeeds, and the picture is EXACTLY the synthetic one
+AssertionError: expected [ 'summary.json', 'outcome.json' ] to include 'candidate.json'
+ ❯ tests/agent-driven/integration/native-cache-normal-pilot.test.ts:414:19
+    412|     // manifest of the artifacts and the FINAL qualification.
+    413|     const names = state.evidence.map(entry => entry.name);
+    414|     expect(names).toContain("candidate.json");
+       |                   ^
+    415|     expect(names).toContain("manifest.json");
+    416|     expect(names).toContain("final.json");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/12]⎯
+
+ FAIL  tests/agent-driven/integration/native-cache-normal-pilot.test.ts > the positive pilot > does not lose the owner when the destination fails asynchronously
+AssertionError: expected [ 'summary.json', 'outcome.json' ] to include 'final.json'
+ ❯ tests/agent-driven/integration/native-cache-normal-pilot.test.ts:673:53
+    671|     // The run really ended: the evidence of it was written, and the o…
+    672|     // the draw was never lost.
+    673|     expect(state.evidence.map(entry => entry.name)).toContain("final.j…
+       |                                                     ^
+    674|     // The failure of the reporting is a fact of the case: it is never…
+    675|     expect(code).toBe(1);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/12]⎯
+
+ FAIL  tests/agent-driven/integration/native-cache-normal-pilot.test.ts > the real asynchronous order of the two modes > does NOT cancel a draw that is still making progress
+AssertionError: expected [ …(1) ] to deeply equal []
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- [][39m
+[31m+ [[39m
+[31m+   PositivePilotFailure {[39m
+[31m+     "message": "the draw of this run was not settled",[39m
+[31m+     "code": "DRAW_NOT_SETTLED",[39m
+[31m+     "name": "PositivePilotFailure",[39m
+[31m+   },[39m
+[31m+ ][39m
+
+ ❯ tests/agent-driven/integration/native-cache-normal-pilot.test.ts:690:37
+    688|     const outcome = await runPositivePilot(OPTIONS, deps);
+    689|     // NOTHING was cancelled while the draw was pending.
+    690|     expect(supervisor.cancelErrors).toEqual([]);
+       |                                     ^
+    691|     // And the natural result of the draw is the result of the run.
+    692|     expect(outcome.kind).toBe("ok");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/12]⎯
+
+ FAIL  tests/agent-driven/integration/native-cache-normal-pilot.test.ts > the real asynchronous order of the two modes > waits for the accepted worker before it injects the deliberate failure
+AssertionError: expected 'WORKER_NOT_OBSERVED' to be 'EXPECTED_ASSERTION_FAILURE' // Object.is equality
+
+Expected: [32m"EXPECTED_ASSERTION_FAILURE"[39m
+Received: [31m"WORKER_NOT_OBSERVED"[39m
+
+ ❯ tests/agent-driven/integration/native-cache-normal-pilot.test.ts:709:69
+    707|     // Exactly ONE cancel, and it is the deliberate failure.
+    708|     expect(supervisor.cancelErrors.length).toBe(1);
+    709|     expect((supervisor.cancelErrors[0] as { code?: unknown }).code).to…
+       |                                                                     ^
+    710|     expect(outcome.kind).toBe("fault-observed");
+    711|     expect(outcome.faultCasePassed).toBe(true);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/12]⎯
+
+ FAIL  tests/agent-driven/integration/native-cache-normal-pilot.test.ts > the real asynchronous order of the two modes > does NOT inject when the draw REALLY failed before the worker was accepted
+AssertionError: expected 'WORKER_NOT_OBSERVED' to be 'WORKER_FAILED' // Object.is equality
+
+Expected: [32m"WORKER_[7mFAIL[27mED"[39m
+Received: [31m"WORKER_[7mNOT_OBSERV[27mED"[39m
+
+ ❯ tests/agent-driven/integration/native-cache-normal-pilot.test.ts:724:66
+    722|     const { deps } = depsOf(supervisor);
+    723|     const outcome = await runPositivePilot({ ...OPTIONS, mode: "assert…
+    724|     expect((outcome.originalFailure as { code?: unknown }).code).toBe(…
+       |                                                                  ^
+    725|     expect(outcome.faultCasePassed).toBe(false);
+    726|     expect((supervisor.cancelErrors[0] as { code?: unknown }).code).no…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/12]⎯
+
+ FAIL  tests/agent-driven/integration/native-cache-normal-pilot.test.ts > the raw cleanup of the draw > is NOT green when the raw settlement carries a cleanup failure
+AssertionError: expected 'ok' not to be 'ok' // Object.is equality
+ ❯ tests/agent-driven/integration/native-cache-normal-pilot.test.ts:751:30
+    749|     // The picture was exact, and the case is STILL not green: a clean…
+    750|     // failure is not erased by a good picture.
+    751|     expect(outcome.kind).not.toBe("ok");
+       |                              ^
+    752|     expect(outcome.exitCode).toBe(1);
+    753|     const cleanup = (outcome as unknown as { cleanupFacts?: readonly u…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/12]⎯
+
+ FAIL  tests/agent-driven/integration/native-cache-normal-pilot.test.ts > the raw cleanup of the draw > is NOT a fault when the raw settlement carries a cleanup failure
+AssertionError: expected 'fault-observed' not to be 'fault-observed' // Object.is equality
+ ❯ tests/agent-driven/integration/native-cache-normal-pilot.test.ts:764:30
+    762|     const { deps } = depsOf(supervisor);
+    763|     const outcome = await runPositivePilot({ ...OPTIONS, mode: "assert…
+    764|     expect(outcome.kind).not.toBe("fault-observed");
+       |                              ^
+    765|     expect(outcome.faultCasePassed).toBe(false);
+    766|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/12]⎯
+
+ FAIL  tests/agent-driven/integration/native-cache-normal-pilot.test.ts > the raw cleanup of the draw > is NOT green when the FINAL diagnostic carries cleanup failures
+AssertionError: expected 'ok' not to be 'ok' // Object.is equality
+ ❯ tests/agent-driven/integration/native-cache-normal-pilot.test.ts:776:30
+    774|     const { deps } = depsOf(supervisor);
+    775|     const outcome = await runPositivePilot(OPTIONS, deps);
+    776|     expect(outcome.kind).not.toBe("ok");
+       |                              ^
+    777|     expect(outcome.exitCode).toBe(1);
+    778|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/12]⎯
+
+ FAIL  tests/agent-driven/integration/native-cache-normal-pilot.test.ts > the ownership of the runtime root > writes NO evidence at all when the root could not be allocated
+AssertionError: expected [ Array(2) ] to deeply equal []
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- [][39m
+[31m+ [[39m
+[31m+   {[39m
+[31m+     "data": {[39m
+[31m+       "actual_image": null,[39m
+[31m+       "artifact_sha256": {},[39m
+[31m+       "copied_fixture_sha256": null,[39m
+[31m+       "custodian_sha256": null,[39m
+[31m+       "diagnostic_snapshot": null,[39m
+[31m+       "evidence_errors": [],[39m
+[31m+       "expected_image": {[39m
+[31m+         "bytes": 1024,[39m
+[31m+         "sha256": "d592c3cbaf5d17852d9cff7fd0002db9a336e3d41acee2456689b86b5521b238",[39m
+[31m+       },[39m
+[31m+       "fault_case_passed": false,[39m
+[31m+       "fixture_sha256": null,[39m
+[31m+       "kind": "positive-pilot",[39m
+[31m+       "mode": "normal",[39m
+[31m+       "original_failure": {[39m
+[31m+         "code": "EACCES",[39m
+[31m+         "message": "permission denied",[39m
+[31m+         "name": "Error",[39m
+[31m+       },[39m
+[31m+       "reporting_failure": null,[39m
+[31m+       "reporting_failures": [],[39m
+[31m+       "root": "",[39m
+[31m+       "scenario": "normal",[39m
+[31m+       "settlement_failure": null,[39m
+[31m+       "terminal_proof": false,[39m
+[31m+       "timeline": [[39m
+[31m+         {[39m
+[31m+           "at": 0,[39m
+[31m+           "detail": {[39m
+[31m+             "code": "EACCES",[39m
+[31m+             "message": "permission denied",[39m
+[31m+             "name": "Error",[39m
+[31m+           },[39m
+[31m+           "what": "setup-failed",[39m
+[31m+         },[39m
+[31m+         {[39m
+[31m+           "at": 0,[39m
+[31m+           "detail": null,[39m
+[31m+           "what": "not-started",[39m
+[31m+         },[39m
+[31m+       ],[39m
+[31m+     },[39m
+[31m+     "name": "summary.json",[39m
+[31m+   },[39m
+[31m+   {[39m
+[31m+     "data": {[39m
+[31m+       "evidence_errors": [],[39m
+[31m+       "exit_code": 1,[39m
+[31m+       "fault_case_passed": false,[39m
+[31m+       "kind": "failed",[39m
+[31m+       "mode": "normal",[39m
+[31m+       "original_failure": {[39m
+[31m+         "code": "EACCES",[39m
+[31m+         "message": "permission denied",[39m
+[31m+         "name": "Error",[39m
+[31m+       },[39m
+[31m+       "picture_bytes": null,[39m
+[31m+       "picture_is_the_exact_one": false,[39m
+[31m+       "picture_sha256": null,[39m
+[31m+       "reporting_failure": null,[39m
+[31m+       "root": "",[39m
+[31m+       "settlement_failure": null,[39m
+[31m+       "terminal_proof": false,[39m
+[31m+     },[39m
+[31m+     "name": "outcome.json",[39m
+[31m+   },[39m
+[31m+ ][39m
+
+ ❯ tests/agent-driven/integration/native-cache-normal-pilot.test.ts:790:28
+    788|     // There is NO root: there is nothing that may own an evidence fil…
+    789|     // the working directory is NOT a substitute for a missing root.
+    790|     expect(state.evidence).toEqual([]);
+       |                            ^
+    791|     expect(outcome.root).toBeNull();
+    792|     // And there is NO phantom supervisor and NO phantom handle.
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/12]⎯
+
+ FAIL  tests/agent-driven/integration/native-cache-normal-pilot.test.ts > the final qualification of a run > commits the final qualification AFTER the report callbacks
+AssertionError: expected undefined to be false // Object.is equality
+
+[32m- Expected:[39m 
+false
+
+[31m+ Received:[39m 
+undefined
+
+ ❯ tests/agent-driven/integration/native-cache-normal-pilot.test.ts:810:38
+    808|     const final = evidenceOf(state, "final.json");
+    809|     // The CANDIDATE facts are explicitly NOT authoritative.
+    810|     expect(candidate?.authoritative).toBe(false);
+       |                                      ^
+    811|     // The FINAL record is the authority, and it names the candidate a…
+    812|     // manifest it was built from.
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/12]⎯
+
+ FAIL  tests/agent-driven/integration/native-cache-normal-pilot.test.ts > the final qualification of a run > revokes the final qualification when the report destination fails LATE
+AssertionError: expected undefined to be false // Object.is equality
+
+[32m- Expected:[39m 
+false
+
+[31m+ Received:[39m 
+undefined
+
+ ❯ tests/agent-driven/integration/native-cache-normal-pilot.test.ts:839:38
+    837|     // The final record says that the run is NOT the expected fault, e…
+    838|     // though the exit code of the expected fault is 1 anyway.
+    839|     expect(final?.fault_case_passed).toBe(false);
+       |                                      ^
+    840|     expect(final?.reporting_failure).not.toBeNull();
+    841|     expect(outcome.faultCasePassed).toBe(false);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/12]⎯
+
+ FAIL  tests/agent-driven/integration/native-cache-normal-pilot.test.ts > the final qualification of a run > is NOT green when the manifest of the artifacts could not be built
+AssertionError: expected 'ok' not to be 'ok' // Object.is equality
+ ❯ tests/agent-driven/integration/native-cache-normal-pilot.test.ts:861:30
+    859|     // green and the final record says why.
+    860|     expect(final?.kind).not.toBe("ok");
+    861|     expect(outcome.kind).not.toBe("ok");
+       |                              ^
+    862|     expect(outcome.exitCode).toBe(1);
+    863|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/12]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  12 failed | 27 passed (39)
+   Start at  15:43:31
+   Duration  2.86s (transform 182ms, setup 0ms, collect 278ms, tests 98ms, environment 0ms, prepare 1.65s)
+

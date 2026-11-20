@@ -205,12 +205,12 @@ it('B0-1 the fixed producer really draws and the witness binds the request, the 
 /**
  * B0-2 — one owner's close never kills the peer's work in flight.
  *
- * The pinned producer keeps ONE browser for the whole process. An owner that stops
- * admits no new calls and drains the calls it really started, and the browser is
- * closed only when the LAST owner has drained - so a peer that is still drawing is
- * untouched.
+ * Every draw happens in a worker of its own, with a browser of its own, in a
+ * process group of its own. An owner that stops admits no new calls and drains the
+ * calls it really started - and the process domain of the peer is a domain of its
+ * own, so a close of one owner never reaches into it.
  */
-it('B0-2 one owner close never kills the peer work in flight, and the browser goes with the last owner',async()=>{
+it('B0-2 one owner close never kills the peer work in flight, and every draw has a process domain of its own',async()=>{
  const f=await nativeSourceFixture();
  let first:OpenFilmCacheProducerOwner|undefined;
  let second:OpenFilmCacheProducerOwner|undefined;
@@ -229,7 +229,7 @@ it('B0-2 one owner close never kills the peer work in flight, and the browser go
   await first.close();
   // The peer's draw is untouched: it answers with a real picture.
   const jpeg=await drawing;
-  expect(jpeg.length).toBeGreaterThan(0);
+  expect(jpeg.picture.length).toBeGreaterThan(0);
  }catch(error){primary=error;}
  const failures:unknown[]=[];
  // The producers are drained BEFORE the serving goes.

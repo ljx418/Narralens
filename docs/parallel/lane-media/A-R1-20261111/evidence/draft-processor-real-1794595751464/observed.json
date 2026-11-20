@@ -1,0 +1,166 @@
+{
+  "scope": "real synthetic registered media + actual source-only processor; not production Run rights/MCP/human voice/adoption/Delivery",
+  "job": {
+    "attempt": 1,
+    "bootstrap": null,
+    "execution": {
+      "attempt": 1,
+      "authorization_id": "grant-62d67934-53ce-46eb-af57-c79419360f3f",
+      "input_digest": "bc7578a0ae8b4542b94779dfce30bf61c291cd6d2ed3af85c52144a0e4ad76aa",
+      "plan_version": 1,
+      "run_id": "run-dc235b73-4215-4f58-801b-868e01338514",
+      "run_scope_digest": "fe64bc1bb35973febb56f364322ceeda12e0e49227dabfae7d6d70db1c3d0642",
+      "step_id": "sample"
+    },
+    "job_id": "job_1a701daeb26842b7a0b842823f2f6681",
+    "next_actions": [
+      "review_prepared_source"
+    ],
+    "project_id": "project_89941b99e7f54bd496674e189a3e7986",
+    "result_ref": null,
+    "snapshot_id": "80a13aa2d08c767cb1653c0af0f2b207d68c734b57d172a7bba7e9e4bd46a66b",
+    "state": "succeeded"
+  },
+  "fact": {
+    "files": [
+      {
+        "bytes": 11,
+        "relative_path": ".film/settings.json",
+        "sha256": "5f098b8911b608c4f0ebefa7a838289331f490c8fb79880249941c10866e2ad9"
+      },
+      {
+        "bytes": 530,
+        "relative_path": ".film/subtitles.json",
+        "sha256": "2ac9c6ecad02ee5b179565bb0d73ff6e0a88051c4cbd52bd5b2bb398077d97d2"
+      },
+      {
+        "bytes": 4112,
+        "relative_path": "assets/video/001-23cfae6d486bb5558e398f8b48069b68c773910cf7eb360e157adb9a83b39bc5.mp4",
+        "sha256": "23cfae6d486bb5558e398f8b48069b68c773910cf7eb360e157adb9a83b39bc5"
+      },
+      {
+        "bytes": 259,
+        "relative_path": "assets/vo/002-42c9992dbd4dcfbeaf52790767beb0febee1279ce37e2e46d5cb474bdd8e1a1d.vtt",
+        "sha256": "7589688eff6e9ca5ee39341deb23d149f5a6cccec1da8ac9299fbb07230b88d9"
+      },
+      {
+        "bytes": 288078,
+        "relative_path": "assets/vo/002-42c9992dbd4dcfbeaf52790767beb0febee1279ce37e2e46d5cb474bdd8e1a1d.wav",
+        "sha256": "42c9992dbd4dcfbeaf52790767beb0febee1279ce37e2e46d5cb474bdd8e1a1d"
+      },
+      {
+        "bytes": 2228,
+        "relative_path": "draft-plan.json",
+        "sha256": "d45d3726fc6afd76e6391769dc6fd2e4816b4bea5f75f22203d4feeba8227049"
+      },
+      {
+        "bytes": 933,
+        "relative_path": "film.html",
+        "sha256": "ed7b107d820d02065b5cca124058201769589de0f7f0a99ca8302aeb41c1d447"
+      },
+      {
+        "bytes": 1646,
+        "relative_path": "prepared-native.json",
+        "sha256": "8fbf96fcfa44a8bb637fee263d493735d9553ee2e367abb2a5828be0a966cee1"
+      },
+      {
+        "bytes": 1260,
+        "relative_path": "rights.json",
+        "sha256": "5608cf44a67dc68ebbdde64a45b913dbc95abb07d2e901b1860f2c90978cc4cc"
+      },
+      {
+        "bytes": 976,
+        "relative_path": "scenes/001.html",
+        "sha256": "7709f707a89923e04062d045124de642a2367dd2191ae1ae344c4927b0b7db1e"
+      },
+      {
+        "bytes": 939,
+        "relative_path": "scenes/003.html",
+        "sha256": "bc3520cfecfd1210f0a2d1a7605dd35349ad87c71d3cb5c051daa4e6c6651b8e"
+      }
+    ],
+    "format": "narralens.created-task-prepared@1",
+    "plan_digest": "1697a194aa0c60a46a58140e51caa57e6f279baee7b3978d2ece51b719daeb15",
+    "rights_digest": "49893776a7ae99c6c2f5ea5102ea184e72787d159fdf39fb0950781268560eba",
+    "roots": [
+      "film.html",
+      ".film/settings.json",
+      ".film/subtitles.json",
+      "assets/vo/002-42c9992dbd4dcfbeaf52790767beb0febee1279ce37e2e46d5cb474bdd8e1a1d.vtt",
+      "draft-plan.json",
+      "rights.json",
+      "scenes/001.html",
+      "scenes/003.html",
+      "prepared-native.json",
+      "assets/video/001-23cfae6d486bb5558e398f8b48069b68c773910cf7eb360e157adb9a83b39bc5.mp4",
+      "assets/vo/002-42c9992dbd4dcfbeaf52790767beb0febee1279ce37e2e46d5cb474bdd8e1a1d.wav"
+    ],
+    "source_digest": "85d77dca329bdc849e68d7ae48d282795c4704933d3097b2e18affafcce10c81",
+    "stage_token": "stage__oJc7NEIhPX4Th-Q2ipgzfhM-ckaml3B"
+  },
+  "metadata": {
+    "assets": [
+      {
+        "asset_id": "asset_75e35e422da52a8093e1f35f159e5f52af5cafed81cb8eeb0f430ff3",
+        "bytes": 4112,
+        "duration_frames": 90,
+        "license": {
+          "commercial_use": true,
+          "label": "Diagnostic fixture only",
+          "status": "cleared"
+        },
+        "media_type": "video/mp4",
+        "path": "assets/video/001-23cfae6d486bb5558e398f8b48069b68c773910cf7eb360e157adb9a83b39bc5.mp4",
+        "recording_origin": null,
+        "rights_ref": "rights_75e35e422da52a8093e1f35f159e5f52af5cafed81cb8eeb0f430ff3",
+        "sha256": "23cfae6d486bb5558e398f8b48069b68c773910cf7eb360e157adb9a83b39bc5",
+        "source": {
+          "kind": "generated",
+          "label": "Test-created local diagnostic media"
+        }
+      },
+      {
+        "asset_id": "asset_b8a1d5d26376685e7820c1c5ff3e5f6ee51999654fe6a95b413e3bb5",
+        "bytes": 288078,
+        "duration_frames": 90,
+        "license": {
+          "commercial_use": true,
+          "label": "Diagnostic fixture only",
+          "status": "cleared"
+        },
+        "media_type": "audio/wav",
+        "path": "assets/vo/002-42c9992dbd4dcfbeaf52790767beb0febee1279ce37e2e46d5cb474bdd8e1a1d.wav",
+        "recording_origin": "synthetic",
+        "rights_ref": "rights_b8a1d5d26376685e7820c1c5ff3e5f6ee51999654fe6a95b413e3bb5",
+        "sha256": "42c9992dbd4dcfbeaf52790767beb0febee1279ce37e2e46d5cb474bdd8e1a1d",
+        "source": {
+          "kind": "generated",
+          "label": "Test-created local diagnostic media"
+        }
+      }
+    ],
+    "clip_ids": [
+      "concept-s1",
+      "shot-s1",
+      "shot-s2",
+      "shot-s3",
+      "narration"
+    ],
+    "format": "narralens.prepared-native-output@1",
+    "fps": {
+      "den": 1,
+      "num": 30
+    },
+    "frame_count": 90,
+    "plan_digest": "1697a194aa0c60a46a58140e51caa57e6f279baee7b3978d2ece51b719daeb15",
+    "project_id": "project_89941b99e7f54bd496674e189a3e7986",
+    "subtitle_timing_basis": "storyboard_plan",
+    "subtitles": [
+      {
+        "path": "assets/vo/002-42c9992dbd4dcfbeaf52790767beb0febee1279ce37e2e46d5cb474bdd8e1a1d.vtt",
+        "subtitle_id": "storyboard-captions"
+      }
+    ]
+  },
+  "author_unchanged": true
+}

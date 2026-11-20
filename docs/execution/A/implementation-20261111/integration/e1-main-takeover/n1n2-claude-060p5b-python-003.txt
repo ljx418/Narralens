@@ -1,0 +1,14 @@
+.............................................F
+======================================================================
+FAIL: test_the_hard_signal_is_owed_and_is_sent_when_the_identity_returns (__main__.TheUnknownIdentityOfTheWorker.test_the_hard_signal_is_owed_and_is_sent_when_the_identity_returns)
+The hard signal that is OWED is sent, in the same lifetime.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/helpers/cache-custodian-unit.py", line 1401, in test_the_hard_signal_is_owed_and_is_sent_when_the_identity_returns
+    self.assertEqual(kinds.count("group"), 1)
+AssertionError: 0 != 1
+
+----------------------------------------------------------------------
+Ran 46 tests in 0.039s
+
+FAILED (failures=1)

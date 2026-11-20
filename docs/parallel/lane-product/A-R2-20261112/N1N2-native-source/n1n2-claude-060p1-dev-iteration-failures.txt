@@ -1,0 +1,81 @@
+n1n2-claude-060p1 — 开发期迭代中出现的失败（原样保留；这些失败发生在任何 recorder 捕获之前，
+所以它们没有对应的 .result.json；正式捕获见 n1n2-claude-060p1-report.md §3，全部 exit 0）
+
+================================================================================
+失败 1 — worker 的 TypeScript 语法混进了 .mjs（node --check，捕获前）
+================================================================================
+$ node --check src/adapters/openfilm/openfilm-cache-worker.mjs
+src/adapters/openfilm/openfilm-cache-worker.mjs:143
+    const waiter = frameWaiters[0]!;
+                                  ^
+SyntaxError: Unexpected token '!'
+    at checkSyntax (node:internal/check_syntax:74:5)
+
+Node.js v22.22.1
+
+修正：.mjs 不是 TypeScript，去掉非空断言。
+$ node --check src/adapters/openfilm/openfilm-cache-worker.mjs
+src/adapters/openfilm/openfilm-cache-worker.mjs:200
+  await new Promise<void>((resolveClose) => {
+                        ^
+SyntaxError: Unexpected token '>'
+    at checkSyntax (node:internal/check_syntax:74:5)
+
+Node.js v22.22.1
+
+修正：去掉泛型参数。
+$ node --check src/adapters/openfilm/openfilm-cache-worker.mjs && echo "WORKER OK"
+WORKER OK
+
+================================================================================
+失败 2 — 调度器：全局队列满被判在同根队列满之前（vitest，捕获前）
+================================================================================
+$ corepack pnpm exec vitest run --config vitest.config.ts tests/agent-driven/integration/cache-production-scope.test.ts
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+ ❯ tests/agent-driven/integration/cache-production-scope.test.ts (10 tests | 1 failed) 26ms
+   ✓ the native cache production scheduler > holds one scope per physical root and refuses a second one while it is alive 2ms
+   ✓ the native cache production scheduler > shares one lock between two names of the same physical directory 2ms
+   ✓ the native cache production scheduler > runs two different roots at the same time and queues the third 1ms
+   × the native cache production scheduler > refuses a reservation beyond the queue of thirty-two and beyond the queue of one root 14ms
+     → expected CacheProductionAdmissionError: The cache … { code: '…' } to match object { Object (code) }
+   ✓ the native cache production scheduler > refuses a reservation that waited longer than the queue deadline 3ms
+   ✓ the native cache production scheduler > takes a cancelled reservation out of the queue without starting anything 1ms
+   ✓ the native cache production scheduler > keeps the scope of a production whose cleanup could not be proven 2ms
+   ✓ the native cache production scheduler > carries the scope of a production into the steps inside it, and refuses a dead one 1ms
+   ✓ the native cache production scheduler > refuses a root that is not a directory, and does not take a place in the queue 1ms
+   ✓ the native cache production scheduler > does not let a lookalike be a scope 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/cache-production-scope.test.ts > refuses a reservation beyond the queue of thirty-two and beyond the queue of one root
+AssertionError: expected CacheProductionAdmissionError: The cache … { code: '…' } to match object { Object (code) }
+(1 matching property omitted from actual)
+
+- Expected
++ Received
+
+- {
+-   "code": "CACHE_PRODUCTION_ROOT_QUEUE_FULL",
++ CacheProductionAdmissionError {
++   "code": "CACHE_PRODUCTION_QUEUE_FULL",
+  }
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 9 passed (10)
+
+修正：先判更窄的“同根队列满”，再判“全局队列满”。
+$ corepack pnpm exec vitest run --config vitest.config.ts tests/agent-driven/integration/cache-production-scope.test.ts
+
+ ✓ tests/agent-driven/integration/cache-production-scope.test.ts (10 tests) 12ms
+
+ Test Files  1 passed (1)
+      Tests  10 passed (10)
+
+================================================================================
+说明
+================================================================================
+以上是**捕获之前**的开发迭代失败，修正后由 recorder 以唯一前缀重新捕获，正式捕获全部
+exit 0、runtime 捕获全部 source_changed=[]（见 n1n2-claude-060p1-report.md §3）。
+本波没有在 recorder 捕获里产生过失败。

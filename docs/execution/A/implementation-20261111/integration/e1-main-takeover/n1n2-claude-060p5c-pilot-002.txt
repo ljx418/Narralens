@@ -1,0 +1,54 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+ ❯ tests/agent-driven/integration/native-cache-normal-pilot.test.ts (28 tests | 1 failed) 69ms
+   ✓ the arguments of the positive pilot > takes exactly a mode and two digests 1ms
+   ✓ the arguments of the positive pilot > does not run the pilot when its module is imported 1ms
+   ✓ the positive pilot > really succeeds, and the picture is EXACTLY the synthetic one 19ms
+   ✓ the positive pilot > is NOT a success when the picture is not the exact one 2ms
+   ✓ the positive pilot > refuses bytes that are not the reviewed ones, and starts nothing 2ms
+   ✓ the positive pilot > refuses a COPY of the helper that is not the reviewed one, and starts nothing 2ms
+   ✓ the positive pilot > injects the deliberate failure only after the worker was REALLY alive 2ms
+   ✓ the positive pilot > does NOT inject the deliberate failure when the worker was not observed 1ms
+   ✓ the positive pilot > does NOT inject the deliberate failure after a GO of another worker 2ms
+   ✓ the positive pilot > does NOT inject the deliberate failure after a GO of another draw 2ms
+   ✓ the positive pilot > does NOT inject the deliberate failure when the worker is a zombie 2ms
+   ✓ the positive pilot > does NOT inject the deliberate failure when the worker is another start time 2ms
+   ✓ the positive pilot > does NOT inject the deliberate failure when the worker is another parent 1ms
+   ✓ the positive pilot > does NOT inject the deliberate failure when the worker is another group 1ms
+   ✓ the positive pilot > does NOT accept an unrelated failure as the expected fault 2ms
+   ✓ the positive pilot > does NOT accept a transport failure as the expected fault 1ms
+   ✓ the positive pilot > keeps a failure of the evidence, and it is never a green case 2ms
+   ✓ the positive pilot > keeps the owner of a HELD draw and ends with the fresh proof 1ms
+   ✓ the positive pilot > keeps the owner when the ROOT could not be prepared, and it starts nothing 1ms
+   ✓ the positive pilot > keeps the owner when the RESERVE failed, and there is no phantom child 1ms
+   × the positive pilot > reads the ORIGINAL result of a draw that was held and that ended LATE 9ms
+     → expected 'ok' not to be 'ok' // Object.is equality
+   ✓ the positive pilot > keeps the owner when the event reader failed after the start 2ms
+   ✓ the positive pilot > never kills anything: it asks, and it does nothing else 2ms
+   ✓ the positive pilot > does not lose the owner when the destination fails asynchronously 3ms
+   ✓ the command of the positive pilot > answers 2 for arguments it does not take 1ms
+   ✓ the command of the positive pilot > answers 0 for a normal draw that really succeeded 2ms
+   ✓ the command of the positive pilot > answers 1 for the deliberate failure that was really observed 1ms
+   ✓ the digest of the synthetic picture > is the digest of exactly 1024 bytes of 0x4a 0ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/native-cache-normal-pilot.test.ts > the positive pilot > reads the ORIGINAL result of a draw that was held and that ended LATE
+AssertionError: expected 'ok' not to be 'ok' // Object.is equality
+ ❯ tests/agent-driven/integration/native-cache-normal-pilot.test.ts:578:30
+    576|     // The draw was held and the owner ended it: the run is not a succ…
+    577|     // the failure of the owner is the FIRST failure of the run.
+    578|     expect(outcome.kind).not.toBe("ok");
+       |                              ^
+    579|     expect(outcome.originalFailure).not.toBeNull();
+    580|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 27 passed (28)
+   Start at  15:08:26
+   Duration  2.44s (transform 163ms, setup 0ms, collect 269ms, tests 69ms, environment 0ms, prepare 1.41s)
+

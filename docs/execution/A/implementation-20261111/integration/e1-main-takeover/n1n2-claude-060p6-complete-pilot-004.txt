@@ -1,0 +1,304 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+ ❯ tests/agent-driven/integration/native-cache-normal-pilot.test.ts (264 tests | 1 failed) 2161ms
+   ✓ the arguments of the positive pilot > takes exactly a mode and two digests 2ms
+   ✓ the arguments of the positive pilot > does not run the pilot when its module is imported 0ms
+   ✓ the positive pilot > really succeeds, and the picture is EXACTLY the synthetic one 30ms
+   ✓ the positive pilot > is NOT a success when the picture is not the exact one 3ms
+   ✓ the positive pilot > refuses bytes that are not the reviewed ones, and starts nothing 2ms
+   ✓ the positive pilot > refuses a COPY of the helper that is not the reviewed one, and starts nothing 2ms
+   ✓ the positive pilot > injects the deliberate failure only after the worker was REALLY alive 2ms
+   ✓ the positive pilot > does NOT inject the deliberate failure when the worker was not observed 2ms
+   ✓ the positive pilot > does NOT inject the deliberate failure after a GO of another worker 3ms
+   ✓ the positive pilot > does NOT inject the deliberate failure after a GO of another draw 2ms
+   ✓ the positive pilot > does NOT inject the deliberate failure when the worker is a zombie 3ms
+   ✓ the positive pilot > does NOT inject the deliberate failure when the worker is another start time 2ms
+   ✓ the positive pilot > does NOT inject the deliberate failure when the worker is another parent 2ms
+   ✓ the positive pilot > does NOT inject the deliberate failure when the worker is another group 2ms
+   ✓ the positive pilot > does NOT accept an unrelated failure as the expected fault 2ms
+   ✓ the positive pilot > does NOT accept a transport failure as the expected fault 2ms
+   ✓ the positive pilot > keeps a failure of the evidence, and it is never a green case 3ms
+   ✓ the positive pilot > keeps the owner of a HELD draw and ends with the fresh proof 2ms
+   ✓ the positive pilot > keeps the owner when the ROOT could not be prepared, and it starts nothing 2ms
+   ✓ the positive pilot > keeps the owner when the RESERVE failed, and there is no phantom child 2ms
+   ✓ the positive pilot > reads the ORIGINAL result of a draw that was held and that ended LATE 2ms
+   ✓ the positive pilot > keeps the owner when the event reader failed after the start 2ms
+   ✓ the positive pilot > never kills anything: it asks, and it does nothing else 2ms
+   ✓ the positive pilot > does not lose the owner when the destination fails asynchronously 4ms
+   ✓ the real asynchronous order of the two modes > does NOT cancel a draw that is still making progress 2ms
+   ✓ the real asynchronous order of the two modes > waits for the accepted worker before it injects the deliberate failure 2ms
+   ✓ the real asynchronous order of the two modes > does NOT inject when the draw REALLY failed before the worker was accepted 2ms
+   ✓ the real asynchronous order of the two modes > does NOT inject when the GO of this draw never arrives 2ms
+   ✓ the raw cleanup of the draw > is NOT green when the raw settlement carries a cleanup failure 5ms
+   ✓ the raw cleanup of the draw > is NOT a fault when the raw settlement carries a cleanup failure 3ms
+   ✓ the raw cleanup of the draw > is NOT green when the FINAL diagnostic carries cleanup failures 2ms
+   ✓ the ownership of the runtime root > writes NO evidence at all when the root could not be allocated 2ms
+   ✓ the final qualification of a run > commits the final qualification AFTER the report callbacks 2ms
+   ✓ the final qualification of a run > revokes the final qualification when the report destination fails LATE 4ms
+   ✓ the final qualification of a run > is NOT green when the manifest of the artifacts could not be built 2ms
+   ✓ the JOINT publication of a run > publishes the final into the root of the run, and the temporary file is gone 2ms
+   ✓ the JOINT publication of a run > revokes the qualification when the publication fails BEFORE the bytes are written 2ms
+   ✓ the JOINT publication of a run > revokes the qualification when the publication fails AFTER the complete write 2ms
+   ✓ the JOINT publication of a run > is NOT green when a REQUIRED artifact of the manifest carries an error 2ms
+   ✓ the JOINT publication of a run > is NOT green when a REQUIRED artifact is missing from the manifest 1ms
+   ✓ the JOINT publication of a run > is NOT green when the manifest does not name the digest of the candidate that is on the disk 1ms
+   ✓ the JOINT publication of a run > answers 3 when the publication of the run failed 2ms
+   ✓ the JOINT publication of a run > answers 2 for a refusal of the arguments, and 1 for a fault that was really observed 4ms
+   ✓ the JOINT publication of a run > the REAL filesystem: the final is published in the root of the run 9ms
+   ✓ the JOINT publication of a run > a CONSUMER that applies the joint judgement rejects a run whose publication failed 7ms
+   ✓ the JOINT publication of a run > the REAL filesystem: a required record that was not written is not a green case 8ms
+   ✓ the JOINT checker of a published run > accepts a normal run that really succeeded 9ms
+   ✓ the JOINT checker of a published run > accepts the deliberate fault that was really observed 12ms
+   ✓ the JOINT checker of a published run > does NOT accept an ordinary business failure 8ms
+   ✓ the JOINT checker of a published run > does NOT accept a fault that carries an extra failure 8ms
+   ✓ the JOINT checker of a published run > refuses when the final record cannot be read, and it keeps the evidence 8ms
+   ✓ the JOINT checker of a published run > refuses when the candidate cannot be read 8ms
+   ✓ the JOINT checker of a published run > refuses when the helper cannot be read 8ms
+   ✓ the JOINT checker of a published run > refuses when a third listed artifact cannot be read 7ms
+   ✓ the JOINT checker of a published run > refuses when a record is GONE from the root 8ms
+   ✓ the JOINT checker of a published run > refuses a record with a LEGITIMATE digest but another mode 9ms
+   ✓ the JOINT checker of a published run > refuses a record with a LEGITIMATE digest but another protocol 8ms
+   ✓ the JOINT checker of a published run > refuses a record with a LEGITIMATE digest but a broken link 8ms
+   ✓ the JOINT checker of a published run > refuses a record with a LEGITIMATE digest but another number of bytes 8ms
+   ✓ the JOINT checker of a published run > answers 3 from the COMMAND when the evidence cannot be read 8ms
+   ✓ the JOINT checker of a published run > the REAL mapper: a single EIO on a third artifact makes the run unreliable 8ms
+   ✓ the RESULT FACTS of a published run > refuses 'F01 final.kind_of_run deleted' 8ms
+   ✓ the RESULT FACTS of a published run > refuses 'F01 final.kind_of_run wrong type' 8ms
+   ✓ the RESULT FACTS of a published run > refuses 'F01 final.kind_of_run contradicted' 8ms
+   ✓ the RESULT FACTS of a published run > refuses 'F01 final.exit_code deleted' 8ms
+   ✓ the RESULT FACTS of a published run > refuses 'F01 final.exit_code wrong type' 8ms
+   ✓ the RESULT FACTS of a published run > refuses 'F01 final.exit_code contradicted' 7ms
+   ✓ the RESULT FACTS of a published run > refuses 'F01 final.fault_case_passed deleted' 7ms
+   ✓ the RESULT FACTS of a published run > refuses 'F01 final.fault_case_passed wrong type' 7ms
+   ✓ the RESULT FACTS of a published run > refuses 'F01 final.fault_case_passed contradic…' 8ms
+   ✓ the RESULT FACTS of a published run > refuses 'F01 candidate.authoritative deleted' 7ms
+   ✓ the RESULT FACTS of a published run > refuses 'F01 candidate.authoritative wrong type' 7ms
+   ✓ the RESULT FACTS of a published run > refuses 'F01 candidate.authoritative contradic…' 7ms
+   ✓ the RESULT FACTS of a published run > refuses 'F01 final.mode deleted' 7ms
+   ✓ the RESULT FACTS of a published run > refuses 'F01 final.mode wrong type' 8ms
+   ✓ the RESULT FACTS of a published run > refuses 'F01 final.mode contradicted' 8ms
+   ✓ the RESULT FACTS of a published run > refuses 'F02 candidate.original_failure deleted' 8ms
+   ✓ the RESULT FACTS of a published run > refuses 'F02 candidate.original_failure wrong …' 8ms
+   ✓ the RESULT FACTS of a published run > refuses 'F02 candidate.original_failure contra…' 8ms
+   ✓ the RESULT FACTS of a published run > refuses 'F02 final.original_failure deleted' 8ms
+   ✓ the RESULT FACTS of a published run > refuses 'F02 final.original_failure wrong type' 8ms
+   ✓ the RESULT FACTS of a published run > refuses 'F02 final.original_failure contradict…' 8ms
+   ✓ the RESULT FACTS of a published run > refuses 'F03 candidate.settlement_failure dele…' 7ms
+   ✓ the RESULT FACTS of a published run > refuses 'F03 candidate.settlement_failure wron…' 9ms
+   ✓ the RESULT FACTS of a published run > refuses 'F03 candidate.settlement_failure cont…' 8ms
+   ✓ the RESULT FACTS of a published run > refuses 'F03 final.settlement_failure deleted' 7ms
+   ✓ the RESULT FACTS of a published run > refuses 'F03 final.settlement_failure wrong ty…' 7ms
+   ✓ the RESULT FACTS of a published run > refuses 'F03 final.settlement_failure contradi…' 7ms
+   ✓ the RESULT FACTS of a published run > refuses 'F04 candidate.cleanup_facts deleted' 6ms
+   ✓ the RESULT FACTS of a published run > refuses 'F04 candidate.cleanup_facts wrong type' 7ms
+   ✓ the RESULT FACTS of a published run > refuses 'F04 candidate.cleanup_facts contradic…' 7ms
+   ✓ the RESULT FACTS of a published run > refuses 'F04 final.cleanup_facts deleted' 6ms
+   ✓ the RESULT FACTS of a published run > refuses 'F04 final.cleanup_facts wrong type' 7ms
+   ✓ the RESULT FACTS of a published run > refuses 'F04 final.cleanup_facts contradicted' 9ms
+   ✓ the RESULT FACTS of a published run > refuses 'F05 candidate.terminal_proof deleted' 8ms
+   ✓ the RESULT FACTS of a published run > refuses 'F05 candidate.terminal_proof wrong ty…' 7ms
+   ✓ the RESULT FACTS of a published run > refuses 'F05 candidate.terminal_proof contradi…' 8ms
+   ✓ the RESULT FACTS of a published run > refuses 'F05 final.terminal_proof deleted' 8ms
+   ✓ the RESULT FACTS of a published run > refuses 'F05 final.terminal_proof wrong type' 8ms
+   ✓ the RESULT FACTS of a published run > refuses 'F05 final.terminal_proof contradicted' 7ms
+   ✓ the RESULT FACTS of a published run > refuses 'F06 candidate.actual_image deleted' 7ms
+   ✓ the RESULT FACTS of a published run > refuses 'F06 candidate.actual_image wrong type' 8ms
+   ✓ the RESULT FACTS of a published run > refuses 'F06 candidate.actual_image contradict…' 7ms
+   ✓ the RESULT FACTS of a published run > refuses 'F06 final.picture_sha256 deleted' 8ms
+   ✓ the RESULT FACTS of a published run > refuses 'F06 final.picture_sha256 wrong type' 7ms
+   ✓ the RESULT FACTS of a published run > refuses 'F06 final.picture_sha256 contradicted' 7ms
+   ✓ the RESULT FACTS of a published run > refuses 'F06 final.picture_bytes deleted' 7ms
+   ✓ the RESULT FACTS of a published run > refuses 'F06 final.picture_bytes wrong type' 7ms
+   ✓ the RESULT FACTS of a published run > refuses 'F06 final.picture_bytes contradicted' 7ms
+   ✓ the RESULT FACTS of a published run > refuses 'F07 final.diagnostic_snapshot deleted' 7ms
+   ✓ the RESULT FACTS of a published run > refuses 'F07 final.diagnostic_snapshot wrong t…' 8ms
+   ✓ the RESULT FACTS of a published run > refuses 'F07 final.diagnostic_snapshot contrad…' 7ms
+   ✓ the RESULT FACTS of a published run > refuses 'F07 candidate.accumulator_summary del…' 7ms
+   ✓ the RESULT FACTS of a published run > refuses 'F07 candidate.accumulator_summary wro…' 7ms
+   ✓ the RESULT FACTS of a published run > refuses 'F07 candidate.accumulator_summary con…' 8ms
+   ✓ the RESULT FACTS of a published run > refuses 'F07 candidate.terminal_proof_observat…' 7ms
+   ✓ the RESULT FACTS of a published run > refuses 'F07 candidate.terminal_proof_observat…' 6ms
+   ✓ the RESULT FACTS of a published run > refuses 'F07 candidate.terminal_proof_observat…' 6ms
+   ✓ the RESULT FACTS of a published run > refuses 'F08 final.diagnostic_snapshot.cleanup…' 10ms
+   ✓ the RESULT FACTS of a published run > refuses 'F08 final.diagnostic_snapshot.cleanup…' 8ms
+   ✓ the RESULT FACTS of a published run > refuses 'F08 final.diagnostic_snapshot.cleanup…' 7ms
+   ✓ the RESULT FACTS of a published run > refuses 'F08 final.diagnostic_snapshot.transpo…' 7ms
+   ✓ the RESULT FACTS of a published run > refuses 'F08 final.diagnostic_snapshot.transpo…' 7ms
+   ✓ the RESULT FACTS of a published run > refuses 'F08 final.diagnostic_snapshot.transpo…' 9ms
+   ✓ the RESULT FACTS of a published run > refuses 'F08 final.diagnostic_snapshot.latched…' 8ms
+   ✓ the RESULT FACTS of a published run > refuses 'F08 final.diagnostic_snapshot.latched…' 8ms
+   ✓ the RESULT FACTS of a published run > refuses 'F08 final.diagnostic_snapshot.latched…' 8ms
+   ✓ the RESULT FACTS of a published run > refuses 'F09 final.diagnostic_snapshot.cancel_…' 8ms
+   ✓ the RESULT FACTS of a published run > refuses 'F09 final.diagnostic_snapshot.cancel_…' 8ms
+   ✓ the RESULT FACTS of a published run > refuses 'F09 final.diagnostic_snapshot.cancel_…' 7ms
+   ✓ the RESULT FACTS of a published run > refuses 'F01 final.authoritative deleted' 7ms
+   ✓ the RESULT FACTS of a published run > refuses 'F01 final.authoritative wrong type' 7ms
+   ✓ the RESULT FACTS of a published run > refuses 'F01 final.authoritative contradicted' 8ms
+   ✓ the RESULT FACTS of a published run > refuses 'F01 final.publication_protocol deleted' 7ms
+   ✓ the RESULT FACTS of a published run > refuses 'F01 final.publication_protocol wrong …' 7ms
+   ✓ the RESULT FACTS of a published run > refuses 'F01 final.publication_protocol contra…' 7ms
+   ✓ the RESULT FACTS of a published run > refuses 'F01 final.root deleted' 7ms
+   ✓ the RESULT FACTS of a published run > refuses 'F01 final.root wrong type' 7ms
+   ✓ the RESULT FACTS of a published run > refuses 'F01 final.root contradicted' 6ms
+   ✓ the RESULT FACTS of a published run > refuses 'F05 final.diagnostic_snapshot.termina…' 6ms
+   ✓ the RESULT FACTS of a published run > refuses 'F05 final.diagnostic_snapshot.termina…' 6ms
+   ✓ the RESULT FACTS of a published run > refuses 'F05 final.diagnostic_snapshot.termina…' 8ms
+   ✓ the RESULT FACTS of a published run > refuses 'F06 candidate.expected_image deleted' 7ms
+   ✓ the RESULT FACTS of a published run > refuses 'F06 candidate.expected_image wrong ty…' 8ms
+   ✓ the RESULT FACTS of a published run > refuses 'F06 candidate.expected_image contradi…' 7ms
+   ✓ the RESULT FACTS of a published run > refuses 'F07 candidate.receipt_summary deleted' 7ms
+   ✓ the RESULT FACTS of a published run > refuses 'F07 candidate.receipt_summary wrong t…' 7ms
+   ✓ the RESULT FACTS of a published run > refuses 'F07 candidate.receipt_summary contrad…' 8ms
+   ✓ the RESULT FACTS of a published run > refuses 'F08 final.diagnostic_snapshot.cleanup…' 7ms
+   ✓ the RESULT FACTS of a published run > refuses 'F08 final.diagnostic_snapshot.cleanup…' 7ms
+   ✓ the RESULT FACTS of a published run > refuses 'F08 final.diagnostic_snapshot.cleanup…' 8ms
+   ✓ the RESULT FACTS of a published run > refuses 'F09 final.diagnostic_snapshot.cancel_…' 8ms
+   ✓ the RESULT FACTS of a published run > refuses 'F09 final.diagnostic_snapshot.cancel_…' 7ms
+   ✓ the RESULT FACTS of a published run > refuses 'F09 final.diagnostic_snapshot.cancel_…' 7ms
+   ✓ the RESULT FACTS of a published run > refuses 'F10 final.evidence_errors deleted' 7ms
+   ✓ the RESULT FACTS of a published run > refuses 'F10 final.evidence_errors wrong type' 7ms
+   ✓ the RESULT FACTS of a published run > refuses 'F10 final.evidence_errors contradicted' 7ms
+   ✓ the RESULT FACTS of a published run > refuses 'F10 final.reporting_failures deleted' 7ms
+   ✓ the RESULT FACTS of a published run > refuses 'F10 final.reporting_failures wrong ty…' 7ms
+   ✓ the RESULT FACTS of a published run > refuses 'F10 final.reporting_failures contradi…' 7ms
+   ✓ the RESULT FACTS of a published run > refuses 'F09 final.diagnostic_snapshot.cancel_…' 8ms
+   ✓ the RESULT FACTS of a published run > refuses 'F09 final.diagnostic_snapshot.cancel_…' 7ms
+   ✓ the RESULT FACTS of a published run > refuses 'F09 final.diagnostic_snapshot.cancel_…' 7ms
+   ✓ the RESULT FACTS of a published run > refuses 'F09 final.diagnostic_snapshot.cancel_…' 7ms
+   ✓ the RESULT FACTS of a published run > refuses 'F09 final.diagnostic_snapshot.cancel_…' 7ms
+   ✓ the RESULT FACTS of a published run > refuses 'F09 final.diagnostic_snapshot.cancel_…' 8ms
+   ✓ the RESULT FACTS of a published run > refuses a record that says NULL where the run really failed 8ms
+   ✓ the RESULT FACTS of a published run > refuses a candidate that carries a failure, a cleanup and a missing field at once 7ms
+   ✓ the RESULT FACTS of a published run > refuses a final whose diagnostic carries an extra failure 7ms
+   ✓ the RESULT FACTS of a published run > refuses an outcome whose own facts contradict the records 8ms
+   ✓ the RESULT FACTS of a published run > refuses an outcome whose kind, exit and fault flags contradict the records 7ms
+   ✓ the RESULT FACTS of a published run > refuses a fault whose settlement is an unrelated failure 7ms
+   ✓ the RESULT FACTS of a published run > refuses a fault whose ACTUAL settlement is another object with the same text 8ms
+   ✓ the RESULT FACTS of a published run > ACCEPTS a fault whose settlement is the WRAPPER of the original error 10ms
+   ✓ the RESULT FACTS of a published run > keeps an ordinary business failure reliable, not accepted, and at the exit code 1 8ms
+   ✓ the RESULT FACTS of a published run > keeps an ordinary failure of the FAULT mode reliable, not accepted, and at the exit code 1 7ms
+   ✓ the RESULT FACTS of a published run > answers 3 from the COMMAND when a result fact of the candidate is wrong 7ms
+   ✓ the RESULT FACTS of a published run > does NOT change when the snapshot is read again 6ms
+   ✓ the run WITHOUT a root > answers 3 and it writes NOTHING 2ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'candidate.kind' 7ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'candidate.authoritative' 8ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'candidate.mode' 8ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'candidate.root' 8ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'candidate.custodian_sha256' 8ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'candidate.fixture_sha256' 7ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'candidate.copied_fixture_sha256' 7ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'candidate.scenario' 7ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'candidate.expected_image' 7ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'candidate.actual_image' 7ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'candidate.original_failure' 7ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'candidate.settlement_failure' 7ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'candidate.cleanup_facts' 7ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'candidate.terminal_proof' 9ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'candidate.terminal_proof_observations' 7ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'candidate.receipt_summary' 7ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'candidate.accumulator_summary' 7ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'candidate.raw_segments_saved' 8ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'candidate.timeline' 8ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'manifest.kind' 7ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'manifest.authoritative' 7ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'manifest.root' 8ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'manifest.artifacts' 7ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'manifest.listing_error' 7ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'manifest.excluded' 7ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'manifest.exclusion_reason' 7ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'manifest.required_artifacts' 7ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'final.kind' 8ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'final.authoritative' 7ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'final.publication_protocol' 8ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'final.mode' 7ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'final.root' 8ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'final.exit_code' 7ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'final.kind_of_run' 7ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'final.fault_case_passed' 7ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'final.terminal_proof' 7ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'final.picture_sha256' 9ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'final.picture_bytes' 7ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'final.picture_is_the_exact_one' 8ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'final.original_failure' 7ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'final.settlement_failure' 7ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'final.cleanup_facts' 9ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'final.reporting_failure' 8ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'final.reporting_failures' 7ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'final.evidence_errors' 8ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'final.evidence_problems' 9ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'final.manifest_error' 9ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'final.required_artifacts' 7ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'final.candidate_sha256' 7ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'final.candidate_bytes' 10ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'final.manifest_sha256' 8ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'final.manifest_bytes' 8ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'final.terminal_proof_observations' 7ms
+   ✓ the PRESENCE of every published field > refuses the publication without 'final.diagnostic_snapshot' 8ms
+   ✓ the PRESENCE of every published field > refuses a manifest whose artifact row does not carry its error 7ms
+   ✓ the PRESENCE of every published field > refuses a final.reporting_failure that carries a REAL failure 6ms
+   ✓ the PRESENCE of every published field > refuses a manifest.listing_error that carries a REAL failure 7ms
+   ✓ the PRESENCE of every published field > refuses an artifact row that carries a REAL failure 8ms
+   ✓ the run WITHOUT a snapshot > keeps it reliable, not accepted, and at the exit code 1 9ms
+   ✓ the run WITHOUT a snapshot > refuses the run without the snapshot when candidate.receipt_summary is missing 9ms
+   ✓ the run WITHOUT a snapshot > refuses the run without the snapshot when candidate.accumulator_summary is missing 8ms
+   ✓ the run WITHOUT a snapshot > refuses the run without the snapshot when candidate.terminal_proof_observations is missing 7ms
+   ✓ the run WITHOUT a snapshot > refuses the run without the snapshot when final.terminal_proof_observations is missing 10ms
+   ✓ the run WITHOUT a snapshot > refuses the run without the snapshot when candidate.receipt_summary is explicitly undefined 8ms
+   ✓ the run WITHOUT a snapshot > refuses the run without the snapshot when candidate.accumulator_summary is explicitly undefined 7ms
+   ✓ the run WITHOUT a snapshot > refuses the run without the snapshot when candidate.terminal_proof_observations is explicitly undefined 7ms
+   ✓ the run WITHOUT a snapshot > refuses the run without the snapshot when final.terminal_proof_observations is explicitly undefined 8ms
+   ✓ the run WITHOUT a snapshot > refuses the run without the snapshot when candidate.receipt_summary has the wrong type 8ms
+   ✓ the run WITHOUT a snapshot > refuses the run without the snapshot when candidate.accumulator_summary has the wrong type 8ms
+   ✓ the run WITHOUT a snapshot > refuses the run without the snapshot when candidate.terminal_proof_observations has the wrong type 8ms
+   ✓ the run WITHOUT a snapshot > refuses the run without the snapshot when final.terminal_proof_observations has the wrong type 9ms
+   ✓ the run WITHOUT a snapshot > refuses the run without the snapshot when candidate.receipt_summary carries a legal object 8ms
+   ✓ the run WITHOUT a snapshot > refuses the run without the snapshot when candidate.accumulator_summary carries a legal object 8ms
+   ✓ the run WITHOUT a snapshot > refuses the run without the snapshot when candidate.terminal_proof_observations carries a legal object 8ms
+   ✓ the run WITHOUT a snapshot > refuses the run without the snapshot when final.terminal_proof_observations carries a legal object 8ms
+   × the ORCHESTRATION over the ACTUAL supervisor > waits for the REAL asynchronous start of the normal mode, and cancels NOTHING 69ms
+     → expected { segments: 1, received: 1, …(7) } to deeply equal { segments: 1, received: 1, …(7) }
+   ✓ the ORCHESTRATION over the ACTUAL supervisor > waits for the LATE worker of the fault mode before it injects 106ms
+   ✓ the ORDER of the terminal channels of a draw > does NOT send a CANCEL when the finalisation was already authorised 54ms
+   ✓ the ORDER of the terminal channels of a draw > sends the CANCEL and FAILS when the draw ended WITHOUT the finalisation 56ms
+   ✓ the reporting over a REAL destination > revokes the final qualification when the destination fails LATE 4ms
+   ✓ the reporting over a REAL destination > does NOT lose the owner when the destination breaks while the settlement is PENDING 154ms
+   ✓ the command of the positive pilot > answers 2 for arguments it does not take 3ms
+   ✓ the command of the positive pilot > answers 0 for a normal draw that really succeeded 4ms
+   ✓ the command of the positive pilot > answers 1 for the deliberate failure that was really observed 2ms
+   ✓ the digest of the synthetic picture > is the digest of exactly 1024 bytes of 0x4a 0ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/native-cache-normal-pilot.test.ts > the ORCHESTRATION over the ACTUAL supervisor > waits for the REAL asynchronous start of the normal mode, and cancels NOTHING
+AssertionError: expected { segments: 1, received: 1, …(7) } to deeply equal { segments: 1, received: 1, …(7) }
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[33m@@ -5,7 +5,7 @@[39m
+[2m    "identities_digest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",[22m
+[2m    "received": 1,[22m
+[2m    "refused": false,[22m
+[2m    "segments": 1,[22m
+[2m    "waits": 1,[22m
+[32m-   "waits_digest": "ed8e31ae409545cb792e2ee0499e7924f858a75a54f6c09799b49e706a916022",[39m
+[31m+   "waits_digest": "5aec5debdb9dc918f59a1a45c45abaf2ecb575d2c1fee4835756fa40457e05f1",[39m
+[2m  }[22m
+
+ ❯ tests/agent-driven/integration/native-cache-normal-pilot.test.ts:3442:43
+    3440|       readonly accumulator_summary?: Record<string, unknown> | null;
+    3441|     } | null;
+    3442|     expect(snapshot?.accumulator_summary).toEqual({
+       |                                           ^
+    3443|       segments: 1, received: 1, events: 0, waits: 1, identities: 0, re…
+    3444|       // The digests that the ACCUMULATOR really computed: the digest …
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 263 passed (264)
+   Start at  02:33:17
+   Duration  4.68s (transform 308ms, setup 0ms, collect 422ms, tests 2.16s, environment 0ms, prepare 1.34s)
+

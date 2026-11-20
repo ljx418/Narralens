@@ -4,8 +4,10 @@ import type {ChildProcess} from 'node:child_process';
 import {posix} from 'node:path';
 import type {CommittedSnapshotAuthority,VerifiedNativeFacts,VerifiedNativeFactsLease} from './committed-snapshot-authority.js';
 import type {CreatedNativeWorkspaceService,NativeWorkspaceLease} from './created-native-workspace.js';
+import type {NativeCacheWitness} from './native-cache-witness.js';
 import {RetainedNativeClosure,RetainedDescriptorBudget,RETAINED_NATIVE_BUDGET,mergeRetainedCleanupCauses,retainedCleanupFailures,markRetainedCleanupFailures} from './retained-native-closure.js';
 import type {RetainedNativeDescriptorOps,RetainedDescriptorPool,RetainedNativeFile} from './retained-native-closure.js';
+import {cacheProductionRootState} from '../../adapters/openfilm/cache-production-scope.js';
 import {computeNativeEffectiveSidecars,NATIVE_SIDECARS_UPSTREAM} from '../m5/native-effective-sidecars.js';
 import type {NativeSidecarInputs,NativeSidecarResult} from '../m5/native-effective-sidecars.js';
 import type {
@@ -565,6 +567,15 @@ export class CreatedNativeSourceReader implements NativeExpectedSourcePort {
    if(this.#closed)refuse('NATIVE_SOURCE_READER_CLOSED','The native source reader was closed while it was reading');
    if(workspaceLease.generation!==baseline.instance_generation)refuse('NATIVE_SOURCE_GENERATION_STALE','The native workspace generation moved');
    if(workspaceLease.assertCurrent()!==true)refuse('NATIVE_SOURCE_WORKSPACE_STALE','The native workspace view is no longer current');
+   // The working copy this read is about has to be QUIET.
+   //
+   // The query is about THAT physical root and about nothing else: a production of
+   // another root does not make this read stale, and a production of this root
+   // does. A root that is being produced into - or one whose production could not
+   // be proven to have ended - may still change under the reader's feet, and the
+   // generic production lease of the view does NOT become stale because of it: the
+   // lease says that the VIEW is current, this says that the TREE is quiet.
+   if(cacheProductionRootState(workspaceLease.root)!=='idle')refuse('NATIVE_SOURCE_ROOT_BUSY','The native working copy is being produced into');
 
    // The committed facts of that very transaction, and the retained source tree.
    // The wait cannot be cancelled, so a close ends it: a result that arrives after
@@ -664,6 +675,10 @@ export class CreatedNativeSourceReader implements NativeExpectedSourcePort {
    if(workspaceLease.assertCurrent()!==true)refuse('NATIVE_SOURCE_WORKSPACE_STALE','The native workspace view is no longer current');
    if(this.#closed)refuse('NATIVE_SOURCE_READER_CLOSED','The native source reader was closed while it was reading');
    if(this.#cleanupUncertain)refuse('NATIVE_SOURCE_READER_UNCERTAIN','The native source reader cannot say what it holds');
+   // The root is checked at the LAST moment as well: a production may have started
+   // on this very root while the read was running, and the facts of the tree the
+   // read speaks about would then be about a tree that is being written.
+   if(cacheProductionRootState(workspaceLease.root)!=='idle')refuse('NATIVE_SOURCE_ROOT_BUSY','The native working copy is being produced into');
    // From now on the resources are the owner's: the reader does not close them.
    owned.delivered=true;
    return read;
@@ -1202,27 +1217,18 @@ export class CreatedNativeSourceReader implements NativeExpectedSourcePort {
     refuse('NATIVE_SOURCE_CACHE_FORGED','A probe cache entry does not match an independent probe of the same bytes');
    return;
   }
-  const poster=relative.match(/^posters\/([0-9a-f]{20})\.jpg$/);
-  if(poster){
-   if(!mediaKeys.has(poster[1]!))refuse('NATIVE_SOURCE_CACHE_UNBOUND','A poster cache entry is not bound to a media file of this project');
-   return;
-  }
-  const frame=relative.match(/^frames\/([0-9a-f]{20})-(\d+)-(\d+)\.jpg$/);
-  if(frame){
-   if(!mediaKeys.has(frame[1]!))refuse('NATIVE_SOURCE_CACHE_UNBOUND','A frame cache entry is not bound to a media file of this project');
-   const width=Number(frame[3]);
-   if(!Number.isInteger(width)||width<32||width>640||width%2!==0)refuse('NATIVE_SOURCE_CACHE_MALFORMED','A frame cache entry has a width the native does not draw');
-   return;
-  }
-  const wave=relative.match(/^waves\/([0-9a-f]{20})\.json$/);
-  if(wave){
-   if(!mediaKeys.has(wave[1]!))refuse('NATIVE_SOURCE_CACHE_UNBOUND','A wave cache entry is not bound to a media file of this project');
-   const text=await closure.readText(file);
-   let cached:unknown;
-   try{cached=JSON.parse(text);}catch{refuse('NATIVE_SOURCE_CACHE_MALFORMED','A wave cache entry is not JSON');}
-   if(!cached||typeof cached!=='object')refuse('NATIVE_SOURCE_CACHE_MALFORMED','A wave cache entry is not an object');
-   return;
-  }
+  // The MEDIA families of the native's cache that the FIXED producer this Host issues
+  // does NOT write: the posters, the frames and the waves are written by the
+  // upstream's own media tool chain, which is not pinned here and has no witness in
+  // this Host. A file of one of these families is therefore NOT admitted on its
+  // name and its shape: it is refused, and it is refused as what it is - a family
+  // this Host cannot prove.
+  //
+  // The families the fixed producer DOES write keep their own proof, unchanged: the
+  // probe (compared field by field with the reader's own probe), the page frame
+  // triple and the film poster (the witness of the draw that wrote them).
+  if(/^posters\//.test(relative)||/^frames\//.test(relative)||/^waves\//.test(relative))
+   refuse('NATIVE_SOURCE_CACHE_FAMILY_UNSUPPORTED','This native cache family is not produced by the fixed producer this Host issues');
   if(relative==='film-duration.json'){
    const text=await closure.readText(file);
    let cached:unknown;
@@ -1244,6 +1250,13 @@ export class CreatedNativeSourceReader implements NativeExpectedSourcePort {
     refuse('NATIVE_SOURCE_CACHE_FORGED','The film duration cache entry is not the output the witness is about');
    if(record.film!==`${film.mtime_ms}:${film.bytes}`)refuse('NATIVE_SOURCE_CACHE_STALE','The film duration cache entry is not about this film');
    if(typeof record.duration!=='number'||!Number.isFinite(record.duration))refuse('NATIVE_SOURCE_CACHE_MALFORMED','The film duration cache entry has no usable duration');
+   // The DEPENDENCIES of this draw are checked as well: the film the duration is
+   // about must be the very film the witness read. The triple of that draw is NOT
+   // required to be on the disk - it is another cache family - but the files the
+   // draw READ are, and their identity is the whole one: a file that was changed
+   // and written back keeps its bytes and its change time of its content, and
+   // changes the change time of its inode.
+   this.#proveWitnessDependencies(witness,files);
    return;
   }
   if(relative==='film-poster.jpg'){
@@ -1324,6 +1337,24 @@ export class CreatedNativeSourceReader implements NativeExpectedSourcePort {
   }
   // Every dependency the producer read must be a retained file of this copy, with
   // the very identity the witness saw.
+  this.#proveWitnessDependencies(witness,files);
+ }
+ /** The dependencies of a witness, checked against this copy.
+  *
+  * The witness is a HISTORICAL fact: it says what the producer read, and what those
+  * files were, when it read them. A fresh closure only proves the state of the tree
+  * NOW; it never repairs a historical witness. So every file the draw read must
+  * still be here, with the WHOLE identity the witness saw: the same digest, the
+  * same size, the same device, the same inode, the same nanosecond change times
+  * and the same number of names.
+  *
+  * The page frame triple and the film poster share this check: they are the
+  * outputs of a draw whose dependencies are the files it read. The FILM DURATION
+  * shares it as well - it is the output of the draw of the film's own page, and
+  * the film it is about is one of the files that draw read. What is NOT required
+  * is that the unrelated outputs of that draw are still on the disk: they are
+  * other cache families, and their absence says nothing about this one. */
+ #proveWitnessDependencies(witness:NativeCacheWitness,files:Map<string,RetainedNativeFile>):void{
   for(const dependency of witness.dependencies){
    const retained=files.get(dependency.path);
    if(retained===undefined)refuse('NATIVE_SOURCE_CACHE_UNPROVEN','A file the native cache entry depends on is not retained');

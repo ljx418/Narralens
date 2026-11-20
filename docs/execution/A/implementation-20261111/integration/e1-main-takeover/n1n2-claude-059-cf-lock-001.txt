@@ -1,0 +1,287 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+ ❯ tests/m2.1/openfilm-upstream-lock.test.ts (60 tests | 47 failed) 376ms
+   ✓ M-04 pinned OpenFilm checkout verification > pins every file the loader is about to execute, plus package, lock and licence 1ms
+   ✓ M-04 pinned OpenFilm checkout verification > keeps the production lock consistent with the M1B recorded upstream lock 0ms
+   ✓ M-04 pinned OpenFilm checkout verification > refuses a checkout with no git HEAD 5ms
+   ✓ M-04 pinned OpenFilm checkout verification > fails closed when git status cannot be executed 8ms
+   ✓ M-04 pinned OpenFilm checkout verification > fails closed when git status exits non-zero 7ms
+   ✓ M-04 pinned OpenFilm checkout verification > fails closed when git status times out 16ms
+   ✓ M-04 pinned OpenFilm checkout verification > uses a 30 second production default without weakening an explicit fail-closed budget 3ms
+   ✓ M-04 pinned OpenFilm checkout verification > rejects a tracked dirty checkout and records git_clean only after a successful check 14ms
+   ✓ M-04 pinned OpenFilm checkout verification > refuses when the seam module was tampered with 6ms
+   ✓ M-04 pinned OpenFilm checkout verification > refuses when any other loaded module, package, lock or licence changes 28ms
+   ✓ M-04 pinned OpenFilm checkout verification > reports a missing pinned file as missing rather than as a digest mismatch 5ms
+   ✓ M-04 pinned OpenFilm checkout verification > refuses to load rather than loading a module whose digest does not match 4ms
+   ✓ M-04 pinned OpenFilm checkout verification > refuses a caller-forged reusable verification verdict 4ms
+   × M-04 pinned OpenFilm checkout verification > never lets a caller supply the vendor path through a request 37ms
+     → vendorRegistryNames is not defined
+   × M-04 pinned OpenFilm checkout verification > derives the entry points of a module from its OWN capability flow 1ms
+     → vendorRegistryNames is not defined
+   × M-04 pinned OpenFilm checkout verification > follows an alias of the issued capability through the transparent wrappers 1ms
+     → vendorRegistryNames is not defined
+   × M-04 pinned OpenFilm checkout verification > the vendor-path rule detects a request header 16ms
+     → vendorRegistryNames is not defined
+   × M-04 pinned OpenFilm checkout verification > the vendor-path rule detects a request body 8ms
+     → vendorRegistryNames is not defined
+   × M-04 pinned OpenFilm checkout verification > the vendor-path rule detects an alias of a request 9ms
+     → vendorRegistryNames is not defined
+   × M-04 pinned OpenFilm checkout verification > the vendor-path rule detects a renamed request parameter 7ms
+     → vendorRegistryNames is not defined
+   × M-04 pinned OpenFilm checkout verification > the vendor-path rule detects a helper that was handed the request 6ms
+     → vendorRegistryNames is not defined
+   × M-04 pinned OpenFilm checkout verification > the vendor-path rule detects a helper that receives the value in its own parameter 8ms
+     → vendorRegistryNames is not defined
+   × M-04 pinned OpenFilm checkout verification > the vendor-path rule detects the same export under a renamed import 6ms
+     → vendorRegistryNames is not defined
+   × M-04 pinned OpenFilm checkout verification > the vendor-path rule detects the same export through a namespace import 6ms
+     → vendorRegistryNames is not defined
+   × M-04 pinned OpenFilm checkout verification > the vendor-path rule detects the producer position of the serving owner 5ms
+     → vendorRegistryNames is not defined
+   × M-04 pinned OpenFilm checkout verification > the vendor-path rule detects the producer position of the bridge 6ms
+     → vendorRegistryNames is not defined
+   × M-04 pinned OpenFilm checkout verification > the vendor-path rule detects a request wrapped in an assertion 5ms
+     → vendorRegistryNames is not defined
+   × M-04 pinned OpenFilm checkout verification > the vendor-path rule detects a request wrapped in parentheses 6ms
+     → vendorRegistryNames is not defined
+   × M-04 pinned OpenFilm checkout verification > the vendor-path rule accepts the composition-time value 5ms
+     → vendorRegistryNames is not defined
+   × M-04 pinned OpenFilm checkout verification > the vendor-path rule accepts a file that never reaches the loader 5ms
+     → vendorRegistryNames is not defined
+   × M-04 pinned OpenFilm checkout verification > the vendor-path rule accepts a same-named parameter that is trusted 4ms
+     → vendorRegistryNames is not defined
+   × M-04 pinned OpenFilm checkout verification > the vendor-path rule accepts a wrapped composition-time value 4ms
+     → vendorRegistryNames is not defined
+   × M-04 pinned OpenFilm checkout verification > the vendor-path rule accepts a wrapped same-named parameter that is trusted 5ms
+     → vendorRegistryNames is not defined
+   × M-04 pinned OpenFilm checkout verification > detects the loader module's own local call with a request-derived value 5ms
+     → vendorRegistryNames is not defined
+   × M-04 pinned OpenFilm checkout verification > does not mistake a same-named parameter for a vendor path 0ms
+     → vendorRegistryNames is not defined
+   × M-04 pinned OpenFilm checkout verification > the vendor-path rule detects a request in a class method 4ms
+     → vendorRegistryNames is not defined
+   × M-04 pinned OpenFilm checkout verification > the vendor-path rule detects a request in a constructor 5ms
+     → vendorRegistryNames is not defined
+   × M-04 pinned OpenFilm checkout verification > the vendor-path rule detects a request in a top level arrow 5ms
+     → vendorRegistryNames is not defined
+   × M-04 pinned OpenFilm checkout verification > the vendor-path rule detects a request in a top level function expression 5ms
+     → vendorRegistryNames is not defined
+   × M-04 pinned OpenFilm checkout verification > the vendor-path rule detects a request in an arrow inside a class method 4ms
+     → vendorRegistryNames is not defined
+   × M-04 pinned OpenFilm checkout verification > the vendor-path rule detects a request in an object literal method 5ms
+     → vendorRegistryNames is not defined
+   × M-04 pinned OpenFilm checkout verification > the vendor-path rule detects a request in a class property initializer 4ms
+     → vendorRegistryNames is not defined
+   × M-04 pinned OpenFilm checkout verification > the vendor-path rule detects a request in a static block that reads a request the module really holds 5ms
+     → vendorRegistryNames is not defined
+   × M-04 pinned OpenFilm checkout verification > the vendor-path rule detects a request in a helper called from a class method 4ms
+     → vendorRegistryNames is not defined
+   × M-04 pinned OpenFilm checkout verification > the vendor-path rule detects a request in a helper that is an arrow 4ms
+     → vendorRegistryNames is not defined
+   × M-04 pinned OpenFilm checkout verification > the vendor-path rule detects a request in a serving owner built in a class method 5ms
+     → vendorRegistryNames is not defined
+   × M-04 pinned OpenFilm checkout verification > the vendor-path rule detects a request in a bridge drawn in a class method 5ms
+     → vendorRegistryNames is not defined
+   × M-04 pinned OpenFilm checkout verification > the vendor-path rule detects a request in the default value of a parameter 4ms
+     → vendorRegistryNames is not defined
+   × M-04 pinned OpenFilm checkout verification > the vendor-path rule detects a request in the default value of a parameter of a method 5ms
+     → vendorRegistryNames is not defined
+   × M-04 pinned OpenFilm checkout verification > the vendor-path rule detects a request in a computed name of a member 4ms
+     → vendorRegistryNames is not defined
+   × M-04 pinned OpenFilm checkout verification > the vendor-path rule detects a request in a method of this class, called through this 4ms
+     → vendorRegistryNames is not defined
+   × M-04 pinned OpenFilm checkout verification > the vendor-path rule accepts a class method with a string parameter 6ms
+     → vendorRegistryNames is not defined
+   × M-04 pinned OpenFilm checkout verification > the vendor-path rule accepts a same named parameter that is not a request 7ms
+     → vendorRegistryNames is not defined
+   × M-04 pinned OpenFilm checkout verification > the vendor-path rule accepts a parameter that shadows a request of an outer scope 4ms
+     → vendorRegistryNames is not defined
+   × M-04 pinned OpenFilm checkout verification > the vendor-path rule accepts a static block with no request in it 4ms
+     → vendorRegistryNames is not defined
+   × M-04 pinned OpenFilm checkout verification > the vendor-path rule accepts an unrelated class 4ms
+     → vendorRegistryNames is not defined
+   × M-04 pinned OpenFilm checkout verification > the vendor-path rule accepts a default value that holds no request 4ms
+     → vendorRegistryNames is not defined
+   × M-04 pinned OpenFilm checkout verification > the vendor-path rule accepts a computed name in a scope that holds no request 4ms
+     → vendorRegistryNames is not defined
+   × M-04 pinned OpenFilm checkout verification > the vendor-path rule accepts a method of this class, called with a value that is not a request 6ms
+     → vendorRegistryNames is not defined
+   × M-04 pinned OpenFilm checkout verification > enumerates the loader call sites of the Host, one by one 4ms
+     → vendorRegistryNames is not defined
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 47 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/m2.1/openfilm-upstream-lock.test.ts > M-04 pinned OpenFilm checkout verification > never lets a caller supply the vendor path through a request
+ReferenceError: vendorRegistryNames is not defined
+ ❯ vendorEntries tests/m2.1/openfilm-upstream-lock.test.ts:255:22
+    253| function vendorEntries(text: string): VendorEntry[] {
+    254|   const tree = parseSource(text, "vendor-entry-points.ts");
+    255|   const registries = vendorRegistryNames(tree);
+       |                      ^
+    256|   const producers = issuedProducerRegistryNames(tree, registries);
+    257|   const found: VendorEntry[] = [];
+ ❯ tests/m2.1/openfilm-upstream-lock.test.ts:716:21
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/47]⎯
+
+ FAIL  tests/m2.1/openfilm-upstream-lock.test.ts > M-04 pinned OpenFilm checkout verification > derives the entry points of a module from its OWN capability flow
+ReferenceError: vendorRegistryNames is not defined
+ ❯ vendorEntries tests/m2.1/openfilm-upstream-lock.test.ts:255:22
+    253| function vendorEntries(text: string): VendorEntry[] {
+    254|   const tree = parseSource(text, "vendor-entry-points.ts");
+    255|   const registries = vendorRegistryNames(tree);
+       |                      ^
+    256|   const producers = issuedProducerRegistryNames(tree, registries);
+    257|   const found: VendorEntry[] = [];
+ ❯ tests/m2.1/openfilm-upstream-lock.test.ts:748:31
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/47]⎯
+
+ FAIL  tests/m2.1/openfilm-upstream-lock.test.ts > M-04 pinned OpenFilm checkout verification > follows an alias of the issued capability through the transparent wrappers
+ReferenceError: vendorRegistryNames is not defined
+ ❯ vendorEntries tests/m2.1/openfilm-upstream-lock.test.ts:255:22
+    253| function vendorEntries(text: string): VendorEntry[] {
+    254|   const tree = parseSource(text, "vendor-entry-points.ts");
+    255|   const registries = vendorRegistryNames(tree);
+       |                      ^
+    256|   const producers = issuedProducerRegistryNames(tree, registries);
+    257|   const found: VendorEntry[] = [];
+ ❯ tests/m2.1/openfilm-upstream-lock.test.ts:780:40
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/47]⎯
+
+ FAIL  tests/m2.1/openfilm-upstream-lock.test.ts > M-04 pinned OpenFilm checkout verification > the vendor-path rule detects a request header
+ FAIL  tests/m2.1/openfilm-upstream-lock.test.ts > M-04 pinned OpenFilm checkout verification > the vendor-path rule detects a request body
+ FAIL  tests/m2.1/openfilm-upstream-lock.test.ts > M-04 pinned OpenFilm checkout verification > the vendor-path rule detects an alias of a request
+ FAIL  tests/m2.1/openfilm-upstream-lock.test.ts > M-04 pinned OpenFilm checkout verification > the vendor-path rule detects a renamed request parameter
+ FAIL  tests/m2.1/openfilm-upstream-lock.test.ts > M-04 pinned OpenFilm checkout verification > the vendor-path rule detects a helper that was handed the request
+ FAIL  tests/m2.1/openfilm-upstream-lock.test.ts > M-04 pinned OpenFilm checkout verification > the vendor-path rule detects a helper that receives the value in its own parameter
+ FAIL  tests/m2.1/openfilm-upstream-lock.test.ts > M-04 pinned OpenFilm checkout verification > the vendor-path rule detects the same export under a renamed import
+ FAIL  tests/m2.1/openfilm-upstream-lock.test.ts > M-04 pinned OpenFilm checkout verification > the vendor-path rule detects the same export through a namespace import
+ FAIL  tests/m2.1/openfilm-upstream-lock.test.ts > M-04 pinned OpenFilm checkout verification > the vendor-path rule detects the producer position of the serving owner
+ FAIL  tests/m2.1/openfilm-upstream-lock.test.ts > M-04 pinned OpenFilm checkout verification > the vendor-path rule detects the producer position of the bridge
+ FAIL  tests/m2.1/openfilm-upstream-lock.test.ts > M-04 pinned OpenFilm checkout verification > the vendor-path rule detects a request wrapped in an assertion
+ FAIL  tests/m2.1/openfilm-upstream-lock.test.ts > M-04 pinned OpenFilm checkout verification > the vendor-path rule detects a request wrapped in parentheses
+ReferenceError: vendorRegistryNames is not defined
+ ❯ vendorEntries tests/m2.1/openfilm-upstream-lock.test.ts:255:22
+    253| function vendorEntries(text: string): VendorEntry[] {
+    254|   const tree = parseSource(text, "vendor-entry-points.ts");
+    255|   const registries = vendorRegistryNames(tree);
+       |                      ^
+    256|   const producers = issuedProducerRegistryNames(tree, registries);
+    257|   const found: VendorEntry[] = [];
+ ❯ tests/m2.1/openfilm-upstream-lock.test.ts:810:75
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/47]⎯
+
+ FAIL  tests/m2.1/openfilm-upstream-lock.test.ts > M-04 pinned OpenFilm checkout verification > the vendor-path rule accepts the composition-time value
+ FAIL  tests/m2.1/openfilm-upstream-lock.test.ts > M-04 pinned OpenFilm checkout verification > the vendor-path rule accepts a file that never reaches the loader
+ FAIL  tests/m2.1/openfilm-upstream-lock.test.ts > M-04 pinned OpenFilm checkout verification > the vendor-path rule accepts a same-named parameter that is trusted
+ FAIL  tests/m2.1/openfilm-upstream-lock.test.ts > M-04 pinned OpenFilm checkout verification > the vendor-path rule accepts a wrapped composition-time value
+ FAIL  tests/m2.1/openfilm-upstream-lock.test.ts > M-04 pinned OpenFilm checkout verification > the vendor-path rule accepts a wrapped same-named parameter that is trusted
+ReferenceError: vendorRegistryNames is not defined
+ ❯ vendorEntries tests/m2.1/openfilm-upstream-lock.test.ts:255:22
+    253| function vendorEntries(text: string): VendorEntry[] {
+    254|   const tree = parseSource(text, "vendor-entry-points.ts");
+    255|   const registries = vendorRegistryNames(tree);
+       |                      ^
+    256|   const producers = issuedProducerRegistryNames(tree, registries);
+    257|   const found: VendorEntry[] = [];
+ ❯ tests/m2.1/openfilm-upstream-lock.test.ts:825:75
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/47]⎯
+
+ FAIL  tests/m2.1/openfilm-upstream-lock.test.ts > M-04 pinned OpenFilm checkout verification > detects the loader module's own local call with a request-derived value
+ReferenceError: vendorRegistryNames is not defined
+ ❯ vendorEntries tests/m2.1/openfilm-upstream-lock.test.ts:255:22
+    253| function vendorEntries(text: string): VendorEntry[] {
+    254|   const tree = parseSource(text, "vendor-entry-points.ts");
+    255|   const registries = vendorRegistryNames(tree);
+       |                      ^
+    256|   const producers = issuedProducerRegistryNames(tree, registries);
+    257|   const found: VendorEntry[] = [];
+ ❯ tests/m2.1/openfilm-upstream-lock.test.ts:835:75
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/47]⎯
+
+ FAIL  tests/m2.1/openfilm-upstream-lock.test.ts > M-04 pinned OpenFilm checkout verification > does not mistake a same-named parameter for a vendor path
+ReferenceError: vendorRegistryNames is not defined
+ ❯ vendorEntries tests/m2.1/openfilm-upstream-lock.test.ts:255:22
+    253| function vendorEntries(text: string): VendorEntry[] {
+    254|   const tree = parseSource(text, "vendor-entry-points.ts");
+    255|   const registries = vendorRegistryNames(tree);
+       |                      ^
+    256|   const producers = issuedProducerRegistryNames(tree, registries);
+    257|   const found: VendorEntry[] = [];
+ ❯ tests/m2.1/openfilm-upstream-lock.test.ts:843:12
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/47]⎯
+
+ FAIL  tests/m2.1/openfilm-upstream-lock.test.ts > M-04 pinned OpenFilm checkout verification > the vendor-path rule detects a request in a class method
+ FAIL  tests/m2.1/openfilm-upstream-lock.test.ts > M-04 pinned OpenFilm checkout verification > the vendor-path rule detects a request in a constructor
+ FAIL  tests/m2.1/openfilm-upstream-lock.test.ts > M-04 pinned OpenFilm checkout verification > the vendor-path rule detects a request in a top level arrow
+ FAIL  tests/m2.1/openfilm-upstream-lock.test.ts > M-04 pinned OpenFilm checkout verification > the vendor-path rule detects a request in a top level function expression
+ FAIL  tests/m2.1/openfilm-upstream-lock.test.ts > M-04 pinned OpenFilm checkout verification > the vendor-path rule detects a request in an arrow inside a class method
+ FAIL  tests/m2.1/openfilm-upstream-lock.test.ts > M-04 pinned OpenFilm checkout verification > the vendor-path rule detects a request in an object literal method
+ FAIL  tests/m2.1/openfilm-upstream-lock.test.ts > M-04 pinned OpenFilm checkout verification > the vendor-path rule detects a request in a class property initializer
+ FAIL  tests/m2.1/openfilm-upstream-lock.test.ts > M-04 pinned OpenFilm checkout verification > the vendor-path rule detects a request in a static block that reads a request the module really holds
+ FAIL  tests/m2.1/openfilm-upstream-lock.test.ts > M-04 pinned OpenFilm checkout verification > the vendor-path rule detects a request in a helper called from a class method
+ FAIL  tests/m2.1/openfilm-upstream-lock.test.ts > M-04 pinned OpenFilm checkout verification > the vendor-path rule detects a request in a helper that is an arrow
+ FAIL  tests/m2.1/openfilm-upstream-lock.test.ts > M-04 pinned OpenFilm checkout verification > the vendor-path rule detects a request in a serving owner built in a class method
+ FAIL  tests/m2.1/openfilm-upstream-lock.test.ts > M-04 pinned OpenFilm checkout verification > the vendor-path rule detects a request in a bridge drawn in a class method
+ FAIL  tests/m2.1/openfilm-upstream-lock.test.ts > M-04 pinned OpenFilm checkout verification > the vendor-path rule detects a request in the default value of a parameter
+ FAIL  tests/m2.1/openfilm-upstream-lock.test.ts > M-04 pinned OpenFilm checkout verification > the vendor-path rule detects a request in the default value of a parameter of a method
+ FAIL  tests/m2.1/openfilm-upstream-lock.test.ts > M-04 pinned OpenFilm checkout verification > the vendor-path rule detects a request in a computed name of a member
+ FAIL  tests/m2.1/openfilm-upstream-lock.test.ts > M-04 pinned OpenFilm checkout verification > the vendor-path rule detects a request in a method of this class, called through this
+ReferenceError: vendorRegistryNames is not defined
+ ❯ vendorEntries tests/m2.1/openfilm-upstream-lock.test.ts:255:22
+    253| function vendorEntries(text: string): VendorEntry[] {
+    254|   const tree = parseSource(text, "vendor-entry-points.ts");
+    255|   const registries = vendorRegistryNames(tree);
+       |                      ^
+    256|   const producers = issuedProducerRegistryNames(tree, registries);
+    257|   const found: VendorEntry[] = [];
+ ❯ tests/m2.1/openfilm-upstream-lock.test.ts:878:75
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/47]⎯
+
+ FAIL  tests/m2.1/openfilm-upstream-lock.test.ts > M-04 pinned OpenFilm checkout verification > the vendor-path rule accepts a class method with a string parameter
+ FAIL  tests/m2.1/openfilm-upstream-lock.test.ts > M-04 pinned OpenFilm checkout verification > the vendor-path rule accepts a same named parameter that is not a request
+ FAIL  tests/m2.1/openfilm-upstream-lock.test.ts > M-04 pinned OpenFilm checkout verification > the vendor-path rule accepts a parameter that shadows a request of an outer scope
+ FAIL  tests/m2.1/openfilm-upstream-lock.test.ts > M-04 pinned OpenFilm checkout verification > the vendor-path rule accepts a static block with no request in it
+ FAIL  tests/m2.1/openfilm-upstream-lock.test.ts > M-04 pinned OpenFilm checkout verification > the vendor-path rule accepts an unrelated class
+ FAIL  tests/m2.1/openfilm-upstream-lock.test.ts > M-04 pinned OpenFilm checkout verification > the vendor-path rule accepts a default value that holds no request
+ FAIL  tests/m2.1/openfilm-upstream-lock.test.ts > M-04 pinned OpenFilm checkout verification > the vendor-path rule accepts a computed name in a scope that holds no request
+ FAIL  tests/m2.1/openfilm-upstream-lock.test.ts > M-04 pinned OpenFilm checkout verification > the vendor-path rule accepts a method of this class, called with a value that is not a request
+ReferenceError: vendorRegistryNames is not defined
+ ❯ vendorEntries tests/m2.1/openfilm-upstream-lock.test.ts:255:22
+    253| function vendorEntries(text: string): VendorEntry[] {
+    254|   const tree = parseSource(text, "vendor-entry-points.ts");
+    255|   const registries = vendorRegistryNames(tree);
+       |                      ^
+    256|   const producers = issuedProducerRegistryNames(tree, registries);
+    257|   const found: VendorEntry[] = [];
+ ❯ tests/m2.1/openfilm-upstream-lock.test.ts:904:75
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/47]⎯
+
+ FAIL  tests/m2.1/openfilm-upstream-lock.test.ts > M-04 pinned OpenFilm checkout verification > enumerates the loader call sites of the Host, one by one
+ReferenceError: vendorRegistryNames is not defined
+ ❯ vendorEntries tests/m2.1/openfilm-upstream-lock.test.ts:255:22
+    253| function vendorEntries(text: string): VendorEntry[] {
+    254|   const tree = parseSource(text, "vendor-entry-points.ts");
+    255|   const registries = vendorRegistryNames(tree);
+       |                      ^
+    256|   const producers = issuedProducerRegistryNames(tree, registries);
+    257|   const found: VendorEntry[] = [];
+ ❯ tests/m2.1/openfilm-upstream-lock.test.ts:920:21
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/47]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  47 failed | 13 passed (60)
+   Start at  11:24:44
+   Duration  3.99s (transform 116ms, setup 0ms, collect 611ms, tests 376ms, environment 0ms, prepare 1.27s)
+

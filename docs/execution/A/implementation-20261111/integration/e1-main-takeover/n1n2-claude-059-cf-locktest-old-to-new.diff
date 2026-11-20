@@ -1,0 +1,398 @@
+4c4
+< import { join, resolve } from "node:path";
+---
+> import { join, relative, resolve, sep } from "node:path";
+131a132,147
+> /**
+>  * The source of a file, parsed the way the file itself is written.
+>  *
+>  * A `.ts` file is parsed as TypeScript and a `.tsx` file as TypeScript with JSX:
+>  * a `.ts` file parsed as TSX reads a `<` as the start of a JSX element, and the
+>  * whole rest of the file - a class with all its methods - is then swallowed by
+>  * that element and never visited at all.
+>  */
+> /**
+>  * The source of a file, parsed the way the file itself is written.
+>  *
+>  * A `.ts` file is parsed as TypeScript and a `.tsx` file as TypeScript with JSX:
+>  * a `.ts` file parsed as TSX reads a `<` as the start of a JSX element, and the
+>  * whole rest of the file - a class with all its methods - is then swallowed by
+>  * that element and never visited at all.
+>  */
+133c149,150
+<   ts.createSourceFile(name, text, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+---
+>   ts.createSourceFile(name, text, ts.ScriptTarget.Latest, true,
+>     name.endsWith(".tsx") ? ts.ScriptKind.TSX : ts.ScriptKind.TS);
+306c323
+<  * One lexical scope: a function body, or the module's top level.
+---
+>  * One lexical scope: a function body, a class body, or the module's top level.
+314a332,333
+>   /** What this scope is: the module, a function, or a class body. */
+>   readonly kind: "module" | "function" | "class";
+323a343,371
+> /**
+>  * The nodes that open a scope of their own.
+>  *
+>  * A method, a constructor, an accessor, an arrow and a function expression all
+>  * hold their own parameters: they are scopes, exactly like a function declaration
+>  * is. The rule that follows a request into the Host's own code has to see them all
+>  * - a class method is not "the top level of the file" just because the file has
+>  * no function declaration around it.
+>  */
+> function isFunctionLike(node: ts.Node): node is ts.FunctionLikeDeclaration {
+>   return ts.isFunctionDeclaration(node) || ts.isFunctionExpression(node) || ts.isArrowFunction(node)
+>     || ts.isMethodDeclaration(node) || ts.isConstructorDeclaration(node)
+>     || ts.isGetAccessorDeclaration(node) || ts.isSetAccessorDeclaration(node);
+> }
+> 
+> /**
+>  * The function a call really reaches.
+>  *
+>  * It is the declaration itself when the declaration IS a function, and the
+>  * function a variable holds when the name is a variable: `const helper = (root) =>
+>  * …` is a helper with a parameter, and the rule has to see that parameter.
+>  */
+> function callableOf(declaration: ts.Node): ts.FunctionLikeDeclaration | undefined {
+>   if (isFunctionLike(declaration)) return declaration;
+>   if (ts.isVariableDeclaration(declaration) && declaration.initializer !== undefined
+>     && isFunctionLike(declaration.initializer)) return declaration.initializer;
+>   return undefined;
+> }
+> 
+325c373
+<   const module: LexicalScope = { parent: undefined, locals: new Map() };
+---
+>   const module: LexicalScope = { parent: undefined, locals: new Map(), kind: "module" };
+331,339c379,381
+<   for (const statement of tree.statements) {
+<     if (ts.isVariableStatement(statement))
+<       for (const declaration of statement.declarationList.declarations)
+<         if (ts.isIdentifier(declaration.name)) bind(module, declaration.name.text, declaration);
+<     if (ts.isFunctionDeclaration(statement) && statement.name !== undefined)
+<       bind(module, statement.name.text, statement);
+<   }
+<   const walkFunction = (fn: ts.FunctionDeclaration, parent: LexicalScope): void => {
+<     const scope: LexicalScope = { parent, locals: new Map() };
+---
+>   /** The scope of one function-like node: its parameters, and its own name. */
+>   const scopeOf = (fn: ts.FunctionLikeDeclaration, parent: LexicalScope): LexicalScope => {
+>     const scope: LexicalScope = { parent, locals: new Map(), kind: "function" };
+343,349c385,439
+<     const collect = (node: ts.Node): void => {
+<       if (ts.isVariableDeclaration(node) && ts.isIdentifier(node.name)) bind(scope, node.name.text, node);
+<       if (ts.isFunctionDeclaration(node)) {
+<         // The nested function binds its OWN name here, but its body has its own
+<         // scope: its declarations must not leak into this one.
+<         if (node.name !== undefined) bind(scope, node.name.text, node);
+<         return;
+---
+>     if (fn.name !== undefined && ts.isIdentifier(fn.name)) bind(scope, fn.name.text, fn);
+>     return scope;
+>   };
+>   /**
+>    * The whole file, with the scope every declaration really lives in.
+>    *
+>    * EVERY call of the file is collected, in the scope it is written in: a call in a
+>    * method, in a constructor, in an accessor, in an arrow, in a function expression,
+>    * in an initializer, in a static block, in a default value of a parameter, in a
+>    * computed name of a member and in the top level of the module alike.
+>    */
+>   const walk = (node: ts.Node, scope: LexicalScope): void => {
+>     if (ts.isCallExpression(node)) calls.push({ scope, node });
+>     if (ts.isVariableDeclaration(node) && ts.isIdentifier(node.name)) bind(scope, node.name.text, node);
+>     if (ts.isFunctionDeclaration(node) && node.name !== undefined) bind(scope, node.name.text, node);
+>     if (ts.isClassDeclaration(node) && node.name !== undefined) bind(scope, node.name.text, node);
+>     if (isFunctionLike(node)) {
+>       // A function-like opens its own scope: its body is walked in it, and the
+>       // declarations of that body do not leak into the one around it.
+>       const own = scopeOf(node, scope);
+>       // The DEFAULT VALUE of a parameter is evaluated in the function's OWN scope:
+>       // it may call anything, and it may use the parameters before it.
+>       for (const parameter of node.parameters)
+>         if (parameter.initializer !== undefined) walk(parameter.initializer, own);
+>       if (node.body !== undefined) walk(node.body, own);
+>       return;
+>     }
+>     if (ts.isClassDeclaration(node) || ts.isClassExpression(node)) {
+>       // The body of a class is a scope of its own: its members, its property
+>       // initializers and its static blocks live in it, and every method opens a
+>       // scope of its own inside it.
+>       const classScope: LexicalScope = { parent: scope, locals: new Map(), kind: "class" };
+>       scopes.push(classScope);
+>       for (const member of node.members) {
+>         const name = (member as ts.NamedDeclaration).name;
+>         const computed = name !== undefined && ts.isComputedPropertyName(name);
+>         // The NAME of a member is computed in the scope the class is WRITTEN in, not
+>         // in the scope of the member itself.
+>         if (computed) walk((name as ts.ComputedPropertyName).expression, scope);
+>         // The methods of the class are bound in the class scope: `this.helper(…)`
+>         // reaches the method this class really declares, and not a name of the
+>         // world outside it.
+>         if (name !== undefined && ts.isIdentifier(name)
+>           && (ts.isMethodDeclaration(member) || ts.isGetAccessorDeclaration(member) || ts.isSetAccessorDeclaration(member)))
+>           bind(classScope, name.text, member);
+>         if (isFunctionLike(member)) {
+>           // The member opens its own scope; its name is not walked with it.
+>           walk(member, classScope);
+>           continue;
+>         }
+>         ts.forEachChild(member, child => {
+>           // The computed name was walked in ITS scope already.
+>           if (computed && child === name) return;
+>           walk(child, classScope);
+>         });
+351,356c441,443
+<       if (ts.isCallExpression(node)) calls.push({ scope, node });
+<       ts.forEachChild(node, collect);
+<     };
+<     if (fn.body !== undefined) collect(fn.body);
+<     for (const statement of fn.body?.statements ?? [])
+<       if (ts.isFunctionDeclaration(statement)) walkFunction(statement, scope);
+---
+>       return;
+>     }
+>     ts.forEachChild(node, child => walk(child, scope));
+358,365c445,467
+<   for (const statement of tree.statements) {
+<     if (ts.isFunctionDeclaration(statement)) walkFunction(statement, module);
+<     if (ts.isExpressionStatement(statement)) {
+<       const collect = (node: ts.Node): void => {
+<         if (ts.isCallExpression(node)) calls.push({ scope: module, node });
+<         ts.forEachChild(node, collect);
+<       };
+<       collect(statement);
+---
+>   walk(tree, module);
+>   return { module, scopes, calls };
+> }
+> 
+> /**
+>  * The declaration a call really reaches.
+>  *
+>  * A name is resolved in the scope the call is written in. `this.helper(…)` is
+>  * resolved in the CLASS the call is written in - the class is the boundary: a name
+>  * of the world outside the class is not this class's method.
+>  */
+> function calleeDeclaration(scope: LexicalScope, expression: ts.Expression): ts.Node | undefined {
+>   if (ts.isIdentifier(expression)) return resolveDeclaration(scope, expression.text);
+>   if (ts.isPropertyAccessExpression(expression) && ts.isThis(expression.expression)
+>     && ts.isIdentifier(expression.name)) {
+>     let current: LexicalScope | undefined = scope;
+>     while (current !== undefined) {
+>       const found = current.locals.get(expression.name.text);
+>       if (found !== undefined) return found;
+>       // The class is the boundary of `this`: nothing outside it is this class's
+>       // method.
+>       if (current.kind === "class") return undefined;
+>       current = current.parent;
+366a469
+>     return undefined;
+368c471
+<   return { module, scopes, calls };
+---
+>   return undefined;
+476,478c579,585
+<       if (!ts.isIdentifier(call.node.expression)) continue;
+<       const callee = resolveDeclaration(call.scope, call.node.expression.text);
+<       if (callee === undefined || !ts.isFunctionDeclaration(callee)) continue;
+---
+>       // The helper that was handed the request may be a function, a method, a
+>       // constructor, an arrow or a function expression - and it may be held by a
+>       // variable: they all hold parameters. `this.helper(…)` reaches the method
+>       // the class really declares.
+>       const callee = calleeDeclaration(call.scope, call.node.expression);
+>       const callable = callee === undefined ? undefined : callableOf(callee);
+>       if (callable === undefined) continue;
+480c587
+<         const parameter = callee.parameters[index];
+---
+>         const parameter = callable.parameters[index];
+500a608,674
+> /**
+>  * How the local names of a file reach the exports of the loader module.
+>  *
+>  * An import that renames the export, a namespace import and the loader module's own
+>  * local call are all the same thing: a call of that entry point.
+>  */
+> function loaderBindings(tree: ts.SourceFile, known: ReadonlyMap<string, VendorEntry>, isLoader: boolean): {
+>   readonly resolveExport: (callee: ts.Expression) => string | undefined;
+> } {
+>   const localToExport = new Map<string, string>();
+>   const namespaces = new Set<string>();
+>   for (const statement of tree.statements) {
+>     if (!ts.isImportDeclaration(statement) || !ts.isStringLiteral(statement.moduleSpecifier)) continue;
+>     if (!statement.moduleSpecifier.text.endsWith("openfilm-upstream.js")) continue;
+>     const bindings = statement.importClause?.namedBindings;
+>     if (bindings === undefined) continue;
+>     if (ts.isNamespaceImport(bindings)) { namespaces.add(bindings.name.text); continue; }
+>     for (const element of bindings.elements)
+>       localToExport.set(element.name.text, (element.propertyName ?? element.name).text);
+>   }
+>   // The loader module ITSELF reaches its own exports by their own names.
+>   const resolveExport = (callee: ts.Expression): string | undefined => {
+>     if (ts.isIdentifier(callee)) {
+>       const local = localToExport.get(callee.text);
+>       if (local !== undefined) return local;
+>       return isLoader && known.has(callee.text) ? callee.text : undefined;
+>     }
+>     if (ts.isPropertyAccessExpression(callee) && ts.isIdentifier(callee.expression)
+>       && namespaces.has(callee.expression.text) && ts.isIdentifier(callee.name))
+>       return callee.name.text;
+>     return undefined;
+>   };
+>   return { resolveExport };
+> }
+> 
+> /**
+>  * Every call of a loader entry point in the Host's own sources.
+>  *
+>  * This is the DIRECT evidence that the rule reaches the real call sites: the set is
+>  * the set the traversal really finds, file by file, and the assertion below is the
+>  * set the real sources really hold. A traversal that misses the class methods and
+>  * the arrows of the Host finds fewer of them - and the gate says so.
+>  *
+>  * The loader module itself is not in this set: its own calls are checked by their
+>  * own case, with its own facts.
+>  */
+> function loaderCallSites(
+>   files: readonly { readonly file: string; readonly text: string }[],
+>   entries: readonly VendorEntry[],
+>   loaderModule: string = LOADER_MODULE,
+> ): { readonly file: string; readonly exportName: string }[] {
+>   const known = new Map(entries.map(entry => [entry.exportName, entry]));
+>   const found: { file: string; exportName: string }[] = [];
+>   for (const { file, text } of files) {
+>     if (file.endsWith(loaderModule)) continue;
+>     const tree = parseSource(text, "vendor-call-site.ts");
+>     const model = buildScopes(tree);
+>     const { resolveExport } = loaderBindings(tree, known, false);
+>     for (const call of model.calls) {
+>       const exportName = resolveExport(call.node.expression);
+>       if (exportName === undefined || !known.has(exportName)) continue;
+>       found.push({ file: relative(process.cwd(), file).split(sep).join("/"), exportName });
+>     }
+>   }
+>   return found;
+> }
+> 
+512,536c686
+<     // The local names that reach an export of the loader module.
+<     const localToExport = new Map<string, string>();
+<     const namespaces = new Set<string>();
+<     for (const statement of tree.statements) {
+<       if (!ts.isImportDeclaration(statement) || !ts.isStringLiteral(statement.moduleSpecifier)) continue;
+<       if (!statement.moduleSpecifier.text.endsWith("openfilm-upstream.js")) continue;
+<       const bindings = statement.importClause?.namedBindings;
+<       if (bindings === undefined) continue;
+<       if (ts.isNamespaceImport(bindings)) { namespaces.add(bindings.name.text); continue; }
+<       for (const element of bindings.elements)
+<         localToExport.set(element.name.text, (element.propertyName ?? element.name).text);
+<     }
+<     // The loader module ITSELF reaches its own exports by their own names.
+<     const isLoader = file.endsWith(loaderModule);
+<     const resolveExport = (callee: ts.Expression): string | undefined => {
+<       if (ts.isIdentifier(callee)) {
+<         const local = localToExport.get(callee.text);
+<         if (local !== undefined) return local;
+<         return isLoader && known.has(callee.text) ? callee.text : undefined;
+<       }
+<       if (ts.isPropertyAccessExpression(callee) && ts.isIdentifier(callee.expression)
+<         && namespaces.has(callee.expression.text) && ts.isIdentifier(callee.name))
+<         return callee.name.text;
+<       return undefined;
+<     };
+---
+>     const { resolveExport } = loaderBindings(tree, known, file.endsWith(loaderModule));
+824a975,1064
+>   });
+> 
+>   /**
+>    * The Host's own code is not a file of function declarations.
+>    *
+>    * A class method, a constructor, an arrow, a function expression, an object
+>    * literal, a property initializer and a static block all hold calls - and the
+>    * rule that follows a request into the Host has to see them. The shapes below are
+>    * the shapes the REAL call sites of the Host have: the server's constructor, the
+>    * authority's private methods, the workspace's service, the supervisor's probe.
+>    */
+>   it.each([
+>     ["a class method", 'class Handler { run(incoming: IncomingMessage): void { createPinnedOpenFilmUpstream(incoming.url as unknown as string); } }'],
+>     ["a constructor", 'class Handler { constructor(req: IncomingMessage) { createPinnedOpenFilmUpstream(req.url as unknown as string); } }'],
+>     ["a top level arrow", 'const handler = (req: IncomingMessage): void => { createPinnedOpenFilmUpstream(req.url as unknown as string); };'],
+>     ["a top level function expression", 'const handler = function (req: IncomingMessage): void { createPinnedOpenFilmUpstream(req.url as unknown as string); };'],
+>     ["an arrow inside a class method", 'class Handler { run(): void { const handler = (req: IncomingMessage): void => { createPinnedOpenFilmUpstream(req.url as unknown as string); }; handler; } }'],
+>     ["an object literal method", 'const handlers = { run(req: IncomingMessage): void { createPinnedOpenFilmUpstream(req.url as unknown as string); } };'],
+>     ["a class property initializer", 'class Handler { handler = (req: IncomingMessage): void => { createPinnedOpenFilmUpstream(req.url as unknown as string); }; }'],
+>     ["a static block that reads a request the module really holds", 'const held: IncomingMessage = {} as IncomingMessage; class Handler { static { createPinnedOpenFilmUpstream(held.url as unknown as string); } }'],
+>     ["a helper called from a class method", 'class Handler { run(req: IncomingMessage): void { helper(req.url as unknown as string); } } function helper(root: string): void { createPinnedOpenFilmUpstream(root); }'],
+>     ["a helper that is an arrow", 'class Handler { run(req: IncomingMessage): void { const helper = (root: string): void => { createPinnedOpenFilmUpstream(root); }; helper(req.url as unknown as string); } }'],
+>     ["a serving owner built in a class method", 'class Handler { run(req: IncomingMessage): void { createPinnedOpenFilmServingOwner(req.headers["x"] as unknown as object, {} as object); } }'],
+>     ["a bridge drawn in a class method", 'class Handler { run(req: IncomingMessage): void { openFilmServingBridge({} as object, req.headers["x"] as unknown as object); } }'],
+>     ["the default value of a parameter", 'export function call(req: IncomingMessage, value = createPinnedOpenFilmUpstream(req.url as unknown as string)): void { void value; }'],
+>     ["the default value of a parameter of a method", 'class Handler { run(req: IncomingMessage, value = createPinnedOpenFilmUpstream(req.url as unknown as string)): void { void value; } }'],
+>     ["a computed name of a member", 'const held: IncomingMessage = {} as IncomingMessage; class Handler { [createPinnedOpenFilmUpstream(held.url as unknown as string)](): void { /* the name is computed where the class is written */ } }'],
+>     ["a method of this class, called through this", 'class Handler { run(req: IncomingMessage): void { this.helper(req.url as unknown as string); } helper(root: string): void { createPinnedOpenFilmUpstream(root); } }'],
+>   ])("the vendor-path rule detects a request in %s", (_name, body) => {
+>     const source = [
+>       'import type { IncomingMessage } from "node:http";',
+>       'import { createPinnedOpenFilmUpstream, createPinnedOpenFilmServingOwner, openFilmServingBridge } from "../../adapters/openfilm/openfilm-upstream.js";',
+>       body,
+>     ].join("\n");
+>     expect(vendorPathViolations([{ file: "synthetic.ts", text: source }], vendorEntries(readFileSync(LOADER_MODULE, "utf8"))).length).toBe(1);
+>   });
+> 
+>   /**
+>    * The negative side of the same shapes.
+>    *
+>    * A value that is not a request stays a value that is not a request - including
+>    * when it SHADOWS a request of an outer scope, and including when it lives in a
+>    * scope that never held one. A rule that taints by name, or that reaches across
+>    * scopes, would report these; a rule that follows the real data flow does not.
+>    */
+>   it.each([
+>     ["a class method with a string parameter", 'class Handler { run(root: string): void { createPinnedOpenFilmUpstream(root); } }'],
+>     ["a same named parameter that is not a request", 'class Handler { run(req: string): void { createPinnedOpenFilmUpstream(req); } }'],
+>     ["a parameter that shadows a request of an outer scope", 'export function outer(req: IncomingMessage): void { const inner = (req: string): void => { createPinnedOpenFilmUpstream(req); }; inner("x"); }'],
+>     ["a static block with no request in it", 'class Handler { static { createPinnedOpenFilmUpstream("/root"); } }'],
+>     ["an unrelated class", 'class Handler { run(value: number): void { other(value); } }'],
+>     ["a default value that holds no request", 'export function call(root: string, value = createPinnedOpenFilmUpstream(root)): void { void value; }'],
+>     ["a computed name in a scope that holds no request", 'class Handler { [createPinnedOpenFilmUpstream("/root")](): void { /* the name is computed where the class is written */ } }'],
+>     ["a method of this class, called with a value that is not a request", 'class Handler { run(root: string): void { this.helper(root); } helper(value: string): void { createPinnedOpenFilmUpstream(value); } }'],
+>   ])("the vendor-path rule accepts %s", (_name, body) => {
+>     const source = [
+>       'import type { IncomingMessage } from "node:http";',
+>       'import { createPinnedOpenFilmUpstream } from "../../adapters/openfilm/openfilm-upstream.js";',
+>       body,
+>     ].join("\n");
+>     expect(vendorPathViolations([{ file: "synthetic.ts", text: source }], vendorEntries(readFileSync(LOADER_MODULE, "utf8"))).length).toBe(0);
+>   });
+> 
+>   /**
+>    * The DIRECT evidence that the rule reaches the Host's OWN call sites.
+>    *
+>    * The set below is the set the real sources hold (read out of them, not guessed):
+>    * the server's constructor, the authority's three calls, the workspace's serving
+>    * and bridge, the composition, the render pin, the supervisor's probe and the
+>    * creation source verifier. A traversal that misses the class methods and the
+>    * arrows finds fewer of them - and this assertion says so.
+>    *
+>    * The loader module itself is not in this set: its own calls are checked by their
+>    * own case, with its own facts.
+>    */
+>   it("enumerates the loader call sites of the Host, one by one", () => {
+>     const entries = vendorEntries(readFileSync(LOADER_MODULE, "utf8"));
+>     const sites = loaderCallSites(productionSources(), entries).map(site => `${site.file}:${site.exportName}`);
+>     expect(sites.sort()).toEqual([
+>       "src/host/agent-driven/committed-snapshot-authority.ts:createPinnedOpenFilmUpstream",
+>       "src/host/agent-driven/committed-snapshot-authority.ts:createPinnedOpenFilmUpstream",
+>       "src/host/agent-driven/committed-snapshot-authority.ts:createPinnedOpenFilmUpstream",
+>       "src/host/agent-driven/created-native-workspace.ts:createPinnedOpenFilmServingOwner",
+>       "src/host/agent-driven/created-native-workspace.ts:openFilmServingBridge",
+>       "src/host/engine/openfilm-composition.ts:createPinnedOpenFilmUpstream",
+>       "src/host/m5/openfilm-studio-supervisor.ts:openFilmAvailability",
+>       "src/host/projects/creation-source-verifier.ts:createPinnedOpenFilmUpstream",
+>       "src/host/render/upstream-pin.ts:openFilmAvailability",
+>       "src/host/server.ts:createPinnedOpenFilmUpstream",
+>     ]);

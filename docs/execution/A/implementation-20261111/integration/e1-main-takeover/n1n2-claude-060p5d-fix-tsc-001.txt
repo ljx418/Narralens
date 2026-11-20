@@ -1,0 +1,6 @@
+tests/agent-driven/integration/cache-custodian-lifecycle.test.ts(247,27): error TS2345: Argument of type 'string | null' is not assignable to parameter of type 'string'.
+  Type 'null' is not assignable to type 'string'.
+tests/agent-driven/integration/cache-custodian-lifecycle.test.ts(262,34): error TS2345: Argument of type 'string | null' is not assignable to parameter of type 'string'.
+  Type 'null' is not assignable to type 'string'.
+tests/agent-driven/integration/native-cache-normal-pilot.test.ts(254,5): error TS2739: Type '{ known: true; phase: "drawing"; settled: boolean; cleanup_required: boolean; draw_id: string; ticket_digest: string; custodian: { pid: number; ppid: number; pgid: number; sid: number; start_ticks: number; state: string; }; ... 15 more ...; transport_failure: CacheNativeErrorEnvelope | null; }' is missing the following properties from type 'CacheDiagnosticSnapshot': cancel_secondary, cleanup_facts, terminal_proof
+tests/agent-driven/integration/native-cache-normal-pilot.test.ts(318,5): error TS2353: Object literal may only specify known properties, and 'listRootFiles' does not exist in type 'PositivePilotDependencies'.

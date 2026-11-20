@@ -4,12 +4,26 @@ import { createServer } from "node:http";
 import { mkdtemp, open, readFile, realpath, rm, writeFile } from "node:fs/promises";
 import {constants, realpathSync, statSync} from "node:fs";
 import type {IncomingMessage, ServerResponse} from "node:http";
+import type {Readable} from "node:stream";
 import {tmpdir} from "node:os";
 import { join, resolve, sep } from "node:path";
 import { promisify } from "node:util";
-import { pathToFileURL } from "node:url";
+import { pathToFileURL, fileURLToPath } from "node:url";
 import lock from "../../../contracts/openfilm-upstream-lock.json" with { type: "json" };
 import { HttpError } from "../../host/api-error.js";
+import { CacheProcessSupervisor } from "./cache-process-supervisor.js";
+import type { CacheDrawHandle } from "./cache-process-supervisor.js";
+import {
+  acquireCacheProductionScope,
+  cacheProductionScopeCovers,
+  completeCacheProductionScope,
+  currentCacheProductionScope,
+  mintCacheProductionCompletion,
+  markCacheProductionCleanupRequired,
+  openCacheProductionPhaseLease,
+  releaseCacheProductionScope,
+} from "./cache-production-scope.js";
+import type { CacheProductionPhaseLease, CacheProductionScope } from "./cache-production-scope.js";
 
 const run = promisify(execFile);
 
@@ -315,6 +329,33 @@ export const OPENFILM_CACHE_PRODUCER_SHA256 =
   "87d82f73add17d699aab963a99e45b4406cf68ecf547389b61a24083658f2828";
 
 /**
+ * The worker of one native cache draw.
+ *
+ * It is a fixed path beside this module: the draw is started with this file and
+ * nothing else, so nothing a caller says can reach the argument vector of a
+ * process. The ticket of the draw travels over the private pipe the worker
+ * inherits.
+ */
+const CACHE_WORKER_URL = new URL("./openfilm-cache-worker.mjs", import.meta.url);
+
+/**
+ * The custodian of one native cache draw.
+ *
+ * It is the only wait owner of the draw's process tree, and it lives OUTSIDE the
+ * group it reaps: a worker that is killed cannot reap the orphans it leaves.
+ */
+const CACHE_CUSTODIAN_URL = new URL("./cache-process-custodian.py", import.meta.url);
+
+/**
+ * The interpreter the custodian runs under.
+ *
+ * It is an absolute path that was verified on this machine, and it is never
+ * looked up in the PATH of the user: another interpreter would be another
+ * runtime, and the custodian is a part of the settlement.
+ */
+const CACHE_PYTHON_EXECUTABLE = "/usr/bin/python3.12";
+
+/**
  * The owner of the pinned cache producer of one Host instance.
  *
  * The pinned producer keeps ONE browser for the whole process, and it is closed by
@@ -350,6 +391,183 @@ const cacheProducerOwners = new Set<OpenFilmCacheProducerOwner>();
 let cacheProducerCalls = 0;
 
 /**
+ * The responsibility of ONE production of the fixed producer.
+ *
+ * It is registered BEFORE the first await of the draw, and it covers the whole
+ * path: the reservation of the scope, the supervisor, the handle of the draw and
+ * the controller that cancels the reservation when the owner closes.
+ *
+ * It is the thing a reconcile acts on. It is NOT a picture, not a promise and not
+ * a number: it is the private record of a responsibility that is still open.
+ */
+interface ProductionResponsibility {
+  readonly owner: OpenFilmCacheProducerOwner;
+  /** The working copy the draw is about. */
+  readonly root: string;
+  /** The scope of the production, once it was taken. */
+  scope: CacheProductionScope | null;
+  /** Whether this draw took the scope for itself and has to give it back. */
+  ownScope: boolean;
+  /** The controller that cancels the reservation of the scope. */
+  readonly controller: AbortController;
+  /** The supervisor of the draw. It is set before the scope is taken. */
+  supervisor: CacheProcessSupervisor | null;
+  /** The handle of the draw. It is signed by that supervisor. */
+  handle: CacheDrawHandle | null;
+  /**
+   * Where the responsibility is.
+   *
+   * `refused` is TERMINAL: the draw was refused before it took a single
+   * resource, and there is nothing left of it. A responsibility that stays
+   * `queued` after its promise was resolved would keep its controller and its
+   * root for ever.
+   */
+  phase: "queued" | "executing" | "settled" | "refused";
+  /** Whether the execution of the draw really ended. */
+  executionSettled: boolean;
+  /** Whether the parent's own resources were really drained. */
+  parentDrained: boolean;
+  /** The outcome of the draw: a BOUNDED summary, never the picture itself. */
+  outcome: unknown;
+  /** The promise that ends when the responsibility really ended. */
+  readonly settled: Promise<void>;
+  readonly settleOnce: () => void;
+  /** The lease of the execution phase, when this draw took the scope itself. */
+  executionLease: CacheProductionPhaseLease | null;
+  /** The lease of the parent drain phase, when this draw took the scope itself. */
+  parentLease: CacheProductionPhaseLease | null;
+  /**
+   * The BRIDGE that owns the parent phase of this draw.
+   *
+   * It is set by the bridge itself, right after it started the draw: the bridge
+   * is the one that drains the parent afterwards, and the scope of a direct draw
+   * covers that drain as well.
+   */
+  bridgeOwnsParent: boolean;
+  /** The scope was given back: the draw really ended with it. */
+  scopeReleased: boolean;
+}
+
+/**
+ * The responsibilities of every issued producer.
+ *
+ * It is private to this module: the real owner of a responsibility is found here
+ * and nowhere else, so a copy of a producer, a JSON object and a foreign handle
+ * are all unrecognised.
+ */
+const productionResponsibilities = new WeakMap<object, ProductionResponsibility[]>();
+
+/**
+ * How many SETTLED responsibilities of one owner are kept.
+ *
+ * A settled responsibility keeps a bounded summary and nothing else: the
+ * picture of a draw is eight megabytes, and a producer that lives for ever would
+ * otherwise carry every picture it ever drew.
+ */
+const MAX_SETTLED_RESPONSIBILITIES = 8;
+
+/** Register the responsibility of one draw, BEFORE the first await. */
+function registerProductionResponsibility(
+  owner: OpenFilmCacheProducerOwner,
+  root: string,
+): ProductionResponsibility {
+  let settleOnce!: () => void;
+  const settled = new Promise<void>((resolveOnce) => { settleOnce = resolveOnce; });
+  const responsibility: ProductionResponsibility = {
+    owner, root,
+    scope: null,
+    ownScope: false,
+    controller: new AbortController(),
+    supervisor: null,
+    handle: null,
+    phase: "queued",
+    executionSettled: false,
+    parentDrained: false,
+    outcome: null,
+    settled,
+    settleOnce: () => { settleOnce(); },
+    executionLease: null,
+    parentLease: null,
+    bridgeOwnsParent: false,
+    scopeReleased: false,
+  };
+  const list = productionResponsibilities.get(owner as unknown as object);
+  if (list === undefined) productionResponsibilities.set(owner as unknown as object, [responsibility]);
+  else list.push(responsibility);
+  return responsibility;
+}
+
+/** The responsibilities of one owner, as they are right now. */
+function productionResponsibilitiesOf(owner: OpenFilmCacheProducerOwner): readonly ProductionResponsibility[] {
+  return productionResponsibilities.get(owner as unknown as object) ?? [];
+}
+
+/**
+ * How many responsibilities this module still holds for ONE producer.
+ *
+ * It is a READ-ONLY count and it grants nothing: it exists so that a case may
+ * show that the history of a long living producer stays BOUNDED, and that the
+ * refusals of a producer that is under pressure do not accumulate for ever.
+ *
+ * A responsibility that is NOT settled is never pruned: a held draw keeps its
+ * real owner, and that owner is what a reconcile acts on.
+ */
+export function openFilmProductionResponsibilityCount(producer: unknown): number {
+  if (producer === null || typeof producer !== "object") return 0;
+  return productionResponsibilities.get(producer as object)?.length ?? 0;
+}
+
+/**
+ * The responsibility that was registered LAST by this owner.
+ *
+ * The registration happens BEFORE the first await of the draw, and the draw is
+ * called synchronously: the responsibility of THIS draw is therefore the one
+ * that was registered last, and it is the one the caller is holding. A lookup
+ * by the root would find a DIFFERENT draw - the one that is queued behind this
+ * one, or the one that is still held.
+ */
+function lastProductionResponsibility(owner: OpenFilmCacheProducerOwner): ProductionResponsibility | undefined {
+  const list = productionResponsibilitiesOf(owner);
+  return list.length === 0 ? undefined : list[list.length - 1];
+}
+
+/**
+ * Forget the settled responsibilities that are not needed any more.
+ *
+ * The ones that are NOT settled are never forgotten: a held draw keeps its real
+ * owner, and that owner is what a reconcile acts on.
+ */
+function pruneProductionResponsibilities(owner: OpenFilmCacheProducerOwner): void {
+  const list = productionResponsibilities.get(owner as unknown as object);
+  if (list === undefined) return;
+  let settledSeen = 0;
+  for (let index = list.length - 1; index >= 0; index -= 1) {
+    const entry = list[index]!;
+    if (entry.phase !== "settled" && entry.phase !== "refused") continue;
+    settledSeen += 1;
+    if (settledSeen > MAX_SETTLED_RESPONSIBILITIES) list.splice(index, 1);
+  }
+}
+
+/**
+ * Give the scope of a direct draw back, when the WHOLE production really ended.
+ *
+ * The COMPLETION is minted inside the closure of the owner of that scope, and
+ * it is the only thing that may clear the held marker. A completion that could
+ * not be minted means that a phase of the production did not really end: the
+ * scope is then NOT released, and the root it holds stays held.
+ */
+function releaseProductionScope(responsibility: ProductionResponsibility): void {
+  const scope = responsibility.scope;
+  if (scope === null || !responsibility.ownScope || responsibility.scopeReleased) return;
+  responsibility.scopeReleased = true;
+  const completion = mintCacheProductionCompletion(scope, responsibility.outcome === null ? "failed" : "settled");
+  const consumed = completeCacheProductionScope(scope, completion);
+  if (consumed) releaseCacheProductionScope(scope);
+  else markCacheProductionCleanupRequired(scope);
+}
+
+/**
  * Load the pinned cache producer of the pinned tree.
  *
  * It is the SAME tree the seam comes from, and it is loaded only after that tree's
@@ -383,39 +601,162 @@ export async function createPinnedOpenFilmCacheProducer(vendorRoot: string,
   if (sha256 === null || sha256 !== OPENFILM_CACHE_PRODUCER_SHA256) {
     throw new HttpError(503, "ENGINE_UNAVAILABLE", "OpenFilm cache producer is not the pinned runtime");
   }
-  const moduleUrl = pathToFileURL(file).href;
-  let loaded: Record<string, unknown>;
-  try { loaded = await import(/* @vite-ignore */ moduleUrl) as Record<string, unknown>; }
-  catch { throw new HttpError(503, "ENGINE_UNAVAILABLE", "OpenFilm cache producer could not be loaded"); }
-  for (const name of ["pageFrame", "closePageFrames"]) {
-    if (typeof loaded[name] !== "function") {
-      throw new HttpError(503, "ENGINE_UNAVAILABLE", `OpenFilm cache producer is missing export ${name}`);
-    }
-  }
-  // The calls this owner really started. The close drains them; it never kills them.
-  const calls = new Set<Promise<unknown>>();
+  // The producer is NOT loaded into this process any more.
+  //
+  // The pinned producer keeps ONE browser for the whole process, and it is closed by
+  // the upstream's own `closePageFrames`. That browser is shared: one slow draw, one
+  // abandoned page or one browser that never came back keeps the next draw waiting,
+  // and a picture that was returned says nothing about whether the work behind it
+  // really ended. So every draw now happens in a worker of its own, in its own
+  // session and its own group, watched by a custodian that lives OUTSIDE that
+  // group and is the only wait owner of it. The worker loads the very bytes this
+  // factory checked above. The picture comes back; the settlement does not.
   let draining = false;
+  let closePromise: Promise<void> | undefined;
   const owner: OpenFilmCacheProducerOwner = {
     pageFrame: async (request: { readonly root: string; readonly base: string; readonly rel: string; readonly ms: number; readonly width: number; readonly overrides?: unknown[] | null }) => {
       if (draining) throw new HttpError(503, "ENGINE_UNAVAILABLE", "OpenFilm cache producer is closing");
-      cacheProducerCalls += 1;
-      const work = (loaded.pageFrame as (a: string, b: string, c: string, d: number, e: number, f?: unknown[] | null) => Promise<Buffer>)(request.root, request.base, request.rel, request.ms, request.width, request.overrides ?? null);
-      calls.add(work);
-      void work.then(() => calls.delete(work), () => calls.delete(work));
-      try { return await work; }
-      finally { cacheProducerCalls -= 1; }
+      // The RESPONSIBILITY of this draw is registered BEFORE the first await.
+      //
+      // It covers the queue and the settlement: the reservation of the scope, the
+      // supervisor, the handle, and the controller that cancels the reservation
+      // when the owner closes. A close that arrives while the draw is still
+      // waiting for a scope must be able to find it - and must be able to CANCEL
+      // it, so that no worker is born after the owner closed.
+      const responsibility = registerProductionResponsibility(owner, request.root);
+      // Whether this call was really counted. The counter is only decremented
+      // when it was incremented: a refusal before the draw was counted must not
+      // take the count of the calls that ARE running below it.
+      let counted = false;
+      try {
+        // A closed producer admits NO new production. The responsibility of this
+        // draw is registered BEFORE this check, so that the caller that started
+        // it always finds THIS draw and not another one.
+        if (draining) throw new HttpError(503, "ENGINE_UNAVAILABLE", "OpenFilm cache producer is closing");
+        // The scope of the production this draw belongs to.
+        //
+        // A production that came through the workspace already holds one: the scope
+        // is held over the WHOLE production - from before the PRE capture until
+        // the witness is activated - and the draw is one step inside it. A draw
+        // that arrives without one - a direct call of this factory - takes a scope
+        // of its own from the SAME scheduler, so there is never a second queue and
+        // never a way around the capacity.
+        const ambient = currentCacheProductionScope();
+        const scope = ambient !== null && cacheProductionScopeCovers(ambient, request.root)
+          ? ambient
+          : await acquireCacheProductionScope(request.root, {
+            signal: responsibility.controller.signal,
+            // A scope this draw takes for itself is a DIRECT scope: it owns the
+            // execution of the draw AND the drain of the parent's own resources.
+            // The scope of a workspace owns the whole production, and it is never
+            // taken again here.
+            mode: "direct",
+            owner,
+          });
+        responsibility.scope = scope;
+        responsibility.ownScope = scope !== ambient;
+        // The supervisor is created WITH the scope: a draw whose cleanup could not
+        // be proven has to mark the root it holds, and it can only do that when it
+        // knows which scope that is. The scope is the ambient one when the draw
+        // is inside a workspace, and the draw's own one otherwise.
+        const supervisor = new CacheProcessSupervisor({
+          vendorRoot: availability.vendor_root,
+          producerFile: OPENFILM_CACHE_PRODUCER_FILE,
+          producerSha256: sha256,
+          workerPath: fileURLToPath(CACHE_WORKER_URL),
+          custodianPath: fileURLToPath(CACHE_CUSTODIAN_URL),
+          pythonExecutable: CACHE_PYTHON_EXECUTABLE,
+          scope,
+        });
+        responsibility.supervisor = supervisor;
+        responsibility.handle = supervisor.reserve({
+          root: request.root, base: request.base, rel: request.rel,
+          ms: request.ms, width: request.width, overrides: request.overrides ?? null,
+        });
+        // The leases of the phases this draw took the scope for. They are opened
+        // HERE, by the owner of the scope, and they are settled by the code that
+        // really ends the phase.
+        if (responsibility.ownScope) {
+          responsibility.executionLease = openCacheProductionPhaseLease(scope, "execution", owner);
+          responsibility.parentLease = openCacheProductionPhaseLease(scope, "parent_drain", owner);
+        }
+        // The owner may have closed while the draw was waiting for its scope. A
+        // draw that is admitted after the close is a draw that may not be born.
+        if (draining) {
+          throw new HttpError(503, "ENGINE_UNAVAILABLE", "OpenFilm cache producer is closing");
+        }
+        responsibility.phase = "executing";
+        cacheProducerCalls += 1;
+        counted = true;
+        const settlement = await supervisor.start(responsibility.handle);
+        responsibility.executionSettled = true;
+        // The outcome is a BOUNDED summary: the picture of a draw is eight
+        // megabytes, and a producer that lives for ever may not carry every
+        // picture it ever drew.
+        responsibility.outcome = settlement.error !== null
+          ? settlement.error
+          : settlement.picture === null
+            ? null
+            : { digest: createHash("sha256").update(settlement.picture).digest("hex"), bytes: settlement.picture.length };
+        responsibility.phase = "settled";
+        if (settlement.error !== null) throw settlement.error;
+        if (settlement.picture === null) throw new Error("The cache draw ended with no picture");
+        return settlement.picture;
+      } finally {
+        if (counted) cacheProducerCalls -= 1;
+        const scope = responsibility.scope;
+        // The EXECUTION phase really ended - with a picture or with a failure.
+        // Its lease is settled HERE; the lease of the PARENT DRAIN is settled by
+        // the bridge that drains the parent, and only there.
+        if (responsibility.ownScope) responsibility.executionLease?.settle();
+        // A scope this draw took for itself is given back when the WHOLE
+        // production really ended. A draw whose cleanup could not be proven keeps
+        // it: the root stays held, and the next production of that root does not
+        // start.
+        //
+        // When the BRIDGE owns the parent phase, the scope is given back THERE:
+        // the bridge drains the parent after this call returned, and a scope that
+        // was given back before that drain let the next production of the same
+        // root walk over resources that were still there.
+        if (scope !== null && responsibility.ownScope && !responsibility.bridgeOwnsParent) {
+          // There was no bridge: there was no parent to drain, and the phase is
+          // over.
+          responsibility.parentLease?.settle();
+          releaseProductionScope(responsibility);
+        }
+        if (!responsibility.bridgeOwnsParent) {
+          // A draw that never took a single resource is TERMINAL: there is
+          // nothing left of it, and it may be pruned. A draw that DID take a
+          // resource and whose cleanup could not be proven keeps its phase, and
+          // it is not pruned.
+          if (responsibility.phase === "queued") responsibility.phase = "refused";
+          responsibility.settleOnce();
+          pruneProductionResponsibilities(owner);
+        }
+      }
     },
     close: async () => {
-      // Stop admitting, then drain the calls this owner really started. A call that
-      // is still running is waited for, never killed.
+      // The close is SHARED: a second close waits for the very same settlement and
+      // never returns before the first one did.
+      if (closePromise !== undefined) return closePromise;
       draining = true;
-      await Promise.allSettled([...calls]);
-      cacheProducerOwners.delete(owner);
-      // The shared browser is closed only when the LAST owner has drained and no
-      // call of any owner is still in flight. Headless is not "already cleaned".
-      if (cacheProducerOwners.size === 0 && cacheProducerCalls === 0) {
-        await (loaded.closePageFrames as () => Promise<void>)();
-      }
+      closePromise = (async (): Promise<void> => {
+        // The reservations that are still waiting for a scope are CANCELLED: no
+        // worker may be born after this owner closed.
+        for (const responsibility of productionResponsibilitiesOf(owner)) {
+          responsibility.controller.abort();
+        }
+        // The calls this owner really started are waited for. A call that is still
+        // running is waited for, never killed.
+        await Promise.allSettled(
+          productionResponsibilitiesOf(owner).map(responsibility => responsibility.settled));
+        cacheProducerOwners.delete(owner);
+        // There is no shared browser left to close: the browser of a draw belongs to
+        // the worker of that draw, and that worker closed it. A browser that did
+        // not close is a cleanup this owner cannot prove, and it is the supervisor
+        // of that draw that holds the evidence.
+      })();
+      return closePromise;
     },
   };
   cacheProducerOwners.add(owner);
@@ -521,10 +862,38 @@ export interface OpenFilmFolderServer {
   /** The requests and the real media probes this server really started. */
   readonly pending: () => number;
   /**
+   * Stop admitting new work.
+   *
+   * A frozen serving opens no file of the project and starts no probe: a request
+   * that arrives after the freeze is refused with a bounded answer, and nothing
+   * new is created. The freeze is SYNCHRONOUS: between the freeze and the drain
+   * that follows it, no new work can slip in.
+   */
+  readonly freezeAdmission: () => void;
+  /**
+   * The failures of the sources and of their closing.
+   *
+   * An error of a source is not a close, and a failure of the destroy is not a
+   * silence: both are kept here, so that the party that drains this serving can
+   * keep its own responsibility instead of reading an empty ledger.
+   */
+  readonly failures: () => readonly unknown[];
+  /**
+   * Admit work again.
+   *
+   * The next draw opens the admission of its own serving again, explicitly. A
+   * serving that is closed never opens again.
+   */
+  readonly openAdmission: () => void;
+  /** Whether the admission of this serving is frozen right now. */
+  readonly admissionFrozen: () => boolean;
+  /**
    * Wait until the work this server really started has settled.
    *
    * A request that never ends is not given a deadline to hide behind: the wait is
-   * the real settlement, and what did not settle is named.
+   * the real settlement, and what did not settle is named. The real SOURCE of an
+   * answer - the readable the upstream streamed into the response - is part of
+   * that work: a response that ended is not a source that closed.
    */
   readonly drain: () => Promise<OpenFilmFolderSettlement>;
 }
@@ -595,12 +964,22 @@ export async function createPinnedOpenFilmFolderServer(
   const refuse = (res: ServerResponse, status: number, message: string): void => {
     res.writeHead(status, { ...headers, "content-type": "text/plain; charset=utf-8" }).end(message);
   };
-  // The work this server really started: the requests it answers and the media
-  // probes the upstream really runs.
+  // The work this server really started: the requests it answers, the media
+  // probes the upstream really runs, and the real SOURCES the upstream streamed
+  // into the responses.
+  //
+  // A source is its own resource with its own file descriptor. A response that
+  // ended - even one that was aborted - does not close the source: the source is
+  // closed when the source says so, and that is what the drain waits for.
   const requests = new Set<Promise<void>>();
   const probes = new Set<Promise<unknown>>();
+  const streams = new Set<Promise<void>>();
+  /** The failures of the sources and of their closing. They are KEPT. */
+  const sourceFailures: unknown[] = [];
   let finished = 0;
   let aborted = 0;
+  /** A frozen serving opens no file and starts no probe. */
+  let admissionFrozen = false;
   const track = <T,>(set: Set<T>, work: T): void => {
     set.add(work);
     void Promise.resolve(work).then(() => set.delete(work), () => set.delete(work));
@@ -617,76 +996,157 @@ export async function createPinnedOpenFilmFolderServer(
     if (real !== realRoot && !real.startsWith(realRoot + sep)) return null;
     return asked;
   };
+  /**
+   * Answer one request.
+   *
+   * Every failure of the serving is a BOUNDED answer: a bad address is a 400, a
+   * resource that is not there is a 404, and an unexpected failure of the serving
+   * itself is a 500 - never an exception that escapes into the HTTP listener and
+   * ends the process, and never an answer that calls a failure a success.
+   */
+  const answer = (req: IncomingMessage, res: ServerResponse): void => {
+    // A frozen serving admits NOTHING new.
+    //
+    // The check is FIRST: no file of the project is opened, no probe is started and
+    // no stream is created. The answer is a bounded refusal, and the listener stays
+    // up: the resources that were already accepted are still there to be drained.
+    if (admissionFrozen) { refuse(res, 503, "unavailable"); return; }
+    // A page is read, never written.
+    if (req.method !== "GET" && req.method !== "HEAD") { refuse(res, 405, "method not allowed"); return; }
+    // The root must still be the very directory this server was bound to.
+    let rootInfo;
+    try { rootInfo = statSync(realRoot); }
+    catch { refuse(res, 503, "unavailable"); return; }
+    if (!rootInfo.isDirectory() || rootInfo.dev !== rootIdentity.dev || rootInfo.ino !== rootIdentity.ino) {
+      refuse(res, 503, "unavailable"); return;
+    }
+    const url = req.url ?? "/";
+    // The request target must be an ORIGIN-FORM path: it starts with "/" and it is
+    // not an authority reference. A target that starts with "//" is not a path here
+    // - the URL parser reads it as ANOTHER origin, and an unterminated one is not a
+    // URL at all - so it is refused before anything is parsed. Every other target
+    // keeps the answer it always had.
+    if (!url.startsWith("/") || url.startsWith("//")) { refuse(res, 400, "bad address"); return; }
+    const rawPath = url.split("?")[0] ?? "/";
+    let decoded: string;
+    try { decoded = decodeURIComponent(rawPath); }
+    catch { refuse(res, 400, "bad address"); return; }
+    // An address speaks in `/`: a backslash in it, a NUL or a colon is never a name.
+    if (decoded.includes("\\") || decoded.includes("\0") || decoded.includes(":")) { refuse(res, 400, "bad address"); return; }
+    const relative = decoded.replace(/^\/+/, "");
+    const segments = relative.split("/").filter(part => part !== "");
+    // A dot file or a dot folder is never served: the native's own metadata and
+    // the person's own files stay out of the page origin.
+    if (segments.some(part => part.startsWith("."))) { refuse(res, 403, "forbidden"); return; }
+    if (segments.some(part => part === "..")) { refuse(res, 403, "forbidden"); return; }
+    // The query is the upstream's own query: the same parser, the same semantics.
+    // It is only BOUNDED: a target the parser refuses is a bad address, not a
+    // failure of the serving.
+    let query: URLSearchParams;
+    try { query = new URL(url, "http://127.0.0.1").searchParams; }
+    catch { refuse(res, 400, "bad address"); return; }
+    if (segments[0] === "__film") {
+      // The virtual runtime is an exact set of routes, never a prefix.
+      if (!OPENFILM_VIRTUAL_RUNTIME_ROUTES.has(relative)) { refuse(res, 403, "forbidden"); return; }
+      if (relative === "__film/frame-duration") {
+        // The address the probe is about is a file of the project: it is checked
+        // here, with the same rules, so the virtual route is no way out of the
+        // root - and the upstream's own file lookup, which allows a readable
+        // link, never gets the chance to answer for it.
+        const of = query.get("of");
+        if (of === null) { refuse(res, 400, "bad address"); return; }
+        let target: string;
+        try { target = decodeURIComponent(of); }
+        catch { refuse(res, 400, "bad address"); return; }
+        if (target.includes("\\") || target.includes("\0") || target.includes(":")) { refuse(res, 400, "bad address"); return; }
+        const asked = inside(target);
+        if (asked === null) { refuse(res, 403, "forbidden"); return; }
+        // The upstream's own probe of that file: the SAME promise its own route
+        // uses (the upstream keeps one promise per file version), so what is
+        // tracked here is the real probe and not a report about it.
+        track(probes, frameDuration(asked));
+      }
+    } else {
+      // A file of the project: it must be inside the ONE root this server is
+      // bound to.
+      if (inside(relative) === null) { refuse(res, 404, "not found"); return; }
+    }
+    // The REAL SOURCE of the answer, when the upstream streams a file into the
+    // response.
+    //
+    // It is observed, never patched: the upstream's bytes are not touched and `fs`
+    // is not touched globally. The source is registered BEFORE it is waited for,
+    // and it leaves the ledger only when it REALLY closed.
+    //
+    // An error of the source is NOT a close: the error object is kept, the source
+    // is destroyed if it is the one this response owns, and the REAL close is
+    // still waited for. A file descriptor that was closed by an error path is not
+    // the same fact as a file descriptor that was closed.
+    let ownedSource: Readable | undefined;
+    res.on("pipe", (source: Readable) => {
+      ownedSource = source;
+      const closed = new Promise<void>(resolveClose => {
+        let done = false;
+        const settle = (): void => { if (done) return; done = true; resolveClose(); };
+        source.once("close", settle);
+        source.once("error", (error: unknown) => {
+          // The error is KEPT. It is not a close, and it does not settle the
+          // ledger: the real close of the source is still waited for.
+          sourceFailures.push(error);
+        });
+      });
+      track(streams, closed);
+    });
+    // The request itself: the HTTP side is tracked, and a request that was
+    // aborted is told apart from one that was answered.
+    const settled = new Promise<void>(resolve => {
+      let done = false;
+      res.on("finish", () => { done = true; finished += 1; resolve(); });
+      res.on("close", () => {
+        if (!done) {
+          aborted += 1;
+          // The response was aborted. The source this response really owns is
+          // destroyed, and its real close is what the stream ledger waits for: the
+          // end of the response is NOT the end of the source. A failure of the
+          // destroy is KEPT as well: it is a reason, not a silence.
+          try { ownedSource?.destroy(); }
+          catch (error) { sourceFailures.push(error); }
+        }
+        resolve();
+      });
+    });
+    track(requests, settled);
+    if (!serve(req, res, rawPath, query)) refuse(res, 403, "forbidden");
+  };
   return Object.freeze({
     file: OPENFILM_FOLDER_SERVER_FILE,
     sha256: OPENFILM_FOLDER_SERVER_SHA256,
     root: realRoot,
-    pending: () => requests.size + probes.size,
+    pending: () => requests.size + probes.size + streams.size,
+    freezeAdmission: (): void => { admissionFrozen = true; },
+    openAdmission: (): void => { admissionFrozen = false; },
+    admissionFrozen: (): boolean => admissionFrozen,
+    failures: (): readonly unknown[] => Object.freeze([...sourceFailures]),
     drain: async (): Promise<OpenFilmFolderSettlement> => {
       // The real settlement, not a deadline: a work that never ends is named.
       while (requests.size > 0) await Promise.allSettled([...requests]);
+      while (streams.size > 0) await Promise.allSettled([...streams]);
       while (probes.size > 0) await Promise.allSettled([...probes]);
-      return { finished, aborted, open: requests.size + probes.size };
+      return { finished, aborted, open: requests.size + probes.size + streams.size };
     },
     handle: (req: IncomingMessage, res: ServerResponse): void => {
-      // A page is read, never written.
-      if (req.method !== "GET" && req.method !== "HEAD") { refuse(res, 405, "method not allowed"); return; }
-      // The root must still be the very directory this server was bound to.
-      let rootInfo;
-      try { rootInfo = statSync(realRoot); }
-      catch { refuse(res, 503, "unavailable"); return; }
-      if (!rootInfo.isDirectory() || rootInfo.dev !== rootIdentity.dev || rootInfo.ino !== rootIdentity.ino) {
-        refuse(res, 503, "unavailable"); return;
+      try { answer(req, res); }
+      catch {
+        // An unexpected failure of the serving is a failure of the SERVING: it is
+        // answered with a bounded 500 - never with a success, and never with an
+        // exception that escapes into the HTTP listener and ends the process. A
+        // resource or a media that is not there is NOT this: it keeps its own
+        // refusal, and the answer that was already begun is only ended.
+        try {
+          if (res.headersSent) res.end();
+          else res.writeHead(500, { ...headers, "content-type": "text/plain; charset=utf-8" }).end("unavailable");
+        } catch { /* the response is already gone: there is nothing left to answer */ }
       }
-      const url = req.url ?? "/";
-      const rawPath = url.split("?")[0] ?? "/";
-      let decoded: string;
-      try { decoded = decodeURIComponent(rawPath); }
-      catch { refuse(res, 400, "bad address"); return; }
-      // An address speaks in `/`: a backslash in it, a NUL or a colon is never a name.
-      if (decoded.includes("\\") || decoded.includes("\0") || decoded.includes(":")) { refuse(res, 400, "bad address"); return; }
-      const relative = decoded.replace(/^\/+/, "");
-      const segments = relative.split("/").filter(part => part !== "");
-      // A dot file or a dot folder is never served: the native's own metadata and
-      // the person's own files stay out of the page origin.
-      if (segments.some(part => part.startsWith("."))) { refuse(res, 403, "forbidden"); return; }
-      if (segments.some(part => part === "..")) { refuse(res, 403, "forbidden"); return; }
-      const query = new URL(url, "http://127.0.0.1").searchParams;
-      if (segments[0] === "__film") {
-        // The virtual runtime is an exact set of routes, never a prefix.
-        if (!OPENFILM_VIRTUAL_RUNTIME_ROUTES.has(relative)) { refuse(res, 403, "forbidden"); return; }
-        if (relative === "__film/frame-duration") {
-          // The address the probe is about is a file of the project: it is checked
-          // here, with the same rules, so the virtual route is no way out of the
-          // root - and the upstream's own file lookup, which allows a readable
-          // link, never gets the chance to answer for it.
-          const of = query.get("of");
-          if (of === null) { refuse(res, 400, "bad address"); return; }
-          let target: string;
-          try { target = decodeURIComponent(of); }
-          catch { refuse(res, 400, "bad address"); return; }
-          if (target.includes("\\") || target.includes("\0") || target.includes(":")) { refuse(res, 400, "bad address"); return; }
-          const asked = inside(target);
-          if (asked === null) { refuse(res, 403, "forbidden"); return; }
-          // The upstream's own probe of that file: the SAME promise its own route
-          // uses (the upstream keeps one promise per file version), so what is
-          // tracked here is the real probe and not a report about it.
-          track(probes, frameDuration(asked));
-        }
-      } else {
-        // A file of the project: it must be inside the ONE root this server is
-        // bound to.
-        if (inside(relative) === null) { refuse(res, 404, "not found"); return; }
-      }
-      // The request itself: the HTTP side is tracked, and a request that was
-      // aborted is told apart from one that was answered.
-      const settled = new Promise<void>(resolve => {
-        let done = false;
-        res.on("finish", () => { done = true; finished += 1; resolve(); });
-        res.on("close", () => { if (!done) aborted += 1; resolve(); });
-      });
-      track(requests, settled);
-      if (!serve(req, res, rawPath, query)) refuse(res, 403, "forbidden");
     },
   });
 }
@@ -776,7 +1236,89 @@ export interface OpenFilmServingBridge {
    * one this module issued. A caller can neither hand over a base nor a producer of
    * its own.
    */
-  draw(request: { readonly rel: string; readonly ms: number; readonly width: number; readonly overrides: unknown[] | null }): Promise<Buffer>;
+  draw(request: { readonly rel: string; readonly ms: number; readonly width: number; readonly overrides: unknown[] | null }): Promise<OpenFilmDrawResult>;
+  /**
+   * The Host-private state of EVERY production of this bridge that is not
+   * settled yet.
+   *
+   * It is a READ-ONLY LIST OF COPIES and it grants nothing. Every entry names
+   * the opaque handle of ITS OWN responsibility, and that handle is meaningful
+   * only to a reconcile of THIS bridge.
+   *
+   * It is a LIST and not one view: a bridge that holds a production which is
+   * stuck and starts another one must not let the second one hide the first.
+   */
+  inspectCleanup(): readonly OpenFilmCleanupView[];
+  /**
+   * Advance the EXECUTION of the production this bridge is drawing for.
+   *
+   * It settles the execution of the draw - and nothing else. The parent drain of
+   * the serving and the whole production of the workspace go on afterwards, in
+   * their own order: a reconcile that waited for them would wait for itself.
+   */
+  reconcileCleanup(handle: unknown): Promise<OpenFilmCleanupView>;
+}
+
+/**
+ * What ONE draw of a bridge ended with.
+ *
+ * The parent drain of the serving belongs to the draw that asked for it, and it
+ * is reported HERE: the continuation of that draw is the only thing that may
+ * read it.
+ */
+export interface OpenFilmDrawResult {
+  /** The picture the draw really produced. */
+  readonly picture: Buffer;
+  /** Whether the parent's own resources were really drained. */
+  readonly parent_drained: boolean;
+  /** The opaque handle of THIS draw: it is the one a reconcile acts on. */
+  readonly handle: unknown;
+}
+
+/**
+ * The Host-private view of the cleanup of one production.
+ *
+ * It is a copy of facts and not a capability: the handle it names is the opaque
+ * handle of a responsibility, and only the issuer of that responsibility may act
+ * on it.
+ */
+export interface OpenFilmCleanupView {
+  /** Whether this bridge has a production at all. */
+  readonly known: boolean;
+  /** The opaque handle of the responsibility, or null. */
+  readonly handle: unknown;
+  /** The phase of the execution of the draw. */
+  readonly phase: string;
+  /** Whether the execution is held because its cleanup could not be proven. */
+  readonly cleanup_required: boolean;
+  /** Whether the execution really ended. */
+  readonly settled: boolean;
+  /** The outcome that was latched for the draw. */
+  readonly latched: { readonly kind: string; readonly code: string | null; readonly message: string | null; readonly native_phase: string | null } | null;
+  /** Where the responsibility is: queued, executing or settled. */
+  readonly parent_phase: string;
+  /** Whether the parent's own resources were really drained. */
+  readonly parent_drained: boolean;
+}
+
+/**
+ * The responsibility of one draw, by the root it is about.
+ *
+ * It is NOT how a bridge finds its own draw any more: a bridge holds the
+ * responsibility of the draw it started, because a lookup by the root finds the
+ * LAST registration of that root, and the last registration may be a draw that
+ * is still QUEUED behind the one that is held.
+ */
+function responsibilityOfRoot(
+  owner: OpenFilmCacheProducerOwner,
+  root: string,
+): ProductionResponsibility | undefined {
+  const list = productionResponsibilitiesOf(owner);
+  for (let index = list.length - 1; index >= 0; index -= 1) {
+    const responsibility = list[index]!;
+    if (responsibility.root === root) return responsibility;
+  }
+  return undefined;
 }
 
 /**
@@ -1026,6 +1568,10 @@ export async function createPinnedOpenFilmServingOwner(
       // A close that is already under way refuses a NEW draw: the accepted ones are
       // what this serving waits for.
       if (facts.closing) throw new Error("the OpenFilm serving owner is closing");
+      // The admission of this serving is opened again for THIS draw. The previous
+      // draw froze it when its execution domain died, and a frozen serving opens no
+      // file and starts no probe: the page of this draw has to be served.
+      facts.folder.openAdmission();
       if (facts.accepted === 0) {
         // The settlement of the accepted draws: it is resolved when the last one ends.
         facts.drawsSettled = new Promise<void>(resolve => { facts.resolveDraws = () => { resolve(); }; });
@@ -1042,6 +1588,10 @@ export async function createPinnedOpenFilmServingOwner(
       const settlement = (async (): Promise<void> => {
         // No NEW draw is admitted from here on.
         facts.closing = true;
+        // The admission of this serving is sealed FOR EVER: no new request opens a
+        // file, no new probe is started and no new stream is created. The listener
+        // stays up until what was already accepted is really drained.
+        facts.folder.freezeAdmission();
         // Every accepted draw really settles first - including the page, the iframe
         // and the media requests it still has to make. The listener is NOT stopped
         // before that: an accepted draw must never lose its origin.
@@ -1097,19 +1647,147 @@ export function openFilmServingBridge(owner: unknown, producer: unknown): OpenFi
   // The producer of this serving is the one the bridge may use.
   if (facts.producer !== producer) return null;
   const issued = producer as OpenFilmCacheProducerOwner;
+  /**
+   * The responsibility of the draw THIS bridge is drawing for.
+   *
+   * It is the responsibility itself and NOT a lookup by the root: two draws of
+   * the same root may not overlap, but the one that is queued behind the other
+   * is registered first, and a lookup by the root would find the wrong one.
+   */
+  /**
+   * EVERY draw of this bridge that is not settled yet, by its issued handle.
+   *
+   * It is a MAP and not one pointer: a bridge that holds a production which is
+   * stuck and starts another one must not let the second one hide the first.
+   * The handle of a draw is the one its supervisor issued, and only that
+   * handle may act on that draw.
+   */
+  const unsettled = new Map<unknown, ProductionResponsibility>();
+  /** The state of ONE production of this bridge. */
+  const viewOf = (current: ProductionResponsibility): OpenFilmCleanupView => {
+    if (current.handle === null || current.supervisor === null) {
+      return Object.freeze({
+        known: false, handle: null, phase: "none", cleanup_required: false,
+        settled: false, latched: null, parent_phase: "none", parent_drained: false,
+      });
+    }
+    const inspection = current.supervisor.inspectCleanup(current.handle);
+    return Object.freeze({
+      known: true,
+      handle: current.handle,
+      phase: inspection.phase ?? "unknown",
+      cleanup_required: inspection.cleanup_required,
+      settled: inspection.settled,
+      latched: inspection.latched_outcome,
+      parent_phase: current.phase,
+      parent_drained: current.parentDrained,
+    });
+  };
+  /** The state of EVERY production of this bridge that is not settled yet. */
+  const inspect = (): readonly OpenFilmCleanupView[] =>
+    Object.freeze([...unsettled.values()].map(viewOf));
   return Object.freeze({
-    draw: async (request: { readonly rel: string; readonly ms: number; readonly width: number; readonly overrides: unknown[] | null }): Promise<Buffer> => {
-      facts.owner.beginDraw();
-      try {
-        // The upstream's own call, with the origin and the root of THIS serving.
-        return await issued.pageFrame({
-          root: facts.canonical_root, base: facts.origin, rel: request.rel,
-          ms: request.ms, width: request.width, overrides: request.overrides,
-        });
-      } finally {
-        // The draw is settled whether it drew a picture or not.
-        facts.owner.endDraw();
+    inspectCleanup: inspect,
+    reconcileCleanup: async (handle: unknown): Promise<OpenFilmCleanupView> => {
+      const current = unsettled.get(handle);
+      if (current === undefined || current.handle === null || current.supervisor === null) {
+        // A handle of another bridge, a copy of one and a JSON object are all
+        // refused here.
+        throw new Error("The cleanup handle is not one this bridge issued");
       }
+      await current.supervisor.reconcileCleanup(current.handle);
+      const view = viewOf(current);
+      if (current.phase === "settled") unsettled.delete(current.handle);
+      return view;
+    },
+    draw: async (request: { readonly rel: string; readonly ms: number; readonly width: number; readonly overrides: unknown[] | null }): Promise<OpenFilmDrawResult> => {
+      facts.owner.beginDraw();
+      let picture: Buffer | undefined;
+      let primary: unknown;
+      // The upstream's own call, with the origin and the root of THIS serving.
+      // It happens in a worker of its own, and it settles only when the whole
+      // process domain of that worker really disappeared.
+      //
+      // The draw is called SYNCHRONOUSLY and the responsibility of it is
+      // registered before its first await: the responsibility that is registered
+      // last is therefore the one of THIS draw.
+      const started = issued.pageFrame({
+        root: facts.canonical_root, base: facts.origin, rel: request.rel,
+        ms: request.ms, width: request.width, overrides: request.overrides,
+      });
+      const current = lastProductionResponsibility(issued) ?? null;
+      // The responsibility of THIS draw is registered by its own issued handle:
+      // a second draw of this bridge does not replace it, and a reconcile of the
+      // first one still finds the first one.
+      if (current !== null && current.handle !== null) unsettled.set(current.handle, current);
+      // This bridge owns the parent phase of this draw: it is the one that drains
+      // the parent afterwards, and the scope of a direct draw covers that drain.
+      if (current !== null) current.bridgeOwnsParent = true;
+      try {
+        picture = await started;
+      } catch (error) { primary = error; }
+      // The execution domain of the draw is gone - or the draw failed. The
+      // admission of this serving is frozen NOW, synchronously, and the resources
+      // that were already accepted are really drained: the source streams that are
+      // still open, the requests that are still open and the media probes that are
+      // still running.
+      //
+      // The listener stays up while that happens: a request that was accepted
+      // keeps its origin. And the drain is NOT a close of this serving: a close
+      // that waited for the accepted draws would wait for itself.
+      facts.folder.freezeAdmission();
+      let drainFailure: unknown;
+      try {
+        await facts.folder.drain();
+        if (current !== null) {
+          current.parentDrained = true;
+          // The PARENT DRAIN phase really ended: its lease is settled here, and
+          // only here.
+          current.parentLease?.settle();
+        }
+      }
+      catch (error) { drainFailure = error; }
+      // The scope of a direct draw is given back HERE: after the drain, and not
+      // before it. The responsibility of the draw is only settled now too, so
+      // that a close of the producer waits for the drain as well.
+      if (current !== null) {
+        releaseProductionScope(current);
+        current.phase = "settled";
+        current.settleOnce();
+        if (current.handle !== null) unsettled.delete(current.handle);
+        pruneProductionResponsibilities(issued);
+      }
+      // The failures of the sources are KEPT, and they are reported. A source
+      // that errored is not a source that closed, and the reason may not be
+      // swallowed: the party above has to see it, and the production it belongs
+      // to has to fail with it.
+      const sourceFailures = facts.folder.failures();
+      // The draw is settled whether it drew a picture or not.
+      facts.owner.endDraw();
+      if (drainFailure === undefined && sourceFailures.length > 0) {
+        drainFailure = new Error("A source of the page origin did not end cleanly");
+        try {
+          Object.defineProperty(drainFailure, "cleanup_failures",
+            { value: [...sourceFailures], enumerable: false, configurable: true });
+        } catch { /* a frozen failure keeps the reason in the ledger of the serving */ }
+      }
+      if (primary !== undefined) {
+        if (drainFailure !== undefined) {
+          // The primary keeps its place; the failure of the drain is carried with it.
+          try {
+            Object.defineProperty(primary, "cleanup_failures",
+              { value: [drainFailure], enumerable: false, configurable: true });
+          } catch { /* a frozen primary keeps the failure in the ledger of the drain */ }
+        }
+        throw primary;
+      }
+      if (drainFailure !== undefined) throw drainFailure;
+      if (picture === undefined) throw new Error("The cache producer returned no picture");
+      return Object.freeze({
+        picture,
+        parent_drained: current === null ? false : current.parentDrained,
+        handle: current === null ? null : current.handle,
+      });
     },
   });
 }

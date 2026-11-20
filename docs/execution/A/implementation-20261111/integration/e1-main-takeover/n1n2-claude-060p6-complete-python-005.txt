@@ -1,0 +1,14 @@
+.....................................................................E......
+======================================================================
+ERROR: test_the_wait_item_carries_its_order_and_its_category (__main__.TheShapesOfTheReceipt.test_the_wait_item_carries_its_order_and_its_category)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/helpers/cache-custodian-unit.py", line 2467, in test_the_wait_item_carries_its_order_and_its_category
+    self.assertEqual(value["order"], 3)
+                     ~~~~~^^^^^^^^^
+KeyError: 'order'
+
+----------------------------------------------------------------------
+Ran 76 tests in 0.059s
+
+FAILED (errors=1)

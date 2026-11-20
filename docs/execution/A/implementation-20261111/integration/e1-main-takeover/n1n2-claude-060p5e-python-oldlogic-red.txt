@@ -1,0 +1,23 @@
+..............................................FF...........
+======================================================================
+FAIL: test_a_revoked_authority_still_proves_that_the_original_domain_ended (__main__.TheRevokedAuthorityStillProvesTheDomain.test_a_revoked_authority_still_proves_that_the_original_domain_ended)
+TERM ends N; N is really reaped; the group probe is unknown.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/helpers/cache-custodian-unit.py", line 2016, in test_a_revoked_authority_still_proves_that_the_original_domain_ended
+    self.assertIn(("group", 200, 0), self.raw)
+AssertionError: ('group', 200, 0) not found in []
+
+======================================================================
+FAIL: test_the_original_group_is_proved_by_a_raw_probe_after_the_revoke (__main__.TheRevokedAuthorityStillProvesTheDomain.test_the_original_group_is_proved_by_a_raw_probe_after_the_revoke)
+The ORIGINAL group is proved by a RAW probe, even after the revoke.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/helpers/cache-custodian-unit.py", line 2060, in test_the_original_group_is_proved_by_a_raw_probe_after_the_revoke
+    self.assertFalse(third["ok"])
+AssertionError: True is not false
+
+----------------------------------------------------------------------
+Ran 59 tests in 0.052s
+
+FAILED (failures=2)

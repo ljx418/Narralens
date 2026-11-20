@@ -1,0 +1,40 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+ ❯ tests/agent-driven/integration/native-cache-normal-pilot.test.ts (14 tests | 1 failed) 13ms
+   ✓ the arguments of the positive pilot > takes exactly a mode and two digests 1ms
+   ✓ the arguments of the positive pilot > does not run the pilot when its module is imported 0ms
+   ✓ the positive pilot > really succeeds, and the picture is EXACTLY the synthetic one 1ms
+   ✓ the positive pilot > is NOT a success when the picture is not the exact one 0ms
+   ✓ the positive pilot > refuses bytes that are not the reviewed ones, and starts nothing 0ms
+   ✓ the positive pilot > injects the deliberate failure only after the worker was REALLY alive 0ms
+   ✓ the positive pilot > does NOT inject the deliberate failure when the worker was not observed 0ms
+   × the positive pilot > keeps a failure of the evidence, and it is never a green case 7ms
+     → expected 'ok' not to be 'ok' // Object.is equality
+   ✓ the positive pilot > keeps the owner of a HELD draw and ends with the fresh proof 0ms
+   ✓ the positive pilot > never kills anything: it asks, and it does nothing else 0ms
+   ✓ the command of the positive pilot > answers 2 for arguments it does not take 0ms
+   ✓ the command of the positive pilot > answers 0 for a normal draw that really succeeded 0ms
+   ✓ the command of the positive pilot > answers 1 for the deliberate failure that was really observed 0ms
+   ✓ the digest of the synthetic picture > is the digest of exactly 1024 bytes of 0x4a 0ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/native-cache-normal-pilot.test.ts > the positive pilot > keeps a failure of the evidence, and it is never a green case
+AssertionError: expected 'ok' not to be 'ok' // Object.is equality
+ ❯ tests/agent-driven/integration/native-cache-normal-pilot.test.ts:354:30
+    352|     });
+    353|     const outcome = await runPositivePilot(OPTIONS, deps);
+    354|     expect(outcome.kind).not.toBe("ok");
+       |                              ^
+    355|     expect(outcome.exitCode).toBe(1);
+    356|     expect(outcome.evidenceErrors.length).toBeGreaterThan(0);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 13 passed (14)
+   Start at  10:50:19
+   Duration  2.02s (transform 142ms, setup 0ms, collect 248ms, tests 13ms, environment 0ms, prepare 1.17s)
+

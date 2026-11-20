@@ -1,0 +1,25 @@
+tests/agent-driven/integration/native-cache-normal-pilot.test.ts(174,60): error TS2322: Type 'string' is not assignable to type 'number'.
+tests/agent-driven/integration/native-cache-normal-pilot.test.ts(178,7): error TS2322: Type '{ pid: number; ppid: number; pgid: number; sid: number; start_ticks: string; state: string; } | null' is not assignable to type 'CacheProcessIdentity | null'.
+  Type '{ pid: number; ppid: number; pgid: number; sid: number; start_ticks: string; state: string; }' is not assignable to type 'CacheProcessIdentity'.
+    Types of property 'start_ticks' are incompatible.
+      Type 'string' is not assignable to type 'number'.
+tools/native-cache-normal-pilot.ts(247,10): error TS2339: Property 'code' does not exist on type 'PositivePilotFailure'.
+tools/native-cache-normal-pilot.ts(443,56): error TS2322: Type 'number' is not assignable to type 'string'.
+tools/native-cache-normal-pilot.ts(627,23): error TS2540: Cannot assign to 'originalFailure' because it is a read-only property.
+tools/native-cache-normal-pilot.ts(634,23): error TS2540: Cannot assign to 'originalFailure' because it is a read-only property.
+tools/native-cache-normal-pilot.ts(642,21): error TS2540: Cannot assign to 'state' because it is a read-only property.
+tools/native-cache-normal-pilot.ts(646,21): error TS2540: Cannot assign to 'state' because it is a read-only property.
+tools/native-cache-normal-pilot.ts(648,21): error TS2540: Cannot assign to 'state' because it is a read-only property.
+tools/native-cache-normal-pilot.ts(654,25): error TS2540: Cannot assign to 'originalFailure' because it is a read-only property.
+tools/native-cache-normal-pilot.ts(663,19): error TS2540: Cannot assign to 'originalFailure' because it is a read-only property.
+tools/native-cache-normal-pilot.ts(664,19): error TS2540: Cannot assign to 'state' because it is a read-only property.
+tools/native-cache-normal-pilot.ts(753,13): error TS2540: Cannot assign to 'kind' because it is a read-only property.
+tools/native-cache-normal-pilot.ts(754,13): error TS2540: Cannot assign to 'exitCode' because it is a read-only property.
+tools/native-cache-normal-pilot.ts(756,11): error TS2540: Cannot assign to 'originalFailure' because it is a read-only property.
+tools/native-cache-normal-pilot.ts(757,11): error TS2540: Cannot assign to 'settlementFailure' because it is a read-only property.
+tools/native-cache-normal-pilot.ts(758,11): error TS2540: Cannot assign to 'faultCasePassed' because it is a read-only property.
+tools/native-cache-normal-pilot.ts(759,11): error TS2540: Cannot assign to 'terminalProof' because it is a read-only property.
+tools/native-cache-normal-pilot.ts(760,11): error TS2540: Cannot assign to 'pictureSha256' because it is a read-only property.
+tools/native-cache-normal-pilot.ts(761,11): error TS2540: Cannot assign to 'pictureBytes' because it is a read-only property.
+tools/native-cache-normal-pilot.ts(762,11): error TS2540: Cannot assign to 'pictureIsTheExactOne' because it is a read-only property.
+tools/native-cache-normal-pilot.ts(763,11): error TS2540: Cannot assign to 'reportingFailure' because it is a read-only property.

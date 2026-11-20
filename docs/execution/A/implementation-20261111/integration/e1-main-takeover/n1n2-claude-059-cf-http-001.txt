@@ -1,0 +1,87 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+ ❯ tests/agent-driven/integration/openfilm-serving-url.test.ts (1 test | 1 failed) 2405ms
+   × the OpenFilm serving refuses a malformed request target > answers a bounded 400, stays alive, and still answers the next legal request 2404ms
+     → node:internal/url:818
+      href = bindingUrl.parse(input, base, true);
+                        ^
+
+TypeError: Invalid URL
+    at new URL (node:internal/url:818:25)
+    at Object.handle (/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/src/adapters/openfilm/openfilm-upstream.ts:654:21)
+    at Server.<anonymous> (/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/src/adapters/openfilm/openfilm-upstream.ts:962:12)
+    at Server.emit (node:events:519:28)
+    at parserOnIncoming (node:_http_server:1186:12)
+    at HTTPParser.parserOnHeadersComplete (node:_http_common:125:17) {
+  code: 'ERR_INVALID_URL',
+  input: '//[',
+  base: 'http://127.0.0.1'
+}
+
+Node.js v22.22.1
+: expected 'node:internal/url:818\n      href = b…' not to match /ERR_INVALID_URL|Uncaught/i
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/openfilm-serving-url.test.ts > the OpenFilm serving refuses a malformed request target > answers a bounded 400, stays alive, and still answers the next legal request
+AssertionError: node:internal/url:818
+      href = bindingUrl.parse(input, base, true);
+                        ^
+
+TypeError: Invalid URL
+    at new URL (node:internal/url:818:25)
+    at Object.handle (/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/src/adapters/openfilm/openfilm-upstream.ts:654:21)
+    at Server.<anonymous> (/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/src/adapters/openfilm/openfilm-upstream.ts:962:12)
+    at Server.emit (node:events:519:28)
+    at parserOnIncoming (node:_http_server:1186:12)
+    at HTTPParser.parserOnHeadersComplete (node:_http_common:125:17) {
+  code: 'ERR_INVALID_URL',
+  input: '//[',
+  base: 'http://127.0.0.1'
+}
+
+Node.js v22.22.1
+: expected 'node:internal/url:818\n      href = b…' not to match /ERR_INVALID_URL|Uncaught/i
+
+[32m- Expected:[39m 
+/ERR_INVALID_URL|Uncaught/i
+
+[31m+ Received:[39m 
+"node:internal/url:818
+      href = bindingUrl.parse(input, base, true);
+                        ^
+
+TypeError: Invalid URL
+    at new URL (node:internal/url:818:25)
+    at Object.handle (/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/src/adapters/openfilm/openfilm-upstream.ts:654:21)
+    at Server.<anonymous> (/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/src/adapters/openfilm/openfilm-upstream.ts:962:12)
+    at Server.emit (node:events:519:28)
+    at parserOnIncoming (node:_http_server:1186:12)
+    at HTTPParser.parserOnHeadersComplete (node:_http_common:125:17) {
+  code: 'ERR_INVALID_URL',
+  input: '//[',
+  base: 'http://127.0.0.1'
+}
+
+Node.js v22.22.1
+"
+
+ ❯ Object.handle src/adapters/openfilm/openfilm-upstream.ts:654:21
+ ❯ Server.<anonymous> src/adapters/openfilm/openfilm-upstream.ts:962:12
+ ❯ tests/agent-driven/integration/openfilm-serving-url.test.ts:75:32
+     73|     // old implementation the exception escaped the HTTP listener and …
+     74|     // died with it.
+     75|     expect(stderr, stderr).not.toMatch(/ERR_INVALID_URL|Uncaught/i);
+       |                                ^
+     76|     expect(exit, `${stdout}\n${stderr}`).toBe(0);
+     77|     const line = stdout.trim().split("\n").pop() ?? "";
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed (1)
+   Start at  11:22:02
+   Duration  4.18s (transform 47ms, setup 0ms, collect 127ms, tests 2.40s, environment 0ms, prepare 1.08s)
+

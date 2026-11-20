@@ -1,0 +1,270 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+ ❯ tests/agent-driven/integration/native-cache-normal-pilot.test.ts (43 tests | 9 failed) 10260ms
+   ✓ the arguments of the positive pilot > takes exactly a mode and two digests 1ms
+   ✓ the arguments of the positive pilot > does not run the pilot when its module is imported 0ms
+   ✓ the positive pilot > really succeeds, and the picture is EXACTLY the synthetic one 21ms
+   ✓ the positive pilot > is NOT a success when the picture is not the exact one 2ms
+   × the positive pilot > refuses bytes that are not the reviewed ones, and starts nothing 10ms
+     → expected 3 to be 1 // Object.is equality
+   ✓ the positive pilot > refuses a COPY of the helper that is not the reviewed one, and starts nothing 2ms
+   ✓ the positive pilot > injects the deliberate failure only after the worker was REALLY alive 2ms
+   ✓ the positive pilot > does NOT inject the deliberate failure when the worker was not observed 2ms
+   ✓ the positive pilot > does NOT inject the deliberate failure after a GO of another worker 2ms
+   ✓ the positive pilot > does NOT inject the deliberate failure after a GO of another draw 1ms
+   ✓ the positive pilot > does NOT inject the deliberate failure when the worker is a zombie 2ms
+   ✓ the positive pilot > does NOT inject the deliberate failure when the worker is another start time 2ms
+   ✓ the positive pilot > does NOT inject the deliberate failure when the worker is another parent 1ms
+   ✓ the positive pilot > does NOT inject the deliberate failure when the worker is another group 1ms
+   ✓ the positive pilot > does NOT accept an unrelated failure as the expected fault 2ms
+   ✓ the positive pilot > does NOT accept a transport failure as the expected fault 2ms
+   × the positive pilot > keeps a failure of the evidence, and it is never a green case 2ms
+     → expected 3 to be 1 // Object.is equality
+   ✓ the positive pilot > keeps the owner of a HELD draw and ends with the fresh proof 2ms
+   ✓ the positive pilot > keeps the owner when the ROOT could not be prepared, and it starts nothing 2ms
+   ✓ the positive pilot > keeps the owner when the RESERVE failed, and there is no phantom child 2ms
+   ✓ the positive pilot > reads the ORIGINAL result of a draw that was held and that ended LATE 2ms
+   ✓ the positive pilot > keeps the owner when the event reader failed after the start 2ms
+   ✓ the positive pilot > never kills anything: it asks, and it does nothing else 2ms
+   × the positive pilot > does not lose the owner when the destination fails asynchronously 3ms
+     → expected 3 to be 1 // Object.is equality
+   ✓ the real asynchronous order of the two modes > does NOT cancel a draw that is still making progress 2ms
+   ✓ the real asynchronous order of the two modes > waits for the accepted worker before it injects the deliberate failure 2ms
+   ✓ the real asynchronous order of the two modes > does NOT inject when the draw REALLY failed before the worker was accepted 1ms
+   ✓ the real asynchronous order of the two modes > does NOT inject when the GO of this draw never arrives 2ms
+   ✓ the raw cleanup of the draw > is NOT green when the raw settlement carries a cleanup failure 1ms
+   ✓ the raw cleanup of the draw > is NOT a fault when the raw settlement carries a cleanup failure 2ms
+   ✓ the raw cleanup of the draw > is NOT green when the FINAL diagnostic carries cleanup failures 1ms
+   ✓ the ownership of the runtime root > writes NO evidence at all when the root could not be allocated 2ms
+   ✓ the final qualification of a run > commits the final qualification AFTER the report callbacks 2ms
+   ✓ the final qualification of a run > revokes the final qualification when the report destination fails LATE 3ms
+   × the final qualification of a run > is NOT green when the manifest of the artifacts could not be built 2ms
+     → expected 3 to be 1 // Object.is equality
+   × the ORCHESTRATION over the ACTUAL supervisor > waits for the REAL asynchronous start of the normal mode, and cancels NOTHING 5006ms
+     → Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+     → expected [ 'process.kill(-4242, 0)', …(193) ] to deeply equal []
+   × the ORCHESTRATION over the ACTUAL supervisor > waits for the LATE worker of the fault mode before it injects 5001ms
+     → Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+     → expected [ 'process.kill(-4242, 0)', …(384) ] to deeply equal []
+   × the reporting over a REAL destination > revokes the final qualification when the destination fails LATE 3ms
+     → expected 3 to be 1 // Object.is equality
+   × the reporting over a REAL destination > does NOT lose the owner when the destination breaks while the settlement is PENDING 153ms
+     → expected 3 to be 1 // Object.is equality
+     → expected [ 'process.kill(-4242, 0)', …(11) ] to deeply equal []
+   ✓ the command of the positive pilot > answers 2 for arguments it does not take 2ms
+   × the command of the positive pilot > answers 0 for a normal draw that really succeeded 3ms
+     → expected [ 'process.kill(-4242, 0)', …(1) ] to deeply equal []
+   ✓ the command of the positive pilot > answers 1 for the deliberate failure that was really observed 2ms
+   ✓ the digest of the synthetic picture > is the digest of exactly 1024 bytes of 0x4a 0ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 9 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/native-cache-normal-pilot.test.ts > the positive pilot > refuses bytes that are not the reviewed ones, and starts nothing
+AssertionError: expected 3 to be 1 // Object.is equality
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 1[39m
+[31m+ 3[39m
+
+ ❯ tests/agent-driven/integration/native-cache-normal-pilot.test.ts:703:30
+    701|     const outcome = await runPositivePilot(OPTIONS, deps);
+    702|     expect(outcome.kind).toBe("failed");
+    703|     expect(outcome.exitCode).toBe(1);
+       |                              ^
+    704|     expect((outcome.originalFailure as { code?: unknown }).code).toBe(…
+    705|     // Nothing was started: the supervisor was never asked for anythin…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/12]⎯
+
+ FAIL  tests/agent-driven/integration/native-cache-normal-pilot.test.ts > the positive pilot > keeps a failure of the evidence, and it is never a green case
+AssertionError: expected 3 to be 1 // Object.is equality
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 1[39m
+[31m+ 3[39m
+
+ ❯ tests/agent-driven/integration/native-cache-normal-pilot.test.ts:823:30
+    821|     const outcome = await runPositivePilot(OPTIONS, deps);
+    822|     expect(outcome.kind).not.toBe("ok");
+    823|     expect(outcome.exitCode).toBe(1);
+       |                              ^
+    824|     expect(outcome.evidenceErrors.length).toBeGreaterThan(0);
+    825|     expect(outcome.evidenceErrors[0]?.error.code).toBe("ENOSPC");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/12]⎯
+
+ FAIL  tests/agent-driven/integration/native-cache-normal-pilot.test.ts > the positive pilot > does not lose the owner when the destination fails asynchronously
+AssertionError: expected 3 to be 1 // Object.is equality
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 1[39m
+[31m+ 3[39m
+
+ ❯ tests/agent-driven/integration/native-cache-normal-pilot.test.ts:938:18
+    936|     expect(state.evidence.map(entry => entry.name)).toContain("final.j…
+    937|     // The failure of the reporting is a fact of the case: it is never…
+    938|     expect(code).toBe(1);
+       |                  ^
+    939|   });
+    940| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/12]⎯
+
+ FAIL  tests/agent-driven/integration/native-cache-normal-pilot.test.ts > the final qualification of a run > is NOT green when the manifest of the artifacts could not be built
+AssertionError: expected 3 to be 1 // Object.is equality
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 1[39m
+[31m+ 3[39m
+
+ ❯ tests/agent-driven/integration/native-cache-normal-pilot.test.ts:1125:30
+    1123|     expect(final?.kind).not.toBe("ok");
+    1124|     expect(outcome.kind).not.toBe("ok");
+    1125|     expect(outcome.exitCode).toBe(1);
+       |                              ^
+    1126|   });
+    1127| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/12]⎯
+
+ FAIL  tests/agent-driven/integration/native-cache-normal-pilot.test.ts > the ORCHESTRATION over the ACTUAL supervisor > waits for the REAL asynchronous start of the normal mode, and cancels NOTHING
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ tests/agent-driven/integration/native-cache-normal-pilot.test.ts:1413:3
+    1411|   }
+    1412| 
+    1413|   it("waits for the REAL asynchronous start of the normal mode, and ca…
+       |   ^
+    1414|     // The supervisor is the REAL one, and the custodian is a fake tha…
+    1415|     // the REAL protocol. The draw really is PENDING while the runner …
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/12]⎯
+
+ FAIL  tests/agent-driven/integration/native-cache-normal-pilot.test.ts > the ORCHESTRATION over the ACTUAL supervisor > waits for the REAL asynchronous start of the normal mode, and cancels NOTHING
+AssertionError: expected [ 'process.kill(-4242, 0)', …(193) ] to deeply equal []
+
+[2mCompared values have no visual difference.[22m
+
+ ❯ tests/agent-driven/integration/native-cache-normal-pilot.test.ts:243:30
+    241|   // NOT hidden by the cleanup.
+    242|   try {
+    243|     expect(rawEdges.denials).toEqual(rawEdges.expectedDenials);
+       |                              ^
+    244|   } finally {
+    245|     rawEdges.denials.length = 0;
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/12]⎯
+
+ FAIL  tests/agent-driven/integration/native-cache-normal-pilot.test.ts > the ORCHESTRATION over the ACTUAL supervisor > waits for the LATE worker of the fault mode before it injects
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ tests/agent-driven/integration/native-cache-normal-pilot.test.ts:1443:3
+    1441|   });
+    1442| 
+    1443|   it("waits for the LATE worker of the fault mode before it injects", …
+       |   ^
+    1444|     // The worker is accepted LATER: the draw is STARTING, and a null …
+    1445|     // during the startup is not a failed observation.
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/12]⎯
+
+ FAIL  tests/agent-driven/integration/native-cache-normal-pilot.test.ts > the ORCHESTRATION over the ACTUAL supervisor > waits for the LATE worker of the fault mode before it injects
+AssertionError: expected [ 'process.kill(-4242, 0)', …(384) ] to deeply equal []
+
+[2mCompared values have no visual difference.[22m
+
+ ❯ tests/agent-driven/integration/native-cache-normal-pilot.test.ts:243:30
+    241|   // NOT hidden by the cleanup.
+    242|   try {
+    243|     expect(rawEdges.denials).toEqual(rawEdges.expectedDenials);
+       |                              ^
+    244|   } finally {
+    245|     rawEdges.denials.length = 0;
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/12]⎯
+
+ FAIL  tests/agent-driven/integration/native-cache-normal-pilot.test.ts > the reporting over a REAL destination > revokes the final qualification when the destination fails LATE
+AssertionError: expected 3 to be 1 // Object.is equality
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 1[39m
+[31m+ 3[39m
+
+ ❯ tests/agent-driven/integration/native-cache-normal-pilot.test.ts:1508:18
+    1506|     expect(final?.fault_case_passed).toBe(false);
+    1507|     expect(final?.reporting_failure).not.toBeNull();
+    1508|     expect(code).toBe(1);
+       |                  ^
+    1509|   });
+    1510| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/12]⎯
+
+ FAIL  tests/agent-driven/integration/native-cache-normal-pilot.test.ts > the reporting over a REAL destination > does NOT lose the owner when the destination breaks while the settlement is PENDING
+AssertionError: expected 3 to be 1 // Object.is equality
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 1[39m
+[31m+ 3[39m
+
+ ❯ tests/agent-driven/integration/native-cache-normal-pilot.test.ts:1544:18
+    1542|     // The failure of the reporting is a fact of the case, and the run…
+    1543|     // with the SAME owner: the final record was written after the ter…
+    1544|     expect(code).toBe(1);
+       |                  ^
+    1545|     const final = evidenceOf(state, "final.json");
+    1546|     expect(final?.reporting_failure).not.toBeNull();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/12]⎯
+
+ FAIL  tests/agent-driven/integration/native-cache-normal-pilot.test.ts > the reporting over a REAL destination > does NOT lose the owner when the destination breaks while the settlement is PENDING
+AssertionError: expected [ 'process.kill(-4242, 0)', …(11) ] to deeply equal []
+
+[2mCompared values have no visual difference.[22m
+
+ ❯ tests/agent-driven/integration/native-cache-normal-pilot.test.ts:243:30
+    241|   // NOT hidden by the cleanup.
+    242|   try {
+    243|     expect(rawEdges.denials).toEqual(rawEdges.expectedDenials);
+       |                              ^
+    244|   } finally {
+    245|     rawEdges.denials.length = 0;
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/12]⎯
+
+ FAIL  tests/agent-driven/integration/native-cache-normal-pilot.test.ts > the command of the positive pilot > answers 0 for a normal draw that really succeeded
+AssertionError: expected [ 'process.kill(-4242, 0)', …(1) ] to deeply equal []
+
+[2mCompared values have no visual difference.[22m
+
+ ❯ tests/agent-driven/integration/native-cache-normal-pilot.test.ts:243:30
+    241|   // NOT hidden by the cleanup.
+    242|   try {
+    243|     expect(rawEdges.denials).toEqual(rawEdges.expectedDenials);
+       |                              ^
+    244|   } finally {
+    245|     rawEdges.denials.length = 0;
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/12]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  9 failed | 34 passed (43)
+   Start at  21:41:32
+   Duration  12.29s (transform 192ms, setup 0ms, collect 292ms, tests 10.26s, environment 0ms, prepare 1.15s)
+

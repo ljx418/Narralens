@@ -1,0 +1,1 @@
+{"runner_version": 3, "name": "n1n2-claude-060p1r-custodian-syntax-001", "argv": ["/usr/bin/python3.12", "-I", "-S", "-B", "-c", "import ast,pathlib; ast.parse(pathlib.Path('src/adapters/openfilm/cache-process-custodian.py').read_text(encoding='utf-8')); print('CUSTODIAN_SYNTAX_OK')"], "claimed_at": "2026-11-14T09:23:34.764254+00:00"}

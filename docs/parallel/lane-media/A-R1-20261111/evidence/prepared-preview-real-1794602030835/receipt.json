@@ -1,0 +1,80 @@
+{
+  "format": "narralens.prepared-preview-receipt@1",
+  "project_id": "project_08b0a79f7a4742e68226ad2730be9103",
+  "run_id": "run-3b7d4424-8714-4043-96ef-e94f4c37e0de",
+  "plan_version": 1,
+  "step_id": "sample",
+  "execution_attempt": 1,
+  "prepared_job_id": "job_0a85ba6633da4c53b16a761ac0a3b47d",
+  "prepared_source_id": "prepared_eb316fe972d0846552d9578c",
+  "source_digest": "eb316fe972d0846552d9578cd50d7f5c6d3797219bd66d910dcb655d630c1534",
+  "plan_digest": "41216e90b8170ab5e0cf89e8f3129e09e509c062684318a3cf2c8930e1de3f4d",
+  "rights_digest": "f30a2be3db647a0ed89d455b4ddb603f5a298ee92ddf8718f70d30f51a8d85bb",
+  "producer_attempt": 1,
+  "fps": {
+    "num": 30,
+    "den": 1
+  },
+  "frame_count": 90,
+  "parts": [
+    {
+      "slot": "preview",
+      "object_id": "obj_c0b58afa358a4305b20da5d3d8a2ce9b",
+      "content_type": "video/mp4",
+      "bytes": 85499,
+      "sha256": "16413a94195f1d85801a3d5c16409488ba1017cad52fb5722155b841decdc9cb",
+      "media_facts": {
+        "kind": "video",
+        "fps": {
+          "num": 30,
+          "den": 1
+        },
+        "frame_count": 90
+      }
+    },
+    {
+      "slot": "narration",
+      "object_id": "obj_9018de2c1b674816be3f636528607e07",
+      "content_type": "audio/wav",
+      "bytes": 288078,
+      "sha256": "42c9992dbd4dcfbeaf52790767beb0febee1279ce37e2e46d5cb474bdd8e1a1d",
+      "media_facts": {
+        "kind": "audio",
+        "sample_rate": 48000,
+        "sample_count": 144000,
+        "channels": 1
+      }
+    },
+    {
+      "slot": "subtitles",
+      "object_id": "obj_8ad6f8c832cb4aeab4e9ccb2539cf774",
+      "content_type": "text/vtt; charset=utf-8",
+      "bytes": 259,
+      "sha256": "7589688eff6e9ca5ee39341deb23d149f5a6cccec1da8ac9299fbb07230b88d9",
+      "media_facts": {
+        "kind": "text"
+      }
+    },
+    {
+      "slot": "shot_summary",
+      "object_id": "obj_c84c6f7398a943f484a511e62d791353",
+      "content_type": "application/json; charset=utf-8",
+      "bytes": 385,
+      "sha256": "d81186c67e2aa6ad5ff4ace6314812562a6391143e85c0f9ee267fd66d87edc5",
+      "media_facts": {
+        "kind": "json"
+      }
+    },
+    {
+      "slot": "rights_quality",
+      "object_id": "obj_3d887a4054a345b387e291ad7f3a9ff6",
+      "content_type": "application/json; charset=utf-8",
+      "bytes": 1663,
+      "sha256": "b62382224d949938438b28201b64f31d52f33c06d95671d5e1a5103480a34496",
+      "media_facts": {
+        "kind": "json"
+      }
+    }
+  ],
+  "receipt_digest": "acfe9021ea4f3ab7444b83b10ac06998ed9e97cd20d868bc565a9ed69a9f950f"
+}

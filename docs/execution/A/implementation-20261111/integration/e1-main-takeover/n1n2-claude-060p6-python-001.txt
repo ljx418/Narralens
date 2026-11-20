@@ -1,0 +1,47 @@
+...........EEE..F..........................................
+======================================================================
+ERROR: test_a_payload_is_the_real_errno_of_the_failure (__main__.TheExecPipe.test_a_payload_is_the_real_errno_of_the_failure)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/helpers/cache-custodian-unit.py", line 447, in test_a_payload_is_the_real_errno_of_the_failure
+    status = custodian.classify_exec_status(b"2")
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'narralens_cache_custodian' has no attribute 'classify_exec_status'
+
+======================================================================
+ERROR: test_a_payload_that_is_not_a_number_is_an_unknown_failure (__main__.TheExecPipe.test_a_payload_that_is_not_a_number_is_an_unknown_failure)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/helpers/cache-custodian-unit.py", line 454, in test_a_payload_that_is_not_a_number_is_an_unknown_failure
+    status = custodian.classify_exec_status(b"not-a-number")
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'narralens_cache_custodian' has no attribute 'classify_exec_status'
+
+======================================================================
+ERROR: test_an_empty_read_is_the_success (__main__.TheExecPipe.test_an_empty_read_is_the_success)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/helpers/cache-custodian-unit.py", line 444, in test_an_empty_read_is_the_success
+    self.assertEqual(custodian.classify_exec_status(b""), {"ok": True})
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'narralens_cache_custodian' has no attribute 'classify_exec_status'
+
+======================================================================
+FAIL: test_the_status_is_never_read_blocking (__main__.TheExecPipe.test_the_status_is_never_read_blocking)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tests/agent-driven/integration/helpers/cache-custodian-unit.py", line 477, in test_the_status_is_never_read_blocking
+    self.assertEqual(finished, [{"ok": False, "errno": 2}])
+AssertionError: Lists differ: [{'ok': False, 'stage': None, 'errno': 5, 'session_established': False}] != [{'ok': False, 'errno': 2}]
+
+First differing element 0:
+{'ok': False, 'stage': None, 'errno': 5, 'session_established': False}
+{'ok': False, 'errno': 2}
+
+- [{'errno': 5, 'ok': False, 'session_established': False, 'stage': None}]
++ [{'errno': 2, 'ok': False}]
+
+----------------------------------------------------------------------
+Ran 59 tests in 0.060s
+
+FAILED (failures=1, errors=3)

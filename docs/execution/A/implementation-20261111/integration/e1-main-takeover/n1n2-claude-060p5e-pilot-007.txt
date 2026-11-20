@@ -1,0 +1,13 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+stdout | tests/agent-driven/integration/native-cache-normal-pilot.test.ts > the ORCHESTRATION over the ACTUAL supervisor > waits for the REAL asynchronous start of the normal mode, and cancels NOTHING
+BOUNDED_DIGEST_FACTS:{"receipt_summary":{"kind":"DOMAIN_REAPED","outcome":"reaped","seq":4,"segments":1,"events_count":0,"waits_count":1,"identities_count":0,"exec_ok":true,"echild":true,"group_esrch":true,"known_ids_gone":true,"anchor_retained":true,"identity_overflow":false,"events_truncated":false,"diagnostics_lost":false,"state":"exit"},"accumulator_summary":{"segments":1,"received":1,"events":0,"waits":1,"identities":0,"refused":false}}
+
+ ✓ tests/agent-driven/integration/native-cache-normal-pilot.test.ts (54 tests) 454ms
+
+ Test Files  1 passed (1)
+      Tests  54 passed (54)
+   Start at  21:47:09
+   Duration  2.66s (transform 207ms, setup 0ms, collect 318ms, tests 454ms, environment 0ms, prepare 1.25s)
+
